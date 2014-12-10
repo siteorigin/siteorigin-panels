@@ -1,0 +1,188 @@
+/* @override 
+	http://wpdev.dynalias.com/focus/wp-content/themes/focus/jplayer/skins/siteorigin/jplayer.siteorigin.css?ver=3.5 */
+
+.jp-audio,
+.jp-audio-stream,
+.jp-video {
+	background-color:#1c1c1c;
+	position: relative;
+}
+
+.jp-video .jp-type-single{
+}
+
+/* @group GUI */
+
+.jp-video .jp-gui{
+	height: 35px;
+	overflow: hidden;
+	margin-top: -35px;
+	
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#F1F1F1), to(#D1D1D1));
+	
+	box-shadow: 0 0 1px rgba(255,255,255,1);
+	
+	position: relative;
+}
+
+.jp-video .jp-gui .jp-controls {
+	list-style: none;
+	display: block;
+	margin: 0;
+}
+
+.jp-video .jp-gui .jp-controls li a{
+	position: absolute;
+	display: block;
+	text-indent: -9999px;
+	overflow: hidden;
+}
+
+.jp-video .jp-gui .jp-controls .jp-play,
+.jp-video .jp-gui .jp-controls .jp-pause{
+	width: 15px;
+	height: 15px;
+	overflow: hidden;
+	
+	top: 11px;
+	left: 15px;
+	
+	background: url('sprites/play.png');
+}
+
+.jp-video .jp-gui .jp-controls .jp-pause{
+	background: url('sprites/pause.png');
+	width: 13px;
+}
+
+/* @end */
+
+/* @group Progress Bar */
+
+.jp-video .jp-progress{
+	display: block;
+	height: 10px;
+	width: auto;
+	margin: 0 125px 0 51px;
+	background: #706d6d;
+	margin-top: 13px;
+	
+	border-radius: 10px;
+	box-shadow: inset 0 1px 4px rgba(0,0,0,0.4), 0 1px 0 #FFF;
+}
+
+.jp-video .jp-progress .jp-seek-bar{
+	height: 10px;
+	background: rgba(34,34,34,0.34);
+	border-radius: 10px;
+	
+	cursor: pointer;
+}
+
+.jp-video .jp-progress .jp-play-bar{
+	position: relative;
+	height: 10px;
+	background: #bb2a1e;
+	border-radius: 10px;
+	box-shadow: inset 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.jp-video .jp-progress .jp-play-bar-marker{
+	position: absolute;
+	width: 16px;
+	height: 17px;
+	background: url('sprites/handle.png') no-repeat;
+	right: -8px;
+	top: -3px;
+}
+
+/* @end */
+
+.jp-video .jp-time-info{
+
+	position: absolute;
+	right: 34px;
+	top: 50%;
+	margin-top: -0.475em;
+	width: 80px;
+	color: #444;
+	text-shadow: 0 1px 0 #FFF;
+	font: 11px/1 Arial, sans-serif;
+}
+
+.jp-video .jp-time-info > div{
+	display: inline;
+}
+
+.jp-video .jp-full-screen,
+.jp-video .jp-restore-screen{
+	display: block;
+	top: 11px;
+	right: 15px;
+	
+	width: 14px;
+	height: 15px;
+	background: url('sprites/full-screen.png') no-repeat;
+}
+
+/* @group Full Screen */
+
+.jp-video-full .jp-jplayer{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100000; /* One higher than the WordPress admin bar */
+    background: #000000;
+}
+
+.jp-video-full .jp-gui{
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	z-index: 100001; /* One higher than the video player */
+}
+
+/* @end */
+
+.jp-video .sep{
+	position: absolute;
+	display: block;
+	width: 2px;
+	height: 21px;
+	background: url('sprites/sep.png') no-repeat;
+	top: 7px;
+}
+
+.jp-video .jp-controls-sep{
+	left: 40px;
+}
+
+.jp-video .jp-time-sep{
+	right: 235px;
+}
+
+.jp-video .jp-full-sep{
+	right: 39px;
+}
+
+.jp-video .jp-play{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	cursor: pointer;
+}
+
+.jp-video .jp-play-default{
+	margin-top: -49px;
+	margin-left: -49px;
+	
+	width: 97px;
+	height: 97px;
+}
+
+.jp-video .jp-gui{
+	display: none;
+}

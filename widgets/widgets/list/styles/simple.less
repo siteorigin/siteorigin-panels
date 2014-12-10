@@ -1,0 +1,23 @@
+/*
+Name: Simple
+Template: simple
+Author: Greg Priday
+Author URI: http://siteorigin.com/
+*/
+
+@import "../../../less/mixins";
+
+@image: white;
+
+ul {
+	margin: 0;
+	padding: 0;
+
+	li {
+		@image_url: 'checks/@{image}.png';
+		list-style: url(widgetimage(@image_url));
+		line-height: 2em;
+		margin-left: 24px;
+		padding-left: 6px;
+	}
+}

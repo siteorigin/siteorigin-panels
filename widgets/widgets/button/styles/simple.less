@@ -1,0 +1,78 @@
+/*
+Name: Simple
+Template: simple
+Author: Greg Priday
+Author URI: http://siteorigin.com/
+*/
+
+@background_color: #F5F5F5;
+
+@text_darken: 35%;
+@inset_highlight: 10%;
+@drop_shadow: 0.1;
+@text_shadow: 20%;
+
+@rounded: 4px;
+@font_size: 0.875em;
+
+@padding_top: 10px;
+@padding_sides: 45px;
+
+@font_family: inherit;
+@font_weight: 500;
+
+@import "../../../less/mixins";
+
+& {
+
+	a {
+		display:inline-block;
+		padding: @padding_top @padding_sides;
+
+		.rounded(@rounded);
+
+		color: lumdarken(@background_color, @text_darken);
+
+		font-size: @font_size;
+		font-family: @font_family;
+		font-weight: @font_weight;
+		text-decoration:none;
+
+		text-shadow: 0 1px 0 lumlighten(@background_color, @text_shadow);
+		text-align: center;
+
+		@inset_highlight_color: lumlighten(@background_color, @inset_highlight);
+		.box-shadow(~"inset 0 1px 0 @{inset_highlight_color}, 0 1px 2px rgba(0,0,0,@{drop_shadow})");
+		.button-style(@background_color);
+
+		&:hover {
+			.button-style( lumlighten(@background_color, 1.75%) );
+		}
+
+		&:active {
+			.button-style(lumdarken(@background_color, 1.75), -2);
+			.box-shadow(none);
+			padding-top: @padding_top + 1;
+			padding-bottom: @padding_top - 1;
+		}
+	}
+
+	&.align-left {
+		text-align: left;
+	}
+
+	&.align-right {
+		text-align: right;
+	}
+
+	&.align-center {
+		text-align: center;
+	}
+
+	&.align-justify {
+		a {
+			display: block;
+		}
+	}
+
+}

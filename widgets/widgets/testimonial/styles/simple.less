@@ -1,0 +1,61 @@
+/*
+Name: Simple
+Template: simple
+Author: Greg Priday
+Author URI: http://siteorigin.com/
+*/
+
+@import "../../../less/mixins";
+
+@borders: 1px solid #D0D0D0;
+@background_color: #FCFCFC;
+
+& {
+	background: @background_color;
+	border: @borders;
+	padding: 20px;
+	.clearfix();
+	.box-shadow(0 1px 2px rgba(0,0,0,0.1));
+
+	h5.testimonial-name {
+		margin: 1em 0 5px 0;
+		line-height: 1;
+		color: #333;
+		clear: none;
+
+		a {
+			color: inherit;
+		}
+	}
+
+	small.testimonial-location {
+		font-size: 0.9em;
+		display: block;
+		margin: 0;
+		line-height: 1;
+		color: #999;
+		clear: none;
+	}
+
+	.text {
+		margin-left: 80px;
+		font-size: 0.95em;
+
+		p:first-child {
+			margin-top: 0;
+		}
+	}
+
+	.testimonial-image-wrapper {
+		.rounded(4px);
+		float: left;
+		width: 60px;
+		height: 60px;
+		overflow: hidden;
+		background: #333;
+		img {
+			width: 100%;
+			height: auto;
+		}
+	}
+}

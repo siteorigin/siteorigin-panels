@@ -1,0 +1,70 @@
+/*
+Name: Simple
+Template: simple
+Author: Greg Priday
+Author URI: http://siteorigin.com/
+*/
+
+@import "../../../less/mixins";
+
+/* Everything for the background */
+
+@background_color: #F6F6F6;
+@padding: 2em;
+@rounding: 4px;
+@shadow: 0.1;
+@borders: 1px solid #E0E0E0;
+
+/* Everything for the Title */
+
+@title_text_color: #EFEFEF;
+@title_font_weight: auto;
+@subtitle_text_color: #CCCCCC;
+@subtitle_font_weight: auto;
+@texture: dark-dashed;
+
+& {
+	.clearfix();
+	padding: @padding;
+	position: relative;
+	.rounded(@rounding);
+
+	background: texture(@texture, @background_color);
+	.box-shadow(0 1px 2px rgba(0,0,0,@shadow));
+	border: @borders;
+
+	.title {
+		line-height: 1.6em;
+		margin: 0;
+		color: @title_text_color;
+		font-weight: @title_font_weight;
+	}
+
+	.subtitle {
+		line-height: 1.25em;
+		margin: 0;
+		color: @subtitle_text_color;
+		font-weight: @subtitle_font_weight;
+	}
+
+	.origin-widget-button {
+		position: absolute;
+		display: block;
+		top: 50%;
+		right: 2em;
+		margin-top: -22px;
+	}
+}
+
+@media (max-width:680px) {
+	& {
+		.origin-widget-button {
+			position: static;
+			margin-top: 2em;
+
+			a {
+				display: block;
+			}
+		}
+	}
+}
