@@ -22,7 +22,7 @@
 
         cell: null,
 
-        defaults: {
+        defaults : {
             // The PHP Class of the widget
             class : null,
 
@@ -39,19 +39,22 @@
             styles: {}
         },
 
-        initialize: function(){
-        },
-
         /**
          * @param field
          * @returns {*}
          */
-        getWidgetField: function(field){
-            if(typeof panelsOptions['widgets'][this.get('class')] == 'undefined') {
-                if(field == 'title' || field == 'description') return panelsOptions.loc.missing_widget[field];
-                else return '';
+        getWidgetField: function(field) {
+            if(typeof panelsOptions.widgets[ this.get('class') ] === 'undefined') {
+                if(field === 'title' || field === 'description') {
+                    return panelsOptions.loc.missing_widget[field];
+                }
+                else {
+                    return '';
+                }
             }
-            else return panelsOptions['widgets'][this.get('class')][field];
+            else {
+                return panelsOptions.widgets[this.get('class')][field];
+            }
         },
 
         /**
@@ -60,7 +63,7 @@
          * @param panels.model.cell newCell
          */
         moveToCell: function(newCell){
-            if( this.cell.cid == newCell.cid ) return;
+            if( this.cell.cid === newCell.cid ) { return false; }
 
             this.cell = newCell;
             this.collection.remove(this, {silent:true});
@@ -106,7 +109,7 @@
          * @returns {panels.model.widget}
          */
         clone: function( cell, options ){
-            if( typeof cell == 'undefined' ) cell = this.cell;
+            if( typeof cell === 'undefined' ) { cell = this.cell; }
 
             var clone = new this.constructor( this.attributes );
 
@@ -237,7 +240,7 @@
          * @returns {null}
          */
         getEditDialog: function(){
-            if(this.dialog == null){
+            if(this.dialog === null){
                 this.dialog = new panels.dialog.widget({
                     model: this.model
                 });
@@ -1176,7 +1179,7 @@
             var newData = this.getPanelsData();
             this.set( 'data', newData, { silent: true } );
 
-            if( JSON.stringify( newData ) != oldData ) {
+            if( JSON.stringify( newData ) !== oldData ) {
                 // The default change event doesn't trigger on deep changes, so we'll trigger our own
                 this.trigger('change');
                 this.trigger('change:data');

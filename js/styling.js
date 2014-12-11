@@ -19,13 +19,13 @@ jQuery(function($){
             $$.css({
                 'margin-left' : -leftSpace,
                 'margin-right' : -rightSpace,
-                'padding-left' : $$.data('stretch-type') == 'full' ? leftSpace : 0,
-                'padding-right' : $$.data('stretch-type') == 'full' ? rightSpace : 0
+                'padding-left' : $$.data('stretch-type') === 'full' ? leftSpace : 0,
+                'padding-right' : $$.data('stretch-type') === 'full' ? rightSpace : 0
             });
 
             var cells = $$.find('> .panel-grid-cell');
 
-            if( $$.data('stretch-type') == 'full-stretched' && cells.length == 1 ) {
+            if( $$.data('stretch-type') === 'full-stretched' && cells.length === 1 ) {
                 cells.css({
                     'padding-left' : 0,
                     'padding-right' : 0

@@ -49,7 +49,7 @@
          */
         addEntry: function(text, data) {
 
-            if(typeof data == 'undefined' || data == null) {
+            if(typeof data === 'undefined' || data === null) {
                 data = this.builder.getPanelsData();
             }
 
@@ -72,8 +72,8 @@
                 var lastEntry = this.at(this.models.length - 2);
 
                 if(
-                    ( entry.get('text') == lastEntry.get('text') &&  entry.get('time') - lastEntry.get('time') < 15 )
-                    || ( entry.get('data') == lastEntry.get('data') )
+                    ( entry.get('text') === lastEntry.get('text') &&  entry.get('time') - lastEntry.get('time') < 15 ) ||
+                    ( entry.get('data') === lastEntry.get('data') )
                 ) {
                     // If both entries have the same text and are within 20 seconds of each other, or have the same data, then remove most recent
                     this.remove( entry );
@@ -161,7 +161,7 @@
             c.empty();
 
             if( this.currentEntry.get('data') != this.revertEntry.get('data') || this.entries.models.length > 0 ) {
-                $(this.historyEntryTemplate({title: panelsOptions.loc.history['revert'], count: 1}))
+                $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
                     .data('historyEntry', this.revertEntry)
                     .prependTo(c);
             }

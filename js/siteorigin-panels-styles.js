@@ -7,7 +7,6 @@
 
     var panels = window.siteoriginPanels;
 
-
     /**
      * The styles view handlers all the cool rendering stuff
      */
