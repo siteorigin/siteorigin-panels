@@ -2996,16 +2996,33 @@
                         $('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
                             .val( parseFloat( $$.html() ) ).insertAfter( $$ )
                             .focus( function(){
-                                $(this).removeClass('no-user-interacted');
                                 clearTimeout( timeout );
                             } )
                             .keyup(function(e){
-                                $(this).removeClass('no-user-interacted');
+                                if(e.keyCode !== 9) {
+                                    // Only register the interaction if the user didn't press tab
+                                    $(this).removeClass('no-user-interacted');
+                                }
 
                                 // Enter is clicked
                                 if(e.keyCode === 13){
                                     e.preventDefault();
                                     $(this).blur();
+                                }
+                            })
+                            .keydown(function(e){
+                                if(e.keyCode === 9){
+                                    e.preventDefault();
+
+                                    // Tab will always cycle around the row inputs
+                                    var inputs = rowPreview.find( '.preview-cell-weight-input');
+                                    var i = inputs.index( $(this) );
+                                    if( i === inputs.length - 1 ) {
+                                        inputs.eq(0).focus().select();
+                                    }
+                                    else {
+                                        inputs.eq(i+1).focus().select();
+                                    }
                                 }
                             })
                             .blur( function(){
