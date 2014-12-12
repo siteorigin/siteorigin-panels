@@ -2508,7 +2508,6 @@
                 data,
                 function(result){
                     // Add in the CID of the widget model
-                    // TODO DOUBLE CHECK THIS
                     var html = result.replace( /{\$id}/g, thisView.model.cid );
 
                     // Load this content into the form
@@ -2997,37 +2996,16 @@
                         $('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
                             .val( parseFloat( $$.html() ) ).insertAfter( $$ )
                             .focus( function(){
+                                $(this).removeClass('no-user-interacted');
                                 clearTimeout( timeout );
                             } )
                             .keyup(function(e){
+                                $(this).removeClass('no-user-interacted');
+
                                 // Enter is clicked
                                 if(e.keyCode === 13){
                                     e.preventDefault();
-
-                                    $(this).removeClass('no-user-interacted');
-
-                                    // Select the next input
-                                    var inputs = rowPreview.find('.preview-cell-weight-input');
-                                    var index = inputs.index( $(this) );
-
-                                    if(index === inputs.length - 1) {
-                                        // Go to first input
-                                        index = 0;
-                                    }
-                                    else {
-                                        // Go to next
-                                        index = index + 1;
-                                    }
-
-                                    var next = rowPreview.find('.preview-cell-weight-input').eq( index );
-
-                                    // Either go to the next input or blur to set
-                                    if( !next.hasClass('no-user-interacted') ) {
-                                        $(this).blur();
-                                    }
-                                    else {
-                                        next.select();
-                                    }
+                                    $(this).blur();
                                 }
                             })
                             .blur( function(){
@@ -3038,27 +3016,46 @@
                                     }
 
                                     // Go through all the inputs
-                                    var rowWeights = [];
+                                    var rowWeights = [],
+                                        rowChanged = [],
+                                        changedSum = 0,
+                                        unchangedSum = 0;
+
                                     rowPreview.find( '.preview-cell-weight-input' ).each(function(i, el){
                                         var val = parseFloat( $(el).val() );
                                         if( isNaN(val) ) {
                                             val = 1 / thisDialog.cells.length;
                                         }
                                         else {
-                                            val = val / 100;
+                                            val = Math.round(val*10) / 1000;
                                         }
 
-                                        rowWeights.push( val );
-                                    });
+                                        // Check within 3 decimal points
+                                        var changed = ! $(el).hasClass('no-user-interacted');
 
-                                    // Make sure the sum is 1
-                                    var sum = 0;
-                                    for( var j = 0; j < rowWeights.length; j++ ) {
-                                        sum += rowWeights[j];
+                                        rowWeights.push( val );
+                                        rowChanged.push( changed );
+
+                                        if( changed ) {
+                                            changedSum += val;
+                                        }
+                                        else{
+                                            unchangedSum += val;
+                                        }
+                                    } );
+
+                                    if ( changedSum > 0 && unchangedSum > 0 && ( 1 - changedSum ) > 0 ) {
+                                        // Balance out the unchanged rows to occupy the weight left over by the changed sum
+                                        for( var i = 0; i < rowWeights.length; i++ ) {
+                                            if( !rowChanged[i] ) {
+                                                rowWeights[i] = ( rowWeights[i] / unchangedSum ) * ( 1 - changedSum );
+                                            }
+                                        }
                                     }
-                                    for( var k = 0; k < rowWeights.length; j++ ) {
-                                        rowWeights[k] = rowWeights[k] / sum;
-                                    }
+
+                                    // Last check to ensure total weight is 1
+                                    var sum = _.reduce( rowWeights, function(memo, num){ return memo + num; } );
+                                    rowWeights = rowWeights.map( function(w){ return w/sum; } );
 
                                     // Set the new cell weights and regenerate the preview.
                                     if( Math.min.apply(Math, rowWeights) > 0.01 ) {
@@ -3070,7 +3067,6 @@
                                 }, 100 );
                             } )
                             .click( function(){
-                                rowPreview.find('.preview-cell-weight-input').addClass('no-user-interacted');
                                 $(this).select();
                             } );
                     } );
@@ -3128,7 +3124,7 @@
 
             // Now lets make sure that the row weights add up to 1
 
-            var totalRowWeight = _.reduce( cells, function(memo, weight){ return memo + weight });
+            var totalRowWeight = _.reduce( cells, function(memo, weight){ return memo + weight; });
             cells = _.map(cells, function(cell){
                 return cell/totalRowWeight;
             });
