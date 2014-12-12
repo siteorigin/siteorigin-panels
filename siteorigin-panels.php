@@ -815,6 +815,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		$siteorigin_panels_inline_css .= siteorigin_panels_generate_css($post_id, $panels_data);
 	}
 
+	echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data['grids'][$gi] );
+
 	foreach ( $grids as $gi => $cells ) {
 
 		$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array('panel-grid'), $panels_data['grids'][$gi] );
@@ -871,6 +873,9 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			if( !empty($cell_style_wrapper) ) echo '</div>';
 			echo '</div>';
 		}
+
+		echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data['grids'][$gi] );
+
 		echo '</div>';
 
 		// Close the
