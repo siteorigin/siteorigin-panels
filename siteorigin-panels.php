@@ -815,7 +815,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		$siteorigin_panels_inline_css .= siteorigin_panels_generate_css($post_id, $panels_data);
 	}
 
-	echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data['grids'][$gi] );
+	echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
 	foreach ( $grids as $gi => $cells ) {
 
@@ -874,8 +874,6 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			echo '</div>';
 		}
 
-		echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data['grids'][$gi] );
-
 		echo '</div>';
 
 		// Close the
@@ -884,6 +882,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		// This allows other themes and plugins to add html after the row
 		echo apply_filters( 'siteorigin_panels_after_row', '', $panels_data['grids'][$gi], $grid_attributes );
 	}
+
+	echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data, $post_id );
 
 	echo '</div>';
 
