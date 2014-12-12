@@ -2,7 +2,7 @@
 Contributors: gpriday
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 3.7
-Tested up to: 4.0
+Tested up to: 4.1
 Stable tag: 1.5.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
