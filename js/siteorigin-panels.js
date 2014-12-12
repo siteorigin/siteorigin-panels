@@ -98,7 +98,7 @@
             if( hasChanged ) {
                 // We'll trigger our own change events
                 this.trigger('change');
-                this.trigger('change:values')
+                this.trigger('change:values');
             }
         },
 
@@ -2074,7 +2074,7 @@
                         fieldValue = $$.val() != '' ? $$.val() : true;
                     }
                     else {
-                        fieldValue = false;
+                        fieldValue = null;
                     }
                 }
                 else if( $$.attr('type') == 'radio' ){
@@ -2098,7 +2098,7 @@
                 else if ( $$.prop('tagName') == 'SELECT' ) {
                     fieldValue = $$.find('option:selected').val();
                 }
-                if( fieldValue == null ) {
+                else {
                     fieldValue = $$.val();
                 }
 
@@ -2118,15 +2118,17 @@
                 }
 
                 // Now convert this into an array
-                for(var i = 0; i < parts.length; i++) {
-                    if(i == parts.length - 1) {
-                        sub[parts[i]] = fieldValue;
-                    }
-                    else {
-                        if(typeof sub[parts[i]] == 'undefined') {
-                            sub[parts[i]] = {};
+                if(fieldValue !== null) {
+                    for (var i = 0; i < parts.length; i++) {
+                        if (i == parts.length - 1) {
+                            sub[parts[i]] = fieldValue;
                         }
-                        sub = sub[parts[i]];
+                        else {
+                            if (typeof sub[parts[i]] == 'undefined') {
+                                sub[parts[i]] = {};
+                            }
+                            sub = sub[parts[i]];
+                        }
                     }
                 }
 
