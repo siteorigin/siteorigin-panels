@@ -89,7 +89,7 @@
          */
         setValues: function(values){
             var hasChanged = false;
-            if( JSON.stringify( values ) != JSON.stringify( this.get('values') ) ) {
+            if( JSON.stringify( values ) !== JSON.stringify( this.get('values') ) ) {
                 hasChanged = true;
             }
 
@@ -116,7 +116,7 @@
             // Create a deep clone of the original values
             var cloneValues = JSON.parse( JSON.stringify( this.get('values') ) );
 
-            if( this.get('class') == "SiteOrigin_Panels_Widgets_Layout" ) {
+            if( this.get('class') === "SiteOrigin_Panels_Widgets_Layout" ) {
                 // Special case of this being a layout widget, it needs a new ID
                 cloneValues.builder_id = Math.random().toString(36).substr(2);
             }
@@ -133,7 +133,7 @@
          */
         getTitle: function(){
             var widgetData = panelsOptions.widgets[this.get('class')];
-            if( typeof widgetData.panels_title != 'undefined' ) {
+            if( typeof widgetData.panels_title !== 'undefined' ) {
                 // This means that the widget has told us which field it wants us to use as a title
                 if( widgetData.panels_title === false ) {
                     return panelsOptions.widgets[this.get('class')].description;
@@ -152,9 +152,9 @@
 
             for( var i in titleFields ) {
                 if(
-                    typeof values[titleFields[i]] != 'undefined' &&
-                    typeof values[titleFields[i]] == 'string' &&
-                    values[titleFields[i]] != '' &&
+                    typeof values[titleFields[i]] !== 'undefined' &&
+                    typeof values[titleFields[i]] === 'string' &&
+                    values[titleFields[i]] !== '' &&
                     !$.isNumeric( values[titleFields[i]] )
                 ) {
                     var title = values[ titleFields[i] ];
@@ -215,7 +215,7 @@
 
             this.$el.data( 'view', this );
 
-            if( _.size( this.model.get('values') ) == 0 ||  options.loadForm) {
+            if( _.size( this.model.get('values') ) === 0 ||  options.loadForm) {
                 // If this widget doesn't have a value, create a form and save it
                 var dialog = this.getEditDialog();
 
@@ -366,7 +366,9 @@
          * Create a clone of the cell, along with all its widgets
          */
         clone: function(row, cloneOptions){
-            if( typeof row == 'undefined' ) row = this.row;
+            if( typeof row === 'undefined' ) {
+                row = this.row;
+            }
             cloneOptions = _.extend({ cloneWidgets: true }, cloneOptions);
 
             var clone = new this.constructor( this.attributes );
@@ -526,7 +528,7 @@
                 start: function(e, ui){
                     // Set the containment to the cell parent
                     previousCell = cellView.$el.prev().data('view');
-                    if( typeof previousCell == 'undefined' ) return false;
+                    if( typeof previousCell === 'undefined' ) { return false; }
 
                     // Create the clone for the current cell
                     var newCellClone = cellView.$el.clone().appendTo(ui.helper).css({
@@ -601,7 +603,7 @@
             } );
             view.cell = this;
 
-            if( typeof widget.isDuplicate == 'undefined' ) {
+            if( typeof widget.isDuplicate === 'undefined' ) {
                 widget.isDuplicate = false;
             }
 
@@ -610,7 +612,7 @@
                 'loadForm': widget.isDuplicate
             });
 
-            if( typeof options.at == 'undefined' || collection.length <= 1 ) {
+            if( typeof options.at === 'undefined' || collection.length <= 1 ) {
                 // Insert this at the end of the widgets container
                 view.$el.appendTo( this.$( '.widgets-container' ) );
             }
@@ -672,7 +674,7 @@
         setCells: function(cells){
             var thisModel = this;
 
-            if( this.cells.length == 0 ) {
+            if( this.cells.length === 0 ) {
                 // We're adding the initial cells
                 _.each(cells, function (cellWeight) {
                     // Add the new cell to the row
@@ -749,7 +751,9 @@
          * @return {panels.model.row} The cloned row.
          */
         clone: function( builder, cloneOptions ){
-            if(typeof builder == 'undefined') builder = this.builder;
+            if(typeof builder === 'undefined') {
+                builder = this.builder;
+            }
             cloneOptions = _.extend({ cloneCells: true }, cloneOptions);
 
             var clone = new this.constructor( this.attributes );
@@ -773,17 +777,17 @@
     panels.collection.rows = Backbone.Collection.extend( {
         model: panels.model.row,
 
-        initialize: function(){
-        },
-
         /**
          * Destroy all the rows in this collection
          */
         empty: function(){
             var model;
-            while ( model = this.collection.first() ) {
+            do {
+                model = this.collection.first();
+                if( !model ) { break; }
+
                 model.destroy();
-            }
+            } while( true );
         }
     } );
 
@@ -869,7 +873,9 @@
          */
         resize: function(e){
             // Don't resize this
-            if( !this.$el.is(':visible') ) return;
+            if( !this.$el.is(':visible') ) {
+                return false;
+            }
 
             // Reset everything to have an automatic height
             this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
@@ -936,7 +942,9 @@
             var $$ = $(e.target);
 
             // The user clicked on the dashicon
-            if( $$.hasClass('dashicons') ) $$ = $$.parent();
+            if( $$.hasClass('dashicons') ) {
+                $$ = $$.parent();
+            }
 
             if( $$.hasClass('so-confirmed') ) {
                 this.visualDestroyModel();
@@ -1001,9 +1009,11 @@
             // Find the view that ties in to the cell we're removing
             this.$el.find('.so-cells > .cell').each( function(){
                 var view = $(this).data('view');
-                if(typeof view == 'undefined') return;
+                if(typeof view === 'undefined') {
+                    return false;
+                }
 
-                if( view.model.cid == cell.cid ) {
+                if( view.model.cid === cell.cid ) {
                     // Remove this view
                     view.remove();
                 }
@@ -1064,12 +1074,14 @@
             var cit = 0;
             var rows = [];
 
-            if( typeof data.grid_cells == 'undefined' ) return;
+            if( typeof data.grid_cells === 'undefined' ) { return; }
 
             var gi;
             for(var ci = 0; ci < data.grid_cells.length; ci++) {
                 gi = parseInt(data.grid_cells[ci].grid);
-                if(typeof rows[gi] == 'undefined') rows[gi] = [];
+                if(typeof rows[gi] === 'undefined') {
+                    rows[gi] = [];
+                }
 
                 rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
             }
@@ -1077,21 +1089,21 @@
             var builderModel = this;
             _.each( rows, function(row, i){
                 // This will create and add the row model and its cells
-                var row = builderModel.addRow( row, { noAnimate: true } );
+                var newRow = builderModel.addRow( row, { noAnimate: true } );
 
-                if( typeof data.grids[i].style != 'undefined' ) {
-                    row.set( 'style', data.grids[i].style );
+                if( typeof data.grids[i].style !== 'undefined' ) {
+                    newRow.set( 'style', data.grids[i].style );
                 }
             } );
 
 
-            if( typeof data.widgets == 'undefined' ) return;
+            if( typeof data.widgets === 'undefined' ) { return; }
 
             // Add the widgets
             _.each(data.widgets, function(widgetData){
                 try {
                     var panels_info = null;
-                    if (typeof widgetData.panels_info != 'undefined') {
+                    if (typeof widgetData.panels_info !== 'undefined') {
                         panels_info = widgetData.panels_info;
                         delete widgetData.panels_info;
                     }
@@ -1108,7 +1120,7 @@
                         values: widgetData
                     });
 
-                    if( typeof panels_info.style != 'undefined' ) {
+                    if( typeof panels_info.style !== 'undefined' ) {
                         newWidget.set('style', panels_info.style );
                     }
 
@@ -1240,7 +1252,7 @@
             // Set the builder for each dialog and render it.
             _.each(this.dialogs, function(p, i, d){
                 d[i].setBuilder( builder );
-            })
+            });
 
             this.dialogs.row.setRowDialogType('create');
 
@@ -1249,7 +1261,7 @@
 
             // Reflow the entire builder when ever the
             $(window).resize(function(e){
-                if(e.target == window) {
+                if(e.target === window) {
                     builder.trigger('builder_resize');
                 }
             });
@@ -1259,9 +1271,7 @@
 
             // Handle a content change
             this.on('content_change', this.handleContentChange, this);
-
             this.on('display_builder', this.handleDisplayBuilder, this);
-
             this.model.on('change:data', this.toggleWelcomeDisplay, this);
         },
 
@@ -1309,7 +1319,9 @@
          * @returns {panels.view.builder}
          */
         attachToEditor: function(){
-            if( typeof this.metabox == 'undefined' ) return this;
+            if( typeof this.metabox === 'undefined' ) {
+                return this;
+            }
 
             this.attachedToEditor = true;
             var metabox = this.metabox;
@@ -1364,7 +1376,7 @@
 
             // Switch to the Page Builder interface as soon as we load the page if there are widgets
             var data = this.model.get('data');
-            if( typeof data.widgets != 'undefined' && _.size(data.widgets) != 0 ) {
+            if( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) {
                 $('#content-panels.switch-panels').click();
             }
 
@@ -1373,7 +1385,7 @@
                 var toolbar = thisView.$('.so-builder-toolbar');
                 var newTop = $(window).scrollTop() - thisView.$el.offset().top;
 
-                if( $('#wpadminbar').css('position') == 'fixed' ) {
+                if( $('#wpadminbar').css('position') === 'fixed' ) {
                     newTop += $('#wpadminbar').outerHeight();
                 }
 
@@ -1384,7 +1396,8 @@
                 // Position the toolbar
                 toolbar.css('top', newTop);
                 thisView.$el.css('padding-top', toolbar.outerHeight());
-            }
+            };
+
             $( window ).resize( stickToolbar );
             $( document ).scroll( stickToolbar );
             stickToolbar();
@@ -1420,7 +1433,7 @@
          */
         refreshSortable: function(){
             // Refresh the sortable to account for the new row
-            if(this.rowsSortable != null) {
+            if(this.rowsSortable !== null) {
                 this.rowsSortable.sortable('refresh');
             }
         },
@@ -1437,12 +1450,14 @@
             this.dataField = field;
             this.dataField.data('builder', this);
 
-            if( options.load && field.val() != '') {
+            if( options.load && field.val() !== '') {
                 var data;
                 try {
                     data = JSON.parse( this.dataField.val( ) );
                 }
-                catch(err) { data = '' }
+                catch(err) {
+                    data = '';
+                }
 
                 this.model.loadPanelsData(data);
                 this.currentData = data;
@@ -1458,7 +1473,7 @@
         storeModelData: function(){
             var data = JSON.stringify( this.model.get('data' ) );
 
-            if( $(this.dataField).val( ) != data ) {
+            if( $(this.dataField).val() !== data ) {
                 // If the data is different, set it and trigger a content_change event
                 $(this.dataField).val( data );
                 this.trigger('content_change');
@@ -1473,7 +1488,7 @@
             rowView.render();
 
             // Attach the row elements to this builder
-            if( typeof options.at == 'undefined' || collection.length <= 1 ) {
+            if( typeof options.at === 'undefined' || collection.length <= 1 ) {
                 // Insert this at the end of the widgets container
                 rowView.$el.appendTo( this.$( '.so-rows-container' ) );
             }
@@ -1522,7 +1537,7 @@
          * Get the model for the currently active cell
          */
         getActiveCell: function(){
-            if( this.$('.so-cells .cell').length == 0 ) {
+            if( this.$('.so-cells .cell').length === 0 ) {
                 // Create a row with a single cell
                 this.model.addRow( [1], {noAnimate: true} );
             }
@@ -1553,7 +1568,7 @@
                     $c.find('.so-widget').each(function(wi, el) {
                         var $w = $(el);
                         indexes[ $w.data('view').model.cid ] = wi;
-                    })
+                    });
                 });
             });
 
@@ -1567,7 +1582,7 @@
                     cell.widgets.models = cell.widgets.sortBy(function(widget){
                         return indexes[widget.cid];
                     });
-                })
+                });
             });
 
             // Update the builder model to reflect the newly ordered data.
@@ -1580,7 +1595,9 @@
          * @returns {panels.view.builder}
          */
         addLiveEditor: function(postId){
-            if( typeof panels.view.liveEditor == 'undefined' ) return this;
+            if( typeof panels.view.liveEditor === 'undefined' ) {
+                return this;
+            }
 
             // Create the live editor and set the builder to this.
             this.liveEditor = new panels.view.liveEditor();
@@ -1600,7 +1617,9 @@
          * Show the current live editor
          */
         displayLiveEditor: function(){
-            if(typeof this.liveEditor == 'undefined') return false;
+            if(typeof this.liveEditor === 'undefined') {
+                return false;
+            }
 
             this.liveEditor.open();
             return false;
@@ -1612,7 +1631,9 @@
          * @return {panels.view.builder}
          */
         addHistoryBrowser: function(){
-            if(typeof panels.dialog.history == 'undefined') return this;
+            if(typeof panels.dialog.history === 'undefined') {
+                return this;
+            }
 
             this.dialogs.history = new panels.dialog.history();
             this.dialogs.history.builder = this;
@@ -1632,9 +1653,11 @@
          * @param data
          */
         addHistoryEntry: function(text, data){
-            if(typeof data == 'undefined') data = null;
+            if(typeof data === 'undefined') {
+                data = null;
+            }
 
-            if( typeof this.dialogs.history != 'undefined' ) {
+            if( typeof this.dialogs.history !== 'undefined' ) {
                 this.dialogs.history.entries.addEntry(text, data);
             }
         },
@@ -1664,8 +1687,12 @@
                         content = t.html();
 
                         // Set the content of the editor
-                        if( typeof tinyMCE == 'undefined' || tinyMCE.get("content") == null ) $('#content').val( content );
-                        else tinyMCE.get("content").setContent(content);
+                        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+                            $('#content').val( content );
+                        }
+                        else {
+                            tinyMCE.get("content").setContent(content);
+                        }
 
                         // Trigger a focusout (mainly for Yoast SEO)
                         $('#content').focusout();
@@ -1684,28 +1711,32 @@
          */
         handleDisplayBuilder: function(){
             var editorContent = '';
-            if ( typeof tinyMCE != 'undefined' ) editor = tinyMCE.get( 'content' );
-            if( editor != null && typeof( editor.getContent ) == "function" ) {
+            var editor;
+
+            if ( typeof tinyMCE !== 'undefined' ) {
+                editor = tinyMCE.get( 'content' );
+            }
+            if( editor !== null && typeof( editor.getContent ) === "function" ) {
                 editorContent = editor.getContent();
             }
             else {
                 editorContent = $('textarea#content').val();
             }
 
-            if( this.model.get('data') == '' && editorContent != '') {
+            if( this.model.get('data') === '' && editorContent !== '') {
                 // Confirm with the user first
-                if( !confirm( panelsOptions.loc.confirm_use_builder ) ) return;
+                if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
                 var widgetClass = '';
-                if( typeof panelsOptions.widgets["WP_Widget_Black_Studio_TinyMCE"] ) {
+                if( typeof panelsOptions.widgets.WP_Widget_Black_Studio_TinyMCE !== 'undefined' ) {
                     widgetClass = 'WP_Widget_Black_Studio_TinyMCE';
                 }
                 // There is a small chance a theme will have removed this, so check
-                else if( typeof panelsOptions.widgets["WP_Widget_Text"] ) {
+                else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
                     widgetClass = 'WP_Widget_Text';
                 }
 
-                if( widgetClass == '' ) return;
+                if( widgetClass === '' ) { return; }
 
                 // Create the existing page content in a single widget
                 this.model.loadPanelsData( {
@@ -1727,15 +1758,6 @@
                 this.model.trigger('change');
                 this.model.trigger('change:data');
             }
-            else if ( this.model.get('data') == '' ) {
-                // Set up a blank single row
-                //this.model.loadPanelsData( {
-                //    grid_cells : [ { grid: 0, weight: 1 } ],
-                //    grids: [ { cells: 1 } ],
-                //    widgets: []
-                //} );
-            }
-
         },
 
         /**
@@ -1752,7 +1774,7 @@
             // For any future dialogs
             this.on('add_dialog', function(newDialog){
                 newDialog.setParent(text, dialog);
-            }, this)
+            }, this);
         },
 
         toggleWelcomeDisplay: function(){
@@ -1762,7 +1784,7 @@
             else {
                 this.$('.so-panels-welcome-message').show();
             }
-        },
+        }
 
     } );
 
@@ -1794,7 +1816,7 @@
 
             this.trigger('initialize_dialog', this);
 
-            if(typeof this.initializeDialog != 'undefined') {
+            if(typeof this.initializeDialog !== 'undefined') {
                 this.initializeDialog();
             }
         },
@@ -1819,7 +1841,7 @@
          * Adds a dialog class to uniquely identify this dialog type
          */
         setDialogClass: function(){
-            if(this.dialogClass != ''){
+            if(this.dialogClass !== ''){
                 this.$('.so-panels-dialog').addClass(this.dialogClass);
             }
         },
@@ -1887,7 +1909,7 @@
             this.$el.data('view', this);
             this.$el.addClass('so-panels-dialog-wrapper');
 
-            if( this.parentDialog != false ) {
+            if( this.parentDialog !== false ) {
                 // Add a link to the parent dialog as a sort of crumbtrail.
                 var thisDialog = this;
                 var dialogParent = $('<h3 class="so-parent-link"></h3>').html( this.parentDialog.text + '<div class="so-separator"></div>' );
@@ -1908,7 +1930,9 @@
         initTabs: function(){
             var tabs = this.$el.find('.so-sidebar-tabs li a');
 
-            if(tabs.length == 0) return;
+            if(tabs.length === 0) {
+                return this;
+            }
 
             var thisDialog = this;
             tabs.click(function(e){
@@ -1921,7 +1945,7 @@
                 $$.parent().addClass('tab-active');
 
                 var url = $$.attr('href');
-                if(typeof url != 'undefined' && url.charAt(0) == '#') {
+                if(typeof url !== 'undefined' && url.charAt(0) === '#') {
                     // Display the new tab
                     var tabName = url.split('#')[1];
                     thisDialog.$('.so-content .so-content-tabs .tab-' + tabName).show();
@@ -1934,7 +1958,7 @@
 
             // Trigger a click on the first tab
             this.$el.find('.so-sidebar-tabs li a').first().click();
-
+            return this;
         },
 
         /**
@@ -1958,11 +1982,19 @@
             var prevDialog = this.getPrevDialog();
             var prevButton = this.$('.so-title-bar .so-previous');
 
-            if(nextDialog === null) nextButton.hide();
-            else if(nextDialog === false) nextButton.addClass('so-disabled');
+            if(nextDialog === null) {
+                nextButton.hide();
+            }
+            else if(nextDialog === false) {
+                nextButton.addClass('so-disabled');
+            }
 
-            if(prevDialog === null) prevButton.hide();
-            else if(prevDialog === false) prevButton.addClass('so-disabled');
+            if(prevDialog === null) {
+                prevButton.hide();
+            }
+            else if(prevDialog === false) {
+                prevButton.addClass('so-disabled');
+            }
         },
 
         /**
@@ -1993,7 +2025,7 @@
             this.trigger('close_dialog');
 
             // In the builder, trigger an update
-            if(typeof this.builder != 'undefined') {
+            if(typeof this.builder !== 'undefined') {
                 // Store the model data when a dialog is closed.
                 this.builder.model.refreshPanelsData();
             }
@@ -2019,7 +2051,7 @@
             this.closeDialog(null);
 
             var prev = this.getPrevDialog();
-            if(prev != null && prev != false){
+            if(prev !== null && prev !== false){
                 prev.openDialog();
             }
         },
@@ -2031,7 +2063,7 @@
             this.closeDialog(null);
 
             var next = this.getNextDialog();
-            if(next != null && next != false){
+            if(next !== null && next !== false){
                 next.openDialog();
             }
         },
@@ -2040,7 +2072,10 @@
          * Get the values from the form and convert them into a data array
          */
         getFormValues: function(formSelector){
-            if(typeof formSelector == 'undefined') formSelector = '.so-content';
+            if(typeof formSelector === 'undefined') {
+                formSelector = '.so-content';
+            }
+
             var $f = this.$(formSelector);
 
             var data = {}, parts;
@@ -2052,7 +2087,7 @@
                 var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr('name') );
 
                 // Create an array with the parts of the name
-                if(typeof name[2] == 'undefined') {
+                if(typeof name[2] === 'undefined') {
                     parts = $$.attr('name');
                 }
                 else {
@@ -2061,23 +2096,27 @@
                 }
 
                 parts = parts.map(function(e){
-                    if( !isNaN(parseFloat(e)) && isFinite(e) ) return parseInt(e);
-                    else return e;
+                    if( !isNaN(parseFloat(e)) && isFinite(e) ) {
+                        return parseInt(e);
+                    }
+                    else {
+                        return e;
+                    }
                 });
 
                 var sub = data;
                 var fieldValue = null;
 
                 // First we need to get the value from the field
-                if( $$.attr('type') == 'checkbox' ){
+                if( $$.attr('type') === 'checkbox' ){
                     if ( $$.is(':checked') ) {
-                        fieldValue = $$.val() != '' ? $$.val() : true;
+                        fieldValue = $$.val() !== '' ? $$.val() : true;
                     }
                     else {
                         fieldValue = null;
                     }
                 }
-                else if( $$.attr('type') == 'radio' ){
+                else if( $$.attr('type') === 'radio' ){
                     if ( $$.is(':checked') ) {
                         fieldValue = $$.val();
                     }
@@ -2086,16 +2125,18 @@
                         return;
                     }
                 }
-                else if( $$.prop('tagName') == 'TEXTAREA' && $$.hasClass('wp-editor-area') ){
+                else if( $$.prop('tagName') === 'TEXTAREA' && $$.hasClass('wp-editor-area') ){
                     // This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
                     var editor = null;
-                    if ( typeof tinyMCE != 'undefined' ) editor = tinyMCE.get( $$.attr('id') );
+                    if ( typeof tinyMCE !== 'undefined' ) {
+                        editor = tinyMCE.get( $$.attr('id') );
+                    }
 
-                    if( editor != null && typeof( editor.getContent ) == "function" ) {
+                    if( editor !== null && typeof( editor.getContent ) === "function" ) {
                         fieldValue = editor.getContent();
                     }
                 }
-                else if ( $$.prop('tagName') == 'SELECT' ) {
+                else if ( $$.prop('tagName') === 'SELECT' ) {
                     fieldValue = $$.find('option:selected').val();
                 }
                 else {
@@ -2103,7 +2144,7 @@
                 }
 
                 // Now, we need to filter this value if necessary
-                if( typeof $$.data('panels-filter') != 'undefined' ) {
+                if( typeof $$.data('panels-filter') !== 'undefined' ) {
                     switch( $$.data('panels-filter') ) {
                         case 'json_parse':
                             // Attempt to parse the JSON value of this field
@@ -2120,11 +2161,11 @@
                 // Now convert this into an array
                 if(fieldValue !== null) {
                     for (var i = 0; i < parts.length; i++) {
-                        if (i == parts.length - 1) {
+                        if (i === parts.length - 1) {
                             sub[parts[i]] = fieldValue;
                         }
                         else {
-                            if (typeof sub[parts[i]] == 'undefined') {
+                            if (typeof sub[parts[i]] === 'undefined') {
                                 sub[parts[i]] = {};
                             }
                             sub = sub[parts[i]];
@@ -2142,7 +2183,7 @@
          */
         setStatusMessage: function(message, loading){
             this.$('.so-toolbar .so-status').html( message );
-            if( typeof loading != 'undefined' && loading ) {
+            if( typeof loading !== 'undefined' && loading ) {
                 this.$('.so-toolbar .so-status').addClass('so-panels-loading');
             }
         },
@@ -2154,7 +2195,7 @@
             this.parentDialog = {
                 text: text,
                 dialog: dialog
-            }
+            };
         }
     } );
 
@@ -2229,9 +2270,11 @@
                     description : widget.description
                 } ) ) ;
 
-                if(typeof widget.icon == 'undefined') widget.icon = 'dashicons dashicons-admin-generic';
+                if(typeof widget.icon === 'undefined') {
+                    widget.icon = 'dashicons dashicons-admin-generic';
+                }
 
-                if( typeof widget.icon != 'undefined' ){
+                if( typeof widget.icon !== 'undefined' ){
                     $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
                 }
 
@@ -2254,7 +2297,7 @@
         tabClickHandler: function($t){
             // Get the filter from the tab, and filter the widgets
             this.filter = $t.parent().data('filter');
-            if( this.$el.find('.so-sidebar-search').val() != '' ) {
+            if( this.$el.find('.so-sidebar-search').val() !== '' ) {
                 this.filter.search = this.$el.find('.so-sidebar-search').val();
             }
             this.filterWidgets(this.filter);
@@ -2275,9 +2318,13 @@
          * @param filter
          */
         filterWidgets: function(filter) {
-            if (typeof filter == 'undefined') filter = {};
+            if (typeof filter === 'undefined') {
+                filter = {};
+            }
 
-            if(typeof filter.groups == 'undefined') filter.groups = '';
+            if(typeof filter.groups === 'undefined') {
+                filter.groups = '';
+            }
 
             this.$el.find('.widget-type-list .widget-type').each(function(){
                 var $$ = $(this), showWidget;
@@ -2285,11 +2332,11 @@
 
                 var widgetData = ( typeof panelsOptions.widgets[widgetClass] != 'undefined' ) ? panelsOptions.widgets[widgetClass] : false;
 
-                if( filter.groups.length == 0 ) {
+                if( filter.groups.length === 0 ) {
                     // This filter doesn't specify groups, so show all
                     showWidget = true;
                 }
-                else if( widgetData !== false && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
+                else if( !widgetData && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
                     // This widget is in the filter group
                     showWidget = true;
                 }
@@ -2301,17 +2348,21 @@
                 // This can probably be done with a more intelligent operator
                 if( showWidget ) {
 
-                    if( typeof filter.search != 'undefined' && filter.search != '' ) {
+                    if( typeof filter.search !== 'undefined' && filter.search !== '' ) {
                         // Check if the widget title contains the search term
-                        if( widgetData.title.toLowerCase().indexOf( filter.search.toLowerCase() ) == -1 ) {
+                        if( widgetData.title.toLowerCase().indexOf( filter.search.toLowerCase() ) === -1 ) {
                             showWidget = false;
                         }
                     }
 
                 }
 
-                if(showWidget) $$.show();
-                else $$.hide();
+                if(showWidget) {
+                    $$.show();
+                }
+                else {
+                    $$.hide();
+                }
             });
         },
 
@@ -2370,7 +2421,7 @@
             this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-widget').html(), {} ) );
             this.loadForm();
 
-            if( typeof panelsOptions.widgets[ this.model.get('class') ] != 'undefined') {
+            if( typeof panelsOptions.widgets[ this.model.get('class') ] !== 'undefined') {
                 this.$('.so-title .widget-name').html( panelsOptions.widgets[ this.model.get('class')].title );
             }
             else {
@@ -2396,15 +2447,19 @@
          */
         getPrevDialog: function(){
             var widgets = this.builder.$('.so-cells .cell .so-widget');
-            if(widgets.length <= 1) return false;
+            if(widgets.length <= 1) {
+                return false;
+            }
             var currentIndex = widgets.index( this.widgetView.$el );
 
-            if( currentIndex == 0 ) {
+            if( currentIndex === 0 ) {
                 return false;
             }
             else {
                 var widgetView = widgets.eq(currentIndex - 1).data('view');
-                if(typeof widgetView == 'undefined') return false;
+                if(typeof widgetView === 'undefined') {
+                    return false;
+                }
 
                 return widgetView.getEditDialog();
             }
@@ -2416,15 +2471,19 @@
          */
         getNextDialog: function(){
             var widgets = this.builder.$('.so-cells .cell .so-widget');
-            if(widgets.length <= 1) return false;
+            if(widgets.length <= 1) {
+                return false;
+            }
             var currentIndex = widgets.index( this.widgetView.$el );
 
-            if( currentIndex == widgets.length - 1 ) {
+            if( currentIndex === widgets.length - 1 ) {
                 return false;
             }
             else {
                 var widgetView = widgets.eq(currentIndex + 1).data('view');
-                if(typeof widgetView == 'undefined') return false;
+                if(typeof widgetView === 'undefined') {
+                    return false;
+                }
 
                 return widgetView.getEditDialog();
             }
@@ -2449,7 +2508,8 @@
                 data,
                 function(result){
                     // Add in the CID of the widget model
-                    var html = result.replace( /\{\$id\}/g, thisView.model.cid );
+                    // TODO DOUBLE CHECK THIS
+                    var html = result.replace( /{\$id}/g, thisView.model.cid );
 
                     // Load this content into the form
                     thisView.$el.find('.so-content')
@@ -2475,9 +2535,11 @@
         saveWidget: function(){
             // Get the values from the form and assign the new values to the model
             var values = this.getFormValues();
-            if(typeof values.widgets == 'undefined') return;
+            if(typeof values.widgets === 'undefined') {
+                return false;
+            }
             values = values.widgets;
-            values = values[Object.keys(values)[0]];
+            values = values[ Object.keys(values)[0] ];
 
             this.model.setValues(values);
             this.model.set('raw', true); // We've saved from the widget form, so this is now raw
@@ -2486,7 +2548,7 @@
                 // If the styles view has loaded
                 var style = {};
                 try {
-                    var style = this.getFormValues('.so-sidebar .so-visual-styles').style;
+                    style = this.getFormValues('.so-sidebar .so-visual-styles').style;
                 }
                 catch (e) {
                 }
@@ -2585,7 +2647,7 @@
 
             this.currentTab = tab;
 
-            if( typeof this.layoutCache[tab] == 'undefined' ) {
+            if( typeof this.layoutCache[tab] === 'undefined' ) {
                 // We need to load the tab items from the server
                 this.$('.so-content').addClass('so-panels-loading');
 
@@ -2616,25 +2678,29 @@
             var c = this.$('.so-content').empty();
             var query = this.$('.so-sidebar-search').val().toLowerCase();
 
-            if( typeof layouts.error_message != 'undefined' ) {
+            if( typeof layouts.error_message !== 'undefined' ) {
                 this.$('.so-content').append(
                     $('<div class="so-error-message">').html( layouts.error_message )
                 );
                 return;
             }
 
-            for(var lid in layouts) {
+            for (var lid in layouts) {
                 // Exclude the current post if we have one
-                if( type != 'prebuilt' && lid == $('#post_ID').val() ) continue;
-                if(query != '' && layouts[lid].name.toLowerCase().indexOf( query ) === -1 ) continue;
+                if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
+                    continue;
+                }
+                if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
+                    continue;
+                }
 
-                var $l = $( this.entryTemplate( {
+                var $l = $(this.entryTemplate({
                     name: layouts[lid].name,
                     description: layouts[lid].description
-                } ) );
+                }));
 
                 // Create and append the
-                $l.appendTo(c).data({'type' : type, 'lid' : lid});
+                $l.appendTo(c).data({'type': type, 'lid': lid});
             }
         },
 
@@ -2659,7 +2725,9 @@
         loadLayout: function(type, lid){
             var thisView = this;
 
-            if( !confirm(panelsOptions.loc.prebuilt_confirm) ) return false;
+            if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
+                return false;
+            }
             this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
             $.post(
@@ -2674,8 +2742,6 @@
                     thisView.setStatusMessage('', false);
                     thisView.builder.addHistoryEntry('prebuilt_loaded');
 
-                    console.log(layout);
-
                     thisView.builder.model.loadPanelsData(layout);
                     thisView.closeDialog();
 
@@ -2687,7 +2753,9 @@
          * Handle an update to the search
          */
         searchHandler: function(){
-            if( this.currentTab == false || typeof this.layoutCache[ this.currentTab ] == 'undefined') return;
+            if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+                return false;
+            }
             this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
         }
 
@@ -2732,7 +2800,7 @@
 
         initializeDialog: function(){
             this.on('open_dialog', function(){
-                if( typeof this.model != 'undefined' && this.model.cells.length != 0 ) {
+                if( typeof this.model !== 'undefined' && this.model.cells.length !== 0 ) {
                     this.setRowModel( this.model );
                 }
                 else {
@@ -2746,7 +2814,7 @@
             this.row = {
                 cells : [0.5, 0.5],
                 style : { }
-            }
+            };
         },
 
         /**
@@ -2763,7 +2831,7 @@
         render: function(dialogType){
             this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-row').html(), { dialogType: this.dialogType } ) );
 
-            if( this.dialogType == 'edit' ) {
+            if( this.dialogType === 'edit' ) {
                 // Now we need to attach the style window
                 this.styles = new panels.view.styles();
                 this.styles.model = this.model;
@@ -2777,7 +2845,7 @@
                 this.$('.so-sidebar.so-right-sidebar').addClass('so-panels-loading');
             }
 
-            if( typeof this.model != 'undefined' ) {
+            if( typeof this.model !== 'undefined' ) {
                 // Set the initial value of the
                 this.$('input.so-row-field').val( this.model.cells.length );
             }
@@ -2797,7 +2865,9 @@
          */
         setRowModel: function(model){
             this.model = model;
-            if( this.model == null ) return;
+            if( this.model === null ) {
+                return this;
+            }
 
             // Set the rows to be a copy of the model
             this.row = {
@@ -2931,7 +3001,7 @@
                             } )
                             .keyup(function(e){
                                 // Enter is clicked
-                                if(e.keyCode == 13){
+                                if(e.keyCode === 13){
                                     e.preventDefault();
 
                                     $(this).removeClass('no-user-interacted');
@@ -2940,27 +3010,43 @@
                                     var inputs = rowPreview.find('.preview-cell-weight-input');
                                     var index = inputs.index( $(this) );
 
-                                    if(index == inputs.length - 1) index = 0; // Go to first input
-                                    else index = index + 1; // Go to next
+                                    if(index === inputs.length - 1) {
+                                        // Go to first input
+                                        index = 0;
+                                    }
+                                    else {
+                                        // Go to next
+                                        index = index + 1;
+                                    }
 
                                     var next = rowPreview.find('.preview-cell-weight-input').eq( index );
 
                                     // Either go to the next input or blur to set
-                                    if( !next.hasClass('no-user-interacted') ) $(this).blur();
-                                    else next.select();
+                                    if( !next.hasClass('no-user-interacted') ) {
+                                        $(this).blur();
+                                    }
+                                    else {
+                                        next.select();
+                                    }
                                 }
                             })
                             .blur( function(){
                                 timeout = setTimeout( function(){
                                     // If there are no weight inputs, then skip this
-                                    if( rowPreview.find( '.preview-cell-weight-input').length == 0 ) return;
+                                    if( rowPreview.find( '.preview-cell-weight-input').length === 0 ) {
+                                        return false;
+                                    }
 
                                     // Go through all the inputs
                                     var rowWeights = [];
                                     rowPreview.find( '.preview-cell-weight-input' ).each(function(i, el){
                                         var val = parseFloat( $(el).val() );
-                                        if( val == NaN ) val = 1 / thisDialog.cells.length;
-                                        else val = val / 100;
+                                        if( isNaN(val) ) {
+                                            val = 1 / thisDialog.cells.length;
+                                        }
+                                        else {
+                                            val = val / 100;
+                                        }
 
                                         rowWeights.push( val );
                                     });
@@ -2970,8 +3056,8 @@
                                     for( var j = 0; j < rowWeights.length; j++ ) {
                                         sum += rowWeights[j];
                                     }
-                                    for( var j = 0; j < rowWeights.length; j++ ) {
-                                        rowWeights[j] = rowWeights[j] / sum;
+                                    for( var k = 0; k < rowWeights.length; j++ ) {
+                                        rowWeights[k] = rowWeights[k] / sum;
                                     }
 
                                     // Set the new cell weights and regenerate the preview.
@@ -3016,11 +3102,13 @@
                 'cells' : parseInt( this.$el.find('.row-set-form input[name="cells"]').val() ),
                 'ratio' : parseFloat( this.$el.find('.row-set-form select[name="ratio"]').val() ),
                 'direction' : this.$el.find('.row-set-form select[name="ratio_direction"]').val()
-            }
+            };
             var cells = [];
 
             // Ignore this if the ratio or cell count is NaN
-            if( isNaN(f.cells) || isNaN(f.ratio) ) return;
+            if( isNaN(f.cells) || isNaN(f.ratio) ) {
+                return false;
+            }
 
             if( f.cells < 1 ) {
                 this.$el.find('.row-set-form input[name="cells"]').val(1);
@@ -3046,9 +3134,11 @@
             });
 
             // Don't return cells that are too small
-            cells = _.filter(cells, function(cell){ return cell > 0.01 });
+            cells = _.filter(cells, function(cell){
+                return cell > 0.01;
+            });
 
-            if(f.direction == 'left') {
+            if(f.direction === 'left') {
                 cells = cells.reverse();
             }
 
@@ -3063,7 +3153,7 @@
          * Handle a click on the dialog left bar tab
          */
         tabClickHandler : function($t){
-            if($t.attr('href') == '#row-layout') {
+            if($t.attr('href') === '#row-layout') {
                 this.$('.so-panels-dialog').addClass('so-panels-dialog-has-right-sidebar');
             }
             else {
@@ -3079,11 +3169,11 @@
             this.model.setCells( this.row.cells );
 
             // Update the styles if they've loaded
-            if ( typeof this.styles != 'undefined' && this.styles.stylesLoaded ) {
+            if ( typeof this.styles !== 'undefined' && this.styles.stylesLoaded ) {
                 // This is an edit dialog, so there are styles
                 var style = {};
                 try {
-                    var style = this.getFormValues('.so-sidebar .so-visual-styles').style;
+                    style = this.getFormValues('.so-sidebar .so-visual-styles').style;
                 }
                 catch( e ) { }
 
@@ -3104,7 +3194,7 @@
             this.model.collection = this.builder.model.rows;
             this.builder.model.rows.add( this.model );
 
-            this.closeDialog();
+            this.closeDialog( );
 
             return false;
         },
@@ -3218,7 +3308,7 @@ jQuery( function($){
             var widgetId = $$.closest('form').find('.widget-id').val();
 
             // Exit if this isn't a real widget
-            if( widgetId != null && widgetId.indexOf('__i__') > -1 ) {
+            if( widgetId !== null && widgetId.indexOf('__i__') > -1 ) {
                 return;
             }
 
@@ -3232,7 +3322,7 @@ jQuery( function($){
 
             // Save panels data when we close the dialog, if we're in a dialog
             var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-            if( dialog != null ) {
+            if( dialog !== null ) {
                 dialog.on('close_dialog', function(){
                     builderModel.refreshPanelsData();
                 } );

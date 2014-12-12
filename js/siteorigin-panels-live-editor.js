@@ -98,8 +98,12 @@
          * Display the live editor
          */
         open: function(){
-            if( this.$el.html() == '' ) this.render();
-            if( this.$el.closest('body').length == 0 ) this.attach();
+            if( this.$el.html() === '' ) {
+                this.render();
+            }
+            if( this.$el.closest('body').length === 0 ) {
+                this.attach();
+            }
 
             // Refresh the preview display
             this.refreshWidgets();
@@ -129,7 +133,9 @@
          * Refresh the preview display
          */
         refreshPreview: function(){
-            if( !this.$el.is(':visible') ) return;
+            if( !this.$el.is(':visible') ) {
+                return false;
+            }
 
             this.$('iframe#siteorigin-panels-live-editor-iframe').hide();
 
@@ -247,10 +253,11 @@
                             .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .panel')
                             .filter(function(){
                                 // Filter to only include non nested
-                                return $(this).parents('.widget_siteorigin-panels-builder').length == 0;
+                                return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
                             })
-                            .not('panel-hover-widget').eq(thisWidgetIndex);
-                    }
+                            .not('panel-hover-widget')
+                            .eq(thisWidgetIndex);
+                    };
 
                     var overlay = null, hoverWidget = null;
 
@@ -282,11 +289,13 @@
                                 .find('html,body')
                                 .clearQueue();
 
-                            if(overlay != null) {
-                                overlay.fadeOut('fast', function(){ $(this).remove() });
+                            if(overlay !== null) {
+                                overlay.fadeOut('fast', function(){
+                                    $(this).remove();
+                                });
                                 overlay = null;
                             }
-                            if(hoverWidget != null) {
+                            if(hoverWidget !== null) {
                                 hoverWidget.remove();
                                 hoverWidget = null;
                             }
@@ -301,7 +310,7 @@
          * @return {boolean}
          */
         hasPreviewUrl: function(){
-            return this.$('form.live-editor-form').attr('action') != '';
+            return this.$('form.live-editor-form').attr('action') !== '';
         }
     } );
 

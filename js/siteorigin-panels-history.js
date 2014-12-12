@@ -160,7 +160,7 @@
 
             c.empty();
 
-            if( this.currentEntry.get('data') != this.revertEntry.get('data') || this.entries.models.length > 0 ) {
+            if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
                 $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
                     .data('historyEntry', this.revertEntry)
                     .prependTo(c);
@@ -224,15 +224,17 @@
          */
         restoreSelectedEntry: function(){
 
-            if( this.$('.so-buttons .so-restore').hasClass('disabled') ) return false;
+            if( this.$('.so-buttons .so-restore').hasClass('disabled') ) {
+                return false;
+            }
 
-            if( this.currentEntry.get('data') == this.selectedEntry.get('data') ) {
+            if( this.currentEntry.get('data') === this.selectedEntry.get('data') ) {
                 this.closeDialog();
-                return;
+                return false;
             }
 
             // Add an entry for this restore event
-            if( this.selectedEntry.get('text') != 'restore' ) {
+            if( this.selectedEntry.get('text') !== 'restore' ) {
                 this.entries.addEntry( 'restore', this.builder.model.getPanelsData() );
             }
 
@@ -273,26 +275,38 @@
             // There are 3600 seconds in an hour
             if( diff > 3600 ) {
                 interval = Math.floor( diff / 3600 );
-                if(interval == 1) parts.push(panelsOptions.loc.time.hour.replace('%d', interval ));
-                else  parts.push(panelsOptions.loc.time.hours.replace('%d', interval ));
-                diff -= interval * 3600
+                if(interval === 1) {
+                    parts.push(panelsOptions.loc.time.hour.replace('%d', interval ));
+                }
+                else  {
+                    parts.push(panelsOptions.loc.time.hours.replace('%d', interval ));
+                }
+                diff -= interval * 3600;
             }
 
             // There are 60 seconds in a minute
             if( diff > 60 ) {
                 interval = Math.floor( diff / 60 );
-                if(interval == 1) parts.push(panelsOptions.loc.time.minute.replace('%d', interval ));
-                else  parts.push(panelsOptions.loc.time.minutes.replace('%d', interval ));
-                diff -= interval * 60
+                if(interval === 1) {
+                    parts.push(panelsOptions.loc.time.minute.replace('%d', interval ));
+                }
+                else {
+                    parts.push(panelsOptions.loc.time.minutes.replace('%d', interval ));
+                }
+                diff -= interval * 60;
             }
 
             if( diff > 0 ) {
-                if(diff == 1) parts.push(panelsOptions.loc.time.second.replace('%d', diff ));
-                else  parts.push(panelsOptions.loc.time.seconds.replace('%d', diff ));
+                if(diff === 1) {
+                    parts.push(panelsOptions.loc.time.second.replace('%d', diff ));
+                }
+                else  {
+                    parts.push(panelsOptions.loc.time.seconds.replace('%d', diff ));
+                }
             }
 
             // Return the amount of time ago
-            return parts.length == 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
+            return parts.length === 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
 
         }
 
