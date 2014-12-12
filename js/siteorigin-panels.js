@@ -3009,6 +3009,12 @@
                                 }
                             })
                             .blur( function(){
+                                rowPreview.find( '.preview-cell-weight-input' ).each(function(i, el){
+                                    if( isNaN( parseFloat( $(el).val() ) ) ) {
+                                        $(el).val( Math.floor(thisDialog.row.cells[i] * 1000)/10 );
+                                    }
+                                });
+
                                 timeout = setTimeout( function(){
                                     // If there are no weight inputs, then skip this
                                     if( rowPreview.find( '.preview-cell-weight-input').length === 0 ) {
@@ -3024,7 +3030,7 @@
                                     rowPreview.find( '.preview-cell-weight-input' ).each(function(i, el){
                                         var val = parseFloat( $(el).val() );
                                         if( isNaN(val) ) {
-                                            val = 1 / thisDialog.cells.length;
+                                            val = 1 / thisDialog.row.cells.length;
                                         }
                                         else {
                                             val = Math.round(val*10) / 1000;
