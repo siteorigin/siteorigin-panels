@@ -2913,7 +2913,7 @@
                 var prevCell = newCell.prev();
                 var handle;
 
-                if( prevCell.length != 0 ) {
+                if( prevCell.length !== 0 ) {
                     handle = $('<div class="resize-handle"></div>');
                     handle
                         .appendTo( newCell )
@@ -3095,7 +3095,18 @@
                                         thisDialog.row.cells = rowWeights;
                                     }
 
-                                    thisDialog.regenerateRowPreview();
+                                    // Now lets animate the cells into their new widths
+                                    rowPreview.find( '.preview-cell').each(function(i, el){
+                                        $(el).animate({ 'width': Math.round(thisDialog.row.cells[i]*1000)/10 + "%"}, 250 );
+                                        $(el).find('.preview-cell-weight-input').val( Math.round(thisDialog.row.cells[i]*1000)/10 );
+                                    });
+
+                                    // So the draggable handle is not hidden.
+                                    rowPreview.find( '.preview-cell').css('overflow', 'visible');
+
+                                    setTimeout(function(){
+                                        thisDialog.regenerateRowPreview();
+                                    }, 260);
 
                                 }, 100 );
                             } )
@@ -3139,6 +3150,8 @@
                 return false;
             }
 
+            var cellCountChanged = ( this.row.cells.length !== f.cells );
+
             if( f.cells < 1 ) {
                 this.$el.find('.row-set-form input[name="cells"]').val(1);
                 f.cells = 1;
@@ -3172,7 +3185,27 @@
             }
 
             this.row.cells = cells;
-            this.regenerateRowPreview();
+
+            if( cellCountChanged ) {
+                this.regenerateRowPreview();
+            }
+            else {
+                var thisDialog = this;
+
+                // Now lets animate the cells into their new widths
+                this.$el.find( '.preview-cell').each(function(i, el){
+                    $(el).animate({ 'width': Math.round(thisDialog.row.cells[i]*1000)/10 + "%"}, 250 );
+                    $(el).find('.preview-cell-weight').html( Math.round(thisDialog.row.cells[i]*1000)/10 );
+                });
+
+                // So the draggable handle is not hidden.
+                this.$el.find( '.preview-cell').css('overflow', 'visible');
+
+                setTimeout(function(){
+                    thisDialog.regenerateRowPreview();
+                }, 260);
+            }
+
 
             // Remove the button primary class
             this.$el.find('.row-set-form .so-button-row-set').removeClass('button-primary');

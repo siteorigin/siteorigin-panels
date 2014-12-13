@@ -1081,6 +1081,7 @@
   margin: 0 -6px;
   height: 360px;
   position: relative;
+  white-space: nowrap;
 }
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell,
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell-in,
@@ -1091,7 +1092,7 @@
   box-sizing: border-box;
 }
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell {
-  float: left;
+  display: inline-block;
   position: relative;
   padding: 0 6px;
 }
