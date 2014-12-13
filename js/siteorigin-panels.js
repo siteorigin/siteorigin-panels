@@ -1339,7 +1339,7 @@
                     thisView.trigger('hide_builder');
                 } ).end()
                 .prepend(
-                $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</a>' )
+                $( '<button id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</button>' )
                     .click( function (e) {
                         // Switch to the Page Builder interface
                         e.preventDefault();
@@ -1357,8 +1357,18 @@
                         $( document).scroll();
 
                         thisView.trigger('display_builder');
+
                     } )
             );
+
+            // WordPress 4.1 changed the float of the tabs. Reorder them here.
+            // After WP 4.3 is released we'll make the new ordering default
+            if( $('body').hasClass('branch-4-1') || $('body').hasClass('branch-4-2') ) {
+                $( '#wp-content-wrap .wp-editor-tabs #content-panels' )
+                    .appendTo( $( '#wp-content-wrap .wp-editor-tabs' ) );
+            }
+
+
 
             // Switch back to the standard editor
             metabox.find('.so-switch-to-standard').click(function(e){
@@ -2330,13 +2340,13 @@
                 var $$ = $(this), showWidget;
                 var widgetClass = $$.data('class');
 
-                var widgetData = ( typeof panelsOptions.widgets[widgetClass] != 'undefined' ) ? panelsOptions.widgets[widgetClass] : false;
+                var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
 
                 if( filter.groups.length === 0 ) {
                     // This filter doesn't specify groups, so show all
                     showWidget = true;
                 }
-                else if( !widgetData && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
+                else if( widgetData !== null && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
                     // This widget is in the filter group
                     showWidget = true;
                 }
@@ -3327,7 +3337,7 @@ jQuery( function($){
             var widgetId = $$.closest('form').find('.widget-id').val();
 
             // Exit if this isn't a real widget
-            if( widgetId !== null && widgetId.indexOf('__i__') > -1 ) {
+            if( typeof widgetId !== 'undefined' && widgetId.indexOf('__i__') > -1 ) {
                 return;
             }
 

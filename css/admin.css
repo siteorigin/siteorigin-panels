@@ -1409,6 +1409,10 @@
 .so-panels-dialog .so-content .siteorigin-panels-builder .so-rows-container {
   padding: 20px 0 0 0;
 }
+.so-panels-dialog .so-content .siteorigin-panels-builder .so-panels-welcome-message {
+  padding-left: 0;
+  padding-right: 0;
+}
 .so-panels-live-editor > div {
   position: fixed;
   z-index: 99999;
