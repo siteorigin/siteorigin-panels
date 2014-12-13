@@ -2149,6 +2149,9 @@
                     if( editor !== null && typeof( editor.getContent ) === "function" ) {
                         fieldValue = editor.getContent();
                     }
+                    else {
+                        fieldValue = $$.val();
+                    }
                 }
                 else if ( $$.prop('tagName') === 'SELECT' ) {
                     fieldValue = $$.find('option:selected').val();
