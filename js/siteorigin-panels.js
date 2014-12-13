@@ -463,8 +463,6 @@
 
             var builderID = cellView.row.builder.$el.attr('id');
 
-            var scrollTop;
-
             // Create a widget sortable that's connected with all other cells
             this.widgetSortable = this.$el.find('.widgets-container').sortable( {
                 placeholder: "so-widget-sortable-highlight",
@@ -488,7 +486,13 @@
                     cellView.row.builder.sortCollections();
                 },
                 helper: function(e, el){
-                    var helper = el.clone().css('width', el.outerWidth()).addClass('widget-being-dragged').appendTo( 'body' );
+                    var helper = el.clone()
+                        .css({
+                            'width': el.outerWidth(),
+                            'z-index' : 10000,
+                            'position' :'fixed'
+                        })
+                        .addClass('widget-being-dragged').appendTo( 'body' );
 
                     // Center the helper to the mouse cursor.
                     if( el.outerWidth() > 720 ) {
@@ -2627,6 +2631,7 @@
 
             this.on('open_dialog', function(){
                 thisView.$('.so-sidebar-tabs li a[href="#prebuilt"]').click();
+                thisView.$('.so-status').removeClass('so-panels-loading');
             });
         },
 
@@ -3384,7 +3389,8 @@ jQuery( function($){
 
             // Save panels data when we close the dialog, if we're in a dialog
             var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-            if( dialog !== null ) {
+
+            if( typeof dialog !== 'undefined' ) {
                 dialog.on('close_dialog', function(){
                     builderModel.refreshPanelsData();
                 } );

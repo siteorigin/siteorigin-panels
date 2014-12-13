@@ -9,7 +9,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 	function __construct() {
 		parent::__construct(
 			'siteorigin-panels-builder',
-			__( 'Layout', 'siteorigin-panels' ),
+			__( 'Layout Builder', 'siteorigin-panels' ),
 			array(
 				'description' => __( 'A full SiteOrigin Page Builder layout as a widget.', 'siteorigin-panels' ),
 				'panels_title' => false,

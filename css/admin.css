@@ -518,6 +518,8 @@
 }
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
+  /* Need a high z-index for layout builder widget */
+  z-index: 100001 !important;
   cursor: move;
   margin-bottom: 5px;
   background: #f9f9fb;
