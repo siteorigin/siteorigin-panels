@@ -175,7 +175,7 @@
      * The view for a widget in the builder interface
      */
     panels.view.widget = Backbone.View.extend({
-        template: _.template( $('#siteorigin-panels-builder-widget').html() ),
+        template: _.template( $('#siteorigin-panels-builder-widget').html().trim() ),
 
         // The cell view that
         cell: null,
@@ -415,7 +415,7 @@
      * The view for a cell
      */
     panels.view.cell = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder-cell').html() ),
+        template: _.template( $('#siteorigin-panels-builder-cell').html().trim() ),
         events : {
             'click .cell-wrapper' : 'handleCellClick',
             'click .so-cell-actions a' : 'handleActionClick'
@@ -795,7 +795,7 @@
      * View for handling the row.
      */
     panels.view.row = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder-row').html() ),
+        template: _.template( $('#siteorigin-panels-builder-row').html().trim() ),
 
         events: {
             'click .so-row-settings' : 'editSettingsHandler',
@@ -1214,7 +1214,7 @@
      * This is the main view for the Page Builder interface.
      */
     panels.view.builder = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder').html() ),
+        template: _.template( $('#siteorigin-panels-builder').html().trim() ),
         dialogs: {  },
         rowsSortable: null,
         dataField : false,
@@ -1339,7 +1339,7 @@
                     thisView.trigger('hide_builder');
                 } ).end()
                 .prepend(
-                $( '<button id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</button>' )
+                $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</a>' )
                     .click( function (e) {
                         // Switch to the Page Builder interface
                         e.preventDefault();
@@ -1802,8 +1802,8 @@
      * The default dialog view. This should be extended by the other views.
      */
     panels.view.dialog = Backbone.View.extend( {
-        dialogTemplate: _.template( $('#siteorigin-panels-dialog').html() ),
-        dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html() ),
+        dialogTemplate: _.template( $('#siteorigin-panels-dialog').html().trim() ),
+        dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html().trim() ),
 
         tabbed: false,
         rendered: false,
@@ -1889,7 +1889,7 @@
             args = _.extend({cid: this.cid}, args);
 
 
-            var c = $( ( _.template(html) )( args ) );
+            var c = $( ( _.template( html.trim() ) )( args ) );
             var r = {
                 title : c.find('.title').html(),
                 buttons : c.find('.buttons').html(),
@@ -2239,7 +2239,7 @@
     panels.dialog.widgets = panels.view.dialog.extend( {
 
         builder: null,
-        widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html() ),
+        widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html().trim() ),
         filter: {},
 
         dialogClass : 'so-panels-dialog-add-widget',
@@ -2405,7 +2405,7 @@
     panels.dialog.widget = panels.view.dialog.extend( {
 
         builder: null,
-        sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html() ),
+        sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().trim() ),
         dialogClass : 'so-panels-dialog-edit-widget',
         widgetView : false,
 
@@ -2605,7 +2605,7 @@
      */
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
-        entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html() ),
+        entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().trim() ),
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
@@ -2775,7 +2775,7 @@
      */
     panels.dialog.row = panels.view.dialog.extend( {
 
-        cellPreviewTemplate : _.template( $('#siteorigin-panels-dialog-row-cell-preview').html() ),
+        cellPreviewTemplate : _.template( $('#siteorigin-panels-dialog-row-cell-preview').html().trim() ),
 
         events: {
             'click .so-close': 'closeDialog',

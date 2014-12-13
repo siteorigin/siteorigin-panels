@@ -56,7 +56,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-row">
-
 	<div class="so-row-container ui-draggable">
 
 		<div class="so-row-toolbar">
@@ -81,7 +80,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 	</div>
-
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-cell">
@@ -109,7 +107,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog">
-
 	<div class="so-panels-dialog <% if(typeof left_sidebar != 'undefined') print('so-panels-dialog-has-left-sidebar '); if(typeof right_sidebar != 'undefined') print('so-panels-dialog-has-right-sidebar '); %>">
 
 		<div class="so-overlay"></div>
@@ -141,7 +138,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 	</div>
-
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-builder">
@@ -313,7 +309,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt">
-
 	<div class="dialog-data">
 
 		<h3 class="title"><?php _e('Prebuilt Layouts', 'siteorigin-panels') ?></h3>
@@ -344,7 +339,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 	</div>
-
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt-entry">
@@ -388,7 +382,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-live-editor">
-
 	<div class="so-panels-live-editor">
 
 		<div class="so-overlay"></div>
@@ -424,12 +417,4 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="section-widgets">
 		</div>
 	</div>
-</script>
-
-<script type="text/template" id="siteorigin-panels-style-fields">
-
-	<div class="color">
-
-	</div>
-
 </script>
