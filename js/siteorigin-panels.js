@@ -16,6 +16,21 @@
     };
 
     /**
+     * Convert template into something compatible with Underscore.js templates
+     *
+     * @param s
+     * @return {*}
+     */
+    String.prototype.panelsProcessTemplate = function(){
+        var s = this;
+        s = s.replace(/{{%/g, '<%');
+        s = s.replace(/%}}/g, '%>');
+        s = s.trim();
+
+        return s;
+    };
+
+    /**
      * Model for an instance of a widget
      */
     panels.model.widget = Backbone.Model.extend( {
@@ -175,7 +190,7 @@
      * The view for a widget in the builder interface
      */
     panels.view.widget = Backbone.View.extend({
-        template: _.template( $('#siteorigin-panels-builder-widget').html().trim() ),
+        template: _.template( $('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
 
         // The cell view that
         cell: null,
@@ -415,7 +430,7 @@
      * The view for a cell
      */
     panels.view.cell = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder-cell').html().trim() ),
+        template: _.template( $('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
         events : {
             'click .cell-wrapper' : 'handleCellClick',
             'click .so-cell-actions a' : 'handleActionClick'
@@ -798,7 +813,7 @@
      * View for handling the row.
      */
     panels.view.row = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder-row').html().trim() ),
+        template: _.template( $('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
 
         events: {
             'click .so-row-settings' : 'editSettingsHandler',
@@ -1216,7 +1231,7 @@
      * This is the main view for the Page Builder interface.
      */
     panels.view.builder = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-builder').html().trim() ),
+        template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
         dialogs: {  },
         rowsSortable: null,
         dataField : false,
@@ -1807,8 +1822,8 @@
      * The default dialog view. This should be extended by the other views.
      */
     panels.view.dialog = Backbone.View.extend( {
-        dialogTemplate: _.template( $('#siteorigin-panels-dialog').html().trim() ),
-        dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html().trim() ),
+        dialogTemplate: _.template( $('#siteorigin-panels-dialog').html().panelsProcessTemplate() ),
+        dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html().panelsProcessTemplate() ),
 
         tabbed: false,
         rendered: false,
@@ -1894,7 +1909,7 @@
             args = _.extend({cid: this.cid}, args);
 
 
-            var c = $( ( _.template( html.trim() ) )( args ) );
+            var c = $( ( _.template( html.panelsProcessTemplate() ) )( args ) );
             var r = {
                 title : c.find('.title').html(),
                 buttons : c.find('.buttons').html(),
@@ -2261,7 +2276,7 @@
     panels.dialog.widgets = panels.view.dialog.extend( {
 
         builder: null,
-        widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html().trim() ),
+        widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html().panelsProcessTemplate() ),
         filter: {},
 
         dialogClass : 'so-panels-dialog-add-widget',
@@ -2427,7 +2442,7 @@
     panels.dialog.widget = panels.view.dialog.extend( {
 
         builder: null,
-        sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().trim() ),
+        sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
         dialogClass : 'so-panels-dialog-edit-widget',
         widgetView : false,
 
@@ -2627,7 +2642,7 @@
      */
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
-        entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().trim() ),
+        entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
@@ -2797,7 +2812,7 @@
      */
     panels.dialog.row = panels.view.dialog.extend( {
 
-        cellPreviewTemplate : _.template( $('#siteorigin-panels-dialog-row-cell-preview').html().trim() ),
+        cellPreviewTemplate : _.template( $('#siteorigin-panels-dialog-row-cell-preview').html().panelsProcessTemplate() ),
 
         events: {
             'click .so-close': 'closeDialog',

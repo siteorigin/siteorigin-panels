@@ -87,6 +87,11 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.0.1 =
+* Fixed issue with preview causing content loss in standard editor.
+* Fixed issue with Black Studio TinyMCE
+* Changed templating tags in js-templates.php to prevent possible conflicts.
+
 = 2.0 =
 * Complete rewrite of Page Builder Javascript using Backbone.
 * Complete UI redesign.

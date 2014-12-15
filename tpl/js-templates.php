@@ -94,47 +94,47 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-widget ui-draggable">
 		<div class="so-widget-wrapper">
 			<div class="title">
-				<h4><%= title %></h4>
+				<h4>{{%= title %}}</h4>
 					<span class="actions">
 						<a href="#" class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
 						<a href="#" class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
 						<a href="#" class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
 					</span>
 			</div>
-			<small class="description"><%= description %></small>
+			<small class="description">{{%= description %}}</small>
 		</div>
 	</div>
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog">
-	<div class="so-panels-dialog <% if(typeof left_sidebar != 'undefined') print('so-panels-dialog-has-left-sidebar '); if(typeof right_sidebar != 'undefined') print('so-panels-dialog-has-right-sidebar '); %>">
+	<div class="so-panels-dialog {{% if(typeof left_sidebar != 'undefined') print('so-panels-dialog-has-left-sidebar '); if(typeof right_sidebar != 'undefined') print('so-panels-dialog-has-right-sidebar '); %}}">
 
 		<div class="so-overlay"></div>
 
 		<div class="so-title-bar">
-			<h3 class="so-title"><%= title %></h3>
+			<h3 class="so-title">{{%= title %}}</h3>
 			<a class="so-previous so-nav" href="#"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav" href="#"><span class="so-dialog-icon"></span></a>
 			<a class="so-close" href="#"><span class="so-dialog-icon"></span></a>
 		</div>
 
 		<div class="so-toolbar">
-			<div class="so-status"><% if(typeof status != 'undefined') print(status); %></div>
+			<div class="so-status">{{% if(typeof status != 'undefined') print(status); %}}</div>
 			<div class="so-buttons">
-				<%= buttons %>
+				{{%= buttons %}}
 			</div>
 		</div>
 
 		<div class="so-sidebar so-left-sidebar">
-			<% if(typeof left_sidebar  != 'undefined') print(left_sidebar ); %>
+			{{% if(typeof left_sidebar  != 'undefined') print(left_sidebar ); %}}
 		</div>
 
 		<div class="so-sidebar so-right-sidebar">
-			<% if(typeof right_sidebar  != 'undefined') print(right_sidebar ); %>
+			{{% if(typeof right_sidebar  != 'undefined') print(right_sidebar ); %}}
 		</div>
 
 		<div class="so-content panel-dialog">
-			<%= content %>
+			{{%= content %}}
 		</div>
 
 	</div>
@@ -160,7 +160,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 
 <script type="text/template" id="siteorigin-panels-dialog-tab">
-	<li><a href="<% if(typeof tab != 'undefined') { print ( '#' + tab ); } %>"><%= title %></a></li>
+	<li><a href="{{% if(typeof tab != 'undefined') { print ( '#' + tab ); } %}}">{{%= title %}}</a></li>
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-widgets">
@@ -191,8 +191,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-widgets-widget">
 	<li class="widget-type">
 		<div class="widget-type-wrapper">
-			<h3><%= title %></h3>
-			<small class="description"><%= description %></small>
+			<h3>{{%= title %}}</h3>
+			<small class="description">{{%= description %}}</small>
 		</div>
 	</li>
 </script>
@@ -225,9 +225,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-dialog-widget-sidebar-widget">
 	<div class="so-widget">
-		<h3><%= title %></h3>
+		<h3>{{%= title %}}</h3>
 		<small class="description">
-			<%= description %>
+			{{%= description %}}
 		</small>
 	</div>
 </script>
@@ -236,16 +236,16 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="dialog-data">
 
 		<h3 class="title">
-			<% if( dialogType == 'create' ) { %>
+			{{% if( dialogType == 'create' ) { %}}
 				<span class="add-row"><?php _e('Add New Row', 'siteorigin-panels') ?></span>
-			<% } else { %>
+			{{% } else { %}}
 				<span class="edit-row"><?php _e('Edit Row', 'siteorigin-panels') ?></span>
-			<% } %>
+			{{% } %}}
 		</h3>
 
-		<% if( dialogType == 'edit' ) { %>
+		{{% if( dialogType == 'edit' ) { %}}
 			<div class="right-sidebar"></div>
-		<% } %>
+		{{% } %}}
 
 		<div class="content">
 
@@ -283,27 +283,27 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<% if( dialogType == 'edit' ) { %>
+			{{% if( dialogType == 'edit' ) { %}}
 				<div class="action-buttons">
 					<a href="#" class="so-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
 					<a href="#" class="so-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
 				</div>
-			<% } %>
+			{{% } %}}
 
-			<% if( dialogType == 'create' ) { %>
+			{{% if( dialogType == 'create' ) { %}}
 				<input type="button" class="button-primary so-insert" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" />
-			<% } else { %>
+			{{% } else { %}}
 				<input type="button" class="button-primary so-save" value="<?php esc_attr_e('Save', 'siteorigin-panels') ?>" />
-			<% } %>
+			{{% } %}}
 		</div>
 
 	</div>
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-row-cell-preview">
-	<div class="preview-cell" style="width: <%- weight*100 %>%">
+	<div class="preview-cell" style="width: {{%- weight*100 %}}%">
 		<div class="preview-cell-in">
-			<div class="preview-cell-weight"><% print(Math.round(weight * 1000) / 10) %></div>
+			<div class="preview-cell-weight">{{% print(Math.round(weight * 1000) / 10) %}}</div>
 		</div>
 	</div>
 </script>
@@ -345,8 +345,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="layout">
 		<div class="layout-inside">
 			<div class="dashicons dashicons-migrate"></div>
-			<h4><%= name %></h4>
-			<div class="description"><%= description %></div>
+			<h4>{{%= name %}}</h4>
+			<div class="description">{{%= description %}}</div>
 		</div>
 	</div>
 </script>
@@ -361,10 +361,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-history-iframe-<%= cid ?>" class="history-form">
+			<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-history-iframe-{{%= cid ?>" class="history-form">
 				<input type="hidden" name="siteorigin_panels_data" value="">
 			</form>
-			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-<%= cid ?>" src=""></iframe>
+			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid ?>" src=""></iframe>
 		</div>
 
 		<div class="buttons">
@@ -376,7 +376,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-dialog-history-entry">
 	<div class="history-entry">
-		<h3><%= title %><% if( count > 1 ) { %> <span class="count">(<%= count %>)</span><% } %></h3>
+		<h3>{{%= title %}}{{% if( count > 1 ) { %}} <span class="count">({{%= count %}})</span>{{% } %}}</h3>
 		<div class="timesince"></div>
 	</div>
 </script>
@@ -412,7 +412,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-live-editor-sidebar-section">
 	<div class="page-widgets-section">
 		<div class="section-header">
-			<h4><%= title %></h4>
+			<h4>{{%= title %}}</h4>
 		</div>
 		<div class="section-widgets">
 		</div>
