@@ -2119,8 +2119,10 @@
                 var sub = data;
                 var fieldValue = null;
 
+                var fieldType = ( typeof $$.attr('type') === 'string' ? $$.attr('type').toLowerCase() : false );
+
                 // First we need to get the value from the field
-                if( $$.attr('type').toLowerCase() === 'checkbox' ){
+                if( fieldType === 'checkbox' ){
                     if ( $$.is(':checked') ) {
                         fieldValue = $$.val() !== '' ? $$.val() : true;
                     }
@@ -2128,7 +2130,7 @@
                         fieldValue = null;
                     }
                 }
-                else if( $$.attr('type').toLowerCase() === 'radio' ){
+                else if( fieldType === 'radio' ){
                     if ( $$.is(':checked') ) {
                         fieldValue = $$.val();
                     }
