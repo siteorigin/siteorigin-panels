@@ -673,7 +673,6 @@
          * Add cells to the model row
          *
          * @param cells an array of cells, where each object in the array has a weight value
-         * @todo make this handle changing the number of cells in an existing row
          */
         setCells: function(cells){
             var thisModel = this;
@@ -1132,7 +1131,6 @@
                     cell.widgets.add(newWidget, {noAnimate: true});
                 }
                 catch (err) {
-                    // TODO handle this error
                 }
             } );
         },
@@ -2095,7 +2093,7 @@
             var data = {}, parts;
 
             // Find all the named fields in the form
-            $f.find('[name]').each(function(){
+            $f.find('[name]').each( function(){
                 var $$ = $(this);
 
                 var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr('name') );
@@ -2154,9 +2152,21 @@
                     }
                 }
                 else if ( $$.prop('tagName') === 'SELECT' ) {
-                    fieldValue = $$.find('option:selected').val();
+                    var selected = $$.find('option:selected');
+
+                    if( selected.length === 1 ) {
+                        fieldValue = $$.find('option:selected').val();
+                    }
+                    else if( selected.length > 1 ) {
+                        // This is a mutli-select field
+                        fieldValue = _.map( $$.find('option:selected'), function(n ,i){
+                            return $(n).val();
+                        } );
+                    }
+
                 }
                 else {
+                    // This is a fallback that will work for most fields
                     fieldValue = $$.val();
                 }
 
@@ -2179,7 +2189,17 @@
                 if(fieldValue !== null) {
                     for (var i = 0; i < parts.length; i++) {
                         if (i === parts.length - 1) {
-                            sub[parts[i]] = fieldValue;
+                            if( _.isArray(sub[parts[i]]) ) {
+                                sub[parts[i]].push( fieldValue );
+                            }
+                            else if( typeof sub[parts[i]] !== 'undefined' ) {
+                                // This is so we can properly handle multi checkboxes
+                                sub[parts[i]] = [ sub[ parts[i] ] ];
+                                sub[parts[i]].push( fieldValue );
+                            }
+                            else {
+                                sub[parts[i]] = fieldValue;
+                            }
                         }
                         else {
                             if (typeof sub[parts[i]] === 'undefined') {
@@ -2190,7 +2210,7 @@
                     }
                 }
 
-            }); // End of each through input fields
+            } ); // End of each through input fields
 
             return data;
         },
@@ -2761,7 +2781,6 @@
 
                     thisView.builder.model.loadPanelsData(layout);
                     thisView.closeDialog();
-
                 }
             );
         },
@@ -2892,7 +2911,7 @@
                     return cell.get('weight');
                 } ),
                 style: { }
-            }
+            };
 
             // Set the initial value of the cell field.
             this.$('input.so-row-field').val( this.model.cells.length );
@@ -2902,8 +2921,6 @@
 
         /**
          * Regenerate the row preview and resizing interface.
-         *
-         * @todo refactor this so we use the original row view.
          */
         regenerateRowPreview: function(){
             var thisDialog = this;
@@ -3138,7 +3155,7 @@
             this.$('.row-preview .preview-cell').each(function(i, el){
                 $(el)
                     .css('width', thisDialog.row.cells[i] * 100 + "%")
-                    .find('.preview-cell-weight').html( Math.round( thisDialog.row.cells[i] * 1000 )/10 )
+                    .find('.preview-cell-weight').html( Math.round( thisDialog.row.cells[i] * 1000 )/10 );
             });
         },
 
@@ -3335,7 +3352,7 @@ jQuery( function($){
         postId = $('#panels-home-page').data('post-id');
     }
 
-    if( container != false ) {
+    if( container !== false ) {
         // If we have a container, then set up the main builder
         var panels = window.siteoriginPanels;
 
