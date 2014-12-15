@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Page Builder by SiteOrigin\n"
-"POT-Creation-Date: 2014-12-12 17:15+0200\n"
-"PO-Revision-Date: 2014-12-12 17:15+0200\n"
+"POT-Creation-Date: 2014-12-14 14:24+0200\n"
+"PO-Revision-Date: 2014-12-14 14:24+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -214,7 +214,7 @@ msgstr ""
 msgid "Attributes"
 msgstr ""
 
-#: inc/styles.php:44 widgets/basic.php:12
+#: inc/styles.php:44
 msgid "Layout"
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr ""
 msgid "Home Page"
 msgstr ""
 
-#: siteorigin-panels.php:91 siteorigin-panels.php:419 tpl/js-templates.php:150
+#: siteorigin-panels.php:91 siteorigin-panels.php:419 tpl/js-templates.php:146
 msgid "Page Builder"
 msgstr ""
 
@@ -333,7 +333,7 @@ msgid "Missing Widget"
 msgstr ""
 
 #: siteorigin-panels.php:245
-msgid "Page Builder doesn't know about this widget"
+msgid "Page Builder doesn't know about this widget."
 msgstr ""
 
 #: siteorigin-panels.php:248
@@ -450,10 +450,10 @@ msgid "Would you like to copy this editor's existing content to Page Builder?"
 msgstr ""
 
 #: siteorigin-panels.php:290
-msgid "Layout Widget"
+msgid "Layout Builder Widget"
 msgstr ""
 
-#: siteorigin-panels.php:291 tpl/js-templates.php:72
+#: siteorigin-panels.php:291 tpl/js-templates.php:71
 msgid "Are you sure?"
 msgstr ""
 
@@ -593,153 +593,153 @@ msgstr ""
 msgid "starting guide"
 msgstr ""
 
-#: tpl/js-templates.php:70 tpl/js-templates.php:246
+#: tpl/js-templates.php:69 tpl/js-templates.php:242
 msgid "Edit Row"
 msgstr ""
 
-#: tpl/js-templates.php:71
+#: tpl/js-templates.php:70
 msgid "Duplicate Row"
 msgstr ""
 
-#: tpl/js-templates.php:72
+#: tpl/js-templates.php:71
 msgid "Delete Row"
 msgstr ""
 
-#: tpl/js-templates.php:101
+#: tpl/js-templates.php:99
 msgid "Edit"
 msgstr ""
 
-#: tpl/js-templates.php:102 tpl/js-templates.php:221 tpl/js-templates.php:293
+#: tpl/js-templates.php:100 tpl/js-templates.php:217 tpl/js-templates.php:289
 msgid "Duplicate"
 msgstr ""
 
-#: tpl/js-templates.php:103 tpl/js-templates.php:220 tpl/js-templates.php:292
+#: tpl/js-templates.php:101 tpl/js-templates.php:216 tpl/js-templates.php:288
 msgid "Delete"
 msgstr ""
 
-#: tpl/js-templates.php:159 tpl/js-templates.php:224
+#: tpl/js-templates.php:155 tpl/js-templates.php:220
 msgid "Done"
 msgstr ""
 
-#: tpl/js-templates.php:173
+#: tpl/js-templates.php:169
 #, php-format
 msgid "Add New Widget %s"
 msgstr ""
 
-#: tpl/js-templates.php:177
+#: tpl/js-templates.php:173
 msgid "Search Widgets"
 msgstr ""
 
-#: tpl/js-templates.php:189
+#: tpl/js-templates.php:185
 msgid "Close"
 msgstr ""
 
-#: tpl/js-templates.php:244
+#: tpl/js-templates.php:240
 msgid "Add New Row"
 msgstr ""
 
-#: tpl/js-templates.php:258
+#: tpl/js-templates.php:254
 msgid "Set Row Layout"
 msgstr ""
 
-#: tpl/js-templates.php:261
+#: tpl/js-templates.php:257
 msgid "Columns with Ratio"
 msgstr ""
 
-#: tpl/js-templates.php:263
+#: tpl/js-templates.php:259
 msgid "Even"
 msgstr ""
 
-#: tpl/js-templates.php:264
+#: tpl/js-templates.php:260
 msgid "Golden"
 msgstr ""
 
-#: tpl/js-templates.php:265
+#: tpl/js-templates.php:261
 msgid "Halves"
 msgstr ""
 
-#: tpl/js-templates.php:266
+#: tpl/js-templates.php:262
 msgid "Thirds"
 msgstr ""
 
-#: tpl/js-templates.php:267
+#: tpl/js-templates.php:263
 msgid "Diagon"
 msgstr ""
 
-#: tpl/js-templates.php:268
+#: tpl/js-templates.php:264
 msgid "Hecton"
 msgstr ""
 
-#: tpl/js-templates.php:269
+#: tpl/js-templates.php:265
 msgid "Hemidiagon"
 msgstr ""
 
-#: tpl/js-templates.php:270
+#: tpl/js-templates.php:266
 msgid "Penton"
 msgstr ""
 
-#: tpl/js-templates.php:271
+#: tpl/js-templates.php:267
 msgid "Trion"
 msgstr ""
 
-#: tpl/js-templates.php:272
+#: tpl/js-templates.php:268
 msgid "Quadriagon"
 msgstr ""
 
-#: tpl/js-templates.php:273
+#: tpl/js-templates.php:269
 msgid "Biauron"
 msgstr ""
 
-#: tpl/js-templates.php:274
+#: tpl/js-templates.php:270
 msgid "Bipenton"
 msgstr ""
 
-#: tpl/js-templates.php:277
+#: tpl/js-templates.php:273
 msgid "Left to Right"
 msgstr ""
 
-#: tpl/js-templates.php:278
+#: tpl/js-templates.php:274
 msgid "Right to Left"
 msgstr ""
 
-#: tpl/js-templates.php:280
-msgid "Set Row"
+#: tpl/js-templates.php:276
+msgid "Set"
 msgstr ""
 
-#: tpl/js-templates.php:298
+#: tpl/js-templates.php:294
 msgid "Insert"
 msgstr ""
 
-#: tpl/js-templates.php:300
+#: tpl/js-templates.php:296
 msgid "Save"
 msgstr ""
 
-#: tpl/js-templates.php:319
+#: tpl/js-templates.php:314
 msgid "Prebuilt Layouts"
 msgstr ""
 
-#: tpl/js-templates.php:323
+#: tpl/js-templates.php:318
 msgid "Search"
 msgstr ""
 
-#: tpl/js-templates.php:326
+#: tpl/js-templates.php:321
 msgid "Theme Defined"
 msgstr ""
 
-#: tpl/js-templates.php:332
+#: tpl/js-templates.php:327
 #, php-format
 msgid "Clone: %s"
 msgstr ""
 
-#: tpl/js-templates.php:363
+#: tpl/js-templates.php:357
 msgid "Page Builder Change History"
 msgstr ""
 
-#: tpl/js-templates.php:377
+#: tpl/js-templates.php:371
 msgid "Restore Version"
 msgstr ""
 
-#: tpl/js-templates.php:403
+#: tpl/js-templates.php:396
 msgid "Close Live Editor"
 msgstr ""
 
@@ -838,6 +838,10 @@ msgstr ""
 
 #: video/jplayer/skins/premium/gui.php:11
 msgid "unmute"
+msgstr ""
+
+#: widgets/basic.php:12
+msgid "Layout Builder"
 msgstr ""
 
 #: widgets/basic.php:14

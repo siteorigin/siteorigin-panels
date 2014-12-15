@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.0-bleeding
+Version: 2.0
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/donate/
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.0-bleeding');
+define('SITEORIGIN_PANELS_VERSION', '2.0');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
@@ -242,7 +242,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 			'loc' => array(
 				'missing_widget' => array(
 					'title' => __('Missing Widget', 'siteorigin-panels'),
-					'description' => __("Page Builder doesn't know about this widget", 'siteorigin-panels'),
+					'description' => __("Page Builder doesn't know about this widget.", 'siteorigin-panels'),
 				),
 				'time' => array(
 					'seconds' => __('%d seconds', 'siteorigin-panels'),
@@ -287,7 +287,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'prebuilt_confirm' => __('Are you sure you want to overwrite your current content? This can be undone in the builder history.', 'siteorigin-panels'),
 				'prebuilt_loading' => __('Loading prebuilt layout', 'siteorigin-panels'),
 				'confirm_use_builder' => __("Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels'),
-				'layout_widget' => __('Layout Widget', 'siteorigin-panels'),
+				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 			),
 		));

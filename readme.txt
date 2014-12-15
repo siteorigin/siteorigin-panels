@@ -1,12 +1,12 @@
 === Page Builder by SiteOrigin ===
-Contributors: gpriday
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 3.7
 Tested up to: 4.1
-Stable tag: 1.5.4
+Stable tag: 2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
+Contributors: gpriday, braam-genis
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
 
@@ -14,47 +14,43 @@ Build responsive page layouts using the widgets you know and love using this sim
 
 [vimeo http://vimeo.com/59561067]
 
-WordPress has evolved into a fully functional CMS. Page Builder (previously called Panels) completes the transition by giving you a way to create responsive column layouts using the widgets you know and love.
+Page Builder by SiteOrigin is the most popular page creation plugin for WordPress. It makes it easy to create responsive column based content, using the widgets you know and love. Your content will accurately adapt to all mobile devices, ensuring your site is mobile-ready.
 
-= Use Your Widgets =
+We've created an intuitive interface that looks just like WordPress itself. It's easy to learn, so you'll be building beautiful, responsive content in no time.
 
-You know widgets. They're the things you add to your sidebars. Page Builder makes all your widgets even more useful by turning them into the building blocks of your pages.
+Page Builder works with standard WordPress widgets, so you'll always find the widget you need. We've created the SiteOrigin Widgets Bundle to give you all the most common widgets, and with a world of plugins out there, you'll always find the widget you need.
 
-We've included a few useful widgets, but it works with a lot of other widgets and plugins out there.
+= It works with your theme. =
 
-= Works with Most Themes =
+Page Builder gives you complete freedom to choose any WordPress theme you like. It's not a commitment to a single theme or theme developer. The advantage is that you're free to change themes as often as you like. Your content will always come along with you.
 
-Page Builder works with most well made themes. The only requirement is that your theme supports pages. And if your theme is responsive, change a few settings and boom, your layouts will work with your theme and collapse into a single column on mobile devices.
+= No coding required. =
 
-There are loads free and premium themes that work with the Page Builder, we have our own collection of [free themes](http://siteorigin.com/) if you'd like to use one of ours.
+Page Builder's simple drag and drop interface means you'll never need to write a single line of code. Page Builder generates all the highly efficient code for you.
 
-Page Builder [Documentation](http://siteorigin.com/page-builder/documentation/) is available on SiteOrigin and we offer free support on our [support forum](http://siteorigin.com/threads/plugin-page-builder/). If you're having strange issues, try following [this guide](http://siteorigin.com/troubleshooting/identifying-plugin-conflicts/).
+We don't limit you with a set of pre-defined row layouts. Page Builder gives you complete flexibility. You can choose the exact number of columns for each row and the precise weight of each column - down to the decimal point. This flexibility is all possible using our convenient row builder. And, if you're not sure what you like, the Row Builder will guide you towards beautifully proportioned content using advanced ratios.
 
-= Bundled Widgets =
+= Live Editing. =
 
-To get you started, we've include a few widgets:
+Page Builder supports live editing. This tool lets you see your content and edit widgets in real-time. It's the fastest way to adjust your content quickly and easily.
 
-* Gallery widget for inserting image galleries.
-* Image widget for inserting standard images.
-* Self hosted video widget for embedding your own videos.
-* Post Loop to display a list of posts. This requires that your theme supports it.
+= History Browser. =
 
-As well as some essential page elements widgets:
+This tool lets you roll forward and back through your changes. It gives you the freedom to experiment with different layouts and content without the fear of breaking your content.
 
-* Button
-* Call to Action
-* List
-* Price Box
-* Animated Image
-* Testimonial
+= Row and widget styles. =
 
-= 3rd Party Widgets =
+Row and widget styles give you all the control you need to make your content uniquely your own. Change attributes like paddings, background colours and column spacing. You can also enter custom CSS and CSS classes if you need even finer grained control.
 
-Most standard widgets work with Page Builder, but here are some of our favorites.
+= It's free, and always will be. =
 
-* [SiteOrigin Widget Bundle](http://wordpress.org/plugins/so-widgets-bundle/) for growing collection of widgets like buttons, price tables and images.
-* [Black Studio TinyMCE](http://wordpress.org/plugins/black-studio-tinymce-widget/) for a visual content editing widget.
-* [Meta Slider](http://wordpress.org/plugins/ml-slider/) for a responsive slider widget.
+Page Builder is our commitment to the democratization of content creation. Like WordPress, Page Builder is, and always will be free. We'll continue supporting and developing it for many years to come. It'll only get better from here.
+
+We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
+
+= Actively Developed =
+
+Page Builder is actively developed with new features and exciting enhancements all the time. Keep track on the [Page Builder GitHub repository](https://github.com/siteorigin/siteorigin-panels).
 
 == Installation ==
 
@@ -64,6 +60,10 @@ Most standard widgets work with Page Builder, but here are some of our favorites
 == Screenshots ==
 
 1. The page builder interface.
+2. Powerful widget insert dialog with groups and search.
+3. Live Editor that lets you change your content in real time.
+4. Undo changes with the History Browser.
+5. Row Builder that gives unlimited flexibility.
 
 == Documentation ==
 
@@ -79,7 +79,7 @@ We recommend the [duplicator plugin](https://wordpress.org/plugins/duplicator/).
 
 Yes, provided your theme is licensed under GPL or a compatible license. If you're publishing your theme on ThemeForest, you must select the GPL license instead of their regular license.
 
-Page Builder is actively developed and updated, so generally I'd recommend that you have your users install the actual plugin so they can receive updates. You can try [TGM Plugin Activation](http://tgmpluginactivation.com/).
+Page Builder is actively developed and updated, so generally I'd recommend that you have your users install the original plugin so they can receive updates. You can try [TGM Plugin Activation](http://tgmpluginactivation.com/).
 
 = Will plugin X work with Page Builder? =
 
@@ -89,4 +89,10 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 = 2.0 =
 * Complete rewrite of Page Builder Javascript using Backbone.
-*
+* Complete UI redesign.
+* Grid Engine rewrite for more efficient CSS.
+* Various performance enhancements and bug fixes.
+
+== Upgrade Notice ==
+
+Page Builder 2.0 is a major update. Please ensure that you backup your database before updating from a 1.x version. Updating from 1.x to 2.0 is a smooth transition, but it's always better to have a backup.

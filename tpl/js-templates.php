@@ -273,7 +273,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<option value="right"><?php esc_html_e('Left to Right', 'siteorigin-panels') ?></option>
 					<option value="left"><?php esc_html_e('Right to Left', 'siteorigin-panels') ?></option>
 				</select>
-				<button class="button-secondary set-row"><?php esc_html_e('Set Row', 'siteorigin-panels') ?></button>
+				<button class="button-secondary set-row"><?php esc_html_e('Set', 'siteorigin-panels') ?></button>
 			</div>
 
 			<div class="row-preview">
