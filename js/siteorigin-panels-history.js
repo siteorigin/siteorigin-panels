@@ -93,7 +93,7 @@
      */
     panels.dialog.history = panels.view.dialog.extend( {
 
-        historyEntryTemplate: _.template( $('#siteorigin-panels-dialog-history-entry').html() ),
+        historyEntryTemplate: _.template( $('#siteorigin-panels-dialog-history-entry').html().panelsProcessTemplate() ),
 
         entries: {},
         currentEntry: null,

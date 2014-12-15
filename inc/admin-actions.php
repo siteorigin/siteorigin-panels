@@ -10,7 +10,7 @@ function siteorigin_panels_ajax_builder_content(){
 
 	if( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
 		echo '';
-		return;
+		exit();
 	}
 
 	// echo the content

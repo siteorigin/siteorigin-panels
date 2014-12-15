@@ -5,6 +5,20 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/**
+ * Convert template into something compatible with Underscore.js templates
+ *
+ * @param s
+ * @return {*}
+ */
+String.prototype.panelsProcessTemplate = function(){
+    var s = this;
+    s = s.replace(/{{%/g, '<%');
+    s = s.replace(/%}}/g, '%>');
+    s = s.trim();
+    return s;
+};
+
 ( function( $, _, panelsOptions ){
 
     var panels = {
@@ -13,21 +27,6 @@
         view : { },
         dialog : { },
         fn : {}
-    };
-
-    /**
-     * Convert template into something compatible with Underscore.js templates
-     *
-     * @param s
-     * @return {*}
-     */
-    String.prototype.panelsProcessTemplate = function(){
-        var s = this;
-        s = s.replace(/{{%/g, '<%');
-        s = s.replace(/%}}/g, '%>');
-        s = s.trim();
-
-        return s;
     };
 
     /**

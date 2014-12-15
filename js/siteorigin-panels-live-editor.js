@@ -13,9 +13,9 @@
      * Live editor handles
      */
     panels.view.liveEditor = Backbone.View.extend( {
-        template: _.template( $('#siteorigin-panels-live-editor').html() ),
+        template: _.template( $('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
 
-        sectionTemplate: _.template( $('#siteorigin-panels-live-editor-sidebar-section').html() ),
+        sectionTemplate: _.template( $('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
 
         postId: false,
         bodyScrollTop : null,
