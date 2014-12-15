@@ -1754,7 +1754,7 @@ String.prototype.panelsProcessTemplate = function(){
                 editorContent = $('textarea#content').val();
             }
 
-            if( this.model.get('data') == '' && editorContent !== '') {
+            if( _.isEmpty( this.model.get('data') ) && editorContent !== '') {
                 // Confirm with the user first
                 if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
