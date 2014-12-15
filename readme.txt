@@ -2,7 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 3.7
 Tested up to: 4.1
-Stable tag: 2.0
+Stable tag: 2.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
@@ -12,9 +12,9 @@ Build responsive page layouts using the widgets you know and love using this sim
 
 == Description ==
 
-[vimeo http://vimeo.com/59561067]
+[vimeo https://vimeo.com/114529361]
 
-Page Builder by SiteOrigin is the most popular page creation plugin for WordPress. It makes it easy to create responsive column based content, using the widgets you know and love. Your content will accurately adapt to all mobile devices, ensuring your site is mobile-ready.
+Page Builder by SiteOrigin is the most popular page creation plugin for WordPress. It makes it easy to create responsive column based content, using the widgets you know and love. Your content will accurately adapt to all mobile devices, ensuring your site is mobile-ready. Read more on [SiteOrigin](https://siteorigin.com/thread/).
 
 We've created an intuitive interface that looks just like WordPress itself. It's easy to learn, so you'll be building beautiful, responsive content in no time.
 
@@ -23,6 +23,8 @@ Page Builder works with standard WordPress widgets, so you'll always find the wi
 = It works with your theme. =
 
 Page Builder gives you complete freedom to choose any WordPress theme you like. It's not a commitment to a single theme or theme developer. The advantage is that you're free to change themes as often as you like. Your content will always come along with you.
+
+We've also made some fantastic [free themes](https://siteorigin.com/theme/) that work well with Page Builder.
 
 = No coding required. =
 
