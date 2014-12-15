@@ -2120,7 +2120,7 @@
                 var fieldValue = null;
 
                 // First we need to get the value from the field
-                if( $$.attr('type') === 'checkbox' ){
+                if( $$.attr('type').toLowerCase() === 'checkbox' ){
                     if ( $$.is(':checked') ) {
                         fieldValue = $$.val() !== '' ? $$.val() : true;
                     }
@@ -2128,7 +2128,7 @@
                         fieldValue = null;
                     }
                 }
-                else if( $$.attr('type') === 'radio' ){
+                else if( $$.attr('type').toLowerCase() === 'radio' ){
                     if ( $$.is(':checked') ) {
                         fieldValue = $$.val();
                     }
@@ -2189,17 +2189,7 @@
                 if(fieldValue !== null) {
                     for (var i = 0; i < parts.length; i++) {
                         if (i === parts.length - 1) {
-                            if( _.isArray(sub[parts[i]]) ) {
-                                sub[parts[i]].push( fieldValue );
-                            }
-                            else if( typeof sub[parts[i]] !== 'undefined' ) {
-                                // This is so we can properly handle multi checkboxes
-                                sub[parts[i]] = [ sub[ parts[i] ] ];
-                                sub[parts[i]].push( fieldValue );
-                            }
-                            else {
-                                sub[parts[i]] = fieldValue;
-                            }
+                            sub[parts[i]] = fieldValue;
                         }
                         else {
                             if (typeof sub[parts[i]] === 'undefined') {
