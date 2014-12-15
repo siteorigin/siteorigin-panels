@@ -1679,7 +1679,8 @@
          */
         handleContentChange: function(){
 
-            if(this.attachedToEditor) {
+            // Make sure we actually need to copy content.
+            if( this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0) {
                 // We're going to create a copy of page builder content into the post content
                 $.post(
                     ajaxurl,
@@ -1689,6 +1690,8 @@
                         post_id : $('#post_ID').val()
                     },
                     function(content){
+
+                        if( content === '' ) return;
 
                         // Strip all the known layout divs
                         var t = $('<div />').html( content );

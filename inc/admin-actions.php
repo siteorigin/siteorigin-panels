@@ -6,8 +6,12 @@
 function siteorigin_panels_ajax_builder_content(){
 	header('content-type: text/html');
 
-	if( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) )
-		if( !current_user_can('edit_post', $_POST['post_id'] ) ) return;
+	if( !current_user_can('edit_post', $_POST['post_id'] ) ) exit();
+
+	if( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
+		echo '';
+		return;
+	}
 
 	// echo the content
 	echo siteorigin_panels_render( intval($_POST['post_id']), false, json_decode( wp_unslash($_POST['panels_data']), true ) );
