@@ -52,7 +52,7 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 
 	// Check if we need a default group
 	foreach($fields as $field_id => $field) {
-		if( empty($field['group']) ) {
+		if( empty($field['group']) || $field['group'] == 'theme' ) {
 			if( empty($groups['theme']) ) {
 				$groups['theme'] = array(
 					'name' => __('Theme', 'siteorigin-panels'),
