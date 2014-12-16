@@ -172,7 +172,7 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			break;
 
 		case 'checkbox' :
-			$current = boolval($current);
+			$current = (bool) $current;
 			?>
 			<label class="so-checkbox-label">
 				<input type="checkbox" name="<?php echo esc_attr($field_name) ?>" <?php checked($current) ?> />
