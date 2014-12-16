@@ -52,7 +52,7 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 
 	// Check if we need a default group
 	foreach($fields as $field_id => $field) {
-		if( empty($field['group']) ) {
+		if( empty($field['group']) || $field['group'] == 'theme' ) {
 			if( empty($groups['theme']) ) {
 				$groups['theme'] = array(
 					'name' => __('Theme', 'siteorigin-panels'),
@@ -172,7 +172,7 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			break;
 
 		case 'checkbox' :
-			$current = boolval($current);
+			$current = (bool) $current;
 			?>
 			<label class="so-checkbox-label">
 				<input type="checkbox" name="<?php echo esc_attr($field_name) ?>" <?php checked($current) ?> />
