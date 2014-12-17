@@ -217,7 +217,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . $js_suffix . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
-		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . $js_suffix . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . $js_suffix . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' ) {
 			// We don't use the history browser and live editor in the widgets interface
@@ -325,7 +325,9 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 
 		// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
 		do_action( 'siteorigin_panel_enqueue_admin_scripts' );
-		do_action( 'sidebar_admin_setup' );
+		if( $screen->base != 'widgets' ) {
+			do_action( 'sidebar_admin_setup' );
+		}
 	}
 }
 add_action( 'admin_print_scripts-post-new.php', 'siteorigin_panels_admin_enqueue_scripts' );
