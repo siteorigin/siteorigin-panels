@@ -2164,7 +2164,7 @@ String.prototype.panelsProcessTemplate = function(){
                         editor = tinyMCE.get( $$.attr('id') );
                     }
 
-                    if( editor !== null && typeof( editor.getContent ) === "function" ) {
+                    if( editor !== null && typeof( editor.getContent ) === "function" && !editor.isHidden() ) {
                         fieldValue = editor.getContent();
                     }
                     else {
