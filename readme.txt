@@ -89,6 +89,10 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.0.3 =
+* Fixed issue with double calling sidebar_admin_setup that was breaking some widgets.
+* Fixed fetching content from TinyMCE in text mode.
+
 = 2.0.2 =
 * Fixed fatal error in validation for PHP < 5.5
 
