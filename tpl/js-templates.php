@@ -9,17 +9,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<a href="#" class="so-tool-button so-widget-add">
 			<span class="so-panels-icon so-panels-icon-plus"></span>
-			<span class="so-button-text"><?php esc_attr_e('Add Widget') ?></span>
+			<span class="so-button-text"><?php esc_attr_e('Add Widget', 'siteorigin-panels') ?></span>
 		</a>
 
 		<a href="#" class="so-tool-button so-row-add">
 			<span class="so-panels-icon so-panels-icon-columns"></span>
-			<span class="so-button-text"><?php esc_attr_e('Add Row') ?></span>
+			<span class="so-button-text"><?php esc_attr_e('Add Row', 'siteorigin-panels') ?></span>
 		</a>
 
 		<a href="#" class="so-tool-button so-prebuilt-add">
 			<span class="so-panels-icon so-panels-icon-cubes"></span>
-			<span class="so-button-text"><?php esc_attr_e('Prebuilt') ?></span>
+			<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
 		</a>
 
 		<a href="#" class="so-tool-button so-history" style="display: none">
