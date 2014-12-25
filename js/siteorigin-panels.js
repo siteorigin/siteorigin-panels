@@ -147,7 +147,11 @@ String.prototype.panelsProcessTemplate = function(){
          */
         getTitle: function(){
             var widgetData = panelsOptions.widgets[this.get('class')];
-            if( typeof widgetData.panels_title !== 'undefined' ) {
+
+            if( typeof widgetData === 'undefined' ) {
+                return this.get('class').replace(/_/g, ' ');
+            }
+            else if( typeof widgetData.panels_title !== 'undefined' ) {
                 // This means that the widget has told us which field it wants us to use as a title
                 if( widgetData.panels_title === false ) {
                     return panelsOptions.widgets[this.get('class')].description;
