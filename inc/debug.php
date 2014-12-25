@@ -5,7 +5,7 @@
  */
 function siteorigin_panels_dump(){
 	echo "<!--\n\n";
-	echo "// Page Builder Data dump\n\n";
+	echo "// Page Builder Data\n\n";
 
 	if(isset($_GET['page']) && $_GET['page'] == 'so_panels_home_page') {
 		var_export( get_option( 'siteorigin_panels_home_page', null ) );
