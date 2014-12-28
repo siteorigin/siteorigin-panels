@@ -130,6 +130,21 @@ String.prototype.panelsProcessTemplate = function(){
             // Create a deep clone of the original values
             var cloneValues = JSON.parse( JSON.stringify( this.get('values') ) );
 
+            // We want to exclude any fields that start with _ from the clone. Assuming these are internal.
+            var cleanClone = function(vals){
+                _.each( vals, function(el, i){
+                    if( typeof i === 'string' && i[0] === '_' ) {
+                        delete vals[i];
+                    }
+                    else if ( _.isObject( vals[i] ) ) {
+                        cleanClone( vals[i] );
+                    }
+                } );
+
+                return vals;
+            };
+            cloneValues = cleanClone(cloneValues);
+
             if( this.get('class') === "SiteOrigin_Panels_Widgets_Layout" ) {
                 // Special case of this being a layout widget, it needs a new ID
                 cloneValues.builder_id = Math.random().toString(36).substr(2);
