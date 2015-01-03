@@ -324,8 +324,8 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		}
 
 		// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
-		do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 		if( $screen->base != 'widgets' ) {
+			do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 			do_action( 'sidebar_admin_setup' );
 		}
 	}
