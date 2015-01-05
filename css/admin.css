@@ -1416,6 +1416,15 @@
   padding-left: 0;
   padding-right: 0;
 }
+/* Display the dialog with a proper z-index in the customizer */
+.wp-customizer .so-panels-dialog .so-overlay,
+.wp-customizer .so-panels-dialog .so-content,
+.wp-customizer .so-panels-dialog .so-title-bar,
+.wp-customizer .so-panels-dialog .so-toolbar,
+.wp-customizer .so-panels-dialog .so-left-sidebar,
+.wp-customizer .so-panels-dialog .so-right-sidebar {
+  z-index: 500001;
+}
 .so-panels-live-editor > div {
   position: fixed;
   z-index: 99999;
@@ -1701,4 +1710,10 @@
 #panels-home-page #panels-view-as-page {
   display: inline-block;
   margin-left: 50px;
+}
+.siteorigin-page-builder-widget .siteorigin-panels-display-builder {
+  display: inline-block !important;
+}
+.siteorigin-page-builder-widget .siteorigin-panels-no-builder {
+  display: none !important;
 }

@@ -1,0 +1,1647 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Page Builder by SiteOrigin v2.0.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2014-12-20 18:32:10+0000\n"
+"Last-Translator: surbma <peter@surbma.hu>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: CSL v1.x\n"
+"X-Poedit-Language: Hungarian\n"
+"X-Poedit-Country: HUNGARY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+#: inc/admin-actions.php:59
+#@ siteorigin-panels
+msgid "No description"
+msgstr "Nincs leírás"
+
+#: inc/admin-actions.php:68
+#@ siteorigin-panels
+msgid "Your theme doesn't have any prebuilt layouts."
+msgstr "A jelenlegi sablonnak nincsenek előre beépített elrendezései."
+
+#: inc/admin-actions.php:69
+#@ siteorigin-panels
+msgid "You can still clone existing pages though."
+msgstr "Bár duplikálhatsz már létező oldal elrendezéseket."
+
+#: inc/admin-actions.php:102
+#@ siteorigin-panels
+msgid "Clone"
+msgstr "Duplikálás"
+
+#: inc/admin-actions.php:119
+#, php-format
+#@ siteorigin-panels
+msgid "There are no %s with Page Builder content to clone."
+msgstr "Nincs még %s Page Builder tartalommal, amit duplikálni lehetne."
+
+#: inc/default-styles.php:41
+#@ siteorigin-panels
+msgid "Row Class"
+msgstr "Sor osztály (class)"
+
+#: inc/default-styles.php:44
+#: inc/default-styles.php:149
+#@ siteorigin-panels
+msgid "A CSS class"
+msgstr "CSS osztályok (class)"
+
+#: inc/default-styles.php:49
+#@ siteorigin-panels
+msgid "Cell Class"
+msgstr "Cella osztály (class)"
+
+#: inc/default-styles.php:52
+#@ siteorigin-panels
+msgid "Class added to all cells in this row."
+msgstr "Minden cella megkapja az itt meghatározott osztályokat (class)."
+
+#: inc/default-styles.php:57
+#: inc/default-styles.php:154
+#@ siteorigin-panels
+msgid "CSS Styles"
+msgstr "CSS stílusok"
+
+#: inc/default-styles.php:60
+#: inc/default-styles.php:157
+#@ siteorigin-panels
+msgid "CSS Styles, given as one per row."
+msgstr "CSS stílusok, egy sorba egyet lehet megadni."
+
+#: inc/default-styles.php:67
+#@ siteorigin-panels
+msgid "Bottom Margin"
+msgstr "Alsó margó (bottom-margin)"
+
+#: inc/default-styles.php:70
+#@ siteorigin-panels
+msgid "Space below the row."
+msgstr "Sor alatti helyköz."
+
+#: inc/default-styles.php:75
+#@ siteorigin-panels
+msgid "Gutter"
+msgstr "Rács köz"
+
+#: inc/default-styles.php:78
+#@ siteorigin-panels
+msgid "Amount of space between columns."
+msgstr "Oszlopok közötti távolság."
+
+#: inc/default-styles.php:83
+#: inc/default-styles.php:162
+#@ siteorigin-panels
+msgid "Padding"
+msgstr "Belső táv"
+
+#: inc/default-styles.php:86
+#@ siteorigin-panels
+msgid "Padding around the entire row."
+msgstr "A teljes sor belső helyköze."
+
+#: inc/default-styles.php:91
+#@ siteorigin-panels
+msgid "Row Layout"
+msgstr "Sor elrendezés"
+
+#: inc/default-styles.php:95
+#@ siteorigin-panels
+msgid "Standard"
+msgstr "Normál"
+
+#: inc/default-styles.php:96
+#@ siteorigin-panels
+msgid "Full Width"
+msgstr "Teljes szélesség"
+
+#: inc/default-styles.php:97
+#@ siteorigin-panels
+msgid "Full Width Stretched"
+msgstr "Teljes szélesség kihúzva"
+
+#: inc/default-styles.php:105
+#: inc/default-styles.php:172
+#@ siteorigin-panels
+msgid "Background Color"
+msgstr "Háttérszín"
+
+#: inc/default-styles.php:108
+#@ siteorigin-panels
+msgid "Background color of the row."
+msgstr "A sor háttérszíne."
+
+#: inc/default-styles.php:113
+#: inc/default-styles.php:180
+#@ siteorigin-panels
+msgid "Background Image"
+msgstr "Háttérkép"
+
+#: inc/default-styles.php:116
+#@ siteorigin-panels
+msgid "Background image of the row."
+msgstr "A sor háttérképe."
+
+#: inc/default-styles.php:121
+#: inc/default-styles.php:188
+#@ siteorigin-panels
+msgid "Background Image Display"
+msgstr "Háttérkép megjelenítése"
+
+#: inc/default-styles.php:125
+#: inc/default-styles.php:192
+#@ siteorigin-panels
+msgid "Tiled Image"
+msgstr "Ismétlés"
+
+#: inc/default-styles.php:126
+#: inc/default-styles.php:193
+#@ siteorigin-panels
+msgid "Cover"
+msgstr "Befedés"
+
+#: inc/default-styles.php:127
+#: inc/default-styles.php:194
+#@ siteorigin-panels
+msgid "Centered, with original size"
+msgstr "Középre igazítás (eredeti méretben)"
+
+#: inc/default-styles.php:129
+#: inc/default-styles.php:196
+#@ siteorigin-panels
+msgid "How the background image is displayed."
+msgstr "Ahogyan megjelenik a háttérkép."
+
+#: inc/default-styles.php:134
+#: inc/default-styles.php:201
+#@ siteorigin-panels
+msgid "Border Color"
+msgstr "Keret szín"
+
+#: inc/default-styles.php:137
+#@ siteorigin-panels
+msgid "Border color of the row."
+msgstr "A sor keret színe."
+
+#: inc/default-styles.php:146
+#@ siteorigin-panels
+msgid "Widget Class"
+msgstr "Widget osztály (class)"
+
+#: inc/default-styles.php:165
+#@ siteorigin-panels
+msgid "Padding around the entire widget."
+msgstr "A widget belső helyköze."
+
+#: inc/default-styles.php:175
+#@ siteorigin-panels
+msgid "Background color of the widget."
+msgstr "A widget háttérszíne."
+
+#: inc/default-styles.php:183
+#@ siteorigin-panels
+msgid "Background image of the widget."
+msgstr "A widget háttérképe."
+
+#: inc/default-styles.php:204
+#@ siteorigin-panels
+msgid "Border color of the widget."
+msgstr "A widget keret színe."
+
+#: inc/default-styles.php:209
+#@ siteorigin-panels
+msgid "Font Color"
+msgstr "Betű színe"
+
+#: inc/default-styles.php:212
+#@ siteorigin-panels
+msgid "Color of text inside this widget."
+msgstr "A widgetben megjelenő szöveg színe."
+
+#: inc/options.php:69
+#: tpl/options.php:5
+#@ siteorigin-panels
+msgid "SiteOrigin Page Builder"
+msgstr "SiteOrigin Page Builder"
+
+#: inc/options.php:108
+#@ siteorigin-panels
+msgid "Post types that will have the page builder available"
+msgstr "Bejegyzéstípusok, amelyeken lehet használni a Page Builder-t."
+
+#: inc/options.php:123
+#: inc/styles.php:179
+#@ siteorigin-panels
+msgid "Enabled"
+msgstr "Engedélyezve"
+
+#: inc/options.php:128
+#@ siteorigin-panels
+msgid "px"
+msgstr "px"
+
+#: inc/plugin-activation.php:7
+#: inc/plugin-activation.php:8
+#@ siteorigin-panels
+msgid "Install Page Builder Plugin"
+msgstr "Page Builder bővítmény telepítése"
+
+#: inc/plugin-activation.php:74
+#, php-format
+#@ siteorigin-panels
+msgid "Installing %s"
+msgstr "%s telepítése"
+
+#: inc/revisions.php:50
+#@ siteorigin-panels
+msgid "Page Builder Content"
+msgstr "Page Builder tartalom"
+
+#: inc/styles.php:15
+#@ siteorigin-panels
+msgid "Row Styles"
+msgstr "Sor stílusok"
+
+#: inc/styles.php:19
+#@ siteorigin-panels
+msgid "Widget Styles"
+msgstr "Widget stílusok"
+
+#: inc/styles.php:40
+#@ siteorigin-panels
+msgid "Attributes"
+msgstr "Tulajdonságok"
+
+#: inc/styles.php:44
+#@ siteorigin-panels
+msgid "Layout"
+msgstr "Elrendezés"
+
+#: inc/styles.php:48
+#@ siteorigin-panels
+msgid "Design"
+msgstr "Design"
+
+#: inc/styles.php:58
+#@ siteorigin-panels
+msgid "Theme"
+msgstr "Sablon"
+
+#: inc/styles.php:161
+#@ default
+msgid "Select Image"
+msgstr "Kép választása"
+
+#: inc/styles.php:165
+#@ default
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#: inc/widgets-bundle.php:7
+#@ siteorigin-panels
+msgid "SiteOrigin Button"
+msgstr "SiteOrigin gomb"
+
+#: inc/widgets-bundle.php:8
+#: widgets/widgets/button/button.php:8
+#@ siteorigin-panels
+msgid "A simple button"
+msgstr "Egy egyszerű gomb"
+
+#: inc/widgets-bundle.php:11
+#: inc/widgets-bundle.php:23
+#: inc/widgets-bundle.php:35
+#: inc/widgets-bundle.php:47
+#: inc/widgets-bundle.php:59
+#@ siteorigin-panels
+msgid "SiteOrigin Widgets Bundle"
+msgstr "SiteOrigin widget csomag"
+
+#: inc/widgets-bundle.php:19
+#@ siteorigin-panels
+msgid "SiteOrigin Image"
+msgstr "SiteOrigin kép"
+
+#: inc/widgets-bundle.php:20
+#@ siteorigin-panels
+msgid "Choose images from your media library."
+msgstr "Képek megjelenítése a médiatárból."
+
+#: inc/widgets-bundle.php:31
+#@ siteorigin-panels
+msgid "SiteOrigin Slider"
+msgstr "SiteOrigin slider"
+
+#: inc/widgets-bundle.php:32
+#@ siteorigin-panels
+msgid "A basic slider widget."
+msgstr "Egy alap slider widget."
+
+#: inc/widgets-bundle.php:43
+#@ siteorigin-panels
+msgid "SiteOrigin Features"
+msgstr "SiteOrigin jellemzők"
+
+#: inc/widgets-bundle.php:44
+#@ siteorigin-panels
+msgid "Display site features as a collection of icons."
+msgstr "Jellemzők megjelenítése ikonokkal."
+
+#: inc/widgets-bundle.php:55
+#@ siteorigin-panels
+msgid "SiteOrigin Post Carousel"
+msgstr "SiteOrigin bejegyzés körhinta"
+
+#: inc/widgets-bundle.php:56
+#@ siteorigin-panels
+msgid "Display your posts as a carousel."
+msgstr "Bejegyzések megjelenítése körhintával."
+
+#: inc/widgets.php:15
+#@ siteorigin-panels
+msgid "Visual Editor"
+msgstr "Vizuális szerkesztő"
+
+#: inc/widgets.php:16
+#@ siteorigin-panels
+msgid "Arbitrary text or HTML with visual editor"
+msgstr "Szabad szöveges és HTML szerkesztő."
+
+#: inc/widgets.php:19
+#@ siteorigin-panels
+msgid "Black Studio TinyMCE"
+msgstr "Black Studio TinyMCE"
+
+#: inc/widgets.php:83
+#@ siteorigin-panels
+msgid "Widgets Bundle"
+msgstr "Widget csomag"
+
+#: inc/widgets.php:90
+#@ siteorigin-panels
+msgid "Page Builder Widgets"
+msgstr "Page Builder widgetek"
+
+#: inc/widgets.php:97
+#@ siteorigin-panels
+msgid "WordPress Widgets"
+msgstr "WordPress widgetek"
+
+#: inc/widgets.php:104
+#@ siteorigin-panels
+msgid "Recommended Widgets"
+msgstr "Ajánlott widgetek"
+
+#: siteorigin-panels.php:67
+#@ siteorigin-panels
+msgid "Custom Home Page Builder"
+msgstr "Egyedi kezdőoldal Page Builder"
+
+#: siteorigin-panels.php:68
+#@ siteorigin-panels
+msgid "Home Page"
+msgstr "Kezdőoldal"
+
+#: siteorigin-panels.php:91
+#: siteorigin-panels.php:421
+#: tpl/js-templates.php:146
+#@ siteorigin-panels
+msgid "Page Builder"
+msgstr "Page Builder"
+
+#: siteorigin-panels.php:107
+#@ siteorigin-panels
+msgid "Home"
+msgstr "Kezdőoldal"
+
+#: siteorigin-panels.php:236
+#@ siteorigin-panels
+msgid "All Widgets"
+msgstr "Minden widget"
+
+#: siteorigin-panels.php:244
+#@ siteorigin-panels
+msgid "Missing Widget"
+msgstr "Hiányzó widget"
+
+#: siteorigin-panels.php:245
+#@ siteorigin-panels
+msgid "Page Builder doesn't know about this widget."
+msgstr "A Page Builder nem ismeri ezt a widgetet."
+
+#: siteorigin-panels.php:248
+#, php-format
+#@ siteorigin-panels
+msgid "%d seconds"
+msgstr "%d másodperc"
+
+#: siteorigin-panels.php:249
+#, php-format
+#@ siteorigin-panels
+msgid "%d minutes"
+msgstr "%d perc"
+
+#: siteorigin-panels.php:250
+#, php-format
+#@ siteorigin-panels
+msgid "%d hours"
+msgstr "%d óra"
+
+#: siteorigin-panels.php:252
+#, php-format
+#@ siteorigin-panels
+msgid "%d second"
+msgstr "%d másodperc"
+
+#: siteorigin-panels.php:253
+#, php-format
+#@ siteorigin-panels
+msgid "%d minute"
+msgstr "%d perc"
+
+#: siteorigin-panels.php:254
+#, php-format
+#@ siteorigin-panels
+msgid "%d hour"
+msgstr "%d óra"
+
+#: siteorigin-panels.php:256
+#, php-format
+#@ siteorigin-panels
+msgid "%s before"
+msgstr "%s telt el azóta"
+
+#: siteorigin-panels.php:257
+#@ siteorigin-panels
+msgid "Now"
+msgstr "Most"
+
+#: siteorigin-panels.php:261
+#@ siteorigin-panels
+msgid "Current"
+msgstr "Jelenlegi"
+
+#: siteorigin-panels.php:262
+#@ siteorigin-panels
+msgid "Original"
+msgstr "Eredeti"
+
+#: siteorigin-panels.php:263
+#@ siteorigin-panels
+msgid "Version restored"
+msgstr "Verzió visszaállítva"
+
+#: siteorigin-panels.php:266
+#@ siteorigin-panels
+msgid "Widget deleted"
+msgstr "Widget törölve"
+
+#: siteorigin-panels.php:267
+#@ siteorigin-panels
+msgid "Widget added"
+msgstr "Widget hozzáadva"
+
+#: siteorigin-panels.php:268
+#@ siteorigin-panels
+msgid "Widget edited"
+msgstr "Widget szerkesztve"
+
+#: siteorigin-panels.php:269
+#@ siteorigin-panels
+msgid "Widget duplicated"
+msgstr "Widget duplikálva"
+
+#: siteorigin-panels.php:270
+#@ siteorigin-panels
+msgid "Widget moved"
+msgstr "Widget áthelyezve"
+
+#: siteorigin-panels.php:273
+#@ siteorigin-panels
+msgid "Row deleted"
+msgstr "Sor törölve"
+
+#: siteorigin-panels.php:274
+#@ siteorigin-panels
+msgid "Row added"
+msgstr "Sor hozzáadva"
+
+#: siteorigin-panels.php:275
+#@ siteorigin-panels
+msgid "Row edited"
+msgstr "Sor szerkesztve"
+
+#: siteorigin-panels.php:276
+#@ siteorigin-panels
+msgid "Row moved"
+msgstr "Sor áthelyezve"
+
+#: siteorigin-panels.php:277
+#@ siteorigin-panels
+msgid "Row duplicated"
+msgstr "Sor duplikálva"
+
+#: siteorigin-panels.php:280
+#@ siteorigin-panels
+msgid "Cell resized"
+msgstr "Cella átméretezve"
+
+#: siteorigin-panels.php:283
+#@ siteorigin-panels
+msgid "Prebuilt layout loaded"
+msgstr "Előre beépített elrendezés betöltve"
+
+#: siteorigin-panels.php:287
+#@ siteorigin-panels
+msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
+msgstr "Biztos vagy benne, hogy felülírod a jelenlegi tartalmat? Ezt nem lehet az időgéppel visszaállítani."
+
+#: siteorigin-panels.php:288
+#@ siteorigin-panels
+msgid "Loading prebuilt layout"
+msgstr "Beépített elrendezés betöltése"
+
+#: siteorigin-panels.php:289
+#@ siteorigin-panels
+msgid "Would you like to copy this editor's existing content to Page Builder?"
+msgstr "Szeretnéd a szerkesztő jelenlegi tartalmát a Page Builder-be másolni?"
+
+#: siteorigin-panels.php:290
+#@ siteorigin-panels
+msgid "Layout Builder Widget"
+msgstr "Page Builder widget"
+
+#: siteorigin-panels.php:291
+#: tpl/js-templates.php:71
+#@ siteorigin-panels
+msgid "Are you sure?"
+msgstr "Biztosan ezt szeretnéd?"
+
+#: siteorigin-panels.php:305
+#@ siteorigin-panels
+msgid "Install the missing widget"
+msgstr "Telepítsd a hiányzó widgetet"
+
+#: siteorigin-panels.php:349
+#@ siteorigin-panels
+msgid "Untitled Widget"
+msgstr "Névtelen widget"
+
+#: siteorigin-panels.php:1032
+#@ siteorigin-panels
+msgid "Edit Home Page"
+msgstr "Kezdőoldal szerkesztése"
+
+#: siteorigin-panels.php:1181
+#, php-format
+#@ siteorigin-panels
+msgid "You need to <a href='%s' target='_blank'>install %s</a> to use the widget <strong>%s</strong>. It's a free plugin available off the official WordPress plugin directory."
+msgstr "You need to <a href='%s' target='_blank'>install %s</a> to use the widget <strong>%s</strong>. It's a free plugin available off the official WordPress plugin directory."
+
+#: siteorigin-panels.php:1186
+#@ default
+msgid "Save and reload this page to start using the widget after you've installed it."
+msgstr ""
+
+#: siteorigin-panels.php:1194
+#, php-format
+#@ siteorigin-panels
+msgid "The widget <strong>%s</strong> is not available. Please try locate and install the missing plugin. Post on the <a href=\"%s\" target=\"_blank\">support forums</a> if you need help."
+msgstr ""
+
+#: siteorigin-panels.php:1261
+#@ siteorigin-panels
+msgid "Support Forum"
+msgstr "Támogatói fórum"
+
+#: siteorigin-panels.php:1262
+#@ siteorigin-panels
+msgid "Newsletter"
+msgstr "Hírlevél"
+
+#: tpl/admin-home-page.php:9
+#@ siteorigin-panels
+msgid "On"
+msgstr "Be"
+
+#: tpl/admin-home-page.php:9
+#@ siteorigin-panels
+msgid "Off"
+msgstr "Ki"
+
+#: tpl/admin-home-page.php:13
+#@ siteorigin-panels
+msgid "Custom Home Page"
+msgstr "Egyedi kezdőoldal"
+
+#: tpl/admin-home-page.php:24
+#, php-format
+#@ siteorigin-panels
+msgid "Home page updated. <a href=\"%s\">View page</a>"
+msgstr "Kezdőoldal frissítve. <a href=\"%s\">Oldal megtekintése</a>"
+
+#: tpl/admin-home-page.php:34
+#@ siteorigin-panels
+msgid "Save Home Page"
+msgstr "Kezdőoldal mentése"
+
+#: tpl/admin-home-page.php:38
+#@ siteorigin-panels
+msgid "This interface requires Javascript"
+msgstr "A felület használatához Javascript szükséges"
+
+#: tpl/help.php:2
+#@ siteorigin-panels
+msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
+msgstr "A SiteOrigin Page Builder segítségével létrehozhatod a kezdő- és más oldalakat, melyeken widgeteket használhatsz."
+
+#: tpl/help.php:3
+#@ siteorigin-panels
+msgid "The page layouts are responsive and fully customizable."
+msgstr "Az oldalak szerkezete reszponzív és teljesen testreszabható."
+
+#: tpl/help.php:8
+#, php-format
+#@ siteorigin-panels
+msgid "Read the <a href='%s' target='_blank'>full documentation</a> on SiteOrigin."
+msgstr "Olvasd el a <a href='%s' target='_blank'>teljes dokumentációt</a> a SiteOrigin oldalán."
+
+#: tpl/help.php:9
+#, php-format
+#@ siteorigin-panels
+msgid "Ask a question on our <a href='%s' target='_blank'>support forum</a> if you need help and sign up to <a href='%s' target='_blank'>our newsletter</a> to stay up to date with future developments."
+msgstr ""
+
+#: tpl/js-templates.php:12
+#@ default
+msgid "Add Widget"
+msgstr "Widget hozzáadása"
+
+#: tpl/js-templates.php:17
+#@ default
+msgid "Add Row"
+msgstr "Sor hozzáadása"
+
+#: tpl/js-templates.php:22
+#@ default
+msgid "Prebuilt"
+msgstr "Beépített"
+
+#: tpl/js-templates.php:27
+#@ siteorigin-panels
+msgid "History"
+msgstr "Időgép"
+
+#: tpl/js-templates.php:31
+#@ siteorigin-panels
+msgid "Live Editor"
+msgstr "Élő szerkesztés"
+
+#: tpl/js-templates.php:34
+#@ siteorigin-panels
+msgid "Switch to Editor"
+msgstr "Váltás a szerkesztőre"
+
+#: tpl/js-templates.php:46
+#, php-format
+#@ siteorigin-panels
+msgid "Add a %s %s or %s to get started. Read our %s if you need help."
+msgstr "A %s %s vagy a %s elemekkel már kezdheted is a szerkesztést. Ha segítségre van szükséged, itt megtalálod: %s"
+
+#: tpl/js-templates.php:47
+#@ siteorigin-panels
+msgid "widget"
+msgstr "widget"
+
+#: tpl/js-templates.php:48
+#@ siteorigin-panels
+msgid "row"
+msgstr "sor"
+
+#: tpl/js-templates.php:49
+#@ siteorigin-panels
+msgid "prebuilt layout"
+msgstr "beépített elrendezés"
+
+#: tpl/js-templates.php:50
+#@ siteorigin-panels
+msgid "starting guide"
+msgstr "használati útmutató"
+
+#: tpl/js-templates.php:69
+#: tpl/js-templates.php:242
+#@ default
+#@ siteorigin-panels
+msgid "Edit Row"
+msgstr "Sor szerkesztése"
+
+#: tpl/js-templates.php:70
+#@ default
+msgid "Duplicate Row"
+msgstr "Sor duplikálása"
+
+#: tpl/js-templates.php:71
+#@ default
+msgid "Delete Row"
+msgstr "Sor törlése"
+
+#: tpl/js-templates.php:99
+#@ siteorigin-panels
+msgid "Edit"
+msgstr "Szerkesztés"
+
+#: tpl/js-templates.php:100
+#: tpl/js-templates.php:217
+#: tpl/js-templates.php:289
+#@ siteorigin-panels
+msgid "Duplicate"
+msgstr "Duplikálás"
+
+#: tpl/js-templates.php:101
+#: tpl/js-templates.php:216
+#: tpl/js-templates.php:288
+#@ siteorigin-panels
+msgid "Delete"
+msgstr "Törlés"
+
+#: tpl/js-templates.php:155
+#: tpl/js-templates.php:220
+#@ siteorigin-panels
+msgid "Done"
+msgstr "Kész"
+
+#: tpl/js-templates.php:169
+#, php-format
+#@ default
+msgid "Add New Widget %s"
+msgstr ""
+
+#: tpl/js-templates.php:173
+#@ siteorigin-panels
+msgid "Search Widgets"
+msgstr "Widgetek keresése"
+
+#: tpl/js-templates.php:185
+#@ siteorigin-panels
+msgid "Close"
+msgstr "Bezár"
+
+#: tpl/js-templates.php:240
+#@ siteorigin-panels
+msgid "Add New Row"
+msgstr "Új sor hozzáadása"
+
+#: tpl/js-templates.php:254
+#@ default
+msgid "Set Row Layout"
+msgstr "Sor elrendezés beállítása"
+
+#: tpl/js-templates.php:257
+#@ default
+msgid "Columns with Ratio"
+msgstr "Oszlopok aránya"
+
+#: tpl/js-templates.php:259
+#@ siteorigin-panels
+msgid "Even"
+msgstr "Egyenlő"
+
+#: tpl/js-templates.php:260
+#@ siteorigin-panels
+msgid "Golden"
+msgstr "Arany"
+
+#: tpl/js-templates.php:261
+#@ siteorigin-panels
+msgid "Halves"
+msgstr "Feles"
+
+#: tpl/js-templates.php:262
+#@ siteorigin-panels
+msgid "Thirds"
+msgstr "Harmados"
+
+#: tpl/js-templates.php:263
+#@ siteorigin-panels
+msgid "Diagon"
+msgstr "Diagon"
+
+#: tpl/js-templates.php:264
+#@ siteorigin-panels
+msgid "Hecton"
+msgstr "Hecton"
+
+#: tpl/js-templates.php:265
+#@ siteorigin-panels
+msgid "Hemidiagon"
+msgstr "Hemidiagon"
+
+#: tpl/js-templates.php:266
+#@ siteorigin-panels
+msgid "Penton"
+msgstr "Penton"
+
+#: tpl/js-templates.php:267
+#@ siteorigin-panels
+msgid "Trion"
+msgstr "Trion"
+
+#: tpl/js-templates.php:268
+#@ siteorigin-panels
+msgid "Quadriagon"
+msgstr "Quadriagon"
+
+#: tpl/js-templates.php:269
+#@ siteorigin-panels
+msgid "Biauron"
+msgstr "Biauron"
+
+#: tpl/js-templates.php:270
+#@ siteorigin-panels
+msgid "Bipenton"
+msgstr "Bipenton"
+
+#: tpl/js-templates.php:273
+#@ siteorigin-panels
+msgid "Left to Right"
+msgstr "Balról jobbra"
+
+#: tpl/js-templates.php:274
+#@ siteorigin-panels
+msgid "Right to Left"
+msgstr "Jobbról balra"
+
+#: tpl/js-templates.php:276
+#@ siteorigin-panels
+msgid "Set"
+msgstr "Beállít"
+
+#: tpl/js-templates.php:294
+#@ siteorigin-panels
+msgid "Insert"
+msgstr "Beilleszt"
+
+#: tpl/js-templates.php:296
+#@ siteorigin-panels
+msgid "Save"
+msgstr "Mentés"
+
+#: tpl/js-templates.php:314
+#@ siteorigin-panels
+msgid "Prebuilt Layouts"
+msgstr "Beépített elrendezések"
+
+#: tpl/js-templates.php:318
+#@ siteorigin-panels
+msgid "Search"
+msgstr "Keresés"
+
+#: tpl/js-templates.php:321
+#@ siteorigin-panels
+msgid "Theme Defined"
+msgstr "Sablon által meghatározott"
+
+#: tpl/js-templates.php:327
+#, php-format
+#@ siteorigin-panels
+msgid "Clone: %s"
+msgstr "Duplikálás: %s"
+
+#: tpl/js-templates.php:357
+#@ siteorigin-panels
+msgid "Page Builder Change History"
+msgstr "Page Builder változások"
+
+#: tpl/js-templates.php:371
+#@ siteorigin-panels
+msgid "Restore Version"
+msgstr "Verzió visszaállítása"
+
+#: tpl/js-templates.php:396
+#@ siteorigin-panels
+msgid "Close Live Editor"
+msgstr "Élő szerkesztő bezárása"
+
+#: tpl/options.php:11
+#@ siteorigin-panels
+msgid "General"
+msgstr "Általános"
+
+#: tpl/options.php:15
+#@ siteorigin-panels
+msgid "Post Types"
+msgstr "Bejegyzés típusok"
+
+#: tpl/options.php:25
+#@ siteorigin-panels
+msgid "Copy Content"
+msgstr "Tartalom másolása"
+
+#: tpl/options.php:26
+#@ siteorigin-panels
+msgid "Copy content from Page Builder into the standard content editor."
+msgstr "A Page Builder-ben létrehozoztt tartalmak másolása a normál szerkesztőbe."
+
+#: tpl/options.php:32
+#@ siteorigin-panels
+msgid "Animations"
+msgstr "Animációk"
+
+#: tpl/options.php:33
+#@ siteorigin-panels
+msgid "Disable animations for improved performance."
+msgstr "Kapcsold ki az animációkat a jobb teljesítmény érdekében."
+
+#: tpl/options.php:39
+#@ siteorigin-panels
+msgid "Bundled Widgets"
+msgstr "Widget csomag"
+
+#: tpl/options.php:40
+#@ siteorigin-panels
+msgid "Include the bundled widgets."
+msgstr "További hasznos widgetek telepítése."
+
+#: tpl/options.php:48
+#@ siteorigin-panels
+msgid "Display"
+msgstr "Megjelenés"
+
+#: tpl/options.php:57
+#@ siteorigin-panels
+msgid "Responsive Layout"
+msgstr "Reszponzív elrendezés"
+
+#: tpl/options.php:58
+#@ siteorigin-panels
+msgid "Should the layout collapse for mobile devices."
+msgstr "Ha szeretnéd, hogy az elrendezés alkalmazkodjon a mobil kijelzőkhöz."
+
+#: tpl/options.php:64
+#@ siteorigin-panels
+msgid "Mobile Width"
+msgstr "Mobil szélesség"
+
+#: tpl/options.php:70
+#@ siteorigin-panels
+msgid "Row Bottom Margin"
+msgstr "Sor alsó margója"
+
+#: tpl/options.php:76
+#@ siteorigin-panels
+msgid "Cell Side Margins"
+msgstr "Cellák oldalsó margója"
+
+#: tpl/options.php:82
+#@ siteorigin-panels
+msgid "Inline CSS"
+msgstr "Inline CSS"
+
+#: tpl/options.php:93
+#@ siteorigin-panels
+msgid "Save Settings"
+msgstr "Beállítások mentése"
+
+#: video/jplayer/skins/premium/gui.php:3
+#: video/jplayer/skins/siteorigin/gui.php:3
+#@ focus
+msgid "play"
+msgstr "lejátszás"
+
+#: video/jplayer/skins/premium/gui.php:4
+#: video/jplayer/skins/siteorigin/gui.php:4
+#@ focus
+msgid "pause"
+msgstr "pillanat állj"
+
+#: video/jplayer/skins/premium/gui.php:5
+#: video/jplayer/skins/siteorigin/gui.php:5
+#@ focus
+msgid "stop"
+msgstr "megállítás"
+
+#: video/jplayer/skins/premium/gui.php:7
+#: video/jplayer/skins/siteorigin/gui.php:7
+#@ focus
+msgid "full screen"
+msgstr "teljes képernyő"
+
+#: video/jplayer/skins/premium/gui.php:8
+#: video/jplayer/skins/siteorigin/gui.php:8
+#@ focus
+msgid "restore screen"
+msgstr "kijelző visszaállítása"
+
+#: video/jplayer/skins/premium/gui.php:10
+#@ focus
+msgid "mute"
+msgstr "némítás"
+
+#: video/jplayer/skins/premium/gui.php:11
+#@ focus
+msgid "unmute"
+msgstr "némítás kikapcsolása"
+
+#: widgets/basic.php:12
+#@ siteorigin-panels
+msgid "Layout Builder"
+msgstr "Page Builder szerkesztő"
+
+#: widgets/basic.php:14
+#@ siteorigin-panels
+msgid "A full SiteOrigin Page Builder layout as a widget."
+msgstr "Teljes értékű Page Builder widgetként."
+
+#: widgets/basic.php:51
+#@ siteorigin-panels
+msgid "Open Builder"
+msgstr "Szerkesztő megnyitása"
+
+#: widgets/basic.php:75
+#@ siteorigin-panels
+msgid "Post Content"
+msgstr "Bejegyzés tartalom"
+
+#: widgets/basic.php:77
+#@ siteorigin-panels
+msgid "Displays some form of post content form the current post."
+msgstr "Az aktuális bejegyzés tartalmi elemeinek a megjelenítése."
+
+#: widgets/basic.php:123
+#: widgets/basic.php:381
+#: widgets/widgets.php:598
+#: widgets/widgets.php:769
+#@ siteorigin-panels
+msgid "None"
+msgstr "Egyik sem"
+
+#: widgets/basic.php:124
+#: widgets/basic.php:346
+#: widgets/widgets/call-to-action/call-to-action.php:15
+#: widgets/widgets/list/list.php:15
+#: widgets/widgets/price-box/price-box.php:15
+#@ siteorigin-panels
+msgid "Title"
+msgstr "Cím"
+
+#: widgets/basic.php:125
+#@ siteorigin-panels
+msgid "Featured Image"
+msgstr "Kiemelt kép"
+
+#: widgets/basic.php:130
+#@ siteorigin-panels
+msgid "Display Content"
+msgstr "Tartalom megjelenítése"
+
+#: widgets/basic.php:150
+#@ siteorigin-panels
+msgid "Post Loop"
+msgstr "Bejegyzés loop"
+
+#: widgets/basic.php:152
+#@ siteorigin-panels
+msgid "Displays a post loop."
+msgstr "Egy bejegyzés loop megjelenítése"
+
+#: widgets/basic.php:335
+#@ siteorigin-panels
+msgid "Your theme doesn't have any post loops."
+msgstr "A használt sablon nem rendelkezik bejegyzés loop-pal."
+
+#: widgets/basic.php:350
+#@ siteorigin-panels
+msgid "Template"
+msgstr "Sablon"
+
+#: widgets/basic.php:365
+#: widgets/widgets.php:584
+#@ siteorigin-panels
+msgid "Post Type"
+msgstr "Bejegyzés típus"
+
+#: widgets/basic.php:374
+#: widgets/widgets.php:591
+#@ siteorigin-panels
+msgid "Posts Per Page"
+msgstr "Bejegyzés száma oldalanként"
+
+#: widgets/basic.php:379
+#: widgets/widgets.php:596
+#@ siteorigin-panels
+msgid "Order By"
+msgstr "Sorrend alapja"
+
+#: widgets/basic.php:382
+#: widgets/widgets.php:599
+#@ siteorigin-panels
+msgid "Post ID"
+msgstr "Bejegyzés azonosító"
+
+#: widgets/basic.php:383
+#: widgets/widgets.php:600
+#@ siteorigin-panels
+msgid "Author"
+msgstr "Szerző"
+
+#: widgets/basic.php:384
+#: widgets/basic.php:385
+#: widgets/widgets/testimonial/testimonial.php:15
+#: widgets/widgets.php:601
+#: widgets/widgets.php:602
+#@ siteorigin-panels
+msgid "Name"
+msgstr "Név"
+
+#: widgets/basic.php:386
+#: widgets/widgets.php:603
+#@ siteorigin-panels
+msgid "Date"
+msgstr "Dátum"
+
+#: widgets/basic.php:387
+#: widgets/widgets.php:604
+#@ siteorigin-panels
+msgid "Modified"
+msgstr "Módosítva"
+
+#: widgets/basic.php:388
+#: widgets/widgets.php:605
+#@ siteorigin-panels
+msgid "Parent"
+msgstr "Szülő"
+
+#: widgets/basic.php:389
+#: widgets/widgets.php:606
+#@ siteorigin-panels
+msgid "Random"
+msgstr "Véletlen"
+
+#: widgets/basic.php:390
+#: widgets/widgets.php:607
+#@ siteorigin-panels
+msgid "Comment Count"
+msgstr "Hozzászólás száma"
+
+#: widgets/basic.php:391
+#: widgets/basic.php:392
+#: widgets/widgets.php:608
+#@ siteorigin-panels
+msgid "Menu Order"
+msgstr "Menü sorrend"
+
+#: widgets/basic.php:393
+#@ siteorigin-panels
+msgid "Post In Order"
+msgstr ""
+
+#: widgets/basic.php:398
+#: widgets/widgets.php:614
+#@ siteorigin-panels
+msgid "Order"
+msgstr "Sorrend iránya"
+
+#: widgets/basic.php:400
+#: widgets/widgets.php:617
+#@ siteorigin-panels
+msgid "Descending"
+msgstr "Csökkenő"
+
+#: widgets/basic.php:401
+#: widgets/widgets.php:616
+#@ siteorigin-panels
+msgid "Ascending"
+msgstr "Növekvő"
+
+#: widgets/basic.php:406
+#: widgets/widgets.php:623
+#@ siteorigin-panels
+msgid "Sticky Posts"
+msgstr "Ragadós bejegyzések"
+
+#: widgets/basic.php:408
+#: widgets/widgets.php:625
+#: widgets/widgets.php:743
+#@ siteorigin-panels
+msgid "Default"
+msgstr "Alapértelemezett"
+
+#: widgets/basic.php:409
+#: widgets/widgets.php:626
+#@ siteorigin-panels
+msgid "Ignore Sticky"
+msgstr "Ragadós bejegyzés elvetése"
+
+#: widgets/basic.php:410
+#: widgets/widgets.php:627
+#@ siteorigin-panels
+msgid "Exclude Sticky"
+msgstr "Ragadós bejegyzés kihagyása"
+
+#: widgets/basic.php:411
+#: widgets/widgets.php:628
+#@ siteorigin-panels
+msgid "Only Sticky"
+msgstr "Csak ragadós bejegyzés"
+
+#: widgets/basic.php:416
+#@ siteorigin-panels
+msgid "More Link "
+msgstr "Tovább link "
+
+#: widgets/basic.php:418
+#@ siteorigin-panels
+msgid "If the template supports it, cut posts and display the more link."
+msgstr "Amennyiben a sablon megengedi, a bejegyzést lerövidíti és a tovább linket megjeleníti."
+
+#: widgets/basic.php:422
+#@ siteorigin-panels
+msgid "Additional "
+msgstr "További "
+
+#: widgets/basic.php:424
+#: widgets/widgets.php:635
+#, php-format
+#@ siteorigin-panels
+msgid "Additional query arguments. See <a href=\"%s\" target=\"_blank\">query_posts</a>."
+msgstr ""
+
+#: widgets/widgets/animated-image/animated-image.php:6
+#@ siteorigin-panels
+msgid "Animated Image (PB)"
+msgstr "Animált kép (PB)"
+
+#: widgets/widgets/animated-image/animated-image.php:8
+#@ siteorigin-panels
+msgid "An image that animates in when it enters the screen."
+msgstr "Egy kép animált megjelenítése, amikor a látótérbe kerül."
+
+#: widgets/widgets/animated-image/animated-image.php:15
+#: widgets/widgets.php:821
+#@ siteorigin-panels
+msgid "Image URL"
+msgstr "Kép URL"
+
+#: widgets/widgets/animated-image/animated-image.php:19
+#@ siteorigin-panels
+msgid "Animation"
+msgstr "Animáció"
+
+#: widgets/widgets/animated-image/animated-image.php:21
+#@ siteorigin-panels
+msgid "Fade In"
+msgstr "Előtűnés"
+
+#: widgets/widgets/animated-image/animated-image.php:22
+#@ siteorigin-panels
+msgid "Slide Up"
+msgstr "Csúszás fel"
+
+#: widgets/widgets/animated-image/animated-image.php:23
+#@ siteorigin-panels
+msgid "Slide Down"
+msgstr "Csúszás le"
+
+#: widgets/widgets/animated-image/animated-image.php:24
+#@ siteorigin-panels
+msgid "Slide Left"
+msgstr "Csúszás balra"
+
+#: widgets/widgets/animated-image/animated-image.php:25
+#@ siteorigin-panels
+msgid "Slide Right"
+msgstr "Csúszás jobbra"
+
+#: widgets/widgets/button/button.php:6
+#@ siteorigin-panels
+msgid "Button (PB)"
+msgstr "Gomb (PB)"
+
+#: widgets/widgets/button/button.php:15
+#: widgets/widgets/list/list.php:19
+#: widgets/widgets/testimonial/testimonial.php:27
+#@ siteorigin-panels
+msgid "Text"
+msgstr "Szöveg"
+
+#: widgets/widgets/button/button.php:19
+#: widgets/widgets.php:825
+#@ siteorigin-panels
+msgid "Destination URL"
+msgstr "Cél URL"
+
+#: widgets/widgets/button/button.php:23
+#: widgets/widgets/call-to-action/call-to-action.php:31
+#: widgets/widgets/price-box/price-box.php:44
+#: widgets/widgets/testimonial/testimonial.php:35
+#@ siteorigin-panels
+msgid "Open In New Window"
+msgstr "Megnyitás új lapon"
+
+#: widgets/widgets/button/button.php:27
+#@ siteorigin-panels
+msgid "Button Alignment"
+msgstr "Gomb illesztése"
+
+#: widgets/widgets/button/button.php:29
+#@ siteorigin-panels
+msgid "Left"
+msgstr "Balra"
+
+#: widgets/widgets/button/button.php:30
+#@ siteorigin-panels
+msgid "Right"
+msgstr "Jobbra"
+
+#: widgets/widgets/button/button.php:31
+#@ siteorigin-panels
+msgid "Center"
+msgstr "Középre"
+
+#: widgets/widgets/button/button.php:32
+#@ siteorigin-panels
+msgid "Justify"
+msgstr "Sorkizárt"
+
+#: widgets/widgets/call-to-action/call-to-action.php:6
+#@ siteorigin-panels
+msgid "Call To Action (PB)"
+msgstr "Cselekedetre felszólítás (PB)"
+
+#: widgets/widgets/call-to-action/call-to-action.php:8
+#@ siteorigin-panels
+msgid "A Call to Action block"
+msgstr "Egy cselekedetre felszólító blokk"
+
+#: widgets/widgets/call-to-action/call-to-action.php:19
+#@ siteorigin-panels
+msgid "Sub Title"
+msgstr "Alcím"
+
+#: widgets/widgets/call-to-action/call-to-action.php:23
+#: widgets/widgets/price-box/price-box.php:36
+#@ siteorigin-panels
+msgid "Button Text"
+msgstr "Gomb szöveg"
+
+#: widgets/widgets/call-to-action/call-to-action.php:27
+#: widgets/widgets/price-box/price-box.php:40
+#@ siteorigin-panels
+msgid "Button URL"
+msgstr "Gomb URL"
+
+#: widgets/widgets/call-to-action/call-to-action.php:37
+#: widgets/widgets/price-box/price-box.php:49
+#@ siteorigin-panels
+msgid "Button"
+msgstr "Gomb"
+
+#: widgets/widgets/list/list.php:6
+#@ siteorigin-panels
+msgid "List (PB)"
+msgstr "Lista (PB)"
+
+#: widgets/widgets/list/list.php:8
+#: widgets/widgets/price-box/price-box.php:8
+#: widgets/widgets/testimonial/testimonial.php:8
+#@ siteorigin-panels
+msgid "Displays a bullet list of elements"
+msgstr "Egy lista megjelenítése"
+
+#: widgets/widgets/list/list.php:20
+#: widgets/widgets/price-box/price-box.php:32
+#@ siteorigin-panels
+msgid "Start each new point with an asterisk (*)"
+msgstr "Minden új listaelemet csillaggal (*) kell kezdeni"
+
+#: widgets/widgets/price-box/price-box.php:6
+#@ siteorigin-panels
+msgid "Price Box (PB)"
+msgstr "Árak (PB)"
+
+#: widgets/widgets/price-box/price-box.php:19
+#@ siteorigin-panels
+msgid "Price"
+msgstr "Ár"
+
+#: widgets/widgets/price-box/price-box.php:23
+#@ siteorigin-panels
+msgid "Per"
+msgstr "Per"
+
+#: widgets/widgets/price-box/price-box.php:27
+#@ siteorigin-panels
+msgid "Information Text"
+msgstr "Információs szöveg"
+
+#: widgets/widgets/price-box/price-box.php:31
+#@ siteorigin-panels
+msgid "Features Text"
+msgstr "Jellemzők leírása"
+
+#: widgets/widgets/price-box/price-box.php:50
+#@ siteorigin-panels
+msgid "Feature List"
+msgstr "Jellemzők felsorolása"
+
+#: widgets/widgets/testimonial/testimonial.php:6
+#@ siteorigin-panels
+msgid "Testimonial (PB)"
+msgstr "Vélemények (PB)"
+
+#: widgets/widgets/testimonial/testimonial.php:19
+#@ siteorigin-panels
+msgid "Location"
+msgstr "Hely"
+
+#: widgets/widgets/testimonial/testimonial.php:23
+#@ siteorigin-panels
+msgid "Image"
+msgstr "Kép"
+
+#: widgets/widgets/testimonial/testimonial.php:31
+#@ siteorigin-panels
+msgid "URL"
+msgstr "URL"
+
+#: widgets/widgets.php:204
+#@ siteorigin-panels
+msgid "Style"
+msgstr "Stílus"
+
+#: widgets/widgets.php:228
+#, php-format
+#@ siteorigin-panels
+msgid "%s Style"
+msgstr "%s stílusa"
+
+#: widgets/widgets.php:634
+#@ siteorigin-panels
+msgid "Additional Arguments"
+msgstr ""
+
+#: widgets/widgets.php:691
+#@ siteorigin-panels
+msgid "Gallery (PB)"
+msgstr "Galéria (PB)"
+
+#: widgets/widgets.php:693
+#@ siteorigin-panels
+msgid "Displays a gallery."
+msgstr "Galéria megjelenítése."
+
+#: widgets/widgets.php:732
+#@ siteorigin-panels
+msgid "Gallery Images"
+msgstr "Galéria képek"
+
+#: widgets/widgets.php:733
+#@ siteorigin-panels
+msgid "edit gallery"
+msgstr "galéria szerkesztése"
+
+#: widgets/widgets.php:737
+#@ default
+msgid "Comma separated attachment IDs. Defaults to all current page's attachments."
+msgstr ""
+
+#: widgets/widgets.php:741
+#@ siteorigin-panels
+msgid "Image Size"
+msgstr "Kép méret"
+
+#: widgets/widgets.php:744
+#@ siteorigin-panels
+msgid "Large"
+msgstr "Nagy"
+
+#: widgets/widgets.php:745
+#@ siteorigin-panels
+msgid "Medium"
+msgstr "Közepes"
+
+#: widgets/widgets.php:746
+#@ siteorigin-panels
+msgid "Thumbnail"
+msgstr "Kiskép"
+
+#: widgets/widgets.php:747
+#@ siteorigin-panels
+msgid "Full"
+msgstr "Teljes méret"
+
+#: widgets/widgets.php:755
+#@ siteorigin-panels
+msgid "Gallery Type"
+msgstr "Galéria típus"
+
+#: widgets/widgets.php:760
+#@ siteorigin-panels
+msgid "Columns"
+msgstr "Oszlopok"
+
+#: widgets/widgets.php:765
+#@ siteorigin-panels
+msgid "Link To"
+msgstr "Hivatkozás"
+
+#: widgets/widgets.php:767
+#@ siteorigin-panels
+msgid "Attachment Page"
+msgstr "Csatolmány oldal"
+
+#: widgets/widgets.php:768
+#@ siteorigin-panels
+msgid "File"
+msgstr "Fájl"
+
+#: widgets/widgets.php:786
+#@ siteorigin-panels
+msgid "Image (PB)"
+msgstr "Kép (PB)"
+
+#: widgets/widgets.php:788
+#@ siteorigin-panels
+msgid "Displays a simple image."
+msgstr "Egyszerű kép megjelenítése."
+
+#: widgets/widgets.php:839
+#@ siteorigin-panels
+msgid "Embedded Video (PB)"
+msgstr "Beágyazott videó (PB)"
+
+#: widgets/widgets.php:841
+#@ siteorigin-panels
+msgid "Embeds a video."
+msgstr "Videó beágyazása."
+
+#: widgets/widgets.php:879
+#@ siteorigin-panels
+msgid "Video"
+msgstr "Videó"
+
+#: widgets/widgets.php:895
+#@ siteorigin-panels
+msgid "Self Hosted Video (PB)"
+msgstr "Saját feltöltött videó (PB)"
+
+#: widgets/widgets.php:897
+#@ siteorigin-panels
+msgid "A self hosted video player."
+msgstr "Saját feltöltött videó lejátszó."
+
+#: widgets/widgets.php:972
+#@ siteorigin-panels
+msgid "Video URL"
+msgstr "Videó URL"
+
+#: widgets/widgets.php:976
+#@ siteorigin-panels
+msgid "Poster URL"
+msgstr "Poszter URL"
+
+#: widgets/widgets.php:978
+#@ siteorigin-panels
+msgid "An image that displays before the video starts playing."
+msgstr "Egy kép, ami a videó lejátszása előtt jelenik meg."
+
+#: widgets/widgets.php:981
+#@ siteorigin-panels
+msgid "Skin"
+msgstr "Stílus"
+
+#: widgets/widgets.php:983
+#@ siteorigin-panels
+msgid "SiteOrigin"
+msgstr "SiteOrigin"
+
+#: widgets/widgets.php:984
+#@ siteorigin-panels
+msgid "Premium Pixels"
+msgstr "Premium Pixels"
+
+#: widgets/widgets.php:988
+#@ siteorigin-panels
+msgid "Aspect Ratio"
+msgstr "Méretarány"
+
+#: widgets/widgets.php:990
+#@ siteorigin-panels
+msgid "1.777 is HD standard."
+msgstr "1.777 a HD alapértelmezett."
+
+#: widgets/widgets.php:995
+#@ siteorigin-panels
+msgid "Auto Play Video"
+msgstr "Videó automatikus elindítása"
+

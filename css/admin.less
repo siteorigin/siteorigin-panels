@@ -1526,6 +1526,13 @@
 	}
 }
 
+/* Display the dialog with a proper z-index in the customizer */
+.wp-customizer .so-panels-dialog {
+	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
+		z-index: 500001;
+	}
+}
+
 .so-panels-live-editor {
 	> div {
 		position: fixed;
@@ -1856,5 +1863,15 @@
 	#panels-view-as-page {
 		display: inline-block;
 		margin-left: 50px;
+	}
+}
+
+.siteorigin-page-builder-widget {
+	.siteorigin-panels-display-builder {
+		display: inline-block !important;
+	}
+
+	.siteorigin-panels-no-builder {
+		display: none !important;
 	}
 }
