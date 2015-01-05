@@ -1,11 +1,11 @@
 <div class="jp-gui">
 	<div class="jp-controls">
-		<a href="#" class="jp-play" tabindex="1"><?php esc_html_e('play', 'focus') ?></a>
-		<a href="#" class="jp-pause" tabindex="1"><?php esc_html_e('pause', 'focus') ?></a>
-		<a href="#" class="jp-stop" tabindex="1"><?php esc_html_e('stop', 'focus') ?></a>
+		<a href="#" class="jp-play" tabindex="1"><?php esc_html_e('play', 'siteorigin-panels') ?></a>
+		<a href="#" class="jp-pause" tabindex="1"><?php esc_html_e('pause', 'siteorigin-panels') ?></a>
+		<a href="#" class="jp-stop" tabindex="1"><?php esc_html_e('stop', 'siteorigin-panels') ?></a>
 
-		<a href="#" class="jp-full-screen" tabindex="1"><?php esc_html_e('full screen', 'focus') ?></a>
-		<a href="#" class="jp-restore-screen" tabindex="1"><?php esc_html_e('restore screen', 'focus') ?></a>
+		<a href="#" class="jp-full-screen" tabindex="1"><?php esc_html_e('full screen', 'siteorigin-panels') ?></a>
+		<a href="#" class="jp-restore-screen" tabindex="1"><?php esc_html_e('restore screen', 'siteorigin-panels') ?></a>
 	</div>
 
 	<div class="sep jp-controls-sep"></div>
