@@ -52,7 +52,12 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 				<span class="siteorigin-panels-no-builder"><?php _e('The layout widget does not work in the Customizer interface. Please use it in the widget interface or Page Builder.', 'siteorigin-panels') ?></span>
 				<a href="#" class="button-secondary siteorigin-panels-display-builder" style="display: none"><?php _e('Open Builder', 'siteorigin-panels') ?></a>
 			</p>
-			<input type="hidden" data-panels-filter="json_parse" value="<?php echo esc_attr( $instance['panels_data'] ) ?>" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" />
+
+			<input type="hidden" data-panels-filter="json_parse" value="" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" id="<?php echo $this->get_field_id('panels_data') ?>" />
+			<script type="text/javascript">
+				document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = "<?php echo addslashes( $instance['panels_data'] ) ?>";
+			</script>
+
 			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />
 		</div>
 		<script type="text/javascript">
