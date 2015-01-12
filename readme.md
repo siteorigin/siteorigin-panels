@@ -10,4 +10,5 @@ We handle support on the [SiteOrigin support forums](https://siteorigin.com/thre
 
 ## Documentation
 
-We have usage documentation on SiteOrigin. We're working on developer documentation and will release that here on Github.
+* [User Documentation](https://siteorigin.com/page-builder/documentation/).
+* [Developer Documentation](https://siteorigin.com/docs/page-builder/).
