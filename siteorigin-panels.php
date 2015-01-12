@@ -1124,37 +1124,6 @@ function siteorigin_panels_enqueue_styles(){
 add_action('wp_enqueue_scripts', 'siteorigin_panels_enqueue_styles', 1);
 
 /**
- * Add a filter to import panels_data meta key. This fixes serialized PHP.
- */
-function siteorigin_panels_wp_import_post_meta($post_meta){
-	foreach($post_meta as $i => $meta) {
-		if($meta['key'] == 'panels_data') {
-			$value = $meta['value'];
-			$value = preg_replace("/[\r\n]/", "<<<br>>>", $value);
-			$value = preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $value);
-			$value = unserialize($value);
-			$value = array_map('siteorigin_panels_wp_import_post_meta_map', $value);
-
-			$post_meta[$i]['value'] = $value;
-		}
-	}
-
-	return $post_meta;
-}
-add_filter('wp_import_post_meta', 'siteorigin_panels_wp_import_post_meta');
-
-/**
- * A callback that replaces temporary break tag with actual line breaks.
- *
- * @param $val
- * @return array|mixed
- */
-function siteorigin_panels_wp_import_post_meta_map($val) {
-	if(is_string($val)) return str_replace('<<<br>>>', "\n", $val);
-	else return array_map('siteorigin_panels_wp_import_post_meta_map', $val);
-}
-
-/**
  * Render a widget form with all the Page Builder specific fields
  *
  * @param string $widget The class of the widget
