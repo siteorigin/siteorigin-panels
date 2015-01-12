@@ -195,7 +195,7 @@
 
                 thisView.selectedEntry = entry;
 
-                if( thisView.selectedEntry.cid != thisView.currentEntry.cid ) {
+                if( thisView.selectedEntry.cid !== thisView.currentEntry.cid ) {
                     thisView.$('.so-buttons .so-restore').removeClass('disabled');
                 }
                 else {

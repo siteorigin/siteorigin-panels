@@ -24,7 +24,9 @@
          * @param type
          */
         render: function( stylesType ){
-            if( typeof stylesType == 'undefined' ) return false;
+            if( typeof stylesType === 'undefined' ) {
+                return false;
+            }
 
             this.$el.addClass('so-visual-styles');
 
@@ -78,7 +80,7 @@
             });
 
             // Set up the color fields
-            if(typeof $.fn.wpColorPicker != 'undefined') {
+            if(typeof $.fn.wpColorPicker !== 'undefined') {
                 this.$('.so-wp-color-field').wpColorPicker();
             }
 
@@ -89,7 +91,7 @@
 
                 $s.find('.so-image-selector').click( function(){
 
-                    if( frame == null ) {
+                    if( frame === null ) {
                         // Create the media frame.
                         frame = wp.media({
                             // Set the title of the modal.
@@ -131,7 +133,7 @@
                 // Handle clicking on remove
                 $s.find('.remove-image').click(function(){
                     $s.find( '.current-image').css('background-image', 'none');
-                    $s.find('input').val( '' )
+                    $s.find('input').val( '' );
                 });
             } );
 
@@ -144,10 +146,10 @@
                 var hidden = $$.find('input[type="hidden"]');
 
                 // Load the value from the hidden field
-                if( hidden.val() != '' ) {
+                if( hidden.val() !== '' ) {
                     var re = /([0-9\.,]+)(.*)/;
                     var match = re.exec( hidden.val() );
-                    if( match != null && typeof match[1] != 'undefined' && typeof match[2] != 'undefined' ) {
+                    if( match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined' ) {
                         text.val( match[1] );
                         unit.val( match[2] );
                     }
