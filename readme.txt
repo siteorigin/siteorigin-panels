@@ -91,6 +91,13 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.0.4 =
+* Changed how data is json encoded to prevent malformed Page Builder data.
+* Fixed import/export.
+* Added layout widget notification (doesn't work in customizer).
+* Fixed translation domains.
+* Additional hooks and filters.
+
 = 2.0.3 =
 * Fixed issue with double calling sidebar_admin_setup that was breaking some widgets.
 * Fixed fetching content from TinyMCE in text mode.
