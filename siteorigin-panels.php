@@ -1161,7 +1161,7 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 				'<div class="panels-missing-widget-form"><p>' .
 				sprintf(
 					__('The widget <strong>%s</strong> is not available. Please try locate and install the missing plugin. Post on the <a href="%s" target="_blank">support forums</a> if you need help.', 'siteorigin-panels'),
-					$widget,
+					esc_html($widget),
 					'http://siteorigin.com/thread/'
 				).
 				'</p></div>';
