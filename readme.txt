@@ -54,6 +54,8 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 Page Builder is actively developed with new features and exciting enhancements all the time. Keep track on the [Page Builder GitHub repository](https://github.com/siteorigin/siteorigin-panels).
 
+Read the [Page Builder developer docs](https://siteorigin.com/docs/page-builder/) if you'd like to develop for Page Builder.
+
 == Installation ==
 
 1. Upload and install Page Builder in the same way you'd install any other plugin.
@@ -88,6 +90,13 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.0.4 =
+* Changed how data is json encoded to prevent malformed Page Builder data.
+* Fixed import/export.
+* Added layout widget notification (doesn't work in customizer).
+* Fixed translation domains.
+* Additional hooks and filters.
 
 = 2.0.3 =
 * Fixed issue with double calling sidebar_admin_setup that was breaking some widgets.

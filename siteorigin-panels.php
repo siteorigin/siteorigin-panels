@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.0.3
+Version: 2.0.4
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.0.3');
+define('SITEORIGIN_PANELS_VERSION', '2.0.4');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
@@ -324,8 +324,8 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		}
 
 		// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
-		do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 		if( $screen->base != 'widgets' ) {
+			do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 			do_action( 'sidebar_admin_setup' );
 		}
 	}
@@ -981,7 +981,7 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'panel', 'widget' ));
+	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'panel', 'widget' ), $widget, $instance);
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
@@ -1122,37 +1122,6 @@ function siteorigin_panels_enqueue_styles(){
 	wp_register_style('siteorigin-panels-front', plugin_dir_url(__FILE__) . 'css/front.css', array(), SITEORIGIN_PANELS_VERSION );
 }
 add_action('wp_enqueue_scripts', 'siteorigin_panels_enqueue_styles', 1);
-
-/**
- * Add a filter to import panels_data meta key. This fixes serialized PHP.
- */
-function siteorigin_panels_wp_import_post_meta($post_meta){
-	foreach($post_meta as $i => $meta) {
-		if($meta['key'] == 'panels_data') {
-			$value = $meta['value'];
-			$value = preg_replace("/[\r\n]/", "<<<br>>>", $value);
-			$value = preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $value);
-			$value = unserialize($value);
-			$value = array_map('siteorigin_panels_wp_import_post_meta_map', $value);
-
-			$post_meta[$i]['value'] = $value;
-		}
-	}
-
-	return $post_meta;
-}
-add_filter('wp_import_post_meta', 'siteorigin_panels_wp_import_post_meta');
-
-/**
- * A callback that replaces temporary break tag with actual line breaks.
- *
- * @param $val
- * @return array|mixed
- */
-function siteorigin_panels_wp_import_post_meta_map($val) {
-	if(is_string($val)) return str_replace('<<<br>>>', "\n", $val);
-	else return array_map('siteorigin_panels_wp_import_post_meta_map', $val);
-}
 
 /**
  * Render a widget form with all the Page Builder specific fields
