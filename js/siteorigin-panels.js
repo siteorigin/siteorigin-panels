@@ -1717,7 +1717,7 @@ String.prototype.panelsProcessTemplate = function(){
 
                 // We're going to create a copy of page builder content into the post content
                 $.post(
-                    ajaxurl,
+                    panelsOptions.ajaxurl,
                     {
                         action: 'so_panels_builder_content',
                         panels_data: JSON.stringify( this.model.getPanelsData() ),
@@ -2570,7 +2570,7 @@ String.prototype.panelsProcessTemplate = function(){
             };
 
             $.post(
-                ajaxurl,
+                panelsOptions.ajaxurl,
                 data,
                 function(result){
                     // Add in the CID of the widget model
@@ -2718,7 +2718,7 @@ String.prototype.panelsProcessTemplate = function(){
                 this.$('.so-content').addClass('so-panels-loading');
 
                 $.post(
-                    ajaxurl,
+                    panelsOptions.ajaxurl,
                     {
                         action: 'so_panels_prebuilt_layouts',
                         type: tab
@@ -2797,7 +2797,7 @@ String.prototype.panelsProcessTemplate = function(){
             this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
             $.post(
-                ajaxurl,
+                panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_get_prebuilt_layout',
                     type: type,

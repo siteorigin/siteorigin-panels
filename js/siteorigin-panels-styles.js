@@ -33,7 +33,7 @@
             // Load the form
             var thisView = this;
             $.post(
-                ajaxurl,
+                panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_style_form',
                     type: stylesType,

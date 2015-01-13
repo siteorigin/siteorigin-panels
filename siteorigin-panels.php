@@ -230,6 +230,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		$widgets = siteorigin_panels_get_widgets();
 
 		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
+			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 				array(

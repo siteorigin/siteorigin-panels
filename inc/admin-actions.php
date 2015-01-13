@@ -24,8 +24,10 @@ add_action('wp_ajax_so_panels_builder_content', 'siteorigin_panels_ajax_builder_
  * Display a widget form with the provided data
  */
 function siteorigin_panels_ajax_widget_form(){
+	if( empty( $_REQUEST['widget'] ) ) exit();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+
 	$request = array_map('stripslashes_deep', $_REQUEST);
-	if( empty( $request['widget'] ) ) exit();
 
 	$widget = $request['widget'];
 	$instance = !empty($request['instance']) ? json_decode( $request['instance'], true ) : array();
@@ -43,6 +45,7 @@ add_action('wp_ajax_so_panels_widget_form', 'siteorigin_panels_ajax_widget_form'
  */
 function siteorigin_panels_ajax_prebuilt_layouts(){
 	if( empty($_REQUEST['type']) ) exit();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
 
 	// Get any layouts that the current user could edit.
 	header('content-type: application/json');
@@ -137,6 +140,7 @@ add_action('wp_ajax_so_panels_prebuilt_layouts', 'siteorigin_panels_ajax_prebuil
 function siteorigin_panels_ajax_get_prebuilt_layout(){
 	if( empty( $_REQUEST['type'] ) ) exit();
 	if( empty( $_REQUEST['lid'] ) ) exit();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
 
 	header('content-type: application/json');
 
@@ -170,6 +174,8 @@ add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_
  * @TODO check if this is still being used
  */
 function siteorigin_panels_ajax_action_prebuilt(){
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+
 	// Get any layouts that the current user could edit.
 	$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
