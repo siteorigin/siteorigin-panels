@@ -1011,7 +1011,7 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 	}
 	else {
 		// This gives themes a chance to display some sort of placeholder for missing widgets
-		echo apply_filters('siteorigin_panels_missing_widget', '', $widget, $args , $instance);
+		echo apply_filters('siteorigin_panels_missing_widget', $args['before_widget'] . $args['after_widget'], $widget, $args , $instance);
 	}
 }
 
