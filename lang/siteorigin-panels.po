@@ -1,14 +1,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Page Builder by SiteOrigin\n"
-"POT-Creation-Date: 2014-12-14 14:24+0200\n"
-"PO-Revision-Date: 2014-12-14 14:24+0200\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2015-01-23 23:42+0200\n"
+"PO-Revision-Date: 2015-01-23 23:42+0200\n"
+"Last-Translator: Greg Priday <greg@siteorigin.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.7.3\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -16,23 +16,23 @@ msgstr ""
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: inc/admin-actions.php:55
+#: inc/admin-actions.php:62
 msgid "No description"
 msgstr ""
 
-#: inc/admin-actions.php:64
+#: inc/admin-actions.php:71
 msgid "Your theme doesn't have any prebuilt layouts."
 msgstr ""
 
-#: inc/admin-actions.php:65
+#: inc/admin-actions.php:72
 msgid "You can still clone existing pages though."
 msgstr ""
 
-#: inc/admin-actions.php:98
+#: inc/admin-actions.php:105
 msgid "Clone"
 msgstr ""
 
-#: inc/admin-actions.php:115
+#: inc/admin-actions.php:122
 #, php-format
 msgid "There are no %s with Page Builder content to clone."
 msgstr ""
@@ -316,7 +316,7 @@ msgstr ""
 msgid "Home Page"
 msgstr ""
 
-#: siteorigin-panels.php:91 siteorigin-panels.php:419 tpl/js-templates.php:146
+#: siteorigin-panels.php:91 siteorigin-panels.php:422 tpl/js-templates.php:146
 msgid "Page Builder"
 msgstr ""
 
@@ -324,152 +324,152 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: siteorigin-panels.php:236
+#: siteorigin-panels.php:237
 msgid "All Widgets"
 msgstr ""
 
-#: siteorigin-panels.php:244
+#: siteorigin-panels.php:245
 msgid "Missing Widget"
 msgstr ""
 
-#: siteorigin-panels.php:245
+#: siteorigin-panels.php:246
 msgid "Page Builder doesn't know about this widget."
-msgstr ""
-
-#: siteorigin-panels.php:248
-#, php-format
-msgid "%d seconds"
 msgstr ""
 
 #: siteorigin-panels.php:249
 #, php-format
-msgid "%d minutes"
+msgid "%d seconds"
 msgstr ""
 
 #: siteorigin-panels.php:250
 #, php-format
-msgid "%d hours"
+msgid "%d minutes"
 msgstr ""
 
-#: siteorigin-panels.php:252
+#: siteorigin-panels.php:251
 #, php-format
-msgid "%d second"
+msgid "%d hours"
 msgstr ""
 
 #: siteorigin-panels.php:253
 #, php-format
-msgid "%d minute"
+msgid "%d second"
 msgstr ""
 
 #: siteorigin-panels.php:254
 #, php-format
+msgid "%d minute"
+msgstr ""
+
+#: siteorigin-panels.php:255
+#, php-format
 msgid "%d hour"
 msgstr ""
 
-#: siteorigin-panels.php:256
+#: siteorigin-panels.php:257
 #, php-format
 msgid "%s before"
 msgstr ""
 
-#: siteorigin-panels.php:257
+#: siteorigin-panels.php:258
 msgid "Now"
 msgstr ""
 
-#: siteorigin-panels.php:261
+#: siteorigin-panels.php:262
 msgid "Current"
 msgstr ""
 
-#: siteorigin-panels.php:262
+#: siteorigin-panels.php:263
 msgid "Original"
 msgstr ""
 
-#: siteorigin-panels.php:263
+#: siteorigin-panels.php:264
 msgid "Version restored"
 msgstr ""
 
-#: siteorigin-panels.php:266
+#: siteorigin-panels.php:267
 msgid "Widget deleted"
 msgstr ""
 
-#: siteorigin-panels.php:267
+#: siteorigin-panels.php:268
 msgid "Widget added"
 msgstr ""
 
-#: siteorigin-panels.php:268
+#: siteorigin-panels.php:269
 msgid "Widget edited"
 msgstr ""
 
-#: siteorigin-panels.php:269
+#: siteorigin-panels.php:270
 msgid "Widget duplicated"
 msgstr ""
 
-#: siteorigin-panels.php:270
+#: siteorigin-panels.php:271
 msgid "Widget moved"
 msgstr ""
 
-#: siteorigin-panels.php:273
+#: siteorigin-panels.php:274
 msgid "Row deleted"
 msgstr ""
 
-#: siteorigin-panels.php:274
+#: siteorigin-panels.php:275
 msgid "Row added"
 msgstr ""
 
-#: siteorigin-panels.php:275
+#: siteorigin-panels.php:276
 msgid "Row edited"
 msgstr ""
 
-#: siteorigin-panels.php:276
+#: siteorigin-panels.php:277
 msgid "Row moved"
 msgstr ""
 
-#: siteorigin-panels.php:277
+#: siteorigin-panels.php:278
 msgid "Row duplicated"
 msgstr ""
 
-#: siteorigin-panels.php:280
+#: siteorigin-panels.php:281
 msgid "Cell resized"
 msgstr ""
 
-#: siteorigin-panels.php:283
+#: siteorigin-panels.php:284
 msgid "Prebuilt layout loaded"
 msgstr ""
 
-#: siteorigin-panels.php:287
+#: siteorigin-panels.php:288
 msgid ""
 "Are you sure you want to overwrite your current content? This can be undone "
 "in the builder history."
 msgstr ""
 
-#: siteorigin-panels.php:288
+#: siteorigin-panels.php:289
 msgid "Loading prebuilt layout"
 msgstr ""
 
-#: siteorigin-panels.php:289
+#: siteorigin-panels.php:290
 msgid "Would you like to copy this editor's existing content to Page Builder?"
 msgstr ""
 
-#: siteorigin-panels.php:290
+#: siteorigin-panels.php:291
 msgid "Layout Builder Widget"
 msgstr ""
 
-#: siteorigin-panels.php:291 tpl/js-templates.php:71
+#: siteorigin-panels.php:292 tpl/js-templates.php:71
 msgid "Are you sure?"
 msgstr ""
 
-#: siteorigin-panels.php:305
+#: siteorigin-panels.php:306
 msgid "Install the missing widget"
 msgstr ""
 
-#: siteorigin-panels.php:347
+#: siteorigin-panels.php:350
 msgid "Untitled Widget"
 msgstr ""
 
-#: siteorigin-panels.php:1030
+#: siteorigin-panels.php:1033
 msgid "Edit Home Page"
 msgstr ""
 
-#: siteorigin-panels.php:1179
+#: siteorigin-panels.php:1151
 #, php-format
 msgid ""
 "You need to <a href='%s' target='_blank'>install %s</a> to use the widget "
@@ -477,13 +477,13 @@ msgid ""
 "plugin directory."
 msgstr ""
 
-#: siteorigin-panels.php:1184
+#: siteorigin-panels.php:1156
 msgid ""
 "Save and reload this page to start using the widget after you've installed "
 "it."
 msgstr ""
 
-#: siteorigin-panels.php:1192
+#: siteorigin-panels.php:1164
 #, php-format
 msgid ""
 "The widget <strong>%s</strong> is not available. Please try locate and "
@@ -491,11 +491,11 @@ msgid ""
 "\">support forums</a> if you need help."
 msgstr ""
 
-#: siteorigin-panels.php:1259
+#: siteorigin-panels.php:1231
 msgid "Support Forum"
 msgstr ""
 
-#: siteorigin-panels.php:1260
+#: siteorigin-panels.php:1232
 msgid "Newsletter"
 msgstr ""
 
@@ -848,151 +848,157 @@ msgstr ""
 msgid "A full SiteOrigin Page Builder layout as a widget."
 msgstr ""
 
-#: widgets/basic.php:51
+#: widgets/basic.php:52
+msgid ""
+"The layout widget does not work in the Customizer interface. Please use it "
+"in the widget interface or Page Builder."
+msgstr ""
+
+#: widgets/basic.php:53
 msgid "Open Builder"
 msgstr ""
 
-#: widgets/basic.php:75
+#: widgets/basic.php:82
 msgid "Post Content"
 msgstr ""
 
-#: widgets/basic.php:77
+#: widgets/basic.php:84
 msgid "Displays some form of post content form the current post."
 msgstr ""
 
-#: widgets/basic.php:123 widgets/basic.php:381 widgets/widgets.php:598
+#: widgets/basic.php:130 widgets/basic.php:388 widgets/widgets.php:598
 #: widgets/widgets.php:769
 msgid "None"
 msgstr ""
 
-#: widgets/basic.php:124 widgets/basic.php:346
+#: widgets/basic.php:131 widgets/basic.php:353
 #: widgets/widgets/call-to-action/call-to-action.php:15
 #: widgets/widgets/list/list.php:15 widgets/widgets/price-box/price-box.php:15
 msgid "Title"
 msgstr ""
 
-#: widgets/basic.php:125
+#: widgets/basic.php:132
 msgid "Featured Image"
 msgstr ""
 
-#: widgets/basic.php:130
+#: widgets/basic.php:137
 msgid "Display Content"
 msgstr ""
 
-#: widgets/basic.php:150
+#: widgets/basic.php:157
 msgid "Post Loop"
 msgstr ""
 
-#: widgets/basic.php:152
+#: widgets/basic.php:159
 msgid "Displays a post loop."
 msgstr ""
 
-#: widgets/basic.php:335
+#: widgets/basic.php:342
 msgid "Your theme doesn't have any post loops."
 msgstr ""
 
-#: widgets/basic.php:350
+#: widgets/basic.php:357
 msgid "Template"
 msgstr ""
 
-#: widgets/basic.php:365 widgets/widgets.php:584
+#: widgets/basic.php:372 widgets/widgets.php:584
 msgid "Post Type"
 msgstr ""
 
-#: widgets/basic.php:374 widgets/widgets.php:591
+#: widgets/basic.php:381 widgets/widgets.php:591
 msgid "Posts Per Page"
 msgstr ""
 
-#: widgets/basic.php:379 widgets/widgets.php:596
+#: widgets/basic.php:386 widgets/widgets.php:596
 msgid "Order By"
 msgstr ""
 
-#: widgets/basic.php:382 widgets/widgets.php:599
+#: widgets/basic.php:389 widgets/widgets.php:599
 msgid "Post ID"
 msgstr ""
 
-#: widgets/basic.php:383 widgets/widgets.php:600
+#: widgets/basic.php:390 widgets/widgets.php:600
 msgid "Author"
 msgstr ""
 
-#: widgets/basic.php:384 widgets/basic.php:385 widgets/widgets.php:601
+#: widgets/basic.php:391 widgets/basic.php:392 widgets/widgets.php:601
 #: widgets/widgets.php:602 widgets/widgets/testimonial/testimonial.php:15
 msgid "Name"
 msgstr ""
 
-#: widgets/basic.php:386 widgets/widgets.php:603
+#: widgets/basic.php:393 widgets/widgets.php:603
 msgid "Date"
 msgstr ""
 
-#: widgets/basic.php:387 widgets/widgets.php:604
+#: widgets/basic.php:394 widgets/widgets.php:604
 msgid "Modified"
 msgstr ""
 
-#: widgets/basic.php:388 widgets/widgets.php:605
+#: widgets/basic.php:395 widgets/widgets.php:605
 msgid "Parent"
 msgstr ""
 
-#: widgets/basic.php:389 widgets/widgets.php:606
+#: widgets/basic.php:396 widgets/widgets.php:606
 msgid "Random"
 msgstr ""
 
-#: widgets/basic.php:390 widgets/widgets.php:607
+#: widgets/basic.php:397 widgets/widgets.php:607
 msgid "Comment Count"
 msgstr ""
 
-#: widgets/basic.php:391 widgets/basic.php:392 widgets/widgets.php:608
+#: widgets/basic.php:398 widgets/basic.php:399 widgets/widgets.php:608
 msgid "Menu Order"
 msgstr ""
 
-#: widgets/basic.php:393
+#: widgets/basic.php:400
 msgid "Post In Order"
 msgstr ""
 
-#: widgets/basic.php:398 widgets/widgets.php:614
+#: widgets/basic.php:405 widgets/widgets.php:614
 msgid "Order"
 msgstr ""
 
-#: widgets/basic.php:400 widgets/widgets.php:617
+#: widgets/basic.php:407 widgets/widgets.php:617
 msgid "Descending"
 msgstr ""
 
-#: widgets/basic.php:401 widgets/widgets.php:616
+#: widgets/basic.php:408 widgets/widgets.php:616
 msgid "Ascending"
 msgstr ""
 
-#: widgets/basic.php:406 widgets/widgets.php:623
+#: widgets/basic.php:413 widgets/widgets.php:623
 msgid "Sticky Posts"
 msgstr ""
 
-#: widgets/basic.php:408 widgets/widgets.php:625 widgets/widgets.php:743
+#: widgets/basic.php:415 widgets/widgets.php:625 widgets/widgets.php:743
 msgid "Default"
 msgstr ""
 
-#: widgets/basic.php:409 widgets/widgets.php:626
+#: widgets/basic.php:416 widgets/widgets.php:626
 msgid "Ignore Sticky"
 msgstr ""
 
-#: widgets/basic.php:410 widgets/widgets.php:627
+#: widgets/basic.php:417 widgets/widgets.php:627
 msgid "Exclude Sticky"
 msgstr ""
 
-#: widgets/basic.php:411 widgets/widgets.php:628
+#: widgets/basic.php:418 widgets/widgets.php:628
 msgid "Only Sticky"
 msgstr ""
 
-#: widgets/basic.php:416
+#: widgets/basic.php:423
 msgid "More Link "
 msgstr ""
 
-#: widgets/basic.php:418
+#: widgets/basic.php:425
 msgid "If the template supports it, cut posts and display the more link."
 msgstr ""
 
-#: widgets/basic.php:422
+#: widgets/basic.php:429
 msgid "Additional "
 msgstr ""
 
-#: widgets/basic.php:424 widgets/widgets.php:635
+#: widgets/basic.php:431 widgets/widgets.php:635
 #, php-format
 msgid ""
 "Additional query arguments. See <a href=\"%s\" target=\"_blank"
