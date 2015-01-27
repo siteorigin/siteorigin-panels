@@ -91,6 +91,11 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.0.6 =
+* Added nonce to all admin requests.
+* Fixed live editor for missing widgets.
+* Fixed handling of multi-line row/widget custom CSS.
+
 = 2.0.5 =
 * Added proper escaping in widget form.
 
