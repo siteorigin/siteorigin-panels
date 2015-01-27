@@ -228,7 +228,7 @@ class SiteOrigin_Panels_Default_Styling {
 		}
 
 		if( !empty($args['row_css']) ){
-			preg_match_all('/(.+?):(.+?);?$/', $args['row_css'], $matches);
+			preg_match_all('/^(.+?):(.+?);?$/m', $args['row_css'], $matches);
 
 			if(!empty($matches[0])){
 				for($i = 0; $i < count($matches[0]); $i++) {
@@ -288,7 +288,7 @@ class SiteOrigin_Panels_Default_Styling {
 		}
 
 		if( !empty($args['widget_css']) ){
-			preg_match_all('/(.+?):(.+?);?$/', $args['widget_css'], $matches);
+			preg_match_all('/^(.+?):(.+?);?$/m', $args['widget_css'], $matches);
 
 			if(!empty($matches[0])){
 				for($i = 0; $i < count($matches[0]); $i++) {
