@@ -1320,6 +1320,8 @@ String.prototype.panelsProcessTemplate = function(){
             this.$el
                 .attr( 'id', 'siteorigin-panels-builder-' + this.cid )
                 .addClass('so-builder-container');
+
+            this.trigger( 'builder_rendered' );
             return this;
         },
 
@@ -1343,6 +1345,7 @@ String.prototype.panelsProcessTemplate = function(){
                 this.$el.appendTo( options.container );
                 this.metabox = options.container.closest('.postbox');
                 this.initSortable();
+                this.trigger('attached_to_container', options.container);
             }
 
             return this;
@@ -3409,6 +3412,9 @@ jQuery( function($){
         } );
 
         container.removeClass('so-panels-loading');
+
+        // Trigger a global jQuery event after we've setup the builder view
+        $(document).trigger( 'panels_setup', builderView );
     }
 } );
 
@@ -3477,6 +3483,8 @@ jQuery( function($){
                 $$.find( '.siteorigin-panels-display-builder').parent().remove();
             }
 
+            // Trigger a global jQuery event after we've setup the builder view
+            $(document).trigger( 'panels_setup', builderView );
         });
     };
 
