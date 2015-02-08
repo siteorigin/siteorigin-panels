@@ -2937,7 +2937,8 @@ String.prototype.panelsProcessTemplate = function(){
          */
         setRowModel: function(model){
             this.model = model;
-            if( this.model === null ) {
+
+            if( _.isEmpty( this.model ) ) {
                 return this;
             }
 
