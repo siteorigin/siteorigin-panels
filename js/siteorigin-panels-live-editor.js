@@ -146,9 +146,10 @@
         },
 
         /**
+         * Create an overlay in the preview.
          *
          * @param over
-         * @return {*|Object}
+         * @return {*|Object} The item we're hovering over.
          */
         createPreviewOverlay: function(over) {
             var previewFrame = this.$('iframe#siteorigin-panels-live-editor-iframe');
@@ -163,10 +164,11 @@
                 'pointer-events' : 'none'
             } );
 
+            // The overlay item used to highlight the current element
             var overlay = $('<div />').css({
                 'position' : 'absolute',
                 'background' : '#000000',
-                'z-index' : 1000,
+                'z-index' : 10000,
                 'opacity' : 0.25
             });
 
@@ -174,6 +176,7 @@
 
             overlayContainer
                 .append(
+                    // The top overlay
                     overlay.clone().css({
                         'top' : -body.offset().top,
                         'left' : 0,
@@ -182,6 +185,7 @@
                     })
                 )
                 .append(
+                    // The bottom overlay
                     overlay.clone().css({
                         'bottom' : 0,
                         'left' : 0,
@@ -190,19 +194,21 @@
                     })
                 )
                 .append(
+                    // The left overlay
                     overlay.clone().css({
                         'top' : over.offset().top - spacing - body.offset().top,
                         'left' : 0,
                         'width' : over.offset().left - spacing,
-                        'height' : Math.round(over.outerHeight() + spacing*2)
+                        'height' : Math.ceil(over.outerHeight() + spacing*2)
                     })
                 )
                 .append(
+                    // The right overlay
                     overlay.clone().css({
                         'top' : over.offset().top - spacing - body.offset().top,
                         'right' : 0,
                         'left' : over.offset().left + over.outerWidth() + spacing,
-                        'height' : Math.round(over.outerHeight() + spacing*2)
+                        'height' : Math.ceil(over.outerHeight() + spacing*2)
                     })
                 );
 
