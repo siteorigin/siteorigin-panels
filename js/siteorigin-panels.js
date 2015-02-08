@@ -2754,23 +2754,27 @@ String.prototype.panelsProcessTemplate = function(){
                 return;
             }
 
-            for (var lid in layouts) {
-                // Exclude the current post if we have one
-                if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
-                    continue;
-                }
-                if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
-                    continue;
-                }
+            if( layouts.length ) {
+                for (var lid in layouts) {
+                    // Exclude the current post if we have one
+                    if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
+                        continue;
+                    }
+                    if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
+                        continue;
+                    }
 
-                var $l = $(this.entryTemplate({
-                    name: layouts[lid].name,
-                    description: layouts[lid].description
-                }));
+                    // Create the layout item to display in the list
+                    var $l = $(this.entryTemplate({
+                        name: layouts[lid].name,
+                        description: layouts[lid].description
+                    }));
 
-                // Create and append the
-                $l.appendTo(c).data({'type': type, 'lid': lid});
+                    // Create and append the
+                    $l.appendTo(c).data({'type': type, 'lid': lid});
+                }
             }
+
         },
 
         /**
@@ -3498,4 +3502,4 @@ jQuery( function($){
         $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
     });
 
-})(jQuery);
+})( jQuery );
