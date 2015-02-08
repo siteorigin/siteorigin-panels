@@ -31,7 +31,7 @@ jQuery(function($){
                     'padding-right' : 0
                 });
             }
-        }
+        };
 
         $(window).resize( onResize );
         onResize();

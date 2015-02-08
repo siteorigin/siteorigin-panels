@@ -1320,6 +1320,8 @@ String.prototype.panelsProcessTemplate = function(){
             this.$el
                 .attr( 'id', 'siteorigin-panels-builder-' + this.cid )
                 .addClass('so-builder-container');
+
+            this.trigger( 'builder_rendered' );
             return this;
         },
 
@@ -1343,6 +1345,7 @@ String.prototype.panelsProcessTemplate = function(){
                 this.$el.appendTo( options.container );
                 this.metabox = options.container.closest('.postbox');
                 this.initSortable();
+                this.trigger('attached_to_container', options.container);
             }
 
             return this;
@@ -2751,23 +2754,27 @@ String.prototype.panelsProcessTemplate = function(){
                 return;
             }
 
-            for (var lid in layouts) {
-                // Exclude the current post if we have one
-                if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
-                    continue;
-                }
-                if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
-                    continue;
-                }
+            if( layouts.length ) {
+                for (var lid in layouts) {
+                    // Exclude the current post if we have one
+                    if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
+                        continue;
+                    }
+                    if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
+                        continue;
+                    }
 
-                var $l = $(this.entryTemplate({
-                    name: layouts[lid].name,
-                    description: layouts[lid].description
-                }));
+                    // Create the layout item to display in the list
+                    var $l = $(this.entryTemplate({
+                        name: layouts[lid].name,
+                        description: layouts[lid].description
+                    }));
 
-                // Create and append the
-                $l.appendTo(c).data({'type': type, 'lid': lid});
+                    // Create and append the
+                    $l.appendTo(c).data({'type': type, 'lid': lid});
+                }
             }
+
         },
 
         /**
@@ -3409,6 +3416,9 @@ jQuery( function($){
         } );
 
         container.removeClass('so-panels-loading');
+
+        // Trigger a global jQuery event after we've setup the builder view
+        $(document).trigger( 'panels_setup', builderView );
     }
 } );
 
@@ -3477,6 +3487,8 @@ jQuery( function($){
                 $$.find( '.siteorigin-panels-display-builder').parent().remove();
             }
 
+            // Trigger a global jQuery event after we've setup the builder view
+            $(document).trigger( 'panels_setup', builderView );
         });
     };
 
@@ -3490,4 +3502,4 @@ jQuery( function($){
         $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
     });
 
-})(jQuery);
+})( jQuery );

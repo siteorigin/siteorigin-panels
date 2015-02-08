@@ -2,7 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 3.7
 Tested up to: 4.1
-Stable tag: 2.0.3
+Stable tag: 2.0.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
@@ -90,6 +90,12 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.0.6 =
+* Added nonce to all admin requests.
+* Fixed live editor for missing widgets.
+* Fixed handling of multi-line row/widget custom CSS.
+* Fixed issue with encoding of panels_data.
 
 = 2.0.5 =
 * Added proper escaping in widget form.
