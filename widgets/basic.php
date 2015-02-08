@@ -55,7 +55,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 
 			<input type="hidden" data-panels-filter="json_parse" value="" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" id="<?php echo $this->get_field_id('panels_data') ?>" />
 			<script type="text/javascript">
-				document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = "<?php echo addslashes( $instance['panels_data'] ) ?>";
+				document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = decodeURIComponent("<?php echo rawurlencode( $instance['panels_data'] ); ?>");
 			</script>
 
 			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />
