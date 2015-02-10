@@ -2754,7 +2754,7 @@ String.prototype.panelsProcessTemplate = function(){
                 return;
             }
 
-            if( layouts.length ) {
+            if( _.size(layouts) ) {
                 for (var lid in layouts) {
                     // Exclude the current post if we have one
                     if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
@@ -2774,7 +2774,6 @@ String.prototype.panelsProcessTemplate = function(){
                     $l.appendTo(c).data({'type': type, 'lid': lid});
                 }
             }
-
         },
 
         /**
