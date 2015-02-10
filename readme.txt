@@ -93,7 +93,6 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 = 2.0.7 =
 * Fixed issue that prevented prebuilt layouts from showing up.
-* Changed how script enqueues are handled so other plugins can use Page Builder in unusual places.
 
 = 2.0.6 =
 * Added nonce to all admin requests.
