@@ -328,7 +328,10 @@ function siteorigin_panels_style_update_data($panels_data){
 
 	for($i = 0; $i < count($panels_data['grids']); $i++) {
 
-		if( isset($panels_data['grids'][$i]['style']) && is_string($panels_data['grids'][$i]['style']) ){
+		if( !is_array($panels_data['grids'][$i]) ) continue;
+		if( !isset($panels_data['grids'][$i]['style']) ) continue;
+
+		if( is_string($panels_data['grids'][$i]['style']) ){
 			$panels_data['grids'][$i]['style'] = array('class' => $panels_data['grids'][$i]['style']);
 		}
 
