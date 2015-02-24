@@ -212,6 +212,14 @@ class SiteOrigin_Panels_Default_Styling {
 			'description' => __('Color of text inside this widget.', 'siteorigin-panels'),
 			'priority' => 15,
 		);
+		
+		$fields['link_color'] = array(
+			'name' => __('Links Color', 'siteorigin-panels'),
+			'type' => 'color',
+			'group' => 'design',
+			'description' => __('Color of links inside this widget.', 'siteorigin-panels'),
+			'priority' => 16,
+		);
 
 		return $fields;
 	}
