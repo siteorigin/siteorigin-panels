@@ -2061,6 +2061,9 @@ String.prototype.panelsProcessTemplate = function(){
             this.bodyScrollTop = $('body').scrollTop();
             $('body').css({'overflow':'hidden'});
 
+            // Start listen for keyboard keypresses.
+            $(window).on('keyup', this.keyboardListen);
+
             this.$el.show();
 
             // This triggers once everything is visible
@@ -2089,11 +2092,25 @@ String.prototype.panelsProcessTemplate = function(){
                 $('body').css({'overflow':'auto'});
                 $('body').scrollTop( this.bodyScrollTop );
             }
+            
+            // Stop listen for keyboard keypresses.
+            $(window).off('keyup', this.keyboardListen);
 
             // This triggers once everything is hidden
             this.trigger('close_dialog_complete');
 
             return false;
+        },
+        
+        /**
+         * Keyboard events handler
+         */
+        keyboardListen: function(e) {
+        
+            // [Esc] to close
+            if (e.which == 27) {
+                $('.so-panels-dialog-wrapper .so-close').trigger('click');
+            }
         },
 
         /**
