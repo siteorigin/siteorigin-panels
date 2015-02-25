@@ -35,7 +35,7 @@ function siteorigin_panels_setting($key = ''){
 		if( !empty($theme_settings) ) $theme_settings = $theme_settings[0];
 		else $theme_settings = array();
 
-		$settings = wp_parse_args( $theme_settings, apply_filters( 'siteorigin_panels_settings_defaults', array(
+		$settings = wp_parse_args( $current_settings, apply_filters( 'siteorigin_panels_settings_defaults', array(
 			'home-page' => false,
 			'home-page-default' => false,
 			'home-template' => 'home-panels.php',
@@ -52,7 +52,7 @@ function siteorigin_panels_setting($key = ''){
 			'animations' => true,
 			'inline-css' => true,
 		) ) );
-		$settings = wp_parse_args( $current_settings, $settings);
+		$settings = wp_parse_args( $theme_settings, $settings);
 
 		// Filter these settings
 		$settings = apply_filters('siteorigin_panels_settings', $settings);
