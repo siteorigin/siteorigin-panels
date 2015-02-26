@@ -1000,6 +1000,9 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 		'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
 	);
 
+	// Let other themes and plugins change the arguments that go to the widget class.
+	$args = apply_filters('siteorigin_panels_widget_args', $args);
+
 	// If there is a style wrapper, add it.
 	if( !empty($style_wrapper) ) {
 		$args['before_widget'] = $args['before_widget'] . $style_wrapper;
