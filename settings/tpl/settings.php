@@ -28,7 +28,7 @@
 								<th scope="row"><label><?php echo esc_html($field['label']) ?></label></th>
 								<td>
 									<?php
-									siteorigin_panels_settings_display_field( $field_id, $field );
+									$this->display_field( $field_id, $field );
 									if( !empty($field['description']) ) {
 										?>
 										<small class="description">
