@@ -5,7 +5,7 @@
 			<img src="<?php echo plugin_dir_url(__FILE__) ?>../images/icon-layer.png" class="layer-2" />
 			<img src="<?php echo plugin_dir_url(__FILE__) ?>../images/icon-layer.png" class="layer-1" />
 		</span>
-		<h1>SiteOrigin Page Builder</h1>
+		<h1><?php _e('SiteOrigin Page Builder', 'siteorigin-panels') ?></h1>
 	</div>
 
 	<ul class="settings-nav">
