@@ -14,10 +14,13 @@ Donate link: http://siteorigin.com/page-builder/#donate
 define('SITEORIGIN_PANELS_VERSION', '2.0.8-dev');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
+// All the basic settings
+require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
+
+// Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
 
 require_once plugin_dir_path(__FILE__) . 'inc/css.php';
-require_once plugin_dir_path(__FILE__) . 'inc/options.php';
 require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/default-styles.php';
