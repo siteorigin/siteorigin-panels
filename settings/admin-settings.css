@@ -3,7 +3,7 @@
 }
 #panels-settings-page .settings-banner {
   display: block;
-  padding: 15px 40px 5px 40px;
+  padding: 15px 30px 5px 30px;
   background: #f6f6f6;
   position: relative;
 }
@@ -43,7 +43,7 @@
 #panels-settings-page .settings-nav {
   background: #f6f6f6;
   border-bottom: 1px solid #d6d6d6;
-  padding: 5px 0 0 40px;
+  padding: 5px 0 0 30px;
   margin: 0;
   font-size: 0;
 }
@@ -66,6 +66,7 @@
   color: #555;
   padding: 12px 25px;
   font-weight: bold;
+  box-shadow: none !important;
 }
 #panels-settings-page .settings-nav li:hover {
   background: #f3f3f3;
@@ -76,6 +77,30 @@
 }
 #panels-settings-page .settings-panel {
   min-height: 300px;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section {
+  display: none;
+  padding: 0 30px;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section .description {
+  font-style: italic;
+  color: #999;
+  margin-top: 5px;
+  display: block;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section label {
+  display: block;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section tr td label {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#panels-settings-page .submit {
+  margin-top: 30px;
+  padding: 0 30px;
 }
 body.settings_page_siteorigin_panels #contextual-help-link-wrap {
   z-index: 10;

@@ -1,51 +1,17 @@
 <?php
 
-function siteorigin_panels_settings_enqueue_scripts($prefix){
-	if( $prefix != 'settings_page_siteorigin_panels' ) return;
-	wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
-	wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.js', array(), SITEORIGIN_PANELS_VERSION );
-}
-add_action('admin_enqueue_scripts', 'siteorigin_panels_settings_enqueue_scripts');
-
-function siteorigin_panels_add_settings_help_tab(){
-	$screen = get_current_screen();
-	$screen->add_help_tab( array(
-		'id' => 'panels-help-tab', //unique id for the tab
-		'title' => 'This is a test', //unique visible title for the tab
-		'content' => '<p>THIS IS FOO BAR</p>',  //actual help text
-	) );
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
- * Get the settings
+ * Get a setting with the given key.
  *
- * @param string $key Only get a specific key.
- * @return mixed
+ * @param string $key
+ *
+ * @return array|bool|mixed|null
  */
 function siteorigin_panels_setting($key = ''){
 
-	global $siteorigin_panels_settings;
+	static $settings = false;
 	if( !has_action('after_setup_theme') ) {
-		$siteorigin_panels_settings = false;
+		$settings = false;
 	}
 
 	if( empty($settings) ){
@@ -70,23 +36,7 @@ function siteorigin_panels_setting($key = ''){
 		if( !empty($theme_settings) ) $theme_settings = $theme_settings[0];
 		else $theme_settings = array();
 
-		$settings = wp_parse_args( $theme_settings, apply_filters( 'siteorigin_panels_settings_defaults', array(
-			'home-page' => false,
-			'home-page-default' => false,
-			'home-template' => 'home-panels.php',
-			'post-types' => array('page', 'post'),
-
-			'bundled-widgets' => get_option( 'siteorigin_panels_is_using_bundled', false ),
-			'responsive' => true,
-			'mobile-width' => 780,
-
-			'margin-bottom' => 30,
-			'margin-sides' => 30,
-			'affiliate-id' => apply_filters( 'siteorigin_panels_affiliate_id', false ),
-			'copy-content' => true,
-			'animations' => true,
-			'inline-css' => true,
-		) ) );
+		$settings = wp_parse_args( $theme_settings, apply_filters( 'siteorigin_panels_settings_defaults', array() ) );
 		$settings = wp_parse_args( $current_settings, $settings);
 
 		// Filter these settings
@@ -96,6 +46,65 @@ function siteorigin_panels_setting($key = ''){
 	if( !empty( $key ) ) return isset( $settings[$key] ) ? $settings[$key] : null;
 	return $settings;
 }
+
+/**
+ * Filter the default settings
+ *
+ * @param $defaults
+ */
+function siteorigin_panels_settings_defaults($defaults){
+	$defaults['home-page'] = false;
+	$defaults['home-page-default'] = false;
+	$defaults['home-template'] = 'home-panels.php';
+	$defaults['affiliate-id'] = apply_filters( 'siteorigin_panels_affiliate_id', false );
+
+	// Widgets fields
+	$defaults['title-html'] = '<h3 class="widget-title">{{title}}</h3>';
+	$defaults['bundled-widgets'] = get_option( 'siteorigin_panels_is_using_bundled', false );
+	$defaults['recommended-widgets'] = true;
+
+	// Post types
+	$defaults['post-types'] = array('page', 'post');
+
+	// The layout fields
+	$defaults['responsive'] = true;
+	$defaults['mobile-width'] = 780;
+	$defaults['margin-bottom'] = 30;
+	$defaults['margin-sides'] = 30;
+
+	// Content fields
+	$defaults['copy-content'] = true;
+	$defaults['powered-by'] = false;
+
+	return $defaults;
+}
+add_filter('siteorigin_panels_settings_defaults', 'siteorigin_panels_settings_defaults');
+
+/**
+ * @param $prefix
+ */
+function siteorigin_panels_settings_enqueue_scripts($prefix){
+	if( $prefix != 'settings_page_siteorigin_panels' ) return;
+	wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
+	wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.js', array(), SITEORIGIN_PANELS_VERSION );
+}
+add_action('admin_enqueue_scripts', 'siteorigin_panels_settings_enqueue_scripts');
+
+/**
+ * Add the settings page help tab.
+ */
+function siteorigin_panels_add_settings_help_tab(){
+	$screen = get_current_screen();
+	ob_start();
+	include plugin_dir_path(__FILE__) . 'tpl/help.php';
+	$content = ob_get_clean();
+
+	$screen->add_help_tab( array(
+		'id' => 'panels-help-tab',
+		'title' => __('Page Builder Settings', 'siteorigin-panels'),
+		'content' => $content
+	) );
+};
 
 /**
  * Add the options page
@@ -110,106 +119,156 @@ add_action( 'admin_menu', 'siteorigin_panels_options_admin_menu' );
  * Display the admin page.
  */
 function siteorigin_panels_options_page(){
+	$settings_fields = apply_filters('siteorigin_panels_settings_fields', array() );
 	include plugin_dir_path(__FILE__) . '/tpl/settings.php';
 }
 
 /**
- * Display the field for selecting the post types
+ * Add any settings fields we need.
+ *
+ * @param $fields
  */
-function siteorigin_panels_options_field_post_types( $panels_post_types ){
-	$all_post_types = array_values( array_merge( array( 'page' => 'page', 'post' => 'post' ), get_post_types( array( '_builtin' => false ) ) ) );
+function siteorigin_panels_settings_fields($fields){
 
-	// These are post types we know we don't want to show
-	$all_post_types = array_diff($all_post_types, array(
-		// Meta Slider
-		'ml-slider'
-	) );
+	// The widgets fields
 
-	foreach($all_post_types as $type){
-		$info = get_post_type_object($type);
-		if(empty($info->labels->name)) continue;
-		$checked = in_array(
-			$type,
-			$panels_post_types
-		);
+	$fields['widgets'] = array(
+		'title' => __('Widgets', 'siteorigin-panels'),
+		'fields' => array(),
+	);
 
-		?>
-		<label>
-			<input type="checkbox" name="siteorigin_panels_post_types[<?php echo esc_attr($type) ?>]" <?php checked($checked) ?> />
-			<?php echo esc_html($info->labels->name) ?>
-		</label><br/>
-	<?php
-	}
+	$fields['widgets']['fields']['title-html'] = array(
+		'type' => 'html',
+		'label' => __('Widget Title HTML', 'siteorigin-panels'),
+		'description' => __('The HTML used for widget titles. {{title}} is replaced with the widget title.', 'siteorigin-panels'),
+	);
 
-	?><p class="description"><?php _e('Post types that will have the page builder available', 'siteorigin-panels') ?></p><?php
+	$fields['widgets']['fields']['bundled-widgets'] = array(
+		'type' => 'checkbox',
+		'label' => __('Bundled Widgets', 'siteorigin-panels'),
+		'description' => __('Load legacy bundled widgets from Page Builder 1.', 'siteorigin-panels'),
+	);
+
+	$fields['widgets']['fields']['recommended-widgets'] = array(
+		'type' => 'checkbox',
+		'label' => __('Recommended Widgets', 'siteorigin-panels'),
+		'description' => __('Recommend widgets in Page Builder.', 'siteorigin-panels'),
+	);
+
+	// The post types fields
+
+	$fields['post-types'] = array(
+		'title' => __('Post Types', 'siteorigin-panels'),
+		'fields' => array(),
+	);
+
+	$fields['post-types']['fields']['post-types'] = array(
+		'type' => 'post_types',
+		'label' => __('Post Types', 'siteorigin-panels'),
+		'description' => __('The post types to use Page Builder on.', 'siteorigin-panels'),
+	);
+
+	// The layout fields
+
+	$fields['layout'] = array(
+		'title' => __('Layout', 'siteorigin-panels'),
+		'fields' => array(),
+	);
+
+	// The layout fields
+
+	$fields['layout']['fields']['responsive'] = array(
+		'type' => 'checkbox',
+		'label' => __('Responsive Layout', 'siteorigin-panels'),
+		'description' => __('Collapse widgets, rows and columns on mobile devices.', 'siteorigin-panels'),
+	);
+
+	$fields['layout']['fields']['mobile-width'] = array(
+		'type' => 'number',
+		'unit' => 'px',
+		'label' => __('Mobile Width', 'siteorigin-panels'),
+		'description' => __('Device width, in pixels, to collapse into a mobile view .', 'siteorigin-panels'),
+	);
+
+	$fields['layout']['fields']['margin-bottom'] = array(
+		'type' => 'number',
+		'unit' => 'px',
+		'label' => __('Row Bottom Margin', 'siteorigin-panels'),
+		'description' => __('Default margin below rows.', 'siteorigin-panels'),
+	);
+
+	$fields['layout']['fields']['margin-sides'] = array(
+		'type' => 'number',
+		'unit' => 'px',
+		'label' => __('Row Gutter', 'siteorigin-panels'),
+		'description' => __('Default spacing between columns in each row.', 'siteorigin-panels'),
+	);
+
+	// The content fields
+
+	$fields['content'] = array(
+		'title' => __('Content', 'siteorigin-panels'),
+		'fields' => array(),
+	);
+
+	$fields['content']['fields']['copy-content'] = array(
+		'type' => 'checkbox',
+		'label' => __('Copy Content', 'siteorigin-panels'),
+		'description' => __('Copy content from Page Builder to post content.', 'siteorigin-panels'),
+	);
+
+	$fields['content']['fields']['powered-by'] = array(
+		'type' => 'checkbox',
+		'label' => __('Powered By Link', 'siteorigin-panels'),
+		'description' => __('Show your support for Page Builder by including an optional powered by link.', 'siteorigin-panels'),
+	);
+
+	return $fields;
 }
+add_filter('siteorigin_panels_settings_fields', 'siteorigin_panels_settings_fields');
 
-function siteorigin_panels_options_field( $id, $value, $title, $description = false ){
-	?>
-	<tr>
-		<th scope="row"><strong><?php echo esc_html($title) ?></strong></th>
-		<td>
-			<?php
-			switch($id) {
-				case 'responsive' :
-				case 'copy-content' :
-				case 'animations' :
-				case 'inline-css' :
-				case 'bundled-widgets' :
-					?><label><input type="checkbox" name="siteorigin_panels_settings[<?php echo esc_attr($id) ?>]" <?php checked($value) ?> /> <?php _e('Enabled', 'siteorigin-panels') ?></label><?php
-					break;
-				case 'mobile-width' :
-				case 'margin-bottom' :
-				case 'margin-sides' :
-					?><input type="text" name="siteorigin_panels_settings[<?php echo esc_attr($id) ?>]" value="<?php echo esc_attr($value) ?>" class="small-text" /> <?php _e('px', 'siteorigin-panels') ?><?php
-					break;
-			}
+/**
+ * Display a single settings field
+ */
+function siteorigin_panels_settings_display_field( $field_id, $field ){
+	$value = siteorigin_panels_setting($field_id);
+
+	$field_name = 'panels_setting[' . $field_id . ']';
+
+	switch ($field['type'] ) {
+		case 'text':
+			?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?> widefat" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
+			break;
+
+		case 'number':
 			?>
-			<p class="description"><?php echo esc_html($description) ?></p>
-		</td>
-	</tr>
-<?php
-}
+			<input name="<?php echo esc_attr($field_name) ?>" type="number" class="panels-setting-<?php echo esc_attr($field['type']) ?>" value="<?php echo esc_attr($value) ?>" />
+			<?php
+			if( !empty($field['unit']) ) echo esc_html($field['unit']);
+			break;
 
-function siteorigin_panels_save_options(){
-	// Lets save us some settings
-	if( !current_user_can('manage_options') ) return;
-	if( empty($_POST['_wpnonce']) || !wp_verify_nonce( $_POST['_wpnonce'], 'save_panels_settings' ) ) return;
+		case 'html':
+			?><textarea name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?> widefat" rows="<?php echo !empty($field['rows']) ? intval($field['rows']) : 2 ?>"><?php echo esc_textarea($value) ?></textarea> <?php
+			break;
 
-	// Save the post types settings
-	$post_types = isset( $_POST['siteorigin_panels_post_types'] ) ? array_keys( $_POST['siteorigin_panels_post_types'] ) : array();
+		case 'checkbox':
+			?>
+			<label class="widefat">
+				<input name="<?php echo esc_attr($field_name) ?>" type="checkbox" <?php checked( !empty($value) ) ?> />
+				<?php echo !empty($field['checkbox_text']) ? esc_html($field['checkbox_text']) : __('Enabled', 'siteorigin-panels') ?>
+			</label>
+			<?php
+			break;
 
-	$settings = isset( $_POST['siteorigin_panels_settings'] ) ? $_POST['siteorigin_panels_settings'] : array();
-	foreach($settings as $f => $v){
-		switch($f){
-			case 'inline-css' :
-			case 'responsive' :
-			case 'copy-content' :
-			case 'animations' :
-			case 'bundled-widgets' :
-				$settings[$f] = !empty($settings[$f]);
-				break;
-			case 'margin-bottom' :
-			case 'margin-sides' :
-			case 'mobile-width' :
-				$settings[$f] = intval($settings[$f]);
-				break;
-		}
+		case 'post_types':
+			?>RENDER THE POST TYPES SELECTOR<?php
+			break;
 	}
-
-	// Checkbox settings
-	$settings['responsive'] = !empty($settings['responsive']);
-	$settings['copy-content'] = !empty($settings['copy-content']);
-	$settings['animations'] = !empty($settings['animations']);
-	$settings['inline-css'] = !empty($settings['inline-css']);
-	$settings['bundled-widgets'] = !empty($settings['bundled-widgets']);
-
-	// Post type settings
-	$settings['post-types'] = $post_types;
-
-	update_option('siteorigin_panels_settings', $settings);
-
-	global $siteorigin_panels_settings;
-	$siteorigin_panels_settings = false;
 }
-add_action('load-settings_page_siteorigin_panels', 'siteorigin_panels_save_options');
+
+/**
+ * Sanitize and save settings from $_POST
+ */
+function siteorigin_panels_settings_save_settings(){
+
+}
