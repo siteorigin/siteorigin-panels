@@ -51,12 +51,16 @@ jQuery( function($){
         // Click on the correct container
         $('.settings-nav li a[href="#' + $s.closest('.panels-settings-section').data('section') + '"]').first().click();
 
+        $s.addClass('highlighted');
+
         $s
             .find('label')
             .css('border-left-width', 0)
-            .animate({ 'border-left-width': 5 }, 'fast')
+            .animate({ 'border-left-width': 5 }, 'normal')
             .delay(3000)
-            .animate({ 'border-left-width': 0 }, 'fast');
+            .animate({ 'border-left-width': 0 }, 'normal', function(){
+                $s.removeClass('highlighted');
+            });
 
         $s.find('input,textarea').focus();
     };
@@ -104,7 +108,7 @@ jQuery( function($){
         if( settings.length > 0 ) {
             $r.show();
             settings.sort( function(a,b){
-                return a.data('isMatch') - b.data('isMatch');
+                return b.data('isMatch') - a.data('isMatch');
             } );
 
             settings = settings.slice(0, 8);
