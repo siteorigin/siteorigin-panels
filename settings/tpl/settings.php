@@ -24,6 +24,12 @@
 		?>
 	</ul>
 
+	<?php if( $this->settings_saved ) : ?>
+		<div id="setting-error-settings_updated" class="updated settings-error">
+			<p><strong><?php _e('Settings Saved', 'siteorigin-panels') ?></strong></p>
+		</div>
+	<?php endif; ?>
+
 	<form action="<?php echo admin_url('options-general.php?page=siteorigin_panels') ?>" method="post" >
 
 		<div id="panels-settings-sections">

@@ -111,6 +111,9 @@
   background: #f0f0f0;
   border-bottom-color: #f0f0f0;
 }
+#panels-settings-page #setting-error-settings_updated {
+  margin: 20px 30px 10px 30px;
+}
 #panels-settings-page .settings-panel {
   min-height: 300px;
 }

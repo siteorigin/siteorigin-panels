@@ -5,10 +5,12 @@ class SiteOrigin_Panels_Settings {
 
 	private $settings;
 	private $fields;
+	private $settings_saved;
 
 	function __construct(){
 		$this->settings = array();
 		$this->fields = array();
+		$this->settings_saved = false;
 
 		// Admin actions
 		add_action( 'admin_enqueue_scripts', array($this, 'admin_scripts') );
@@ -385,6 +387,7 @@ class SiteOrigin_Panels_Settings {
 		// Save the values to the database
 		update_option( 'siteorigin_panels_settings', $values );
 		$this->settings = wp_parse_args( $values, $this->settings );
+		$this->settings_saved = true;
 	}
 
 	function get_post_types(){
