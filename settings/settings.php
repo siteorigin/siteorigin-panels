@@ -116,7 +116,6 @@ class SiteOrigin_Panels_Settings {
 
 		// Content fields
 		$defaults['copy-content'] = true;
-		$defaults['powered-by'] = false;
 
 		return $defaults;
 	}
@@ -254,12 +253,6 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'checkbox',
 			'label' => __('Copy Content', 'siteorigin-panels'),
 			'description' => __('Copy content from Page Builder to post content.', 'siteorigin-panels'),
-		);
-
-		$fields['content']['fields']['powered-by'] = array(
-			'type' => 'checkbox',
-			'label' => __('Powered By Link', 'siteorigin-panels'),
-			'description' => __('Show your support for Page Builder by including an optional powered by link.', 'siteorigin-panels'),
 		);
 
 		return $fields;
