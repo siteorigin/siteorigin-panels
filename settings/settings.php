@@ -52,20 +52,18 @@ class SiteOrigin_Panels_Settings {
 	function get($key = ''){
 
 		if( empty($this->settings) ){
-			$old_settings = get_option( 'siteorigin_panels_display', array() );
 
-			if( !empty($old_settings) ) {
-				// Get the current settings
-				$current_settings = get_option('siteorigin_panels_display', array());
-				$post_types = get_option('siteorigin_panels_post_types' );
+			// Get the settings, attempt to fetch new settings first.
+			$current_settings = get_option( 'siteorigin_panels_settings', false );
+
+			if( $current_settings === false ) {
+				// We can't find the settings, so try access old settings
+				$current_settings = get_option( 'siteorigin_panels_display', array() );
+				$post_types = get_option( 'siteorigin_panels_post_types' );
 				if( !empty($post_types) ) $current_settings['post-types'] = $post_types;
 
-				update_option( 'siteorigin_panels_settings', $current_settings );
-				delete_option( 'siteorigin_panels_display' );
-				delete_option( 'siteorigin_panels_post_types' );
-			}
-			else {
-				$current_settings = get_option( 'siteorigin_panels_settings', array() );
+				// Store the old settings in the new field
+				update_option('siteorigin_panels_settings', $current_settings);
 			}
 
 			// Get the settings provided by the theme
