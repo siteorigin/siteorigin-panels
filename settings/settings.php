@@ -19,6 +19,7 @@ class SiteOrigin_Panels_Settings {
 		// Admin actions
 		add_action( 'admin_enqueue_scripts', array($this, 'admin_scripts') );
 		add_action( 'admin_menu', array($this, 'add_settings_page') );
+		add_action( 'after_setup_theme', array($this, 'clear_cache'), 100 );
 
 		// Default filters for fields and defaults
 		add_filter( 'siteorigin_panels_settings_defaults', array($this, 'settings_defaults') );
@@ -37,6 +38,10 @@ class SiteOrigin_Panels_Settings {
 		return $single;
 	}
 
+	function clear_cache(){
+		$this->settings = array();
+	}
+
 	/**
 	 * Get a settings value
 	 *
@@ -45,9 +50,6 @@ class SiteOrigin_Panels_Settings {
 	 * @return array|bool|mixed|null|void
 	 */
 	function get($key = ''){
-		if( !has_action('after_setup_theme') ) {
-			$this->settings = array();
-		}
 
 		if( empty($this->settings) ){
 			$old_settings = get_option( 'siteorigin_panels_display', array() );
