@@ -10,29 +10,35 @@
 function siteorigin_panels_add_recommended_widgets($widgets){
 
 	if( empty( $widgets['WP_Widget_Black_Studio_TinyMCE'] ) ){
-		$widgets['WP_Widget_Black_Studio_TinyMCE'] = array(
-			'class' => 'WP_Widget_Black_Studio_TinyMCE',
-			'title' => __('Visual Editor', 'siteorigin-panels'),
-			'description' => __('Arbitrary text or HTML with visual editor', 'siteorigin-panels'),
-			'installed' => false,
-			'plugin' => array(
-				'name' => __('Black Studio TinyMCE', 'siteorigin-panels'),
-				'slug' => 'black-studio-tinymce-widget'
-			),
-			'groups' => array('recommended'),
-			'icon' => 'dashicons dashicons-edit',
-		);
+
+		if( siteorigin_panels_setting('recommended-widgets') ) {
+			$widgets['WP_Widget_Black_Studio_TinyMCE'] = array(
+				'class' => 'WP_Widget_Black_Studio_TinyMCE',
+				'title' => __('Visual Editor', 'siteorigin-panels'),
+				'description' => __('Arbitrary text or HTML with visual editor', 'siteorigin-panels'),
+				'installed' => false,
+				'plugin' => array(
+					'name' => __('Black Studio TinyMCE', 'siteorigin-panels'),
+					'slug' => 'black-studio-tinymce-widget'
+				),
+				'groups' => array('recommended'),
+				'icon' => 'dashicons dashicons-edit',
+			);
+		}
+
 	}
 	else {
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['groups'] = array('recommended');
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['icon'] = 'dashicons dashicons-edit';
 	}
 
-	// Add in all the widgets bundle widgets
-	$widgets = wp_parse_args(
-		$widgets,
-		include plugin_dir_path(__FILE__).'/widgets-bundle.php'
-	);
+	if( siteorigin_panels_setting('recommended-widgets') ) {
+		// Add in all the widgets bundle widgets
+		$widgets = wp_parse_args(
+			$widgets,
+			include plugin_dir_path( __FILE__ ) . '/widgets-bundle.php'
+		);
+	}
 
 	foreach($widgets as $class => $data) {
 		if( strpos( $class, 'SiteOrigin_Panels_Widgets_' ) === 0 || strpos( $class, 'SiteOrigin_Panels_Widget_' ) === 0 ) {
