@@ -92,6 +92,7 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 == Changelog ==
 
 = branch:develop =
+* Improved Page Builder settings page.
 * Fixed: Custom home page interface now properly uses page_on_front.
 * Fixed: Page URL for home page in custom home page.
 * Fixed: Custom home page encoding.
