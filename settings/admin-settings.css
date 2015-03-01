@@ -40,6 +40,41 @@
   color: #666;
   /* text-shadow: 0 1px 1px rgba(0,0,0,0.2); */
 }
+#panels-settings-page .settings-banner #panels-settings-search {
+  position: absolute;
+  bottom: -35px;
+  right: 30px;
+}
+#panels-settings-page .settings-banner #panels-settings-search input {
+  box-sizing: border-box;
+  width: 200px;
+}
+#panels-settings-page .settings-banner #panels-settings-search .results {
+  display: none;
+  box-sizing: border-box;
+  position: absolute;
+  top: 100%;
+  left: 1px;
+  width: 200px;
+  background: #f4f4f4;
+  border: 1px solid #e0e0e0;
+  padding: 0;
+  margin: -2px 0 0 0;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+#panels-settings-page .settings-banner #panels-settings-search .results li {
+  margin: 0;
+  padding: 5px;
+  font-size: 0.95em;
+  font-weight: bold;
+  color: #777;
+  cursor: pointer;
+}
+#panels-settings-page .settings-banner #panels-settings-search .results li:hover {
+  background: #f8f8f8;
+}
 #panels-settings-page .settings-nav {
   background: #f6f6f6;
   border-bottom: 1px solid #d6d6d6;
@@ -56,6 +91,7 @@
   position: relative;
   border: 1px solid #d6d6d6;
   border-width: 1px 0 1px 1px;
+  transition: all 0.2s;
 }
 #panels-settings-page .settings-nav li:last-child {
   border-right-width: 1px;
@@ -80,7 +116,7 @@
 }
 #panels-settings-page #panels-settings-sections .panels-settings-section {
   display: none;
-  padding: 0 30px;
+  padding: 0 30px 0 20px;
 }
 #panels-settings-page #panels-settings-sections .panels-settings-section .description {
   font-style: italic;
@@ -90,6 +126,14 @@
 }
 #panels-settings-page #panels-settings-sections .panels-settings-section label {
   display: block;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section tr th {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+#panels-settings-page #panels-settings-sections .panels-settings-section tr th label {
+  border-left: 0 solid #0073aa;
+  padding: 20px 0 20px 10px;
 }
 #panels-settings-page #panels-settings-sections .panels-settings-section tr td label {
   -webkit-touch-callout: none;

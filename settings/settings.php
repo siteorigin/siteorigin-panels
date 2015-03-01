@@ -48,8 +48,8 @@ class SiteOrigin_Panels_Settings {
 		}
 
 		if( empty($this->settings) ){
-			//
 			$old_settings = get_option( 'siteorigin_panels_display', array() );
+
 			if( !empty($old_settings) ) {
 				// Get the current settings
 				$current_settings = get_option('siteorigin_panels_display', array());
@@ -126,8 +126,10 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function admin_scripts($prefix){
 		if( $prefix != 'settings_page_siteorigin_panels' ) return;
+
+		$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
-		wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.js', array(), SITEORIGIN_PANELS_VERSION );
+		wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings' . $js_suffix . '.js', array(), SITEORIGIN_PANELS_VERSION );
 	}
 
 	/**
@@ -172,8 +174,9 @@ class SiteOrigin_Panels_Settings {
 		);
 
 		$fields['general']['fields']['post-types'] = array(
-			'type' => 'post_types',
+			'type' => 'select_multi',
 			'label' => __('Post Types', 'siteorigin-panels'),
+			'options' => $this->get_post_types(),
 			'description' => __('The post types to use Page Builder on.', 'siteorigin-panels'),
 		);
 
@@ -192,7 +195,7 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['widgets']['fields']['bundled-widgets'] = array(
 			'type' => 'checkbox',
-			'label' => __('Bundled Widgets', 'siteorigin-panels'),
+			'label' => __('Legacy Bundled Widgets', 'siteorigin-panels'),
 			'description' => __('Load legacy bundled widgets from Page Builder 1.', 'siteorigin-panels'),
 		);
 
@@ -290,8 +293,26 @@ class SiteOrigin_Panels_Settings {
 				<?php
 				break;
 
-			case 'post_types':
-				?>RENDER THE POST TYPES SELECTOR<?php
+			case 'select':
+				?>
+				<select name="<?php echo esc_attr($field_name) ?>">
+					<?php foreach( $field['options'] as $option_id => $option ) : ?>
+						<option value="<?php echo esc_attr($option_id) ?>" <?php selected($option_id, $value) ?>><?php echo esc_html($option) ?></option>
+					<?php endforeach; ?>
+				</select>
+				<?php
+				break;
+
+			case 'select_multi':
+				foreach( $field['options'] as $option_id => $option ) {
+					?>
+					<label class="widefat">
+						<input name="<?php echo esc_attr($field_name) ?>[<?php echo esc_attr($option_id) ?>]" type="checkbox" <?php checked( in_array($option_id, $value) ) ?> />
+						<?php echo esc_html($option) ?>
+					</label>
+					<?php
+				}
+
 				break;
 		}
 	}
@@ -301,7 +322,89 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function save_settings(){
 		$screen = get_current_screen();
-		if($screen->base != 'settings_page_siteorigin_panels') return;
+		if( $screen->base != 'settings_page_siteorigin_panels' ) return;
+		if( empty($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'panels-settings') ) return;
+		if( empty($_POST['panels_setting']) ) return;
+		if( !current_user_can('manage_options') ) return;
+
+		$values = array();
+		$post = stripslashes_deep( $_POST['panels_setting'] );
+		$settings_fields = $this->fields = apply_filters('siteorigin_panels_settings_fields', array() );
+
+		if( empty($settings_fields) ) return;
+
+		foreach( $settings_fields as $section_id => $section ) {
+			if( empty($section['fields']) ) continue;
+
+			foreach( $section['fields'] as $field_id => $field ) {
+
+				switch( $field['type'] ) {
+					case 'text' :
+						$values[$field_id] = !empty($post[$field_id]) ? sanitize_text_field( $post[$field_id] ) : '';
+						break;
+
+					case 'number':
+						if( $post[$field_id] != '' ) {
+							$values[$field_id] = !empty($post[$field_id]) ? intval( $post[$field_id] ) : 0;
+						}
+						break;
+
+					case 'html':
+						$values[$field_id] = !empty($post[$field_id]) ? $post[$field_id] : '';
+						$values[$field_id] = wp_kses_post( $values[$field_id] );
+						$values[$field_id] = force_balance_tags( $values[$field_id] );
+						break;
+
+					case 'checkbox':
+						$values[$field_id] = !empty( $post[$field_id] );
+						break;
+
+					case 'select':
+						$values[$field_id] = !empty( $post[$field_id] ) ? $post[$field_id] : '';
+						if( !in_array( $values[$field_id], array_keys($field['options']) ) ) {
+							unset($values[$field_id]);
+						}
+						break;
+
+					case 'select_multi':
+						$values[$field_id] = array();
+						$multi_values = array();
+						foreach( $field['options'] as $option_id => $option ) {
+							$multi_values[$option_id] = !empty($post[$field_id][$option_id]);
+						}
+						foreach( $multi_values as $k => $v ) {
+							if( $v ) $values[$field_id][] = $k;
+						}
+
+						break;
+				}
+
+			}
+		}
+
+		// Save the values to the database
+		update_option( 'siteorigin_panels_settings', $values );
+		$this->settings = wp_parse_args( $values, $this->settings );
+	}
+
+	function get_post_types(){
+		$types = array_merge( array( 'page' => 'page', 'post' => 'post' ), get_post_types( array( '_builtin' => false ) ) );
+
+		// These are post types we know we don't want to show
+		unset( $types['ml-slider'] );
+
+		foreach( $types as $type_id => $type ) {
+			$type_object = get_post_type_object( $type_id );
+
+			if( !$type_object->show_ui ) {
+				unset($types[$type_id]);
+				continue;
+			}
+
+			$types[$type_id] = $type_object->label;
+		}
+
+		return $types;
 	}
 
 }

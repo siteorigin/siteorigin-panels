@@ -1,11 +1,19 @@
 <div class="wrap" id="panels-settings-page">
 	<div class="settings-banner">
+
 		<span class="icon">
 			<img src="<?php echo plugin_dir_url(__FILE__) ?>../images/icon-layer.png" class="layer-3" />
 			<img src="<?php echo plugin_dir_url(__FILE__) ?>../images/icon-layer.png" class="layer-2" />
 			<img src="<?php echo plugin_dir_url(__FILE__) ?>../images/icon-layer.png" class="layer-1" />
 		</span>
 		<h1><?php _e('SiteOrigin Page Builder', 'siteorigin-panels') ?></h1>
+
+		<div id="panels-settings-search">
+			<input type="search" placeholder="<?php esc_attr_e('Search Settings', 'siteorigin-panels') ?>" />
+
+			<ul class="results">
+			</ul>
+		</div>
 	</div>
 
 	<ul class="settings-nav">
@@ -16,49 +24,53 @@
 		?>
 	</ul>
 
-	<div id="panels-settings-sections">
-		<?php
-		foreach($settings_fields as $section_id => $section) {
-			?>
-			<div id="panels-settings-section-<?php echo esc_attr($section_id) ?>" class="panels-settings-section">
-				<table class="form-table">
-					<tbody>
-						<?php foreach( $section['fields'] as $field_id => $field ) : ?>
-							<tr>
-								<th scope="row"><label><?php echo esc_html($field['label']) ?></label></th>
-								<td>
-									<?php
-									$this->display_field( $field_id, $field );
-									if( !empty($field['description']) ) {
-										?>
-										<small class="description">
-											<?php
-											echo wp_kses( $field['description'], array(
-												'a' => array(
-													'href' => array(),
-													'title' => array()
-												),
-												'em' => array(),
-												'strong' => array(),
-											) );
-											?>
-										</small>
-										<?php
-									}
-									?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-			</div>
-			<?php
-		}
-		?>
-	</div>
+	<form action="<?php echo admin_url('options-general.php?page=siteorigin_panels') ?>" method="post" >
 
-	<div class="submit">
-		<input type="submit" value="<?php _e('Save Settings', 'siteorigin-panels') ?>" class="button-primary" />
-	</div>
+		<div id="panels-settings-sections">
+			<?php
+			foreach($settings_fields as $section_id => $section) {
+				?>
+				<div id="panels-settings-section-<?php echo esc_attr($section_id) ?>" class="panels-settings-section" data-section="<?php echo esc_attr($section_id) ?>">
+					<table class="form-table">
+						<tbody>
+							<?php foreach( $section['fields'] as $field_id => $field ) : ?>
+								<tr class="panels-setting">
+									<th scope="row"><label><?php echo esc_html($field['label']) ?></label></th>
+									<td>
+										<?php
+										$this->display_field( $field_id, $field );
+										if( !empty($field['description']) ) {
+											?>
+											<small class="description" data-keywords="<?php if(!empty($field['keywords'])) echo esc_attr($field['keywords']) ?>">
+												<?php
+												echo wp_kses( $field['description'], array(
+													'a' => array(
+														'href' => array(),
+														'title' => array()
+													),
+													'em' => array(),
+													'strong' => array(),
+												) );
+												?>
+											</small>
+											<?php
+										}
+										?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+				<?php
+			}
+			?>
+		</div>
+
+		<div class="submit">
+			<?php wp_nonce_field( 'panels-settings' ) ?>
+			<input type="submit" value="<?php _e('Save Settings', 'siteorigin-panels') ?>" class="button-primary" />
+		</div>
+	</form>
 
 </div>
