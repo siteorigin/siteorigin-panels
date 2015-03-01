@@ -324,14 +324,14 @@ function siteorigin_panels_sanitize_style_fields($section, $styles){
  * @return mixed
  */
 function siteorigin_panels_style_update_data($panels_data){
-	if( empty($panels_data['grids']) || !is_array($panels_data['grids']) ) return $panels_data;
+	if( empty($panels_data) || empty($panels_data['grids']) || !is_array($panels_data['grids']) ) return $panels_data;
 
 	for($i = 0; $i < count($panels_data['grids']); $i++) {
 		if( !is_array($panels_data['grids'][$i]) ) continue;
-		if( !isset($panels_data['grids'][$i]['style']) ) continue;
+		if( empty($panels_data['grids'][$i]) || empty($panels_data['grids'][$i]['style']) ) continue;
 
 		if( is_string($panels_data['grids'][$i]['style']) ){
-			$panels_data['grids'][$i]['style'] = array('class' => $panels_data['grids'][$i]['style']);
+			$panels_data['grids'][$i]['style'] = array( 'class' => $panels_data['grids'][$i]['style'] );
 		}
 
 	}

@@ -1,5 +1,5 @@
 <?php
-global $wp_widget_factory;
+global $wp_widget_factory, $post;
 $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 ?>
 
@@ -22,14 +22,19 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
 		</a>
 
-		<a href="#" class="so-tool-button so-history" style="display: none">
-			<span class="so-panels-icon so-panels-icon-rotate-left"></span>
-			<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
-		</a>
-		<a href="#" class="so-tool-button so-live-editor" style="display: none">
-			<span class="so-panels-icon so-panels-icon-eye"></span>
-			<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
-		</a>
+		<?php if( !empty($post) ) : ?>
+
+			<a href="#" class="so-tool-button so-history" style="display: none">
+				<span class="so-panels-icon so-panels-icon-rotate-left"></span>
+				<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
+			</a>
+
+			<a href="#" class="so-tool-button so-live-editor" style="display: none">
+				<span class="so-panels-icon so-panels-icon-eye"></span>
+				<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
+			</a>
+
+		<?php endif; ?>
 
 		<a href="#" class="so-switch-to-standard"><?php _e('Switch to Editor', 'siteorigin-panels') ?></a>
 
