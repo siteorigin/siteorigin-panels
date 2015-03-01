@@ -982,7 +982,7 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'panel', 'widget' ), $widget, $instance);
+	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'widget' ), $widget, $instance);
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
