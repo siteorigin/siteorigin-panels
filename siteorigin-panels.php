@@ -995,11 +995,20 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance);
 	$classes = array_map('sanitize_html_class', $classes);
 
+	$title_html = siteorigin_panels_setting( 'title-html' );
+	if( strpos($title_html, '{{title}}') !== false ) {
+		list( $before_title, $after_title ) = explode( '{{title}}', $title_html, 2 );
+	}
+	else {
+		$before_title = '<h3 class="widget-title">';
+		$after_title = '</h3>';
+	}
+
 	$args = array(
 		'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '">',
 		'after_widget' => '</div>',
-		'before_title' => '<h3 class="widget-title">',
-		'after_title' => '</h3>',
+		'before_title' => $before_title,
+		'after_title' => $after_title,
 		'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
 	);
 
