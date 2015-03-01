@@ -17,7 +17,7 @@ jQuery( function($){
                 }, 150 + 225 * (4 - v) );
             });
         })
-        .each(function() { if(this.complete) $(this).load(); });
+        .each(function() { if(this.complete) { $(this).load(); } });
 
     // Settings page tabbing
 
@@ -36,13 +36,10 @@ jQuery( function($){
     });
 
     // Save the tab the user last clicked
+
     var tabClicked = getUserSetting('siteorigin_panels_setting_tab');
-    if(tabClicked === '') {
-        $('.settings-nav li a').first().click();
-    }
-    else {
-        $('.settings-nav li a[href="#' + tabClicked + '"]').first().click();
-    }
+    if(tabClicked === '') { $('.settings-nav li a').first().click(); }
+    else { $('.settings-nav li a[href="#' + tabClicked + '"]').first().click(); }
 
     // Search settings
 
@@ -57,7 +54,7 @@ jQuery( function($){
             .find('label')
             .css('border-left-width', 0)
             .animate({ 'border-left-width': 5 }, 'normal')
-            .delay(3000)
+            .delay(4000)
             .animate({ 'border-left-width': 0 }, 'normal', function(){
                 $s.removeClass('highlighted');
             });

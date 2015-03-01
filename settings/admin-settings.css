@@ -43,7 +43,7 @@
 #panels-settings-page .settings-banner #panels-settings-search {
   position: absolute;
   bottom: -35px;
-  right: 30px;
+  right: 18px;
 }
 #panels-settings-page .settings-banner #panels-settings-search input {
   box-sizing: border-box;
@@ -56,7 +56,7 @@
   top: 100%;
   left: 1px;
   width: 200px;
-  background: #f4f4f4;
+  background: #ffffff;
   border: 1px solid #e0e0e0;
   padding: 0;
   margin: -2px 0 0 0;
@@ -73,7 +73,7 @@
   cursor: pointer;
 }
 #panels-settings-page .settings-banner #panels-settings-search .results li:hover {
-  background: #f8f8f8;
+  background: #f7f7f7;
 }
 #panels-settings-page .settings-nav {
   background: #f6f6f6;

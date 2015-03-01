@@ -1,6 +1,10 @@
 <?php
 
-
+/**
+ * Class to handle Page Builder settings.
+ *
+ * Class SiteOrigin_Panels_Settings
+ */
 class SiteOrigin_Panels_Settings {
 
 	private $settings;
@@ -33,10 +37,6 @@ class SiteOrigin_Panels_Settings {
 		return $single;
 	}
 
-	function clearCache(){
-		$this->settings = array();
-	}
-
 	/**
 	 * Get a settings value
 	 *
@@ -46,7 +46,7 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function get($key = ''){
 		if( !has_action('after_setup_theme') ) {
-			$this->clearCache();
+			$this->settings = array();
 		}
 
 		if( empty($this->settings) ){
@@ -94,6 +94,13 @@ class SiteOrigin_Panels_Settings {
 		update_option( 'siteorigin_panels_settings', $current_settings );
 	}
 
+	/**
+	 * Add default settings for the Page Builder settings.
+	 *
+	 * @param $defaults
+	 *
+	 * @return mixed
+	 */
 	function settings_defaults($defaults) {
 		$defaults['home-page'] = false;
 		$defaults['home-page-default'] = false;
@@ -166,6 +173,13 @@ class SiteOrigin_Panels_Settings {
 		) );
 	}
 
+	/**
+	 * Add the default Page Builder settings.
+	 *
+	 * @param $fields
+	 *
+	 * @return mixed
+	 */
 	function settings_fields( $fields ){
 		// The post types fields
 
@@ -197,13 +211,13 @@ class SiteOrigin_Panels_Settings {
 		$fields['widgets']['fields']['bundled-widgets'] = array(
 			'type' => 'checkbox',
 			'label' => __('Legacy Bundled Widgets', 'siteorigin-panels'),
-			'description' => __('Load legacy bundled widgets from Page Builder 1.', 'siteorigin-panels'),
+			'description' => __('Load legacy widgets from Page Builder 1.', 'siteorigin-panels'),
 		);
 
 		$fields['widgets']['fields']['recommended-widgets'] = array(
 			'type' => 'checkbox',
 			'label' => __('Recommended Widgets', 'siteorigin-panels'),
-			'description' => __('Recommend widgets in Page Builder.', 'siteorigin-panels'),
+			'description' => __('Display recommend widgets in Page Builder add widget dialog.', 'siteorigin-panels'),
 		);
 
 		// The layout fields
@@ -240,6 +254,7 @@ class SiteOrigin_Panels_Settings {
 			'unit' => 'px',
 			'label' => __('Row Gutter', 'siteorigin-panels'),
 			'description' => __('Default spacing between columns in each row.', 'siteorigin-panels'),
+			'keywords' => 'margin',
 		);
 
 		// The content fields
@@ -258,6 +273,12 @@ class SiteOrigin_Panels_Settings {
 		return $fields;
 	}
 
+	/**
+	 * Display a settings field
+	 *
+	 * @param $field_id
+	 * @param $field
+	 */
 	function display_field($field_id, $field){
 		$value = siteorigin_panels_setting($field_id);
 
@@ -383,10 +404,15 @@ class SiteOrigin_Panels_Settings {
 		$this->settings_saved = true;
 	}
 
+	/**
+	 * Get a post type array
+	 *
+	 * @return array
+	 */
 	function get_post_types(){
 		$types = array_merge( array( 'page' => 'page', 'post' => 'post' ), get_post_types( array( '_builtin' => false ) ) );
 
-		// These are post types we know we don't want to show
+		// These are post types we know we don't want to show Page Builder on
 		unset( $types['ml-slider'] );
 
 		foreach( $types as $type_id => $type ) {
