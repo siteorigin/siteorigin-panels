@@ -777,9 +777,12 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		$last_wi = 0;
 		foreach ($panels_data['widgets'] as $wid => &$widget_info) {
 			if ($widget_info['panels_info']['grid'] != $last_gi) {
+				$last_gi = $widget_info['panels_info']['grid'];
+				$last_ci = 0;
 				$last_wi = 0;
 			}
 			elseif ($widget_info['panels_info']['cell'] != $last_ci) {
+				$last_ci = $widget_info['panels_info']['cell'];
 				$last_wi = 0;
 			}
 			$widget_info['panels_info']['panel'] = $last_wi++;
