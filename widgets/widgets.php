@@ -1,6 +1,7 @@
 <?php
 // Include all the basic widgets
 include plugin_dir_path(__FILE__) . '/less/functions.php';
+include plugin_dir_path(__FILE__) . '/siteorigin-panels-widgets.php';
 
 /**
  * Include all the widget files and register their widgets

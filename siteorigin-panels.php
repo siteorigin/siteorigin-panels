@@ -691,28 +691,6 @@ function siteorigin_panels_generate_css($post_id, $panels_data){
 	return $css->get_css();
 }
 
-/**
- * Add a sidebar for SiteOrigin Panels widgets so they are correctly detected by is_active_widget
-*/
-function siteorigin_panels_add_widgets( $sidebars_widgets ) {
-	$panels_data = get_post_meta( get_the_ID(), 'panels_data', true );
-	if ( ! empty( $panels_data ) ) {
-		global $wp_widget_factory;
-		$siteorigin_panels_widgets = array();
-		foreach ( $panels_data['widgets'] as $widget_instance ) {
-			$widget_class = $widget_instance['panels_info']['class'];
-			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
-				$widget = $wp_widget_factory->widgets[ $widget_class ];
-				$siteorigin_panels_widgets[] = $widget->id;
-			}
-		}
-
-		if( ! empty( $siteorigin_panels_widgets) ) $sidebars_widgets['sidebar-siteorigin_panels'] = array_unique( $siteorigin_panels_widgets );
-	}
-
-	return $sidebars_widgets;
-}
-add_filter( 'sidebars_widgets', 'siteorigin_panels_add_widgets' );
 
 /**
  * Filter the content of the panel, adding all the widgets.
