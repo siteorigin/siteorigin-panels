@@ -1,5 +1,6 @@
 <?php
 
+//TODO: Ideally we would be handling widgets the same as WordPress does, then none of this would be necessary, but until then, this works.
 class SiteOrigin_Panels_Widgets {
 
 	private $all_posts_widgets;
@@ -23,7 +24,9 @@ class SiteOrigin_Panels_Widgets {
 						foreach ( $post_widgets as $widget_instance ) {
 							$instance_class = $widget_instance['panels_info']['class'];
 							if ( $instance_class == $widget_class ) {
-								$args[0][ $widget_instance['id'] ] = $widget_instance;
+								//The option value uses only the widget id number as keys
+								preg_match( '/-([0-9]+$)/', $widget_instance['id'], $num_match );
+								$args[0][ $num_match[1] ] = $widget_instance;
 							}
 						}
 					}
@@ -52,10 +55,10 @@ class SiteOrigin_Panels_Widgets {
 			$this->all_posts_widgets[ $pb_post->ID ] = array();
 			foreach ( $widgets as $widget_instance ) {
 				$id_val = $pb_post->ID . strval( 1000 + intval( $widget_instance['panels_info']['id'] ) );
-				$widget_instance['id'] = $id_val;
 				$widget_class = $widget_instance['panels_info']['class'];
 				if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
 					$widget = $wp_widget_factory->widgets[ $widget_class ];
+					$widget_instance['id'] = $widget->id_base . '-' . $id_val;
 					$widget_option_names[] = $widget->option_name;
 				}
 				$this->all_posts_widgets[$pb_post->ID][] = $widget_instance;
@@ -74,11 +77,11 @@ class SiteOrigin_Panels_Widgets {
 		global $wp_query;
 		if ( ! empty( $this->all_posts_widgets ) ) {
 			$siteorigin_panels_widget_ids = array();
-//			foreach ( $this->all_posts_widgets as $post_id => $post_widgets ) {
 			foreach ( $wp_query->posts as $post ) {
 				if ( ! empty( $this->all_posts_widgets[ $post->ID ] ) ) {
 					$post_widgets = $this->all_posts_widgets[ $post->ID ];
 					foreach ( $post_widgets as $widget_instance ) {
+						//Sidebars widgets and the global $wp_registered widgets use full widget ids as keys
 						$siteorigin_panels_widget_ids[] = $widget_instance['id'];
 					}
 					if( ! empty( $siteorigin_panels_widget_ids) ) $sidebars_widgets['sidebar-siteorigin_panels-post-' . $post->ID] = $siteorigin_panels_widget_ids;
