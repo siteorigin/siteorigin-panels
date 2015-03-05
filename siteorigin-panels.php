@@ -593,8 +593,9 @@ function siteorigin_panels_get_current_admin_panels_data( ){
  * @param $panels_data
  * @return string
  */
-function siteorigin_panels_generate_css($post_id, $panels_data){
+function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	// Exit if we don't have panels data
+	if( empty($panels_data) ) $panels_data = get_post_meta( $post_id, 'panels_data', true );
 	if ( empty( $panels_data ) || empty( $panels_data['grids'] ) ) return;
 
 	// Get some of the default settings
@@ -818,11 +819,11 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	echo '<div id="pl-' . $post_id . '">';
 
 	global $siteorigin_panels_inline_css;
-	if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = '';
+	if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = array();
 
-	if($enqueue_css) {
+	if( $enqueue_css && !isset($siteorigin_panels_inline_css[$post_id]) ) {
 		wp_enqueue_style('siteorigin-panels-front');
-		$siteorigin_panels_inline_css .= siteorigin_panels_generate_css($post_id, $panels_data);
+		$siteorigin_panels_inline_css[$post_id] = siteorigin_panels_generate_css($post_id, $panels_data);
 	}
 
 	echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
@@ -958,7 +959,18 @@ function siteorigin_panels_start_style_wrapper($name, $style_attributes, $style_
 function siteorigin_panels_print_inline_css(){
 	global $siteorigin_panels_inline_css;
 	if(!empty($siteorigin_panels_inline_css)) {
-		?><style type="text/css" media="all"><?php echo $siteorigin_panels_inline_css ?></style><?php
+		$the_css = '';
+		foreach( $siteorigin_panels_inline_css as $post_id => $css ) {
+			if( empty($css) ) continue;
+
+			$the_css .= '/* Layout ' . esc_attr($post_id) . ' */ ';
+			$the_css .= $css;
+			$siteorigin_panels_inline_css[$post_id] = '';
+		}
+
+		if( !empty($css) ) {
+			?><style type="text/css" media="all" id="css-siteorigin-panels-<?php echo esc_attr( current_filter() ) ?>"><?php echo $the_css ?></style><?php
+		}
 	}
 
 	$siteorigin_panels_inline_css = '';
@@ -1131,7 +1143,17 @@ add_filter('body_class', 'siteorigin_panels_body_class');
  * Enqueue the required styles
  */
 function siteorigin_panels_enqueue_styles(){
+	// Register the style to support possible lazy loading
 	wp_register_style('siteorigin-panels-front', plugin_dir_url(__FILE__) . 'css/front.css', array(), SITEORIGIN_PANELS_VERSION );
+
+	if( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
+		wp_enqueue_style('siteorigin-panels-front');
+
+		// Enqueue the general layout CSS
+		global $siteorigin_panels_inline_css;
+		if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = array();
+		$siteorigin_panels_inline_css[ get_the_ID() ] = siteorigin_panels_generate_css( get_the_ID() );
+	}
 }
 add_action('wp_enqueue_scripts', 'siteorigin_panels_enqueue_styles', 1);
 

@@ -37,16 +37,16 @@ class SiteOrigin_Panels_Widget_Sidebars {
 			$opt_name = $opt_matches[1];
 			global $wp_widget_factory;
 			foreach ( $wp_widget_factory->widgets as $widget ) {
-				if ( $widget->id_base == $opt_name ) {
-					$widget_class = get_class( $widget );
-					foreach ( $this->all_posts_widgets as $post_widgets ) {
-						foreach ( $post_widgets as $widget_instance ) {
-							$instance_class = $widget_instance['panels_info']['class'];
-							if ( $instance_class == $widget_class ) {
-								//The option value uses only the widget id number as keys
-								preg_match( '/-([0-9]+$)/', $widget_instance['id'], $num_match );
-								$args[0][ $num_match[1] ] = $widget_instance;
-							}
+				if( $widget->id_base != $opt_name ) continue;
+
+				$widget_class = get_class( $widget );
+				foreach ( $this->all_posts_widgets as $post_widgets ) {
+					foreach ( $post_widgets as $widget_instance ) {
+						$instance_class = $widget_instance['panels_info']['class'];
+						if ( $instance_class == $widget_class ) {
+							//The option value uses only the widget id number as keys
+							preg_match( '/-([0-9]+$)/', $widget_instance['id'], $num_match );
+							$args[0][ $num_match[1] ] = $widget_instance;
 						}
 					}
 				}
