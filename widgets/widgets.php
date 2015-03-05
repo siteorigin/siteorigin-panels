@@ -299,19 +299,10 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 		// Dynamically generate the CSS
 		if(!empty($instance['origin_style'])) {
 			$filename = $this->origin_id.'-'.$style.'-'.$preset;
-			if(siteorigin_panels_setting('inline-css')) {
-				static $inlined_css = array();
-				if(empty($inlined_css[$filename])) {
-					$inlined_css[$filename] = true;
-					?><style type="text/css" media="all"><?php echo origin_widgets_generate_css(get_class($this), $style, $preset) ?></style><?php
-				}
-			}
-			else {
-				wp_enqueue_style( 'origin-widget-'.$filename, add_query_arg(array(
-					'class' => get_class($this),
-					'style' => $style,
-					'preset' => $preset,
-				), site_url('?action=origin_widgets_css') ), array(), SITEORIGIN_PANELS_VERSION );
+			static $inlined_css = array();
+			if(empty($inlined_css[$filename])) {
+				$inlined_css[$filename] = true;
+				?><style type="text/css" media="all"><?php echo origin_widgets_generate_css(get_class($this), $style, $preset) ?></style><?php
 			}
 		}
 
