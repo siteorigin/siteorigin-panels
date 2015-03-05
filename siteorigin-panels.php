@@ -968,12 +968,10 @@ function siteorigin_panels_print_inline_css(){
 			$siteorigin_panels_inline_css[$post_id] = '';
 		}
 
-		if( !empty($css) ) {
-			?><style type="text/css" media="all" id="css-siteorigin-panels-<?php echo esc_attr( current_filter() ) ?>"><?php echo $the_css ?></style><?php
+		if( !empty($the_css) ) {
+			?><style type="text/css" media="all" id="siteorigin-panels-grids-<?php echo esc_attr( current_filter() ) ?>"><?php echo $the_css ?></style><?php
 		}
 	}
-
-	$siteorigin_panels_inline_css = '';
 }
 add_action('wp_head', 'siteorigin_panels_print_inline_css', 12);
 add_action('wp_footer', 'siteorigin_panels_print_inline_css');
