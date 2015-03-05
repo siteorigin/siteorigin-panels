@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.0.7
+Version: 2.0.8-dev
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.0.7');
+define('SITEORIGIN_PANELS_VERSION', '2.0.8-dev');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
@@ -77,8 +77,17 @@ add_action('admin_menu', 'siteorigin_panels_admin_menu');
  * Render the page used to build the custom home page.
  */
 function siteorigin_panels_render_admin_home_page(){
+	// We need a global post for some features in Page Builder (eg history)
 	global $post;
-	$post = get_post( get_option( 'siteorigin_panels_home_page_id' ) );
+
+	$home_page_id = get_option( 'page_on_front' );
+	if( empty($home_page_id) ) $home_page_id = get_option( 'siteorigin_panels_home_page_id' );
+
+	$home_page = get_post( $home_page_id );
+	if( !empty($home_page) && get_post_meta( $home_page->ID, 'panels_data', true ) != '' ) {
+		$post = $home_page;
+	}
+
 	$panels_data = siteorigin_panels_get_current_admin_panels_data();
 	include plugin_dir_path(__FILE__).'tpl/admin-home-page.php';
 }
@@ -101,18 +110,19 @@ function siteorigin_panels_save_home_page(){
 	if( !current_user_can('edit_theme_options') ) return;
 
 	// Check that the home page ID is set and the home page exists
-	if ( !get_option('siteorigin_panels_home_page_id') || !get_post( get_option('siteorigin_panels_home_page_id') ) ) {
+	$page_id = get_option( 'page_on_front' );
+	if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
+
+	if ( !$page_id || get_post_meta( $page_id, 'panels_data', true ) == '' ) {
 		// Lets create a new page
 		$page_id = wp_insert_post( array(
 			'post_title' => __( 'Home', 'siteorigin-panels' ),
-			'post_status' => $_POST['siteorigin_panels_home_enabled'] == 'true' ? 'publish' : 'draft',
+			'post_status' => !empty($_POST['siteorigin_panels_home_enabled']) == 'true' ? 'publish' : 'draft',
 			'post_type' => 'page',
 			'comment_status' => 'closed',
 		) );
+		update_option( 'page_on_front', $page_id );
 		update_option( 'siteorigin_panels_home_page_id', $page_id );
-	}
-	else {
-		$page_id = get_option( 'siteorigin_panels_home_page_id' );
 	}
 
 	// Save the updated page data
@@ -126,18 +136,12 @@ function siteorigin_panels_save_home_page(){
 	if( !empty( $_POST['siteorigin_panels_home_enabled'] ) ) {
 		update_option('show_on_front', 'page');
 		update_option('page_on_front', $page_id);
+		update_option('siteorigin_panels_home_page_id', $page_id);
 		wp_publish_post($page_id);
 	}
 	else {
 		// We're disabling this home page
-		if( get_option('page_on_front') == $page_id ) {
-			// Disable the front page display
-			update_option('page_on_front', false);
-
-			if( !get_option( 'page_for_posts' ) ) {
-				update_option( 'show_on_front', 'posts' );
-			}
-		}
+		update_option( 'show_on_front', 'posts' );
 
 		// Change the post status to draft
 		$post = get_post($page_id);
@@ -165,9 +169,12 @@ add_action('admin_init', 'siteorigin_panels_save_home_page');
  * After the theme is switched, change the template on the home page if the theme supports home page functionality.
  */
 function siteorigin_panels_update_home_on_theme_change(){
-	if( siteorigin_panels_setting( 'home-page' ) && siteorigin_panels_setting( 'home-template' ) && get_option( 'siteorigin_panels_home_page_id' ) ) {
+	$page_id = get_option( 'page_on_front' );
+	if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
+
+	if( siteorigin_panels_setting( 'home-page' ) && siteorigin_panels_setting( 'home-template' ) && $page_id && get_post_meta( $page_id, 'panels_data', true ) !== '' ) {
 		// Lets update the home page to use the home template that this theme supports
-		update_post_meta( get_option( 'siteorigin_panels_home_page_id' ), '_wp_page_template', siteorigin_panels_setting( 'home-template' ) );
+		update_post_meta( $page_id, '_wp_page_template', siteorigin_panels_setting( 'home-template' ) );
 	}
 }
 add_action('after_switch_theme', 'siteorigin_panels_update_home_on_theme_change');
@@ -525,7 +532,11 @@ function siteorigin_panels_process_raw_widgets($widgets) {
  * @return mixed|void
  */
 function siteorigin_panels_get_home_page_data(){
-	$panels_data = get_option('siteorigin_panels_home_page', null);
+	$page_id = get_option( 'page_on_front' );
+	if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
+	if( empty($page_id) ) return false;
+
+	$panels_data = get_post_meta( $page_id, 'panels_data', true );
 	if( is_null( $panels_data ) ){
 		// Load the default layout
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
@@ -540,14 +551,15 @@ function siteorigin_panels_get_home_page_data(){
  *
  * @return array
  */
-function siteorigin_panels_get_current_admin_panels_data(){
+function siteorigin_panels_get_current_admin_panels_data( ){
 	$screen = get_current_screen();
 
 	// Localize the panels with the panels data
 	if($screen->base == 'appearance_page_so_panels_home_page'){
-		$page_id = get_option( 'siteorigin_panels_home_page_id' );
-		if( !empty($page_id) ) $panels_data = get_post_meta( $page_id, 'panels_data', true );
-		else $panels_data = null;
+		$home_page_id = get_option( 'page_on_front' );
+		if( empty($home_page_id) ) $home_page_id = get_option( 'siteorigin_panels_home_page_id' );
+
+		$panels_data = !empty($home_page_id) ? get_post_meta( $home_page_id, 'panels_data', true ) : null;
 
 		if( is_null( $panels_data ) ){
 			// Load the default layout
@@ -555,6 +567,10 @@ function siteorigin_panels_get_current_admin_panels_data(){
 
 			$home_name = siteorigin_panels_setting('home-page-default') ? siteorigin_panels_setting('home-page-default') : 'home';
 			$panels_data = !empty($layouts[$home_name]) ? $layouts[$home_name] : current($layouts);
+		}
+		elseif( empty( $panels_data ) ) {
+			// The current page_on_front isn't using page builder
+			return false;
 		}
 
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, 'home');
@@ -755,7 +771,10 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			$panels_data = !empty($layouts[$prebuilt_id]) ? $layouts[$prebuilt_id] : array();
 		}
 		else if($post_id == 'home'){
-			$panels_data = get_post_meta( get_option('siteorigin_panels_home_page_id'), 'panels_data', true );
+			$page_id = get_option( 'page_on_front' );
+			if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
+
+			$panels_data = !empty($page_id) ? get_post_meta( $page_id, 'panels_data', true ) : null;
 
 			if( is_null($panels_data) ){
 				// Load the default layout
@@ -982,7 +1001,7 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'panel', 'widget' ), $widget, $instance);
+	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'siteorigin-panel', 'widget' ), $widget, $instance);
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
@@ -999,6 +1018,9 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 		'after_title' => '</h3>',
 		'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
 	);
+
+	// Let other themes and plugins change the arguments that go to the widget class.
+	$args = apply_filters('siteorigin_panels_widget_args', $args);
 
 	// If there is a style wrapper, add it.
 	if( !empty($style_wrapper) ) {
@@ -1027,16 +1049,17 @@ function siteorigin_panels_admin_bar_menu($admin_bar){
 	if( !current_user_can('edit_theme_options') ) return $admin_bar;
 
 	if( is_home() || is_front_page() ) {
-		if( ( is_page() && get_the_ID() == get_option('siteorigin_panels_home_page_id') ) || current_user_can('edit_theme_options') ) {
+		if( ( is_page() && get_post_meta( get_the_ID(), 'panels_data', true ) !== '' ) || !is_page() ) {
 			$admin_bar->add_node( array(
 				'id' => 'edit-home-page',
 				'title' => __('Edit Home Page', 'siteorigin-panels'),
 				'href' => admin_url('themes.php?page=so_panels_home_page')
 			) );
-		}
 
-		if( is_page() && get_the_ID() == get_option('siteorigin_panels_home_page_id')  ) {
-			$admin_bar->remove_node('edit');
+			if( is_page() ) {
+				// Remove the standard edit button
+				$admin_bar->remove_node('edit');
+			}
 		}
 	}
 
