@@ -7,7 +7,7 @@ class SiteOrigin_Panels_Widget_Sidebars {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-		add_action( 'widgets_init', array( $this, 'register_widgets' ), 100 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ), 99 );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
@@ -65,7 +65,7 @@ class SiteOrigin_Panels_Widget_Sidebars {
 		$post_id = url_to_postid( add_query_arg( false, false ) );
 		if( empty($post_id) ) {
 			// Maybe this is the home page
-			if( add_query_arg(false, false) == home_url( '/' ) && !get_option('page_on_front') != 0 ) {
+			if( add_query_arg(false, false) == '/' && get_option('page_on_front') != 0 ) {
 				$post_id = get_option( 'page_on_front' );
 			}
 		}
@@ -120,3 +120,8 @@ class SiteOrigin_Panels_Widget_Sidebars {
 }
 
 SiteOrigin_Panels_Widget_Sidebars::single();
+
+function test_die(){
+	//die();
+}
+add_action('wp_footer', 'test_die');
