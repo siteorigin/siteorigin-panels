@@ -827,7 +827,18 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	ob_start();
 
 	// Add the panel layout wrapper
-	echo '<div id="pl-' . $post_id . '">';
+	$panel_layout_classes = apply_filters( 'siteorigin_panels_layout_classes', array(), $post_id, $panels_data );
+	$panel_layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
+		'class' => implode( ' ', $panel_layout_classes ),
+		'id' => 'pl-' . $post_id
+	),  $post_id, $panels_data );
+	echo '<div';
+	foreach ( $panel_layout_attributes as $name => $value ) {
+		if ($value) {
+			echo ' ' . $name . '="' . esc_attr($value) . '"';
+		}
+	}
+	echo '>';
 
 	global $siteorigin_panels_inline_css;
 	if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = '';
