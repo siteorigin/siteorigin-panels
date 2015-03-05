@@ -7,8 +7,7 @@ class SiteOrigin_Panels_Widget_Sidebars {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-
-		add_filter( 'wp', array( $this, 'register_widgets' ) , 20 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ), 100 );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
@@ -62,28 +61,33 @@ class SiteOrigin_Panels_Widget_Sidebars {
 	 * Register all the current widgets so we can filter the get_option('widget_...') values to add instances
 	 */
 	function register_widgets( ) {
-		global $wp_query;
-		if( !$wp_query->is_singular() ) return;
-
-		$pb_post = $wp_query->post;
+		// Get the ID of the current post
+		$post_id = url_to_postid( add_query_arg( false, false ) );
+		if( empty($post_id) ) {
+			// Maybe this is the home page
+			if( add_query_arg(false, false) == home_url( '/' ) && !get_option('page_on_front') != 0 ) {
+				$post_id = get_option( 'page_on_front' );
+			}
+		}
+		if( empty($post_id) ) return;
 
 		global $wp_widget_factory;
 		$widget_option_names = array();
-		$panels_data = get_post_meta( $pb_post->ID, 'panels_data', true );
+		$panels_data = get_post_meta( $post_id, 'panels_data', true );
 		if( empty( $panels_data ) || empty( $panels_data['widgets'] ) ) {
 			return;
 		}
 		$widgets = $panels_data['widgets'];
-		$this->all_posts_widgets[ $pb_post->ID ] = array();
+		$this->all_posts_widgets[ $post_id ] = array();
 		foreach ( $widgets as $widget_instance ) {
-			$id_val = $pb_post->ID . strval( 1000 + intval( $widget_instance['panels_info']['id'] ) );
+			$id_val = $post_id . strval( 1000 + intval( $widget_instance['panels_info']['id'] ) );
 			$widget_class = $widget_instance['panels_info']['class'];
 			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
 				$widget = $wp_widget_factory->widgets[ $widget_class ];
 				$widget_instance['id'] = $widget->id_base . '-' . $id_val;
 				$widget_option_names[] = $widget->option_name;
 			}
-			$this->all_posts_widgets[$pb_post->ID][] = $widget_instance;
+			$this->all_posts_widgets[ $post_id ][] = $widget_instance;
 		}
 
 		$widget_option_names = array_unique( $widget_option_names );
@@ -104,6 +108,7 @@ class SiteOrigin_Panels_Widget_Sidebars {
 		foreach ( array_keys( $this->all_posts_widgets ) as $post_id ) {
 			$post_widgets = $this->all_posts_widgets[ $post_id ];
 			foreach ( $post_widgets as $widget_instance ) {
+				if( empty($widget_instance['id']) ) continue;
 				//Sidebars widgets and the global $wp_registered widgets use full widget ids as keys
 				$siteorigin_panels_widget_ids[] = $widget_instance['id'];
 			}
