@@ -992,26 +992,40 @@
   margin-bottom: 10px;
   float: left;
 }
+.so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type:nth-of-type(4n + 1) {
+  clear: both;
+}
 @media (max-width: 1280px) {
   .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type {
     width: 33.333%;
+  }
+  .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type:nth-of-type(4n + 1) {
+    clear: none;
+  }
+  .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type:nth-of-type(3n + 1) {
+    clear: both;
   }
 }
 @media (max-width: 960px) {
   .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type {
     width: 50%;
   }
+  .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type:nth-of-type(3n + 1) {
+    clear: none;
+  }
+  .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type:nth-of-type(2n + 1) {
+    clear: both;
+  }
 }
 .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type h3 {
   margin: 0 0 7px 0;
   padding: 0;
-  height: 1.2em;
   color: #222222;
   font-size: 14px;
 }
 .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type small {
   font-size: 11px;
-  height: 2.5em;
+  min-height: 2.5em;
   line-height: 1.25em;
   display: block;
   overflow: hidden;
