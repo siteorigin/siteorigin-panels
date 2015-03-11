@@ -2333,7 +2333,7 @@ String.prototype.panelsProcessTemplate = function(){
 
             this.on('open_dialog', function(){
                 this.filter.search = '';
-                this.filterWidgets(this.filter);
+                this.filterWidgets( this.filter );
             }, this);
 
             this.on('open_dialog_complete', function(){
@@ -2389,9 +2389,8 @@ String.prototype.panelsProcessTemplate = function(){
         tabClickHandler: function($t){
             // Get the filter from the tab, and filter the widgets
             this.filter = $t.parent().data('filter');
-            if( this.$el.find('.so-sidebar-search').val() !== '' ) {
-                this.filter.search = this.$el.find('.so-sidebar-search').val();
-            }
+            this.filter.search = this.$el.find('.so-sidebar-search').val();
+
             this.filterWidgets(this.filter);
 
             return false;
@@ -2403,7 +2402,6 @@ String.prototype.panelsProcessTemplate = function(){
         searchHandler: function(e){
             this.filter.search = $(e.target).val();
             this.filterWidgets(this.filter);
-            this.balanceWidgetHeights();
         },
 
         /**
@@ -2457,6 +2455,9 @@ String.prototype.panelsProcessTemplate = function(){
                     $$.hide();
                 }
             });
+
+            // Balance the tags after filtering
+            this.balanceWidgetHeights();
         },
 
         /**
