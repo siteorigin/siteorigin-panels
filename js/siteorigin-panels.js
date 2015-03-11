@@ -2403,6 +2403,7 @@ String.prototype.panelsProcessTemplate = function(){
         searchHandler: function(e){
             this.filter.search = $(e.target).val();
             this.filterWidgets(this.filter);
+            this.balanceWidgetHeights();
         },
 
         /**
@@ -2488,8 +2489,23 @@ String.prototype.panelsProcessTemplate = function(){
             var widgetRows = [ [] ];
             var previousWidget = null;
 
+            // Work out how many widgets there are per row
+            var perRow = Math.round( this.$('.widget-type').parent().width() / this.$('.widget-type').width() );
+
+            // Add clears to create balanced rows
+            this.$('.widget-type')
+                .css('clear', 'none')
+                .filter(':visible')
+                .each( function(i, el) {
+                    if( i % perRow === 0 && i !== 0 ) {
+                        $(el).css('clear', 'both');
+                    }
+                } );
+
+            // Group the widgets into rows
             this.$('.widget-type-wrapper')
-                .css('height', 'auto')
+                .css( 'height', 'auto' )
+                .filter(':visible')
                 .each(function(i, el) {
                     var $el = $(el);
                     if( previousWidget !== null && previousWidget.position().top !== $el.position().top ) {
@@ -2499,8 +2515,8 @@ String.prototype.panelsProcessTemplate = function(){
                     widgetRows[widgetRows.length - 1].push( $el );
                 });
 
+            // Balance the height of the widgets within the row.
             _.each( widgetRows, function(row, i){
-
                 var maxHeight = _.max( row.map( function(el){ return el.height(); } ) );
                 // Set the height of each widget in the row
                 _.each(row, function(el){
