@@ -381,7 +381,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 
 		// If the Widgets Bundle is installed and the post selector is available, use that.
 		// Otherwise revert back to our own form fields.
-		if ( function_exists( 'siteorigin_widget_post_selector_form_fields' ) ) {
+		if ( function_exists( 'siteorigin_widget_post_selector_enqueue_admin_scripts' ) ) {
 			siteorigin_widget_post_selector_enqueue_admin_scripts();
 			$value = '';
 			if ( ! empty( $instance['posts'] ) && ! is_array( $instance['posts'] ) ) {
