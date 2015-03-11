@@ -2339,6 +2339,7 @@ String.prototype.panelsProcessTemplate = function(){
             this.on('open_dialog_complete', function(){
                 // Clear the search and re-filter the widgets when we open the dialog
                 this.$('.so-sidebar-search').val('').focus();
+                this.balanceWidgetHeights();
             });
 
             // We'll implement a custom tab click handler
@@ -2375,6 +2376,11 @@ String.prototype.panelsProcessTemplate = function(){
 
             // We'll be using tabs, so initialize them
             this.initTabs();
+
+            var thisDialog = this;
+            $(window).resize(function(){
+                thisDialog.balanceWidgetHeights();
+            });
         },
 
         /**
@@ -2472,6 +2478,36 @@ String.prototype.panelsProcessTemplate = function(){
             widget.cell.widgets.add( widget );
 
             this.closeDialog();
+        },
+
+        /**
+         * Balance widgets in a given row so they have enqual height.
+         * @param e
+         */
+        balanceWidgetHeights : function(e) {
+            var widgetRows = [ [] ];
+            var previousWidget = null;
+
+            this.$('.widget-type-wrapper')
+                .css('height', 'auto')
+                .each(function(i, el) {
+                    var $el = $(el);
+                    if( previousWidget !== null && previousWidget.position().top !== $el.position().top ) {
+                        widgetRows[widgetRows.length] = [];
+                    }
+                    previousWidget = $el;
+                    widgetRows[widgetRows.length - 1].push( $el );
+                });
+
+            _.each( widgetRows, function(row, i){
+
+                var maxHeight = _.max( row.map( function(el){ return el.height(); } ) );
+                // Set the height of each widget in the row
+                _.each(row, function(el){
+                    el.height(maxHeight);
+                });
+
+            } );
         }
     } );
 
