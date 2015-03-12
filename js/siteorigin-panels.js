@@ -5,6 +5,8 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+
 /**
  * Convert template into something compatible with Underscore.js templates
  *
@@ -174,13 +176,16 @@ String.prototype.panelsProcessTemplate = function(){
             }
 
             var values = this.get('values');
-            var thisModel = this;
 
             // Create a list of fields to check for a title
             var titleFields = ['title', 'text'];
+
             for (var k in values){
-                titleFields.push( k );
+                if( values.hasOwnProperty(k) ) {
+                    titleFields.push( k );
+                }
             }
+
             titleFields = _.uniq(titleFields);
 
             for( var i in titleFields ) {
@@ -1005,12 +1010,10 @@ String.prototype.panelsProcessTemplate = function(){
          */
         editSettingsHandler: function(){
             // Lets open up an instance of the settings dialog
-            var dialog = this.builder.dialogs.row;
-
-            if( this.dialog == null ) {
+            if( this.dialog === null ) {
                 // Create the dialog
                 this.dialog = new panels.dialog.row();
-                this.dialog.setBuilder( this.builder).setRowModel( this.model);
+                this.dialog.setBuilder( this.builder).setRowModel( this.model );
             }
 
             this.dialog.openDialog();
@@ -1406,8 +1409,6 @@ String.prototype.panelsProcessTemplate = function(){
                     .appendTo( $( '#wp-content-wrap .wp-editor-tabs' ) );
             }
 
-
-
             // Switch back to the standard editor
             metabox.find('.so-switch-to-standard').click(function(e){
                 e.preventDefault();
@@ -1728,7 +1729,9 @@ String.prototype.panelsProcessTemplate = function(){
                     },
                     function(content){
 
-                        if( content === '' ) return;
+                        if( content === '' ) {
+                            return;
+                        }
 
                         // Strip all the known layout divs
                         var t = $('<div />').html( content );
@@ -2108,7 +2111,7 @@ String.prototype.panelsProcessTemplate = function(){
         keyboardListen: function(e) {
         
             // [Esc] to close
-            if (e.which == 27) {
+            if (e.which === 27) {
                 $('.so-panels-dialog-wrapper .so-close').trigger('click');
             }
         },
@@ -2826,22 +2829,24 @@ String.prototype.panelsProcessTemplate = function(){
 
             if( _.size(layouts) ) {
                 for (var lid in layouts) {
-                    // Exclude the current post if we have one
-                    if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
-                        continue;
-                    }
-                    if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
-                        continue;
-                    }
+                    if( layouts.hasOwnProperty(lid) ) {
+                        // Exclude the current post if we have one
+                        if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
+                            continue;
+                        }
+                        if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
+                            continue;
+                        }
 
-                    // Create the layout item to display in the list
-                    var $l = $(this.entryTemplate({
-                        name: layouts[lid].name,
-                        description: layouts[lid].description
-                    }));
+                        // Create the layout item to display in the list
+                        var $l = $(this.entryTemplate({
+                            name: layouts[lid].name,
+                            description: layouts[lid].description
+                        }));
 
-                    // Create and append the
-                    $l.appendTo(c).data({'type': type, 'lid': lid});
+                        // Create and append the
+                        $l.appendTo(c).data({'type': type, 'lid': lid});
+                    }
                 }
             }
         },
