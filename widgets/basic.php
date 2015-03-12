@@ -196,7 +196,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 		else {
 			// Get current page number when we're not using permalinks
-			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+			$paged = filter_input( INPUT_GET, 'paged', FILTER_SANITIZE_NUMBER_INT );
+			$query_args['paged'] = $paged !== false ? $paged : 1;
 		}
 
 		switch($instance['sticky']){

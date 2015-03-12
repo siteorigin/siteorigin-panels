@@ -106,18 +106,25 @@ add_action( 'add_meta_boxes', 'siteorigin_panels_metaboxes' );
  * Save home page
  */
 function siteorigin_panels_save_home_page(){
-	if( !isset($_POST['_sopanels_home_nonce'] ) || !wp_verify_nonce($_POST['_sopanels_home_nonce'], 'save') ) return;
+	$nonce = filter_input( INPUT_POST, '_sopanels_home_nonce', FILTER_SANITIZE_STRING );
+	if( !wp_verify_nonce($nonce, 'save') ) return;
+
 	if( !current_user_can('edit_theme_options') ) return;
 
 	// Check that the home page ID is set and the home page exists
 	$page_id = get_option( 'page_on_front' );
 	if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
 
+	$request = filter_input_array( INPUT_POST, array(
+		'panels_data' => FILTER_DEFAULT,
+		'siteorigin_panels_home_enabled' => FILTER_VALIDATE_BOOLEAN
+	) );
+
 	if ( !$page_id || get_post_meta( $page_id, 'panels_data', true ) == '' ) {
 		// Lets create a new page
 		$page_id = wp_insert_post( array(
 			'post_title' => __( 'Home', 'siteorigin-panels' ),
-			'post_status' => !empty($_POST['siteorigin_panels_home_enabled']) == 'true' ? 'publish' : 'draft',
+			'post_status' => $request['siteorigin_panels_home_enabled'] ? 'publish' : 'draft',
 			'post_type' => 'page',
 			'comment_status' => 'closed',
 		) );
@@ -126,14 +133,14 @@ function siteorigin_panels_save_home_page(){
 	}
 
 	// Save the updated page data
-	$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
+	$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
 	update_post_meta( $page_id, '_wp_page_template', siteorigin_panels_setting( 'home-template' ) );
 
-	if( !empty( $_POST['siteorigin_panels_home_enabled'] ) ) {
+	if( $request['siteorigin_panels_home_enabled'] ) {
 		update_option('show_on_front', 'page');
 		update_option('page_on_front', $page_id);
 		update_option('siteorigin_panels_home_page_id', $page_id);
@@ -452,11 +459,16 @@ function siteorigin_panels_add_help_tab_content(){
  */
 function siteorigin_panels_save_post( $post_id, $post ) {
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-	if ( empty( $_POST['_sopanels_nonce'] ) || !wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ) return;
+	$nonce = filter_input( INPUT_POST, '_sopanels_nonce', FILTER_SANITIZE_STRING );
+	if ( !wp_verify_nonce( $nonce, 'save' ) ) return;
 	if ( !current_user_can( 'edit_post', $post_id ) ) return;
 
+	$request = filter_input_array( INPUT_POST, array(
+		'panels_data' => FILTER_DEFAULT
+	) );
+
 	if ( !wp_is_post_revision($post_id) ) {
-		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
+		$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
@@ -470,7 +482,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 	}
 	else {
 		// When previewing, we don't need to wp_unslash the panels_data post variable.
-		$panels_data = json_decode( $_POST['panels_data'], true);
+		$panels_data = json_decode( $request['panels_data'], true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
@@ -1079,22 +1091,6 @@ function siteorigin_panels_admin_bar_menu($admin_bar){
 add_action('admin_bar_menu', 'siteorigin_panels_admin_bar_menu', 100);
 
 /**
- * Handles creating the preview.
- */
-function siteorigin_panels_preview(){
-	if(isset($_GET['siteorigin_panels_preview']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'siteorigin-panels-preview')){
-		global $siteorigin_panels_is_preview;
-		$siteorigin_panels_is_preview = true;
-		// Set the panels home state to true
-		if(empty($_POST['post_id'])) $GLOBALS['siteorigin_panels_is_panels_home'] = true;
-		add_action('siteorigin_panels_data', 'siteorigin_panels_home_preview_load_data');
-		locate_template( siteorigin_panels_setting('home-template'), true );
-		wp_die();
-	}
-}
-add_action('template_redirect', 'siteorigin_panels_preview');
-
-/**
  * Is this a preview.
  *
  * @return bool
@@ -1102,32 +1098,6 @@ add_action('template_redirect', 'siteorigin_panels_preview');
 function siteorigin_panels_is_preview(){
 	global $siteorigin_panels_is_preview;
 	return (bool) $siteorigin_panels_is_preview;
-}
-
-/**
- * Hide the admin bar for panels previews.
- *
- * @param $show
- * @return bool
- */
-function siteorigin_panels_preview_adminbar($show){
-	if(!$show) return false;
-	return !(isset($_GET['siteorigin_panels_preview']) && wp_verify_nonce($_GET['_wpnonce'], 'siteorigin-panels-preview'));
-}
-add_filter('show_admin_bar', 'siteorigin_panels_preview_adminbar');
-
-/**
- * This is a way to show previews of panels, especially for the home page.
- *
- * @param $val
- * @return array
- */
-function siteorigin_panels_home_preview_load_data($val){
-	if( isset($_GET['siteorigin_panels_preview']) ){
-		$val = siteorigin_panels_get_panels_data_from_post( $_POST );
-	}
-
-	return $val;
 }
 
 /**
@@ -1139,12 +1109,6 @@ function siteorigin_panels_home_preview_load_data($val){
 function siteorigin_panels_body_class($classes){
 	if( siteorigin_panels_is_panel() ) $classes[] = 'siteorigin-panels';
 	if( siteorigin_panels_is_home() ) $classes[] = 'siteorigin-panels-home';
-
-	if(isset($_GET['siteorigin_panels_preview']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'siteorigin-panels-preview')) {
-		// This is a home page preview
-		$classes[] = 'siteorigin-panels';
-		$classes[] = 'siteorigin-panels-home';
-	}
 
 	return $classes;
 }
@@ -1269,4 +1233,4 @@ function siteorigin_panels_plugin_action_links($links) {
 add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panels_plugin_action_links');
 
 // Include the live editor file if we're in live editor mode.
-if( !empty( $_GET['siteorigin_panels_live_editor'] ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( filter_input( INPUT_GET, 'siteorigin_panels_live_editor', FILTER_VALIDATE_BOOLEAN ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';

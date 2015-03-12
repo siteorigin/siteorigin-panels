@@ -5,10 +5,11 @@
  * Admin action for handling fetching the style fields
  */
 function siteorigin_panels_ajax_action_style_form(){
-	$type = $_REQUEST['type'];
+	$type = filter_input( INPUT_POST, 'type', FILTER_SANITIZE_STRING );
 	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
-	$current = isset($_REQUEST['style']) ? $_REQUEST['style'] : array();
+	$current = isset($_POST['style']) ? $_POST['style'] : array();
+	var_dump($current);
 
 	switch($type) {
 		case 'row':
@@ -30,6 +31,8 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $before
  * @param string $after
  * @param array $current
+ *
+ * @return bool
  */
 function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array() ){
 	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );

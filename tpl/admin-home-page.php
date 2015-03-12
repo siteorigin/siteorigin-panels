@@ -19,7 +19,7 @@
 			<?php endif; ?>
 		</h2>
 
-		<?php if( isset($_POST['_sopanels_home_nonce']) && wp_verify_nonce($_POST['_sopanels_home_nonce'], 'save') ) : global $post; ?>
+		<?php if( filter_input( INPUT_POST, '_sopanels_home_nonce' ) ) : global $post; ?>
 			<div id="message" class="updated">
 				<p><?php printf( __('Home page updated. <a href="%s">View page</a>', 'siteorigin-panels'), get_the_permalink( $post ) ) ?></p>
 			</div>
