@@ -2790,7 +2790,7 @@ String.prototype.panelsProcessTemplate = function(){
                 // We need to load the tab items from the server
                 this.$('.so-content').addClass('so-panels-loading');
 
-                $.post(
+                $.get(
                     panelsOptions.ajaxurl,
                     {
                         action: 'so_panels_prebuilt_layouts',
