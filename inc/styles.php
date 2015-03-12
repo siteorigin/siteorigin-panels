@@ -9,7 +9,6 @@ function siteorigin_panels_ajax_action_style_form(){
 	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
 	$current = isset($_POST['style']) ? $_POST['style'] : array();
-	var_dump($current);
 
 	switch($type) {
 		case 'row':
