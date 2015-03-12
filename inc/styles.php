@@ -6,7 +6,7 @@
  */
 function siteorigin_panels_ajax_action_style_form(){
 	$type = $_REQUEST['type'];
-	if( !in_array($type, array('row', 'widget') ) ) exit();
+	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
 	$current = isset($_REQUEST['style']) ? $_REQUEST['style'] : array();
 
@@ -19,7 +19,7 @@ function siteorigin_panels_ajax_action_style_form(){
 			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current);
 	}
 
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_form');
 

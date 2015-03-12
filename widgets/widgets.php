@@ -34,7 +34,7 @@ function origin_widgets_display_css(){
 
 	header("Content-type: text/css");
 	echo origin_widgets_generate_css($_GET['class'], $_GET['style'], $_GET['preset'], $_GET['ver']);
-	exit();
+	wp_die();
 }
 add_action('init', 'origin_widgets_display_css');
 

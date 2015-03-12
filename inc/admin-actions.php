@@ -6,17 +6,17 @@
 function siteorigin_panels_ajax_builder_content(){
 	header('content-type: text/html');
 
-	if( !current_user_can('edit_post', $_POST['post_id'] ) ) exit();
+	if( !current_user_can('edit_post', $_POST['post_id'] ) ) wp_die();
 
 	if( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
 		echo '';
-		exit();
+		wp_die();
 	}
 
 	// echo the content
 	echo siteorigin_panels_render( intval($_POST['post_id']), false, json_decode( wp_unslash($_POST['panels_data']), true ) );
 
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_builder_content', 'siteorigin_panels_ajax_builder_content');
 
@@ -24,8 +24,8 @@ add_action('wp_ajax_so_panels_builder_content', 'siteorigin_panels_ajax_builder_
  * Display a widget form with the provided data
  */
 function siteorigin_panels_ajax_widget_form(){
-	if( empty( $_REQUEST['widget'] ) ) exit();
-	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+	if( empty( $_REQUEST['widget'] ) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	$request = array_map('stripslashes_deep', $_REQUEST);
 
@@ -36,7 +36,7 @@ function siteorigin_panels_ajax_widget_form(){
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
 
 	echo $form;
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_widget_form', 'siteorigin_panels_ajax_widget_form');
 
@@ -44,8 +44,8 @@ add_action('wp_ajax_so_panels_widget_form', 'siteorigin_panels_ajax_widget_form'
  * Admin action for loading a list of prebuilt layouts based on the given type
  */
 function siteorigin_panels_ajax_prebuilt_layouts(){
-	if( empty($_REQUEST['type']) ) exit();
-	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+	if( empty($_REQUEST['type']) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	// Get any layouts that the current user could edit.
 	header('content-type: application/json');
@@ -130,7 +130,7 @@ function siteorigin_panels_ajax_prebuilt_layouts(){
 		// Send back an error
 	}
 
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_prebuilt_layouts', 'siteorigin_panels_ajax_prebuilt_layouts');
 
@@ -138,9 +138,9 @@ add_action('wp_ajax_so_panels_prebuilt_layouts', 'siteorigin_panels_ajax_prebuil
  * Ajax handler to get an individual prebuilt layout
  */
 function siteorigin_panels_ajax_get_prebuilt_layout(){
-	if( empty( $_REQUEST['type'] ) ) exit();
-	if( empty( $_REQUEST['lid'] ) ) exit();
-	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+	if( empty( $_REQUEST['type'] ) ) wp_die();
+	if( empty( $_REQUEST['lid'] ) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	header('content-type: application/json');
 
@@ -148,7 +148,7 @@ function siteorigin_panels_ajax_get_prebuilt_layout(){
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		if( empty( $layouts[$_REQUEST['lid']] ) ) {
 			// Display an error message
-			exit();
+			wp_die();
 		}
 
 		$layout = $layouts[$_REQUEST['lid']];
@@ -157,13 +157,13 @@ function siteorigin_panels_ajax_get_prebuilt_layout(){
 		$layout = apply_filters('siteorigin_panels_prebuilt_layout', $layout);
 
 		echo json_encode( $layout );
-		exit();
+		wp_die();
 	}
 	elseif( current_user_can('edit_post', $_REQUEST['lid']) ) {
 		$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
 		$panels_data = apply_filters('siteorigin_panels_data', $panels_data);
 		echo json_encode( $panels_data );
-		exit();
+		wp_die();
 	}
 }
 add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_prebuilt_layout');
@@ -174,13 +174,13 @@ add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_
  * @TODO check if this is still being used
  */
 function siteorigin_panels_ajax_action_prebuilt(){
-	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) exit();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	// Get any layouts that the current user could edit.
 	$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
-	if( empty($_GET['layout']) ) exit();
-	if( empty($layouts[$_GET['layout']]) ) exit();
+	if( empty($_GET['layout']) ) wp_die();
+	if( empty($layouts[$_GET['layout']]) ) wp_die();
 
 	header('content-type: application/json');
 
@@ -188,6 +188,6 @@ function siteorigin_panels_ajax_action_prebuilt(){
 	$layout = apply_filters('siteorigin_panels_prebuilt_layout', $layout);
 
 	echo json_encode( $layout );
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_prebuilt_layout', 'siteorigin_panels_ajax_action_prebuilt');

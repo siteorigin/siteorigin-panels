@@ -1089,7 +1089,7 @@ function siteorigin_panels_preview(){
 		if(empty($_POST['post_id'])) $GLOBALS['siteorigin_panels_is_panels_home'] = true;
 		add_action('siteorigin_panels_data', 'siteorigin_panels_home_preview_load_data');
 		locate_template( siteorigin_panels_setting('home-template'), true );
-		exit();
+		wp_die();
 	}
 }
 add_action('template_redirect', 'siteorigin_panels_preview');
