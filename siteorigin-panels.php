@@ -302,6 +302,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'prebuilt_confirm' => __('Are you sure you want to overwrite your current content? This can be undone in the builder history.', 'siteorigin-panels'),
 				'prebuilt_loading' => __('Loading prebuilt layout', 'siteorigin-panels'),
 				'confirm_use_builder' => __("Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels'),
+				'confirm_stop_builder' => __("Would you like to clear your Page Builder content and revert to using the standard visual editor?", 'siteorigin-panels'),
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 			),

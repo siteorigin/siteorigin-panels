@@ -1413,9 +1413,15 @@ String.prototype.panelsProcessTemplate = function(){
             metabox.find('.so-switch-to-standard').click(function(e){
                 e.preventDefault();
 
+                if( confirm(panelsOptions.loc.confirm_stop_builder) ) {
+                    // User is switching to the standard visual editor
+                    thisView.model.loadPanelsData( false );
+                }
+
                 // Switch back to the standard editor
                 $( '#wp-content-wrap, #post-status-info' ).show();
                 metabox.hide();
+
                 // Resize to trigger reflow of WordPress editor stuff
                 $( window ).resize();
             }).show();
