@@ -5,6 +5,8 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+
 /**
  * Convert template into something compatible with Underscore.js templates
  *
@@ -174,13 +176,16 @@ String.prototype.panelsProcessTemplate = function(){
             }
 
             var values = this.get('values');
-            var thisModel = this;
 
             // Create a list of fields to check for a title
             var titleFields = ['title', 'text'];
+
             for (var k in values){
-                titleFields.push( k );
+                if( values.hasOwnProperty(k) ) {
+                    titleFields.push( k );
+                }
             }
+
             titleFields = _.uniq(titleFields);
 
             for( var i in titleFields ) {
@@ -1005,12 +1010,10 @@ String.prototype.panelsProcessTemplate = function(){
          */
         editSettingsHandler: function(){
             // Lets open up an instance of the settings dialog
-            var dialog = this.builder.dialogs.row;
-
-            if( this.dialog == null ) {
+            if( this.dialog === null ) {
                 // Create the dialog
                 this.dialog = new panels.dialog.row();
-                this.dialog.setBuilder( this.builder).setRowModel( this.model);
+                this.dialog.setBuilder( this.builder).setRowModel( this.model );
             }
 
             this.dialog.openDialog();
@@ -1406,8 +1409,6 @@ String.prototype.panelsProcessTemplate = function(){
                     .appendTo( $( '#wp-content-wrap .wp-editor-tabs' ) );
             }
 
-
-
             // Switch back to the standard editor
             metabox.find('.so-switch-to-standard').click(function(e){
                 e.preventDefault();
@@ -1728,7 +1729,9 @@ String.prototype.panelsProcessTemplate = function(){
                     },
                     function(content){
 
-                        if( content === '' ) return;
+                        if( content === '' ) {
+                            return;
+                        }
 
                         // Strip all the known layout divs
                         var t = $('<div />').html( content );
@@ -2061,6 +2064,9 @@ String.prototype.panelsProcessTemplate = function(){
             this.bodyScrollTop = $('body').scrollTop();
             $('body').css({'overflow':'hidden'});
 
+            // Start listen for keyboard keypresses.
+            $(window).on('keyup', this.keyboardListen);
+
             this.$el.show();
 
             // This triggers once everything is visible
@@ -2089,11 +2095,25 @@ String.prototype.panelsProcessTemplate = function(){
                 $('body').css({'overflow':'auto'});
                 $('body').scrollTop( this.bodyScrollTop );
             }
+            
+            // Stop listen for keyboard keypresses.
+            $(window).off('keyup', this.keyboardListen);
 
             // This triggers once everything is hidden
             this.trigger('close_dialog_complete');
 
             return false;
+        },
+        
+        /**
+         * Keyboard events handler
+         */
+        keyboardListen: function(e) {
+        
+            // [Esc] to close
+            if (e.which === 27) {
+                $('.so-panels-dialog-wrapper .so-close').trigger('click');
+            }
         },
 
         /**
@@ -2316,12 +2336,13 @@ String.prototype.panelsProcessTemplate = function(){
 
             this.on('open_dialog', function(){
                 this.filter.search = '';
-                this.filterWidgets(this.filter);
+                this.filterWidgets( this.filter );
             }, this);
 
             this.on('open_dialog_complete', function(){
                 // Clear the search and re-filter the widgets when we open the dialog
                 this.$('.so-sidebar-search').val('').focus();
+                this.balanceWidgetHeights();
             });
 
             // We'll implement a custom tab click handler
@@ -2358,6 +2379,11 @@ String.prototype.panelsProcessTemplate = function(){
 
             // We'll be using tabs, so initialize them
             this.initTabs();
+
+            var thisDialog = this;
+            $(window).resize(function(){
+                thisDialog.balanceWidgetHeights();
+            });
         },
 
         /**
@@ -2366,9 +2392,8 @@ String.prototype.panelsProcessTemplate = function(){
         tabClickHandler: function($t){
             // Get the filter from the tab, and filter the widgets
             this.filter = $t.parent().data('filter');
-            if( this.$el.find('.so-sidebar-search').val() !== '' ) {
-                this.filter.search = this.$el.find('.so-sidebar-search').val();
-            }
+            this.filter.search = this.$el.find('.so-sidebar-search').val();
+
             this.filterWidgets(this.filter);
 
             return false;
@@ -2433,6 +2458,9 @@ String.prototype.panelsProcessTemplate = function(){
                     $$.hide();
                 }
             });
+
+            // Balance the tags after filtering
+            this.balanceWidgetHeights();
         },
 
         /**
@@ -2455,6 +2483,51 @@ String.prototype.panelsProcessTemplate = function(){
             widget.cell.widgets.add( widget );
 
             this.closeDialog();
+        },
+
+        /**
+         * Balance widgets in a given row so they have enqual height.
+         * @param e
+         */
+        balanceWidgetHeights : function(e) {
+            var widgetRows = [ [] ];
+            var previousWidget = null;
+
+            // Work out how many widgets there are per row
+            var perRow = Math.round( this.$('.widget-type').parent().width() / this.$('.widget-type').width() );
+
+            // Add clears to create balanced rows
+            this.$('.widget-type')
+                .css('clear', 'none')
+                .filter(':visible')
+                .each( function(i, el) {
+                    if( i % perRow === 0 && i !== 0 ) {
+                        $(el).css('clear', 'both');
+                    }
+                } );
+
+            // Group the widgets into rows
+            this.$('.widget-type-wrapper')
+                .css( 'height', 'auto' )
+                .filter(':visible')
+                .each(function(i, el) {
+                    var $el = $(el);
+                    if( previousWidget !== null && previousWidget.position().top !== $el.position().top ) {
+                        widgetRows[widgetRows.length] = [];
+                    }
+                    previousWidget = $el;
+                    widgetRows[widgetRows.length - 1].push( $el );
+                });
+
+            // Balance the height of the widgets within the row.
+            _.each( widgetRows, function(row, i){
+                var maxHeight = _.max( row.map( function(el){ return el.height(); } ) );
+                // Set the height of each widget in the row
+                _.each(row, function(el){
+                    el.height(maxHeight);
+                });
+
+            } );
         }
     } );
 
@@ -2720,7 +2793,7 @@ String.prototype.panelsProcessTemplate = function(){
                 // We need to load the tab items from the server
                 this.$('.so-content').addClass('so-panels-loading');
 
-                $.post(
+                $.get(
                     panelsOptions.ajaxurl,
                     {
                         action: 'so_panels_prebuilt_layouts',
@@ -2756,22 +2829,24 @@ String.prototype.panelsProcessTemplate = function(){
 
             if( _.size(layouts) ) {
                 for (var lid in layouts) {
-                    // Exclude the current post if we have one
-                    if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
-                        continue;
-                    }
-                    if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
-                        continue;
-                    }
+                    if( layouts.hasOwnProperty(lid) ) {
+                        // Exclude the current post if we have one
+                        if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
+                            continue;
+                        }
+                        if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
+                            continue;
+                        }
 
-                    // Create the layout item to display in the list
-                    var $l = $(this.entryTemplate({
-                        name: layouts[lid].name,
-                        description: layouts[lid].description
-                    }));
+                        // Create the layout item to display in the list
+                        var $l = $(this.entryTemplate({
+                            name: layouts[lid].name,
+                            description: layouts[lid].description
+                        }));
 
-                    // Create and append the
-                    $l.appendTo(c).data({'type': type, 'lid': lid});
+                        // Create and append the
+                        $l.appendTo(c).data({'type': type, 'lid': lid});
+                    }
                 }
             }
         },

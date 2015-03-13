@@ -5,10 +5,10 @@
  * Admin action for handling fetching the style fields
  */
 function siteorigin_panels_ajax_action_style_form(){
-	$type = $_REQUEST['type'];
-	if( !in_array($type, array('row', 'widget') ) ) exit();
+	$type = filter_input( INPUT_POST, 'type', FILTER_SANITIZE_STRING );
+	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
-	$current = isset($_REQUEST['style']) ? $_REQUEST['style'] : array();
+	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 
 	switch($type) {
 		case 'row':
@@ -19,7 +19,7 @@ function siteorigin_panels_ajax_action_style_form(){
 			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current);
 	}
 
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_form');
 
@@ -30,6 +30,8 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $before
  * @param string $after
  * @param array $current
+ *
+ * @return bool
  */
 function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array() ){
 	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );

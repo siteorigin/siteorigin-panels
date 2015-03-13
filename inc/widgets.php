@@ -70,6 +70,19 @@ function siteorigin_panels_add_recommended_widgets($widgets){
 			$widgets[$wordpress_widget]['icon'] = 'dashicons dashicons-wordpress';
 		}
 	}
+	
+	// Third-party plugins dettection.
+	foreach ($widgets as $widget_id => &$widget) {
+		if (strpos($widget_id, 'WC_') === 0 || strpos($widget_id, 'WooCommerce') !== FALSE) {
+			$widget['groups'][] = 'woocommerce';
+		}
+		if (strpos($widget_id, 'BBP_') === 0 || strpos($widget_id, 'BBPress') !== FALSE) {
+			$widget['groups'][] = 'bbpress';
+		}
+		if (strpos($widget_id, 'Jetpack') !== FALSE || strpos($widget['title'], 'Jetpack') !== FALSE) {
+			$widget['groups'][] = 'jetpack';
+		}
+	}
 
 	return $widgets;
 
@@ -105,6 +118,36 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 			'groups' => array('wordpress')
 		)
 	);
+	
+	// Check for woocommerce plugin.
+	if (defined('WOOCOMMERCE_VERSION')) {
+		$tabs[] = array(
+			'title'  => __('WooCommerce', 'woocommerce'),
+			'filter' => array(
+			'groups' => array('woocommerce')
+			),
+		);
+	}
+	
+	// Check for jetpack plugin.
+	if (defined('JETPACK__VERSION')) {
+		$tabs[] = array(
+			'title'  => __('Jetpack', 'jetpack'),
+			'filter' => array(
+			'groups' => array('jetpack')
+			),
+		);
+	}
+	
+	// Check for bbpress plugin.
+	if (function_exists('bbpress')) {
+		$tabs[] = array(
+			'title'  => __('BBPress', 'bbpress'),
+			'filter' => array(
+			'groups' => array('bbpress')
+			),
+		);
+	}
 
 	$tabs[] = array(
 		'title' => __('Recommended Widgets', 'siteorigin-panels'),
