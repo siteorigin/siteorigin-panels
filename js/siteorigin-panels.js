@@ -2910,7 +2910,8 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
 
             c.find('.so-export').submit( function(e){
-                $(this).find('input[name="export_panels_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+                console.log( thisView.builder.model.getPanelsData() );
+                $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
             } );
 
             c.find('.so-import').submit( function(e){
