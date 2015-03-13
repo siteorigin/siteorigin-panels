@@ -1525,6 +1525,7 @@ String.prototype.panelsProcessTemplate = function(){
             if( $(this.dataField).val() !== data ) {
                 // If the data is different, set it and trigger a content_change event
                 $(this.dataField).val( data );
+                $(this.dataField).trigger( 'change' );
                 this.trigger('content_change');
             }
         },
@@ -3523,7 +3524,6 @@ jQuery( function($){
 
             // Save panels data when we close the dialog, if we're in a dialog
             var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-
             if( typeof dialog !== 'undefined' ) {
                 dialog.on('close_dialog', function(){
                     builderModel.refreshPanelsData();
