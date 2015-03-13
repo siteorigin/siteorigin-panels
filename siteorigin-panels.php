@@ -226,20 +226,20 @@ function siteorigin_panels_metabox_render( $post ) {
 function siteorigin_panels_admin_enqueue_scripts($prefix) {
 	$screen = get_current_screen();
 
-	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' ) {
+	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize' ) {
 
 		$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . $js_suffix . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
 		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . $js_suffix . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
-		if( $screen->base != 'widgets' ) {
+		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
 			// We don't use the history browser and live editor in the widgets interface
 			wp_enqueue_script( 'so-panels-admin-history', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-history' . $js_suffix . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
 			wp_enqueue_script( 'so-panels-admin-live-editor', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-live-editor' . $js_suffix . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
 		}
 
-		add_action('admin_footer', 'siteorigin_panels_js_templates');
+		add_action( 'admin_footer', 'siteorigin_panels_js_templates' );
 
 		$widgets = siteorigin_panels_get_widgets();
 
@@ -351,6 +351,14 @@ add_action( 'admin_print_scripts-appearance_page_so_panels_home_page', 'siteorig
 add_action( 'admin_print_scripts-widgets.php', 'siteorigin_panels_admin_enqueue_scripts' );
 
 /**
+ * Print templates when in customizer
+ */
+function siteorigin_panels_customize_controls_print_footer_scripts() {
+	siteorigin_panels_js_templates();
+}
+add_action( 'customize_controls_print_footer_scripts', 'siteorigin_panels_customize_controls_print_footer_scripts' );
+
+/**
  * Get an array of all the available widgets.
  *
  * @return array
@@ -412,7 +420,7 @@ function siteorigin_panels_js_templates(){
  */
 function siteorigin_panels_admin_enqueue_styles() {
 	$screen = get_current_screen();
-	if ( in_array( $screen->id, siteorigin_panels_setting('post-types') ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' ) {
+	if ( in_array( $screen->id, siteorigin_panels_setting('post-types') ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize') {
 		wp_enqueue_style( 'so-panels-admin', plugin_dir_url(__FILE__) . 'css/admin.css', array( 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION );
 		do_action( 'siteorigin_panel_enqueue_admin_styles' );
 	}

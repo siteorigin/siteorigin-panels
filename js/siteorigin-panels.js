@@ -3573,8 +3573,10 @@ jQuery( function($){
     });
 
     // Setup existing widgets on the page (for the widgets interface)
-    $(function(){
-        $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
-    });
+    if(!$('body').hasClass('wp-customizer')) {
+        $(function(){
+            $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
+        });
+    }
 
 })( jQuery );
