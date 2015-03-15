@@ -9,6 +9,7 @@ function siteorigin_panels_ajax_action_style_form(){
 	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
 	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+	$post_id = filter_input( INPUT_POST, 'postId', FILTER_SANITIZE_NUMBER_INT );
 
 	switch($type) {
 		case 'row':
