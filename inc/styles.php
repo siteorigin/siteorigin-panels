@@ -7,16 +7,18 @@
 function siteorigin_panels_ajax_action_style_form(){
 	$type = $_REQUEST['type'];
 	if( !in_array($type, array('row', 'widget') ) ) exit();
+	
+	$post_id = empty($_REQUEST['postId']) ? 0 : $_REQUEST['postId'];
 
 	$current = isset($_REQUEST['style']) ? $_REQUEST['style'] : array();
 
 	switch($type) {
 		case 'row':
-			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 			break;
 
 		case 'widget':
-			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 	}
 
 	exit();
@@ -30,9 +32,10 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $before
  * @param string $after
  * @param array $current
+ * @param int $post_id
  */
-function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array() ){
-	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );
+function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0 ){
+	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id );
 	if( empty($fields) ) return false;
 
 	$groups = array(
