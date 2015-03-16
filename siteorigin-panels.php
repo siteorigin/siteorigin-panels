@@ -817,7 +817,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 				$last_ci = $widget_info['panels_info']['cell'];
 				$last_wi = 0;
 			}
-			$widget_info['panels_info']['panel'] = $last_wi++;
+			$widget_info['panels_info']['cell_index'] = $last_wi++;
 		}
 	}
 
