@@ -118,8 +118,8 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
  * 
  * @return array
  */
-function siteorigin_panels_style_mesurement_list() {
-	$mesurements = array(
+function siteorigin_panels_style_get_measurements_list() {
+	$measurements = array(
 		'px',
 		'%',
 		'in',
@@ -132,7 +132,7 @@ function siteorigin_panels_style_mesurement_list() {
 	);
 	
 	// Allow themes and plugins to trim or enhance the list.
-	return apply_filters('siteorigin_panels_style_mesurements', $mesurements);
+	return apply_filters('siteorigin_panels_style_get_measurements_list', $measurements);
 }
 
 /**
@@ -150,8 +150,8 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			?>
 			<input type="text" />
 			<select>
-			<?php foreach (siteorigin_panels_style_mesurement_list() as $mesurement):?>
-				<option><?php echo $mesurement?></option>
+			<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
+				<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
 			<?php endforeach?>
 			</select>
 			<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" />
