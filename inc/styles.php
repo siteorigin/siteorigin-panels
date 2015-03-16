@@ -114,6 +114,28 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 }
 
 /**
+ * Get list of supported mesurements
+ * 
+ * @return array
+ */
+function siteorigin_panels_style_mesurement_list() {
+	$mesurements = array(
+		'px',
+		'%',
+		'in',
+		'cm',
+		'mm',
+		'em',
+		'ex',
+		'pt',
+		'pc',
+	);
+	
+	// Allow themes and plugins to trim or enhance the list.
+	return apply_filters('siteorigin_panels_style_mesurements', $mesurements);
+}
+
+/**
  * Generate the style field
  *
  * @param $field
@@ -128,15 +150,9 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			?>
 			<input type="text" />
 			<select>
-				<option>px</option>
-				<option>%</option>
-				<option>in</option>
-				<option>cm</option>
-				<option>mm</option>
-				<option>em</option>
-				<option>ex</option>
-				<option>pt</option>
-				<option>pc</option>
+			<?php foreach (siteorigin_panels_style_mesurement_list() as $mesurement):?>
+				<option><?php echo $mesurement?></option>
+			<?php endforeach?>
 			</select>
 			<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" />
 			<?php
