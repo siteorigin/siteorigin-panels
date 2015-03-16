@@ -1472,6 +1472,7 @@ String.prototype.panelsProcessTemplate = function(){
                 appendTo: '#wpwrap',
                 items: '.so-row-container',
                 handle: '.so-row-move',
+                axis: 'y',
                 tolerance: 'pointer',
                 scroll: false,
                 stop: function (e) {
