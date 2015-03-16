@@ -803,6 +803,24 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		}
 	}
 
+	if (!empty($panels_data['widgets'])) {
+		$last_gi = 0;
+		$last_ci = 0;
+		$last_wi = 0;
+		foreach ($panels_data['widgets'] as $wid => &$widget_info) {
+			if ($widget_info['panels_info']['grid'] != $last_gi) {
+				$last_gi = $widget_info['panels_info']['grid'];
+				$last_ci = 0;
+				$last_wi = 0;
+			}
+			elseif ($widget_info['panels_info']['cell'] != $last_ci) {
+				$last_ci = $widget_info['panels_info']['cell'];
+				$last_wi = 0;
+			}
+			$widget_info['panels_info']['panel'] = $last_wi++;
+		}
+	}
+
 	$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 	if( empty( $panels_data ) || empty( $panels_data['grids'] ) ) return '';
 
