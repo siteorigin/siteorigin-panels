@@ -19,7 +19,7 @@ function siteorigin_panels_ajax_builder_content(){
 	}
 
 	// echo the content
-	echo siteorigin_panels_render( $request['post_id'], false, json_decode( wp_unslash( $request['panels_data'] ), true ) );
+	echo siteorigin_panels_render( $request['post_id'], false, json_decode( $request['panels_data'], true ) );
 
 	wp_die();
 }

@@ -16,7 +16,7 @@ function siteorigin_panels_live_editor($value, $post_id, $meta_key){
 		current_user_can( 'edit_post', $post_id )
 	) {
 		$panels_data = filter_input( INPUT_POST, 'siteorigin_panels_data', FILTER_DEFAULT );
-		$data = json_decode( wp_unslash( $panels_data ), true );
+		$data = json_decode( $panels_data, true );
 		return array($data);
 	}
 }

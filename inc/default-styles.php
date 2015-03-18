@@ -4,8 +4,7 @@
  * Register the custom styles scripts
  */
 function siteorigin_panels_default_styles_register_scripts(){
-	$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-	wp_register_script('siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . $js_suffix . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_register_script('siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
 }
 add_action('wp_enqueue_scripts', 'siteorigin_panels_default_styles_register_scripts', 5);
 
