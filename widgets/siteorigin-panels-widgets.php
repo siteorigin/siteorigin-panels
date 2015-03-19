@@ -120,8 +120,3 @@ class SiteOrigin_Panels_Widget_Sidebars {
 }
 
 SiteOrigin_Panels_Widget_Sidebars::single();
-
-function test_die(){
-	//die();
-}
-add_action('wp_footer', 'test_die');
