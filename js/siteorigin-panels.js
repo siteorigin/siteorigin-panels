@@ -2797,7 +2797,11 @@ String.prototype.panelsProcessTemplate = function(){
 
             this.currentTab = tab;
 
-            if( typeof this.layoutCache[tab] === 'undefined' ) {
+            if( tab === 'import' ) {
+                // Display the import export
+                this.displayImportExport();
+            }
+            else if( typeof this.layoutCache[tab] === 'undefined' ) {
                 // We need to load the tab items from the server
                 this.$('.so-content').addClass('so-panels-loading');
 
@@ -2901,6 +2905,29 @@ String.prototype.panelsProcessTemplate = function(){
                     thisView.closeDialog();
                 }
             );
+        },
+
+        /**
+         * Display and setup the import/export form
+         */
+        displayImportExport: function(){
+            var c = this.$( '.so-content').empty();
+            c.html( $('#siteorigin-panels-dialog-prebuilt-importexport').html() );
+
+
+            var thisView = this;
+
+            c.find('.so-export').submit( function(e){
+                $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+            } );
+
+            c.find('.so-import').submit( function(e){
+                window.soPanelsImportJson = function(layout){
+                    layout = JSON.parse( layout );
+                    thisView.builder.model.loadPanelsData(layout);
+                    thisView.closeDialog();
+                };
+            } );
         },
 
         /**
