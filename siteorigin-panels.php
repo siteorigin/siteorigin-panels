@@ -12,6 +12,7 @@ Donate link: http://siteorigin.com/page-builder/#donate
 */
 
 define('SITEORIGIN_PANELS_VERSION', '2.0.8-dev');
+define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
@@ -133,7 +134,7 @@ function siteorigin_panels_save_home_page(){
 	}
 
 	// Save the updated page data
-	$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
+	$panels_data = json_decode( $request['panels_data'], true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
@@ -228,15 +229,13 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 
 	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' ) {
 
-		$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . $js_suffix . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
-		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . $js_suffix . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' ) {
 			// We don't use the history browser and live editor in the widgets interface
-			wp_enqueue_script( 'so-panels-admin-history', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-history' . $js_suffix . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
-			wp_enqueue_script( 'so-panels-admin-live-editor', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-live-editor' . $js_suffix . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
+			wp_enqueue_script( 'so-panels-admin-history', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-history' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
+			wp_enqueue_script( 'so-panels-admin-live-editor', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-live-editor' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
 		}
 
 		add_action('admin_footer', 'siteorigin_panels_js_templates');
@@ -302,6 +301,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'prebuilt_confirm' => __('Are you sure you want to overwrite your current content? This can be undone in the builder history.', 'siteorigin-panels'),
 				'prebuilt_loading' => __('Loading prebuilt layout', 'siteorigin-panels'),
 				'confirm_use_builder' => __("Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels'),
+				'confirm_stop_builder' => __("Would you like to clear your Page Builder content and revert to using the standard visual editor?", 'siteorigin-panels'),
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 			),
@@ -468,7 +468,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 	) );
 
 	if ( !wp_is_post_revision($post_id) ) {
-		$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
+		$panels_data = json_decode( $request['panels_data'], true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
@@ -799,6 +799,24 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		else{
 			if ( post_password_required($post_id) ) return false;
 			$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		}
+	}
+
+	if (!empty($panels_data['widgets'])) {
+		$last_gi = 0;
+		$last_ci = 0;
+		$last_wi = 0;
+		foreach ($panels_data['widgets'] as $wid => &$widget_info) {
+			if ($widget_info['panels_info']['grid'] != $last_gi) {
+				$last_gi = $widget_info['panels_info']['grid'];
+				$last_ci = 0;
+				$last_wi = 0;
+			}
+			elseif ($widget_info['panels_info']['cell'] != $last_ci) {
+				$last_ci = $widget_info['panels_info']['cell'];
+				$last_wi = 0;
+			}
+			$widget_info['panels_info']['cell_index'] = $last_wi++;
 		}
 	}
 
