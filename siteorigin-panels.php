@@ -15,10 +15,13 @@ define('SITEORIGIN_PANELS_VERSION', '2.0.8-dev');
 define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
+// All the basic settings
+require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
+
+// Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
 
 require_once plugin_dir_path(__FILE__) . 'inc/css.php';
-require_once plugin_dir_path(__FILE__) . 'inc/options.php';
 require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/default-styles.php';
@@ -1050,11 +1053,20 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance);
 	$classes = array_map('sanitize_html_class', $classes);
 
+	$title_html = siteorigin_panels_setting( 'title-html' );
+	if( strpos($title_html, '{{title}}') !== false ) {
+		list( $before_title, $after_title ) = explode( '{{title}}', $title_html, 2 );
+	}
+	else {
+		$before_title = '<h3 class="widget-title">';
+		$after_title = '</h3>';
+	}
+
 	$args = array(
 		'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '">',
 		'after_widget' => '</div>',
-		'before_title' => '<h3 class="widget-title">',
-		'after_title' => '</h3>',
+		'before_title' => $before_title,
+		'after_title' => $after_title,
 		'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
 	);
 
