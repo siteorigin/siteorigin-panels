@@ -1,7 +1,6 @@
 <?php
 
-//TODO: Ideally we would be handling widgets the same as WordPress does, then none of this would be necessary, but until then, this works.
-class SiteOrigin_Panels_Widget_Sidebars {
+class SiteOrigin_Panels_Sidebars_Emulator {
 
 	private $all_posts_widgets;
 
@@ -18,7 +17,7 @@ class SiteOrigin_Panels_Widget_Sidebars {
 	 */
 	static function single(){
 		static $single = false;
-		if( empty($single) ) $single = new SiteOrigin_Panels_Widget_Sidebars();
+		if( empty($single) ) $single = new SiteOrigin_Panels_Sidebars_Emulator();
 
 		return $single;
 	}
@@ -119,4 +118,4 @@ class SiteOrigin_Panels_Widget_Sidebars {
 	}
 }
 
-SiteOrigin_Panels_Widget_Sidebars::single();
+SiteOrigin_Panels_Sidebars_Emulator::single();
