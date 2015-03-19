@@ -9,14 +9,15 @@ function siteorigin_panels_ajax_action_style_form(){
 	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
 	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+	$post_id = filter_input( INPUT_POST, 'postId', FILTER_SANITIZE_NUMBER_INT );
 
 	switch($type) {
 		case 'row':
-			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 			break;
 
 		case 'widget':
-			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 	}
 
 	wp_die();
@@ -30,11 +31,10 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $before
  * @param string $after
  * @param array $current
- *
- * @return bool
+ * @param int $post_id
  */
-function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array() ){
-	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );
+function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0 ){
+	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id );
 	if( empty($fields) ) return false;
 
 	$groups = array(
@@ -114,6 +114,28 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 }
 
 /**
+ * Get list of supported mesurements
+ * 
+ * @return array
+ */
+function siteorigin_panels_style_get_measurements_list() {
+	$measurements = array(
+		'px',
+		'%',
+		'in',
+		'cm',
+		'mm',
+		'em',
+		'ex',
+		'pt',
+		'pc',
+	);
+	
+	// Allow themes and plugins to trim or enhance the list.
+	return apply_filters('siteorigin_panels_style_get_measurements_list', $measurements);
+}
+
+/**
  * Generate the style field
  *
  * @param $field
@@ -128,15 +150,9 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			?>
 			<input type="text" />
 			<select>
-				<option>px</option>
-				<option>%</option>
-				<option>in</option>
-				<option>cm</option>
-				<option>mm</option>
-				<option>em</option>
-				<option>ex</option>
-				<option>pt</option>
-				<option>pc</option>
+			<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
+				<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
+			<?php endforeach?>
 			</select>
 			<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" />
 			<?php

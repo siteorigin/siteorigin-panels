@@ -1413,9 +1413,15 @@ String.prototype.panelsProcessTemplate = function(){
             metabox.find('.so-switch-to-standard').click(function(e){
                 e.preventDefault();
 
+                if( confirm(panelsOptions.loc.confirm_stop_builder) ) {
+                    // User is switching to the standard visual editor
+                    thisView.model.loadPanelsData( false );
+                }
+
                 // Switch back to the standard editor
                 $( '#wp-content-wrap, #post-status-info' ).show();
                 metabox.hide();
+
                 // Resize to trigger reflow of WordPress editor stuff
                 $( window ).resize();
             }).show();
@@ -1466,6 +1472,7 @@ String.prototype.panelsProcessTemplate = function(){
                 appendTo: '#wpwrap',
                 items: '.so-row-container',
                 handle: '.so-row-move',
+                axis: 'y',
                 tolerance: 'pointer',
                 scroll: false,
                 stop: function (e) {
@@ -2573,7 +2580,7 @@ String.prototype.panelsProcessTemplate = function(){
             // Now we need to attach the style window
             this.styles = new panels.view.styles();
             this.styles.model = this.model;
-            this.styles.render( 'widget' );
+            this.styles.render( 'widget', $('#post_ID').val() );
             this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
 
             // Handle the loading class
@@ -2981,7 +2988,7 @@ String.prototype.panelsProcessTemplate = function(){
                 // Now we need to attach the style window
                 this.styles = new panels.view.styles();
                 this.styles.model = this.model;
-                this.styles.render( 'row' );
+                this.styles.render( 'row', $('#post_ID').val() );
                 this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
 
                 // Handle the loading class
