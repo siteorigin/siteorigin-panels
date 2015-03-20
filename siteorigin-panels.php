@@ -931,7 +931,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 				// TODO this wrapper should go in the before/after widget arguments
 				$widget_style_wrapper = siteorigin_panels_start_style_wrapper( 'widget', array(), !empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
-				siteorigin_panels_the_widget( $widget_info['panels_info']['class'], $instance, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
+				siteorigin_panels_the_widget( $widget_info['panels_info'], $instance, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
 			}
 			if ( empty( $widgets ) ) echo '&nbsp;';
 
@@ -1033,7 +1033,7 @@ add_action('wp_footer', 'siteorigin_panels_print_inline_css');
 /**
  * Render the widget.
  *
- * @param string $widget The widget class name.
+ * @param array $widget_info The widget info.
  * @param array $instance The widget instance
  * @param int $grid The grid number.
  * @param int $cell The cell number.
@@ -1043,9 +1043,12 @@ add_action('wp_footer', 'siteorigin_panels_print_inline_css');
  * @param bool $post_id
  * @param string $style_wrapper The start of the style wrapper
  */
-function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
+function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
 
 	global $wp_widget_factory;
+
+	// Set widget class to $widget
+	$widget = $widget_info['class'];
 
 	// Load the widget from the widget factory and give themes and plugins a chance to provide their own
 	$the_widget = !empty($wp_widget_factory->widgets[$widget]) ? $wp_widget_factory->widgets[$widget] : false;
@@ -1053,14 +1056,14 @@ function siteorigin_panels_the_widget( $widget, $instance, $grid, $cell, $panel,
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'siteorigin-panel', 'widget' ), $widget, $instance);
+	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'siteorigin-panel', 'widget' ), $widget, $instance, $widget_info);
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
 	$id = 'panel-' . $post_id . '-' . $grid . '-' . $cell . '-' . $panel;
 
 	// Filter and sanitize the classes
-	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance);
+	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info);
 	$classes = array_map('sanitize_html_class', $classes);
 
 	$title_html = siteorigin_panels_setting( 'title-html' );
