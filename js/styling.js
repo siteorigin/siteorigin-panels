@@ -1,3 +1,6 @@
+
+/* global jQuery */
+
 jQuery(function($){
 
     // This will handle stretching the cells.
