@@ -358,6 +358,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<p class="drag-drop-buttons">
 					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
 				</p>
+
+				<div class="progress-bar">
+					<div class="progress-percent"></div>
+				</div>
 			</div>
 		</div>
 

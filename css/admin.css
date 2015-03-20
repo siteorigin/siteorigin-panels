@@ -1280,6 +1280,21 @@
   border: 4px dashed #E0E0E0;
   height: 480px;
 }
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .progress-bar {
+  display: none;
+  padding: 2px;
+  border: 2px solid #2181b1;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .progress-bar .progress-percent {
+  height: 14px;
+  background-color: #358ebe;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  border-radius: 1px;
+}
 .so-panels-dialog .so-visual-styles {
   margin: -15px;
   /* All the field types */

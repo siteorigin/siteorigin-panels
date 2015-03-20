@@ -2947,13 +2947,14 @@ String.prototype.panelsProcessTemplate = function(){
                             uploadUi.addClass('has-drag-drop');
                         }
 
-                        uploadUi.show();
+                        uploadUi.show().find('.progress-precent').css('width', '0%');
                     },
                     FilesAdded: function(uploader){
+                        uploadUi.find('.progress-bar').fadeIn('fast');
                         uploader.start();
                     },
                     UploadProgress: function(uploader, file){
-
+                        uploadUi.find('.progress-precent').css('width', file.percent + '%');
                     },
                     FileUploaded : function(uploader, file, response){
                         var layout = JSON.parse( response.response );
