@@ -20,6 +20,7 @@ require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
+require_once plugin_dir_path(__FILE__) . 'widgets/migration.php';
 
 require_once plugin_dir_path(__FILE__) . 'inc/css.php';
 require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
