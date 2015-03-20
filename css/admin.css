@@ -1261,6 +1261,25 @@
   background: #F8F8F8;
   padding: 15px 20px;
 }
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui {
+  padding: 15px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-drop-message {
+  display: none;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui.has-drag-drop .drag-drop-message {
+  display: block;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-upload-area {
+  display: block;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 15px;
+  border: 4px dashed #E0E0E0;
+  height: 480px;
+}
 .so-panels-dialog .so-visual-styles {
   margin: -15px;
   /* All the field types */

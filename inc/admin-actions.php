@@ -199,12 +199,13 @@ add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_
  * Ajax handler to import a layout
  */
 function siteorigin_panels_ajax_import_layout(){
-	$nonce = filter_input( INPUT_POST, '_panelsnonce', FILTER_DEFAULT );
+	$nonce = filter_input( INPUT_GET, '_panelsnonce', FILTER_DEFAULT );
 	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
 
 	if( !empty($_FILES['panels_import_data']['tmp_name']) ) {
+		header('content-type:application/json');
 		$json = file_get_contents($_FILES['panels_import_data']['tmp_name']);
-		?><script>window.parent.soPanelsImportJson( "<?php echo addslashes($json) ?>" );</script><?php
+		echo $json;
 	}
 	wp_die();
 }

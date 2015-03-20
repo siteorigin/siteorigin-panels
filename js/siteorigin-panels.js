@@ -5,7 +5,7 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
-/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, plupload, confirm, console */
 
 /**
  * Convert template into something compatible with Underscore.js templates
@@ -2916,20 +2916,64 @@ String.prototype.panelsProcessTemplate = function(){
             var c = this.$( '.so-content').empty();
             c.html( $('#siteorigin-panels-dialog-prebuilt-importexport').html() );
 
-
             var thisView = this;
+            var uploadUi = thisView.$('.import-upload-ui').hide();
+
+            // Create the uploader
+            var uploader = new plupload.Uploader({
+                runtimes : 'html5,silverlight,flash,html4',
+
+                browse_button : uploadUi.find('.file-browse-button').get(0),
+                container : uploadUi.get(0),
+                drop_element : uploadUi.find('.drag-upload-area').get(0),
+
+                file_data_name : 'panels_import_data',
+                multiple_queues : false,
+                max_file_size : panelsOptions.plupload.max_file_size,
+                url : panelsOptions.plupload.url,
+                flash_swf_url : panelsOptions.plupload.flash_swf_url,
+                silverlight_xap_url : panelsOptions.plupload.silverlight_xap_url,
+                filters : [
+                    { title : "Page Builder layouts", extensions : 'json' }
+                ],
+
+                multipart_params : {
+                    action : 'so_panels_import_layout'
+                },
+
+                init: {
+                    PostInit: function(uploader){
+                        if( uploader.features.dragdrop ) {
+                            uploadUi.addClass('has-drag-drop');
+                        }
+
+                        uploadUi.show();
+                    },
+                    FilesAdded: function(uploader){
+                        uploader.start();
+                    },
+                    UploadProgress: function(uploader, file){
+
+                    },
+                    FileUploaded : function(uploader, file, response){
+                        var layout = JSON.parse( response.response );
+                        if( typeof layout.widgets !== 'undefined' ) {
+                            thisView.builder.addHistoryEntry('prebuilt_loaded');
+                            thisView.builder.model.loadPanelsData(layout);
+                            thisView.closeDialog();
+                        }
+                    },
+                    Error: function(){
+                        // TODO display this error
+                    }
+                }
+            });
+            uploader.init();
 
             c.find('.so-export').submit( function(e){
                 $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
             } );
 
-            c.find('.so-import').submit( function(e){
-                window.soPanelsImportJson = function(layout){
-                    layout = JSON.parse( layout );
-                    thisView.builder.model.loadPanelsData(layout);
-                    thisView.closeDialog();
-                };
-            } );
         },
 
         /**

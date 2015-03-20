@@ -348,21 +348,27 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt-importexport">
 	<div class="import-export">
-		<h3><?php _e('Export', 'siteorigin-panels') ?></h3>
-		<iframe id="siteorigin-panels-export-iframe" style="display: none;" name="siteorigin-panels-export-iframe"></iframe>
-		<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_export_layout') ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
-			<input type="submit" value="<?php esc_attr_e('Export Layout', 'siteorigin-panels') ?>" class="button-secondary" />
-			<input type="hidden" name="panels_export_data" value="" />
-			<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
-		</form>
+		<div class="import-upload-ui hide-if-no-js">
+			<div class="drag-upload-area">
 
-		<h3><?php _e('Import', 'siteorigin-panels') ?></h3>
-		<iframe id="siteorigin-panels-import-iframe" style="display: none;" name="siteorigin-panels-import-iframe"></iframe>
-		<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_import_layout') ?>" target="siteorigin-panels-import-iframe" class="so-import" method="post" enctype="multipart/form-data">
-			<input type="file" name="panels_import_data">
-			<input type="submit" value="<?php esc_attr_e('Import Layout', 'siteorigin-panels') ?>" class="button-secondary" />
-			<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
-		</form>
+				<p class="drag-drop-message">
+					<?php _e('Drop import file here'); ?>
+				</p>
+
+				<p class="drag-drop-buttons">
+					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
+				</p>
+			</div>
+		</div>
+
+		<div class="export-file-ui">
+			<iframe id="siteorigin-panels-export-iframe" style="display: none;" name="siteorigin-panels-export-iframe"></iframe>
+			<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_export_layout') ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
+				<input type="submit" value="<?php esc_attr_e('Export Layout', 'siteorigin-panels') ?>" class="button-secondary" />
+				<input type="hidden" name="panels_export_data" value="" />
+				<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
+			</form>
+		</div>
 	</div>
 </script>
 
