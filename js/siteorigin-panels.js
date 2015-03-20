@@ -2685,10 +2685,12 @@ String.prototype.panelsProcessTemplate = function(){
             // Get the values from the form and assign the new values to the model
             var values = this.getFormValues();
             if(typeof values.widgets === 'undefined') {
-                return false;
+                values = { };
             }
-            values = values.widgets;
-            values = values[ Object.keys(values)[0] ];
+            else {
+                values = values.widgets;
+                values = values[ Object.keys(values)[0] ];
+            }
 
             this.model.setValues(values);
             this.model.set('raw', true); // We've saved from the widget form, so this is now raw
