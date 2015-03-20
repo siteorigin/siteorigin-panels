@@ -204,7 +204,8 @@ function siteorigin_panels_ajax_import_layout(){
 
 	if( !empty($_FILES['panels_import_data']['tmp_name']) ) {
 		header('content-type:application/json');
-		$json = file_get_contents($_FILES['panels_import_data']['tmp_name']);
+		$json = file_get_contents( $_FILES['panels_import_data']['tmp_name'] );
+		@unlink( $_FILES['panels_import_data']['tmp_name'] );
 		echo $json;
 	}
 	wp_die();
