@@ -320,26 +320,6 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 			)
 		));
 
-		// Let themes and plugins give names and descriptions to missing widgets.
-		global $wp_widget_factory;
-		$missing_widgets = array();
-		if ( !empty( $panels_data['widgets'] ) ) {
-			foreach ( $panels_data['widgets'] as $i => $widget ) {
-
-				// There's a chance the widget was activated by siteorigin_panels_widget_is_missing
-				if ( empty( $wp_widget_factory->widgets[ $widget['info']['class'] ] ) ) {
-					$missing_widgets[$widget['info']['class']] = apply_filters('siteorigin_panels_missing_widget_data', array(
-						'title' => str_replace( '_', ' ', $widget['info']['class'] ),
-						'description' => __('Install the missing widget', 'siteorigin-panels'),
-					), $widget['info']['class']);
-				}
-			}
-		}
-
-		if( !empty($missing_widgets) ) {
-			wp_localize_script( 'so-panels-admin', 'panelsMissingWidgets', $missing_widgets );
-		}
-
 		if( $screen->base != 'widgets' ) {
 			// Render all the widget forms. A lot of widgets use this as a chance to enqueue their scripts
 			$original_post = isset($GLOBALS['post']) ? $GLOBALS['post'] : null; // Make sure widgets don't change the global post.
