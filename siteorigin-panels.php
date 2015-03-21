@@ -1272,5 +1272,32 @@ function siteorigin_panels_plugin_action_links($links) {
 }
 add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panels_plugin_action_links');
 
+/**
+ * Process panels data to make sure everything is properly formatted
+ *
+ * @param array $panels_data
+ *
+ * @return array
+ */
+function siteorigin_panels_process_panels_data( $panels_data ){
+
+	// Process all widgets to make sure that panels_info is properly represented
+	if( !empty($panels_data['widgets']) && is_array($panels_data['widgets']) ) {
+
+		foreach( $panels_data['widgets'] as &$widget ) {
+
+			if( empty($widget['panels_info']) && !empty($widget['info']) ) {
+				$widget['panels_info'] = $widget['info'];
+				unset( $widget['info'] );
+			}
+
+		}
+
+	}
+
+	return $panels_data;
+}
+add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
+
 // Include the live editor file if we're in live editor mode.
 if( filter_input( INPUT_GET, 'siteorigin_panels_live_editor', FILTER_VALIDATE_BOOLEAN ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
