@@ -106,26 +106,30 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	);
 
 	if( class_exists('SiteOrigin_Widgets_Bundle') ) {
+		// Add a message about enabling more widgets
 		$tabs['widgets_bundle']['message'] = sprintf(
 			__('Enable more widgets in the <a href="%s" target="_blank">Widgets Bundle settings</a>.'),
 			admin_url('plugins.php?page=so-widgets-plugins')
 		);
 	}
+	else {
+		// Add a message about installing the widgets bundle
+		$tabs['widgets_bundle']['message'] = sprintf(
+			__('Install the <a href="%s" target="_blank">Widgets Bundle</a> to get extra widgets.'),
+			siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __('SiteOrigin Widgets Bundle', 'siteorigin-panels') )
+		);
+	}
 
 	$tabs['page_builder'] = array(
 		'title' => __('Page Builder Widgets', 'siteorigin-panels'),
+		'message' =>  sprintf(
+			__('You can enable the legacy (PB) widgets in the <a href="%s" target="_blank">Page Builder settings</a>.'),
+			admin_url('options-general.php?page=siteorigin_panels')
+		),
 		'filter' => array(
 			'groups' => array('panels')
 		)
 	);
-
-	if( !siteorigin_setting('bundled-widgets') ) {
-		// Add the message about enabling legacy widgets
-		$tabs['page_builder']['message'] = sprintf(
-			__('You can enable the legacy (PB) widgets in the <a href="%s" target="_blank">Page Builder settings</a>.'),
-			admin_url('options-general.php?page=siteorigin_panels')
-		);
-	}
 
 	$tabs['wordpress'] = array(
 		'title' => __('WordPress Widgets', 'siteorigin-panels'),
