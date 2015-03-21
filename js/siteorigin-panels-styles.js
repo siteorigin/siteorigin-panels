@@ -3,6 +3,8 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+
 ( function( $, _, panelsOptions ){
 
     var panels = window.siteoriginPanels;

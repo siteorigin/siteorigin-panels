@@ -43,7 +43,7 @@ function siteorigin_panels_ajax_widget_form(){
 	if( empty( $request['widget'] ) ) wp_die();
 
 	$widget = $request['widget'];
-	$instance = !empty($request['instance']) ? json_decode( stripslashes( $request['instance'] ), true ) : array();
+	$instance = !empty($request['instance']) ? json_decode( $request['instance'], true ) : array();
 
 	$form = siteorigin_panels_render_form( $widget, $instance, $request['raw'] );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
@@ -194,3 +194,35 @@ function siteorigin_panels_ajax_get_prebuilt_layout(){
 	}
 }
 add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_prebuilt_layout');
+
+/**
+ * Ajax handler to import a layout
+ */
+function siteorigin_panels_ajax_import_layout(){
+	$nonce = filter_input( INPUT_POST, '_panelsnonce', FILTER_DEFAULT );
+	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
+
+	if( !empty($_FILES['panels_import_data']['tmp_name']) ) {
+		$json = file_get_contents($_FILES['panels_import_data']['tmp_name']);
+		?><script>window.parent.soPanelsImportJson( "<?php echo addslashes($json) ?>" );</script><?php
+	}
+	wp_die();
+}
+add_action('wp_ajax_so_panels_import_layout', 'siteorigin_panels_ajax_import_layout');
+
+/**
+ * Ajax handler to export a layout
+ */
+function siteorigin_panels_ajax_export_layout(){
+	$nonce = filter_input( INPUT_POST, '_panelsnonce', FILTER_DEFAULT );
+	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
+
+	header('content-type: application/json');
+	header('Content-Disposition: attachment; filename=layout-' . date('dmY') . '.json');
+
+	$export_data = filter_input( INPUT_POST, 'panels_export_data' );
+	echo $export_data;
+
+	wp_die();
+}
+add_action('wp_ajax_so_panels_export_layout', 'siteorigin_panels_ajax_export_layout');

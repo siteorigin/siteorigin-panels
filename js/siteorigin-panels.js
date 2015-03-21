@@ -1532,6 +1532,7 @@ String.prototype.panelsProcessTemplate = function(){
             if( $(this.dataField).val() !== data ) {
                 // If the data is different, set it and trigger a content_change event
                 $(this.dataField).val( data );
+                $(this.dataField).trigger( 'change' );
                 this.trigger('content_change');
             }
         },
@@ -2684,10 +2685,12 @@ String.prototype.panelsProcessTemplate = function(){
             // Get the values from the form and assign the new values to the model
             var values = this.getFormValues();
             if(typeof values.widgets === 'undefined') {
-                return false;
+                values = { };
             }
-            values = values.widgets;
-            values = values[ Object.keys(values)[0] ];
+            else {
+                values = values.widgets;
+                values = values[ Object.keys(values)[0] ];
+            }
 
             this.model.setValues(values);
             this.model.set('raw', true); // We've saved from the widget form, so this is now raw
@@ -2796,7 +2799,11 @@ String.prototype.panelsProcessTemplate = function(){
 
             this.currentTab = tab;
 
-            if( typeof this.layoutCache[tab] === 'undefined' ) {
+            if( tab === 'import' ) {
+                // Display the import export
+                this.displayImportExport();
+            }
+            else if( typeof this.layoutCache[tab] === 'undefined' ) {
                 // We need to load the tab items from the server
                 this.$('.so-content').addClass('so-panels-loading');
 
@@ -2900,6 +2907,29 @@ String.prototype.panelsProcessTemplate = function(){
                     thisView.closeDialog();
                 }
             );
+        },
+
+        /**
+         * Display and setup the import/export form
+         */
+        displayImportExport: function(){
+            var c = this.$( '.so-content').empty();
+            c.html( $('#siteorigin-panels-dialog-prebuilt-importexport').html() );
+
+
+            var thisView = this;
+
+            c.find('.so-export').submit( function(e){
+                $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+            } );
+
+            c.find('.so-import').submit( function(e){
+                window.soPanelsImportJson = function(layout){
+                    layout = JSON.parse( layout );
+                    thisView.builder.model.loadPanelsData(layout);
+                    thisView.closeDialog();
+                };
+            } );
         },
 
         /**
@@ -3530,7 +3560,6 @@ jQuery( function($){
 
             // Save panels data when we close the dialog, if we're in a dialog
             var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-
             if( typeof dialog !== 'undefined' ) {
                 dialog.on('close_dialog', function(){
                     builderModel.refreshPanelsData();
@@ -3580,8 +3609,10 @@ jQuery( function($){
     });
 
     // Setup existing widgets on the page (for the widgets interface)
-    $(function(){
-        $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
-    });
+    if(!$('body').hasClass('wp-customizer')) {
+        $(function(){
+            $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
+        });
+    }
 
 })( jQuery );
