@@ -105,6 +105,13 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 		)
 	);
 
+	if( class_exists('SiteOrigin_Widgets_Bundle') ) {
+		$tabs['widgets_bundle']['message'] = sprintf(
+			__('Enable more widgets in the <a href="%s" target="_blank">Widgets Bundle settings</a>.'),
+			admin_url('plugins.php?page=so-widgets-plugins')
+		);
+	}
+
 	$tabs['page_builder'] = array(
 		'title' => __('Page Builder Widgets', 'siteorigin-panels'),
 		'filter' => array(
