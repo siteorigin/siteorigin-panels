@@ -248,7 +248,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		$widgets = siteorigin_panels_get_widgets();
 
 		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
-			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
+			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php?action=so_panels_import_layout'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 				array(
@@ -310,6 +310,14 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 			),
+			'plupload' => array(
+				'max_file_size' => wp_max_upload_size().'b',
+				'url'  => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
+				'flash_swf_url' => includes_url('js/plupload/plupload.flash.swf'),
+				'silverlight_xap_url' => includes_url('js/plupload/plupload.silverlight.xap'),
+				'filter_title' => __('Page Builder layouts', 'siteorigin-panels'),
+				'error_message' => __('Error uploading or importing file.', 'siteorigin-panels'),
+			)
 		));
 
 		// Let themes and plugins give names and descriptions to missing widgets.

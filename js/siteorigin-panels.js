@@ -5,7 +5,7 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
-/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, plupload, confirm, console */
 
 /**
  * Convert template into something compatible with Underscore.js templates
@@ -2797,7 +2797,7 @@ String.prototype.panelsProcessTemplate = function(){
             // Empty everything
             this.$('.so-content').empty();
 
-            this.currentTab = tab;
+            thisView.currentTab = tab;
 
             if( tab === 'import' ) {
                 // Display the import export
@@ -2815,8 +2815,12 @@ String.prototype.panelsProcessTemplate = function(){
                     },
                     function(layouts){
                         thisView.layoutCache[ tab ] = layouts;
-                        thisView.$( '.so-content' ).removeClass( 'so-panels-loading' );
-                        thisView.displayLayouts( tab, layouts );
+
+                        if( thisView.currentTab === tab ) {
+                            // If the current tab is selected
+                            thisView.$( '.so-content' ).removeClass( 'so-panels-loading' );
+                            thisView.displayLayouts( tab, layouts );
+                        }
                     }
                 );
             }
@@ -2913,23 +2917,83 @@ String.prototype.panelsProcessTemplate = function(){
          * Display and setup the import/export form
          */
         displayImportExport: function(){
-            var c = this.$( '.so-content').empty();
+            var c = this.$( '.so-content').empty().removeClass( 'so-panels-loading' );
             c.html( $('#siteorigin-panels-dialog-prebuilt-importexport').html() );
 
-
             var thisView = this;
+            var uploadUi = thisView.$('.import-upload-ui').hide();
 
+            // Create the uploader
+            var uploader = new plupload.Uploader({
+                runtimes : 'html5,silverlight,flash,html4',
+
+                browse_button : uploadUi.find('.file-browse-button').get(0),
+                container : uploadUi.get(0),
+                drop_element : uploadUi.find('.drag-upload-area').get(0),
+
+                file_data_name : 'panels_import_data',
+                multiple_queues : false,
+                max_file_size : panelsOptions.plupload.max_file_size,
+                url : panelsOptions.plupload.url,
+                flash_swf_url : panelsOptions.plupload.flash_swf_url,
+                silverlight_xap_url : panelsOptions.plupload.silverlight_xap_url,
+                filters : [
+                    { title : panelsOptions.plupload.filter_title, extensions : 'json' }
+                ],
+
+                multipart_params : {
+                    action : 'so_panels_import_layout'
+                },
+
+                init: {
+                    PostInit: function(uploader){
+                        if( uploader.features.dragdrop ) {
+                            uploadUi.addClass('has-drag-drop');
+                        }
+                        uploadUi.show().find('.progress-precent').css('width', '0%');
+                    },
+                    FilesAdded: function(uploader){
+                        uploadUi.find('.file-browse-button').blur();
+                        uploadUi.find('.drag-upload-area').removeClass('file-dragover');
+                        uploadUi.find('.progress-bar').fadeIn('fast');
+                        uploader.start();
+                    },
+                    UploadProgress: function(uploader, file){
+                        uploadUi.find('.progress-precent').css('width', file.percent + '%');
+                    },
+                    FileUploaded : function(uploader, file, response){
+                        var layout = JSON.parse( response.response );
+                        if( typeof layout.widgets !== 'undefined' ) {
+                            thisView.builder.addHistoryEntry('prebuilt_loaded');
+                            thisView.builder.model.loadPanelsData(layout);
+                            thisView.closeDialog();
+                        }
+                        else {
+                            alert( panelsOptions.plupload.error_message );
+                        }
+                    },
+                    Error: function(){
+                        alert( panelsOptions.plupload.error_message );
+                    }
+                }
+            });
+            uploader.init();
+
+            // This is
+            uploadUi.find('.drag-upload-area')
+                .on('dragover', function(){
+                    $(this).addClass('file-dragover');
+                })
+                .on('dragleave', function(){
+                    $(this).removeClass('file-dragover');
+                });
+
+            // Handle exporting the file
             c.find('.so-export').submit( function(e){
-                $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+                var $$ = $(this);
+                $$.find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
             } );
 
-            c.find('.so-import').submit( function(e){
-                window.soPanelsImportJson = function(layout){
-                    layout = JSON.parse( layout );
-                    thisView.builder.model.loadPanelsData(layout);
-                    thisView.closeDialog();
-                };
-            } );
         },
 
         /**
