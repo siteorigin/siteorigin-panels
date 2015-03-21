@@ -324,6 +324,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<ul class="so-sidebar-tabs">
 				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
 				foreach($post_types as $post_type) {
@@ -332,7 +333,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					?><li><a href="#<?php echo 'clone_'.$post_type ?>"><?php printf( __('Clone: %s', 'siteorigin-panels'), $type->labels->name ) ?></a></li><?php
 				}
 				?>
-				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 			</ul>
 
 		</div>
@@ -351,9 +351,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="import-upload-ui hide-if-no-js">
 			<div class="drag-upload-area">
 
-				<p class="drag-drop-message">
-					<?php _e('Drop import file here'); ?>
-				</p>
+				<h2 class="drag-drop-message"><?php _e('Drop import file here', 'siteorigin-panels'); ?></h2>
+				<p class="drag-drop-message"><?php _e('Or', 'siteorigin-panels') ?></p>
 
 				<p class="drag-drop-buttons">
 					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
@@ -368,7 +367,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="export-file-ui">
 			<iframe id="siteorigin-panels-export-iframe" style="display: none;" name="siteorigin-panels-export-iframe"></iframe>
 			<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_export_layout') ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
-				<input type="submit" value="<?php esc_attr_e('Export Layout', 'siteorigin-panels') ?>" class="button-secondary" />
+				<input type="submit" value="<?php esc_attr_e('Download Layout', 'siteorigin-panels') ?>" class="button-primary" />
 				<input type="hidden" name="panels_export_data" value="" />
 				<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
 			</form>

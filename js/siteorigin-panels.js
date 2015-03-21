@@ -2797,7 +2797,7 @@ String.prototype.panelsProcessTemplate = function(){
             // Empty everything
             this.$('.so-content').empty();
 
-            this.currentTab = tab;
+            thisView.currentTab = tab;
 
             if( tab === 'import' ) {
                 // Display the import export
@@ -2815,8 +2815,12 @@ String.prototype.panelsProcessTemplate = function(){
                     },
                     function(layouts){
                         thisView.layoutCache[ tab ] = layouts;
-                        thisView.$( '.so-content' ).removeClass( 'so-panels-loading' );
-                        thisView.displayLayouts( tab, layouts );
+
+                        if( thisView.currentTab === tab ) {
+                            // If the current tab is selected
+                            thisView.$( '.so-content' ).removeClass( 'so-panels-loading' );
+                            thisView.displayLayouts( tab, layouts );
+                        }
                     }
                 );
             }
@@ -2913,7 +2917,7 @@ String.prototype.panelsProcessTemplate = function(){
          * Display and setup the import/export form
          */
         displayImportExport: function(){
-            var c = this.$( '.so-content').empty();
+            var c = this.$( '.so-content').empty().removeClass( 'so-panels-loading' );
             c.html( $('#siteorigin-panels-dialog-prebuilt-importexport').html() );
 
             var thisView = this;
@@ -2934,7 +2938,7 @@ String.prototype.panelsProcessTemplate = function(){
                 flash_swf_url : panelsOptions.plupload.flash_swf_url,
                 silverlight_xap_url : panelsOptions.plupload.silverlight_xap_url,
                 filters : [
-                    { title : "Page Builder layouts", extensions : 'json' }
+                    { title : panelsOptions.plupload.filter_title, extensions : 'json' }
                 ],
 
                 multipart_params : {
@@ -2946,10 +2950,11 @@ String.prototype.panelsProcessTemplate = function(){
                         if( uploader.features.dragdrop ) {
                             uploadUi.addClass('has-drag-drop');
                         }
-
                         uploadUi.show().find('.progress-precent').css('width', '0%');
                     },
                     FilesAdded: function(uploader){
+                        uploadUi.find('.file-browse-button').blur();
+                        uploadUi.find('.drag-upload-area').removeClass('file-dragover');
                         uploadUi.find('.progress-bar').fadeIn('fast');
                         uploader.start();
                     },
@@ -2963,16 +2968,30 @@ String.prototype.panelsProcessTemplate = function(){
                             thisView.builder.model.loadPanelsData(layout);
                             thisView.closeDialog();
                         }
+                        else {
+                            alert( panelsOptions.plupload.error_message );
+                        }
                     },
                     Error: function(){
-                        // TODO display this error
+                        alert( panelsOptions.plupload.error_message );
                     }
                 }
             });
             uploader.init();
 
+            // This is
+            uploadUi.find('.drag-upload-area')
+                .on('dragover', function(){
+                    $(this).addClass('file-dragover');
+                })
+                .on('dragleave', function(){
+                    $(this).removeClass('file-dragover');
+                });
+
+            // Handle exporting the file
             c.find('.so-export').submit( function(e){
-                $(this).find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+                var $$ = $(this);
+                $$.find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
             } );
 
         },

@@ -315,7 +315,8 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'url'  => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
 				'flash_swf_url' => includes_url('js/plupload/plupload.flash.swf'),
 				'silverlight_xap_url' => includes_url('js/plupload/plupload.silverlight.xap'),
-				'filters' => array(array('title' => __('Allowed Files'), 'extensions' => '*')),
+				'filter_title' => __('Page Builder layouts', 'siteorigin-panels'),
+				'error_message' => __('Error uploading or importing file.', 'siteorigin-panels'),
 			)
 		));
 
