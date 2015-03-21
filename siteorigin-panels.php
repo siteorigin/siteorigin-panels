@@ -552,6 +552,7 @@ function siteorigin_panels_process_raw_widgets($widgets) {
 			}
 		}
 
+		$info['class'] = addslashes( $info['class'] );
 		$widgets[$i]['panels_info'] = $info;
 
 	}
