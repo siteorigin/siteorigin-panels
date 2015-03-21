@@ -168,6 +168,14 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		if( empty( $instance['template'] ) ) return;
 		if( is_admin() ) return;
 
+		static $depth = 0;
+		$depth++;
+		if( $depth > 1 ) {
+			// Because of infinite loops, don't render this post loop if its inside another
+			$depth--;
+			return;
+		}
+
 		$query_args = $instance;
 		//If Widgets Bundle post selector is available and a posts query has been saved using it.
 		if ( function_exists( 'siteorigin_widget_post_selector_process_query' ) && ! empty( $instance['posts'] ) ) {
@@ -247,8 +255,6 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 
-		add_filter( 'siteorigin_panels_filter_content_enabled', array( 'SiteOrigin_Panels_Widgets_PostLoop', 'remove_content_filter' ) );
-
 		global $more; $old_more = $more; $more = empty($instance['more']);
 
 		if(strpos('/'.$instance['template'], '/content') !== false) {
@@ -261,20 +267,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			locate_template($instance['template'], true, false);
 		}
 
-		$more = $old_more;
-		remove_filter( 'siteorigin_panels_filter_content_enabled', array( 'SiteOrigin_Panels_Widgets_PostLoop', 'remove_content_filter' ) );
-
 		echo $args['after_widget'];
 
 		// Reset everything
 		wp_reset_query();
-	}
-
-	/**
-	 * @return bool
-	 */
-	static function remove_content_filter(){
-		return false;
+		$depth--;
 	}
 
 	/**
