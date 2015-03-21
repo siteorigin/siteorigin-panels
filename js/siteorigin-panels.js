@@ -2382,7 +2382,10 @@ String.prototype.panelsProcessTemplate = function(){
             // Add the sidebar tabs
             var tabs = this.$el.find('.so-sidebar-tabs');
             _.each(panelsOptions.widget_dialog_tabs, function(tab){
-                var $t = $( this.dialogTabTemplate( { 'title' : tab.title } )).data('filter', tab.filter).appendTo( tabs );
+                $( this.dialogTabTemplate( { 'title' : tab.title } )).data({
+                    'message' : tab.message,
+                    'filter' : tab.filter
+                }).appendTo( tabs );
             }, this);
 
             // We'll be using tabs, so initialize them
@@ -2401,6 +2404,8 @@ String.prototype.panelsProcessTemplate = function(){
             // Get the filter from the tab, and filter the widgets
             this.filter = $t.parent().data('filter');
             this.filter.search = this.$el.find('.so-sidebar-search').val();
+
+            this.$('.so-toolbar .so-status').html( $t.parent().data('message') );
 
             this.filterWidgets(this.filter);
 

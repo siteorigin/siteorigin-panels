@@ -98,21 +98,29 @@ add_filter('siteorigin_panels_widgets', 'siteorigin_panels_add_recommended_widge
  */
 function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 
-	$tabs[] = array(
+	$tabs['widgets_bundle'] = array(
 		'title' => __('Widgets Bundle', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('so-widgets-bundle')
 		)
 	);
 
-	$tabs[] = array(
+	$tabs['page_builder'] = array(
 		'title' => __('Page Builder Widgets', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('panels')
 		)
 	);
 
-	$tabs[] = array(
+	if( !siteorigin_setting('bundled-widgets') ) {
+		// Add the message about enabling legacy widgets
+		$tabs['page_builder']['message'] = sprintf(
+			__('You can enable the legacy (PB) widgets in the <a href="%s" target="_blank">Page Builder settings</a>.'),
+			admin_url('options-general.php?page=siteorigin_panels')
+		);
+	}
+
+	$tabs['wordpress'] = array(
 		'title' => __('WordPress Widgets', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('wordpress')
@@ -121,35 +129,35 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	
 	// Check for woocommerce plugin.
 	if (defined('WOOCOMMERCE_VERSION')) {
-		$tabs[] = array(
+		$tabs['woocommerce'] = array(
 			'title'  => __('WooCommerce', 'woocommerce'),
 			'filter' => array(
-			'groups' => array('woocommerce')
-			),
+				'groups' => array('woocommerce')
+			)
 		);
 	}
 	
 	// Check for jetpack plugin.
 	if (defined('JETPACK__VERSION')) {
-		$tabs[] = array(
+		$tabs['jetpack'] = array(
 			'title'  => __('Jetpack', 'jetpack'),
 			'filter' => array(
-			'groups' => array('jetpack')
+				'groups' => array('jetpack')
 			),
 		);
 	}
 	
 	// Check for bbpress plugin.
 	if (function_exists('bbpress')) {
-		$tabs[] = array(
+		$tabs['bbpress'] = array(
 			'title'  => __('BBPress', 'bbpress'),
 			'filter' => array(
-			'groups' => array('bbpress')
+				'groups' => array('bbpress')
 			),
 		);
 	}
 
-	$tabs[] = array(
+	$tabs['recommended'] = array(
 		'title' => __('Recommended Widgets', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('recommended')
