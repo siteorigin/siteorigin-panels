@@ -173,6 +173,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		if( $depth > 1 ) {
 			// Because of infinite loops, don't render this post loop if its inside another
 			$depth--;
+			echo $args['before_widget'].$args['after_widget'];
 			return;
 		}
 
