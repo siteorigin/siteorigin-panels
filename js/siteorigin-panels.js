@@ -2405,7 +2405,12 @@ String.prototype.panelsProcessTemplate = function(){
             this.filter = $t.parent().data('filter');
             this.filter.search = this.$el.find('.so-sidebar-search').val();
 
-            this.$('.so-toolbar .so-status').html( $t.parent().data('message') );
+            var message = $t.parent().data('message');
+            if( _.isEmpty( message ) ) {
+                message = '';
+            }
+
+            this.$('.so-toolbar .so-status').html( message );
 
             this.filterWidgets(this.filter);
 
