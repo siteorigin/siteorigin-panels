@@ -120,6 +120,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['mobile-width'] = 780;
 		$defaults['margin-bottom'] = 30;
 		$defaults['margin-sides'] = 30;
+		$defaults['full-width-container'] = 'body';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -255,6 +256,13 @@ class SiteOrigin_Panels_Settings {
 			'keywords' => 'margin',
 		);
 
+		$fields['layout']['fields']['full-width-container'] = array(
+			'type' => 'text',
+			'label' => __('Full Width Container', 'siteorigin-panels'),
+			'description' => __('The container used for the full width layout.', 'siteorigin-panels'),
+			'keywords' => 'full width, container, stretch',
+		);
+
 		// The content fields
 
 		$fields['content'] = array(
@@ -284,7 +292,7 @@ class SiteOrigin_Panels_Settings {
 
 		switch ($field['type'] ) {
 			case 'text':
-				?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?> widefat" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
+				?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?>" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
 				break;
 
 			case 'number':

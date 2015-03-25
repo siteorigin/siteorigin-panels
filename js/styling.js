@@ -3,6 +3,11 @@
 
 jQuery(function($){
 
+    var stretchContainer = $( panelsStyles.stretchContainer );
+    if( stretchContainer.length === 0 ) {
+        stretchContainer = $('body');
+    }
+
     // This will handle stretching the cells.
     $('.siteorigin-panels-stretch.panel-row-style').each(function(){
         var $$ = $(this);
@@ -16,8 +21,8 @@ jQuery(function($){
                 'padding-right' : 0
             });
 
-            var leftSpace = $$.offset().left;
-            var rightSpace = $(window).outerWidth() - $$.offset().left - $$.parent().outerWidth();
+            var leftSpace = $$.offset().left - stretchContainer.offset().left;
+            var rightSpace = stretchContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
             $$.css({
                 'margin-left' : -leftSpace,
