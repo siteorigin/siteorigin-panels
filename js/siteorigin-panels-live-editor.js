@@ -279,16 +279,17 @@
                             var hoverWidget = getHoverWidget();
 
                             // Center the iframe on the over item
+                            if(hoverWidget && hoverWidget.offset()) {
+                                previewFrame.contents()
+                                    .find('html,body')
+                                    .clearQueue()
+                                    .animate( {
+                                        scrollTop: hoverWidget.offset().top - Math.max(30, ( Math.min( previewFrame.contents().height(), previewFrame.height() ) - hoverWidget.outerHeight() ) /2 )
+                                    }, 750);
 
-                            previewFrame.contents()
-                                .find('html,body')
-                                .clearQueue()
-                                .animate( {
-                                    scrollTop: hoverWidget.offset().top - Math.max(30, ( Math.min( previewFrame.contents().height(), previewFrame.height() ) - hoverWidget.outerHeight() ) /2 )
-                                }, 750);
-
-                            // Create the overlay
-                            overlay = thisView.createPreviewOverlay( hoverWidget );
+                                // Create the overlay
+                                overlay = thisView.createPreviewOverlay( hoverWidget );
+                            }
 
                         })
                         .mouseleave(function(){
