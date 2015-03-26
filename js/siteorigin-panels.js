@@ -1451,13 +1451,31 @@ String.prototype.panelsProcessTemplate = function(){
                     newTop += $('#wpadminbar').outerHeight();
                 }
 
-                // Make sure this falls in an acceptible range.
-                newTop = Math.max( newTop, 0 );
-                newTop = Math.min( newTop, thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ); // 20px extra to account for padding.
+                var limits = {
+                    top: 0,
+                    bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
+                };
 
-                // Position the toolbar
-                toolbar.css('top', newTop);
-                thisView.$el.css('padding-top', toolbar.outerHeight());
+                if( newTop > limits.top && newTop < limits.bottom ) {
+                    // The toolbar needs to stick to the top, over the interface
+                    toolbar.css({
+                        top: $('#wpadminbar').outerHeight(),
+                        left: thisView.$el.offset().left,
+                        width: thisView.$el.outerWidth(),
+                        position: 'fixed'
+                    });
+                }
+                else {
+                    // The toolbar needs to be at the top or bottom of the interface
+                    toolbar.css({
+                        top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+                        left: 0,
+                        width: '100%',
+                        position: 'absolute'
+                    });
+                }
+
+                thisView.$el.css('padding-top', toolbar.outerHeight() );
             };
 
             $( window ).resize( stickToolbar );
