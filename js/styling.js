@@ -3,9 +3,9 @@
 
 jQuery(function($){
 
-    var stretchContainer = $( panelsStyles.stretchContainer );
-    if( stretchContainer.length === 0 ) {
-        stretchContainer = $('body');
+    var fullContainer = $( panelsStyles.fullContainer );
+    if( fullContainer.length === 0 ) {
+        fullContainer = $('body');
     }
 
     // This will handle stretching the cells.
@@ -21,8 +21,8 @@ jQuery(function($){
                 'padding-right' : 0
             });
 
-            var leftSpace = $$.offset().left - stretchContainer.offset().left;
-            var rightSpace = stretchContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
+            var leftSpace = $$.offset().left - fullContainer.offset().left;
+            var rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
             $$.css({
                 'margin-left' : -leftSpace,
