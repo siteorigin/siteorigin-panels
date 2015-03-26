@@ -1113,7 +1113,11 @@ String.prototype.panelsProcessTemplate = function(){
             var cit = 0;
             var rows = [];
 
-            if( typeof data.grid_cells === 'undefined' ) { return; }
+            if( typeof data.grid_cells === 'undefined' ) {
+                this.trigger('change');
+                this.trigger('change:data');
+                return;
+            }
 
             var gi;
             for(var ci = 0; ci < data.grid_cells.length; ci++) {
@@ -1169,6 +1173,9 @@ String.prototype.panelsProcessTemplate = function(){
                 catch (err) {
                 }
             } );
+
+            this.trigger('change');
+            this.trigger('change:data');
         },
 
         /**
@@ -1524,7 +1531,7 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Store the model data in the data field set in this.setDataField.
+         * Store the model data in the data html field set in this.setDataField.
          */
         storeModelData: function(){
             var data = JSON.stringify( this.model.get('data' ) );
