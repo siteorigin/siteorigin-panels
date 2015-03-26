@@ -1457,13 +1457,15 @@ String.prototype.panelsProcessTemplate = function(){
                 };
 
                 if( newTop > limits.top && newTop < limits.bottom ) {
-                    // The toolbar needs to stick to the top, over the interface
-                    toolbar.css({
-                        top: $('#wpadminbar').outerHeight(),
-                        left: thisView.$el.offset().left,
-                        width: thisView.$el.outerWidth(),
-                        position: 'fixed'
-                    });
+                    if( toolbar.css('position') !== 'fixed' ) {
+                        // The toolbar needs to stick to the top, over the interface
+                        toolbar.css({
+                            top: $('#wpadminbar').outerHeight(),
+                            left: thisView.$el.offset().left,
+                            width: thisView.$el.outerWidth(),
+                            position: 'fixed'
+                        });
+                    }
                 }
                 else {
                     // The toolbar needs to be at the top or bottom of the interface
