@@ -891,60 +891,27 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
-		if (empty($instance['url'])) return;
-		static $video_widget_id = 1;
+		if ( empty($instance['url']) ) return;
+		if ( !function_exists('wp_video_shortcode') ) return;
 
 		$instance = wp_parse_args($instance, array(
 			'url' => '',
 			'poster' => '',
-			'skin' => 'siteorigin',
-			'ratio' => 1.777,
 			'autoplay' => false,
 		));
 
-		// Enqueue jPlayer scripts and intializer
-		wp_enqueue_script( 'siteorigin-panels-video-jplayer', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE).'video/jplayer/jquery.jplayer.min.js', array('jquery'), SITEORIGIN_PANELS_VERSION, true);
-		wp_enqueue_script( 'siteorigin-panels-video', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE).'video/panels.video.jquery.js', array('jquery'), SITEORIGIN_PANELS_VERSION, true);
-
-		// Enqueue the SiteOrigin jPlayer skin
-		$skin = sanitize_file_name($instance['skin']);
-		wp_enqueue_style('siteorigin-panels-video-jplayer-skin', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE).'video/jplayer/skins/'.$skin.'/jplayer.'.$skin.'.css', array(), SITEORIGIN_PANELS_VERSION);
-
-		$file = $instance['url'];
-		$poster = !empty($instance['poster']) ? $instance['poster'] :  plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE).'video/poster.jpg';
-		$instance['ratio'] = floatval($instance['ratio']);
-		if(empty($instance['ratio'])) $instance['ratio'] = 1.777;
-
 		echo $args['before_widget'];
-
-		?>
-		<div class="jp-video" id="jp_container_<?php echo $video_widget_id ?>">
-			<div class="jp-type-single" id="jp_interface_<?php echo $video_widget_id ?>">
-				<div id="jquery_jplayer_<?php echo $video_widget_id ?>" class="jp-jplayer"
-				     data-video="<?php echo esc_url($file) ?>"
-				     data-poster="<?php echo esc_url($poster) ?>"
-				     data-ratio="<?php echo floatval($instance['ratio']) ?>"
-				     data-autoplay="<?php echo esc_attr($instance['autoplay']) ?>"
-				     data-swfpath="<?php echo plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE).'video/jplayer/' ?>"
-				     data-mobile="<?php echo wp_is_mobile() ? 'true' : 'false' ?>"></div>
-
-				<?php $this->display_gui($instance['skin']) ?>
-			</div>
-		</div>
-		<?php
-
-		$video_widget_id++;
+		echo wp_video_shortcode( array(
+			'src' => $instance['url'],
+			'poster' => $instance['poster'],
+			'autoplay' => $instance['autoplay'],
+		) );
 		echo $args['after_widget'];
 	}
 
-	function display_gui($skin){
-		$file = plugin_dir_path(SITEORIGIN_PANELS_BASE_FILE).'video/jplayer/skins/'.$skin.'/gui.php';
-		if(file_exists($file)) include plugin_dir_path(SITEORIGIN_PANELS_BASE_FILE).'video/jplayer/skins/'.$skin.'/gui.php';
-	}
-
 	function update( $new, $old ) {
-		$new['skin'] = sanitize_file_name($new['skin']);
-		$new['ratio'] = floatval($new['ratio']);
+		$new['url'] = esc_url_raw( $new['url'] );
+		$new['poster'] = esc_url_raw( $new['poster'] );
 		$new['autoplay'] = !empty($new['autoplay']) ? 1 : 0;
 		return $new;
 	}
@@ -967,18 +934,6 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 			<label for="<?php echo $this->get_field_id('poster') ?>"><?php _e('Poster URL', 'siteorigin-panels') ?></label>
 			<input id="<?php echo $this->get_field_id('poster') ?>" name="<?php echo $this->get_field_name('poster') ?>" type="text" class="widefat" value="<?php echo esc_attr($instance['poster']) ?>" />
 			<small class="description"><?php _e('An image that displays before the video starts playing.', 'siteorigin-panels') ?></small>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('skin') ?>"><?php _e('Skin', 'siteorigin-panels') ?></label>
-			<select id="<?php echo $this->get_field_id('skin') ?>" name="<?php echo $this->get_field_name('skin') ?>">
-				<option value="siteorigin" <?php selected($instance['skin'], 'siteorigin') ?>><?php esc_html_e('SiteOrigin', 'siteorigin-panels') ?></option>
-				<option value="premium" <?php selected($instance['skin'], 'premium') ?>><?php esc_html_e('Premium Pixels', 'siteorigin-panels') ?></option>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('ratio') ?>"><?php _e('Aspect Ratio', 'siteorigin-panels') ?></label>
-			<input id="<?php echo $this->get_field_id('ratio') ?>" name="<?php echo $this->get_field_name('ratio') ?>" type="text" class="widefat" value="<?php echo esc_attr($instance['ratio']) ?>" />
-			<small class="description"><?php _e('1.777 is HD standard.', 'siteorigin-panels') ?></small>
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id('autoplay') ?>">
