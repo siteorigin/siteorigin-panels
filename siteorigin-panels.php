@@ -684,10 +684,10 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	}
 
 	// Add the bottom margins
-	$css->add_cell_css($post_id, false, false, '.panel', array(
+	$css->add_cell_css($post_id, false, false, '.so-panel', array(
 		'margin-bottom' => $panels_margin_bottom.'px'
 	));
-	$css->add_cell_css($post_id, false, false, '.panel:last-child', array(
+	$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
 		'margin-bottom' => 0
 	));
 
@@ -1047,7 +1047,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = array( 'siteorigin-panel', 'widget' );
+	$classes = array( 'so-panel', 'widget' );   
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
