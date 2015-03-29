@@ -1114,8 +1114,7 @@ String.prototype.panelsProcessTemplate = function(){
             var rows = [];
 
             if( typeof data.grid_cells === 'undefined' ) {
-                this.trigger('change');
-                this.trigger('change:data');
+                this.trigger('load_panels_data');
                 return;
             }
 
@@ -1174,8 +1173,7 @@ String.prototype.panelsProcessTemplate = function(){
                 }
             } );
 
-            this.trigger('change');
-            this.trigger('change:data');
+            this.trigger('load_panels_data');
         },
 
         /**
@@ -1317,7 +1315,7 @@ String.prototype.panelsProcessTemplate = function(){
             // Handle a content change
             this.on('content_change', this.handleContentChange, this);
             this.on('display_builder', this.handleDisplayBuilder, this);
-            this.model.on('change:data', this.toggleWelcomeDisplay, this);
+            this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
         },
 
         /**
