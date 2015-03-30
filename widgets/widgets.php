@@ -937,7 +937,7 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id('autoplay') ?>">
-				<input id="<?php echo $this->get_field_id('autoplay') ?>" name="<?php echo $this->get_field_name('autoplay') ?>" type="checkbox" value="1" />
+				<input id="<?php echo $this->get_field_id('autoplay') ?>" name="<?php echo $this->get_field_name('autoplay') ?>" type="checkbox" value="1" <?php checked($instance['autoplay']) ?> />
 				<?php _e('Auto Play Video', 'siteorigin-panels') ?>
 			</label>
 		</p>
