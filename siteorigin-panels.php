@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.1-beta
+Version: 2.1
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
