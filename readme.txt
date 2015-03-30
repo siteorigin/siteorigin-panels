@@ -91,8 +91,16 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
-= branch:develop =
+= 2.1 =
 * Improved Page Builder settings page.
+* Added sidebar emulation, which makes a Page Builder page appear to be a sidebar. Improves compatibility with other widgets.
+* Removed jPlayer. Self hosted widget (legacy) now uses MediaElement.
+* Small usability improvements.
+* Added legacy widget migration for gallery widget.
+* Layout file based import/export feature.
+* Added widget title setting to change widget title HTML.
+* Fixed: Handling of namespaced widgets.
+* Fixed: Layout Builder widget now works in the Customizer.
 * Fixed: Custom home page interface now properly uses page_on_front.
 * Fixed: Page URL for home page in custom home page.
 * Fixed: Custom home page encoding.
