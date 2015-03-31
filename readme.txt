@@ -99,6 +99,7 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 * Added legacy widget migration for gallery widget.
 * Layout file based import/export feature.
 * Added widget title setting to change widget title HTML.
+* Added setting to control full width container.
 * Fixed: Handling of namespaced widgets.
 * Fixed: Layout Builder widget now works in the Customizer.
 * Fixed: Custom home page interface now properly uses page_on_front.
