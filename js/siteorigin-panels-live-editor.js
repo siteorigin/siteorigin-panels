@@ -48,7 +48,7 @@
                     var ifc = $(this).contents();
 
                     // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-                    ifc.find('.panel-grid .panel-grid-cell .siteorigin-panel.widget')
+                    ifc.find('.panel-grid .panel-grid-cell .so-panel.widget')
                         .filter(function(){
                             // Filter to only include non nested
                             return $(this).parents('.widget_siteorigin-panels-builder').length == 0;
