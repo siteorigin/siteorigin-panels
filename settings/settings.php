@@ -120,6 +120,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['mobile-width'] = 780;
 		$defaults['margin-bottom'] = 30;
 		$defaults['margin-sides'] = 30;
+		$defaults['full-width-container'] = 'body';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -255,6 +256,13 @@ class SiteOrigin_Panels_Settings {
 			'keywords' => 'margin',
 		);
 
+		$fields['layout']['fields']['full-width-container'] = array(
+			'type' => 'text',
+			'label' => __('Full Width Container', 'siteorigin-panels'),
+			'description' => __('The container used for the full width layout.', 'siteorigin-panels'),
+			'keywords' => 'full width, container, stretch',
+		);
+
 		// The content fields
 
 		$fields['content'] = array(
@@ -284,7 +292,7 @@ class SiteOrigin_Panels_Settings {
 
 		switch ($field['type'] ) {
 			case 'text':
-				?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?> widefat" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
+				?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?>" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
 				break;
 
 			case 'number':
@@ -337,9 +345,10 @@ class SiteOrigin_Panels_Settings {
 	function save_settings(){
 		$screen = get_current_screen();
 		if( $screen->base != 'settings_page_siteorigin_panels' ) return;
-		if( empty($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'panels-settings') ) return;
-		if( empty($_POST['panels_setting']) ) return;
+
 		if( !current_user_can('manage_options') ) return;
+		if( !wp_verify_nonce( filter_input(INPUT_POST, '_wpnonce') , 'panels-settings') ) return;
+		if( empty($_POST['panels_setting']) ) return;
 
 		$values = array();
 		$post = stripslashes_deep( $_POST['panels_setting'] );

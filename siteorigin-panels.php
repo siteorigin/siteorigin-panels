@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.0.8-dev
+Version: 2.1
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.0.8-dev');
+define('SITEORIGIN_PANELS_VERSION', '2.1');
 define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
@@ -684,10 +684,10 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	}
 
 	// Add the bottom margins
-	$css->add_cell_css($post_id, false, false, '.panel', array(
+	$css->add_cell_css($post_id, false, false, '.so-panel', array(
 		'margin-bottom' => $panels_margin_bottom.'px'
 	));
-	$css->add_cell_css($post_id, false, false, '.panel:last-child', array(
+	$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
 		'margin-bottom' => 0
 	));
 
@@ -1047,7 +1047,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = apply_filters( 'siteorigin_panels_widget_classes', array( 'siteorigin-panel', 'widget' ), $widget, $instance, $widget_info);
+	$classes = array( 'so-panel', 'widget' );   
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';

@@ -1113,7 +1113,10 @@ String.prototype.panelsProcessTemplate = function(){
             var cit = 0;
             var rows = [];
 
-            if( typeof data.grid_cells === 'undefined' ) { return; }
+            if( typeof data.grid_cells === 'undefined' ) {
+                this.trigger('load_panels_data');
+                return;
+            }
 
             var gi;
             for(var ci = 0; ci < data.grid_cells.length; ci++) {
@@ -1169,6 +1172,8 @@ String.prototype.panelsProcessTemplate = function(){
                 catch (err) {
                 }
             } );
+
+            this.trigger('load_panels_data');
         },
 
         /**
@@ -1310,7 +1315,7 @@ String.prototype.panelsProcessTemplate = function(){
             // Handle a content change
             this.on('content_change', this.handleContentChange, this);
             this.on('display_builder', this.handleDisplayBuilder, this);
-            this.model.on('change:data', this.toggleWelcomeDisplay, this);
+            this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
         },
 
         /**
@@ -1444,13 +1449,33 @@ String.prototype.panelsProcessTemplate = function(){
                     newTop += $('#wpadminbar').outerHeight();
                 }
 
-                // Make sure this falls in an acceptible range.
-                newTop = Math.max( newTop, 0 );
-                newTop = Math.min( newTop, thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ); // 20px extra to account for padding.
+                var limits = {
+                    top: 0,
+                    bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
+                };
 
-                // Position the toolbar
-                toolbar.css('top', newTop);
-                thisView.$el.css('padding-top', toolbar.outerHeight());
+                if( newTop > limits.top && newTop < limits.bottom ) {
+                    if( toolbar.css('position') !== 'fixed' ) {
+                        // The toolbar needs to stick to the top, over the interface
+                        toolbar.css({
+                            top: $('#wpadminbar').outerHeight(),
+                            left: thisView.$el.offset().left,
+                            width: thisView.$el.outerWidth(),
+                            position: 'fixed'
+                        });
+                    }
+                }
+                else {
+                    // The toolbar needs to be at the top or bottom of the interface
+                    toolbar.css({
+                        top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+                        left: 0,
+                        width: '100%',
+                        position: 'absolute'
+                    });
+                }
+
+                thisView.$el.css('padding-top', toolbar.outerHeight() );
             };
 
             $( window ).resize( stickToolbar );
@@ -1524,7 +1549,7 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Store the model data in the data field set in this.setDataField.
+         * Store the model data in the data html field set in this.setDataField.
          */
         storeModelData: function(){
             var data = JSON.stringify( this.model.get('data' ) );
