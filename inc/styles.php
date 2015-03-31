@@ -5,21 +5,22 @@
  * Admin action for handling fetching the style fields
  */
 function siteorigin_panels_ajax_action_style_form(){
-	$type = $_REQUEST['type'];
-	if( !in_array($type, array('row', 'widget') ) ) exit();
+	$type = filter_input( INPUT_POST, 'type', FILTER_SANITIZE_STRING );
+	if( !in_array($type, array('row', 'widget') ) ) wp_die();
 
-	$current = isset($_REQUEST['style']) ? $_REQUEST['style'] : array();
+	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+	$post_id = filter_input( INPUT_POST, 'postId', FILTER_SANITIZE_NUMBER_INT );
 
 	switch($type) {
 		case 'row':
-			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 			break;
 
 		case 'widget':
-			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current);
+			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
 	}
 
-	exit();
+	wp_die();
 }
 add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_form');
 
@@ -30,9 +31,10 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $before
  * @param string $after
  * @param array $current
+ * @param int $post_id
  */
-function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array() ){
-	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );
+function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0 ){
+	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id );
 	if( empty($fields) ) return false;
 
 	$groups = array(
@@ -112,6 +114,28 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 }
 
 /**
+ * Get list of supported mesurements
+ * 
+ * @return array
+ */
+function siteorigin_panels_style_get_measurements_list() {
+	$measurements = array(
+		'px',
+		'%',
+		'in',
+		'cm',
+		'mm',
+		'em',
+		'ex',
+		'pt',
+		'pc',
+	);
+	
+	// Allow themes and plugins to trim or enhance the list.
+	return apply_filters('siteorigin_panels_style_get_measurements_list', $measurements);
+}
+
+/**
  * Generate the style field
  *
  * @param $field
@@ -126,15 +150,9 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			?>
 			<input type="text" />
 			<select>
-				<option>px</option>
-				<option>%</option>
-				<option>in</option>
-				<option>cm</option>
-				<option>mm</option>
-				<option>em</option>
-				<option>ex</option>
-				<option>pt</option>
-				<option>pc</option>
+			<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
+				<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
+			<?php endforeach?>
 			</select>
 			<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" />
 			<?php
@@ -297,8 +315,9 @@ function siteorigin_panels_sanitize_style_fields($section, $styles){
 				$return[$k] = !empty( $styles[$k] );
 				break;
 			case 'measurement' :
-				preg_match('/([0-9\.,]+)(.*)/', $styles[$k], $match);
-				if( !empty($match[0]) && $match[0] != '' && !empty($match[2]) ) $return[$k] = $styles[$k];
+				$measurements = array_map('preg_quote', siteorigin_panels_style_get_measurements_list() );
+				preg_match('/([0-9\.,]+).*?(' . implode('|', $measurements) . ')/', $styles[$k], $match);
+				if( !empty($match[0]) && $match[0] != '' && !empty($match[2]) ) $return[$k] = $match[1] . $match[2];
 				else $return[$k] = '';
 				break;
 			case 'select' :
@@ -324,12 +343,14 @@ function siteorigin_panels_sanitize_style_fields($section, $styles){
  * @return mixed
  */
 function siteorigin_panels_style_update_data($panels_data){
-	if(empty($panels_data['grids'])) return $panels_data;
+	if( empty($panels_data) || empty($panels_data['grids']) || !is_array($panels_data['grids']) ) return $panels_data;
 
 	for($i = 0; $i < count($panels_data['grids']); $i++) {
+		if( !is_array($panels_data['grids'][$i]) ) continue;
+		if( empty($panels_data['grids'][$i]) || empty($panels_data['grids'][$i]['style']) ) continue;
 
-		if( isset($panels_data['grids'][$i]['style']) && is_string($panels_data['grids'][$i]['style']) ){
-			$panels_data['grids'][$i]['style'] = array('class' => $panels_data['grids'][$i]['style']);
+		if( is_string($panels_data['grids'][$i]['style']) ){
+			$panels_data['grids'][$i]['style'] = array( 'class' => $panels_data['grids'][$i]['style'] );
 		}
 
 	}

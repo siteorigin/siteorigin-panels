@@ -1,5 +1,5 @@
 <?php
-global $wp_widget_factory;
+global $wp_widget_factory, $post;
 $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 ?>
 
@@ -22,14 +22,19 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
 		</a>
 
-		<a href="#" class="so-tool-button so-history" style="display: none">
-			<span class="so-panels-icon so-panels-icon-rotate-left"></span>
-			<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
-		</a>
-		<a href="#" class="so-tool-button so-live-editor" style="display: none">
-			<span class="so-panels-icon so-panels-icon-eye"></span>
-			<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
-		</a>
+		<?php if( !empty($post) ) : ?>
+
+			<a href="#" class="so-tool-button so-history" style="display: none">
+				<span class="so-panels-icon so-panels-icon-rotate-left"></span>
+				<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
+			</a>
+
+			<a href="#" class="so-tool-button so-live-editor" style="display: none">
+				<span class="so-panels-icon so-panels-icon-eye"></span>
+				<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
+			</a>
+
+		<?php endif; ?>
 
 		<a href="#" class="so-switch-to-standard"><?php _e('Switch to Editor', 'siteorigin-panels') ?></a>
 
@@ -319,6 +324,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<ul class="so-sidebar-tabs">
 				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
 				foreach($post_types as $post_type) {
@@ -332,12 +338,40 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-
 		</div>
 
 		<div class="buttons">
 		</div>
 
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-dialog-prebuilt-importexport">
+	<div class="import-export">
+		<div class="import-upload-ui hide-if-no-js">
+			<div class="drag-upload-area">
+
+				<h2 class="drag-drop-message"><?php _e('Drop import file here', 'siteorigin-panels'); ?></h2>
+				<p class="drag-drop-message"><?php _e('Or', 'siteorigin-panels') ?></p>
+
+				<p class="drag-drop-buttons">
+					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
+				</p>
+
+				<div class="progress-bar">
+					<div class="progress-percent"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="export-file-ui">
+			<iframe id="siteorigin-panels-export-iframe" style="display: none;" name="siteorigin-panels-export-iframe"></iframe>
+			<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_export_layout') ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
+				<input type="submit" value="<?php esc_attr_e('Download Layout', 'siteorigin-panels') ?>" class="button-primary" />
+				<input type="hidden" name="panels_export_data" value="" />
+				<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
+			</form>
+		</div>
 	</div>
 </script>
 

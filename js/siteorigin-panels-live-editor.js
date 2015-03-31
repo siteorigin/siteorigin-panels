@@ -5,6 +5,8 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+
 ( function( $, _, panelsOptions ){
 
     var panels = window.siteoriginPanels;
@@ -46,7 +48,7 @@
                     var ifc = $(this).contents();
 
                     // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-                    ifc.find('.panel-grid .panel-grid-cell .panel.widget')
+                    ifc.find('.panel-grid .panel-grid-cell .so-panel.widget')
                         .filter(function(){
                             // Filter to only include non nested
                             return $(this).parents('.widget_siteorigin-panels-builder').length == 0;
@@ -62,11 +64,11 @@
                                 })
                                 .mouseenter(function(){
                                     widgetEdit.addClass('so-hovered');
-                                    overlay = thisView.createPreviewOverlay( $(this) )
+                                    overlay = thisView.createPreviewOverlay( $(this) );
                                 })
                                 .mouseleave( function(){
                                     widgetEdit.removeClass('so-hovered');
-                                    overlay.fadeOut('fast', function(){ $(this).remove() });
+                                    overlay.fadeOut('fast', function(){ $(this).remove(); });
                                 } )
                                 .click(function(e){
                                     e.preventDefault();
@@ -256,7 +258,7 @@
                     var getHoverWidget = function(){
                         // TODO this should target the #pl-x selector
                         return previewFrame.contents()
-                            .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .panel')
+                            .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .widget')
                             .filter(function(){
                                 // Filter to only include non nested
                                 return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
@@ -277,16 +279,17 @@
                             var hoverWidget = getHoverWidget();
 
                             // Center the iframe on the over item
+                            if(hoverWidget && hoverWidget.offset()) {
+                                previewFrame.contents()
+                                    .find('html,body')
+                                    .clearQueue()
+                                    .animate( {
+                                        scrollTop: hoverWidget.offset().top - Math.max(30, ( Math.min( previewFrame.contents().height(), previewFrame.height() ) - hoverWidget.outerHeight() ) /2 )
+                                    }, 750);
 
-                            previewFrame.contents()
-                                .find('html,body')
-                                .clearQueue()
-                                .animate( {
-                                    scrollTop: hoverWidget.offset().top - Math.max(30, ( Math.min( previewFrame.contents().height(), previewFrame.height() ) - hoverWidget.outerHeight() ) /2 )
-                                }, 750);
-
-                            // Create the overlay
-                            overlay = thisView.createPreviewOverlay( hoverWidget );
+                                // Create the overlay
+                                overlay = thisView.createPreviewOverlay( hoverWidget );
+                            }
 
                         })
                         .mouseleave(function(){

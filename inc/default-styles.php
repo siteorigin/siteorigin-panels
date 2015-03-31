@@ -4,8 +4,24 @@
  * Register the custom styles scripts
  */
 function siteorigin_panels_default_styles_register_scripts(){
-	$js_suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-	wp_register_script('siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . $js_suffix . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
+		'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
+	) );
+
+	// Check if we need to enqueue the front styles
+	if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) != '' ) {
+		$panels_data = get_post_meta( get_the_ID(), 'panels_data', true );
+
+		if( !empty($panels_data['grids']) ) {
+
+			foreach( $panels_data['grids'] as $grid ) {
+				if( empty($grid['style']['row_stretch']) ) continue;
+				wp_enqueue_script( 'siteorigin-panels-front-styles' );
+				break;
+			}
+		}
+	}
 }
 add_action('wp_enqueue_scripts', 'siteorigin_panels_default_styles_register_scripts', 5);
 

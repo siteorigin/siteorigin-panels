@@ -519,7 +519,7 @@
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
   /* Need a high z-index for layout builder widget */
-  z-index: 100001 !important;
+  z-index: 500002 !important;
   cursor: move;
   margin-bottom: 5px;
   background: #f9f9fb;
@@ -1005,13 +1005,12 @@
 .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type h3 {
   margin: 0 0 7px 0;
   padding: 0;
-  height: 1.2em;
   color: #222222;
   font-size: 14px;
 }
 .so-panels-dialog.so-panels-dialog-add-widget .widget-type-list .widget-type small {
   font-size: 11px;
-  height: 2.5em;
+  min-height: 2.5em;
   line-height: 1.25em;
   display: block;
   overflow: hidden;
@@ -1210,7 +1209,7 @@
   padding: 0 5px 10px 5px;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside {
-  padding: 20px;
+  padding: 10px 15px;
   cursor: pointer;
   border: 1px solid #cccccc;
   background: #F8F8F8;
@@ -1261,6 +1260,60 @@
   border: 1px solid #cccccc;
   background: #F8F8F8;
   padding: 15px 20px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .export-file-ui {
+  padding: 5px 15px;
+  text-align: right;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui {
+  padding: 15px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-drop-message {
+  display: none;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui.has-drag-drop .drag-drop-message {
+  display: block;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui p.drag-drop-message {
+  font-size: 0.9em;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-upload-area {
+  display: block;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 50px 30px;
+  border: 4px dashed #E0E0E0;
+  text-align: center;
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  -o-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-upload-area.file-dragover {
+  background-color: #f2f9fc;
+  border-color: #0074a2;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .progress-bar {
+  display: none;
+  padding: 2px;
+  border: 2px solid #2181b1;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  margin-top: 20px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .progress-bar .progress-percent {
+  height: 14px;
+  background-color: #358ebe;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  border-radius: 1px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .file-browse-button {
+  padding: 12px 30px;
+  height: auto;
 }
 .so-panels-dialog .so-visual-styles {
   margin: -15px;

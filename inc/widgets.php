@@ -10,29 +10,35 @@
 function siteorigin_panels_add_recommended_widgets($widgets){
 
 	if( empty( $widgets['WP_Widget_Black_Studio_TinyMCE'] ) ){
-		$widgets['WP_Widget_Black_Studio_TinyMCE'] = array(
-			'class' => 'WP_Widget_Black_Studio_TinyMCE',
-			'title' => __('Visual Editor', 'siteorigin-panels'),
-			'description' => __('Arbitrary text or HTML with visual editor', 'siteorigin-panels'),
-			'installed' => false,
-			'plugin' => array(
-				'name' => __('Black Studio TinyMCE', 'siteorigin-panels'),
-				'slug' => 'black-studio-tinymce-widget'
-			),
-			'groups' => array('recommended'),
-			'icon' => 'dashicons dashicons-edit',
-		);
+
+		if( siteorigin_panels_setting('recommended-widgets') ) {
+			$widgets['WP_Widget_Black_Studio_TinyMCE'] = array(
+				'class' => 'WP_Widget_Black_Studio_TinyMCE',
+				'title' => __('Visual Editor', 'siteorigin-panels'),
+				'description' => __('Arbitrary text or HTML with visual editor', 'siteorigin-panels'),
+				'installed' => false,
+				'plugin' => array(
+					'name' => __('Black Studio TinyMCE', 'siteorigin-panels'),
+					'slug' => 'black-studio-tinymce-widget'
+				),
+				'groups' => array('recommended'),
+				'icon' => 'dashicons dashicons-edit',
+			);
+		}
+
 	}
 	else {
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['groups'] = array('recommended');
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['icon'] = 'dashicons dashicons-edit';
 	}
 
-	// Add in all the widgets bundle widgets
-	$widgets = wp_parse_args(
-		$widgets,
-		include plugin_dir_path(__FILE__).'/widgets-bundle.php'
-	);
+	if( siteorigin_panels_setting('recommended-widgets') ) {
+		// Add in all the widgets bundle widgets
+		$widgets = wp_parse_args(
+			$widgets,
+			include plugin_dir_path( __FILE__ ) . '/widgets-bundle.php'
+		);
+	}
 
 	foreach($widgets as $class => $data) {
 		if( strpos( $class, 'SiteOrigin_Panels_Widgets_' ) === 0 || strpos( $class, 'SiteOrigin_Panels_Widget_' ) === 0 ) {
@@ -64,6 +70,19 @@ function siteorigin_panels_add_recommended_widgets($widgets){
 			$widgets[$wordpress_widget]['icon'] = 'dashicons dashicons-wordpress';
 		}
 	}
+	
+	// Third-party plugins dettection.
+	foreach ($widgets as $widget_id => &$widget) {
+		if (strpos($widget_id, 'WC_') === 0 || strpos($widget_id, 'WooCommerce') !== FALSE) {
+			$widget['groups'][] = 'woocommerce';
+		}
+		if (strpos($widget_id, 'BBP_') === 0 || strpos($widget_id, 'BBPress') !== FALSE) {
+			$widget['groups'][] = 'bbpress';
+		}
+		if (strpos($widget_id, 'Jetpack') !== FALSE || strpos($widget['title'], 'Jetpack') !== FALSE) {
+			$widget['groups'][] = 'jetpack';
+		}
+	}
 
 	return $widgets;
 
@@ -79,28 +98,77 @@ add_filter('siteorigin_panels_widgets', 'siteorigin_panels_add_recommended_widge
  */
 function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 
-	$tabs[] = array(
+	$tabs['widgets_bundle'] = array(
 		'title' => __('Widgets Bundle', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('so-widgets-bundle')
 		)
 	);
 
-	$tabs[] = array(
+	if( class_exists('SiteOrigin_Widgets_Bundle') ) {
+		// Add a message about enabling more widgets
+		$tabs['widgets_bundle']['message'] = sprintf(
+			__('Enable more widgets in the <a href="%s" target="_blank">Widgets Bundle settings</a>.'),
+			admin_url('plugins.php?page=so-widgets-plugins')
+		);
+	}
+	else {
+		// Add a message about installing the widgets bundle
+		$tabs['widgets_bundle']['message'] = sprintf(
+			__('Install the <a href="%s" target="_blank">Widgets Bundle</a> to get extra widgets.'),
+			siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __('SiteOrigin Widgets Bundle', 'siteorigin-panels') )
+		);
+	}
+
+	$tabs['page_builder'] = array(
 		'title' => __('Page Builder Widgets', 'siteorigin-panels'),
+		'message' =>  sprintf(
+			__('You can enable the legacy (PB) widgets in the <a href="%s" target="_blank">Page Builder settings</a>.'),
+			admin_url('options-general.php?page=siteorigin_panels')
+		),
 		'filter' => array(
 			'groups' => array('panels')
 		)
 	);
 
-	$tabs[] = array(
+	$tabs['wordpress'] = array(
 		'title' => __('WordPress Widgets', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('wordpress')
 		)
 	);
+	
+	// Check for woocommerce plugin.
+	if (defined('WOOCOMMERCE_VERSION')) {
+		$tabs['woocommerce'] = array(
+			'title'  => __('WooCommerce', 'woocommerce'),
+			'filter' => array(
+				'groups' => array('woocommerce')
+			)
+		);
+	}
+	
+	// Check for jetpack plugin.
+	if (defined('JETPACK__VERSION')) {
+		$tabs['jetpack'] = array(
+			'title'  => __('Jetpack', 'jetpack'),
+			'filter' => array(
+				'groups' => array('jetpack')
+			),
+		);
+	}
+	
+	// Check for bbpress plugin.
+	if (function_exists('bbpress')) {
+		$tabs['bbpress'] = array(
+			'title'  => __('BBPress', 'bbpress'),
+			'filter' => array(
+				'groups' => array('bbpress')
+			),
+		);
+	}
 
-	$tabs[] = array(
+	$tabs['recommended'] = array(
 		'title' => __('Recommended Widgets', 'siteorigin-panels'),
 		'filter' => array(
 			'groups' => array('recommended')

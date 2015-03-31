@@ -1,8 +1,8 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
-Requires at least: 3.7
-Tested up to: 4.1
-Stable tag: 2.0.7
+Requires at least: 3.9
+Tested up to: 4.2
+Stable tag: 2.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
@@ -90,6 +90,21 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.1 =
+* Improved Page Builder settings page.
+* Added sidebar emulation, which makes a Page Builder page appear to be a sidebar. Improves compatibility with other widgets.
+* Removed jPlayer. Self hosted widget (legacy) now uses MediaElement.
+* Small usability improvements.
+* Added legacy widget migration for gallery widget.
+* Layout file based import/export feature.
+* Added widget title setting to change widget title HTML.
+* Added setting to control full width container.
+* Fixed: Handling of namespaced widgets.
+* Fixed: Layout Builder widget now works in the Customizer.
+* Fixed: Custom home page interface now properly uses page_on_front.
+* Fixed: Page URL for home page in custom home page.
+* Fixed: Custom home page encoding.
 
 = 2.0.7 =
 * Fixed issue that prevented prebuilt layouts from showing up.

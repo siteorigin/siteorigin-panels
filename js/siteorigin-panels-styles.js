@@ -3,6 +3,8 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
+/* global Backbone, _, jQuery, tinyMCE, soPanelsOptions, confirm */
+
 ( function( $, _, panelsOptions ){
 
     var panels = window.siteoriginPanels;
@@ -22,8 +24,9 @@
          * Render the visual styles object.
          *
          * @param type
+         * @param postId
          */
-        render: function( stylesType ){
+        render: function( stylesType, postId ){
             if( typeof stylesType === 'undefined' ) {
                 return false;
             }
@@ -37,7 +40,8 @@
                 {
                     action: 'so_panels_style_form',
                     type: stylesType,
-                    style: this.model.get('style')
+                    style: this.model.get('style'),
+                    postId: postId
                 },
                 function( response ){
                     thisView.$el.html( response );

@@ -570,9 +570,9 @@
 }
 
 /* This is to display a draggable widget  */
-.so-widget.ui-sortable-helper.widget-being-dragged {
+.so-widget.ui-sortable-helper.widget-being-dragged {    
 	/* Need a high z-index for layout builder widget */
-	z-index: 100001 !important;
+	z-index: 500002 !important;
 
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
@@ -1053,25 +1053,26 @@
 					& {
 						width: 33.333%;
 					}
+
 				}
 
 				@media (max-width: 960px) {
 					& {
 						width: 50%;
 					}
+
 				}
 
 				h3 {
 					margin: 0 0 7px 0;
 					padding: 0;
-					height: 1.2em;
 					color: #222222;
 					font-size: 14px;
 				}
 
 				small{
 					font-size: 11px;
-					height: 2.5em;
+					min-height: 2.5em;
 					line-height: 1.25em;
 					display: block;
 					overflow: hidden;
@@ -1298,7 +1299,7 @@
 				padding: 0 5px 10px 5px;
 
 				.layout-inside {
-					padding: 20px;
+					padding: 10px 15px;
 					cursor: pointer;
 					border: 1px solid #cccccc;
 					background: #F8F8F8;
@@ -1359,6 +1360,60 @@
 				border: 1px solid #cccccc;
 				background: #F8F8F8;
 				padding: 15px 20px;
+			}
+
+			.export-file-ui {
+				padding: 5px 15px;
+				text-align: right;
+			}
+
+			.import-upload-ui {
+				padding: 15px;
+
+				.drag-drop-message {
+					display: none;
+				}
+
+				&.has-drag-drop .drag-drop-message {
+					display: block;
+				}
+
+				p.drag-drop-message{
+					font-size: 0.9em;
+				}
+
+				.drag-upload-area {
+					display: block;
+					.box-sizing(border-box);
+					padding: 50px 30px;
+					border: 4px dashed #E0E0E0;
+					text-align: center;
+					.transition(0.25s);
+
+					&.file-dragover {
+						background-color: #f2f9fc;
+						border-color: #0074a2;
+					}
+				}
+
+				.progress-bar {
+					display: none;
+					padding: 2px;
+					border: 2px solid #2181b1;
+					.rounded(2px);
+					margin-top: 20px;
+
+					.progress-percent{
+						height: 14px;
+						background-color: #358ebe;
+						.rounded(1px);
+					}
+				}
+
+				.file-browse-button {
+					padding: 12px 30px;
+					height: auto;
+				}
 			}
 		}
 

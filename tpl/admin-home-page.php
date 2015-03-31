@@ -19,9 +19,9 @@
 			<?php endif; ?>
 		</h2>
 
-		<?php if(isset($_POST['_sopanels_home_nonce']) && wp_verify_nonce($_POST['_sopanels_home_nonce'], 'save')) : ?>
+		<?php if( filter_input( INPUT_POST, '_sopanels_home_nonce' ) ) : global $post; ?>
 			<div id="message" class="updated">
-				<p><?php printf( __('Home page updated. <a href="%s">View page</a>', 'siteorigin-panels'), get_home_url() ) ?></p>
+				<p><?php printf( __('Home page updated. <a href="%s">View page</a>', 'siteorigin-panels'), get_the_permalink( $post ) ) ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -29,7 +29,10 @@
 
 		</div>
 
-		<input name="panels_data" value="<?php echo esc_attr( json_encode( $panels_data ) ) ?>" type="hidden" class="siteorigin-panels-data-field" />
+		<input name="panels_data" value="" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-home" />
+		<script type="text/javascript">
+			document.getElementById('panels-data-field-home').value = decodeURIComponent("<?php echo rawurlencode( json_encode($panels_data) ); ?>");
+		</script>
 
 		<p><input type="submit" class="button button-primary" id="panels-save-home-page" value="<?php esc_attr_e('Save Home Page', 'siteorigin-panels') ?>" /></p>
 
