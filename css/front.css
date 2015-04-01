@@ -17,14 +17,14 @@
   box-sizing: border-box;
   min-height: 1em;
 }
-.panel-grid-cell .siteorigin-panel.widget {
+.panel-grid-cell .so-panel.widget {
   zoom: 1;
 }
-.panel-grid-cell .siteorigin-panel.widget:before {
+.panel-grid-cell .so-panel.widget:before {
   content: '';
   display: block;
 }
-.panel-grid-cell .siteorigin-panel.widget:after {
+.panel-grid-cell .so-panel.widget:after {
   content: '';
   display: table;
   clear: both;
