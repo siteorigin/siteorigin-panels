@@ -1,19 +1,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Page Builder by SiteOrigin\n"
-"POT-Creation-Date: 2015-04-04 10:57+0200\n"
-"PO-Revision-Date: 2015-04-04 10:57+0200\n"
+"POT-Creation-Date: 2015-04-04 16:39+0200\n"
+"PO-Revision-Date: 2015-04-04 16:39+0200\n"
 "Last-Translator: Greg Priday <greg@siteorigin.com>\n"
 "Language-Team: \n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
 "esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: inc/admin-actions.php:80
@@ -32,7 +34,8 @@ msgstr ""
 msgid "Clone"
 msgstr ""
 
-#: inc/admin-actions.php:140
+#. TRANSLATORS: Indicate if there are items to clone. %s will be pages, posts, etc.
+#: inc/admin-actions.php:141
 #, php-format
 msgid "There are no %s with Page Builder content to clone."
 msgstr ""
@@ -232,7 +235,7 @@ msgstr ""
 
 #: inc/widgets-bundle.php:11 inc/widgets-bundle.php:23
 #: inc/widgets-bundle.php:35 inc/widgets-bundle.php:47
-#: inc/widgets-bundle.php:59 inc/widgets.php:119
+#: inc/widgets-bundle.php:59 inc/widgets.php:126
 msgid "SiteOrigin Widgets Bundle"
 msgstr ""
 
@@ -284,48 +287,42 @@ msgstr ""
 msgid "Widgets Bundle"
 msgstr ""
 
-#: inc/widgets.php:111
-#, php-format
-msgid ""
-"Enable more widgets in the <a href=\"%s\" target=\"_blank\">Widgets Bundle "
-"settings</a>."
-msgstr ""
-
 #: inc/widgets.php:118
-#, php-format
-msgid ""
-"Install the <a href=\"%s\" target=\"_blank\">Widgets Bundle</a> to get extra "
-"widgets."
+msgid "Enable more widgets in the 1{Widgets Bundle settings}."
 msgstr ""
 
-#: inc/widgets.php:124
+#: inc/widgets.php:127
+msgid "Install the 1{Widgets Bundle} to get extra widgets."
+msgstr ""
+
+#: inc/widgets.php:132
 msgid "Page Builder Widgets"
 msgstr ""
 
-#: inc/widgets.php:126
-#, php-format
-msgid ""
-"You can enable the legacy (PB) widgets in the <a href=\"%s\" target=\"_blank"
-"\">Page Builder settings</a>."
+#: inc/widgets.php:140
+msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
 msgstr ""
 
-#: inc/widgets.php:135
+#: inc/widgets.php:148
 msgid "WordPress Widgets"
 msgstr ""
 
-#: inc/widgets.php:144
+#. TRANSLATORS: The name of WordPress plugin
+#: inc/widgets.php:158
 msgid "WooCommerce"
 msgstr ""
 
-#: inc/widgets.php:154
+#. TRANSLATORS: The name of WordPress plugin
+#: inc/widgets.php:169
 msgid "Jetpack"
 msgstr ""
 
-#: inc/widgets.php:164
+#. TRANSLATORS: The name of WordPress plugin
+#: inc/widgets.php:180
 msgid "BBPress"
 msgstr ""
 
-#: inc/widgets.php:172 settings/settings.php:218
+#: inc/widgets.php:188 settings/settings.php:218
 msgid "Recommended Widgets"
 msgstr ""
 
@@ -333,8 +330,8 @@ msgstr ""
 msgid "SiteOrigin Page Builder"
 msgstr ""
 
-#: settings/settings.php:146 siteorigin-panels.php:106
-#: siteorigin-panels.php:437 tpl/js-templates.php:151
+#: settings/settings.php:146 siteorigin-panels.php:108
+#: siteorigin-panels.php:467 tpl/js-templates.php:160
 msgid "Page Builder"
 msgstr ""
 
@@ -431,11 +428,9 @@ msgstr ""
 msgid "Copy content from Page Builder to post content."
 msgstr ""
 
-#: settings/tpl/help.php:4
-#, php-format
+#: settings/tpl/help.php:6
 msgid ""
-"Please read the <a href=\"%s\" target=\"_blank\">settings guide</a> of the "
-"Page Builder documentation for help."
+"Please read the 1{settings guide} of the Page Builder documentation for help."
 msgstr ""
 
 #: settings/tpl/settings.php:12
@@ -454,196 +449,208 @@ msgstr ""
 msgid "Custom Home Page Builder"
 msgstr ""
 
-#: siteorigin-panels.php:74
+#. TRANSLATORS: This is the default name given to a user's home page
+#: siteorigin-panels.php:74 siteorigin-panels.php:140
 msgid "Home Page"
 msgstr ""
 
-#: siteorigin-panels.php:132
-msgid "Home"
-msgstr ""
-
-#: siteorigin-panels.php:255
+#: siteorigin-panels.php:263
 msgid "All Widgets"
 msgstr ""
 
-#: siteorigin-panels.php:263
+#: siteorigin-panels.php:274
 msgid "Missing Widget"
 msgstr ""
 
-#: siteorigin-panels.php:264
+#: siteorigin-panels.php:275
 msgid "Page Builder doesn't know about this widget."
 msgstr ""
 
-#: siteorigin-panels.php:267
+#. TRANSLATORS: Number of seconds since
+#: siteorigin-panels.php:279
 #, php-format
 msgid "%d seconds"
 msgstr ""
 
-#: siteorigin-panels.php:268
+#. TRANSLATORS: Number of minutes since
+#: siteorigin-panels.php:281
 #, php-format
 msgid "%d minutes"
 msgstr ""
 
-#: siteorigin-panels.php:269
+#. TRANSLATORS: Number of hours since
+#: siteorigin-panels.php:283
 #, php-format
 msgid "%d hours"
 msgstr ""
 
-#: siteorigin-panels.php:271
+#. TRANSLATORS: A single second since
+#: siteorigin-panels.php:286
 #, php-format
 msgid "%d second"
 msgstr ""
 
-#: siteorigin-panels.php:272
+#. TRANSLATORS: A single minute since
+#: siteorigin-panels.php:288
 #, php-format
 msgid "%d minute"
 msgstr ""
 
-#: siteorigin-panels.php:273
+#. TRANSLATORS: A single hour since
+#: siteorigin-panels.php:290
 #, php-format
 msgid "%d hour"
 msgstr ""
 
-#: siteorigin-panels.php:275
+#. TRANSLATORS: Time ago - eg. "1 minute before".
+#: siteorigin-panels.php:293
 #, php-format
 msgid "%s before"
 msgstr ""
 
-#: siteorigin-panels.php:276
+#: siteorigin-panels.php:294
 msgid "Now"
 msgstr ""
 
-#: siteorigin-panels.php:280
+#: siteorigin-panels.php:298
 msgid "Current"
 msgstr ""
 
-#: siteorigin-panels.php:281
+#: siteorigin-panels.php:299
 msgid "Original"
 msgstr ""
 
-#: siteorigin-panels.php:282
+#: siteorigin-panels.php:300
 msgid "Version restored"
 msgstr ""
 
-#: siteorigin-panels.php:285
+#. TRANSLATORS: Message displayed in the history when a widget is deleted
+#: siteorigin-panels.php:304
 msgid "Widget deleted"
 msgstr ""
 
-#: siteorigin-panels.php:286
+#. TRANSLATORS: Message displayed in the history when a widget is added
+#: siteorigin-panels.php:306
 msgid "Widget added"
 msgstr ""
 
-#: siteorigin-panels.php:287
+#. TRANSLATORS: Message displayed in the history when a widget is edited
+#: siteorigin-panels.php:308
 msgid "Widget edited"
 msgstr ""
 
-#: siteorigin-panels.php:288
+#. TRANSLATORS: Message displayed in the history when a widget is duplicated
+#: siteorigin-panels.php:310
 msgid "Widget duplicated"
 msgstr ""
 
-#: siteorigin-panels.php:289
+#. TRANSLATORS: Message displayed in the history when a widget position is changed
+#: siteorigin-panels.php:312
 msgid "Widget moved"
 msgstr ""
 
-#: siteorigin-panels.php:292
+#. TRANSLATORS: Message displayed in the history when a row is deleted
+#: siteorigin-panels.php:316
 msgid "Row deleted"
 msgstr ""
 
-#: siteorigin-panels.php:293
+#. TRANSLATORS: Message displayed in the history when a row is added
+#: siteorigin-panels.php:318
 msgid "Row added"
 msgstr ""
 
-#: siteorigin-panels.php:294
+#. TRANSLATORS: Message displayed in the history when a row is edited
+#: siteorigin-panels.php:320
 msgid "Row edited"
 msgstr ""
 
-#: siteorigin-panels.php:295
+#. TRANSLATORS: Message displayed in the history when a row position is changed
+#: siteorigin-panels.php:322
 msgid "Row moved"
 msgstr ""
 
-#: siteorigin-panels.php:296
+#. TRANSLATORS: Message displayed in the history when a row is duplicated
+#: siteorigin-panels.php:324
 msgid "Row duplicated"
 msgstr ""
 
-#: siteorigin-panels.php:299
+#: siteorigin-panels.php:327
 msgid "Cell resized"
 msgstr ""
 
-#: siteorigin-panels.php:302
+#: siteorigin-panels.php:330
 msgid "Prebuilt layout loaded"
 msgstr ""
 
-#: siteorigin-panels.php:306
+#: siteorigin-panels.php:334
 msgid ""
 "Are you sure you want to overwrite your current content? This can be undone "
 "in the builder history."
 msgstr ""
 
-#: siteorigin-panels.php:307
+#: siteorigin-panels.php:335
 msgid "Loading prebuilt layout"
 msgstr ""
 
-#: siteorigin-panels.php:308
+#: siteorigin-panels.php:336
 msgid "Would you like to copy this editor's existing content to Page Builder?"
 msgstr ""
 
-#: siteorigin-panels.php:309
+#: siteorigin-panels.php:337
 msgid ""
 "Would you like to clear your Page Builder content and revert to using the "
 "standard visual editor?"
 msgstr ""
 
-#: siteorigin-panels.php:310
+#. TRANSLATORS: This is the title for a widget called "Layout Builder"
+#: siteorigin-panels.php:339
 msgid "Layout Builder Widget"
 msgstr ""
 
-#: siteorigin-panels.php:311 tpl/js-templates.php:76
+#. TRANSLATORS: A standard confirmation message
+#: siteorigin-panels.php:341 tpl/js-templates.php:85
 msgid "Are you sure?"
 msgstr ""
 
-#: siteorigin-panels.php:318
+#: siteorigin-panels.php:348
 msgid "Page Builder layouts"
 msgstr ""
 
-#: siteorigin-panels.php:319
+#: siteorigin-panels.php:349
 msgid "Error uploading or importing file."
 msgstr ""
 
-#: siteorigin-panels.php:365
+#: siteorigin-panels.php:395
 msgid "Untitled Widget"
 msgstr ""
 
-#: siteorigin-panels.php:1110
+#: siteorigin-panels.php:1140
 msgid "Edit Home Page"
 msgstr ""
 
-#: siteorigin-panels.php:1191
+#: siteorigin-panels.php:1231
 #, php-format
-msgid ""
-"You need to <a href='%s' target='_blank'>install %s</a> to use the widget "
-"<strong>%s</strong>. It's a free plugin available off the official WordPress "
-"plugin directory."
+msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
 msgstr ""
 
-#: siteorigin-panels.php:1196
+#: siteorigin-panels.php:1237
 msgid ""
 "Save and reload this page to start using the widget after you've installed "
 "it."
 msgstr ""
 
-#: siteorigin-panels.php:1204
+#: siteorigin-panels.php:1254
 #, php-format
 msgid ""
-"The widget <strong>%s</strong> is not available. Please try locate and "
-"install the missing plugin. Post on the <a href=\"%s\" target=\"_blank"
-"\">support forums</a> if you need help."
+"The widget 1{%1$s} is not available. Please try locate and install the "
+"missing plugin. Post on the 2{support forums} if you need help."
 msgstr ""
 
-#: siteorigin-panels.php:1271
+#: siteorigin-panels.php:1321
 msgid "Support Forum"
 msgstr ""
 
-#: siteorigin-panels.php:1272
+#: siteorigin-panels.php:1322
 msgid "Newsletter"
 msgstr ""
 
@@ -659,16 +666,15 @@ msgstr ""
 msgid "Custom Home Page"
 msgstr ""
 
-#: tpl/admin-home-page.php:24
-#, php-format
-msgid "Home page updated. <a href=\"%s\">View page</a>"
+#: tpl/admin-home-page.php:29
+msgid "Home page updated. 1{View page}."
 msgstr ""
 
-#: tpl/admin-home-page.php:37
+#: tpl/admin-home-page.php:45
 msgid "Save Home Page"
 msgstr ""
 
-#: tpl/admin-home-page.php:41
+#: tpl/admin-home-page.php:49
 msgid "This interface requires Javascript"
 msgstr ""
 
@@ -682,18 +688,11 @@ msgstr ""
 msgid "The page layouts are responsive and fully customizable."
 msgstr ""
 
-#: tpl/help.php:8
-#, php-format
+#: tpl/help.php:18
 msgid ""
-"Read the <a href='%s' target='_blank'>full documentation</a> on SiteOrigin."
-msgstr ""
-
-#: tpl/help.php:9
-#, php-format
-msgid ""
-"Ask a question on our <a href='%s' target='_blank'>support forum</a> if you "
-"need help and sign up to <a href='%s' target='_blank'>our newsletter</a> to "
-"stay up to date with future developments."
+"Read the 1{full documentation} on SiteOrigin. Ask a question on our "
+"2{support forum} if you need help and sign up to 3{our newsletter} to stay "
+"up to date with future developments."
 msgstr ""
 
 #: tpl/js-templates.php:12
@@ -720,194 +719,180 @@ msgstr ""
 msgid "Switch to Editor"
 msgstr ""
 
-#: tpl/js-templates.php:51
-#, php-format
-msgid "Add a %s %s or %s to get started. Read our %s if you need help."
+#. TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
+#: tpl/js-templates.php:64
+msgid ""
+"Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our "
+"4{documentation} if you need help."
 msgstr ""
 
-#: tpl/js-templates.php:52
-msgid "widget"
-msgstr ""
-
-#: tpl/js-templates.php:53
-msgid "row"
-msgstr ""
-
-#: tpl/js-templates.php:54
-msgid "prebuilt layout"
-msgstr ""
-
-#: tpl/js-templates.php:55
-msgid "starting guide"
-msgstr ""
-
-#: tpl/js-templates.php:74 tpl/js-templates.php:247
+#: tpl/js-templates.php:83 tpl/js-templates.php:256
 msgid "Edit Row"
 msgstr ""
 
-#: tpl/js-templates.php:75
+#: tpl/js-templates.php:84
 msgid "Duplicate Row"
 msgstr ""
 
-#: tpl/js-templates.php:76
+#: tpl/js-templates.php:85
 msgid "Delete Row"
 msgstr ""
 
-#: tpl/js-templates.php:104
+#: tpl/js-templates.php:113
 msgid "Edit"
 msgstr ""
 
-#: tpl/js-templates.php:105 tpl/js-templates.php:222 tpl/js-templates.php:294
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:303
 msgid "Duplicate"
 msgstr ""
 
-#: tpl/js-templates.php:106 tpl/js-templates.php:221 tpl/js-templates.php:293
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:302
 msgid "Delete"
 msgstr ""
 
-#: tpl/js-templates.php:160 tpl/js-templates.php:225
+#: tpl/js-templates.php:169 tpl/js-templates.php:234
 msgid "Done"
 msgstr ""
 
-#: tpl/js-templates.php:174
+#: tpl/js-templates.php:183
 #, php-format
 msgid "Add New Widget %s"
 msgstr ""
 
-#: tpl/js-templates.php:178
+#: tpl/js-templates.php:187
 msgid "Search Widgets"
 msgstr ""
 
-#: tpl/js-templates.php:190
+#: tpl/js-templates.php:199
 msgid "Close"
 msgstr ""
 
-#: tpl/js-templates.php:245
+#: tpl/js-templates.php:254
 msgid "Add New Row"
 msgstr ""
 
-#: tpl/js-templates.php:259
+#: tpl/js-templates.php:268
 msgid "Set Row Layout"
 msgstr ""
 
-#: tpl/js-templates.php:262
+#: tpl/js-templates.php:271
 msgid "Columns with Ratio"
 msgstr ""
 
-#: tpl/js-templates.php:264
+#: tpl/js-templates.php:273
 msgid "Even"
 msgstr ""
 
-#: tpl/js-templates.php:265
+#: tpl/js-templates.php:274
 msgid "Golden"
 msgstr ""
 
-#: tpl/js-templates.php:266
+#: tpl/js-templates.php:275
 msgid "Halves"
 msgstr ""
 
-#: tpl/js-templates.php:267
+#: tpl/js-templates.php:276
 msgid "Thirds"
 msgstr ""
 
-#: tpl/js-templates.php:268
+#: tpl/js-templates.php:277
 msgid "Diagon"
 msgstr ""
 
-#: tpl/js-templates.php:269
+#: tpl/js-templates.php:278
 msgid "Hecton"
 msgstr ""
 
-#: tpl/js-templates.php:270
+#: tpl/js-templates.php:279
 msgid "Hemidiagon"
 msgstr ""
 
-#: tpl/js-templates.php:271
+#: tpl/js-templates.php:280
 msgid "Penton"
 msgstr ""
 
-#: tpl/js-templates.php:272
+#: tpl/js-templates.php:281
 msgid "Trion"
 msgstr ""
 
-#: tpl/js-templates.php:273
+#: tpl/js-templates.php:282
 msgid "Quadriagon"
 msgstr ""
 
-#: tpl/js-templates.php:274
+#: tpl/js-templates.php:283
 msgid "Biauron"
 msgstr ""
 
-#: tpl/js-templates.php:275
+#: tpl/js-templates.php:284
 msgid "Bipenton"
 msgstr ""
 
-#: tpl/js-templates.php:278
+#: tpl/js-templates.php:287
 msgid "Left to Right"
 msgstr ""
 
-#: tpl/js-templates.php:279
+#: tpl/js-templates.php:288
 msgid "Right to Left"
 msgstr ""
 
-#: tpl/js-templates.php:281
+#: tpl/js-templates.php:290
 msgid "Set"
 msgstr ""
 
-#: tpl/js-templates.php:299
+#: tpl/js-templates.php:308
 msgid "Insert"
 msgstr ""
 
-#: tpl/js-templates.php:301
+#: tpl/js-templates.php:310
 msgid "Save"
 msgstr ""
 
-#: tpl/js-templates.php:319
+#: tpl/js-templates.php:328
 msgid "Prebuilt Layouts"
 msgstr ""
 
-#: tpl/js-templates.php:323
+#: tpl/js-templates.php:332
 msgid "Search"
 msgstr ""
 
-#: tpl/js-templates.php:326
+#: tpl/js-templates.php:335
 msgid "Theme Defined"
 msgstr ""
 
-#: tpl/js-templates.php:327
+#: tpl/js-templates.php:336
 msgid "Import/Export"
 msgstr ""
 
-#: tpl/js-templates.php:333
+#: tpl/js-templates.php:342
 #, php-format
 msgid "Clone: %s"
 msgstr ""
 
-#: tpl/js-templates.php:354
+#: tpl/js-templates.php:363
 msgid "Drop import file here"
 msgstr ""
 
-#: tpl/js-templates.php:355
+#: tpl/js-templates.php:364
 msgid "Or"
 msgstr ""
 
-#: tpl/js-templates.php:358
+#: tpl/js-templates.php:367
 msgid "Select Import File"
 msgstr ""
 
-#: tpl/js-templates.php:370
+#: tpl/js-templates.php:379
 msgid "Download Layout"
 msgstr ""
 
-#: tpl/js-templates.php:391
+#: tpl/js-templates.php:400
 msgid "Page Builder Change History"
 msgstr ""
 
-#: tpl/js-templates.php:405
+#: tpl/js-templates.php:414
 msgid "Restore Version"
 msgstr ""
 
-#: tpl/js-templates.php:430
+#: tpl/js-templates.php:439
 msgid "Close Live Editor"
 msgstr ""
 
@@ -947,163 +932,161 @@ msgstr ""
 msgid "Inline CSS"
 msgstr ""
 
-#: widgets/basic.php:12
+#. TRANSLATORS: This is the name of a widget
+#: widgets/basic.php:13
 msgid "Layout Builder"
 msgstr ""
 
-#: widgets/basic.php:14
-msgid "A full SiteOrigin Page Builder layout as a widget."
+#: widgets/basic.php:15
+msgid "A complete SiteOrigin Page Builder layout as a widget."
 msgstr ""
 
-#: widgets/basic.php:52
+#: widgets/basic.php:53
 msgid "Open Builder"
 msgstr ""
 
-#: widgets/basic.php:81
+#: widgets/basic.php:82
 msgid "Post Content"
 msgstr ""
 
-#: widgets/basic.php:83
+#: widgets/basic.php:84
 msgid "Displays some form of post content form the current post."
 msgstr ""
 
-#: widgets/basic.php:129 widgets/basic.php:426 widgets/widgets.php:589
-#: widgets/widgets.php:760
+#: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
+#: widgets/widgets.php:764
 msgid "None"
 msgstr ""
 
-#: widgets/basic.php:130 widgets/basic.php:354
+#: widgets/basic.php:131 widgets/basic.php:355
 #: widgets/widgets/call-to-action/call-to-action.php:15
 #: widgets/widgets/list/list.php:15 widgets/widgets/price-box/price-box.php:15
 msgid "Title"
 msgstr ""
 
-#: widgets/basic.php:131
+#: widgets/basic.php:132
 msgid "Featured Image"
 msgstr ""
 
-#: widgets/basic.php:136
+#: widgets/basic.php:137
 msgid "Display Content"
 msgstr ""
 
-#: widgets/basic.php:156
+#: widgets/basic.php:157
 msgid "Post Loop"
 msgstr ""
 
-#: widgets/basic.php:158
+#: widgets/basic.php:159
 msgid "Displays a post loop."
 msgstr ""
 
-#: widgets/basic.php:348
+#: widgets/basic.php:349
 msgid "Your theme doesn't have any post loops."
 msgstr ""
 
-#: widgets/basic.php:358
+#: widgets/basic.php:359
 msgid "Template"
 msgstr ""
 
-#: widgets/basic.php:374
+#: widgets/basic.php:375
 msgid "More Link "
 msgstr ""
 
-#: widgets/basic.php:376
+#: widgets/basic.php:377
 msgid "If the template supports it, cut posts and display the more link."
 msgstr ""
 
-#: widgets/basic.php:410 widgets/widgets.php:575
+#: widgets/basic.php:411 widgets/widgets.php:575
 msgid "Post Type"
 msgstr ""
 
-#: widgets/basic.php:419 widgets/widgets.php:582
+#: widgets/basic.php:420 widgets/widgets.php:582
 msgid "Posts Per Page"
 msgstr ""
 
-#: widgets/basic.php:424 widgets/widgets.php:587
+#: widgets/basic.php:425 widgets/widgets.php:587
 msgid "Order By"
 msgstr ""
 
-#: widgets/basic.php:427 widgets/widgets.php:590
+#: widgets/basic.php:428 widgets/widgets.php:590
 msgid "Post ID"
 msgstr ""
 
-#: widgets/basic.php:428 widgets/widgets.php:591
+#: widgets/basic.php:429 widgets/widgets.php:591
 msgid "Author"
 msgstr ""
 
-#: widgets/basic.php:429 widgets/basic.php:430 widgets/widgets.php:592
+#: widgets/basic.php:430 widgets/basic.php:431 widgets/widgets.php:592
 #: widgets/widgets.php:593 widgets/widgets/testimonial/testimonial.php:15
 msgid "Name"
 msgstr ""
 
-#: widgets/basic.php:431 widgets/widgets.php:594
+#: widgets/basic.php:432 widgets/widgets.php:594
 msgid "Date"
 msgstr ""
 
-#: widgets/basic.php:432 widgets/widgets.php:595
+#: widgets/basic.php:433 widgets/widgets.php:595
 msgid "Modified"
 msgstr ""
 
-#: widgets/basic.php:433 widgets/widgets.php:596
+#: widgets/basic.php:434 widgets/widgets.php:596
 msgid "Parent"
 msgstr ""
 
-#: widgets/basic.php:434 widgets/widgets.php:597
+#: widgets/basic.php:435 widgets/widgets.php:597
 msgid "Random"
 msgstr ""
 
-#: widgets/basic.php:435 widgets/widgets.php:598
+#: widgets/basic.php:436 widgets/widgets.php:598
 msgid "Comment Count"
 msgstr ""
 
-#: widgets/basic.php:436 widgets/basic.php:437 widgets/widgets.php:599
+#: widgets/basic.php:437 widgets/basic.php:438 widgets/widgets.php:599
 msgid "Menu Order"
 msgstr ""
 
-#: widgets/basic.php:438
+#: widgets/basic.php:439
 msgid "Post In Order"
 msgstr ""
 
-#: widgets/basic.php:443 widgets/widgets.php:605
+#: widgets/basic.php:444 widgets/widgets.php:605
 msgid "Order"
 msgstr ""
 
-#: widgets/basic.php:445 widgets/widgets.php:608
+#: widgets/basic.php:446 widgets/widgets.php:608
 msgid "Descending"
 msgstr ""
 
-#: widgets/basic.php:446 widgets/widgets.php:607
+#: widgets/basic.php:447 widgets/widgets.php:607
 msgid "Ascending"
 msgstr ""
 
-#: widgets/basic.php:451 widgets/widgets.php:614
+#: widgets/basic.php:452 widgets/widgets.php:614
 msgid "Sticky Posts"
 msgstr ""
 
-#: widgets/basic.php:453 widgets/widgets.php:616 widgets/widgets.php:734
+#: widgets/basic.php:454 widgets/widgets.php:616 widgets/widgets.php:738
 msgid "Default"
 msgstr ""
 
-#: widgets/basic.php:454 widgets/widgets.php:617
+#: widgets/basic.php:455 widgets/widgets.php:617
 msgid "Ignore Sticky"
 msgstr ""
 
-#: widgets/basic.php:455 widgets/widgets.php:618
+#: widgets/basic.php:456 widgets/widgets.php:618
 msgid "Exclude Sticky"
 msgstr ""
 
-#: widgets/basic.php:456 widgets/widgets.php:619
+#: widgets/basic.php:457 widgets/widgets.php:619
 msgid "Only Sticky"
 msgstr ""
 
-#: widgets/basic.php:461
+#: widgets/basic.php:462
 msgid "Additional "
 msgstr ""
 
-#: widgets/basic.php:463 widgets/widgets.php:626
-#, php-format
-msgid ""
-"Additional query arguments. See <a href=\"%s\" target=\"_blank"
-"\">query_posts</a>."
+#: widgets/basic.php:469 widgets/widgets.php:629
+msgid "Additional query arguments. See 1{query_posts}."
 msgstr ""
 
 #: widgets/widgets.php:204
@@ -1119,117 +1102,117 @@ msgstr ""
 msgid "Additional Arguments"
 msgstr ""
 
-#: widgets/widgets.php:682
+#: widgets/widgets.php:686
 msgid "Gallery (PB)"
 msgstr ""
 
-#: widgets/widgets.php:684
+#: widgets/widgets.php:688
 msgid "Displays a gallery."
 msgstr ""
 
-#: widgets/widgets.php:723
+#: widgets/widgets.php:727
 msgid "Gallery Images"
 msgstr ""
 
-#: widgets/widgets.php:724
+#: widgets/widgets.php:728
 msgid "edit gallery"
 msgstr ""
 
-#: widgets/widgets.php:728
+#: widgets/widgets.php:732
 msgid ""
 "Comma separated attachment IDs. Defaults to all current page's attachments."
 msgstr ""
 
-#: widgets/widgets.php:732
+#: widgets/widgets.php:736
 msgid "Image Size"
 msgstr ""
 
-#: widgets/widgets.php:735
+#: widgets/widgets.php:739
 msgid "Large"
 msgstr ""
 
-#: widgets/widgets.php:736
+#: widgets/widgets.php:740
 msgid "Medium"
 msgstr ""
 
-#: widgets/widgets.php:737
+#: widgets/widgets.php:741
 msgid "Thumbnail"
 msgstr ""
 
-#: widgets/widgets.php:738
+#: widgets/widgets.php:742
 msgid "Full"
 msgstr ""
 
-#: widgets/widgets.php:746
+#: widgets/widgets.php:750
 msgid "Gallery Type"
 msgstr ""
 
-#: widgets/widgets.php:751
+#: widgets/widgets.php:755
 msgid "Columns"
 msgstr ""
 
-#: widgets/widgets.php:756
+#: widgets/widgets.php:760
 msgid "Link To"
 msgstr ""
 
-#: widgets/widgets.php:758
+#: widgets/widgets.php:762
 msgid "Attachment Page"
 msgstr ""
 
-#: widgets/widgets.php:759
+#: widgets/widgets.php:763
 msgid "File"
 msgstr ""
 
-#: widgets/widgets.php:777
+#: widgets/widgets.php:781
 msgid "Image (PB)"
 msgstr ""
 
-#: widgets/widgets.php:779
+#: widgets/widgets.php:783
 msgid "Displays a simple image."
 msgstr ""
 
-#: widgets/widgets.php:812
+#: widgets/widgets.php:816
 #: widgets/widgets/animated-image/animated-image.php:15
 msgid "Image URL"
 msgstr ""
 
-#: widgets/widgets.php:816 widgets/widgets/button/button.php:19
+#: widgets/widgets.php:820 widgets/widgets/button/button.php:19
 msgid "Destination URL"
 msgstr ""
 
-#: widgets/widgets.php:830
+#: widgets/widgets.php:834
 msgid "Embedded Video (PB)"
 msgstr ""
 
-#: widgets/widgets.php:832
+#: widgets/widgets.php:836
 msgid "Embeds a video."
 msgstr ""
 
-#: widgets/widgets.php:870
+#: widgets/widgets.php:874
 msgid "Video"
 msgstr ""
 
-#: widgets/widgets.php:886
+#: widgets/widgets.php:890
 msgid "Self Hosted Video (PB)"
 msgstr ""
 
-#: widgets/widgets.php:888
+#: widgets/widgets.php:892
 msgid "A self hosted video player."
 msgstr ""
 
-#: widgets/widgets.php:930
+#: widgets/widgets.php:934
 msgid "Video URL"
 msgstr ""
 
-#: widgets/widgets.php:934
+#: widgets/widgets.php:938
 msgid "Poster URL"
 msgstr ""
 
-#: widgets/widgets.php:936
+#: widgets/widgets.php:940
 msgid "An image that displays before the video starts playing."
 msgstr ""
 
-#: widgets/widgets.php:941
+#: widgets/widgets.php:945
 msgid "Auto Play Video"
 msgstr ""
 
@@ -1277,7 +1260,7 @@ msgstr ""
 #: widgets/widgets/button/button.php:23
 #: widgets/widgets/call-to-action/call-to-action.php:31
 #: widgets/widgets/price-box/price-box.php:44
-#: widgets/widgets/testimonial/testimonial.php:35
+#: widgets/widgets/testimonial/testimonial.php:36
 msgid "Open In New Window"
 msgstr ""
 
@@ -1333,7 +1316,6 @@ msgid "List (PB)"
 msgstr ""
 
 #: widgets/widgets/list/list.php:8 widgets/widgets/price-box/price-box.php:8
-#: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of elements"
 msgstr ""
 
@@ -1369,6 +1351,10 @@ msgstr ""
 msgid "Testimonial (PB)"
 msgstr ""
 
+#: widgets/widgets/testimonial/testimonial.php:8
+msgid "Displays a bullet list of points"
+msgstr ""
+
 #: widgets/widgets/testimonial/testimonial.php:19
 msgid "Location"
 msgstr ""
@@ -1377,6 +1363,7 @@ msgstr ""
 msgid "Image"
 msgstr ""
 
-#: widgets/widgets/testimonial/testimonial.php:31
+#. TRANSLATORS: Uniform Resource Locator
+#: widgets/widgets/testimonial/testimonial.php:32
 msgid "URL"
 msgstr ""

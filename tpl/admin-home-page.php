@@ -21,7 +21,15 @@
 
 		<?php if( filter_input( INPUT_POST, '_sopanels_home_nonce' ) ) : global $post; ?>
 			<div id="message" class="updated">
-				<p><?php printf( __('Home page updated. <a href="%s">View page</a>', 'siteorigin-panels'), get_the_permalink( $post ) ) ?></p>
+				<p>
+					<?php
+					echo preg_replace(
+						'/1\{ *(.*?) *\}/',
+						'<a href="' . get_the_permalink( $post ) . '">$1</a>',
+						__('Home page updated. 1{View page}.', 'siteorigin-panels')
+					);
+					?>
+				</p>
 			</div>
 		<?php endif; ?>
 

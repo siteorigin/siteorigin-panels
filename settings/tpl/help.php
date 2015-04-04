@@ -1,8 +1,9 @@
 <p>
 	<?php
-	printf(
-		__( 'Please read the <a href="%s" target="_blank">settings guide</a> of the Page Builder documentation for help.', 'siteorigin-panels' ),
-		'https://siteorigin.com/page-builder/documentation/settings/'
+	echo preg_replace(
+		'/1\{ *(.*?) *\}/',
+		'<a href="https://siteorigin.com/page-builder/documentation/settings/" target="_blank">$1</a>',
+		__( 'Please read the 1{settings guide} of the Page Builder documentation for help.', 'siteorigin-panels' )
 	);
 	?>
 </p>

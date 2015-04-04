@@ -5,7 +5,7 @@ class SiteOrigin_Panels_Widget_Testimonial extends SiteOrigin_Panels_Widget  {
 		parent::__construct(
 			__('Testimonial (PB)', 'siteorigin-panels'),
 			array(
-				'description' => __('Displays a bullet list of elements', 'siteorigin-panels'),
+				'description' => __('Displays a bullet list of points', 'siteorigin-panels'),
 				'default_style' => 'simple',
 			),
 			array(),
@@ -28,6 +28,7 @@ class SiteOrigin_Panels_Widget_Testimonial extends SiteOrigin_Panels_Widget  {
 				),
 				'url' => array(
 					'type' => 'text',
+					// TRANSLATORS: Uniform Resource Locator
 					'label' => __('URL', 'siteorigin-panels'),
 				),
 				'new_window' => array(

@@ -623,7 +623,11 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 		$this->form_args['query_additional'] = array(
 			'type' => 'text',
 			'label' => __('Additional Arguments', 'siteorigin-panels'),
-			'description' => sprintf(__('Additional query arguments. See <a href="%s" target="_blank">query_posts</a>.', 'siteorigin-panels'), 'http://codex.wordpress.org/Function_Reference/query_posts'),
+			'description' => preg_replace(
+				'/1\{ *(.*?) *\}/',
+				'<a href="http://codex.wordpress.org/Function_Reference/query_posts">$1</a>',
+				__('Additional query arguments. See 1{query_posts}.', 'siteorigin-panels')
+			)
 		);
 	}
 
