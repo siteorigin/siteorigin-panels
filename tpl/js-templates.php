@@ -80,9 +80,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 				<div class="so-dropdown-links-wrapper">
 					<ul>
-						<li><a href="#" class="so-row-settings"><?php _e('Edit Row') ?></a></li>
-						<li><a href="#" class="so-row-duplicate"><?php _e('Duplicate Row') ?></a></li>
-						<li><a href="#" class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row') ?></a></li>
+						<li><a href="#" class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
 						<div class="so-pointer"></div>
 					</ul>
 				</div>
@@ -180,7 +180,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-widgets">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php printf( __('Add New Widget %s'), '<span class="current-tab-title"></span>' ) ?></h3>
+		<h3 class="title"><?php printf( __('Add New Widget %s', 'siteorigin-panels'), '<span class="current-tab-title"></span>' ) ?></h3>
 
 		<div class="left-sidebar">
 
@@ -265,10 +265,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<div class="row-set-form">
 				<strong>
-					<?php _e('Set Row Layout') ?>
+					<?php _e('Set Row Layout', 'siteorigin-panels') ?>
 				</strong>
 				<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />
-				<span><?php _e('Columns with Ratio') ?></span>
+				<span><?php _e('Columns with Ratio', 'siteorigin-panels') ?></span>
 				<select name="ratio" class="so-row-field">
 					<option value="1"><?php esc_html_e('Even', 'siteorigin-panels') ?></option>
 					<option value="0.61803398"><?php esc_html_e('Golden', 'siteorigin-panels') ?></option>
