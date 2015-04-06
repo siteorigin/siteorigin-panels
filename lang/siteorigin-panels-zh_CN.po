@@ -33,19 +33,19 @@ msgstr "Page Builder 内容没有%s可拷贝。"
 
 #: inc/default-styles.php:57
 msgid "Row Class"
-msgstr "行的类别"
+msgstr "行的类型"
 
 #: inc/default-styles.php:60 inc/default-styles.php:165
 msgid "A CSS class"
-msgstr "一个 CSS 优先级"
+msgstr "CSS 类"
 
 #: inc/default-styles.php:65
 msgid "Cell Class"
-msgstr "单元格类"
+msgstr "单元格类型"
 
 #: inc/default-styles.php:68
 msgid "Class added to all cells in this row."
-msgstr "已添加到此行所有单元格的类别"
+msgstr "已添加到此行所有单元格的类型"
 
 #: inc/default-styles.php:73 inc/default-styles.php:170
 msgid "CSS Styles"
@@ -53,7 +53,7 @@ msgstr "CSS 样式"
 
 #: inc/default-styles.php:76 inc/default-styles.php:173
 msgid "CSS Styles, given as one per row."
-msgstr "CSS 样式，每行一个。"
+msgstr "每一行给予一个 CSS 样式。"
 
 #: inc/default-styles.php:83
 msgid "Bottom Margin"
@@ -101,7 +101,7 @@ msgstr "背景颜色"
 
 #: inc/default-styles.php:124
 msgid "Background color of the row."
-msgstr "行的底色。"
+msgstr "行的背景颜色。"
 
 #: inc/default-styles.php:129 inc/default-styles.php:196
 msgid "Background Image"
@@ -126,7 +126,7 @@ msgstr "封面"
 
 #: inc/default-styles.php:143 inc/default-styles.php:210
 msgid "Centered, with original size"
-msgstr "置中，使用原本大小"
+msgstr "置中，使用原本的大小"
 
 #: inc/default-styles.php:145 inc/default-styles.php:212
 msgid "How the background image is displayed."
@@ -142,23 +142,23 @@ msgstr "行的边框颜色。"
 
 #: inc/default-styles.php:162
 msgid "Widget Class"
-msgstr "小挂件类别"
+msgstr "小工具类"
 
 #: inc/default-styles.php:181
 msgid "Padding around the entire widget."
-msgstr "填充整个小挂件。"
+msgstr "填充整个小工具。"
 
 #: inc/default-styles.php:191
 msgid "Background color of the widget."
-msgstr "小挂件的背景颜色。"
+msgstr "小工具的背景颜色。"
 
 #: inc/default-styles.php:199
 msgid "Background image of the widget."
-msgstr "小挂件的背景图像。"
+msgstr "小工具的背景图像。"
 
 #: inc/default-styles.php:220
 msgid "Border color of the widget."
-msgstr "小挂件的边框颜色。"
+msgstr "小工具的边框颜色。"
 
 #: inc/default-styles.php:225
 msgid "Font Color"
@@ -166,7 +166,7 @@ msgstr "字体颜色"
 
 #: inc/default-styles.php:228
 msgid "Color of text inside this widget."
-msgstr "此小挂件中的文字颜色。"
+msgstr "此小工具中的文字颜色。"
 
 #: inc/plugin-activation.php:7 inc/plugin-activation.php:8
 msgid "Install Page Builder Plugin"
@@ -186,7 +186,7 @@ msgstr "行的样式"
 
 #: inc/styles.php:20
 msgid "Widget Styles"
-msgstr "小挂件样式"
+msgstr "小工具样式"
 
 #: inc/styles.php:42
 msgid "Attributes"
@@ -228,7 +228,7 @@ msgstr "简单的按钮"
 #: inc/widgets-bundle.php:35 inc/widgets-bundle.php:47
 #: inc/widgets-bundle.php:59 inc/widgets.php:126
 msgid "SiteOrigin Widgets Bundle"
-msgstr "SiteOrigin 小挂件包"
+msgstr "SiteOrigin 小工具包"
 
 #: inc/widgets-bundle.php:19
 msgid "SiteOrigin Image"
@@ -236,7 +236,7 @@ msgstr "Attributes 图像"
 
 #: inc/widgets-bundle.php:20
 msgid "Choose images from your media library."
-msgstr "从您的媒体库选择图像"
+msgstr "从您的媒体库选择图像。"
 
 #: inc/widgets-bundle.php:31
 msgid "SiteOrigin Slider"
@@ -244,7 +244,7 @@ msgstr "SiteOrigin 滑块"
 
 #: inc/widgets-bundle.php:32
 msgid "A basic slider widget."
-msgstr "基本的滑块小挂件。"
+msgstr "基本的滑块小工具。"
 
 #: inc/widgets-bundle.php:43
 msgid "SiteOrigin Features"
@@ -276,40 +276,40 @@ msgstr "Black Studio TinyMCE"
 
 #: inc/widgets.php:102
 msgid "Widgets Bundle"
-msgstr "小挂件包"
+msgstr "小工具包"
 
 #: inc/widgets.php:132
 msgid "Page Builder Widgets"
-msgstr "Page Builder 小挂件"
+msgstr "Page Builder 小工具"
 
 #: inc/widgets.php:148
 msgid "WordPress Widgets"
-msgstr "WordPress 小挂件"
+msgstr "WordPress 小工具"
 
 #: inc/widgets.php:158
 msgid "WooCommerce"
-msgstr "WooCommerce "
+msgstr "WooCommerce"
 
 #: inc/widgets.php:169
 msgid "Jetpack"
-msgstr "Jetpack "
+msgstr "Jetpack"
 
 #: inc/widgets.php:180
 msgid "BBPress"
-msgstr "BBPress "
+msgstr "BBPress"
 
 #: inc/widgets.php:188 settings/settings.php:218
 msgid "Recommended Widgets"
-msgstr "建议小挂件"
+msgstr "建议的小工具"
 
 #: settings/settings.php:146 settings/tpl/settings.php:9 tpl/options.php:5
 msgid "SiteOrigin Page Builder"
-msgstr "SiteOrigin Page Builder "
+msgstr "SiteOrigin Page Builder"
 
 #: settings/settings.php:146 siteorigin-panels.php:108
 #: siteorigin-panels.php:467 tpl/js-templates.php:160
 msgid "Page Builder"
-msgstr "Page Builder "
+msgstr "Page Builder"
 
 #: settings/settings.php:170
 msgid "Page Builder Settings"
@@ -325,31 +325,31 @@ msgstr "帖子类型"
 
 #: settings/settings.php:194
 msgid "The post types to use Page Builder on."
-msgstr "使用 Page Builder 的帖子类型。"
+msgstr "想使用 Page Builder 插件的帖子类型。"
 
 #: settings/settings.php:200
 msgid "Widgets"
-msgstr "小挂件"
+msgstr "小工具"
 
 #: settings/settings.php:206
 msgid "Widget Title HTML"
-msgstr "小挂件标题 HTML"
+msgstr "小工具标题 HTML"
 
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "用于小挂件标题的 HTML。{{title}} 会取代小挂件的标题。"
+msgstr "用于小工具标题的 HTML。{{title}} 会取代小工具的标题。"
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
-msgstr "保留小挂件包"
+msgstr "保留小工具包"
 
 #: settings/settings.php:213
 msgid "Load legacy widgets from Page Builder 1."
-msgstr "从 Page Builder 1 加载保留小挂件。"
+msgstr "从 Page Builder 1 载入保留小工具。"
 
 #: settings/settings.php:219
 msgid "Display recommend widgets in Page Builder add widget dialog."
-msgstr "在 Page Builder 中显示建议的小挂件并添加挂件对话框。"
+msgstr "在 Page Builder 中显示建议的小工具并添加挂件对话框。"
 
 #: settings/settings.php:233 tpl/options.php:57
 msgid "Responsive Layout"
@@ -357,7 +357,7 @@ msgstr "响应式布局"
 
 #: settings/settings.php:234
 msgid "Collapse widgets, rows and columns on mobile devices."
-msgstr "折叠移动设备上的小挂件、行和列"
+msgstr "小工具、行和列在移动设备上显示为单列。"
 
 #: settings/settings.php:240 tpl/options.php:64
 msgid "Mobile Width"
@@ -365,7 +365,7 @@ msgstr "移动设备宽"
 
 #: settings/settings.php:241
 msgid "Device width, in pixels, to collapse into a mobile view ."
-msgstr "设备宽、像素、折叠为移动视图"
+msgstr "设备宽、像素、折叠为移动设备上的视图。"
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
@@ -425,15 +425,15 @@ msgstr "主页"
 
 #: siteorigin-panels.php:263
 msgid "All Widgets"
-msgstr "所有小挂件"
+msgstr "所有小工具"
 
 #: siteorigin-panels.php:274
 msgid "Missing Widget"
-msgstr "缺少的小挂件"
+msgstr "缺少的小工具"
 
 #: siteorigin-panels.php:275
 msgid "Page Builder doesn't know about this widget."
-msgstr "Page Builder 还不知道这个小挂件。"
+msgstr "Page Builder 不认识这个小工具。"
 
 #: siteorigin-panels.php:279
 msgid "%d seconds"
@@ -481,23 +481,23 @@ msgstr "已恢复版本"
 
 #: siteorigin-panels.php:304
 msgid "Widget deleted"
-msgstr "已删除小挂件"
+msgstr "已删除小工具"
 
 #: siteorigin-panels.php:306
 msgid "Widget added"
-msgstr "已添加小挂件"
+msgstr "已添加小工具"
 
 #: siteorigin-panels.php:308
 msgid "Widget edited"
-msgstr "已编辑小挂件"
+msgstr "已编辑小工具"
 
 #: siteorigin-panels.php:310
 msgid "Widget duplicated"
-msgstr "已复制小挂件"
+msgstr "已复制小工具"
 
 #: siteorigin-panels.php:312
 msgid "Widget moved"
-msgstr "已移动小挂件"
+msgstr "已移动小工具"
 
 #: siteorigin-panels.php:316
 msgid "Row deleted"
@@ -545,7 +545,7 @@ msgstr "您希望清楚您的 Page Builder 内容，并回到标准的视觉化�
 
 #: siteorigin-panels.php:339
 msgid "Layout Builder Widget"
-msgstr "布局构建器小挂件"
+msgstr "布局构建器小工具"
 
 #: siteorigin-panels.php:341 tpl/js-templates.php:85
 msgid "Are you sure?"
@@ -561,7 +561,7 @@ msgstr "上传或输入档案时发生错误。"
 
 #: siteorigin-panels.php:395
 msgid "Untitled Widget"
-msgstr "未命名小挂件"
+msgstr "未命名小工具"
 
 #: siteorigin-panels.php:1140
 msgid "Edit Home Page"
@@ -569,7 +569,7 @@ msgstr "编辑主页"
 
 #: siteorigin-panels.php:1237
 msgid "Save and reload this page to start using the widget after you've installed it."
-msgstr "在您安装了小挂件后，保存并重新载入此页开始使用它。"
+msgstr "在您安装了小工具后，保存并重新载入此页开始使用它。"
 
 #: siteorigin-panels.php:1321
 msgid "Support Forum"
@@ -601,7 +601,7 @@ msgstr "此接口需要 Javascript"
 
 #: tpl/help.php:2
 msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
-msgstr "您可使用 SiteOrigin Page Builder 创建主页和子页面，填入您个人的小挂件。"
+msgstr "您可使用 SiteOrigin Page Builder 创建主页和子页面，填入您个人的小工具。"
 
 #: tpl/help.php:3
 msgid "The page layouts are responsive and fully customizable."
@@ -609,7 +609,7 @@ msgstr "页面布局为响应式且完全可自订"
 
 #: tpl/js-templates.php:12
 msgid "Add Widget"
-msgstr "添加小挂件"
+msgstr "添加小工具"
 
 #: tpl/js-templates.php:17
 msgid "Add Row"
@@ -647,11 +647,11 @@ msgstr "删除行"
 msgid "Edit"
 msgstr "编辑"
 
-#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:303
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
 msgid "Duplicate"
 msgstr "复制"
 
-#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:302
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
 msgid "Delete"
 msgstr "删除"
 
@@ -661,11 +661,11 @@ msgstr "已完成"
 
 #: tpl/js-templates.php:183
 msgid "Add New Widget %s"
-msgstr "添加新的小挂件%s"
+msgstr "添加新的小工具%s"
 
 #: tpl/js-templates.php:187
 msgid "Search Widgets"
-msgstr "搜索小挂件"
+msgstr "搜索小工具"
 
 #: tpl/js-templates.php:199
 msgid "Close"
@@ -675,127 +675,71 @@ msgstr "关闭"
 msgid "Add New Row"
 msgstr "添加新的行"
 
-#: tpl/js-templates.php:268
-msgid "Set Row Layout"
-msgstr "设置行的布局"
-
-#: tpl/js-templates.php:271
-msgid "Columns with Ratio"
-msgstr "列的比率"
-
-#: tpl/js-templates.php:273
-msgid "Even"
-msgstr "一比一"
-
-#: tpl/js-templates.php:274
-msgid "Golden"
-msgstr "黄金比例"
-
-#: tpl/js-templates.php:275
-msgid "Halves"
-msgstr "一比二"
-
-#: tpl/js-templates.php:276
-msgid "Thirds"
-msgstr "一比三"
-
-#: tpl/js-templates.php:277
-msgid "Diagon"
-msgstr "对角"
-
-#: tpl/js-templates.php:278
-msgid "Hecton"
-msgstr ""
-
-#: tpl/js-templates.php:279
-msgid "Hemidiagon"
-msgstr ""
-
-#: tpl/js-templates.php:280
-msgid "Penton"
-msgstr ""
-
-#: tpl/js-templates.php:281
-msgid "Trion"
-msgstr ""
-
-#: tpl/js-templates.php:282
-msgid "Quadriagon"
-msgstr ""
-
-#: tpl/js-templates.php:283
-msgid "Biauron"
-msgstr ""
-
-#: tpl/js-templates.php:284
-msgid "Bipenton"
-msgstr ""
-
-#: tpl/js-templates.php:287
+#: tpl/js-templates.php:290
 msgid "Left to Right"
 msgstr "从左到右"
 
-#: tpl/js-templates.php:288
+#: tpl/js-templates.php:291
 msgid "Right to Left"
 msgstr "从右到左"
 
-#: tpl/js-templates.php:290
+#: tpl/js-templates.php:308
 msgid "Set"
 msgstr "设置"
 
-#: tpl/js-templates.php:308
+#: tpl/js-templates.php:327
 msgid "Insert"
 msgstr "插入"
 
-#: tpl/js-templates.php:310
+#: tpl/js-templates.php:329
 msgid "Save"
 msgstr "保存"
 
-#: tpl/js-templates.php:328
+#: tpl/js-templates.php:347
 msgid "Prebuilt Layouts"
 msgstr "预置布局"
 
-#: tpl/js-templates.php:332
+#: tpl/js-templates.php:351
 msgid "Search"
 msgstr "搜索"
 
-#: tpl/js-templates.php:335
+#: tpl/js-templates.php:354
 msgid "Theme Defined"
 msgstr "已定义主题"
 
-#: tpl/js-templates.php:336
+#: tpl/js-templates.php:355
 msgid "Import/Export"
 msgstr "汇入/输出"
 
-#: tpl/js-templates.php:342
+#: tpl/js-templates.php:361
 msgid "Clone: %s"
 msgstr "拷贝：%s"
 
-#: tpl/js-templates.php:363
+#: tpl/js-templates.php:382
 msgid "Drop import file here"
 msgstr "在此放入汇入档案"
 
-#: tpl/js-templates.php:364
+#: tpl/js-templates.php:383
 msgid "Or"
 msgstr "或"
 
-#: tpl/js-templates.php:367
+#: tpl/js-templates.php:386
 msgid "Select Import File"
 msgstr "选择汇入档案"
 
-#: tpl/js-templates.php:379
+#: tpl/js-templates.php:398
 msgid "Download Layout"
 msgstr "下载布局"
 
-#: tpl/js-templates.php:400
+#: tpl/js-templates.php:419
 msgid "Page Builder Change History"
 msgstr "Page Builder 变更纪录"
 
-#: tpl/js-templates.php:414
+#: tpl/js-templates.php:433
 msgid "Restore Version"
 msgstr "恢复版本"
 
-#: tpl/js-templates.php:439
+#: tpl/js-templates.php:458
 msgid "Close Live Editor"
 msgstr "关闭实时编辑器"
 
@@ -813,11 +757,11 @@ msgstr "取消动画提高效能。"
 
 #: tpl/options.php:39
 msgid "Bundled Widgets"
-msgstr "小挂件包"
+msgstr "小工具包"
 
 #: tpl/options.php:40
 msgid "Include the bundled widgets."
-msgstr "包含小挂件包。"
+msgstr "包含小工具包。"
 
 #: tpl/options.php:48
 msgid "Display"
@@ -825,7 +769,7 @@ msgstr "显示"
 
 #: tpl/options.php:58
 msgid "Should the layout collapse for mobile devices."
-msgstr "布局应为移动设备折叠吗"
+msgstr "布局在移动设备上应显示为单列吗？"
 
 #: tpl/options.php:76
 msgid "Cell Side Margins"
@@ -833,7 +777,7 @@ msgstr "单元格边距"
 
 #: tpl/options.php:82
 msgid "Inline CSS"
-msgstr "CSS内联元素"
+msgstr "CSS 内联元素"
 
 #: widgets/basic.php:13
 msgid "Layout Builder"
@@ -1114,7 +1058,7 @@ msgstr "动画图像 (PB)"
 
 #: widgets/widgets/animated-image/animated-image.php:8
 msgid "An image that animates in when it enters the screen."
-msgstr "进入屏幕时的以动画效果呈现的图像。"
+msgstr "进入屏幕时以动画效果呈现的图像。"
 
 #: widgets/widgets/animated-image/animated-image.php:19
 msgid "Animation"
@@ -1191,7 +1135,7 @@ msgstr "子标题"
 #: widgets/widgets/call-to-action/call-to-action.php:23
 #: widgets/widgets/price-box/price-box.php:36
 msgid "Button Text"
-msgstr "按钮文字"
+msgstr "按钮文本"
 
 #: widgets/widgets/call-to-action/call-to-action.php:27
 #: widgets/widgets/price-box/price-box.php:40
@@ -1257,15 +1201,15 @@ msgstr "URL"
 
 #: siteorigin-panels.php:1254
 msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
-msgstr "目前小挂件1{%1$s}尚无法使用。请尝试添加和安装缺少的插件。若您需要帮助，请在2{支持论坛}上发帖子。 "
+msgstr "目前小工具1{%1$s}尚无法使用。请尝试添加和安装缺少的插件。若您需要帮助，请在2{支持论坛}上发帖子。 "
 
 #: tpl/js-templates.php:64
 msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
-msgstr "添加一个1{挂件}、2{行}或3{预置布局}即可开始。若您需要帮助，请阅读我们的4{说明书}。"
+msgstr "添加一个1{小工具}、2{行}或3{预置布局}即可开始。若您需要帮助，请阅读我们的4{说明书}。"
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
-msgstr "作为小挂件的全面 SiteOrigin Page Builder。"
+msgstr "作为小工具的全面 SiteOrigin Page Builder。"
 
 #: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of points"
@@ -1273,19 +1217,19 @@ msgstr "显示要点的项目符号列表"
 
 #: inc/widgets.php:118
 msgid "Enable more widgets in the 1{Widgets Bundle settings}."
-msgstr "在1{小挂件包设置}中允许更多小挂件。"
+msgstr "在1{小工具包设置}中允许更多小工具。"
 
 #: inc/widgets.php:127
 msgid "Install the 1{Widgets Bundle} to get extra widgets."
-msgstr "安装1{小挂件包}以获得其他的小挂件。"
+msgstr "安装1{小工具包}以获得其他的小工具。"
 
 #: inc/widgets.php:140
 msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
-msgstr "您可在1{Page Builder 设置}中允许保存 (PB) 小挂件。"
+msgstr "您可在1{Page Builder 设置}中允许保存 (PB) 小工具。"
 
 #: siteorigin-panels.php:1231
 msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
-msgstr "您必须安装1{%1$s}才可使用小挂件2{%2$s}。"
+msgstr "您必须安装1{%1$s}才可使用小工具2{%2$s}。"
 
 #: settings/tpl/help.php:6
 msgid "Please read the 1{settings guide} of the Page Builder documentation for help."
@@ -1302,3 +1246,7 @@ msgstr "其他查询实参。请见1{query_posts}。"
 #: tpl/help.php:18
 msgid "Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments."
 msgstr "阅读 SiteOrigin 上的1{完整文件}。若您需要帮助， 请在我们的2{支持论坛}上发问，并注册3{我们的电子报}，以追踪未来所有的发展。"
+
+#: tpl/js-templates.php:302
+msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
+msgstr "1{设置行布局}：%1$s 个行，比例为%2$s，由%3$s开始"
