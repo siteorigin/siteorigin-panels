@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Page Builder by SiteOrigin\n"
-"POT-Creation-Date: 2015-04-04 16:39+0200\n"
-"PO-Revision-Date: 2015-04-04 16:39+0200\n"
+"POT-Creation-Date: 2015-04-06 09:20+0200\n"
+"PO-Revision-Date: 2015-04-06 09:20+0200\n"
 "Last-Translator: Greg Priday <greg@siteorigin.com>\n"
 "Language-Team: \n"
 "Language: en\n"
@@ -742,11 +742,11 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:303
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
 msgid "Duplicate"
 msgstr ""
 
-#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:302
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
 msgid "Delete"
 msgstr ""
 
@@ -771,128 +771,77 @@ msgstr ""
 msgid "Add New Row"
 msgstr ""
 
-#: tpl/js-templates.php:268
-msgid "Set Row Layout"
-msgstr ""
-
-#: tpl/js-templates.php:271
-msgid "Columns with Ratio"
-msgstr ""
-
-#: tpl/js-templates.php:273
-msgid "Even"
-msgstr ""
-
-#: tpl/js-templates.php:274
-msgid "Golden"
-msgstr ""
-
-#: tpl/js-templates.php:275
-msgid "Halves"
-msgstr ""
-
-#: tpl/js-templates.php:276
-msgid "Thirds"
-msgstr ""
-
-#: tpl/js-templates.php:277
-msgid "Diagon"
-msgstr ""
-
-#: tpl/js-templates.php:278
-msgid "Hecton"
-msgstr ""
-
-#: tpl/js-templates.php:279
-msgid "Hemidiagon"
-msgstr ""
-
-#: tpl/js-templates.php:280
-msgid "Penton"
-msgstr ""
-
-#: tpl/js-templates.php:281
-msgid "Trion"
-msgstr ""
-
-#: tpl/js-templates.php:282
-msgid "Quadriagon"
-msgstr ""
-
-#: tpl/js-templates.php:283
-msgid "Biauron"
-msgstr ""
-
-#: tpl/js-templates.php:284
-msgid "Bipenton"
-msgstr ""
-
-#: tpl/js-templates.php:287
+#: tpl/js-templates.php:290
 msgid "Left to Right"
 msgstr ""
 
-#: tpl/js-templates.php:288
+#: tpl/js-templates.php:291
 msgid "Right to Left"
 msgstr ""
 
-#: tpl/js-templates.php:290
-msgid "Set"
+#: tpl/js-templates.php:302
+#, php-format
+msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
 msgstr ""
 
 #: tpl/js-templates.php:308
+msgid "Set"
+msgstr ""
+
+#: tpl/js-templates.php:327
 msgid "Insert"
 msgstr ""
 
-#: tpl/js-templates.php:310
+#: tpl/js-templates.php:329
 msgid "Save"
 msgstr ""
 
-#: tpl/js-templates.php:328
+#: tpl/js-templates.php:347
 msgid "Prebuilt Layouts"
 msgstr ""
 
-#: tpl/js-templates.php:332
+#: tpl/js-templates.php:351
 msgid "Search"
 msgstr ""
 
-#: tpl/js-templates.php:335
+#: tpl/js-templates.php:354
 msgid "Theme Defined"
 msgstr ""
 
-#: tpl/js-templates.php:336
+#: tpl/js-templates.php:355
 msgid "Import/Export"
 msgstr ""
 
-#: tpl/js-templates.php:342
+#: tpl/js-templates.php:361
 #, php-format
 msgid "Clone: %s"
 msgstr ""
 
-#: tpl/js-templates.php:363
+#: tpl/js-templates.php:382
 msgid "Drop import file here"
 msgstr ""
 
-#: tpl/js-templates.php:364
+#: tpl/js-templates.php:383
 msgid "Or"
 msgstr ""
 
-#: tpl/js-templates.php:367
+#: tpl/js-templates.php:386
 msgid "Select Import File"
 msgstr ""
 
-#: tpl/js-templates.php:379
+#: tpl/js-templates.php:398
 msgid "Download Layout"
 msgstr ""
 
-#: tpl/js-templates.php:400
+#: tpl/js-templates.php:419
 msgid "Page Builder Change History"
 msgstr ""
 
-#: tpl/js-templates.php:414
+#: tpl/js-templates.php:433
 msgid "Restore Version"
 msgstr ""
 
-#: tpl/js-templates.php:439
+#: tpl/js-templates.php:458
 msgid "Close Live Editor"
 msgstr ""
 
