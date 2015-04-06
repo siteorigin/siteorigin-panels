@@ -264,30 +264,49 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="content">
 
 			<div class="row-set-form">
-				<strong>
-					<?php _e('Set Row Layout', 'siteorigin-panels') ?>
-				</strong>
-				<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />
-				<span><?php _e('Columns with Ratio', 'siteorigin-panels') ?></span>
-				<select name="ratio" class="so-row-field">
-					<option value="1"><?php esc_html_e('Even', 'siteorigin-panels') ?></option>
-					<option value="0.61803398"><?php esc_html_e('Golden', 'siteorigin-panels') ?></option>
-					<option value="0.5"><?php esc_html_e('Halves', 'siteorigin-panels') ?></option>
-					<option value="0.33333333"><?php esc_html_e('Thirds', 'siteorigin-panels') ?></option>
-					<option value="0.41421356"><?php esc_html_e('Diagon', 'siteorigin-panels') ?></option>
-					<option value="0.73205080"><?php esc_html_e('Hecton', 'siteorigin-panels') ?></option>
-					<option value="0.11803398"><?php esc_html_e('Hemidiagon', 'siteorigin-panels') ?></option>
-					<option value="0.27201964"><?php esc_html_e('Penton', 'siteorigin-panels') ?></option>
-					<option value="0.15470053"><?php esc_html_e('Trion', 'siteorigin-panels') ?></option>
-					<option value="0.207"><?php esc_html_e('Quadriagon', 'siteorigin-panels') ?></option>
-					<option value="0.30901699"><?php esc_html_e('Biauron', 'siteorigin-panels') ?></option>
-					<option value="0.46"><?php esc_html_e('Bipenton', 'siteorigin-panels') ?></option>
-				</select>
-				<select name="ratio_direction" class="so-row-field">
-					<option value="right"><?php esc_html_e('Left to Right', 'siteorigin-panels') ?></option>
-					<option value="left"><?php esc_html_e('Right to Left', 'siteorigin-panels') ?></option>
-				</select>
-				<button class="button-secondary set-row"><?php esc_html_e('Set', 'siteorigin-panels') ?></button>
+				<?php
+				$cells_field = '<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />';
+				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
+					'Even' => 1,
+					'Golden' => 0.61803398,
+					'Halves' => 0.5,
+					'Thirds' => 0.33333333,
+					'Diagon' => 0.41421356,
+					'Hecton' => 0.73205080,
+					'Hemidiagon' => 0.11803398,
+					'Penton' => 0.27201964,
+					'Trion' => 0.15470053,
+					'Quadriagon' => 0.207,
+					'Biauron' => 0.30901699,
+					'Bipenton' => 0.46,
+				) );
+				$ratio_field = '<select name="ratio" class="so-row-field">';
+				foreach( $ratios as $name => $value ) {
+					$ratio_field .= '<option value="' . esc_attr($value) .  '">' . esc_html($name . ' (' . round($value, 3) . ')') . '</option>';
+				}
+				$ratio_field .= '</select>';
+
+				$direction_field = '<select name="ratio_direction" class="so-row-field">';
+				$direction_field .= '<option value="right">' . esc_html__('Left to Right', 'siteorigin-panels') . '</option>';
+				$direction_field .= '<option value="left">' . esc_html__('Right to Left', 'siteorigin-panels') . '</option>';
+				$direction_field .= '</select>';
+
+				printf(
+					preg_replace(
+						array(
+							'/1\{ *(.*?) *\}/',
+						),
+						array(
+							'<strong>$1</strong>',
+						),
+						__('1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s', 'siteorigin-panels')
+					),
+					$cells_field,
+					$ratio_field,
+					$direction_field
+				);
+				echo '<button class="button-secondary set-row">' . esc_html__('Set', 'siteorigin-panels') . '</button>';
+				?>
 			</div>
 
 			<div class="row-preview">
