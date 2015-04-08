@@ -74,16 +74,26 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Move this widget to a new cell
+         * Move this widget model to a new cell
          *
          * @param panels.model.cell newCell
+         *
+         * @return bool Indicating if the widget was moved into a different cell
          */
-        moveToCell: function(newCell){
-            if( this.cell.cid === newCell.cid ) { return false; }
+        moveToCell: function(newCell, options){
+            options = _.extend( {
+                silent: true
+            }, options );
+
+            if( this.cell.cid === newCell.cid ) {
+                return false;
+            }
 
             this.cell = newCell;
-            this.collection.remove(this, {silent:true});
-            newCell.widgets.add(this, {silent:true});
+            this.collection.remove(this, options );
+            newCell.widgets.add(this, options );
+
+            return true;
         },
 
         /**
@@ -742,8 +752,16 @@ String.prototype.panelsProcessTemplate = function(){
 
                 }
                 else if(cells.length < this.cells.length) {
+                    var newParentCell = this.cells.at( cells.length - 1 );
+
                     // We need to remove cells
                     _.each(this.cells.slice( cells.length, this.cells.length), function(cell){
+                        var widgetsToMove = cell.widgets.models.slice(0);
+                        for( var i = 0; i < widgetsToMove.length; i++ ) {
+                            widgetsToMove[i].moveToCell( newParentCell, {silent: false} );
+                        }
+
+                        // First move all the widgets to the new cell
                         cell.destroy();
                     });
                 }
