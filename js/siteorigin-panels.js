@@ -752,8 +752,16 @@ String.prototype.panelsProcessTemplate = function(){
 
                 }
                 else if(cells.length < this.cells.length) {
+                    var newParentCell = this.cells.at( cells.length - 1 );
+
                     // We need to remove cells
                     _.each(this.cells.slice( cells.length, this.cells.length), function(cell){
+                        var widgetsToMove = cell.widgets.models.slice(0);
+                        for( var i = 0; i < widgetsToMove.length; i++ ) {
+                            widgetsToMove[i].moveToCell( newParentCell, {silent: false} );
+                        }
+
+                        // First move all the widgets to the new cell
                         cell.destroy();
                     });
                 }
