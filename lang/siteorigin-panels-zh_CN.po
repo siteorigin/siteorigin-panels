@@ -15,6 +15,7 @@ msgstr ""
 msgid "No description"
 msgstr "无叙述"
 
+#. A prebuilt layout is essentially a complete visual layout that was pre created.
 #: inc/admin-actions.php:89
 msgid "Your theme doesn't have any prebuilt layouts."
 msgstr "您的主题没有任何预置布局。"
@@ -33,19 +34,20 @@ msgstr "Page Builder 内容没有%s可拷贝。"
 
 #: inc/default-styles.php:57
 msgid "Row Class"
-msgstr "行的类型"
+msgstr "行的类"
 
+#. A CSS class is something to describe an HTML element.
 #: inc/default-styles.php:60 inc/default-styles.php:165
 msgid "A CSS class"
 msgstr "CSS 类"
 
 #: inc/default-styles.php:65
 msgid "Cell Class"
-msgstr "单元格类型"
+msgstr "单元格类"
 
 #: inc/default-styles.php:68
 msgid "Class added to all cells in this row."
-msgstr "已添加到此行所有单元格的类型"
+msgstr "已添加到此行所有单元格的类"
 
 #: inc/default-styles.php:73 inc/default-styles.php:170
 msgid "CSS Styles"
@@ -55,25 +57,34 @@ msgstr "CSS 样式"
 msgid "CSS Styles, given as one per row."
 msgstr "每一行给予一个 CSS 样式。"
 
+#. The amount of spacing below a row. This comes from the concept of a text margin.
 #: inc/default-styles.php:83
 msgid "Bottom Margin"
-msgstr "底边"
+msgstr "底部边距"
 
+#. is "space" the same as "margin"?
 #: inc/default-styles.php:86
+#, fuzzy
 msgid "Space below the row."
-msgstr "行下的空格。"
+msgstr "行底下的空间。"
 
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
 #: inc/default-styles.php:91
 msgid "Gutter"
 msgstr "间距"
 
+#. is "space" the same as "margin"?
 #: inc/default-styles.php:94
+#, fuzzy
 msgid "Amount of space between columns."
-msgstr "直列之间的空格数"
+msgstr "直列之间的空间。"
 
+#. This is essentially the amount of padding, or amount of space around a widget or row.
 #: inc/default-styles.php:99 inc/default-styles.php:178
 msgid "Padding"
-msgstr "填充中"
+msgstr "填充"
 
 #: inc/default-styles.php:102
 msgid "Padding around the entire row."
@@ -91,9 +102,10 @@ msgstr "标准"
 msgid "Full Width"
 msgstr "全宽"
 
+#. This means the row is displayed the full width of the page and the content is also stretched.
 #: inc/default-styles.php:113
 msgid "Full Width Stretched"
-msgstr "已延展完整宽度"
+msgstr "延展为页面全宽"
 
 #: inc/default-styles.php:121 inc/default-styles.php:188
 msgid "Background Color"
@@ -117,20 +129,20 @@ msgstr "背景图像显示"
 
 #: inc/default-styles.php:141 inc/default-styles.php:208
 msgid "Tiled Image"
-msgstr "平铺的图像"
+msgstr "并列图像"
 
 #. is it noun or verb?
 #: inc/default-styles.php:142 inc/default-styles.php:209
 msgid "Cover"
-msgstr "封面"
+msgstr "覆盖"
 
 #: inc/default-styles.php:143 inc/default-styles.php:210
 msgid "Centered, with original size"
-msgstr "置中，使用原本的大小"
+msgstr "置中，使用原本大小"
 
 #: inc/default-styles.php:145 inc/default-styles.php:212
 msgid "How the background image is displayed."
-msgstr "背景图像如何显示"
+msgstr "背景图像显示方式。"
 
 #: inc/default-styles.php:150 inc/default-styles.php:217
 msgid "Border Color"
@@ -166,7 +178,7 @@ msgstr "字体颜色"
 
 #: inc/default-styles.php:228
 msgid "Color of text inside this widget."
-msgstr "此小工具中的文字颜色。"
+msgstr "此小工具中的文本颜色。"
 
 #: inc/plugin-activation.php:7 inc/plugin-activation.php:8
 msgid "Install Page Builder Plugin"
@@ -214,7 +226,7 @@ msgstr "移除"
 
 #: inc/styles.php:197 settings/settings.php:313
 msgid "Enabled"
-msgstr "已允许"
+msgstr "允许"
 
 #: inc/widgets-bundle.php:7
 msgid "SiteOrigin Button"
@@ -232,7 +244,7 @@ msgstr "SiteOrigin 小工具包"
 
 #: inc/widgets-bundle.php:19
 msgid "SiteOrigin Image"
-msgstr "Attributes 图像"
+msgstr "SiteOrigin 图像"
 
 #: inc/widgets-bundle.php:20
 msgid "Choose images from your media library."
@@ -325,7 +337,7 @@ msgstr "帖子类型"
 
 #: settings/settings.php:194
 msgid "The post types to use Page Builder on."
-msgstr "想使用 Page Builder 插件的帖子类型。"
+msgstr "欲使用 Page Builder 插件的帖子类型。"
 
 #: settings/settings.php:200
 msgid "Widgets"
@@ -361,7 +373,7 @@ msgstr "小工具、行和列在移动设备上显示为单列。"
 
 #: settings/settings.php:240 tpl/options.php:64
 msgid "Mobile Width"
-msgstr "移动设备宽"
+msgstr "移动设备屏幕宽"
 
 #: settings/settings.php:241
 msgid "Device width, in pixels, to collapse into a mobile view ."
@@ -369,12 +381,15 @@ msgstr "设备宽、像素、折叠为移动设备上的视图。"
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
-msgstr "行的底边"
+msgstr "行的底部边距"
 
 #: settings/settings.php:248
 msgid "Default margin below rows."
 msgstr "行底下的默认边距。"
 
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
 #: settings/settings.php:254
 msgid "Row Gutter"
 msgstr "行距"
@@ -383,13 +398,14 @@ msgstr "行距"
 msgid "Default spacing between columns in each row."
 msgstr "每一行的默认列距。"
 
+#. In this context, the container is an HTML container or wrapper.
 #: settings/settings.php:261
 msgid "Full Width Container"
-msgstr "全宽容器"
+msgstr "全宽包装器"
 
 #: settings/settings.php:262
 msgid "The container used for the full width layout."
-msgstr "用于全宽布局的容器"
+msgstr "用于全宽布局的包装器。"
 
 #: settings/settings.php:269
 msgid "Content"
@@ -401,7 +417,7 @@ msgstr "复制内容"
 
 #: settings/settings.php:276
 msgid "Copy content from Page Builder to post content."
-msgstr "从 Page Builder 复制内容到帖子内容。"
+msgstr "复制 Page Builder 中的内容到帖子内容。"
 
 #: settings/tpl/settings.php:12
 msgid "Search Settings"
@@ -417,7 +433,7 @@ msgstr "保存设置"
 
 #: siteorigin-panels.php:73
 msgid "Custom Home Page Builder"
-msgstr "自订主页 Page Builder "
+msgstr "自订主页构建器"
 
 #: siteorigin-panels.php:74 siteorigin-panels.php:140
 msgid "Home Page"
@@ -605,7 +621,7 @@ msgstr "您可使用 SiteOrigin Page Builder 创建主页和子页面，填入�
 
 #: tpl/help.php:3
 msgid "The page layouts are responsive and fully customizable."
-msgstr "页面布局为响应式且完全可自订"
+msgstr "页面布局为响应式，完全可自订"
 
 #: tpl/js-templates.php:12
 msgid "Add Widget"
@@ -629,7 +645,7 @@ msgstr "实时编辑器"
 
 #: tpl/js-templates.php:39
 msgid "Switch to Editor"
-msgstr "转换到编辑器"
+msgstr "切换到编辑器"
 
 #: tpl/js-templates.php:83 tpl/js-templates.php:256
 msgid "Edit Row"
@@ -677,11 +693,11 @@ msgstr "添加新的行"
 
 #: tpl/js-templates.php:290
 msgid "Left to Right"
-msgstr "从左到右"
+msgstr "左到右"
 
 #: tpl/js-templates.php:291
 msgid "Right to Left"
-msgstr "从右到左"
+msgstr "右到左"
 
 #: tpl/js-templates.php:308
 msgid "Set"
@@ -703,9 +719,11 @@ msgstr "预置布局"
 msgid "Search"
 msgstr "搜索"
 
+#. is "defined" an verb (perfect tense) or adjective?
 #: tpl/js-templates.php:354
+#, fuzzy
 msgid "Theme Defined"
-msgstr "已定义主题"
+msgstr "已定义的主题"
 
 #: tpl/js-templates.php:355
 msgid "Import/Export"
@@ -773,7 +791,7 @@ msgstr "布局在移动设备上应显示为单列吗？"
 
 #: tpl/options.php:76
 msgid "Cell Side Margins"
-msgstr "单元格边距"
+msgstr "单元格侧边距"
 
 #: tpl/options.php:82
 msgid "Inline CSS"
@@ -871,7 +889,9 @@ msgstr "日期"
 msgid "Modified"
 msgstr "已修改"
 
+#. does it literally mean "parent" or is there other synonym?
 #: widgets/basic.php:434 widgets/widgets.php:596
+#, fuzzy
 msgid "Parent"
 msgstr "家长"
 
@@ -1022,7 +1042,7 @@ msgstr "已嵌入视频 (PB)"
 
 #: widgets/widgets.php:836
 msgid "Embeds a video."
-msgstr "嵌入一则视频。"
+msgstr "嵌入一条视频。"
 
 #: widgets/widgets.php:874
 msgid "Video"
@@ -1124,9 +1144,11 @@ msgstr "左右对齐"
 msgid "Call To Action (PB)"
 msgstr "行动号召 (PB)"
 
+#. I'm not sure about the "block", is there other synonym?
 #: widgets/widgets/call-to-action/call-to-action.php:8
+#, fuzzy
 msgid "A Call to Action block"
-msgstr "行动号召方块"
+msgstr "行动号召区块"
 
 #: widgets/widgets/call-to-action/call-to-action.php:19
 msgid "Sub Title"
@@ -1175,9 +1197,11 @@ msgstr "每"
 msgid "Information Text"
 msgstr "信息文本"
 
+#. does it mean featured or functions?
 #: widgets/widgets/price-box/price-box.php:31
+#, fuzzy
 msgid "Features Text"
-msgstr "特别文本"
+msgstr "特色文本"
 
 #: widgets/widgets/price-box/price-box.php:50
 msgid "Feature List"
@@ -1201,15 +1225,15 @@ msgstr "URL"
 
 #: siteorigin-panels.php:1254
 msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
-msgstr "目前小工具1{%1$s}尚无法使用。请尝试添加和安装缺少的插件。若您需要帮助，请在2{支持论坛}上发帖子。 "
+msgstr "目前小工具1{%1$s}尚无法使用。请尝试添加或安装缺少的插件。若您需要帮助，请在2{支持论坛}上发帖子。"
 
 #: tpl/js-templates.php:64
 msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
-msgstr "添加一个1{小工具}、2{行}或3{预置布局}即可开始。若您需要帮助，请阅读我们的4{说明书}。"
+msgstr "添加一个1{小工具}、2{行}或3{预置布局}即可开始创建。若您需要帮助，请阅读我们的4{说明书}。"
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
-msgstr "作为小工具的全面 SiteOrigin Page Builder。"
+msgstr "作为小工具的全面 SiteOrigin Page Builder 布局。"
 
 #: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of points"
@@ -1249,4 +1273,4 @@ msgstr "阅读 SiteOrigin 上的1{完整文件}。若您需要帮助， 请在�
 
 #: tpl/js-templates.php:302
 msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
-msgstr "1{设置行布局}：%1$s 个行，比例为%2$s，由%3$s开始"
+msgstr "1{设置行布局}：%1$s 个行，比例为%2$s，从%3$s"
