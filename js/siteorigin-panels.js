@@ -28,8 +28,10 @@ String.prototype.panelsProcessTemplate = function(){
         collection : { },
         view : { },
         dialog : { },
-        fn : {}
+        fn : { }
     };
+
+    window.panels = panels;
 
     /**
      * Model for an instance of a widget
@@ -3646,8 +3648,8 @@ jQuery( function($){
 
         container.removeClass('so-panels-loading');
 
-        // Trigger a global jQuery event after we've setup the builder view
-        $(document).trigger( 'panels_setup', builderView );
+        // Trigger a global jQuery event after we've setup the builder view. Everything is accessible form there
+        $(document).trigger( 'panels_setup', builderView, window.panels );
     }
 } );
 
