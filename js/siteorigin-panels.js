@@ -74,16 +74,26 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Move this widget to a new cell
+         * Move this widget model to a new cell
          *
          * @param panels.model.cell newCell
+         *
+         * @return bool Indicating if the widget was moved into a different cell
          */
-        moveToCell: function(newCell){
-            if( this.cell.cid === newCell.cid ) { return false; }
+        moveToCell: function(newCell, options){
+            options = _.extend( {
+                silent: true
+            }, options );
+
+            if( this.cell.cid === newCell.cid ) {
+                return false;
+            }
 
             this.cell = newCell;
-            this.collection.remove(this, {silent:true});
-            newCell.widgets.add(this, {silent:true});
+            this.collection.remove(this, options );
+            newCell.widgets.add(this, options );
+
+            return true;
         },
 
         /**
