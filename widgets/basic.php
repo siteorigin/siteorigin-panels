@@ -81,7 +81,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 			'siteorigin-panels-post-content',
 			__( 'Post Content', 'siteorigin-panels' ),
 			array(
-				'description' => __( 'Displays some form of post content form the current post.', 'siteorigin-panels' ),
+				'description' => __( 'Displays content from the current post.', 'siteorigin-panels' ),
 			)
 		);
 	}
