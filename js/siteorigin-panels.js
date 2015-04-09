@@ -1440,6 +1440,7 @@ String.prototype.panelsProcessTemplate = function(){
 
                 if( confirm(panelsOptions.loc.confirm_stop_builder) ) {
                     // User is switching to the standard visual editor
+                    thisView.addHistoryEntry( 'back_to_editor' );
                     thisView.model.loadPanelsData( false );
                 }
 

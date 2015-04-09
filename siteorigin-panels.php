@@ -298,6 +298,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 					'current' => __('Current', 'siteorigin-panels'),
 					'revert' => __('Original', 'siteorigin-panels'),
 					'restore' => __('Version restored', 'siteorigin-panels'),
+					'back_to_editor' => __('Converted to editor', 'siteorigin-panels'),
 
 					// Widgets
 					// TRANSLATORS: Message displayed in the history when a widget is deleted
