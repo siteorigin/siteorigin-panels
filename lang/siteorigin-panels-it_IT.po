@@ -1217,11 +1217,11 @@ msgstr "URL"
 
 #: siteorigin-panels.php:1254
 msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
-msgstr "Il widget 1 {%1$s} non è disponibile. Per favore prova a localizzare ed installa il plugin mancante. Fai una domanda su 2 {forum di supporto} se hai bisogno di aiuto."
+msgstr "Il widget 1{%1$s} non è disponibile. Per favore prova a localizzare ed installa il plugin mancante. Fai una domanda su 2{forum di supporto} se hai bisogno di aiuto."
 
 #: tpl/js-templates.php:64
 msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
-msgstr "Aggiungi una 1 {widget}, 2{riga} o 3 {layout precostriuto} per iniziare. Leggi la nostra 4 {documentazione} se hai bisogno di aiuto."
+msgstr "Aggiungi una 1{widget}, 2{riga} o 3{layout precostriuto} per iniziare. Leggi la nostra 4{documentazione} se hai bisogno di aiuto."
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
@@ -1233,7 +1233,7 @@ msgstr "Mostra una lista puntata di punti"
 
 #: inc/widgets.php:118
 msgid "Enable more widgets in the 1{Widgets Bundle settings}."
-msgstr "Abilita più widget in 1 {impostazioni di raccolta dei widget}."
+msgstr "Abilita più widget in 1{impostazioni di raccolta dei widget}."
 
 #: inc/widgets.php:127
 msgid "Install the 1{Widgets Bundle} to get extra widgets."
@@ -1245,11 +1245,11 @@ msgstr "Puoi abilitare i widget datati (PB) in {impostazioni di Page Builder}"
 
 #: siteorigin-panels.php:1231
 msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
-msgstr "Devi installare 1 {%1$s} per usare il widget 2{%2$s}."
+msgstr "Devi installare 1{%1$s} per usare il widget 2{%2$s}."
 
 #: settings/tpl/help.php:6
 msgid "Please read the 1{settings guide} of the Page Builder documentation for help."
-msgstr "Per favore leggi 1 {guida impostazioni} della documentazione di Page Builder per supporto."
+msgstr "Per favore leggi 1{guida impostazioni} della documentazione di Page Builder per supporto."
 
 #: tpl/admin-home-page.php:29
 msgid "Home page updated. 1{View page}."
@@ -1257,12 +1257,12 @@ msgstr "Homepage aggiornata. 1{Mostra la pagina}. "
 
 #: widgets/basic.php:469 widgets/widgets.php:629
 msgid "Additional query arguments. See 1{query_posts}."
-msgstr "Argomenti di domanda aggiuntivi. Vedi 1 {domanda_notifiche}."
+msgstr "Argomenti di domanda aggiuntivi. Vedi 1{domanda_notifiche}."
 
 #: tpl/help.php:18
 msgid "Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments."
-msgstr "Leggi 1 {documentazione completa} su SiteOrigin. Fai una domanda su nostro 2 {forum di supporto} se hai bisogno di aiuto e registrati alla nostra 3 {newsletter} per essere aggiornato di futuri sviluppi."
+msgstr "Leggi 1{documentazione completa} su SiteOrigin. Fai una domanda su nostro 2{forum di supporto} se hai bisogno di aiuto e registrati alla nostra 3{newsletter} per essere aggiornato di futuri sviluppi."
 
 #: tpl/js-templates.php:302
 msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
-msgstr "1 {configura layout di riga}: %1$s colonne con un rapporto di %2$s scendendo da %3$s "
+msgstr "1{configura layout di riga}: %1$s colonne con un rapporto di %2$s scendendo da %3$s "
