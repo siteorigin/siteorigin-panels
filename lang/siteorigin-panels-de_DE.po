@@ -3,7 +3,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.7.5\n"
 "Project-Id-Version: Page Builder\n"
 "Language: de\n"
 "POT-Creation-Date: \n"
@@ -15,9 +15,10 @@ msgstr ""
 msgid "No description"
 msgstr "Keine Beschreibung"
 
+#. A prebuilt layout is essentially a complete visual layout that was pre created.
 #: inc/admin-actions.php:89
 msgid "Your theme doesn't have any prebuilt layouts."
-msgstr "Ihr Theme hat keine vorgefertigten Layouts"
+msgstr "Ihr Theme hat keine vorgefertigten Layouts."
 
 #: inc/admin-actions.php:90
 msgid "You can still clone existing pages though."
@@ -35,6 +36,7 @@ msgstr "Es gibt keine %s mit Page Builder Content zu kopieren."
 msgid "Row Class"
 msgstr "Zeilen Klasse"
 
+#. A CSS class is something to describe an HTML element.
 #: inc/default-styles.php:60 inc/default-styles.php:165
 msgid "A CSS class"
 msgstr "Eine CSS Klasse"
@@ -55,6 +57,7 @@ msgstr "CSS Styles"
 msgid "CSS Styles, given as one per row."
 msgstr "CSS Styles, jeweils einer je Zeile."
 
+#. The amount of spacing below a row. This comes from the concept of a text margin.
 #: inc/default-styles.php:83
 msgid "Bottom Margin"
 msgstr "Unterer Rand"
@@ -63,14 +66,18 @@ msgstr "Unterer Rand"
 msgid "Space below the row."
 msgstr "Abstand unter der Zeile."
 
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
 #: inc/default-styles.php:91
 msgid "Gutter"
-msgstr "Gutter"
+msgstr "Spaltensatz"
 
 #: inc/default-styles.php:94
 msgid "Amount of space between columns."
-msgstr "Abstand zwischen den Splaten."
+msgstr "Abstand zwischen den Spalten."
 
+#. This is essentially the amount of padding, or amount of space around a widget or row.
 #: inc/default-styles.php:99 inc/default-styles.php:178
 msgid "Padding"
 msgstr "Padding"
@@ -91,6 +98,7 @@ msgstr "Standard"
 msgid "Full Width"
 msgstr "Gesamte Breite"
 
+#. This means the row is displayed the full width of the page and the content is also stretched.
 #: inc/default-styles.php:113
 msgid "Full Width Stretched"
 msgstr "Gesamte Breite gestreckt"
@@ -121,7 +129,7 @@ msgstr "Gekacheltes Bild"
 
 #: inc/default-styles.php:142 inc/default-styles.php:209
 msgid "Cover"
-msgstr "Cover"
+msgstr "Abdecken"
 
 #: inc/default-styles.php:143 inc/default-styles.php:210
 msgid "Centered, with original size"
@@ -205,7 +213,7 @@ msgstr "Theme"
 
 #: inc/styles.php:179
 msgid "Select Image"
-msgstr "Bild Auswählen"
+msgstr "Bild auswählen"
 
 #: inc/styles.php:183
 msgid "Remove"
@@ -227,7 +235,7 @@ msgstr "Ein einfacher Button"
 #: inc/widgets-bundle.php:35 inc/widgets-bundle.php:47
 #: inc/widgets-bundle.php:59 inc/widgets.php:126
 msgid "SiteOrigin Widgets Bundle"
-msgstr "SiteOrigin Widgets Paket"
+msgstr "SiteOrigin Widgets Bundle"
 
 #: inc/widgets-bundle.php:19
 msgid "SiteOrigin Image"
@@ -335,24 +343,20 @@ msgid "Widget Title HTML"
 msgstr "Widget-Titel HTML"
 
 #: settings/settings.php:207
-msgid ""
-"The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr ""
-"HTML, das für die Widget-Titel verwendet wird. {{title}} wird mit dem Widget-"
-"Titel ersetzt."
+msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
+msgstr "HTML, das für die Widget-Titel verwendet wird. {{title}} wird mit dem Widget-Titel ersetzt."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
-msgstr "Veraltete Paket-Widgets"
+msgstr "Veraltete Bundle-Widgets"
 
 #: settings/settings.php:213
 msgid "Load legacy widgets from Page Builder 1."
-msgstr "Laden Sie veralteten Widgets aus Page Builder 1."
+msgstr "Laden Sie die veralteten Widgets aus Page Builder 1."
 
 #: settings/settings.php:219
 msgid "Display recommend widgets in Page Builder add widget dialog."
-msgstr ""
-"Empfohlene Widgets im Page Builder \"Widget hinzufügen\" Dialog anzeigen."
+msgstr "Empfohlene Widgets im Page Builder \"Widget hinzufügen\" Dialog anzeigen."
 
 #: settings/settings.php:233 tpl/options.php:57
 msgid "Responsive Layout"
@@ -360,7 +364,7 @@ msgstr "Responsives Layout"
 
 #: settings/settings.php:234
 msgid "Collapse widgets, rows and columns on mobile devices."
-msgstr "Widgets, Zeilen und Spalten auf mobilen geräten einklappen."
+msgstr "Widgets, Zeilen und Spalten auf mobilen Geräten einklappen."
 
 #: settings/settings.php:240 tpl/options.php:64
 msgid "Mobile Width"
@@ -368,9 +372,7 @@ msgstr "Mobile Breite"
 
 #: settings/settings.php:241
 msgid "Device width, in pixels, to collapse into a mobile view ."
-msgstr ""
-"Gerätbreite in Pixel, bei der auf die mobile Ansicht umgeschaltet werden "
-"soll. "
+msgstr "Breite des Geräts in Pixel, bei der auf die mobile Ansicht umgeschaltet werden soll."
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
@@ -380,17 +382,21 @@ msgstr "Zeile unterer Außenabstand"
 msgid "Default margin below rows."
 msgstr "Standard Außenabstand unter Zeilen."
 
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
 #: settings/settings.php:254
 msgid "Row Gutter"
-msgstr "Zeilen-Gutter"
+msgstr "Zeilen-Spaltensatz"
 
 #: settings/settings.php:255
 msgid "Default spacing between columns in each row."
 msgstr "Standard Abstand zwischen den Spalten jeder Zeile."
 
+#. In this context, the container is an HTML container or wrapper.
 #: settings/settings.php:261
 msgid "Full Width Container"
-msgstr "Gesamtbreite Container"
+msgstr "Gesamtbreiten-Container"
 
 #: settings/settings.php:262
 msgid "The container used for the full width layout."
@@ -406,7 +412,7 @@ msgstr "Inhalt kopieren"
 
 #: settings/settings.php:276
 msgid "Copy content from Page Builder to post content."
-msgstr "Kopiert Inhalte von Page Builder zu Post Inhalt. "
+msgstr "Inhalte von Page Builder zu Post Inhalt kopieren."
 
 #: settings/tpl/settings.php:12
 msgid "Search Settings"
@@ -422,7 +428,7 @@ msgstr "Einstellungen speichern"
 
 #: siteorigin-panels.php:73
 msgid "Custom Home Page Builder"
-msgstr "Benutzerdefinierter Homepage Bilder"
+msgstr "Benutzerdefinierter Homepage Builder"
 
 #: siteorigin-panels.php:74 siteorigin-panels.php:140
 msgid "Home Page"
@@ -438,7 +444,7 @@ msgstr "Fehlendes Widget"
 
 #: siteorigin-panels.php:275
 msgid "Page Builder doesn't know about this widget."
-msgstr "Page Builder weis nichts über dieses Widget."
+msgstr "Page Builder weiß nichts über dieses Widget."
 
 #: siteorigin-panels.php:279
 msgid "%d seconds"
@@ -533,12 +539,8 @@ msgid "Prebuilt layout loaded"
 msgstr "Vorgefertigtes Layout geladen"
 
 #: siteorigin-panels.php:334
-msgid ""
-"Are you sure you want to overwrite your current content? This can be undone "
-"in the builder history."
-msgstr ""
-"Sind Sie sicher, dass Sie Ihren aktuellen Inhalt überschreiben möchten? Dies "
-"kann im Builder-Verlauf rückgängig gemacht werden."
+msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
+msgstr "Sind Sie sicher, dass Sie Ihren aktuellen Inhalt überschreiben möchten? Dies kann im Builder-Verlauf rückgängig gemacht werden."
 
 #: siteorigin-panels.php:335
 msgid "Loading prebuilt layout"
@@ -546,16 +548,11 @@ msgstr "Vorgefertigtes Layout laden"
 
 #: siteorigin-panels.php:336
 msgid "Would you like to copy this editor's existing content to Page Builder?"
-msgstr ""
-"Wollen Sie den vorhandenen Inhalt dieses Editors zu Page Builder kopieren?"
+msgstr "Wollen Sie den vorhandenen Inhalt dieses Editors zu Page Builder kopieren?"
 
 #: siteorigin-panels.php:337
-msgid ""
-"Would you like to clear your Page Builder content and revert to using the "
-"standard visual editor?"
-msgstr ""
-"Wollen Sie Ihren Page Builder Inhalt leeren und zum visuellen Standard-"
-"Editor zurückkehren?"
+msgid "Would you like to clear your Page Builder content and revert to using the standard visual editor?"
+msgstr "Wollen Sie Ihren Page Builder Inhalt verwerfen und zum visuellen Standard-Editor zurückkehren?"
 
 #: siteorigin-panels.php:339
 msgid "Layout Builder Widget"
@@ -582,12 +579,8 @@ msgid "Edit Home Page"
 msgstr "Homepage editieren"
 
 #: siteorigin-panels.php:1237
-msgid ""
-"Save and reload this page to start using the widget after you've installed "
-"it."
-msgstr ""
-"Speichern und laden Sie diese Seite erneut, um das Widget nach der "
-"Installation zu verwenden."
+msgid "Save and reload this page to start using the widget after you've installed it."
+msgstr "Speichern und laden Sie diese Seite erneut, um das Widget nach der Installation zu verwenden."
 
 #: siteorigin-panels.php:1321
 msgid "Support Forum"
@@ -618,12 +611,8 @@ msgid "This interface requires Javascript"
 msgstr "Dieses Interface benötigt Javascript"
 
 #: tpl/help.php:2
-msgid ""
-"You can use SiteOrigin Page Builder to create home and sub pages, filled "
-"your own widgets."
-msgstr ""
-"Sie können den SiteOrigin Page Builder verwenden, um Homepages und "
-"Unterseiten zu erstellen und mit Ihren eigenen Widgets zu füllen."
+msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
+msgstr "Sie können den SiteOrigin Page Builder verwenden, um Homepages und Unterseiten zu erstellen und mit Ihren eigenen Widgets zu füllen."
 
 #: tpl/help.php:3
 msgid "The page layouts are responsive and fully customizable."
@@ -669,11 +658,11 @@ msgstr "Zeile löschen"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:303
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
 msgid "Duplicate"
 msgstr "Duplizieren"
 
-#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:302
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
 msgid "Delete"
 msgstr "Löschen"
 
@@ -697,127 +686,71 @@ msgstr "Schließen"
 msgid "Add New Row"
 msgstr "Neue Zeile hinzufügen"
 
-#: tpl/js-templates.php:268
-msgid "Set Row Layout"
-msgstr "Zeilen-Layout einstellen"
-
-#: tpl/js-templates.php:271
-msgid "Columns with Ratio"
-msgstr "Spalten im Verhältnis"
-
-#: tpl/js-templates.php:273
-msgid "Even"
-msgstr "Gerade"
-
-#: tpl/js-templates.php:274
-msgid "Golden"
-msgstr "Golden"
-
-#: tpl/js-templates.php:275
-msgid "Halves"
-msgstr "Hälften"
-
-#: tpl/js-templates.php:276
-msgid "Thirds"
-msgstr "Drittel"
-
-#: tpl/js-templates.php:277
-msgid "Diagon"
-msgstr "Diagon"
-
-#: tpl/js-templates.php:278
-msgid "Hecton"
-msgstr "Hekton"
-
-#: tpl/js-templates.php:279
-msgid "Hemidiagon"
-msgstr "Hemidiagon"
-
-#: tpl/js-templates.php:280
-msgid "Penton"
-msgstr "Penton"
-
-#: tpl/js-templates.php:281
-msgid "Trion"
-msgstr "Trion"
-
-#: tpl/js-templates.php:282
-msgid "Quadriagon"
-msgstr "Quadrigon"
-
-#: tpl/js-templates.php:283
-msgid "Biauron"
-msgstr "Biauron"
-
-#: tpl/js-templates.php:284
-msgid "Bipenton"
-msgstr "Bipenton"
-
-#: tpl/js-templates.php:287
+#: tpl/js-templates.php:290
 msgid "Left to Right"
 msgstr "Links nach rechts"
 
-#: tpl/js-templates.php:288
+#: tpl/js-templates.php:291
 msgid "Right to Left"
 msgstr "Rechts nach links"
 
-#: tpl/js-templates.php:290
+#: tpl/js-templates.php:308
 msgid "Set"
 msgstr "Einstellen"
 
-#: tpl/js-templates.php:308
+#: tpl/js-templates.php:327
 msgid "Insert"
 msgstr "Einfügen"
 
-#: tpl/js-templates.php:310
+#: tpl/js-templates.php:329
 msgid "Save"
 msgstr "Speichern"
 
-#: tpl/js-templates.php:328
+#: tpl/js-templates.php:347
 msgid "Prebuilt Layouts"
 msgstr "Vorgefertigte Layouts"
 
-#: tpl/js-templates.php:332
+#: tpl/js-templates.php:351
 msgid "Search"
 msgstr "Suchen"
 
-#: tpl/js-templates.php:335
+#: tpl/js-templates.php:354
 msgid "Theme Defined"
 msgstr "Bestimmtes Theme"
 
-#: tpl/js-templates.php:336
+#: tpl/js-templates.php:355
 msgid "Import/Export"
 msgstr "Import/Export"
 
-#: tpl/js-templates.php:342
+#: tpl/js-templates.php:361
 msgid "Clone: %s"
 msgstr "Kopiere: %s"
 
-#: tpl/js-templates.php:363
+#: tpl/js-templates.php:382
 msgid "Drop import file here"
 msgstr "Ziehen Sie die Importdatei hierher"
 
-#: tpl/js-templates.php:364
+#: tpl/js-templates.php:383
 msgid "Or"
 msgstr "Oder"
 
-#: tpl/js-templates.php:367
+#: tpl/js-templates.php:386
 msgid "Select Import File"
 msgstr "Wählen Sie eine Importdatei"
 
-#: tpl/js-templates.php:379
+#: tpl/js-templates.php:398
 msgid "Download Layout"
 msgstr "Layout herunterladen"
 
-#: tpl/js-templates.php:400
+#: tpl/js-templates.php:419
 msgid "Page Builder Change History"
 msgstr "Page Builder Änderungsverlauf"
 
-#: tpl/js-templates.php:414
+#: tpl/js-templates.php:433
 msgid "Restore Version"
 msgstr "Version wiederherstellen"
 
-#: tpl/js-templates.php:439
+#: tpl/js-templates.php:458
 msgid "Close Live Editor"
 msgstr "Live Editor schließen"
 
@@ -914,9 +847,7 @@ msgstr "Weiterlesen Link "
 
 #: widgets/basic.php:377
 msgid "If the template supports it, cut posts and display the more link."
-msgstr ""
-"Wenn vom Template unterstützt, wird der Post abgeschnittem und ein "
-"Weiterlesen-Link angezeigt."
+msgstr "Wenn vom Template unterstützt, wird der Post abgeschnittem und ein Weiterlesen-Link angezeigt."
 
 #: widgets/basic.php:411 widgets/widgets.php:575
 msgid "Post Type"
@@ -1036,10 +967,8 @@ msgid "edit gallery"
 msgstr "Galerie bearbeiten"
 
 #: widgets/widgets.php:732
-msgid ""
-"Comma separated attachment IDs. Defaults to all current page's attachments."
-msgstr ""
-"Komma getrennte Anhangs-IDs. Standard für alle aktuellen Seiten-Anhänge."
+msgid "Comma separated attachment IDs. Defaults to all current page's attachments."
+msgstr "Komma getrennte Anhangs-IDs. Standard für alle aktuellen Seiten-Anhänge."
 
 #: widgets/widgets.php:736
 msgid "Image Size"
@@ -1282,21 +1211,12 @@ msgid "URL"
 msgstr "URL"
 
 #: siteorigin-panels.php:1254
-msgid ""
-"The widget 1{%1$s} is not available. Please try locate and install the "
-"missing plugin. Post on the 2{support forums} if you need help."
-msgstr ""
-"Das Widget 1{%1$s} ist nicht verfügbar. Bitte versuchen Sie das fehlende "
-"Plugin zu installieren. Schreiben Sie im 2{Support-Forum}, wenn Sie Hilfe "
-"benötigen."
+msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
+msgstr "Das Widget 1{%1$s} ist nicht verfügbar. Bitte versuchen Sie das fehlende Plugin zu installieren. Schreiben Sie im 2{Support-Forum}, wenn Sie Hilfe benötigen."
 
 #: tpl/js-templates.php:64
-msgid ""
-"Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our "
-"4{documentation} if you need help."
-msgstr ""
-"Fügen Sie ein 1{Widget}, 2{Zeile} oder ein 3{vorgefertigtes Layout} ein, um "
-"anzufangen. Lesen Sie die 4{Dokumentation}, wenn Sie Hilfe benötigen."
+msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
+msgstr "Fügen Sie ein 1{Widget}, 2{Zeile} oder ein 3{vorgefertigtes Layout} ein, um anzufangen. Lesen Sie die 4{Dokumentation}, wenn Sie Hilfe benötigen."
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
@@ -1312,26 +1232,19 @@ msgstr "Aktivieren Sie mehr Widgets in den 1{Widget-Paket-Einstellungen}. "
 
 #: inc/widgets.php:127
 msgid "Install the 1{Widgets Bundle} to get extra widgets."
-msgstr ""
-"Installieren Sie das 1{Widgets-Paket} um zusätzliche Widgets zu erhalten."
+msgstr "Installieren Sie das 1{Widgets-Paket} um zusätzliche Widgets zu erhalten."
 
 #: inc/widgets.php:140
 msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
-msgstr ""
-"Sie können die veralteten (PB) Widets in den 1{Page Builder Einstellungen} "
-"aktivieren."
+msgstr "Sie können die veralteten (PB) Widets in den 1{Page Builder Einstellungen} aktivieren."
 
 #: siteorigin-panels.php:1231
 msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
-msgstr ""
-"Sie müssen {%1$s} installieren, um das Widget 2{%2$s} verwenden zu können."
+msgstr "Sie müssen {%1$s} installieren, um das Widget 2{%2$s} verwenden zu können."
 
 #: settings/tpl/help.php:6
-msgid ""
-"Please read the 1{settings guide} of the Page Builder documentation for help."
-msgstr ""
-"Hilfe finden Sie in der 1{Einstellungs-Anleitung} der Page Builder "
-"Dokumentation."
+msgid "Please read the 1{settings guide} of the Page Builder documentation for help."
+msgstr "Hilfe finden Sie in der 1{Einstellungs-Anleitung} der Page Builder Dokumentation."
 
 #: tpl/admin-home-page.php:29
 msgid "Home page updated. 1{View page}."
@@ -1342,12 +1255,9 @@ msgid "Additional query arguments. See 1{query_posts}."
 msgstr "Zusätzliche Abfrage-Argumente. Siehe 1{query_posts}."
 
 #: tpl/help.php:18
-msgid ""
-"Read the 1{full documentation} on SiteOrigin. Ask a question on our "
-"2{support forum} if you need help and sign up to 3{our newsletter} to stay "
-"up to date with future developments."
-msgstr ""
-"Lesen Sie die 1{vollständige Dokumentation} auf SiteOrigin. Stellen Sie eine "
-"Frage in unserem 2{Support-Forum}, wenn Sie Hilfe benötigen und melden Sie "
-"sich für unseren Newsletter an, um über die zukünftige Entwicklung auf dem "
-"Laufenden zu bleiben."
+msgid "Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments."
+msgstr "Lesen Sie die 1{vollständige Dokumentation} auf SiteOrigin. Stellen Sie eine Frage in unserem 2{Support-Forum}, wenn Sie Hilfe benötigen und melden Sie sich für unseren Newsletter an, um über die zukünftige Entwicklung auf dem Laufenden zu bleiben."
+
+#: tpl/js-templates.php:302
+msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
+msgstr "1{Zeilen-Layout einstellen}: %1$s Spalten mit einem Verhältnis %2$s von %3$s"
