@@ -1106,13 +1106,17 @@ String.prototype.panelsProcessTemplate = function(){
          * @param weights
          */
         addRow: function( weights, options ){
-            options = _.extend({noAnimate : false}, options);
+            options = _.extend({
+                noAnimate : false
+            }, options);
             // Create the actual row
             var row = new panels.model.row( {
                 collection: this.rows
             } );
+
             row.setCells( weights );
             row.builder = this;
+
             this.rows.add(row, options);
 
             return row;
@@ -1637,18 +1641,36 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Get the model for the currently active cell
+         * Get the model for the currently selected cell
          */
-        getActiveCell: function(){
+        getActiveCell: function( options ){
+            console.log(options);
+            options = _.extend( {
+                createCell: true,
+                defaultPosition: 'first'
+            }, options );
+
             if( this.$('.so-cells .cell').length === 0 ) {
-                // Create a row with a single cell
-                this.model.addRow( [1], {noAnimate: true} );
+
+                if( options.createCell ) {
+                    // Create a row with a single cell
+                    this.model.addRow( [1], {noAnimate: true} );
+                }
+                else {
+                    return null;
+                }
+
             }
 
             var activeCell = this.$('.so-cells .cell.cell-selected');
 
             if(!activeCell.length) {
-                activeCell = this.$('.so-cells .cell').first();
+                if( options.defaultPosition === 'last' ){
+                    activeCell = this.$('.so-cells .cell').first();
+                }
+                else {
+                    activeCell = this.$('.so-cells .cell').last();
+                }
             }
 
             return activeCell.data('view').model;
@@ -3545,11 +3567,21 @@ String.prototype.panelsProcessTemplate = function(){
             this.model = new panels.model.row();
             this.updateModel();
 
+            var activeCell = this.builder.getActiveCell({
+                createCell: false,
+                defaultPosition: 'last'
+            });
+
+            var options = {};
+            if( activeCell !== null ) {
+                options.at = this.builder.model.rows.indexOf( activeCell.row ) + 1;
+            }
+
             // Set up the model and add it to the builder
             this.model.collection = this.builder.model.rows;
-            this.builder.model.rows.add( this.model );
+            this.builder.model.rows.add( this.model, options );
 
-            this.closeDialog( );
+            this.closeDialog();
 
             return false;
         },
