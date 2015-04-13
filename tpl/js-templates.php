@@ -127,9 +127,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-title-bar">
 			<h3 class="so-title">{{%= title %}}</h3>
-			<a class="so-previous so-nav" href="#"><span class="so-dialog-icon"></span></a>
-			<a class="so-next so-nav" href="#"><span class="so-dialog-icon"></span></a>
-			<a class="so-close" href="#"><span class="so-dialog-icon"></span></a>
+			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
+			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
+			<a class="so-close"><span class="so-dialog-icon"></span></a>
 		</div>
 
 		<div class="so-toolbar">

@@ -712,6 +712,7 @@
   }
 }
 .so-panels-dialog .so-title-bar a {
+  cursor: pointer;
   position: absolute;
   box-sizing: border-box;
   width: 50px;
