@@ -176,11 +176,11 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 				</div>
 
 				<div class="select-image">
-					<?php _e('Select Image') ?>
+					<?php _e('Select Image', 'siteorigin-panels') ?>
 				</div>
 				<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo intval($current) ?>" />
 			</div>
-			<a href="#" class="remove-image"><?php _e('Remove') ?></a>
+			<a href="#" class="remove-image"><?php _e('Remove', 'siteorigin-panels') ?></a>
 			<?php
 			break;
 

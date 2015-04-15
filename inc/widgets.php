@@ -115,7 +115,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 				array(
 					'<a href="' . admin_url('plugins.php?page=so-widgets-plugins') . '">$1</a>'
 				),
-				__('Enable more widgets in the 1{Widgets Bundle settings}.')
+				__('Enable more widgets in the 1{Widgets Bundle settings}.', 'siteorigin-panels')
 			)
 		);
 	}
@@ -124,7 +124,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 		$tabs['widgets_bundle']['message'] = preg_replace(
 			'/1\{ *(.*?) *\}/',
 			'<a href="' . siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __('SiteOrigin Widgets Bundle', 'siteorigin-panels') ) . '">$1</a>',
-			__('Install the 1{Widgets Bundle} to get extra widgets.')
+			__('Install the 1{Widgets Bundle} to get extra widgets.', 'siteorigin-panels')
 		);
 	}
 
@@ -137,7 +137,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 			array(
 				'<a href="' . admin_url('options-general.php?page=siteorigin_panels') . '">$1</a>'
 			),
-			__('You can enable the legacy (PB) widgets in the 1{Page Builder settings}.')
+			__('You can enable the legacy (PB) widgets in the 1{Page Builder settings}.', 'siteorigin-panels')
 		),
 		'filter' => array(
 			'groups' => array('panels')

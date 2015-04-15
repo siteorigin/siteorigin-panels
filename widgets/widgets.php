@@ -729,7 +729,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			<input type="text" class="widefat" value="<?php echo esc_attr($instance['ids']) ?>" name="<?php echo $this->get_field_name('ids') ?>" />
 		</p>
 		<p class="description">
-			<?php _e("Comma separated attachment IDs. Defaults to all current page's attachments.") ?>
+			<?php _e("Comma separated attachment IDs. Defaults to all current page's attachments.", 'siteorigin-panels') ?>
 		</p>
 
 		<p>
