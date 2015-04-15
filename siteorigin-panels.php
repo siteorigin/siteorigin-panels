@@ -1353,4 +1353,4 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
 // Include the live editor file if we're in live editor mode.
-if( filter_input( INPUT_GET, 'siteorigin_panels_live_editor', FILTER_VALIDATE_BOOLEAN ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
