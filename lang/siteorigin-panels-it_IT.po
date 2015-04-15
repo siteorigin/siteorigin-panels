@@ -345,9 +345,10 @@ msgstr "Widget"
 msgid "Widget Title HTML"
 msgstr "Titolo Widget HTML"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "HTML usato per i titoli del widget. {{titolo}} viene sostituito con il titolo del widget."
+msgstr "HTML usato per i titoli del widget. {{title}} viene sostituito con il titolo del widget."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
@@ -551,7 +552,7 @@ msgstr "Caricamento della configurazione pre-costituita"
 
 #: siteorigin-panels.php:336
 msgid "Would you like to copy this editor's existing content to Page Builder?"
-msgstr "Vorresti copiare il contenuto esistente di questo editor in Page Builder?"
+msgstr "Vorresti copiare il contenuto esistente in questo editor in Page Builder?"
 
 #: siteorigin-panels.php:337
 msgid "Would you like to clear your Page Builder content and revert to using the standard visual editor?"
@@ -639,7 +640,7 @@ msgstr "Storia"
 
 #: tpl/js-templates.php:34
 msgid "Live Editor"
-msgstr "Editor Live"
+msgstr "Live Editor"
 
 #: tpl/js-templates.php:39
 msgid "Switch to Editor"
@@ -711,7 +712,7 @@ msgstr "Salva"
 
 #: tpl/js-templates.php:347
 msgid "Prebuilt Layouts"
-msgstr "Configurazioni di pagina pre-costruite"
+msgstr "Configurazioni di pagina pre-costruita"
 
 #: tpl/js-templates.php:351
 msgid "Search"
@@ -756,7 +757,7 @@ msgstr "Ripristina versione"
 
 #: tpl/js-templates.php:458
 msgid "Close Live Editor"
-msgstr "Chiudi Editor Live"
+msgstr "Chiudi Live Editor"
 
 #: tpl/options.php:26
 msgid "Copy content from Page Builder into the standard content editor."
@@ -807,8 +808,9 @@ msgid "Post Content"
 msgstr "Pubblica Contenuto"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
-msgstr "Mostra alcune notifiche dalla notifica corrente."
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "Mostra contenuti dalla notifica corrente."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
 #: widgets/widgets.php:764
@@ -1038,7 +1040,7 @@ msgstr "Video Integrato (PM)"
 
 #: widgets/widgets.php:836
 msgid "Embeds a video."
-msgstr "Integre un video."
+msgstr "Integra un video."
 
 #: widgets/widgets.php:874
 msgid "Video"
@@ -1221,7 +1223,7 @@ msgstr "Il widget 1{%1$s} non è disponibile. Per favore prova a localizzare ed 
 
 #: tpl/js-templates.php:64
 msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
-msgstr "Aggiungi una 1{widget}, 2{riga} o 3{layout precostriuto} per iniziare. Leggi la nostra 4{documentazione} se hai bisogno di aiuto."
+msgstr "Aggiungi un 1{widget}, 2{riga} o 3{layout precostriuto} per iniziare. Leggi la nostra 4{documentazione} se hai bisogno di aiuto."
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
@@ -1265,4 +1267,4 @@ msgstr "Leggi 1{documentazione completa} su SiteOrigin. Fai una domanda su nostr
 
 #: tpl/js-templates.php:302
 msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
-msgstr "1{configura layout di riga}: %1$s colonne con un rapporto di %2$s scendendo da %3$s "
+msgstr "1{configura layout di riga}: %1$s colonne con un rapporto di %2$s andando da %3$s "

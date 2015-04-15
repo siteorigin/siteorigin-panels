@@ -342,9 +342,10 @@ msgstr "Виджеты"
 msgid "Widget Title HTML"
 msgstr "HTML-заголовок виджета"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "HTML используется для заголовков виджетов. {{заголовок}} заменяется заголовком виджета."
+msgstr "HTML используется для заголовков виджетов. {{title}} заменяется заголовком виджета."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
@@ -803,7 +804,8 @@ msgid "Post Content"
 msgstr "Разместить запись"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
+#, fuzzy
+msgid "Displays content from the current post."
 msgstr "Отображает определенный вид содержимого записи с текущей записи."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589

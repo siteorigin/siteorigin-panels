@@ -18,7 +18,7 @@ msgstr "Geen beschrijving"
 #. A prebuilt layout is essentially a complete visual layout that was pre created.
 #: inc/admin-actions.php:89
 msgid "Your theme doesn't have any prebuilt layouts."
-msgstr "Je thema heeft geen ingebouwde layouts"
+msgstr "Jouw theme heeft geen ingebouwde layouts."
 
 #: inc/admin-actions.php:90
 msgid "You can still clone existing pages though."
@@ -30,7 +30,7 @@ msgstr "Klonen"
 
 #: inc/admin-actions.php:141
 msgid "There are no %s with Page Builder content to clone."
-msgstr "Er zijn geen %s met Page Builder-inhoud te klonen"
+msgstr "Er zijn geen %s met Page Builder-inhoud te klonen."
 
 #: inc/default-styles.php:57
 msgid "Row Class"
@@ -84,7 +84,7 @@ msgstr "Padding"
 
 #: inc/default-styles.php:102
 msgid "Padding around the entire row."
-msgstr "Padding rondom de gehele rij"
+msgstr "Padding rondom de gehele rij."
 
 #: inc/default-styles.php:107
 msgid "Row Layout"
@@ -117,20 +117,20 @@ msgstr "Achtergrond afbeelding"
 
 #: inc/default-styles.php:132
 msgid "Background image of the row."
-msgstr "Achtergrond afbeelding van de rij"
+msgstr "Achtergrond afbeelding van de rij."
 
 #: inc/default-styles.php:137 inc/default-styles.php:204
 msgid "Background Image Display"
-msgstr "Achtergrond afbeelding display"
+msgstr "Toon achtergrond afbeelding"
 
 #. Betegelde afbeelding, klinkt dat niet een beetje gek?
 #: inc/default-styles.php:141 inc/default-styles.php:208
 msgid "Tiled Image"
-msgstr "Betegelde afbeelding"
+msgstr "Als tegels"
 
 #: inc/default-styles.php:142 inc/default-styles.php:209
 msgid "Cover"
-msgstr "Voorkant"
+msgstr "Geheel bedekt"
 
 #: inc/default-styles.php:143 inc/default-styles.php:210
 msgid "Centered, with original size"
@@ -138,7 +138,7 @@ msgstr "Gecentreerd, in de originele grootte"
 
 #: inc/default-styles.php:145 inc/default-styles.php:212
 msgid "How the background image is displayed."
-msgstr "Hoe de achtergrond afbeelding wordt afgebeeld"
+msgstr "Hoe de achtergrond afbeelding wordt afgebeeld."
 
 #: inc/default-styles.php:150 inc/default-styles.php:217
 msgid "Border Color"
@@ -146,7 +146,7 @@ msgstr "Rand kleur"
 
 #: inc/default-styles.php:153
 msgid "Border color of the row."
-msgstr "Rand kleur van de rij"
+msgstr "Rand kleur van de rij."
 
 #. Widget is commonly used in Dutch
 #: inc/default-styles.php:162
@@ -155,7 +155,7 @@ msgstr "Widget klasse"
 
 #: inc/default-styles.php:181
 msgid "Padding around the entire widget."
-msgstr "Padding rondom de volledige widget"
+msgstr "Padding rondom de volledige widget."
 
 #: inc/default-styles.php:191
 msgid "Background color of the widget."
@@ -163,7 +163,7 @@ msgstr "Achtergrondkleur van de widget"
 
 #: inc/default-styles.php:199
 msgid "Background image of the widget."
-msgstr "Achtergrondafbeelding van de widget"
+msgstr "Achtergrondafbeelding van de widget."
 
 #: inc/default-styles.php:220
 msgid "Border color of the widget."
@@ -221,7 +221,7 @@ msgstr "Selecteer afbeelding"
 
 #: inc/styles.php:183
 msgid "Remove"
-msgstr "Verwijder"
+msgstr "Verwijderen"
 
 #: inc/styles.php:197 settings/settings.php:313
 msgid "Enabled"
@@ -273,7 +273,7 @@ msgstr "SiteOrigin Post Carrousel"
 
 #: inc/widgets-bundle.php:56
 msgid "Display your posts as a carousel."
-msgstr "Posts als carrousel laten zien"
+msgstr "Berichten als carrousel laten zien"
 
 #: inc/widgets.php:17
 msgid "Visual Editor"
@@ -339,7 +339,7 @@ msgstr "Bericht types"
 
 #: settings/settings.php:194
 msgid "The post types to use Page Builder on."
-msgstr "Gebruik Page Builder op deze bericht types"
+msgstr "Gebruik Page Builder voor deze bericht types."
 
 #: settings/settings.php:200
 msgid "Widgets"
@@ -349,9 +349,10 @@ msgstr "Widgets"
 msgid "Widget Title HTML"
 msgstr "Widget Titel HTML"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "De HTML gebruikt voor widget titels. {{titel}} wordt vervangen door de widget titel"
+msgstr "De HTML gebruikt voor widget titels. {{title}} wordt vervangen door de widget titel."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
@@ -359,11 +360,11 @@ msgstr "gebundelde Legacy widgets"
 
 #: settings/settings.php:213
 msgid "Load legacy widgets from Page Builder 1."
-msgstr "Laadt Legacy widgets van Page Builder 1"
+msgstr "Laadt Legacy widgets van Page Builder 1."
 
 #: settings/settings.php:219
 msgid "Display recommend widgets in Page Builder add widget dialog."
-msgstr "Toon aanbevolen widgets in Page Builder \"voeg widget toe\" - dialoog"
+msgstr "Toon aanbevolen widgets in Page Builder \"voeg widget toe\" - dialoog."
 
 #: settings/settings.php:233 tpl/options.php:57
 msgid "Responsive Layout"
@@ -372,7 +373,7 @@ msgstr "Responsive Layout"
 #. Betekent collapse niet inklappen?
 #: settings/settings.php:234
 msgid "Collapse widgets, rows and columns on mobile devices."
-msgstr "Klap widgets, rijen en kolommen in op mobile aparaten"
+msgstr "Klap widgets, rijen en kolommen in op mobile aparaten."
 
 #: settings/settings.php:240 tpl/options.php:64
 msgid "Mobile Width"
@@ -380,7 +381,7 @@ msgstr "Mobiele breedte"
 
 #: settings/settings.php:241
 msgid "Device width, in pixels, to collapse into a mobile view ."
-msgstr "Apparaat breedte, in pixels, om te veranderen in een mobiel overzicht"
+msgstr "Apparaat breedte, in pixels, om te veranderen in een mobiel overzicht."
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
@@ -399,7 +400,7 @@ msgstr "Tussenruimte Rij"
 
 #: settings/settings.php:255
 msgid "Default spacing between columns in each row."
-msgstr "Vaste ruimte tussen kolommen in elke rij"
+msgstr "Vaste ruimte tussen kolommen in elke rij."
 
 #. In this context, the container is an HTML container or wrapper.
 #: settings/settings.php:261
@@ -408,7 +409,7 @@ msgstr "Volle breedte container"
 
 #: settings/settings.php:262
 msgid "The container used for the full width layout."
-msgstr "De container wordt gebruikt voor de volle breedte layout"
+msgstr "De container wordt gebruikt voor de volle breedte layout."
 
 #: settings/settings.php:269
 msgid "Content"
@@ -420,7 +421,7 @@ msgstr "Kopieer inhoud"
 
 #: settings/settings.php:276
 msgid "Copy content from Page Builder to post content."
-msgstr "Kopieer inhoud van Page Builder naar post inhoud"
+msgstr "Kopieer inhoud van Page Builder naar bericht inhoud."
 
 #: settings/tpl/settings.php:12
 msgid "Search Settings"
@@ -493,7 +494,7 @@ msgstr "Huidig"
 
 #: siteorigin-panels.php:299
 msgid "Original"
-msgstr "Originele"
+msgstr "Origineel"
 
 #: siteorigin-panels.php:300
 msgid "Version restored"
@@ -545,15 +546,15 @@ msgstr "Cel formaat gewijzigd"
 
 #: siteorigin-panels.php:330
 msgid "Prebuilt layout loaded"
-msgstr "Vooraf gebouwde layout geladen"
+msgstr "Voorafgebouwde layout geladen"
 
 #: siteorigin-panels.php:334
 msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
-msgstr "Weet je zeker dat je de huidige inhoud wilt overschrijven? Dit kan ongedaan gemaakt worden in de bouwhistorie"
+msgstr "Weet je zeker dat je de huidige inhoud wilt overschrijven? Dit kan ongedaan gemaakt worden in de bouwgeschiedenis."
 
 #: siteorigin-panels.php:335
 msgid "Loading prebuilt layout"
-msgstr "Laden Vooraf gebouwde layout"
+msgstr "Laden voorafgebouwde layout"
 
 #: siteorigin-panels.php:336
 msgid "Would you like to copy this editor's existing content to Page Builder?"
@@ -577,7 +578,7 @@ msgstr "Page Builder layouts"
 
 #: siteorigin-panels.php:349
 msgid "Error uploading or importing file."
-msgstr "Fout bij uploaden of importeren bestand"
+msgstr "Fout bij uploaden of importeren bestand."
 
 #: siteorigin-panels.php:395
 msgid "Untitled Widget"
@@ -589,7 +590,7 @@ msgstr "Wijzig homepage"
 
 #: siteorigin-panels.php:1237
 msgid "Save and reload this page to start using the widget after you've installed it."
-msgstr "Opslaan en pagina opnieuw laden om widget te gebruiken na installatie"
+msgstr "Opslaan en pagina opnieuw laden om widget te gebruiken na installatie."
 
 #: siteorigin-panels.php:1321
 msgid "Support Forum"
@@ -622,7 +623,7 @@ msgstr "Deze interface heeft Javascript nodig"
 #. English text incomplete filled "with" your own widgets
 #: tpl/help.php:2
 msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
-msgstr "Je kunt SiteOrigin Page Builder gebruiken om homepages en webpagina's te bouwen gevuld met je eigen widgets"
+msgstr "Je kunt SiteOrigin Page Builder gebruiken om homepages en webpagina's te bouwen gevuld met je eigen widgets."
 
 #. responsive "webdesign" is commonly used in Dutch
 #: tpl/help.php:3
@@ -643,7 +644,7 @@ msgstr "Voorafgebouwd"
 
 #: tpl/js-templates.php:29
 msgid "History"
-msgstr "Historie"
+msgstr "Geschiedenis"
 
 #: tpl/js-templates.php:34
 msgid "Live Editor"
@@ -671,7 +672,7 @@ msgstr "Aanpassen"
 
 #: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
 msgid "Duplicate"
-msgstr "Kopieren"
+msgstr "Kopiëren"
 
 #: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
 msgid "Delete"
@@ -699,11 +700,11 @@ msgstr "Nieuwe rij toevoegen"
 
 #: tpl/js-templates.php:290
 msgid "Left to Right"
-msgstr "Van links naar rechts"
+msgstr "links naar rechts"
 
 #: tpl/js-templates.php:291
 msgid "Right to Left"
-msgstr "Van rechts naar links"
+msgstr "rechts naar links"
 
 #: tpl/js-templates.php:308
 msgid "Set"
@@ -735,7 +736,7 @@ msgstr "Import/Export"
 
 #: tpl/js-templates.php:361
 msgid "Clone: %s"
-msgstr "Kloon: %s"
+msgstr "Kloon %s"
 
 #: tpl/js-templates.php:382
 msgid "Drop import file here"
@@ -755,7 +756,7 @@ msgstr "Download Layout"
 
 #: tpl/js-templates.php:419
 msgid "Page Builder Change History"
-msgstr "Page Builder wijzig historie"
+msgstr "Geschiedenis wijzigingen Page Builder"
 
 #: tpl/js-templates.php:433
 msgid "Restore Version"
@@ -767,7 +768,7 @@ msgstr "Sluit Live Editor"
 
 #: tpl/options.php:26
 msgid "Copy content from Page Builder into the standard content editor."
-msgstr "Kopieer inhoud van Page Builder in de standaard editor"
+msgstr "Kopieer inhoud van Page Builder in de standaard editor."
 
 #: tpl/options.php:32
 msgid "Animations"
@@ -775,7 +776,7 @@ msgstr "Animaties"
 
 #: tpl/options.php:33
 msgid "Disable animations for improved performance."
-msgstr "Zet animaties uit voor een verbeterde prestatie"
+msgstr "Zet animaties uit voor een verbeterde weergave."
 
 #: tpl/options.php:39
 msgid "Bundled Widgets"
@@ -783,7 +784,7 @@ msgstr "Gebundelde Widgets"
 
 #: tpl/options.php:40
 msgid "Include the bundled widgets."
-msgstr "Voeg de gebundelde widgets ook toe"
+msgstr "Voeg de gebundelde widgets ook toe."
 
 #: tpl/options.php:48
 msgid "Display"
@@ -814,8 +815,9 @@ msgid "Post Content"
 msgstr "Plaats inhoud"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
-msgstr "Toont een soort geplaatste inhoud van de huidige post"
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "Toont de inhoud van het geplaatste bericht."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
 #: widgets/widgets.php:764
@@ -830,7 +832,7 @@ msgstr "Titel"
 
 #: widgets/basic.php:132
 msgid "Featured Image"
-msgstr "hoofdingsafbeelding"
+msgstr "Uitgelichte afbeelding"
 
 #: widgets/basic.php:137
 msgid "Display Content"
@@ -844,9 +846,11 @@ msgstr "Plaats loop"
 msgid "Displays a post loop."
 msgstr "Toont een bericht loop"
 
+#. Loops wordt ook wel als lus vertaald.
+#. Loops could also be translated as 'lus'. I don't know what is most common in Dutch for this item.
 #: widgets/basic.php:349
 msgid "Your theme doesn't have any post loops."
-msgstr "Jouw theme heeft geen bericht loops"
+msgstr "Jouw theme heeft geen bericht loops."
 
 #. "Template" is commonly used in Dutch Translated it is "Sjabloon" but i will use "template" as it is accepted
 #: widgets/basic.php:359
@@ -982,7 +986,7 @@ msgstr "Galerij bewerken"
 
 #: widgets/widgets.php:732
 msgid "Comma separated attachment IDs. Defaults to all current page's attachments."
-msgstr "Komma gescheiden bijlage ID's. Gestandaardiseerd naar alle huidige pagina bijlages"
+msgstr "Komma gescheiden bijlage ID's. Gestandaardiseerd naar alle huidige pagina bijlages."
 
 #: widgets/widgets.php:736
 msgid "Image Size"
@@ -1032,7 +1036,7 @@ msgstr "Beeld"
 
 #: widgets/widgets.php:783
 msgid "Displays a simple image."
-msgstr "Toont een simpel beeld"
+msgstr "Toont een simpel beeld."
 
 #: widgets/widgets.php:816
 #: widgets/widgets/animated-image/animated-image.php:15
@@ -1061,7 +1065,7 @@ msgstr "Zelf gehoste video"
 
 #: widgets/widgets.php:892
 msgid "A self hosted video player."
-msgstr "Zelf gehoste videospeler"
+msgstr "Zelf gehoste videospeler."
 
 #: widgets/widgets.php:934
 msgid "Video URL"
@@ -1073,7 +1077,7 @@ msgstr "URL plaatser"
 
 #: widgets/widgets.php:940
 msgid "An image that displays before the video starts playing."
-msgstr "Een afbeelding die verschijnt voordat de video begint af te spelen"
+msgstr "Een afbeelding die verschijnt voordat de video begint af te spelen."
 
 #: widgets/widgets.php:945
 msgid "Auto Play Video"
@@ -1085,7 +1089,7 @@ msgstr "Geanimeerd beeld"
 
 #: widgets/widgets/animated-image/animated-image.php:8
 msgid "An image that animates in when it enters the screen."
-msgstr "Een afbeelding die beweegt als het op het scherm verschijnt"
+msgstr "Een afbeelding die beweegt als het op het scherm verschijnt."
 
 #: widgets/widgets/animated-image/animated-image.php:19
 msgid "Animation"
@@ -1180,7 +1184,7 @@ msgstr "Lijst (PB)"
 
 #: widgets/widgets/list/list.php:8 widgets/widgets/price-box/price-box.php:8
 msgid "Displays a bullet list of elements"
-msgstr "Toon een opsomming van gegevens"
+msgstr "Toont een opsomming van gegevens"
 
 #: widgets/widgets/list/list.php:20 widgets/widgets/price-box/price-box.php:32
 msgid "Start each new point with an asterisk (*)"
@@ -1236,11 +1240,11 @@ msgstr "Voeg een 1{widget}, 2{rij} or 3{voorafgebouwde layout} toe om te beginne
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
-msgstr "Een complete SiteOrigin Page Builder layout als een widget"
+msgstr "Een complete SiteOrigin Page Builder layout als een widget."
 
 #: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of points"
-msgstr "Toont een opsomming met punten"
+msgstr "Toont een puntsgewijze opsomming"
 
 #: inc/widgets.php:118
 msgid "Enable more widgets in the 1{Widgets Bundle settings}."
@@ -1248,7 +1252,7 @@ msgstr "Schakel meer widgets vrij in de 1{Widgets Bundel instellingen}."
 
 #: inc/widgets.php:127
 msgid "Install the 1{Widgets Bundle} to get extra widgets."
-msgstr "Installeer de 1{Widgets Bundel} om extra widgets te krijgen"
+msgstr "Installeer de 1{Widgets Bundel} om extra widgets te krijgen."
 
 #: inc/widgets.php:140
 msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
@@ -1256,7 +1260,7 @@ msgstr "Je kunt de Legacy (PB) widgets vrijschakelen in de 1{Page Builder instel
 
 #: siteorigin-panels.php:1231
 msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
-msgstr "Je moet 1{%1$s} installeren om widget 2{%2$s} te kunnen gebruiken"
+msgstr "Je moet 1{%1$s} installeren om widget 2{%2$s} te kunnen gebruiken."
 
 #: settings/tpl/help.php:6
 msgid "Please read the 1{settings guide} of the Page Builder documentation for help."

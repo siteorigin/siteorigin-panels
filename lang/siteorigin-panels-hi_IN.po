@@ -343,6 +343,7 @@ msgstr "विजेट्स"
 msgid "Widget Title HTML"
 msgstr "विजेट शीर्षक एचटीएमएल"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
 msgstr "विजेट शीर्षक के लिए उपयोग की गई एचटीएमएल। {{title}} को विजेट शीर्षक से बदल दिया जाता है।"
@@ -361,7 +362,7 @@ msgstr "पेज बिल्डर विजेट डायलॉग मे�
 
 #: settings/settings.php:233 tpl/options.php:57
 msgid "Responsive Layout"
-msgstr "प्रतिक्रियात्मक लेआउट"
+msgstr "रिस्पोंसिव लेआउट"
 
 #: settings/settings.php:234
 msgid "Collapse widgets, rows and columns on mobile devices."
@@ -373,7 +374,7 @@ msgstr "मोबाइल चौड़ाई"
 
 #: settings/settings.php:241
 msgid "Device width, in pixels, to collapse into a mobile view ."
-msgstr "मोबाइल व्यू में संक्षिप्त करने के लिए पिक्सेल में, उपकरण चौड़ाई।"
+msgstr "उपकरण चौड़ाई, पिक्सेल में, मोबाइल व्यू संक्षिप्त करने के लिए।"
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
@@ -413,11 +414,11 @@ msgstr "सामग्री कॉपी करें"
 
 #: settings/settings.php:276
 msgid "Copy content from Page Builder to post content."
-msgstr "पेज बिल्डर की सामग्री से पोस्ट की सामग्री के लिए कॉपी करें।"
+msgstr "पेज बिल्डर की सामग्री से पोस्ट की सामग्री में कॉपी करें।"
 
 #: settings/tpl/settings.php:12
 msgid "Search Settings"
-msgstr "खोज सेटिंग्स"
+msgstr "सेटिंग्स खोजें"
 
 #: settings/tpl/settings.php:29
 msgid "Settings Saved"
@@ -449,11 +450,11 @@ msgstr "पेज बिल्डर इस विजेट के बारे 
 
 #: siteorigin-panels.php:279
 msgid "%d seconds"
-msgstr "%d सेकंड्स"
+msgstr "%d सेकंड"
 
 #: siteorigin-panels.php:281
 msgid "%d minutes"
-msgstr "%d मिनट्स"
+msgstr "%d मिनट"
 
 #: siteorigin-panels.php:283
 msgid "%d hours"
@@ -617,7 +618,7 @@ msgstr "आप साइटऑरिजिन पेज बिल्डर क�
 
 #: tpl/help.php:3
 msgid "The page layouts are responsive and fully customizable."
-msgstr "पेज लेआउट प्रतिक्रियात्मक एवं पूरी तरह से अनुकूलन योग्य हैं।"
+msgstr "पेज लेआउट रिस्पोंसिव एवं पूरी तरह से अनुकूलन योग्य हैं।"
 
 #: tpl/js-templates.php:12
 msgid "Add Widget"
@@ -697,7 +698,7 @@ msgstr "दाएँ से बाएँ"
 
 #: tpl/js-templates.php:308
 msgid "Set"
-msgstr "सेट"
+msgstr "सेट करें"
 
 #: tpl/js-templates.php:327
 msgid "Insert"
@@ -805,8 +806,9 @@ msgstr "सामग्री पोस्ट करें"
 
 #. Displays some form of post content "form" the current post. [form=from]
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
-msgstr "वर्तमान पोस्ट में से पोस्ट की सामग्री का कुछ फॉर्म प्रदर्शित करता है।"
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "वर्तमान पोस्ट में से सामग्री को प्रदर्शित करता है।"
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
 #: widgets/widgets.php:764
@@ -1262,4 +1264,4 @@ msgstr "SiteOrigin पर 1{full documentation} पढ़ें। आपको 
 
 #: tpl/js-templates.php:302
 msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
-msgstr "1{Set row layout}: %3$s से जाते %2$s के अनुपात के साथ %1$s कॉलम"
+msgstr "1{Set row layout}: %3$s जाते %2$s के अनुपात के साथ %1$s कॉलम"

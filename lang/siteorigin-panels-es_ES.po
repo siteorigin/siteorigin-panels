@@ -137,7 +137,7 @@ msgstr "Centrado, con tamaño original"
 
 #: inc/default-styles.php:145 inc/default-styles.php:212
 msgid "How the background image is displayed."
-msgstr "Como la imagen de fondo es mostrada."
+msgstr "Como se muestra la imagen de fondo."
 
 #: inc/default-styles.php:150 inc/default-styles.php:217
 msgid "Border Color"
@@ -342,9 +342,10 @@ msgstr "Widgets"
 msgid "Widget Title HTML"
 msgstr "Código HTML del título del widget"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "El código HTML utilizado para títulos del widget. {{título}} se reemplaza con el título del widget."
+msgstr "El código HTML utilizado para títulos del widget. {{title}} se reemplaza con el título del widget."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
@@ -692,7 +693,7 @@ msgstr "De izquierda a derecha"
 
 #: tpl/js-templates.php:291
 msgid "Right to Left"
-msgstr "De derecha a izquierda"
+msgstr "de derecha a izquierda"
 
 #: tpl/js-templates.php:308
 msgid "Set"
@@ -803,7 +804,8 @@ msgid "Post Content"
 msgstr "Contenido del post"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
+#, fuzzy
+msgid "Displays content from the current post."
 msgstr "Muestra alguna forma del contenido del post de la forma de la publicación actual."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
@@ -1220,7 +1222,7 @@ msgstr "Agrega un 1{widget}, 2{fila} o 3{diseño predeterminado} para iniciar. L
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
-msgstr "Un diseño completo de Page Builder en SiteOrigin como un widget."
+msgstr "Diseño completo de Page Builder del SiteOrigin como un widget."
 
 #: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of points"
@@ -1260,4 +1262,4 @@ msgstr "Lea el 1{documento completo} en SiteOrigin. Haz una pregunta en nuestro 
 
 #: tpl/js-templates.php:302
 msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
-msgstr "1{Establecer diseño de la fila}: %1$s columnas con una proporción de %2$s que va de %3$s"
+msgstr "1{Establecer diseño de la fila}: %1$s columnas con relación a %2$s que van de %3$s"

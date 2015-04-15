@@ -342,6 +342,7 @@ msgstr "Widgets"
 msgid "Widget Title HTML"
 msgstr "Widget titel HTML"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
 msgstr "HTML som bliver brugt i widgets titler.  {{title}} bliver erstattet med widget titlen."
@@ -803,7 +804,8 @@ msgid "Post Content"
 msgstr "Indlæggets indhold"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
+#, fuzzy
+msgid "Displays content from the current post."
 msgstr "Vis noget af indlæggets indhold fra den aktuelle artikel."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589

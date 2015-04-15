@@ -129,7 +129,7 @@ msgstr "Gekacheltes Bild"
 
 #: inc/default-styles.php:142 inc/default-styles.php:209
 msgid "Cover"
-msgstr "Abdecken"
+msgstr "Ausfüllen"
 
 #: inc/default-styles.php:143 inc/default-styles.php:210
 msgid "Centered, with original size"
@@ -342,17 +342,18 @@ msgstr "Widgets"
 msgid "Widget Title HTML"
 msgstr "Widget-Titel HTML"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
-msgstr "HTML, das für die Widget-Titel verwendet wird. {{title}} wird mit dem Widget-Titel ersetzt."
+msgstr "HTML, welches für die Widget-Titel verwendet wird. {{title}} wird mit dem Widget-Titel ersetzt."
 
 #: settings/settings.php:212
 msgid "Legacy Bundled Widgets"
-msgstr "Veraltete Bundle-Widgets"
+msgstr "Veraltetes Widgets-Paket"
 
 #: settings/settings.php:213
 msgid "Load legacy widgets from Page Builder 1."
-msgstr "Laden Sie die veralteten Widgets aus Page Builder 1."
+msgstr "Lädt die veralteten Widgets aus Page Builder 1."
 
 #: settings/settings.php:219
 msgid "Display recommend widgets in Page Builder add widget dialog."
@@ -400,7 +401,7 @@ msgstr "Gesamtbreiten-Container"
 
 #: settings/settings.php:262
 msgid "The container used for the full width layout."
-msgstr "Container, der für das Layout mit gesamter Breite verwendet wird."
+msgstr "Container, der für das Layout mit gesamter Breite verwendet werden soll."
 
 #: settings/settings.php:269
 msgid "Content"
@@ -412,7 +413,7 @@ msgstr "Inhalt kopieren"
 
 #: settings/settings.php:276
 msgid "Copy content from Page Builder to post content."
-msgstr "Inhalte von Page Builder zu Post Inhalt kopieren."
+msgstr "Inhalte von Page Builder zu Post-Inhalt kopieren."
 
 #: settings/tpl/settings.php:12
 msgid "Search Settings"
@@ -540,7 +541,7 @@ msgstr "Vorgefertigtes Layout geladen"
 
 #: siteorigin-panels.php:334
 msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
-msgstr "Sind Sie sicher, dass Sie Ihren aktuellen Inhalt überschreiben möchten? Dies kann im Builder-Verlauf rückgängig gemacht werden."
+msgstr "Sind Sie sicher, dass Sie Ihren aktuellen Inhalt überschreiben möchten? Kann im Builder-Verlauf rückgängig gemacht werden."
 
 #: siteorigin-panels.php:335
 msgid "Loading prebuilt layout"
@@ -728,7 +729,7 @@ msgstr "Kopiere: %s"
 
 #: tpl/js-templates.php:382
 msgid "Drop import file here"
-msgstr "Ziehen Sie die Importdatei hierher"
+msgstr "Ziehen Sie eine Datei zum Importieren hierher"
 
 #: tpl/js-templates.php:383
 msgid "Or"
@@ -736,7 +737,7 @@ msgstr "Oder"
 
 #: tpl/js-templates.php:386
 msgid "Select Import File"
-msgstr "Wählen Sie eine Importdatei"
+msgstr "Wählen Sie eine Datei zum Import aus"
 
 #: tpl/js-templates.php:398
 msgid "Download Layout"
@@ -800,11 +801,12 @@ msgstr "Builder öffnen"
 
 #: widgets/basic.php:82
 msgid "Post Content"
-msgstr "Inhalt Posten"
+msgstr "Beitragsinhalt"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
-msgstr "Zeigt eine Art von Post Inhalt des aktuellen Posts an."
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "Zeigt den Inhalt des aktuellen Beitrags an."
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
 #: widgets/widgets.php:764
@@ -1081,7 +1083,7 @@ msgstr "Einblenden"
 
 #: widgets/widgets/animated-image/animated-image.php:22
 msgid "Slide Up"
-msgstr "Hoch schieben"
+msgstr "Nach oben schieben"
 
 #: widgets/widgets/animated-image/animated-image.php:23
 msgid "Slide Down"
@@ -1212,7 +1214,7 @@ msgstr "URL"
 
 #: siteorigin-panels.php:1254
 msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
-msgstr "Das Widget 1{%1$s} ist nicht verfügbar. Bitte versuchen Sie das fehlende Plugin zu installieren. Schreiben Sie im 2{Support-Forum}, wenn Sie Hilfe benötigen."
+msgstr "Das Widget 1{%1$s} ist nicht verfügbar. Bitte versuchen Sie das fehlende Plugin zu installieren. Besuchen Sie unser 2{Support-Forum}, wenn Sie Hilfe benötigen."
 
 #: tpl/js-templates.php:64
 msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
@@ -1220,7 +1222,7 @@ msgstr "Fügen Sie ein 1{Widget}, 2{Zeile} oder ein 3{vorgefertigtes Layout} ein
 
 #: widgets/basic.php:15
 msgid "A complete SiteOrigin Page Builder layout as a widget."
-msgstr "Ein komplettes SiteOrigin Page Builder Layout als Widget."
+msgstr "Ein komplettes SiteOrigin Page Builder-Layout als Widget."
 
 #: widgets/widgets/testimonial/testimonial.php:8
 msgid "Displays a bullet list of points"

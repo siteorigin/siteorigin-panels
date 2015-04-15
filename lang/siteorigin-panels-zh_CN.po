@@ -347,6 +347,7 @@ msgstr "小工具"
 msgid "Widget Title HTML"
 msgstr "小工具标题 HTML"
 
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
 #: settings/settings.php:207
 msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
 msgstr "用于小工具标题的 HTML。{{title}} 会取代小工具的标题。"
@@ -810,7 +811,8 @@ msgid "Post Content"
 msgstr "帖子内容"
 
 #: widgets/basic.php:84
-msgid "Displays some form of post content form the current post."
+#, fuzzy
+msgid "Displays content from the current post."
 msgstr "显示现有帖子的一些帖子内容格式。"
 
 #: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
