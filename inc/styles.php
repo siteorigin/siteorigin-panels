@@ -316,9 +316,22 @@ function siteorigin_panels_sanitize_style_fields($section, $styles){
 				break;
 			case 'measurement' :
 				$measurements = array_map('preg_quote', siteorigin_panels_style_get_measurements_list() );
-				preg_match('/([0-9\.,]+).*?(' . implode('|', $measurements) . ')/', $styles[$k], $match);
-				if( !empty($match[0]) && $match[0] != '' && !empty($match[2]) ) $return[$k] = $match[1] . $match[2];
-				else $return[$k] = '';
+				if (!empty($field['multiple'])) {
+					if (preg_match_all('/(?:([0-9\.,]+).*?(' . implode('|', $measurements) . ')+)/', $styles[$k], $match)) {
+						$return[$k] = $styles[$k];
+					}
+					else {
+						$return[$k] = '';
+					}
+				}
+				else {
+					if (preg_match('/([0-9\.,]+).*?(' . implode('|', $measurements) . ')/', $styles[$k], $match)) {
+						$return[$k] = $match[1] . $match[2];
+					}
+					else {
+						$return[$k] = '';
+					}
+				}
 				break;
 			case 'select' :
 				if( !empty( $styles[$k] ) && in_array( $styles[$k], array_keys( $field['options'] ) ) ) {
