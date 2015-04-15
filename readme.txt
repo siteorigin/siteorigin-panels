@@ -56,6 +56,12 @@ Page Builder is actively developed with new features and exciting enhancements a
 
 Read the [Page Builder developer docs](https://siteorigin.com/docs/page-builder/) if you'd like to develop for Page Builder.
 
+= Available in 17 Languages =
+
+Through the efforts of both professional translators and our community, Page Builder is available in the following languages:  Afrikaans, Bulgarian, Chinese (simplified), Danish, Dutch, English, Finnish, French, German, Hindi, Italian, Japanese, Polish, Portuguese (BR), Russian, Spanish and Swedish.
+
+Join our [translation project](https://poeditor.com/join/project?hash=82847115cc12f5d35ec3d066495dca1a) if you'd like to help improve our translations or add more languages.
+
 == Installation ==
 
 1. Upload and install Page Builder in the same way you'd install any other plugin.
