@@ -8,9 +8,10 @@ msgstr ""
 "Language: fr\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: Greg Priday <greg@siteorigin.com>\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 
+#. After checking and fix all the translations; what should i do?
 #: inc/admin-actions.php:80
 msgid "No description"
 msgstr "Pas de description"
@@ -55,7 +56,7 @@ msgstr "Styles CSS"
 
 #: inc/default-styles.php:76 inc/default-styles.php:173
 msgid "CSS Styles, given as one per row."
-msgstr "Styles CSS, remplir un style par ligne."
+msgstr "Styles CSS, remplir un style par rangée."
 
 #. The amount of spacing below a row. This comes from the concept of a text margin.
 #: inc/default-styles.php:83
@@ -88,7 +89,7 @@ msgstr "Rembourrage autour de la rangée."
 
 #: inc/default-styles.php:107
 msgid "Row Layout"
-msgstr "Mise en forme de la rangée."
+msgstr "Mise en ligne"
 
 #: inc/default-styles.php:111
 msgid "Standard"
@@ -101,7 +102,7 @@ msgstr "Pleine largeur"
 #. This means the row is displayed the full width of the page and the content is also stretched.
 #: inc/default-styles.php:113
 msgid "Full Width Stretched"
-msgstr "Pleine largeur  étiré"
+msgstr "La Largeur pleine a Étiré "
 
 #: inc/default-styles.php:121 inc/default-styles.php:188
 msgid "Background Color"
@@ -189,7 +190,7 @@ msgstr "Contenu de Page Builder"
 
 #: inc/styles.php:16
 msgid "Row Styles"
-msgstr "Styles de la rangée"
+msgstr "Styles de la ligne "
 
 #: inc/styles.php:20
 msgid "Widget Styles"
@@ -255,7 +256,7 @@ msgstr "Un widget de slider de base"
 
 #: inc/widgets-bundle.php:43
 msgid "SiteOrigin Features"
-msgstr "Caractéristiques SiteOrigin"
+msgstr "Caractéristiques de SiteOrigin"
 
 #: inc/widgets-bundle.php:44
 msgid "Display site features as a collection of icons."
@@ -365,7 +366,7 @@ msgstr "Disposition Responsive"
 
 #: settings/settings.php:234
 msgid "Collapse widgets, rows and columns on mobile devices."
-msgstr "Réduire widgets, rangées et  colonnes sur les appareils mobiles."
+msgstr "Réduire widgets, lignes et  colonnes sur les appareils mobiles."
 
 #: settings/settings.php:240 tpl/options.php:64
 msgid "Mobile Width"
@@ -377,7 +378,7 @@ msgstr "Largeur de l'ecran, en pixels, à laquelle reduire dans une vue Mobile."
 
 #: settings/settings.php:247 tpl/options.php:70
 msgid "Row Bottom Margin"
-msgstr "Marge sous la rangée"
+msgstr "Marge en bas de ligne"
 
 #: settings/settings.php:248
 msgid "Default margin below rows."
@@ -685,7 +686,7 @@ msgstr "Fermer"
 
 #: tpl/js-templates.php:254
 msgid "Add New Row"
-msgstr "Ajouter une nouvelle rangée"
+msgstr "Ajouter une nouvelle ligne"
 
 #: tpl/js-templates.php:290
 msgid "Left to Right"
@@ -919,7 +920,7 @@ msgstr "Ascendant"
 
 #: widgets/basic.php:452 widgets/widgets.php:614
 msgid "Sticky Posts"
-msgstr "Messages Post-it"
+msgstr "messages collantes"
 
 #: widgets/basic.php:454 widgets/widgets.php:616 widgets/widgets.php:738
 msgid "Default"
