@@ -99,7 +99,7 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 = 2.1.1 =
 * Added translations for 16 additional languages
-* Modified strings to improve translatibility.
+* Modified strings to improve translatability.
 * Row and Widget style measurement fields now allow multiple values.
 * New rows now added below row of currently selected cell.
 * Orphaned widgets in edited rows are now moved into remaining cell.
