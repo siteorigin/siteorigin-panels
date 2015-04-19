@@ -93,7 +93,8 @@
                 var frame = null;
                 var $s = $(this);
 
-                $s.find('.so-image-selector').click( function(){
+                $s.find('.so-image-selector').click( function( e ){
+                    e.preventDefault();
 
                     if( frame === null ) {
                         // Create the media frame.
@@ -135,7 +136,8 @@
                 } );
 
                 // Handle clicking on remove
-                $s.find('.remove-image').click(function(){
+                $s.find('.remove-image').click(function(e){
+                    e.preventDefault();
                     $s.find( '.current-image').css('background-image', 'none');
                     $s.find('input').val( '' );
                 });
