@@ -306,8 +306,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 
 		if(!empty($instance['origin_style'])) {
 			$filename = $this->origin_id.'-'.$style.'-'.$preset;
-			static $inlined_css = array();
-			if( !isset($inlined_css[$filename]) ) {
+			if( !isset($origin_widgets_generated_css[$filename]) ) {
 				$origin_widgets_generated_css[$filename] = origin_widgets_generate_css(get_class($this), $style, $preset);
 			}
 		}
