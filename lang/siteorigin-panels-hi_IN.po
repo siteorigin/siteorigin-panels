@@ -1,0 +1,1267 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.5\n"
+"Project-Id-Version: Page Builder\n"
+"Language: hi\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+
+#: inc/admin-actions.php:80
+msgid "No description"
+msgstr "कोई वर्णन नहीं"
+
+#. A prebuilt layout is essentially a complete visual layout that was pre created.
+#: inc/admin-actions.php:89
+msgid "Your theme doesn't have any prebuilt layouts."
+msgstr "आपकी थीम के कोई भी पूर्वनिर्मित लेआउट नहीं हैं।"
+
+#: inc/admin-actions.php:90
+msgid "You can still clone existing pages though."
+msgstr "हालाँकि आप अभी भी मौजूदा पेजों को क्लोन कर सकते हैं।"
+
+#: inc/admin-actions.php:123
+msgid "Clone"
+msgstr "क्लोन"
+
+#: inc/admin-actions.php:141
+msgid "There are no %s with Page Builder content to clone."
+msgstr "पेज बिल्डर सामग्री के साथ क्लोन के लिए वहां कोई %s नहीं हैं।"
+
+#: inc/default-styles.php:57
+msgid "Row Class"
+msgstr "पंक्ति क्लास"
+
+#. A CSS class is something to describe an HTML element.
+#: inc/default-styles.php:60 inc/default-styles.php:165
+msgid "A CSS class"
+msgstr "एक सीएसएस क्लास"
+
+#: inc/default-styles.php:65
+msgid "Cell Class"
+msgstr "सेल क्लास"
+
+#: inc/default-styles.php:68
+msgid "Class added to all cells in this row."
+msgstr "इस पंक्ति के सभी सेल के लिए क्लास जोड़ी गई।"
+
+#: inc/default-styles.php:73 inc/default-styles.php:170
+msgid "CSS Styles"
+msgstr "सीएसएस स्टाइल"
+
+#: inc/default-styles.php:76 inc/default-styles.php:173
+msgid "CSS Styles, given as one per row."
+msgstr "सीएसएस स्टाइल, प्रति पंक्ति एक के रूप में दिया गया।"
+
+#. The amount of spacing below a row. This comes from the concept of a text margin.
+#: inc/default-styles.php:83
+msgid "Bottom Margin"
+msgstr "बॉटम मार्जिन"
+
+#: inc/default-styles.php:86
+msgid "Space below the row."
+msgstr "पंक्ति के नीचे रिक्त स्थान।"
+
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
+#: inc/default-styles.php:91
+msgid "Gutter"
+msgstr "गटर"
+
+#: inc/default-styles.php:94
+msgid "Amount of space between columns."
+msgstr "कॉलमों के बीच रिक्त स्थान की मात्रा।"
+
+#. This is essentially the amount of padding, or amount of space around a widget or row.
+#: inc/default-styles.php:99 inc/default-styles.php:178
+msgid "Padding"
+msgstr "पैडिंग"
+
+#: inc/default-styles.php:102
+msgid "Padding around the entire row."
+msgstr "पूरी पंक्ति के चारों ओर पैडिंग।"
+
+#: inc/default-styles.php:107
+msgid "Row Layout"
+msgstr "पंक्ति लेआउट"
+
+#: inc/default-styles.php:111
+msgid "Standard"
+msgstr "स्टैंडर्ड"
+
+#: inc/default-styles.php:112
+msgid "Full Width"
+msgstr "पूर्ण चौड़ाई"
+
+#. This means the row is displayed the full width of the page and the content is also stretched.
+#: inc/default-styles.php:113
+msgid "Full Width Stretched"
+msgstr "पूर्ण चौड़ाई स्ट्रेच की हुई"
+
+#: inc/default-styles.php:121 inc/default-styles.php:188
+msgid "Background Color"
+msgstr "बैकग्राउंड कलर"
+
+#: inc/default-styles.php:124
+msgid "Background color of the row."
+msgstr "पंक्ति का बैकग्राउंड कलर।"
+
+#: inc/default-styles.php:129 inc/default-styles.php:196
+msgid "Background Image"
+msgstr "बैकग्राउंड तस्वीर"
+
+#: inc/default-styles.php:132
+msgid "Background image of the row."
+msgstr "पंक्ति की बैकग्राउंड तस्वीर।"
+
+#: inc/default-styles.php:137 inc/default-styles.php:204
+msgid "Background Image Display"
+msgstr "बैकग्राउंड तस्वीर डिस्प्ले"
+
+#: inc/default-styles.php:141 inc/default-styles.php:208
+msgid "Tiled Image"
+msgstr "टाइल की हुई तस्वीर"
+
+#: inc/default-styles.php:142 inc/default-styles.php:209
+msgid "Cover"
+msgstr "कवर"
+
+#: inc/default-styles.php:143 inc/default-styles.php:210
+msgid "Centered, with original size"
+msgstr "केंद्र में, मूल आकार के साथ"
+
+#: inc/default-styles.php:145 inc/default-styles.php:212
+msgid "How the background image is displayed."
+msgstr "बैकग्राउंड तस्वीर कैसे दिखाई देती है।"
+
+#: inc/default-styles.php:150 inc/default-styles.php:217
+msgid "Border Color"
+msgstr "बॉर्डर कलर"
+
+#: inc/default-styles.php:153
+msgid "Border color of the row."
+msgstr "पंक्ति का बॉर्डर कलर।"
+
+#: inc/default-styles.php:162
+msgid "Widget Class"
+msgstr "विजेट क्लास"
+
+#: inc/default-styles.php:181
+msgid "Padding around the entire widget."
+msgstr "पूरी विजेट के चारों ओर पैडिंग।"
+
+#: inc/default-styles.php:191
+msgid "Background color of the widget."
+msgstr "विजेट का बैकग्राउंड कलर।"
+
+#: inc/default-styles.php:199
+msgid "Background image of the widget."
+msgstr "विजेट की बैकग्राउंड तस्वीर।"
+
+#: inc/default-styles.php:220
+msgid "Border color of the widget."
+msgstr "विजेट का बॉर्डर कलर।"
+
+#: inc/default-styles.php:225
+msgid "Font Color"
+msgstr "फॉण्ट कलर"
+
+#: inc/default-styles.php:228
+msgid "Color of text inside this widget."
+msgstr "इस विजेट के अंदर टेक्स्ट का कलर।"
+
+#: inc/plugin-activation.php:7 inc/plugin-activation.php:8
+msgid "Install Page Builder Plugin"
+msgstr "पेज बिल्डर प्लगइन इंस्टाल करें"
+
+#: inc/plugin-activation.php:74
+msgid "Installing %s"
+msgstr "%s  इंस्टाल कर रहा है"
+
+#: inc/revisions.php:50
+msgid "Page Builder Content"
+msgstr "पेज बिल्डर सामग्री"
+
+#: inc/styles.php:16
+msgid "Row Styles"
+msgstr "पंक्ति स्टाइल"
+
+#: inc/styles.php:20
+msgid "Widget Styles"
+msgstr "विजेट स्टाइल"
+
+#: inc/styles.php:42
+msgid "Attributes"
+msgstr "एट्रिब्यूट्स"
+
+#: inc/styles.php:46 settings/settings.php:225
+msgid "Layout"
+msgstr "लेआउट"
+
+#: inc/styles.php:50
+msgid "Design"
+msgstr "डिजाईन"
+
+#: inc/styles.php:60
+msgid "Theme"
+msgstr "थीम"
+
+#: inc/styles.php:179
+msgid "Select Image"
+msgstr "तस्वीर चुनें"
+
+#: inc/styles.php:183
+msgid "Remove"
+msgstr "हटाएँ"
+
+#: inc/styles.php:197 settings/settings.php:313
+msgid "Enabled"
+msgstr "सक्षम"
+
+#. Do you need Company, brand names to be translated/transliterated or let them be in English?
+#: inc/widgets-bundle.php:7
+msgid "SiteOrigin Button"
+msgstr "SiteOrigin बटन"
+
+#: inc/widgets-bundle.php:8 widgets/widgets/button/button.php:8
+msgid "A simple button"
+msgstr "एक सरल बटन"
+
+#: inc/widgets-bundle.php:11 inc/widgets-bundle.php:23
+#: inc/widgets-bundle.php:35 inc/widgets-bundle.php:47
+#: inc/widgets-bundle.php:59 inc/widgets.php:126
+msgid "SiteOrigin Widgets Bundle"
+msgstr "SiteOrigin विजेट बंडल"
+
+#: inc/widgets-bundle.php:19
+msgid "SiteOrigin Image"
+msgstr "SiteOrigin तस्वीर"
+
+#: inc/widgets-bundle.php:20
+msgid "Choose images from your media library."
+msgstr "अपनी मीडिया लाइब्रेरी से तस्वीरें चुनें।"
+
+#: inc/widgets-bundle.php:31
+msgid "SiteOrigin Slider"
+msgstr "SiteOrigin स्लाइडर"
+
+#: inc/widgets-bundle.php:32
+msgid "A basic slider widget."
+msgstr "एक बेसिक स्लाइडर विजेट।"
+
+#: inc/widgets-bundle.php:43
+msgid "SiteOrigin Features"
+msgstr "SiteOrigin सुविधाएँ"
+
+#: inc/widgets-bundle.php:44
+msgid "Display site features as a collection of icons."
+msgstr "साइट सुविधाओं को आइकॉन के संग्रह की तरह दिखाएँ।"
+
+#: inc/widgets-bundle.php:55
+msgid "SiteOrigin Post Carousel"
+msgstr "SiteOrigin पोस्ट कैरौसेल"
+
+#: inc/widgets-bundle.php:56
+msgid "Display your posts as a carousel."
+msgstr "अपनी पोस्टों को कैरौसेल की तरह दिखाएँ।"
+
+#: inc/widgets.php:17
+msgid "Visual Editor"
+msgstr "विजुअल एडिटर"
+
+#: inc/widgets.php:18
+msgid "Arbitrary text or HTML with visual editor"
+msgstr "आरबिटरेरी टेक्स्ट या विजुअल एडिटर के साथ एचटीएमएल"
+
+#: inc/widgets.php:21
+msgid "Black Studio TinyMCE"
+msgstr "ब्लैक स्टूडियो टाइनीएमसीई"
+
+#: inc/widgets.php:102
+msgid "Widgets Bundle"
+msgstr "विजेट बंडल"
+
+#: inc/widgets.php:132
+msgid "Page Builder Widgets"
+msgstr "पेज बिल्डर विजेट्स"
+
+#: inc/widgets.php:148
+msgid "WordPress Widgets"
+msgstr "वर्डप्रेस विजेट्स"
+
+#: inc/widgets.php:158
+msgid "WooCommerce"
+msgstr "वूकॉमर्स"
+
+#: inc/widgets.php:169
+msgid "Jetpack"
+msgstr "जेटपैक"
+
+#: inc/widgets.php:180
+msgid "BBPress"
+msgstr "बीबीप्रेस"
+
+#: inc/widgets.php:188 settings/settings.php:218
+msgid "Recommended Widgets"
+msgstr "अनुशंसित विजेट्स"
+
+#: settings/settings.php:146 settings/tpl/settings.php:9 tpl/options.php:5
+msgid "SiteOrigin Page Builder"
+msgstr "SiteOrigin पेज बिल्डर"
+
+#: settings/settings.php:146 siteorigin-panels.php:108
+#: siteorigin-panels.php:467 tpl/js-templates.php:160
+msgid "Page Builder"
+msgstr "पेज बिल्डर"
+
+#: settings/settings.php:170
+msgid "Page Builder Settings"
+msgstr "पेज बिल्डर सेटिंग्स"
+
+#: settings/settings.php:186 tpl/options.php:11
+msgid "General"
+msgstr "जनरल"
+
+#: settings/settings.php:192 tpl/options.php:15
+msgid "Post Types"
+msgstr "पोस्ट की टाइप"
+
+#: settings/settings.php:194
+msgid "The post types to use Page Builder on."
+msgstr "पोस्ट की टाइप जिस में पेज बिल्डर को प्रयोग करना है।"
+
+#: settings/settings.php:200
+msgid "Widgets"
+msgstr "विजेट्स"
+
+#: settings/settings.php:206
+msgid "Widget Title HTML"
+msgstr "विजेट शीर्षक एचटीएमएल"
+
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
+#: settings/settings.php:207
+msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
+msgstr "विजेट शीर्षक के लिए उपयोग की गई एचटीएमएल। {{title}} को विजेट शीर्षक से बदल दिया जाता है।"
+
+#: settings/settings.php:212
+msgid "Legacy Bundled Widgets"
+msgstr "लिगेसी बंडल विजेट्स"
+
+#: settings/settings.php:213
+msgid "Load legacy widgets from Page Builder 1."
+msgstr "पेज बिल्डर 1 से लिगेसी विजेट्स लोड करें।"
+
+#: settings/settings.php:219
+msgid "Display recommend widgets in Page Builder add widget dialog."
+msgstr "पेज बिल्डर विजेट डायलॉग में विजेट्स अनुशंसा दिखाएँ"
+
+#: settings/settings.php:233 tpl/options.php:57
+msgid "Responsive Layout"
+msgstr "रिस्पोंसिव लेआउट"
+
+#: settings/settings.php:234
+msgid "Collapse widgets, rows and columns on mobile devices."
+msgstr "मोबाइल उपकरणों में विजेट्स, पंक्ति और कॉलम संक्षिप्त करें।"
+
+#: settings/settings.php:240 tpl/options.php:64
+msgid "Mobile Width"
+msgstr "मोबाइल चौड़ाई"
+
+#: settings/settings.php:241
+msgid "Device width, in pixels, to collapse into a mobile view ."
+msgstr "उपकरण चौड़ाई, पिक्सेल में, मोबाइल व्यू संक्षिप्त करने के लिए।"
+
+#: settings/settings.php:247 tpl/options.php:70
+msgid "Row Bottom Margin"
+msgstr "पंक्ति बॉटम मार्जिन"
+
+#: settings/settings.php:248
+msgid "Default margin below rows."
+msgstr "पंक्तियों के नीचे डिफ़ॉल्ट मार्जिन।"
+
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
+#: settings/settings.php:254
+msgid "Row Gutter"
+msgstr "पंक्ति गटर"
+
+#: settings/settings.php:255
+msgid "Default spacing between columns in each row."
+msgstr "प्रत्येक पंक्ति में कॉलम के बीच डिफ़ॉल्ट रिक्त स्थान।"
+
+#. In this context, the container is an HTML container or wrapper.
+#: settings/settings.php:261
+msgid "Full Width Container"
+msgstr "पूर्ण चौड़ाई कंटेनर"
+
+#: settings/settings.php:262
+msgid "The container used for the full width layout."
+msgstr "पूर्ण चौड़ाई लेआउट के लिए उपयोग किया गया कंटेनर।"
+
+#: settings/settings.php:269
+msgid "Content"
+msgstr "सामग्री"
+
+#: settings/settings.php:275 tpl/options.php:25
+msgid "Copy Content"
+msgstr "सामग्री कॉपी करें"
+
+#: settings/settings.php:276
+msgid "Copy content from Page Builder to post content."
+msgstr "पेज बिल्डर की सामग्री से पोस्ट की सामग्री में कॉपी करें।"
+
+#: settings/tpl/settings.php:12
+msgid "Search Settings"
+msgstr "सेटिंग्स खोजें"
+
+#: settings/tpl/settings.php:29
+msgid "Settings Saved"
+msgstr "सेटिंग्स सहेजी गई"
+
+#: settings/tpl/settings.php:78 tpl/options.php:93
+msgid "Save Settings"
+msgstr "सेटिंग्स सहेजें"
+
+#: siteorigin-panels.php:73
+msgid "Custom Home Page Builder"
+msgstr "कस्टम होम पेज बिल्डर"
+
+#: siteorigin-panels.php:74 siteorigin-panels.php:140
+msgid "Home Page"
+msgstr "होम पेज"
+
+#: siteorigin-panels.php:263
+msgid "All Widgets"
+msgstr "सभी विजेट्स"
+
+#: siteorigin-panels.php:274
+msgid "Missing Widget"
+msgstr "गुम विजेट"
+
+#: siteorigin-panels.php:275
+msgid "Page Builder doesn't know about this widget."
+msgstr "पेज बिल्डर इस विजेट के बारे में नहीं जानता।"
+
+#: siteorigin-panels.php:279
+msgid "%d seconds"
+msgstr "%d सेकंड"
+
+#: siteorigin-panels.php:281
+msgid "%d minutes"
+msgstr "%d मिनट"
+
+#: siteorigin-panels.php:283
+msgid "%d hours"
+msgstr "%d घंटे"
+
+#: siteorigin-panels.php:286
+msgid "%d second"
+msgstr "%d सेकंड"
+
+#: siteorigin-panels.php:288
+msgid "%d minute"
+msgstr "%d मिनट"
+
+#: siteorigin-panels.php:290
+msgid "%d hour"
+msgstr "%d घंटा"
+
+#: siteorigin-panels.php:293
+msgid "%s before"
+msgstr "%s पहले"
+
+#: siteorigin-panels.php:294
+msgid "Now"
+msgstr "अभी"
+
+#: siteorigin-panels.php:298
+msgid "Current"
+msgstr "वर्तमान"
+
+#: siteorigin-panels.php:299
+msgid "Original"
+msgstr "मूल"
+
+#: siteorigin-panels.php:300
+msgid "Version restored"
+msgstr "संस्करण रिस्टोर किया गया"
+
+#: siteorigin-panels.php:304
+msgid "Widget deleted"
+msgstr "विजेट मिटाया गया"
+
+#: siteorigin-panels.php:306
+msgid "Widget added"
+msgstr "विजेट जोड़ा गया"
+
+#: siteorigin-panels.php:308
+msgid "Widget edited"
+msgstr "विजेट सम्पादित"
+
+#: siteorigin-panels.php:310
+msgid "Widget duplicated"
+msgstr "विजेट डुप्लीकेट किया"
+
+#: siteorigin-panels.php:312
+msgid "Widget moved"
+msgstr "विजेट ले जाया गया"
+
+#: siteorigin-panels.php:316
+msgid "Row deleted"
+msgstr "पंक्ति मिटाई गई"
+
+#: siteorigin-panels.php:318
+msgid "Row added"
+msgstr "पंक्ति जोड़ी गई"
+
+#: siteorigin-panels.php:320
+msgid "Row edited"
+msgstr "पंक्ति संपादित"
+
+#: siteorigin-panels.php:322
+msgid "Row moved"
+msgstr "पंक्ति ले जाई गई"
+
+#: siteorigin-panels.php:324
+msgid "Row duplicated"
+msgstr "पंक्ति डुप्लीकेट की गई"
+
+#: siteorigin-panels.php:327
+msgid "Cell resized"
+msgstr "सेल रिसाइज़"
+
+#: siteorigin-panels.php:330
+msgid "Prebuilt layout loaded"
+msgstr "पूर्वनिर्मित लेआउट लोड किया गया"
+
+#: siteorigin-panels.php:334
+msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
+msgstr "आप अपनी वर्तमान सामग्री के उपर लिखने के लिए सुनिश्चित हैं? इसे बिल्डर इतिहास में पूर्ववत किया जा सकता है।"
+
+#: siteorigin-panels.php:335
+msgid "Loading prebuilt layout"
+msgstr "पूर्वनिर्मित लेआउट को लोड कर रहा है"
+
+#: siteorigin-panels.php:336
+msgid "Would you like to copy this editor's existing content to Page Builder?"
+msgstr "आप इस एडीटर की वर्तमान सामग्री को पेज बिल्डर में कॉपी करना चाहेंगे?"
+
+#: siteorigin-panels.php:337
+msgid "Would you like to clear your Page Builder content and revert to using the standard visual editor?"
+msgstr "आप अपने पेज बिल्डर की सामग्री को हटा कर स्टैंडर्ड विजुअल एडिटर का उपयोग करने के लिए वापस जाना चाहेंगे?"
+
+#: siteorigin-panels.php:339
+msgid "Layout Builder Widget"
+msgstr "लेआउट बिल्डर विजेट"
+
+#: siteorigin-panels.php:341 tpl/js-templates.php:85
+msgid "Are you sure?"
+msgstr "आप सुनिश्चित हैं?"
+
+#: siteorigin-panels.php:348
+msgid "Page Builder layouts"
+msgstr "पेज बिल्डर लेआउट"
+
+#: siteorigin-panels.php:349
+msgid "Error uploading or importing file."
+msgstr "फाइल को अपलोड या इम्पोर्ट करने में त्रुटि।"
+
+#: siteorigin-panels.php:395
+msgid "Untitled Widget"
+msgstr "शीर्षक रहित विजेट"
+
+#: siteorigin-panels.php:1140
+msgid "Edit Home Page"
+msgstr "होम पेज एडिट करें"
+
+#: siteorigin-panels.php:1237
+msgid "Save and reload this page to start using the widget after you've installed it."
+msgstr "विजेट का उपयोग शुरू करने के लिए इसे इंस्टाल करने के बाद इस पेज को सहेजें और रीलोड करें।"
+
+#: siteorigin-panels.php:1321
+msgid "Support Forum"
+msgstr "समर्थन फोरम"
+
+#: siteorigin-panels.php:1322
+msgid "Newsletter"
+msgstr "समाचारपत्र"
+
+#: tpl/admin-home-page.php:9
+msgid "On"
+msgstr "शुरू"
+
+#: tpl/admin-home-page.php:9
+msgid "Off"
+msgstr "बंद"
+
+#: tpl/admin-home-page.php:13
+msgid "Custom Home Page"
+msgstr "कस्टम होम पेज"
+
+#: tpl/admin-home-page.php:45
+msgid "Save Home Page"
+msgstr "होम पेज सहेजें"
+
+#: tpl/admin-home-page.php:49
+msgid "This interface requires Javascript"
+msgstr "इस इंटरफेस के लिए जावास्क्रिप्ट जरूरी है"
+
+#: tpl/help.php:2
+msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
+msgstr "आप साइटऑरिजिन पेज बिल्डर को होम तथा सबपेज बनाने तथा आपकी अपनी विजेट्स भरने के लिए उपयोग कर सकते हैं।"
+
+#: tpl/help.php:3
+msgid "The page layouts are responsive and fully customizable."
+msgstr "पेज लेआउट रिस्पोंसिव एवं पूरी तरह से अनुकूलन योग्य हैं।"
+
+#: tpl/js-templates.php:12
+msgid "Add Widget"
+msgstr "विजेट जोड़ें"
+
+#: tpl/js-templates.php:17
+msgid "Add Row"
+msgstr "पंक्ति जोड़ें"
+
+#: tpl/js-templates.php:22
+msgid "Prebuilt"
+msgstr "पूर्वनिर्मित"
+
+#: tpl/js-templates.php:29
+msgid "History"
+msgstr "इतिहास"
+
+#: tpl/js-templates.php:34
+msgid "Live Editor"
+msgstr "लाइव एडिटर"
+
+#: tpl/js-templates.php:39
+msgid "Switch to Editor"
+msgstr "एडिटर में बदलें"
+
+#: tpl/js-templates.php:83 tpl/js-templates.php:256
+msgid "Edit Row"
+msgstr "पंक्ति एडिट करें"
+
+#: tpl/js-templates.php:84
+msgid "Duplicate Row"
+msgstr "डुप्लीकेट पंक्ति"
+
+#: tpl/js-templates.php:85
+msgid "Delete Row"
+msgstr "पंक्ति डिलीट करें"
+
+#: tpl/js-templates.php:113
+msgid "Edit"
+msgstr "एडिट"
+
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
+msgid "Duplicate"
+msgstr "डुप्लीकेट"
+
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
+msgid "Delete"
+msgstr "डिलीट"
+
+#: tpl/js-templates.php:169 tpl/js-templates.php:234
+msgid "Done"
+msgstr "पूरा"
+
+#: tpl/js-templates.php:183
+msgid "Add New Widget %s"
+msgstr "नयी विजेट %s जोड़ें"
+
+#: tpl/js-templates.php:187
+msgid "Search Widgets"
+msgstr "विजेट्स खोजें"
+
+#: tpl/js-templates.php:199
+msgid "Close"
+msgstr "बंद"
+
+#: tpl/js-templates.php:254
+msgid "Add New Row"
+msgstr "नयी पंक्ति जोड़ें"
+
+#: tpl/js-templates.php:290
+msgid "Left to Right"
+msgstr "बाएँ से दाएँ"
+
+#: tpl/js-templates.php:291
+msgid "Right to Left"
+msgstr "दाएँ से बाएँ"
+
+#: tpl/js-templates.php:308
+msgid "Set"
+msgstr "सेट करें"
+
+#: tpl/js-templates.php:327
+msgid "Insert"
+msgstr "डालें"
+
+#: tpl/js-templates.php:329
+msgid "Save"
+msgstr "सहेजें"
+
+#: tpl/js-templates.php:347
+msgid "Prebuilt Layouts"
+msgstr "पूर्वनिर्मित लेआउट्स"
+
+#: tpl/js-templates.php:351
+msgid "Search"
+msgstr "खोजें"
+
+#: tpl/js-templates.php:354
+msgid "Theme Defined"
+msgstr "थीम निर्धारित"
+
+#: tpl/js-templates.php:355
+msgid "Import/Export"
+msgstr "इम्पोर्ट/एक्सपोर्ट"
+
+#: tpl/js-templates.php:361
+msgid "Clone: %s"
+msgstr "क्लोन: %s"
+
+#: tpl/js-templates.php:382
+msgid "Drop import file here"
+msgstr "इम्पोर्ट फाइल यहाँ ड्राप करें"
+
+#: tpl/js-templates.php:383
+msgid "Or"
+msgstr "या"
+
+#: tpl/js-templates.php:386
+msgid "Select Import File"
+msgstr "इम्पोर्ट फाइल चुनें"
+
+#: tpl/js-templates.php:398
+msgid "Download Layout"
+msgstr "लेआउट डाउनलोड करें"
+
+#: tpl/js-templates.php:419
+msgid "Page Builder Change History"
+msgstr "पेज बिल्डर बदलाव इतिहास"
+
+#: tpl/js-templates.php:433
+msgid "Restore Version"
+msgstr "संस्करण रिस्टोर करें"
+
+#: tpl/js-templates.php:458
+msgid "Close Live Editor"
+msgstr "लाइव एडिटर बंद करें"
+
+#: tpl/options.php:26
+msgid "Copy content from Page Builder into the standard content editor."
+msgstr "पेज बिल्डर से सामग्री को स्टैंडर्ड सामग्री एडिटर में कॉपी करें।"
+
+#: tpl/options.php:32
+msgid "Animations"
+msgstr "एनीमेशन"
+
+#: tpl/options.php:33
+msgid "Disable animations for improved performance."
+msgstr "बेहतर प्रदर्शन के लिए एनीमेशन अक्षम करें।"
+
+#: tpl/options.php:39
+msgid "Bundled Widgets"
+msgstr "बंडल की गई विजेट्स"
+
+#: tpl/options.php:40
+msgid "Include the bundled widgets."
+msgstr "बंडल की गई विजेट्स शामिल करें।"
+
+#: tpl/options.php:48
+msgid "Display"
+msgstr "डिस्प्ले"
+
+#: tpl/options.php:58
+msgid "Should the layout collapse for mobile devices."
+msgstr "मोबाइल उपकरणों के लिए लेआउट को संकुचित होना चाहिए।"
+
+#: tpl/options.php:76
+msgid "Cell Side Margins"
+msgstr "सेल साइड मार्जिन"
+
+#: tpl/options.php:82
+msgid "Inline CSS"
+msgstr "इनलाइन सीएसएस"
+
+#: widgets/basic.php:13
+msgid "Layout Builder"
+msgstr "लेआउट बिल्डर"
+
+#: widgets/basic.php:53
+msgid "Open Builder"
+msgstr "बिल्डर खोलें"
+
+#: widgets/basic.php:82
+msgid "Post Content"
+msgstr "सामग्री पोस्ट करें"
+
+#. Displays some form of post content "form" the current post. [form=from]
+#: widgets/basic.php:84
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "वर्तमान पोस्ट में से सामग्री को प्रदर्शित करता है।"
+
+#: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
+#: widgets/widgets.php:764
+msgid "None"
+msgstr "कोई नहीं"
+
+#: widgets/basic.php:131 widgets/basic.php:355
+#: widgets/widgets/call-to-action/call-to-action.php:15
+#: widgets/widgets/list/list.php:15 widgets/widgets/price-box/price-box.php:15
+msgid "Title"
+msgstr "शीर्षक"
+
+#: widgets/basic.php:132
+msgid "Featured Image"
+msgstr "प्रदर्शित तस्वीर"
+
+#: widgets/basic.php:137
+msgid "Display Content"
+msgstr "सामग्री दिखाएँ"
+
+#: widgets/basic.php:157
+msgid "Post Loop"
+msgstr "पोस्ट लूप"
+
+#: widgets/basic.php:159
+msgid "Displays a post loop."
+msgstr "एक पोस्ट लूप प्रदर्शित करता है।"
+
+#: widgets/basic.php:349
+msgid "Your theme doesn't have any post loops."
+msgstr "आपकी थीम में कोई भी पोस्ट लूप नहीं हैं।"
+
+#: widgets/basic.php:359
+msgid "Template"
+msgstr "टेम्पलेट"
+
+#: widgets/basic.php:375
+msgid "More Link "
+msgstr "ज्यादा लिंक"
+
+#: widgets/basic.php:377
+msgid "If the template supports it, cut posts and display the more link."
+msgstr "अगर टेम्पलेट इसे समर्थन दे, पोस्ट काटें और ज्यादा लिंक दिखाएँ।"
+
+#: widgets/basic.php:411 widgets/widgets.php:575
+msgid "Post Type"
+msgstr "पोस्ट प्रकार"
+
+#: widgets/basic.php:420 widgets/widgets.php:582
+msgid "Posts Per Page"
+msgstr "प्रति पेज पोस्टें"
+
+#: widgets/basic.php:425 widgets/widgets.php:587
+msgid "Order By"
+msgstr "द्वारा क्रमित"
+
+#: widgets/basic.php:428 widgets/widgets.php:590
+msgid "Post ID"
+msgstr "पोस्ट आईडी"
+
+#: widgets/basic.php:429 widgets/widgets.php:591
+msgid "Author"
+msgstr "लेखक"
+
+#: widgets/basic.php:430 widgets/basic.php:431 widgets/widgets.php:592
+#: widgets/widgets.php:593 widgets/widgets/testimonial/testimonial.php:15
+msgid "Name"
+msgstr "नाम"
+
+#: widgets/basic.php:432 widgets/widgets.php:594
+msgid "Date"
+msgstr "तिथि"
+
+#: widgets/basic.php:433 widgets/widgets.php:595
+msgid "Modified"
+msgstr "संशोधित"
+
+#: widgets/basic.php:434 widgets/widgets.php:596
+msgid "Parent"
+msgstr "पैरेंट"
+
+#: widgets/basic.php:435 widgets/widgets.php:597
+msgid "Random"
+msgstr "रैंडम"
+
+#: widgets/basic.php:436 widgets/widgets.php:598
+msgid "Comment Count"
+msgstr "टिप्पणी संख्या"
+
+#: widgets/basic.php:437 widgets/basic.php:438 widgets/widgets.php:599
+msgid "Menu Order"
+msgstr "मेनू क्रम"
+
+#: widgets/basic.php:439
+msgid "Post In Order"
+msgstr "पोस्ट इन क्रम"
+
+#: widgets/basic.php:444 widgets/widgets.php:605
+msgid "Order"
+msgstr "क्रम"
+
+#: widgets/basic.php:446 widgets/widgets.php:608
+msgid "Descending"
+msgstr "अवरोही"
+
+#: widgets/basic.php:447 widgets/widgets.php:607
+msgid "Ascending"
+msgstr "आरोही"
+
+#: widgets/basic.php:452 widgets/widgets.php:614
+msgid "Sticky Posts"
+msgstr "स्टिकी पोस्टें"
+
+#: widgets/basic.php:454 widgets/widgets.php:616 widgets/widgets.php:738
+msgid "Default"
+msgstr "डिफ़ॉल्ट"
+
+#: widgets/basic.php:455 widgets/widgets.php:617
+msgid "Ignore Sticky"
+msgstr "स्टिकी नकारें"
+
+#: widgets/basic.php:456 widgets/widgets.php:618
+msgid "Exclude Sticky"
+msgstr "स्टिकी निकालें"
+
+#: widgets/basic.php:457 widgets/widgets.php:619
+msgid "Only Sticky"
+msgstr "केवल स्टिकी"
+
+#: widgets/basic.php:462
+msgid "Additional "
+msgstr "अतिरिक्त"
+
+#: widgets/widgets.php:204
+msgid "Style"
+msgstr "स्टाइल"
+
+#: widgets/widgets.php:228
+msgid "%s Style"
+msgstr "%s स्टाइल"
+
+#: widgets/widgets.php:625
+msgid "Additional Arguments"
+msgstr "अतिरिक्त तर्क"
+
+#: widgets/widgets.php:686
+msgid "Gallery (PB)"
+msgstr "गैलरी (पीबी)"
+
+#: widgets/widgets.php:688
+msgid "Displays a gallery."
+msgstr "एक गैलरी दिखाता है।"
+
+#: widgets/widgets.php:727
+msgid "Gallery Images"
+msgstr "गैलरी तस्वीरें"
+
+#: widgets/widgets.php:728
+msgid "edit gallery"
+msgstr "गैलरी एडिट करें"
+
+#: widgets/widgets.php:732
+msgid "Comma separated attachment IDs. Defaults to all current page's attachments."
+msgstr "कॉमा से अलग की गई अटैचमेंट आईडी। सभी मौजूदा पेज की अटैचमेंट के लिए डिफ़ॉल्ट।"
+
+#: widgets/widgets.php:736
+msgid "Image Size"
+msgstr "छवि आकार"
+
+#: widgets/widgets.php:739
+msgid "Large"
+msgstr "बड़ा"
+
+#: widgets/widgets.php:740
+msgid "Medium"
+msgstr "मध्यम"
+
+#: widgets/widgets.php:741
+msgid "Thumbnail"
+msgstr "थंबनेल"
+
+#: widgets/widgets.php:742
+msgid "Full"
+msgstr "पूरा"
+
+#: widgets/widgets.php:750
+msgid "Gallery Type"
+msgstr "गैलरी प्रकार"
+
+#: widgets/widgets.php:755
+msgid "Columns"
+msgstr "कॉलम"
+
+#: widgets/widgets.php:760
+msgid "Link To"
+msgstr "से लिंक"
+
+#: widgets/widgets.php:762
+msgid "Attachment Page"
+msgstr "अटैचमेंट पेज"
+
+#: widgets/widgets.php:763
+msgid "File"
+msgstr "फाइल"
+
+#: widgets/widgets.php:781
+msgid "Image (PB)"
+msgstr "छवि (पीबी)"
+
+#: widgets/widgets.php:783
+msgid "Displays a simple image."
+msgstr "एक सरल छवि दिखाता है।"
+
+#: widgets/widgets.php:816
+#: widgets/widgets/animated-image/animated-image.php:15
+msgid "Image URL"
+msgstr "छवि यूआरएल"
+
+#: widgets/widgets.php:820 widgets/widgets/button/button.php:19
+msgid "Destination URL"
+msgstr "गंतव्य यूआरएल"
+
+#: widgets/widgets.php:834
+msgid "Embedded Video (PB)"
+msgstr "एम्बेड की गई वीडियो (पीबी)"
+
+#: widgets/widgets.php:836
+msgid "Embeds a video."
+msgstr "एक वीडियो एम्बेड करता है।"
+
+#: widgets/widgets.php:874
+msgid "Video"
+msgstr "वीडियो"
+
+#: widgets/widgets.php:890
+msgid "Self Hosted Video (PB)"
+msgstr "स्वतः होस्ट किये वीडियो (पीबी)"
+
+#: widgets/widgets.php:892
+msgid "A self hosted video player."
+msgstr "स्वतः होस्ट किये वीडियो प्लेयर।"
+
+#: widgets/widgets.php:934
+msgid "Video URL"
+msgstr "वीडियो यूआरएल"
+
+#: widgets/widgets.php:938
+msgid "Poster URL"
+msgstr "पोस्टर यूआरएल"
+
+#: widgets/widgets.php:940
+msgid "An image that displays before the video starts playing."
+msgstr "एक छवि जो वीडियो चलना शुरू होने से पहले दिखती है।"
+
+#: widgets/widgets.php:945
+msgid "Auto Play Video"
+msgstr "वीडियो स्वतः चलाएँ"
+
+#: widgets/widgets/animated-image/animated-image.php:6
+msgid "Animated Image (PB)"
+msgstr "एनीमेशन छवि (पीबी)"
+
+#: widgets/widgets/animated-image/animated-image.php:8
+msgid "An image that animates in when it enters the screen."
+msgstr "एक छवि जो स्क्रीन पर प्रवेश के समय एनिमेट होती है।"
+
+#: widgets/widgets/animated-image/animated-image.php:19
+msgid "Animation"
+msgstr "एनीमेशन"
+
+#: widgets/widgets/animated-image/animated-image.php:21
+msgid "Fade In"
+msgstr "फेड इन"
+
+#: widgets/widgets/animated-image/animated-image.php:22
+msgid "Slide Up"
+msgstr "उपर स्लाइड"
+
+#: widgets/widgets/animated-image/animated-image.php:23
+msgid "Slide Down"
+msgstr "नीचे स्लाइड"
+
+#: widgets/widgets/animated-image/animated-image.php:24
+msgid "Slide Left"
+msgstr "बाएँ स्लाइड"
+
+#: widgets/widgets/animated-image/animated-image.php:25
+msgid "Slide Right"
+msgstr "दाएँ स्लाइड"
+
+#: widgets/widgets/button/button.php:6
+msgid "Button (PB)"
+msgstr "बटन (पीबी)"
+
+#: widgets/widgets/button/button.php:15 widgets/widgets/list/list.php:19
+#: widgets/widgets/testimonial/testimonial.php:27
+msgid "Text"
+msgstr "टेक्स्ट"
+
+#: widgets/widgets/button/button.php:23
+#: widgets/widgets/call-to-action/call-to-action.php:31
+#: widgets/widgets/price-box/price-box.php:44
+#: widgets/widgets/testimonial/testimonial.php:36
+msgid "Open In New Window"
+msgstr "नयी विंडो में खोलें"
+
+#: widgets/widgets/button/button.php:27
+msgid "Button Alignment"
+msgstr "बटन अलाइनमेंट"
+
+#: widgets/widgets/button/button.php:29
+msgid "Left"
+msgstr "बाएँ"
+
+#: widgets/widgets/button/button.php:30
+msgid "Right"
+msgstr "दाएँ"
+
+#: widgets/widgets/button/button.php:31
+msgid "Center"
+msgstr "मध्य"
+
+#: widgets/widgets/button/button.php:32
+msgid "Justify"
+msgstr "जस्टिफाई"
+
+#: widgets/widgets/call-to-action/call-to-action.php:6
+msgid "Call To Action (PB)"
+msgstr "कॉल टू एक्शन (पीबी)"
+
+#: widgets/widgets/call-to-action/call-to-action.php:8
+msgid "A Call to Action block"
+msgstr "कॉल टू एक्शन ब्लॉक"
+
+#: widgets/widgets/call-to-action/call-to-action.php:19
+msgid "Sub Title"
+msgstr "उप शीर्षक"
+
+#: widgets/widgets/call-to-action/call-to-action.php:23
+#: widgets/widgets/price-box/price-box.php:36
+msgid "Button Text"
+msgstr "बटन टेक्स्ट"
+
+#: widgets/widgets/call-to-action/call-to-action.php:27
+#: widgets/widgets/price-box/price-box.php:40
+msgid "Button URL"
+msgstr "बटन यूआरएल"
+
+#: widgets/widgets/call-to-action/call-to-action.php:37
+#: widgets/widgets/price-box/price-box.php:49
+msgid "Button"
+msgstr "बटन"
+
+#: widgets/widgets/list/list.php:6
+msgid "List (PB)"
+msgstr "सूची (पीबी)"
+
+#: widgets/widgets/list/list.php:8 widgets/widgets/price-box/price-box.php:8
+msgid "Displays a bullet list of elements"
+msgstr "एलिमेंट्स की बुलेट सूची दिखाता है"
+
+#: widgets/widgets/list/list.php:20 widgets/widgets/price-box/price-box.php:32
+msgid "Start each new point with an asterisk (*)"
+msgstr "हरेक नये बिंदु को एक सितारे (*) से शुरू करें"
+
+#: widgets/widgets/price-box/price-box.php:6
+msgid "Price Box (PB)"
+msgstr "मूल्य बॉक्स (पीबी)"
+
+#: widgets/widgets/price-box/price-box.php:19
+msgid "Price"
+msgstr "मूल्य"
+
+#: widgets/widgets/price-box/price-box.php:23
+msgid "Per"
+msgstr "प्रति"
+
+#: widgets/widgets/price-box/price-box.php:27
+msgid "Information Text"
+msgstr "जानकारी टेक्स्ट"
+
+#: widgets/widgets/price-box/price-box.php:31
+msgid "Features Text"
+msgstr "सुविधाएँ टेक्स्ट"
+
+#: widgets/widgets/price-box/price-box.php:50
+msgid "Feature List"
+msgstr "सुविधा सूची"
+
+#: widgets/widgets/testimonial/testimonial.php:6
+msgid "Testimonial (PB)"
+msgstr "प्रमाणक (पीबी)"
+
+#: widgets/widgets/testimonial/testimonial.php:19
+msgid "Location"
+msgstr "लोकेशन"
+
+#: widgets/widgets/testimonial/testimonial.php:23
+msgid "Image"
+msgstr "छवि"
+
+#: widgets/widgets/testimonial/testimonial.php:32
+msgid "URL"
+msgstr "यूआरएल"
+
+#: siteorigin-panels.php:1254
+msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
+msgstr "विजेट 1{%1$s} उपलब्ध नहीं है। कृपया गुम प्लगइन को खोजने और इंस्टाल करने का प्रयास करें। अगर आपको मदद चाहिए तो 2{support forums} पर पोस्ट करें।"
+
+#: tpl/js-templates.php:64
+msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
+msgstr "शुरू करने के लिए 1{widget}, 2{row} या 3{prebuilt layout} जोड़ें। अगर आपको मदद चाहिए तो हमारे 4{documentation} पढ़ें।"
+
+#: widgets/basic.php:15
+msgid "A complete SiteOrigin Page Builder layout as a widget."
+msgstr "विजेट के रूप में एक पूर्ण साइटऑरिजिन पेज बिल्डर लेआउट।"
+
+#: widgets/widgets/testimonial/testimonial.php:8
+msgid "Displays a bullet list of points"
+msgstr "बिन्दुओं की एक बुलेट सूची दिखाता है"
+
+#: inc/widgets.php:118
+msgid "Enable more widgets in the 1{Widgets Bundle settings}."
+msgstr "1{Widgets Bundle settings} में और ज्यादा विजेट्स सक्षम करें।"
+
+#: inc/widgets.php:127
+msgid "Install the 1{Widgets Bundle} to get extra widgets."
+msgstr "अतिरिक्त विजेट्स पाने के लिए 1{Widgets Bundle} इंस्टाल करें।"
+
+#: inc/widgets.php:140
+msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
+msgstr "आप 1{Page Builder settings} में लिगेसी (पीबी) विजेट्स सक्षम कर सकते हैं।"
+
+#: siteorigin-panels.php:1231
+msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
+msgstr "विजेट 2{%2$s} उपयोग करने के लिए आपको 1{%1$s} इंस्टाल करना जरूरी है।"
+
+#: settings/tpl/help.php:6
+msgid "Please read the 1{settings guide} of the Page Builder documentation for help."
+msgstr "मदद के लिए कृपया पेज बिल्डर प्रलेखन का 1{settings guide} पढ़ें।"
+
+#: tpl/admin-home-page.php:29
+msgid "Home page updated. 1{View page}."
+msgstr "होम पेज अपडेट किया गया। 1{View page}।"
+
+#: widgets/basic.php:469 widgets/widgets.php:629
+msgid "Additional query arguments. See 1{query_posts}."
+msgstr "अतिरिक्त क्वेरी आर्गुमेंट। देखें 1{query_posts}।"
+
+#: tpl/help.php:18
+msgid "Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments."
+msgstr "SiteOrigin पर 1{full documentation} पढ़ें। आपको मदद चाहिए तो हमारे 2{support forum} पर प्रश्न पूछें और भविष्य की योजनाओं से अपडेट रहने के लिए 3{our newsletter} साइन अप करें।"
+
+#: tpl/js-templates.php:302
+msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
+msgstr "1{Set row layout}: %3$s जाते %2$s के अनुपात के साथ %1$s कॉलम"

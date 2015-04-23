@@ -9,9 +9,10 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 	function __construct() {
 		parent::__construct(
 			'siteorigin-panels-builder',
+			// TRANSLATORS: This is the name of a widget
 			__( 'Layout Builder', 'siteorigin-panels' ),
 			array(
-				'description' => __( 'A full SiteOrigin Page Builder layout as a widget.', 'siteorigin-panels' ),
+				'description' => __( 'A complete SiteOrigin Page Builder layout as a widget.', 'siteorigin-panels' ),
 				'panels_title' => false,
 			),
 			array(
@@ -80,7 +81,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 			'siteorigin-panels-post-content',
 			__( 'Post Content', 'siteorigin-panels' ),
 			array(
-				'description' => __( 'Displays some form of post content form the current post.', 'siteorigin-panels' ),
+				'description' => __( 'Displays content from the current post.', 'siteorigin-panels' ),
 			)
 		);
 	}
@@ -434,7 +435,6 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<option value="rand" <?php selected($instance['orderby'], 'rand') ?>><?php esc_html_e('Random', 'siteorigin-panels') ?></option>
 					<option value="comment_count" <?php selected($instance['orderby'], 'comment_count') ?>><?php esc_html_e('Comment Count', 'siteorigin-panels') ?></option>
 					<option value="menu_order" <?php selected($instance['orderby'], 'menu_order') ?>><?php esc_html_e('Menu Order', 'siteorigin-panels') ?></option>
-					<option value="menu_order" <?php selected($instance['orderby'], 'menu_order') ?>><?php esc_html_e('Menu Order', 'siteorigin-panels') ?></option>
 					<option value="post__in" <?php selected($instance['orderby'], 'post__in') ?>><?php esc_html_e('Post In Order', 'siteorigin-panels') ?></option>
 				</select>
 			</p>
@@ -460,7 +460,15 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			<p>
 				<label for="<?php echo $this->get_field_id('additional') ?>"><?php _e('Additional ', 'siteorigin-panels') ?></label>
 				<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'additional' ) ?>" name="<?php echo $this->get_field_name( 'additional' ) ?>" value="<?php echo esc_attr($instance['additional']) ?>" />
-				<small><?php printf(__('Additional query arguments. See <a href="%s" target="_blank">query_posts</a>.', 'siteorigin-panels'), 'http://codex.wordpress.org/Function_Reference/query_posts') ?></small>
+				<small>
+					<?php
+					echo preg_replace(
+						'/1\{ *(.*?) *\}/',
+						'<a href="http://codex.wordpress.org/Function_Reference/query_posts">$1</a>',
+						__('Additional query arguments. See 1{query_posts}.', 'siteorigin-panels')
+					)
+					?>
+				</small>
 			</p>
 			<?php
 		}

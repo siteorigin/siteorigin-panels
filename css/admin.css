@@ -712,6 +712,7 @@
   }
 }
 .so-panels-dialog .so-title-bar a {
+  cursor: pointer;
   position: absolute;
   box-sizing: border-box;
   width: 50px;
@@ -1061,19 +1062,13 @@
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form button,
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form strong,
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form span {
-  display: block;
-  float: left;
-  margin-right: 5px;
+  display: inline;
+  margin: 1px 5px;
   outline: none;
   box-shadow: none;
 }
-.so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form strong,
-.so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form span {
-  margin-top: 5px;
-  margin-right: 0.75em;
-}
-.so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form span {
-  margin-left: 0.75em;
+.so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form button {
+  margin-top: 2px;
 }
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-set-form label {
   display: inline;

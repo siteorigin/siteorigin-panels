@@ -1,0 +1,1265 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.5\n"
+"Project-Id-Version: Page Builder\n"
+"Language: ru\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+
+#: inc/admin-actions.php:80
+msgid "No description"
+msgstr "Нет описания"
+
+#. A prebuilt layout is essentially a complete visual layout that was pre created.
+#: inc/admin-actions.php:89
+msgid "Your theme doesn't have any prebuilt layouts."
+msgstr "Ваша тема не имеет готовых макетов."
+
+#: inc/admin-actions.php:90
+msgid "You can still clone existing pages though."
+msgstr "Тем не менее, Вы можете скопировать существующие страницы."
+
+#: inc/admin-actions.php:123
+msgid "Clone"
+msgstr "Скопировать"
+
+#: inc/admin-actions.php:141
+msgid "There are no %s with Page Builder content to clone."
+msgstr "Отсутствуют %s с Page Builder, которые можно скопировать."
+
+#: inc/default-styles.php:57
+msgid "Row Class"
+msgstr "Класс строки"
+
+#. A CSS class is something to describe an HTML element.
+#: inc/default-styles.php:60 inc/default-styles.php:165
+msgid "A CSS class"
+msgstr "Класс CSS"
+
+#: inc/default-styles.php:65
+msgid "Cell Class"
+msgstr "Класс ячейки"
+
+#: inc/default-styles.php:68
+msgid "Class added to all cells in this row."
+msgstr "Класс, добавленный во все ячейки строки"
+
+#: inc/default-styles.php:73 inc/default-styles.php:170
+msgid "CSS Styles"
+msgstr "Стили CSS"
+
+#: inc/default-styles.php:76 inc/default-styles.php:173
+msgid "CSS Styles, given as one per row."
+msgstr "Стили CSS, заданные по одному на строку"
+
+#. The amount of spacing below a row. This comes from the concept of a text margin.
+#: inc/default-styles.php:83
+msgid "Bottom Margin"
+msgstr "Нижнее поле"
+
+#: inc/default-styles.php:86
+msgid "Space below the row."
+msgstr "Место под строкой"
+
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
+#: inc/default-styles.php:91
+msgid "Gutter"
+msgstr "Межстолбцовый промежуток"
+
+#: inc/default-styles.php:94
+msgid "Amount of space between columns."
+msgstr "Промежуток между колонками"
+
+#. This is essentially the amount of padding, or amount of space around a widget or row.
+#: inc/default-styles.php:99 inc/default-styles.php:178
+msgid "Padding"
+msgstr "Поле"
+
+#: inc/default-styles.php:102
+msgid "Padding around the entire row."
+msgstr "Поле вокруг строки"
+
+#: inc/default-styles.php:107
+msgid "Row Layout"
+msgstr "Макет строки"
+
+#: inc/default-styles.php:111
+msgid "Standard"
+msgstr "Стандартный"
+
+#: inc/default-styles.php:112
+msgid "Full Width"
+msgstr "Во всю ширину"
+
+#. This means the row is displayed the full width of the page and the content is also stretched.
+#: inc/default-styles.php:113
+msgid "Full Width Stretched"
+msgstr "Во всю ширину (растянуто)"
+
+#: inc/default-styles.php:121 inc/default-styles.php:188
+msgid "Background Color"
+msgstr "Цвет фона"
+
+#: inc/default-styles.php:124
+msgid "Background color of the row."
+msgstr "Фоновый цвет строки."
+
+#: inc/default-styles.php:129 inc/default-styles.php:196
+msgid "Background Image"
+msgstr "Фоновое изображение"
+
+#: inc/default-styles.php:132
+msgid "Background image of the row."
+msgstr "Фоновое изображение строки."
+
+#: inc/default-styles.php:137 inc/default-styles.php:204
+msgid "Background Image Display"
+msgstr "Отображение фонового изображения"
+
+#: inc/default-styles.php:141 inc/default-styles.php:208
+msgid "Tiled Image"
+msgstr "Замостить"
+
+#: inc/default-styles.php:142 inc/default-styles.php:209
+msgid "Cover"
+msgstr "Обложка"
+
+#: inc/default-styles.php:143 inc/default-styles.php:210
+msgid "Centered, with original size"
+msgstr "По центру, оригинальный размер"
+
+#: inc/default-styles.php:145 inc/default-styles.php:212
+msgid "How the background image is displayed."
+msgstr "Стиль отображения фонового изображения."
+
+#: inc/default-styles.php:150 inc/default-styles.php:217
+msgid "Border Color"
+msgstr "Цвет границы"
+
+#: inc/default-styles.php:153
+msgid "Border color of the row."
+msgstr "Цвет границы строки."
+
+#: inc/default-styles.php:162
+msgid "Widget Class"
+msgstr "Класс виджета"
+
+#: inc/default-styles.php:181
+msgid "Padding around the entire widget."
+msgstr "Поле вокруг виджета"
+
+#: inc/default-styles.php:191
+msgid "Background color of the widget."
+msgstr "Фоновый цвет виджета."
+
+#: inc/default-styles.php:199
+msgid "Background image of the widget."
+msgstr "Фоновое изображение виджета."
+
+#: inc/default-styles.php:220
+msgid "Border color of the widget."
+msgstr "Цвет границы виджета."
+
+#: inc/default-styles.php:225
+msgid "Font Color"
+msgstr "Цвет шрифта"
+
+#: inc/default-styles.php:228
+msgid "Color of text inside this widget."
+msgstr "Цвет текста внутри виджета."
+
+#: inc/plugin-activation.php:7 inc/plugin-activation.php:8
+msgid "Install Page Builder Plugin"
+msgstr "Установить плагин \"Page Builder\""
+
+#: inc/plugin-activation.php:74
+msgid "Installing %s"
+msgstr "Установка %s"
+
+#: inc/revisions.php:50
+msgid "Page Builder Content"
+msgstr "Содержимое Page Builder"
+
+#: inc/styles.php:16
+msgid "Row Styles"
+msgstr "Стили строк"
+
+#: inc/styles.php:20
+msgid "Widget Styles"
+msgstr "Стили виджета"
+
+#: inc/styles.php:42
+msgid "Attributes"
+msgstr "Атрибуты"
+
+#: inc/styles.php:46 settings/settings.php:225
+msgid "Layout"
+msgstr "Макет"
+
+#: inc/styles.php:50
+msgid "Design"
+msgstr "Дизайн"
+
+#: inc/styles.php:60
+msgid "Theme"
+msgstr "Тема"
+
+#: inc/styles.php:179
+msgid "Select Image"
+msgstr "Выбрать изображение"
+
+#: inc/styles.php:183
+msgid "Remove"
+msgstr "Удалить"
+
+#: inc/styles.php:197 settings/settings.php:313
+msgid "Enabled"
+msgstr "Включено"
+
+#: inc/widgets-bundle.php:7
+msgid "SiteOrigin Button"
+msgstr "Кнопка SiteOrigin"
+
+#: inc/widgets-bundle.php:8 widgets/widgets/button/button.php:8
+msgid "A simple button"
+msgstr "Простая кнопка"
+
+#: inc/widgets-bundle.php:11 inc/widgets-bundle.php:23
+#: inc/widgets-bundle.php:35 inc/widgets-bundle.php:47
+#: inc/widgets-bundle.php:59 inc/widgets.php:126
+msgid "SiteOrigin Widgets Bundle"
+msgstr "набор виджетов SiteOrigin"
+
+#: inc/widgets-bundle.php:19
+msgid "SiteOrigin Image"
+msgstr "Изображение SiteOrigin"
+
+#: inc/widgets-bundle.php:20
+msgid "Choose images from your media library."
+msgstr "Выберите изображение из вашей медиа-библиотеки."
+
+#: inc/widgets-bundle.php:31
+msgid "SiteOrigin Slider"
+msgstr "Слайдер SiteOrigin"
+
+#: inc/widgets-bundle.php:32
+msgid "A basic slider widget."
+msgstr "Виджет стандартного слайдера"
+
+#: inc/widgets-bundle.php:43
+msgid "SiteOrigin Features"
+msgstr "Функции SiteOrigin"
+
+#: inc/widgets-bundle.php:44
+msgid "Display site features as a collection of icons."
+msgstr "Отображать возможности сайта в виде набора иконок."
+
+#: inc/widgets-bundle.php:55
+msgid "SiteOrigin Post Carousel"
+msgstr "Карусель записей SiteOrigin"
+
+#: inc/widgets-bundle.php:56
+msgid "Display your posts as a carousel."
+msgstr "Отображать Ваши записи в виде карусели."
+
+#: inc/widgets.php:17
+msgid "Visual Editor"
+msgstr "Визуальный редактор"
+
+#: inc/widgets.php:18
+msgid "Arbitrary text or HTML with visual editor"
+msgstr "Произвольный текст или HTML с визуальным редактором"
+
+#: inc/widgets.php:21
+msgid "Black Studio TinyMCE"
+msgstr "Black Studio TinyMCE"
+
+#: inc/widgets.php:102
+msgid "Widgets Bundle"
+msgstr "Набор виджетов"
+
+#: inc/widgets.php:132
+msgid "Page Builder Widgets"
+msgstr "Виджеты Page Builder"
+
+#: inc/widgets.php:148
+msgid "WordPress Widgets"
+msgstr "Виджеты WordPress"
+
+#: inc/widgets.php:158
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+#: inc/widgets.php:169
+msgid "Jetpack"
+msgstr "Jetpack"
+
+#: inc/widgets.php:180
+msgid "BBPress"
+msgstr "BBPress"
+
+#: inc/widgets.php:188 settings/settings.php:218
+msgid "Recommended Widgets"
+msgstr "Рекомендованные виджеты"
+
+#: settings/settings.php:146 settings/tpl/settings.php:9 tpl/options.php:5
+msgid "SiteOrigin Page Builder"
+msgstr "SiteOrigin Page Builder"
+
+#: settings/settings.php:146 siteorigin-panels.php:108
+#: siteorigin-panels.php:467 tpl/js-templates.php:160
+msgid "Page Builder"
+msgstr "Page Builder"
+
+#: settings/settings.php:170
+msgid "Page Builder Settings"
+msgstr "Настройки PageBuilder"
+
+#: settings/settings.php:186 tpl/options.php:11
+msgid "General"
+msgstr "Основное"
+
+#: settings/settings.php:192 tpl/options.php:15
+msgid "Post Types"
+msgstr "Типы записей"
+
+#: settings/settings.php:194
+msgid "The post types to use Page Builder on."
+msgstr "Типы записей для использования Page Builder"
+
+#: settings/settings.php:200
+msgid "Widgets"
+msgstr "Виджеты"
+
+#: settings/settings.php:206
+msgid "Widget Title HTML"
+msgstr "HTML-заголовок виджета"
+
+#. Something I forgot to mention is that for this string "{{title}}" shouldn't be translated. The rest of the string can be, but that one part needs to remain as is.
+#: settings/settings.php:207
+msgid "The HTML used for widget titles. {{title}} is replaced with the widget title."
+msgstr "HTML используется для заголовков виджетов. {{title}} заменяется заголовком виджета."
+
+#: settings/settings.php:212
+msgid "Legacy Bundled Widgets"
+msgstr "Устаревшие наборы виджетов."
+
+#: settings/settings.php:213
+msgid "Load legacy widgets from Page Builder 1."
+msgstr "Загрузить устаревшие виджеты из Page Builder 1."
+
+#: settings/settings.php:219
+msgid "Display recommend widgets in Page Builder add widget dialog."
+msgstr "Показать рекомендованные виджеты в окне добавления нового виджета Page Builder."
+
+#: settings/settings.php:233 tpl/options.php:57
+msgid "Responsive Layout"
+msgstr "Отзывчивая вёрстка"
+
+#: settings/settings.php:234
+msgid "Collapse widgets, rows and columns on mobile devices."
+msgstr "Сворачивать виджеты, строки и колонки на мобильных устройствах."
+
+#: settings/settings.php:240 tpl/options.php:64
+msgid "Mobile Width"
+msgstr "Ширина для мобильного устройства"
+
+#: settings/settings.php:241
+msgid "Device width, in pixels, to collapse into a mobile view ."
+msgstr "Ширина устройства, в пикселях, для перехода в мобильный режим"
+
+#: settings/settings.php:247 tpl/options.php:70
+msgid "Row Bottom Margin"
+msgstr "Отступ нижней строки"
+
+#: settings/settings.php:248
+msgid "Default margin below rows."
+msgstr "Стандартный отступ между строками"
+
+#. This term comes from typography. It's essentially the spacing between 2 columns.
+#.
+#. http://en.wikipedia.org/wiki/Column_%28typography%29
+#: settings/settings.php:254
+msgid "Row Gutter"
+msgstr "Межстолбцовый интервал"
+
+#: settings/settings.php:255
+msgid "Default spacing between columns in each row."
+msgstr "Интервал по умолчанию между колонками в каждой строке."
+
+#. In this context, the container is an HTML container or wrapper.
+#: settings/settings.php:261
+msgid "Full Width Container"
+msgstr "Контейнер во всю ширину"
+
+#: settings/settings.php:262
+msgid "The container used for the full width layout."
+msgstr "Контейнер используется для макета во всю ширину"
+
+#: settings/settings.php:269
+msgid "Content"
+msgstr "Содержимое"
+
+#: settings/settings.php:275 tpl/options.php:25
+msgid "Copy Content"
+msgstr "Скопировать содержимое"
+
+#: settings/settings.php:276
+msgid "Copy content from Page Builder to post content."
+msgstr "Скопировать содержимое Page Builder в содержимое записи."
+
+#: settings/tpl/settings.php:12
+msgid "Search Settings"
+msgstr "Поиск в настройках"
+
+#: settings/tpl/settings.php:29
+msgid "Settings Saved"
+msgstr "Настройки сохранены"
+
+#: settings/tpl/settings.php:78 tpl/options.php:93
+msgid "Save Settings"
+msgstr "Сохранить настройки"
+
+#: siteorigin-panels.php:73
+msgid "Custom Home Page Builder"
+msgstr "Конструктор модифицированной домашней страницы"
+
+#: siteorigin-panels.php:74 siteorigin-panels.php:140
+msgid "Home Page"
+msgstr "Домашняя страница"
+
+#: siteorigin-panels.php:263
+msgid "All Widgets"
+msgstr "Все виджеты"
+
+#: siteorigin-panels.php:274
+msgid "Missing Widget"
+msgstr "Отсутствующий виджет"
+
+#: siteorigin-panels.php:275
+msgid "Page Builder doesn't know about this widget."
+msgstr "Page Builder не знает о существовании этого виджета"
+
+#: siteorigin-panels.php:279
+msgid "%d seconds"
+msgstr "%d секунд"
+
+#: siteorigin-panels.php:281
+msgid "%d minutes"
+msgstr "%d минут"
+
+#: siteorigin-panels.php:283
+msgid "%d hours"
+msgstr "%d часов"
+
+#: siteorigin-panels.php:286
+msgid "%d second"
+msgstr "%d секунд"
+
+#: siteorigin-panels.php:288
+msgid "%d minute"
+msgstr "%d минут"
+
+#: siteorigin-panels.php:290
+msgid "%d hour"
+msgstr "%d часов"
+
+#: siteorigin-panels.php:293
+msgid "%s before"
+msgstr "%s до"
+
+#: siteorigin-panels.php:294
+msgid "Now"
+msgstr "Сейчас"
+
+#: siteorigin-panels.php:298
+msgid "Current"
+msgstr "Текущий"
+
+#: siteorigin-panels.php:299
+msgid "Original"
+msgstr "Оригинал"
+
+#: siteorigin-panels.php:300
+msgid "Version restored"
+msgstr "Версия восстановлена"
+
+#: siteorigin-panels.php:304
+msgid "Widget deleted"
+msgstr "Виджет удалён"
+
+#: siteorigin-panels.php:306
+msgid "Widget added"
+msgstr "Виджет добавлен"
+
+#: siteorigin-panels.php:308
+msgid "Widget edited"
+msgstr "Виджет отредактирован"
+
+#: siteorigin-panels.php:310
+msgid "Widget duplicated"
+msgstr "Виджет скопирован"
+
+#: siteorigin-panels.php:312
+msgid "Widget moved"
+msgstr "Виджет перемещён"
+
+#: siteorigin-panels.php:316
+msgid "Row deleted"
+msgstr "Строка удалена"
+
+#: siteorigin-panels.php:318
+msgid "Row added"
+msgstr "Строка добавлена"
+
+#: siteorigin-panels.php:320
+msgid "Row edited"
+msgstr "Строка отредактирована"
+
+#: siteorigin-panels.php:322
+msgid "Row moved"
+msgstr "Строка перемещена"
+
+#: siteorigin-panels.php:324
+msgid "Row duplicated"
+msgstr "Строка скопирована"
+
+#: siteorigin-panels.php:327
+msgid "Cell resized"
+msgstr "Размер ячейки изменен"
+
+#: siteorigin-panels.php:330
+msgid "Prebuilt layout loaded"
+msgstr "Загружен готовый макет"
+
+#: siteorigin-panels.php:334
+msgid "Are you sure you want to overwrite your current content? This can be undone in the builder history."
+msgstr "Вы уверены, что хотите перезаписать текущее содержимое? Эта операция может быть отменена в истории."
+
+#: siteorigin-panels.php:335
+msgid "Loading prebuilt layout"
+msgstr "Загрузка готового макета"
+
+#: siteorigin-panels.php:336
+msgid "Would you like to copy this editor's existing content to Page Builder?"
+msgstr "Скопировать текущее содержимое редактора в Page Builder?"
+
+#: siteorigin-panels.php:337
+msgid "Would you like to clear your Page Builder content and revert to using the standard visual editor?"
+msgstr "Очистить содержимое Page Builder и вернуться к использованию стандартного визуального редактора?"
+
+#: siteorigin-panels.php:339
+msgid "Layout Builder Widget"
+msgstr "Виджет конструктора макетов"
+
+#: siteorigin-panels.php:341 tpl/js-templates.php:85
+msgid "Are you sure?"
+msgstr "Вы уверены?"
+
+#: siteorigin-panels.php:348
+msgid "Page Builder layouts"
+msgstr "Макеты Page Builder"
+
+#: siteorigin-panels.php:349
+msgid "Error uploading or importing file."
+msgstr "Ошибка при загрузке/импорте файла."
+
+#: siteorigin-panels.php:395
+msgid "Untitled Widget"
+msgstr "Виджет без названия"
+
+#: siteorigin-panels.php:1140
+msgid "Edit Home Page"
+msgstr "Редактировать домашнюю страницу"
+
+#: siteorigin-panels.php:1237
+msgid "Save and reload this page to start using the widget after you've installed it."
+msgstr "Для использования виджета, после его установки сохраните и перезагрузите страницу."
+
+#: siteorigin-panels.php:1321
+msgid "Support Forum"
+msgstr "Форум техническкой поддержки"
+
+#: siteorigin-panels.php:1322
+msgid "Newsletter"
+msgstr "Новостная лента"
+
+#: tpl/admin-home-page.php:9
+msgid "On"
+msgstr "Включено"
+
+#: tpl/admin-home-page.php:9
+msgid "Off"
+msgstr "Выключено"
+
+#: tpl/admin-home-page.php:13
+msgid "Custom Home Page"
+msgstr "Модифицированная домашняя страница"
+
+#: tpl/admin-home-page.php:45
+msgid "Save Home Page"
+msgstr "Сохранить домашнюю страницу"
+
+#: tpl/admin-home-page.php:49
+msgid "This interface requires Javascript"
+msgstr "Данный интерфейс требует Javascript"
+
+#: tpl/help.php:2
+msgid "You can use SiteOrigin Page Builder to create home and sub pages, filled your own widgets."
+msgstr "Вы можете использовать Page Builder от SiteOrigin для создания страниц с Вашими виджетами."
+
+#: tpl/help.php:3
+msgid "The page layouts are responsive and fully customizable."
+msgstr "Вёрстка страниц отзывчива и полностью настраиваемая."
+
+#: tpl/js-templates.php:12
+msgid "Add Widget"
+msgstr "Добавить виджет"
+
+#: tpl/js-templates.php:17
+msgid "Add Row"
+msgstr "Добавить строку"
+
+#: tpl/js-templates.php:22
+msgid "Prebuilt"
+msgstr "Готовый макет"
+
+#: tpl/js-templates.php:29
+msgid "History"
+msgstr "История"
+
+#: tpl/js-templates.php:34
+msgid "Live Editor"
+msgstr "Визуальный редактор"
+
+#: tpl/js-templates.php:39
+msgid "Switch to Editor"
+msgstr "Переключиться на обычный редактор"
+
+#: tpl/js-templates.php:83 tpl/js-templates.php:256
+msgid "Edit Row"
+msgstr "Редактировать строку"
+
+#: tpl/js-templates.php:84
+msgid "Duplicate Row"
+msgstr "Скопировать строку"
+
+#: tpl/js-templates.php:85
+msgid "Delete Row"
+msgstr "Удалить строку"
+
+#: tpl/js-templates.php:113
+msgid "Edit"
+msgstr "Редактировать"
+
+#: tpl/js-templates.php:114 tpl/js-templates.php:231 tpl/js-templates.php:322
+msgid "Duplicate"
+msgstr "Копировать"
+
+#: tpl/js-templates.php:115 tpl/js-templates.php:230 tpl/js-templates.php:321
+msgid "Delete"
+msgstr "Удалить"
+
+#: tpl/js-templates.php:169 tpl/js-templates.php:234
+msgid "Done"
+msgstr "Выполнено"
+
+#: tpl/js-templates.php:183
+msgid "Add New Widget %s"
+msgstr "Добавить новый виджет %s"
+
+#: tpl/js-templates.php:187
+msgid "Search Widgets"
+msgstr "Поиск виджетов"
+
+#: tpl/js-templates.php:199
+msgid "Close"
+msgstr "Закрыть"
+
+#: tpl/js-templates.php:254
+msgid "Add New Row"
+msgstr "Добавить новую строку"
+
+#: tpl/js-templates.php:290
+msgid "Left to Right"
+msgstr "Слева направо"
+
+#: tpl/js-templates.php:291
+msgid "Right to Left"
+msgstr "Справа налево"
+
+#: tpl/js-templates.php:308
+msgid "Set"
+msgstr "Установить"
+
+#: tpl/js-templates.php:327
+msgid "Insert"
+msgstr "Вставить"
+
+#: tpl/js-templates.php:329
+msgid "Save"
+msgstr "Сохранить"
+
+#: tpl/js-templates.php:347
+msgid "Prebuilt Layouts"
+msgstr "Готовые макеты"
+
+#: tpl/js-templates.php:351
+msgid "Search"
+msgstr "Поиск"
+
+#: tpl/js-templates.php:354
+msgid "Theme Defined"
+msgstr "Тема определена"
+
+#: tpl/js-templates.php:355
+msgid "Import/Export"
+msgstr "Импорт/Экспорт"
+
+#: tpl/js-templates.php:361
+msgid "Clone: %s"
+msgstr "Скопировать: %s"
+
+#: tpl/js-templates.php:382
+msgid "Drop import file here"
+msgstr "Перетащите сюда файл для импорта"
+
+#: tpl/js-templates.php:383
+msgid "Or"
+msgstr "Или"
+
+#: tpl/js-templates.php:386
+msgid "Select Import File"
+msgstr "Выбрать файл для импорта"
+
+#: tpl/js-templates.php:398
+msgid "Download Layout"
+msgstr "Скачать макет"
+
+#: tpl/js-templates.php:419
+msgid "Page Builder Change History"
+msgstr "История изменений Page Builder"
+
+#: tpl/js-templates.php:433
+msgid "Restore Version"
+msgstr "Восстановить версию"
+
+#: tpl/js-templates.php:458
+msgid "Close Live Editor"
+msgstr "Закрыть визуальный редактор"
+
+#: tpl/options.php:26
+msgid "Copy content from Page Builder into the standard content editor."
+msgstr "Скопировать содержимое Page Builder в стандартный редактор."
+
+#: tpl/options.php:32
+msgid "Animations"
+msgstr "Анимации"
+
+#: tpl/options.php:33
+msgid "Disable animations for improved performance."
+msgstr "Отключить анимацию для увеличения производительности."
+
+#: tpl/options.php:39
+msgid "Bundled Widgets"
+msgstr "Наборы виджетов"
+
+#: tpl/options.php:40
+msgid "Include the bundled widgets."
+msgstr "Включить наборы виджетов"
+
+#: tpl/options.php:48
+msgid "Display"
+msgstr "Отображение"
+
+#: tpl/options.php:58
+msgid "Should the layout collapse for mobile devices."
+msgstr "Нужно ли сворачивать макет для мобильных устройств."
+
+#: tpl/options.php:76
+msgid "Cell Side Margins"
+msgstr "Боковые отступы ячейки"
+
+#: tpl/options.php:82
+msgid "Inline CSS"
+msgstr "Встроенные CSS"
+
+#: widgets/basic.php:13
+msgid "Layout Builder"
+msgstr "Конструктор макетов"
+
+#: widgets/basic.php:53
+msgid "Open Builder"
+msgstr "Открыть конструктор"
+
+#: widgets/basic.php:82
+msgid "Post Content"
+msgstr "Разместить запись"
+
+#: widgets/basic.php:84
+#, fuzzy
+msgid "Displays content from the current post."
+msgstr "Отображает определенный вид содержимого записи с текущей записи."
+
+#: widgets/basic.php:130 widgets/basic.php:427 widgets/widgets.php:589
+#: widgets/widgets.php:764
+msgid "None"
+msgstr "Без сортировки"
+
+#: widgets/basic.php:131 widgets/basic.php:355
+#: widgets/widgets/call-to-action/call-to-action.php:15
+#: widgets/widgets/list/list.php:15 widgets/widgets/price-box/price-box.php:15
+msgid "Title"
+msgstr "Заголовок"
+
+#: widgets/basic.php:132
+msgid "Featured Image"
+msgstr "Изображение"
+
+#: widgets/basic.php:137
+msgid "Display Content"
+msgstr "Отображать содержимое"
+
+#: widgets/basic.php:157
+msgid "Post Loop"
+msgstr "Цикл записей"
+
+#: widgets/basic.php:159
+msgid "Displays a post loop."
+msgstr "Отображает цикл записей"
+
+#: widgets/basic.php:349
+msgid "Your theme doesn't have any post loops."
+msgstr "Ваша тема не имеет циклов записей."
+
+#: widgets/basic.php:359
+msgid "Template"
+msgstr "Шаблон"
+
+#: widgets/basic.php:375
+msgid "More Link "
+msgstr "Ссылка \"Далее\" "
+
+#: widgets/basic.php:377
+msgid "If the template supports it, cut posts and display the more link."
+msgstr "Если шаблон поддерживает данную функцию, обрезать запись и включить отображение ссылки \"Далее\"."
+
+#: widgets/basic.php:411 widgets/widgets.php:575
+msgid "Post Type"
+msgstr "Тип записи"
+
+#: widgets/basic.php:420 widgets/widgets.php:582
+msgid "Posts Per Page"
+msgstr "Записей на страницу"
+
+#: widgets/basic.php:425 widgets/widgets.php:587
+msgid "Order By"
+msgstr "Сортировка"
+
+#: widgets/basic.php:428 widgets/widgets.php:590
+msgid "Post ID"
+msgstr "По ID записи"
+
+#: widgets/basic.php:429 widgets/widgets.php:591
+msgid "Author"
+msgstr "По автору"
+
+#: widgets/basic.php:430 widgets/basic.php:431 widgets/widgets.php:592
+#: widgets/widgets.php:593 widgets/widgets/testimonial/testimonial.php:15
+msgid "Name"
+msgstr "По названию"
+
+#: widgets/basic.php:432 widgets/widgets.php:594
+msgid "Date"
+msgstr "По дате создания"
+
+#: widgets/basic.php:433 widgets/widgets.php:595
+msgid "Modified"
+msgstr "По дате редактирования"
+
+#: widgets/basic.php:434 widgets/widgets.php:596
+msgid "Parent"
+msgstr "По вышестоящей странице"
+
+#: widgets/basic.php:435 widgets/widgets.php:597
+msgid "Random"
+msgstr "В произвольном порядке"
+
+#: widgets/basic.php:436 widgets/widgets.php:598
+msgid "Comment Count"
+msgstr "По количеству комментариев"
+
+#: widgets/basic.php:437 widgets/basic.php:438 widgets/widgets.php:599
+msgid "Menu Order"
+msgstr "По порядку меню"
+
+#: widgets/basic.php:439
+msgid "Post In Order"
+msgstr "Отображать записи по порядку"
+
+#: widgets/basic.php:444 widgets/widgets.php:605
+msgid "Order"
+msgstr "Порядок"
+
+#: widgets/basic.php:446 widgets/widgets.php:608
+msgid "Descending"
+msgstr "По убыванию"
+
+#: widgets/basic.php:447 widgets/widgets.php:607
+msgid "Ascending"
+msgstr "По возрастанию"
+
+#: widgets/basic.php:452 widgets/widgets.php:614
+msgid "Sticky Posts"
+msgstr "Закреплённые записи"
+
+#: widgets/basic.php:454 widgets/widgets.php:616 widgets/widgets.php:738
+msgid "Default"
+msgstr "По умолчанию"
+
+#: widgets/basic.php:455 widgets/widgets.php:617
+msgid "Ignore Sticky"
+msgstr "Игнорировать закрепленные записи"
+
+#: widgets/basic.php:456 widgets/widgets.php:618
+msgid "Exclude Sticky"
+msgstr "Исключить закреплённые записи"
+
+#: widgets/basic.php:457 widgets/widgets.php:619
+msgid "Only Sticky"
+msgstr "Только закреплённые записи"
+
+#: widgets/basic.php:462
+msgid "Additional "
+msgstr "Дополнительно "
+
+#: widgets/widgets.php:204
+msgid "Style"
+msgstr "Стиль"
+
+#: widgets/widgets.php:228
+msgid "%s Style"
+msgstr "%s Стиль"
+
+#: widgets/widgets.php:625
+msgid "Additional Arguments"
+msgstr "Дополнительные параметры"
+
+#: widgets/widgets.php:686
+msgid "Gallery (PB)"
+msgstr "Галерея (PB)"
+
+#: widgets/widgets.php:688
+msgid "Displays a gallery."
+msgstr "Показывает галерею."
+
+#: widgets/widgets.php:727
+msgid "Gallery Images"
+msgstr "Изображения из галереи"
+
+#: widgets/widgets.php:728
+msgid "edit gallery"
+msgstr "редактировать галерею"
+
+#: widgets/widgets.php:732
+msgid "Comma separated attachment IDs. Defaults to all current page's attachments."
+msgstr "ID вложений, разделённые запятой. По умолчанию для всех вложений текущих страниц."
+
+#: widgets/widgets.php:736
+msgid "Image Size"
+msgstr "Размер изображения"
+
+#: widgets/widgets.php:739
+msgid "Large"
+msgstr "Большой"
+
+#: widgets/widgets.php:740
+msgid "Medium"
+msgstr "Средний"
+
+#: widgets/widgets.php:741
+msgid "Thumbnail"
+msgstr "Миниатюра"
+
+#: widgets/widgets.php:742
+msgid "Full"
+msgstr "Полный размер"
+
+#: widgets/widgets.php:750
+msgid "Gallery Type"
+msgstr "Тип галереи"
+
+#: widgets/widgets.php:755
+msgid "Columns"
+msgstr "Колонки"
+
+#: widgets/widgets.php:760
+msgid "Link To"
+msgstr "Ссылка на"
+
+#: widgets/widgets.php:762
+msgid "Attachment Page"
+msgstr "Страница вложения"
+
+#: widgets/widgets.php:763
+msgid "File"
+msgstr "Файл"
+
+#: widgets/widgets.php:781
+msgid "Image (PB)"
+msgstr "Изображение (PB)"
+
+#: widgets/widgets.php:783
+msgid "Displays a simple image."
+msgstr "Отображает простое изображение."
+
+#: widgets/widgets.php:816
+#: widgets/widgets/animated-image/animated-image.php:15
+msgid "Image URL"
+msgstr "URL изображения"
+
+#: widgets/widgets.php:820 widgets/widgets/button/button.php:19
+msgid "Destination URL"
+msgstr "URL для перехода"
+
+#: widgets/widgets.php:834
+msgid "Embedded Video (PB)"
+msgstr "Встроенное видео (PB)"
+
+#: widgets/widgets.php:836
+msgid "Embeds a video."
+msgstr "Вставляет видео."
+
+#: widgets/widgets.php:874
+msgid "Video"
+msgstr "Видео"
+
+#: widgets/widgets.php:890
+msgid "Self Hosted Video (PB)"
+msgstr "Загруженное видео (PB)"
+
+#: widgets/widgets.php:892
+msgid "A self hosted video player."
+msgstr "Плеер загруженных видео."
+
+#: widgets/widgets.php:934
+msgid "Video URL"
+msgstr "URL видео"
+
+#: widgets/widgets.php:938
+msgid "Poster URL"
+msgstr "URL обложки"
+
+#: widgets/widgets.php:940
+msgid "An image that displays before the video starts playing."
+msgstr "Изображение, отображающееся до воспроизведения видео"
+
+#: widgets/widgets.php:945
+msgid "Auto Play Video"
+msgstr "Автозапуск видео"
+
+#: widgets/widgets/animated-image/animated-image.php:6
+msgid "Animated Image (PB)"
+msgstr "Анимированное изображение (PB)"
+
+#: widgets/widgets/animated-image/animated-image.php:8
+msgid "An image that animates in when it enters the screen."
+msgstr "Анимация включается при появлении изображения на экране"
+
+#: widgets/widgets/animated-image/animated-image.php:19
+msgid "Animation"
+msgstr "Анимация"
+
+#: widgets/widgets/animated-image/animated-image.php:21
+msgid "Fade In"
+msgstr "Появление"
+
+#: widgets/widgets/animated-image/animated-image.php:22
+msgid "Slide Up"
+msgstr "Сдвиг вверх"
+
+#: widgets/widgets/animated-image/animated-image.php:23
+msgid "Slide Down"
+msgstr "Сдвиг вниз"
+
+#: widgets/widgets/animated-image/animated-image.php:24
+msgid "Slide Left"
+msgstr "Сдвиг влево"
+
+#: widgets/widgets/animated-image/animated-image.php:25
+msgid "Slide Right"
+msgstr "Сдвиг вправо"
+
+#: widgets/widgets/button/button.php:6
+msgid "Button (PB)"
+msgstr "Кнопка (PB)"
+
+#: widgets/widgets/button/button.php:15 widgets/widgets/list/list.php:19
+#: widgets/widgets/testimonial/testimonial.php:27
+msgid "Text"
+msgstr "Текст"
+
+#: widgets/widgets/button/button.php:23
+#: widgets/widgets/call-to-action/call-to-action.php:31
+#: widgets/widgets/price-box/price-box.php:44
+#: widgets/widgets/testimonial/testimonial.php:36
+msgid "Open In New Window"
+msgstr "Открыть в новом окне"
+
+#: widgets/widgets/button/button.php:27
+msgid "Button Alignment"
+msgstr "Расположение кнопки"
+
+#: widgets/widgets/button/button.php:29
+msgid "Left"
+msgstr "Слева"
+
+#: widgets/widgets/button/button.php:30
+msgid "Right"
+msgstr "Справа"
+
+#: widgets/widgets/button/button.php:31
+msgid "Center"
+msgstr "По центру"
+
+#: widgets/widgets/button/button.php:32
+msgid "Justify"
+msgstr "Выравнивание"
+
+#: widgets/widgets/call-to-action/call-to-action.php:6
+msgid "Call To Action (PB)"
+msgstr "Призыв к действию (PB)"
+
+#: widgets/widgets/call-to-action/call-to-action.php:8
+msgid "A Call to Action block"
+msgstr "Блокирование призыва к действию"
+
+#: widgets/widgets/call-to-action/call-to-action.php:19
+msgid "Sub Title"
+msgstr "Подзаголовок"
+
+#: widgets/widgets/call-to-action/call-to-action.php:23
+#: widgets/widgets/price-box/price-box.php:36
+msgid "Button Text"
+msgstr "Текст кнопки"
+
+#: widgets/widgets/call-to-action/call-to-action.php:27
+#: widgets/widgets/price-box/price-box.php:40
+msgid "Button URL"
+msgstr "URL кнопки"
+
+#: widgets/widgets/call-to-action/call-to-action.php:37
+#: widgets/widgets/price-box/price-box.php:49
+msgid "Button"
+msgstr "Кнопка"
+
+#: widgets/widgets/list/list.php:6
+msgid "List (PB)"
+msgstr "Список (PB)"
+
+#: widgets/widgets/list/list.php:8 widgets/widgets/price-box/price-box.php:8
+msgid "Displays a bullet list of elements"
+msgstr "Отображает маркированный список элементов"
+
+#: widgets/widgets/list/list.php:20 widgets/widgets/price-box/price-box.php:32
+msgid "Start each new point with an asterisk (*)"
+msgstr "Каждый новый пункт начинайте со звёздочки (*)"
+
+#: widgets/widgets/price-box/price-box.php:6
+msgid "Price Box (PB)"
+msgstr "Таблица цен (PB)"
+
+#: widgets/widgets/price-box/price-box.php:19
+msgid "Price"
+msgstr "Цена"
+
+#: widgets/widgets/price-box/price-box.php:23
+msgid "Per"
+msgstr "За"
+
+#: widgets/widgets/price-box/price-box.php:27
+msgid "Information Text"
+msgstr "Информационный текст"
+
+#: widgets/widgets/price-box/price-box.php:31
+msgid "Features Text"
+msgstr "Описание"
+
+#: widgets/widgets/price-box/price-box.php:50
+msgid "Feature List"
+msgstr "Список функций"
+
+#: widgets/widgets/testimonial/testimonial.php:6
+msgid "Testimonial (PB)"
+msgstr "Характеристика (PB)"
+
+#: widgets/widgets/testimonial/testimonial.php:19
+msgid "Location"
+msgstr "Местоположение"
+
+#: widgets/widgets/testimonial/testimonial.php:23
+msgid "Image"
+msgstr "Изображение"
+
+#: widgets/widgets/testimonial/testimonial.php:32
+msgid "URL"
+msgstr "URL"
+
+#: siteorigin-panels.php:1254
+msgid "The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help."
+msgstr "Виджет 1{%1$s} недоступен. Пожалуйста, установите отсутствующий плагин. Обратитесь за советом на 2{форум технической поддержки}, если Вам понадобится помощь."
+
+#: tpl/js-templates.php:64
+msgid "Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help."
+msgstr "Для начала добавьте 1{Виджет}, 2{Строку} или 3{Готовый макет} . Прочитайте нашу 4{документацию}, если Вам понадобится помощь."
+
+#: widgets/basic.php:15
+msgid "A complete SiteOrigin Page Builder layout as a widget."
+msgstr "Макет конструктора страниц SiteOrigin в виде виджета."
+
+#: widgets/widgets/testimonial/testimonial.php:8
+msgid "Displays a bullet list of points"
+msgstr "Отображает маркированный список пунктов"
+
+#: inc/widgets.php:118
+msgid "Enable more widgets in the 1{Widgets Bundle settings}."
+msgstr "Включить больше виджетов в 1{настройках набора виджетов}."
+
+#: inc/widgets.php:127
+msgid "Install the 1{Widgets Bundle} to get extra widgets."
+msgstr "Установите 1{набор виджетов} для получения дополнительных виджетов."
+
+#: inc/widgets.php:140
+msgid "You can enable the legacy (PB) widgets in the 1{Page Builder settings}."
+msgstr "Вы можете включить устаревшие виджеты (PB) в 1{настройках Page Builder}"
+
+#: siteorigin-panels.php:1231
+msgid "You need to install 1{%1$s} to use the widget 2{%2$s}."
+msgstr "Вам необходимо установить 1{%1$s} для использования виджета 2{%2$s}."
+
+#: settings/tpl/help.php:6
+msgid "Please read the 1{settings guide} of the Page Builder documentation for help."
+msgstr "Для получения справки, пожалуйста прочитайте 1{руководство по настройке} из комплекта документации Page Builder."
+
+#: tpl/admin-home-page.php:29
+msgid "Home page updated. 1{View page}."
+msgstr "Домашняя страница обновлена. 1{Посмотреть страницу}."
+
+#: widgets/basic.php:469 widgets/widgets.php:629
+msgid "Additional query arguments. See 1{query_posts}."
+msgstr "Дополнительные параметры запроса. Посмотреть возможные 1{запросы}."
+
+#: tpl/help.php:18
+msgid "Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments."
+msgstr "Прочитайте 1{полную документацию} на сайте SiteOrigin. Если Вам необходима помощь, задайте вопрос на нашем 2{форуме технической поддержки} и подпишитесь на 3{нашу рассылку} для получения информации об обновлениях и новых разработках."
+
+#: tpl/js-templates.php:302
+msgid "1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s"
+msgstr "1{Настройка макета}: %1$s колонки с соотношением %2$s, расположенные %3$s"

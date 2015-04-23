@@ -26,18 +26,6 @@ function origin_widgets_enqueue($prefix){
 }
 add_action('admin_enqueue_scripts', 'origin_widgets_enqueue');
 
-function origin_widgets_display_css(){
-	if(is_admin()) return;
-	if(empty($_GET['action']) || $_GET['action'] != 'origin_widgets_css') return;
-	if(empty($_GET['class']) || empty($_GET['style']) || empty($_GET['preset'])) return;
-	if(strpos($_GET['class'], 'SiteOrigin_Panels_Widget_') !== 0) return;
-
-	header("Content-type: text/css");
-	echo origin_widgets_generate_css($_GET['class'], $_GET['style'], $_GET['preset'], $_GET['ver']);
-	exit();
-}
-add_action('init', 'origin_widgets_display_css');
-
 function origin_widgets_generate_css($class, $style, $preset, $version = null){
 	$widget = new $class();
 	if( !is_subclass_of($widget, 'SiteOrigin_Panels_Widget') ) return '';
@@ -49,9 +37,9 @@ function origin_widgets_generate_css($class, $style, $preset, $version = null){
 	$css = get_site_transient('origin_wcss:'.$key);
 	if($css === false || ( defined('SITEORIGIN_PANELS_NOCACHE') && SITEORIGIN_PANELS_NOCACHE ) ) {
 
-		echo "/* Regenerate Cache */\n\n";
 		// Recreate the CSS
-		$css = $widget->create_css($style, $preset);
+		$css = "/* Regenerate Cache */\n\n" ;
+		$css .= $widget->create_css($style, $preset);
 		$css = preg_replace('#/\*.*?\*/#s', '', $css);
 		$css = preg_replace('/\s*([{}|:;,])\s+/', '$1', $css);
 		$css = preg_replace('/\s\s+(.*)/', '$1', $css);
@@ -62,6 +50,21 @@ function origin_widgets_generate_css($class, $style, $preset, $version = null){
 
 	return $css;
 }
+
+function origin_widgets_footer_css(){
+	global $origin_widgets_generated_css;
+	if( !empty( $origin_widgets_generated_css ) ) {
+		echo '<style type="text/css">';
+		foreach( $origin_widgets_generated_css as $id => $css ) {
+			if( empty($css) ) continue;
+			echo $css;
+			$origin_widgets_generated_css[$id] = '';
+		}
+		echo '</style>';
+	}
+}
+add_action('wp_head', 'origin_widgets_footer_css');
+add_action('wp_footer', 'origin_widgets_footer_css');
 
 /**
  * Class SiteOrigin_Panels_Widget
@@ -296,12 +299,15 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 		}
 
 		// Dynamically generate the CSS
+		global $origin_widgets_generated_css;
+		if( empty($origin_widgets_generated_css) ) {
+			$origin_widgets_generated_css = array();
+		}
+
 		if(!empty($instance['origin_style'])) {
 			$filename = $this->origin_id.'-'.$style.'-'.$preset;
-			static $inlined_css = array();
-			if(empty($inlined_css[$filename])) {
-				$inlined_css[$filename] = true;
-				?><style type="text/css" media="all"><?php echo origin_widgets_generate_css(get_class($this), $style, $preset) ?></style><?php
+			if( !isset($origin_widgets_generated_css[$filename]) ) {
+				$origin_widgets_generated_css[$filename] = origin_widgets_generate_css(get_class($this), $style, $preset);
 			}
 		}
 
@@ -623,7 +629,11 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 		$this->form_args['query_additional'] = array(
 			'type' => 'text',
 			'label' => __('Additional Arguments', 'siteorigin-panels'),
-			'description' => sprintf(__('Additional query arguments. See <a href="%s" target="_blank">query_posts</a>.', 'siteorigin-panels'), 'http://codex.wordpress.org/Function_Reference/query_posts'),
+			'description' => preg_replace(
+				'/1\{ *(.*?) *\}/',
+				'<a href="http://codex.wordpress.org/Function_Reference/query_posts">$1</a>',
+				__('Additional query arguments. See 1{query_posts}.', 'siteorigin-panels')
+			)
 		);
 	}
 
@@ -725,7 +735,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			<input type="text" class="widefat" value="<?php echo esc_attr($instance['ids']) ?>" name="<?php echo $this->get_field_name('ids') ?>" />
 		</p>
 		<p class="description">
-			<?php _e("Comma separated attachment IDs. Defaults to all current page's attachments.") ?>
+			<?php _e("Comma separated attachment IDs. Defaults to all current page's attachments.", 'siteorigin-panels') ?>
 		</p>
 
 		<p>

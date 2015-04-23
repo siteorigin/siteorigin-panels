@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.1
+Version: 2.1.1
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.1');
+define('SITEORIGIN_PANELS_VERSION', '2.1.1');
 define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
@@ -103,7 +103,14 @@ function siteorigin_panels_render_admin_home_page(){
  */
 function siteorigin_panels_metaboxes() {
 	foreach( siteorigin_panels_setting( 'post-types' ) as $type ){
-		add_meta_box( 'so-panels-panels', __( 'Page Builder', 'siteorigin-panels' ), 'siteorigin_panels_metabox_render', $type, 'advanced', 'high' );
+		add_meta_box(
+			'so-panels-panels',
+			__( 'Page Builder', 'siteorigin-panels' ),
+			'siteorigin_panels_metabox_render',
+			$type,
+			'advanced',
+			'high'
+		);
 	}
 }
 add_action( 'add_meta_boxes', 'siteorigin_panels_metaboxes' );
@@ -129,7 +136,8 @@ function siteorigin_panels_save_home_page(){
 	if ( !$page_id || get_post_meta( $page_id, 'panels_data', true ) == '' ) {
 		// Lets create a new page
 		$page_id = wp_insert_post( array(
-			'post_title' => __( 'Home', 'siteorigin-panels' ),
+			// TRANSLATORS: This is the default name given to a user's home page
+			'post_title' => __( 'Home Page', 'siteorigin-panels' ),
 			'post_status' => $request['siteorigin_panels_home_enabled'] ? 'publish' : 'draft',
 			'post_type' => 'page',
 			'comment_status' => 'closed',
@@ -234,7 +242,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 
 	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize' ) {
 
-		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
 		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
@@ -253,7 +261,10 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 				0 => array(
 					'title' => __('All Widgets', 'siteorigin-panels'),
-					'filter' => array( 'installed' => true, 'groups' => '' )
+					'filter' => array(
+						'installed' => true,
+						'groups' => ''
+					)
 				)
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
@@ -264,14 +275,21 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 					'description' => __("Page Builder doesn't know about this widget.", 'siteorigin-panels'),
 				),
 				'time' => array(
+					// TRANSLATORS: Number of seconds since
 					'seconds' => __('%d seconds', 'siteorigin-panels'),
+					// TRANSLATORS: Number of minutes since
 					'minutes' => __('%d minutes', 'siteorigin-panels'),
+					// TRANSLATORS: Number of hours since
 					'hours' => __('%d hours', 'siteorigin-panels'),
 
+					// TRANSLATORS: A single second since
 					'second' => __('%d second', 'siteorigin-panels'),
+					// TRANSLATORS: A single minute since
 					'minute' => __('%d minute', 'siteorigin-panels'),
+					// TRANSLATORS: A single hour since
 					'hour' => __('%d hour', 'siteorigin-panels'),
 
+					// TRANSLATORS: Time ago - eg. "1 minute before".
 					'ago' => __('%s before', 'siteorigin-panels'),
 					'now' => __('Now', 'siteorigin-panels'),
 				),
@@ -280,19 +298,30 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 					'current' => __('Current', 'siteorigin-panels'),
 					'revert' => __('Original', 'siteorigin-panels'),
 					'restore' => __('Version restored', 'siteorigin-panels'),
+					'back_to_editor' => __('Converted to editor', 'siteorigin-panels'),
 
 					// Widgets
+					// TRANSLATORS: Message displayed in the history when a widget is deleted
 					'widget_deleted' => __('Widget deleted', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a widget is added
 					'widget_added' => __('Widget added', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a widget is edited
 					'widget_edited' => __('Widget edited', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a widget is duplicated
 					'widget_duplicated' => __('Widget duplicated', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a widget position is changed
 					'widget_moved' => __('Widget moved', 'siteorigin-panels'),
 
 					// Rows
+					// TRANSLATORS: Message displayed in the history when a row is deleted
 					'row_deleted' => __('Row deleted', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a row is added
 					'row_added' => __('Row added', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a row is edited
 					'row_edited' => __('Row edited', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a row position is changed
 					'row_moved' => __('Row moved', 'siteorigin-panels'),
+					// TRANSLATORS: Message displayed in the history when a row is duplicated
 					'row_duplicated' => __('Row duplicated', 'siteorigin-panels'),
 
 					// Cells
@@ -307,7 +336,9 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 				'prebuilt_loading' => __('Loading prebuilt layout', 'siteorigin-panels'),
 				'confirm_use_builder' => __("Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels'),
 				'confirm_stop_builder' => __("Would you like to clear your Page Builder content and revert to using the standard visual editor?", 'siteorigin-panels'),
+				// TRANSLATORS: This is the title for a widget called "Layout Builder"
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
+				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 			),
 			'plupload' => array(
@@ -332,7 +363,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		}
 
 		// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
-		if( $screen->base != 'widgets' ) {
+		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
 			do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 			do_action( 'sidebar_admin_setup' );
 		}
@@ -734,12 +765,18 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 function siteorigin_panels_filter_content( $content ) {
 	global $post;
 
+	static $render_cache = array();
+
 	if ( empty( $post ) ) return $content;
 	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
 	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
-		$panel_content = siteorigin_panels_render( $post->ID );
-
-		if ( !empty( $panel_content ) ) $content = $panel_content;
+		
+		if( empty($render_cache[$post->ID]) ) {
+			$render_cache[$post->ID] = siteorigin_panels_render( $post->ID );
+		}
+		if( !empty($render_cache[$post->ID]) ) {
+			$content = $render_cache[$post->ID];
+		}
 	}
 
 	return $content;
@@ -917,12 +954,9 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			if( !empty($cell_style_wrapper) ) echo $cell_style_wrapper;
 
 			foreach ( $widgets as $pi => $widget_info ) {
-				$instance = $widget_info;
-				unset( $instance['panels_info'] );
-
 				// TODO this wrapper should go in the before/after widget arguments
 				$widget_style_wrapper = siteorigin_panels_start_style_wrapper( 'widget', array(), !empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
-				siteorigin_panels_the_widget( $widget_info['panels_info'], $instance, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
+				siteorigin_panels_the_widget( $widget_info['panels_info'], $widget_info, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
 			}
 			if ( empty( $widgets ) ) echo '&nbsp;';
 
@@ -1187,23 +1221,43 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 			$install_url = siteorigin_panels_plugin_activation_install_url($widgets[$widget]['plugin']['slug'], $widgets[$widget]['plugin']['name']);
 			$form =
 				'<div class="panels-missing-widget-form">' .
-				'<p>' . sprintf(
-					__("You need to <a href='%s' target='_blank'>install %s</a> to use the widget <strong>%s</strong>. It's a free plugin available off the official WordPress plugin directory.", 'siteorigin-panels'),
-					$install_url,
-					$widgets[$widget]['plugin']['name'],
-					$widget
-				). '</p>' .
-				'<p>' . __("Save and reload this page to start using the widget after you've installed it.") . '</p>' .
+				'<p>' .
+				preg_replace(
+					array(
+						'/1\{ *(.*?) *\}/',
+						'/2\{ *(.*?) *\}/',
+					),
+					array(
+						'<a href="'.$install_url.'" target="_blank">$1</a>',
+						'<strong>$1</strong>'
+					),
+					sprintf(
+						__('You need to install 1{%1$s} to use the widget 2{%2$s}.', 'siteorigin-panels') ,
+						$widgets[$widget]['plugin']['name'],
+						$widget
+					)
+				).
+				'</p>' .
+				'<p>' . __("Save and reload this page to start using the widget after you've installed it.", 'siteorigin-panels') . '</p>' .
 				'</div>';
 		}
 		else {
 			// This widget is missing, so show a missing widgets form.
 			$form =
 				'<div class="panels-missing-widget-form"><p>' .
-				sprintf(
-					__('The widget <strong>%s</strong> is not available. Please try locate and install the missing plugin. Post on the <a href="%s" target="_blank">support forums</a> if you need help.', 'siteorigin-panels'),
-					esc_html($widget),
-					'http://siteorigin.com/thread/'
+				preg_replace(
+					array(
+						'/1\{ *(.*?) *\}/',
+						'/2\{ *(.*?) *\}/',
+					),
+					array(
+						'<strong>$1</strong>',
+						'<a href="https://siteorigin.com/thread/" target="_blank">$1</a>'
+					),
+					sprintf(
+						__('The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help.', 'siteorigin-panels'),
+						esc_html($widget)
+					)
 				).
 				'</p></div>';
 		}
@@ -1302,4 +1356,4 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
 // Include the live editor file if we're in live editor mode.
-if( filter_input( INPUT_GET, 'siteorigin_panels_live_editor', FILTER_VALIDATE_BOOLEAN ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';

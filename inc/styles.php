@@ -176,11 +176,11 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 				</div>
 
 				<div class="select-image">
-					<?php _e('Select Image') ?>
+					<?php _e('Select Image', 'siteorigin-panels') ?>
 				</div>
 				<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo intval($current) ?>" />
 			</div>
-			<a href="#" class="remove-image"><?php _e('Remove') ?></a>
+			<a href="#" class="remove-image"><?php _e('Remove', 'siteorigin-panels') ?></a>
 			<?php
 			break;
 
@@ -316,9 +316,22 @@ function siteorigin_panels_sanitize_style_fields($section, $styles){
 				break;
 			case 'measurement' :
 				$measurements = array_map('preg_quote', siteorigin_panels_style_get_measurements_list() );
-				preg_match('/([0-9\.,]+).*?(' . implode('|', $measurements) . ')/', $styles[$k], $match);
-				if( !empty($match[0]) && $match[0] != '' && !empty($match[2]) ) $return[$k] = $match[1] . $match[2];
-				else $return[$k] = '';
+				if (!empty($field['multiple'])) {
+					if (preg_match_all('/(?:([0-9\.,]+).*?(' . implode('|', $measurements) . ')+)/', $styles[$k], $match)) {
+						$return[$k] = $styles[$k];
+					}
+					else {
+						$return[$k] = '';
+					}
+				}
+				else {
+					if (preg_match('/([0-9\.,]+).*?(' . implode('|', $measurements) . ')/', $styles[$k], $match)) {
+						$return[$k] = $match[1] . $match[2];
+					}
+					else {
+						$return[$k] = '';
+					}
+				}
 				break;
 			case 'select' :
 				if( !empty( $styles[$k] ) && in_array( $styles[$k], array_keys( $field['options'] ) ) ) {

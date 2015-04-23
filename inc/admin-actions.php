@@ -137,6 +137,7 @@ function siteorigin_panels_ajax_prebuilt_layouts(){
 			}
 
 			$message = '';
+			// TRANSLATORS: Indicate if there are items to clone. %s will be pages, posts, etc.
 			$message .= sprintf( __("There are no %s with Page Builder content to clone.", 'siteorigin-panels') , $type_name );
 			echo json_encode( array(
 				'error_message' => $message,

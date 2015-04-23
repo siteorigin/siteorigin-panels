@@ -108,23 +108,36 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	if( class_exists('SiteOrigin_Widgets_Bundle') ) {
 		// Add a message about enabling more widgets
 		$tabs['widgets_bundle']['message'] = sprintf(
-			__('Enable more widgets in the <a href="%s" target="_blank">Widgets Bundle settings</a>.'),
-			admin_url('plugins.php?page=so-widgets-plugins')
+			preg_replace(
+				array(
+					'/1\{ *(.*?) *\}/'
+				),
+				array(
+					'<a href="' . admin_url('plugins.php?page=so-widgets-plugins') . '">$1</a>'
+				),
+				__('Enable more widgets in the 1{Widgets Bundle settings}.', 'siteorigin-panels')
+			)
 		);
 	}
 	else {
 		// Add a message about installing the widgets bundle
-		$tabs['widgets_bundle']['message'] = sprintf(
-			__('Install the <a href="%s" target="_blank">Widgets Bundle</a> to get extra widgets.'),
-			siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __('SiteOrigin Widgets Bundle', 'siteorigin-panels') )
+		$tabs['widgets_bundle']['message'] = preg_replace(
+			'/1\{ *(.*?) *\}/',
+			'<a href="' . siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __('SiteOrigin Widgets Bundle', 'siteorigin-panels') ) . '">$1</a>',
+			__('Install the 1{Widgets Bundle} to get extra widgets.', 'siteorigin-panels')
 		);
 	}
 
 	$tabs['page_builder'] = array(
 		'title' => __('Page Builder Widgets', 'siteorigin-panels'),
-		'message' =>  sprintf(
-			__('You can enable the legacy (PB) widgets in the <a href="%s" target="_blank">Page Builder settings</a>.'),
-			admin_url('options-general.php?page=siteorigin_panels')
+		'message' => preg_replace(
+			array(
+				'/1\{ *(.*?) *\}/'
+			),
+			array(
+				'<a href="' . admin_url('options-general.php?page=siteorigin_panels') . '">$1</a>'
+			),
+			__('You can enable the legacy (PB) widgets in the 1{Page Builder settings}.', 'siteorigin-panels')
 		),
 		'filter' => array(
 			'groups' => array('panels')
@@ -141,6 +154,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	// Check for woocommerce plugin.
 	if (defined('WOOCOMMERCE_VERSION')) {
 		$tabs['woocommerce'] = array(
+			// TRANSLATORS: The name of WordPress plugin
 			'title'  => __('WooCommerce', 'woocommerce'),
 			'filter' => array(
 				'groups' => array('woocommerce')
@@ -151,6 +165,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	// Check for jetpack plugin.
 	if (defined('JETPACK__VERSION')) {
 		$tabs['jetpack'] = array(
+			// TRANSLATORS: The name of WordPress plugin
 			'title'  => __('Jetpack', 'jetpack'),
 			'filter' => array(
 				'groups' => array('jetpack')
@@ -161,6 +176,7 @@ function siteorigin_panels_add_widgets_dialog_tabs($tabs){
 	// Check for bbpress plugin.
 	if (function_exists('bbpress')) {
 		$tabs['bbpress'] = array(
+			// TRANSLATORS: The name of WordPress plugin
 			'title'  => __('BBPress', 'bbpress'),
 			'filter' => array(
 				'groups' => array('bbpress')

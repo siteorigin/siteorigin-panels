@@ -699,6 +699,7 @@
 
 		/* These are the action buttons in the title bar */
 		a {
+			cursor: pointer;
 			position: absolute;
 			box-sizing: border-box;
 			width: 50px;
@@ -1123,21 +1124,15 @@
 				background: #F3F3F3;
 
 				input, select, button, strong, span {
-					display: block;
-					float: left;
-					margin-right: 5px;
+					display: inline;
+					margin: 1px 5px;
 
 					outline: none;
 					box-shadow: none;
 				}
 
-				strong, span {
-					margin-top: 5px;
-					margin-right: 0.75em;
-				}
-
-				span {
-					margin-left:  0.75em;
+				button {
+					margin-top: 2px;
 				}
 
 				label{

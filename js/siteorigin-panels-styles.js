@@ -93,7 +93,8 @@
                 var frame = null;
                 var $s = $(this);
 
-                $s.find('.so-image-selector').click( function(){
+                $s.find('.so-image-selector').click( function( e ){
+                    e.preventDefault();
 
                     if( frame === null ) {
                         // Create the media frame.
@@ -135,7 +136,8 @@
                 } );
 
                 // Handle clicking on remove
-                $s.find('.remove-image').click(function(){
+                $s.find('.remove-image').click(function(e){
+                    e.preventDefault();
                     $s.find( '.current-image').css('background-image', 'none');
                     $s.find('input').val( '' );
                 });
@@ -151,16 +153,27 @@
 
                 // Load the value from the hidden field
                 if( hidden.val() !== '' ) {
-                    var re = /([0-9\.,]+)(.*)/;
-                    var match = re.exec( hidden.val() );
-                    if( match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined' ) {
-                        text.val( match[1] );
-                        unit.val( match[2] );
+                    var re = /(?:([0-9\.,]+)(.*))+/;
+                    var valueList = hidden.val().split(' ');
+                    var valueListValue = [];
+                    for (var i in valueList) {
+                        var match = re.exec(valueList[i]);
+                        if (match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined') {
+                          valueListValue.push(match[1]);
+                          unit.val(match[2]);
+                        }
                     }
+                    text.val(valueListValue.join(' '));
                 }
 
                 var setVal = function(){
-                    hidden.val( text.val() + unit.val() );
+                    var fullString = text
+                      .val()
+                      .split(' ')
+                      .filter(function(value) { return value !== '' })
+                      .map(function(value) { return value + unit.val(); })
+                      .join(' ');
+                    hidden.val( fullString );
                 };
 
                 // Set the value when ever anything changes

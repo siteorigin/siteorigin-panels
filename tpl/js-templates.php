@@ -47,12 +47,21 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-panels-welcome-message">
 		<div class="so-message-wrapper">
 			<?php
-			printf(
-				__("Add a %s %s or %s to get started. Read our %s if you need help.", 'siteorigin-panels'),
-				"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> " . __('widget', 'siteorigin-panels') .  "</a>",
-				"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-columns'></span> " . __('row', 'siteorigin-panels') .  "</a>",
-				"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-cubes'></span> " . __('prebuilt layout', 'siteorigin-panels') .  "</a>",
-				"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>" . __('starting guide', 'siteorigin-panels') . "</a>"
+			echo preg_replace(
+				array(
+					'/1\{ *(.*?) *\}/',
+					'/2\{ *(.*?) *\}/',
+					'/3\{ *(.*?) *\}/',
+					'/4\{ *(.*?) *\}/',
+				),
+				array(
+					"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
+					"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-columns'></span> $1</a>",
+					"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-cubes'></span> $1</a>",
+					"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
+				),
+				// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
+				__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
 			);
 			?>
 		</div>
@@ -71,9 +80,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 				<div class="so-dropdown-links-wrapper">
 					<ul>
-						<li><a href="#" class="so-row-settings"><?php _e('Edit Row') ?></a></li>
-						<li><a href="#" class="so-row-duplicate"><?php _e('Duplicate Row') ?></a></li>
-						<li><a href="#" class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row') ?></a></li>
+						<li><a href="#" class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
 						<div class="so-pointer"></div>
 					</ul>
 				</div>
@@ -118,9 +127,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-title-bar">
 			<h3 class="so-title">{{%= title %}}</h3>
-			<a class="so-previous so-nav" href="#"><span class="so-dialog-icon"></span></a>
-			<a class="so-next so-nav" href="#"><span class="so-dialog-icon"></span></a>
-			<a class="so-close" href="#"><span class="so-dialog-icon"></span></a>
+			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
+			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
+			<a class="so-close"><span class="so-dialog-icon"></span></a>
 		</div>
 
 		<div class="so-toolbar">
@@ -171,7 +180,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-widgets">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php printf( __('Add New Widget %s'), '<span class="current-tab-title"></span>' ) ?></h3>
+		<h3 class="title"><?php printf( __('Add New Widget %s', 'siteorigin-panels'), '<span class="current-tab-title"></span>' ) ?></h3>
 
 		<div class="left-sidebar">
 
@@ -255,30 +264,49 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="content">
 
 			<div class="row-set-form">
-				<strong>
-					<?php _e('Set Row Layout') ?>
-				</strong>
-				<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />
-				<span><?php _e('Columns with Ratio') ?></span>
-				<select name="ratio" class="so-row-field">
-					<option value="1"><?php esc_html_e('Even', 'siteorigin-panels') ?></option>
-					<option value="0.61803398"><?php esc_html_e('Golden', 'siteorigin-panels') ?></option>
-					<option value="0.5"><?php esc_html_e('Halves', 'siteorigin-panels') ?></option>
-					<option value="0.33333333"><?php esc_html_e('Thirds', 'siteorigin-panels') ?></option>
-					<option value="0.41421356"><?php esc_html_e('Diagon', 'siteorigin-panels') ?></option>
-					<option value="0.73205080"><?php esc_html_e('Hecton', 'siteorigin-panels') ?></option>
-					<option value="0.11803398"><?php esc_html_e('Hemidiagon', 'siteorigin-panels') ?></option>
-					<option value="0.27201964"><?php esc_html_e('Penton', 'siteorigin-panels') ?></option>
-					<option value="0.15470053"><?php esc_html_e('Trion', 'siteorigin-panels') ?></option>
-					<option value="0.207"><?php esc_html_e('Quadriagon', 'siteorigin-panels') ?></option>
-					<option value="0.30901699"><?php esc_html_e('Biauron', 'siteorigin-panels') ?></option>
-					<option value="0.46"><?php esc_html_e('Bipenton', 'siteorigin-panels') ?></option>
-				</select>
-				<select name="ratio_direction" class="so-row-field">
-					<option value="right"><?php esc_html_e('Left to Right', 'siteorigin-panels') ?></option>
-					<option value="left"><?php esc_html_e('Right to Left', 'siteorigin-panels') ?></option>
-				</select>
-				<button class="button-secondary set-row"><?php esc_html_e('Set', 'siteorigin-panels') ?></button>
+				<?php
+				$cells_field = '<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />';
+				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
+					'Even' => 1,
+					'Golden' => 0.61803398,
+					'Halves' => 0.5,
+					'Thirds' => 0.33333333,
+					'Diagon' => 0.41421356,
+					'Hecton' => 0.73205080,
+					'Hemidiagon' => 0.11803398,
+					'Penton' => 0.27201964,
+					'Trion' => 0.15470053,
+					'Quadriagon' => 0.207,
+					'Biauron' => 0.30901699,
+					'Bipenton' => 0.46,
+				) );
+				$ratio_field = '<select name="ratio" class="so-row-field">';
+				foreach( $ratios as $name => $value ) {
+					$ratio_field .= '<option value="' . esc_attr($value) .  '">' . esc_html($name . ' (' . round($value, 3) . ')') . '</option>';
+				}
+				$ratio_field .= '</select>';
+
+				$direction_field = '<select name="ratio_direction" class="so-row-field">';
+				$direction_field .= '<option value="right">' . esc_html__('Left to Right', 'siteorigin-panels') . '</option>';
+				$direction_field .= '<option value="left">' . esc_html__('Right to Left', 'siteorigin-panels') . '</option>';
+				$direction_field .= '</select>';
+
+				printf(
+					preg_replace(
+						array(
+							'/1\{ *(.*?) *\}/',
+						),
+						array(
+							'<strong>$1</strong>',
+						),
+						__('1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s', 'siteorigin-panels')
+					),
+					$cells_field,
+					$ratio_field,
+					$direction_field
+				);
+				echo '<button class="button-secondary set-row">' . esc_html__('Set', 'siteorigin-panels') . '</button>';
+				?>
 			</div>
 
 			<div class="row-preview">

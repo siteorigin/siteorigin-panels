@@ -56,6 +56,12 @@ Page Builder is actively developed with new features and exciting enhancements a
 
 Read the [Page Builder developer docs](https://siteorigin.com/docs/page-builder/) if you'd like to develop for Page Builder.
 
+= Available in 17 Languages =
+
+Through the efforts of both professional translators and our community, Page Builder is available in the following languages:  Afrikaans, Bulgarian, Chinese (simplified), Danish, Dutch, English, Finnish, French, German, Hindi, Italian, Japanese, Polish, Portuguese (BR), Russian, Spanish and Swedish.
+
+Join our [translation project](https://poeditor.com/join/project?hash=82847115cc12f5d35ec3d066495dca1a) if you'd like to help improve our translations or add more languages.
+
 == Installation ==
 
 1. Upload and install Page Builder in the same way you'd install any other plugin.
@@ -90,6 +96,22 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.1.1 =
+* Added translations for 16 additional languages
+* Modified strings to improve translatability.
+* Row and Widget style measurement fields now allow multiple values.
+* New rows now added below row of currently selected cell.
+* Orphaned widgets in edited rows are now moved into remaining cell.
+* Made panels javascript object globally accessible.
+* panels_info array now passed into widget rendering function.
+* Removed unnecessary action triggers from customizer that was breaking some themes.
+* Disabling Page Builder on a page now properly creates history entry.
+* Small fixes to sidebars emulator.
+* Fixed import/export on custom home page interface.
+* Removed call to filter_input from global space.
+* Fixed bundled widgets conflict with Yoast SEO.
+* Prevented double rendering issue with Yoast SEO.
 
 = 2.1 =
 * Improved Page Builder settings page.
