@@ -765,18 +765,12 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 function siteorigin_panels_filter_content( $content ) {
 	global $post;
 
-	static $render_cache = array();
-
 	if ( empty( $post ) ) return $content;
 	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
 	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
-		
-		if( empty($render_cache[$post->ID]) ) {
-			$render_cache[$post->ID] = siteorigin_panels_render( $post->ID );
-		}
-		if( !empty($render_cache[$post->ID]) ) {
-			$content = $render_cache[$post->ID];
-		}
+		$panel_content = siteorigin_panels_render( $post->ID );
+
+		if ( !empty( $panel_content ) ) $content = $panel_content;
 	}
 
 	return $content;
