@@ -81,7 +81,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 			'siteorigin-panels-post-content',
 			__( 'Post Content', 'siteorigin-panels' ),
 			array(
-				'description' => __( 'Displays some form of post content form the current post.', 'siteorigin-panels' ),
+				'description' => __( 'Displays content from the current post.', 'siteorigin-panels' ),
 			)
 		);
 	}
@@ -434,7 +434,6 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<option value="parent" <?php selected($instance['orderby'], 'parent') ?>><?php esc_html_e('Parent', 'siteorigin-panels') ?></option>
 					<option value="rand" <?php selected($instance['orderby'], 'rand') ?>><?php esc_html_e('Random', 'siteorigin-panels') ?></option>
 					<option value="comment_count" <?php selected($instance['orderby'], 'comment_count') ?>><?php esc_html_e('Comment Count', 'siteorigin-panels') ?></option>
-					<option value="menu_order" <?php selected($instance['orderby'], 'menu_order') ?>><?php esc_html_e('Menu Order', 'siteorigin-panels') ?></option>
 					<option value="menu_order" <?php selected($instance['orderby'], 'menu_order') ?>><?php esc_html_e('Menu Order', 'siteorigin-panels') ?></option>
 					<option value="post__in" <?php selected($instance['orderby'], 'post__in') ?>><?php esc_html_e('Post In Order', 'siteorigin-panels') ?></option>
 				</select>

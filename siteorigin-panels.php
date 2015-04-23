@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: http://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.1
+Version: 2.1.1
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.1');
+define('SITEORIGIN_PANELS_VERSION', '2.1.1');
 define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
@@ -242,7 +242,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 
 	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize' ) {
 
-		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
 		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
@@ -298,6 +298,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 					'current' => __('Current', 'siteorigin-panels'),
 					'revert' => __('Original', 'siteorigin-panels'),
 					'restore' => __('Version restored', 'siteorigin-panels'),
+					'back_to_editor' => __('Converted to editor', 'siteorigin-panels'),
 
 					// Widgets
 					// TRANSLATORS: Message displayed in the history when a widget is deleted
@@ -362,7 +363,7 @@ function siteorigin_panels_admin_enqueue_scripts($prefix) {
 		}
 
 		// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
-		if( $screen->base != 'widgets' ) {
+		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
 			do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 			do_action( 'sidebar_admin_setup' );
 		}
@@ -764,12 +765,18 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 function siteorigin_panels_filter_content( $content ) {
 	global $post;
 
+	static $render_cache = array();
+
 	if ( empty( $post ) ) return $content;
 	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
 	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
-		$panel_content = siteorigin_panels_render( $post->ID );
-
-		if ( !empty( $panel_content ) ) $content = $panel_content;
+		
+		if( empty($render_cache[$post->ID]) ) {
+			$render_cache[$post->ID] = siteorigin_panels_render( $post->ID );
+		}
+		if( !empty($render_cache[$post->ID]) ) {
+			$content = $render_cache[$post->ID];
+		}
 	}
 
 	return $content;
@@ -947,12 +954,9 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			if( !empty($cell_style_wrapper) ) echo $cell_style_wrapper;
 
 			foreach ( $widgets as $pi => $widget_info ) {
-				$instance = $widget_info;
-				unset( $instance['panels_info'] );
-
 				// TODO this wrapper should go in the before/after widget arguments
 				$widget_style_wrapper = siteorigin_panels_start_style_wrapper( 'widget', array(), !empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
-				siteorigin_panels_the_widget( $widget_info['panels_info'], $instance, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
+				siteorigin_panels_the_widget( $widget_info['panels_info'], $widget_info, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
 			}
 			if ( empty( $widgets ) ) echo '&nbsp;';
 
@@ -1352,4 +1356,4 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
 // Include the live editor file if we're in live editor mode.
-if( filter_input( INPUT_GET, 'siteorigin_panels_live_editor', FILTER_VALIDATE_BOOLEAN ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';

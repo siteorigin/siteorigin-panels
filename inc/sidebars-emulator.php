@@ -41,6 +41,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				$widget_class = get_class( $widget );
 				foreach ( $this->all_posts_widgets as $post_widgets ) {
 					foreach ( $post_widgets as $widget_instance ) {
+						if( empty($widget_instance['panels_info']['class']) ) continue;
+
 						$instance_class = $widget_instance['panels_info']['class'];
 						if ( $instance_class == $widget_class ) {
 							//The option value uses only the widget id number as keys
@@ -79,6 +81,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		$widgets = $panels_data['widgets'];
 		$this->all_posts_widgets[ $post_id ] = array();
 		foreach ( $widgets as $widget_instance ) {
+			if( empty($widget_instance['panels_info']['class']) ) continue;
+
 			$id_val = $post_id . strval( 1000 + intval( $widget_instance['panels_info']['id'] ) );
 			$widget_class = $widget_instance['panels_info']['class'];
 			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {

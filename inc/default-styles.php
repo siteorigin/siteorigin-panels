@@ -101,6 +101,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'group' => 'layout',
 			'description' => __('Padding around the entire row.', 'siteorigin-panels'),
 			'priority' => 7,
+			'multiple' => true
 		);
 
 		$fields['row_stretch'] = array(
@@ -180,6 +181,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'group' => 'layout',
 			'description' => __('Padding around the entire widget.', 'siteorigin-panels'),
 			'priority' => 7,
+			'multiple' => true
 		);
 
 		// How lets add the design fields

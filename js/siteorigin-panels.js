@@ -28,8 +28,10 @@ String.prototype.panelsProcessTemplate = function(){
         collection : { },
         view : { },
         dialog : { },
-        fn : {}
+        fn : { }
     };
+
+    window.panels = panels;
 
     /**
      * Model for an instance of a widget
@@ -74,16 +76,26 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Move this widget to a new cell
+         * Move this widget model to a new cell
          *
          * @param panels.model.cell newCell
+         *
+         * @return bool Indicating if the widget was moved into a different cell
          */
-        moveToCell: function(newCell){
-            if( this.cell.cid === newCell.cid ) { return false; }
+        moveToCell: function(newCell, options){
+            options = _.extend( {
+                silent: true
+            }, options );
+
+            if( this.cell.cid === newCell.cid ) {
+                return false;
+            }
 
             this.cell = newCell;
-            this.collection.remove(this, {silent:true});
-            newCell.widgets.add(this, {silent:true});
+            this.collection.remove(this, options );
+            newCell.widgets.add(this, options );
+
+            return true;
         },
 
         /**
@@ -742,8 +754,16 @@ String.prototype.panelsProcessTemplate = function(){
 
                 }
                 else if(cells.length < this.cells.length) {
+                    var newParentCell = this.cells.at( cells.length - 1 );
+
                     // We need to remove cells
                     _.each(this.cells.slice( cells.length, this.cells.length), function(cell){
+                        var widgetsToMove = cell.widgets.models.slice(0);
+                        for( var i = 0; i < widgetsToMove.length; i++ ) {
+                            widgetsToMove[i].moveToCell( newParentCell, {silent: false} );
+                        }
+
+                        // First move all the widgets to the new cell
                         cell.destroy();
                     });
                 }
@@ -1086,13 +1106,17 @@ String.prototype.panelsProcessTemplate = function(){
          * @param weights
          */
         addRow: function( weights, options ){
-            options = _.extend({noAnimate : false}, options);
+            options = _.extend({
+                noAnimate : false
+            }, options);
             // Create the actual row
             var row = new panels.model.row( {
                 collection: this.rows
             } );
+
             row.setCells( weights );
             row.builder = this;
+
             this.rows.add(row, options);
 
             return row;
@@ -1420,6 +1444,7 @@ String.prototype.panelsProcessTemplate = function(){
 
                 if( confirm(panelsOptions.loc.confirm_stop_builder) ) {
                     // User is switching to the standard visual editor
+                    thisView.addHistoryEntry( 'back_to_editor' );
                     thisView.model.loadPanelsData( false );
                 }
 
@@ -1616,18 +1641,36 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Get the model for the currently active cell
+         * Get the model for the currently selected cell
          */
-        getActiveCell: function(){
+        getActiveCell: function( options ){
+            console.log(options);
+            options = _.extend( {
+                createCell: true,
+                defaultPosition: 'first'
+            }, options );
+
             if( this.$('.so-cells .cell').length === 0 ) {
-                // Create a row with a single cell
-                this.model.addRow( [1], {noAnimate: true} );
+
+                if( options.createCell ) {
+                    // Create a row with a single cell
+                    this.model.addRow( [1], {noAnimate: true} );
+                }
+                else {
+                    return null;
+                }
+
             }
 
             var activeCell = this.$('.so-cells .cell.cell-selected');
 
             if(!activeCell.length) {
-                activeCell = this.$('.so-cells .cell').first();
+                if( options.defaultPosition === 'last' ){
+                    activeCell = this.$('.so-cells .cell').first();
+                }
+                else {
+                    activeCell = this.$('.so-cells .cell').last();
+                }
             }
 
             return activeCell.data('view').model;
@@ -3524,11 +3567,21 @@ String.prototype.panelsProcessTemplate = function(){
             this.model = new panels.model.row();
             this.updateModel();
 
+            var activeCell = this.builder.getActiveCell({
+                createCell: false,
+                defaultPosition: 'last'
+            });
+
+            var options = {};
+            if( activeCell !== null ) {
+                options.at = this.builder.model.rows.indexOf( activeCell.row ) + 1;
+            }
+
             // Set up the model and add it to the builder
             this.model.collection = this.builder.model.rows;
-            this.builder.model.rows.add( this.model );
+            this.builder.model.rows.add( this.model, options );
 
-            this.closeDialog( );
+            this.closeDialog();
 
             return false;
         },
@@ -3628,8 +3681,8 @@ jQuery( function($){
 
         container.removeClass('so-panels-loading');
 
-        // Trigger a global jQuery event after we've setup the builder view
-        $(document).trigger( 'panels_setup', builderView );
+        // Trigger a global jQuery event after we've setup the builder view. Everything is accessible form there
+        $(document).trigger( 'panels_setup', builderView, window.panels );
     }
 } );
 
