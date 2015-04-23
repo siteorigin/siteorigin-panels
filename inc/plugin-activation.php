@@ -72,7 +72,7 @@ function siteorigin_panels_plugin_activation_do_plugin_install(){
 
 		/** Prep variables for Plugin_Installer_Skin class */
 		$title = sprintf( __('Installing %s', 'siteorigin-panels'), $plugin['name'] );
-		$url   = add_query_arg( array( 'action' => 'install-plugin', 'plugin' => $plugin['slug'] ), 'update.php' );
+		$url   = add_query_arg( array( 'action' => 'install-plugin', 'plugin' => urlencode( $plugin['slug'] ) ), 'update.php' );
 		if ( isset( $_GET['from'] ) )
 			$url .= add_query_arg( 'from', urlencode( stripslashes( $_GET['from'] ) ), $url );
 
