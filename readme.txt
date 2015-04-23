@@ -97,6 +97,22 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.1.1 =
+* Added translations for 16 additional languages
+* Modified strings to improve translatability.
+* Row and Widget style measurement fields now allow multiple values.
+* New rows now added below row of currently selected cell.
+* Orphaned widgets in edited rows are now moved into remaining cell.
+* Made panels javascript object globally accessible.
+* panels_info array now passed into widget rendering function.
+* Removed unnecessary action triggers from customizer that was breaking some themes.
+* Disabling Page Builder on a page now properly creates history entry.
+* Small fixes to sidebars emulator.
+* Fixed import/export on custom home page interface.
+* Removed call to filter_input from global space.
+* Fixed bundled widgets conflict with Yoast SEO.
+* Prevented double rendering issue with Yoast SEO.
+
 = 2.1 =
 * Improved Page Builder settings page.
 * Added sidebar emulation, which makes a Page Builder page appear to be a sidebar. Improves compatibility with other widgets.
