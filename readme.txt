@@ -110,6 +110,8 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 * Small fixes to sidebars emulator.
 * Fixed import/export on custom home page interface.
 * Removed call to filter_input from global space.
+* Fixed bundled widgets conflict with Yoast SEO.
+* Prevented double rendering issue with Yoast SEO.
 
 = 2.1 =
 * Improved Page Builder settings page.
