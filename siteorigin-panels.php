@@ -772,7 +772,28 @@ function siteorigin_panels_filter_content( $content ) {
 	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
 		$panel_content = siteorigin_panels_render( $post->ID );
 
-		if ( !empty( $panel_content ) ) $content = $panel_content;
+		if ( !empty( $panel_content ) ) {
+			$content = $panel_content;
+
+			if( !is_singular() ) {
+				// This is an archive page, so try strip out anything after the more text
+
+				if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
+					$content = explode( $matches[0], $content, 2 );
+					$content = $content[0];
+					$content = force_balance_tags( $content );
+					if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) ) {
+						$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
+					}
+					else {
+						$more_link_text = __('Read More', 'siteorigin-panels');
+					}
+
+					$more_link = apply_filters( 'the_content_more_link', ' <a href="' . get_permalink() . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
+					$content .= '<p>' . $more_link . '</p>';
+				}
+			}
+		}
 	}
 
 	return $content;
