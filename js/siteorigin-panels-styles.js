@@ -85,7 +85,16 @@
 
             // Set up the color fields
             if(typeof $.fn.wpColorPicker !== 'undefined') {
-                this.$('.so-wp-color-field').wpColorPicker();
+                this.$('.so-wp-color-field').each(function(){
+                    var $s = $(this);
+                    var settings;
+
+                    try {
+                        settings = JSON.parse( $s.attr('data-settings') );
+                    } catch (e) {}
+
+                    $s.wpColorPicker( settings );
+                });
             }
 
             // Set up the image select fields

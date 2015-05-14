@@ -159,8 +159,9 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			break;
 
 		case 'color' :
+			$settings = wp_json_encode( isset( $field['settings'] ) ? $field['settings'] : (object) array() );
 			?>
-			<input type="text" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" class="so-wp-color-field" />
+			<input type="text" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" data-settings="<?php echo esc_attr( $settings ); ?>" class="so-wp-color-field" />
 			<?php
 			break;
 
