@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Page Builder by SiteOrigin
-Plugin URI: http://siteorigin.com/page-builder/
+Plugin URI: https://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
 Version: 2.1.2
 Author: SiteOrigin
-Author URI: http://siteorigin.com
+Author URI: https://siteorigin.com
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
