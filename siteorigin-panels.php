@@ -244,13 +244,17 @@ function siteorigin_panels_is_admin_page(){
 /**
  * Enqueue the panels admin scripts
  *
+ * @param string $prefix
+ * @param bool $force Should we force the enqueues
+ *
  * @action admin_print_scripts-post-new.php
  * @action admin_print_scripts-post.php
  * @action admin_print_scripts-appearance_page_so_panels_home_page
  */
-function siteorigin_panels_admin_enqueue_scripts( ) {
+function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false ) {
 	$screen = get_current_screen();
-	if ( siteorigin_panels_is_admin_page() ) {
+	var_dump( $force );
+	if ( $force || siteorigin_panels_is_admin_page() ) {
 		// Media is required for row styles
 		wp_enqueue_media();
 
@@ -451,12 +455,14 @@ function siteorigin_panels_js_templates(){
 /**
  * Enqueue the admin panel styles
  *
+ * @param string $prefix
+ * @param bool $force Should we force the enqueue
+ *
  * @action admin_print_styles-post-new.php
  * @action admin_print_styles-post.php
  */
-function siteorigin_panels_admin_enqueue_styles() {
-	$screen = get_current_screen();
-	if ( siteorigin_panels_is_admin_page() ) {
+function siteorigin_panels_admin_enqueue_styles( $prefix = '', $force = false ) {
+	if ( $force || siteorigin_panels_is_admin_page() ) {
 		wp_enqueue_style( 'so-panels-admin', plugin_dir_url(__FILE__) . 'css/admin.css', array( 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION );
 		do_action( 'siteorigin_panel_enqueue_admin_styles' );
 	}
