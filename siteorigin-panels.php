@@ -253,7 +253,6 @@ function siteorigin_panels_is_admin_page(){
  */
 function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false ) {
 	$screen = get_current_screen();
-	var_dump( $force );
 	if ( $force || siteorigin_panels_is_admin_page() ) {
 		// Media is required for row styles
 		wp_enqueue_media();
