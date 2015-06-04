@@ -1,7 +1,7 @@
 <?php $settings = siteorigin_panels_setting(); ?>
 
 <div class="wrap" id="panels-home-page" data-post-id="<?php echo get_the_ID() ?>">
-	<form action="<?php echo add_query_arg('page', 'so_panels_home_page') ?>" class="hide-if-no-js" method="post" id="panels-home-page-form">
+	<form action="<?php echo add_query_arg('page', 'so_panels_home_page') ?>" class="hide-if-no-js siteorigin-panels-builder-form" method="post" id="panels-home-page-form">
 		<div id="icon-index" class="icon32"><br></div>
 		<h2>
 			<label class="switch">

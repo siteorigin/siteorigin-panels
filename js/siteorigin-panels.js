@@ -3646,12 +3646,12 @@ jQuery( function($){
         form = $('form#post');
         postId = $('#post_ID').val();
     }
-    else if( $('div#panels-home-page.wrap').length ) {
+    else if( $('.siteorigin-panels-builder-form').length ) {
         // We're dealing with the custom home page interface
-        var $$ = $('div#panels-home-page.wrap');
+        var $$ = $('.siteorigin-panels-builder-form');
         container = $$.find('.siteorigin-panels-builder');
         field = $$.find('input[name="panels_data"]');
-        form = $$.find('form');
+        form = $$;
         postId = $('#panels-home-page').data('post-id');
     }
 

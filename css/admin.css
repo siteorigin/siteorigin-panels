@@ -1630,14 +1630,6 @@
 #panels-home-page {
   /* The Switch - © 2013 Thibaut Courouble - MIT License */
 }
-#panels-home-page .siteorigin-panels-builder {
-  border: 1px solid #D0D0D0;
-  background-color: #ffffff;
-  margin: 10px 0;
-}
-#panels-home-page .siteorigin-panels-builder.so-panels-loading {
-  min-height: 150px;
-}
 #panels-home-page .switch {
   margin: 0 10px 0 0;
   float: left;
@@ -1758,6 +1750,14 @@
 #panels-home-page #panels-view-as-page {
   display: inline-block;
   margin-left: 50px;
+}
+.siteorigin-panels-builder-form .siteorigin-panels-builder {
+  border: 1px solid #D0D0D0;
+  background-color: #ffffff;
+  margin: 10px 0;
+}
+.siteorigin-panels-builder-form .siteorigin-panels-builder.so-panels-loading {
+  min-height: 150px;
 }
 .siteorigin-page-builder-widget .siteorigin-panels-display-builder {
   display: inline-block !important;
