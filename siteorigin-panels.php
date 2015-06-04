@@ -779,9 +779,11 @@ function siteorigin_panels_filter_content( $content ) {
 
 	if ( empty( $post ) ) return $content;
 	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
-	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
-		$panel_content = siteorigin_panels_render( $post->ID );
 
+	// Check if this post has panels_data
+	$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+	if ( !empty( $panels_data ) ) {
+		$panel_content = siteorigin_panels_render( $post->ID );
 		if ( !empty( $panel_content ) ) $content = $panel_content;
 	}
 
