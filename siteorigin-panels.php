@@ -1217,9 +1217,10 @@ add_action('wp_enqueue_scripts', 'siteorigin_panels_enqueue_styles', 1);
  * @param string $widget The class of the widget
  * @param array $instance Widget values
  * @param bool $raw
+ * @param string $widget_number
  * @return mixed|string The form
  */
-function siteorigin_panels_render_form($widget, $instance = array(), $raw = false){
+function siteorigin_panels_render_form($widget, $instance = array(), $raw = false, $widget_number = '{$id}' ){
 	global $wp_widget_factory;
 
 	// This is a chance for plugins to replace missing widgets
@@ -1282,7 +1283,7 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 	if( $raw ) $instance = $the_widget->update($instance, $instance);
 
 	$the_widget->id = 'temp';
-	$the_widget->number = '{$id}';
+	$the_widget->number = $widget_number;
 
 	ob_start();
 	$the_widget->form($instance);
