@@ -1292,7 +1292,7 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 	// Convert the widget field naming into ones that Page Builder uses
 	$exp = preg_quote( $the_widget->get_field_name('____') );
 	$exp = str_replace('____', '(.*?)', $exp);
-	$form = preg_replace( '/'.$exp.'/', 'widgets[{$id}][$1]', $form );
+	$form = preg_replace( '/'.$exp.'/', 'widgets[' . preg_replace('/\$(\d)/', '\\\$$1', $widget_number) . '][$1]', $form );
 
 	$form = apply_filters('siteorigin_panels_widget_form', $form, $widget, $instance);
 
