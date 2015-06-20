@@ -11,13 +11,16 @@ function siteorigin_panels_ajax_action_style_form(){
 	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 	$post_id = filter_input( INPUT_POST, 'postId', FILTER_SANITIZE_NUMBER_INT );
 
+	$args = filter_input( INPUT_POST, 'args', FILTER_DEFAULT );
+	$args = json_decode($args, true);
+
 	switch($type) {
 		case 'row':
-			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
+			siteorigin_panels_render_styles_fields('row', '<h3>' . __('Row Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id, $args);
 			break;
 
 		case 'widget':
-			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id);
+			siteorigin_panels_render_styles_fields('widget', '<h3>' . __('Widget Styles', 'siteorigin-panels') . '</h3>', '', $current, $post_id, $args);
 	}
 
 	wp_die();
@@ -32,9 +35,10 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param string $after
  * @param array $current
  * @param int $post_id
+ * @param array $args Arguments passed by the builder
  */
-function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0 ){
-	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id );
+function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0, $args = array() ){
+	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id, $args );
 	if( empty($fields) ) return false;
 
 	$groups = array(
@@ -64,7 +68,7 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 			$fields[$field_id]['group'] = 'theme';
 		}
 	}
-	$groups = apply_filters('siteorigin_panels_' . $section . '_style_groups', $groups );
+	$groups = apply_filters('siteorigin_panels_' . $section . '_style_groups', $groups, $post_id, $args );
 
 	// Sort the style fields and groups by priority
 	uasort( $fields, 'siteorigin_panels_styles_sort_fields' );
@@ -284,12 +288,14 @@ function siteorigin_panels_styles_sanitize_all($panels_data){
  *
  * @return Sanitized styles
  */
-function siteorigin_panels_sanitize_style_fields($section, $styles){
+function siteorigin_panels_sanitize_style_fields( $section, $styles ){
 	static $fields_cache = array();
 
 	// Use the filter to get the fields for this section.
 	if( empty($fields_cache[$section]) ) {
-		$fields_cache[$section] = apply_filters('siteorigin_panels_' . $section . '_style_fields', array() );
+		// This filter doesn't pass in the arguments $post_id and $args
+		// Plugins looking to extend fields, should always add their fields if these are empty
+		$fields_cache[$section] = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), false, false );
 	}
 	$fields = $fields_cache[$section];
 
