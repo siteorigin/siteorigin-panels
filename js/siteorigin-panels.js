@@ -2278,7 +2278,7 @@ String.prototype.panelsProcessTemplate = function(){
                         // Set value to false when checkboxes aren't checked.
                         // If they are null when you have repeater items containing only a checkbox, the repeater item
                         // is lost when the page is updated.
-                        fieldValue = false;
+                        fieldValue = '';
                     }
                 }
                 else if( fieldType === 'radio' ){

@@ -246,7 +246,6 @@ function siteorigin_panels_styles_sort_fields($a, $b){
  * @return mixed
  */
 function siteorigin_panels_styles_sanitize_all($panels_data){
-
 	if( !empty($panels_data['widgets']) ) {
 		// Sanitize the widgets
 		for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {
@@ -289,8 +288,6 @@ function siteorigin_panels_styles_sanitize_all($panels_data){
  * @return Sanitized styles
  */
 function siteorigin_panels_sanitize_style_fields( $section, $styles ){
-	static $fields_cache = array();
-
 	// Use the filter to get the fields for this section.
 	if( empty($fields_cache[$section]) ) {
 		// This filter doesn't pass in the arguments $post_id and $args
@@ -301,6 +298,12 @@ function siteorigin_panels_sanitize_style_fields( $section, $styles ){
 
 	$return = array();
 	foreach($fields as $k => $field) {
+
+		// Handle the special case of a checkbox
+		if( $field['type'] == 'checkbox' ) {
+			$return[$k] = !empty( $styles[$k] ) ? true : '';
+			continue;
+		}
 
 		// Ignore this if we don't even have a value for the style
 		if( !isset($styles[$k]) || $styles[$k] == '' ) continue;
@@ -316,9 +319,6 @@ function siteorigin_panels_sanitize_style_fields( $section, $styles ){
 				break;
 			case 'url' :
 				$return[$k] = esc_url_raw( $styles[$k] );
-				break;
-			case 'checkbox' :
-				$return[$k] = !empty( $styles[$k] );
 				break;
 			case 'measurement' :
 				$measurements = array_map('preg_quote', siteorigin_panels_style_get_measurements_list() );
