@@ -19,7 +19,7 @@ function siteorigin_panels_ajax_builder_content(){
 	}
 
 	// echo the content
-	echo siteorigin_panels_render( $request['post_id'], false, json_decode( $request['panels_data'], true ) );
+	echo siteorigin_panels_render( $request['post_id'], false, json_decode( wp_unslash( $request['panels_data'] ), true ) );
 
 	wp_die();
 }
@@ -43,7 +43,7 @@ function siteorigin_panels_ajax_widget_form(){
 	if( empty( $request['widget'] ) ) wp_die();
 
 	$widget = $request['widget'];
-	$instance = !empty($request['instance']) ? json_decode( $request['instance'], true ) : array();
+	$instance = !empty($request['instance']) ? json_decode( wp_unslash( $request['instance'] ), true ) : array();
 
 	$form = siteorigin_panels_render_form( $widget, $instance, $request['raw'] );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);

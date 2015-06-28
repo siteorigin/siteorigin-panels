@@ -147,7 +147,7 @@ function siteorigin_panels_save_home_page(){
 	}
 
 	// Save the updated page data
-	$panels_data = json_decode( $request['panels_data'], true);
+	$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
@@ -500,7 +500,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 	) );
 
 	if ( !wp_is_post_revision($post_id) ) {
-		$panels_data = json_decode( $request['panels_data'], true);
+		$panels_data = json_decode( wp_unslash( $request['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
