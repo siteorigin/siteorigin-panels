@@ -141,7 +141,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				<?php endforeach ?>
 			</select>
 		</p>
-	<?php
+		<?php
 	}
 }
 
@@ -225,8 +225,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 		else {
 			// Get current page number when we're not using permalinks
-			$paged = filter_input( INPUT_GET, 'paged', FILTER_SANITIZE_NUMBER_INT );
-			$query_args['paged'] = $paged !== false ? $paged : 1;
+			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
 		}
 
 		// Exclude the current post to prevent possible infinite loop

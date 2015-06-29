@@ -347,7 +347,7 @@ class SiteOrigin_Panels_Settings {
 		if( $screen->base != 'settings_page_siteorigin_panels' ) return;
 
 		if( !current_user_can('manage_options') ) return;
-		if( !wp_verify_nonce( filter_input(INPUT_POST, '_wpnonce') , 'panels-settings') ) return;
+		if( empty($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'panels-settings') ) return;
 		if( empty($_POST['panels_setting']) ) return;
 
 		$values = array();
