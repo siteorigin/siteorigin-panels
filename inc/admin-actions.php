@@ -195,7 +195,7 @@ function siteorigin_panels_ajax_export_layout(){
 	header('content-type: application/json');
 	header('Content-Disposition: attachment; filename=layout-' . date('dmY') . '.json');
 
-	$export_data = filter_input( INPUT_POST, 'panels_export_data' );
+	$export_data = wp_unslash( $_POST['panels_export_data'] );
 	echo $export_data;
 
 	wp_die();
