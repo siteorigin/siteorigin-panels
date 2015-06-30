@@ -5,11 +5,11 @@
  * Admin action for handling fetching the style fields
  */
 function siteorigin_panels_ajax_action_style_form(){
-	$type = filter_input( INPUT_POST, 'type', FILTER_SANITIZE_STRING );
-	if( !in_array($type, array('row', 'widget') ) ) wp_die();
+	$type = $_REQUEST['type'];
+	if( !in_array($type, array('row', 'widget') ) ) exit();
 
-	$current = filter_input( INPUT_POST, 'style', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
-	$post_id = filter_input( INPUT_POST, 'postId', FILTER_SANITIZE_NUMBER_INT );
+	$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
+	$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
 
 	$args = filter_input( INPUT_POST, 'args', FILTER_DEFAULT );
 	$args = json_decode($args, true);
@@ -93,21 +93,21 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 			</div>
 			<div class="style-section-fields" style="display: none">
 				<?php
-					foreach( $fields as $field_id => $field ) {
+				foreach( $fields as $field_id => $field ) {
 
-						if($field['group'] == $group_id){
-							?>
-							<div class="style-field-wrapper">
-								<label><?php echo $field['name'] ?></label>
-								<div class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
-									<?php siteorigin_panels_render_style_field( $field, isset( $current[$field_id] ) ? $current[$field_id] : false, $field_id ) ?>
-								</div>
+					if($field['group'] == $group_id){
+						?>
+						<div class="style-field-wrapper">
+							<label><?php echo $field['name'] ?></label>
+							<div class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
+								<?php siteorigin_panels_render_style_field( $field, isset( $current[$field_id] ) ? $current[$field_id] : false, $field_id ) ?>
 							</div>
-							<?php
-
-						}
+						</div>
+						<?php
 
 					}
+
+				}
 				?>
 			</div>
 		</div>
@@ -119,7 +119,7 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 
 /**
  * Get list of supported mesurements
- * 
+ *
  * @return array
  */
 function siteorigin_panels_style_get_measurements_list() {
@@ -134,7 +134,7 @@ function siteorigin_panels_style_get_measurements_list() {
 		'pt',
 		'pc',
 	);
-	
+
 	// Allow themes and plugins to trim or enhance the list.
 	return apply_filters('siteorigin_panels_style_get_measurements_list', $measurements);
 }
@@ -154,9 +154,9 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 			?>
 			<input type="text" />
 			<select>
-			<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
-				<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
-			<?php endforeach?>
+				<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
+					<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
+				<?php endforeach?>
 			</select>
 			<input type="hidden" name="<?php echo esc_attr($field_name) ?>" value="<?php echo esc_attr( $current ) ?>" />
 			<?php

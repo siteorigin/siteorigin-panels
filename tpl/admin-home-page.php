@@ -19,7 +19,7 @@
 			<?php endif; ?>
 		</h2>
 
-		<?php if( filter_input( INPUT_POST, '_sopanels_home_nonce' ) ) : global $post; ?>
+		<?php if( isset($_POST['_sopanels_home_nonce']) && wp_verify_nonce($_POST['_sopanels_home_nonce'], 'save') ) : global $post; ?>
 			<div id="message" class="updated">
 				<p>
 					<?php

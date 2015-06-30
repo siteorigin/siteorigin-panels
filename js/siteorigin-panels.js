@@ -1859,7 +1859,7 @@ String.prototype.panelsProcessTemplate = function(){
             if ( typeof tinyMCE !== 'undefined' ) {
                 editor = tinyMCE.get( 'content' );
             }
-            if( editor !== null && typeof( editor.getContent ) === "function" ) {
+            if( editor && typeof( editor.getContent ) === "function" ) {
                 editorContent = editor.getContent();
             }
             else {

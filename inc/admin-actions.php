@@ -6,20 +6,15 @@
 function siteorigin_panels_ajax_builder_content(){
 	header('content-type: text/html');
 
-	$request = filter_input_array( INPUT_POST, array(
-		'post_id' => FILTER_VALIDATE_INT,
-		'panels_data' => FILTER_DEFAULT
-	) );
+	if( !current_user_can('edit_post', $_POST['post_id'] ) ) wp_die();
 
-	if( !current_user_can('edit_post', $request['post_id'] ) ) wp_die();
-
-	if( empty( $request['post_id'] ) || empty( $request['panels_data'] ) ) {
+	if( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
 		echo '';
 		wp_die();
 	}
 
 	// echo the content
-	echo siteorigin_panels_render( $request['post_id'], false, json_decode( $request['panels_data'], true ) );
+	echo siteorigin_panels_render( intval($_POST['post_id']), false, json_decode( wp_unslash($_POST['panels_data']), true ) );
 
 	wp_die();
 }
@@ -29,23 +24,16 @@ add_action('wp_ajax_so_panels_builder_content', 'siteorigin_panels_ajax_builder_
  * Display a widget form with the provided data
  */
 function siteorigin_panels_ajax_widget_form(){
-	// Verify the nonce
-	$nonce = filter_input( INPUT_GET, '_panelsnonce', FILTER_DEFAULT );
-	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
+	if( empty( $_REQUEST['widget'] ) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
-	$request = filter_input_array( INPUT_POST, array(
-		'widget' => FILTER_SANITIZE_STRING,
-		'raw' => FILTER_VALIDATE_BOOLEAN,
-		'instance' => FILTER_DEFAULT,
-		'_panelsnonce' => FILTER_DEFAULT
-	) );
-
-	if( empty( $request['widget'] ) ) wp_die();
+	$request = array_map('stripslashes_deep', $_REQUEST);
 
 	$widget = $request['widget'];
-	$instance = !empty($request['instance']) ? json_decode( $request['instance'], true ) : array();
 
-	$form = siteorigin_panels_render_form( $widget, $instance, $request['raw'] );
+	$instance = !empty($request['instance']) ? json_decode( $request['instance'] , true ) : array();
+
+	$form = siteorigin_panels_render_form( $widget, $instance, $_REQUEST['raw'] );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
 
 	echo $form;
@@ -57,20 +45,15 @@ add_action('wp_ajax_so_panels_widget_form', 'siteorigin_panels_ajax_widget_form'
  * Admin action for loading a list of prebuilt layouts based on the given type
  */
 function siteorigin_panels_ajax_prebuilt_layouts(){
-	// Verify the nonce
-	$nonce = filter_input( INPUT_GET, '_panelsnonce', FILTER_DEFAULT );
-	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
-
-	// The type of prebuilt layouts we want
-	$type = filter_input( INPUT_GET, 'type', FILTER_SANITIZE_STRING );
-	if( empty($type) ) wp_die();
+	if( empty($_REQUEST['type']) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	// Get any layouts that the current user could edit.
 	header('content-type: application/json');
 
 	$return = array();
 
-	if( $type == 'prebuilt' ) {
+	if( $_REQUEST['type'] == 'prebuilt' ) {
 		// Display the prebuilt layouts that come with the theme.
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
@@ -95,9 +78,9 @@ function siteorigin_panels_ajax_prebuilt_layouts(){
 
 
 	}
-	elseif( strpos( $type, 'clone_' ) === 0 ) {
+	elseif( strpos( $_REQUEST['type'], 'clone_' ) === 0 ) {
 		// Check that the user can view the given page types
-		$post_type = str_replace('clone_', '', $type );
+		$post_type = str_replace('clone_', '', $_REQUEST['type'] );
 		global $wpdb;
 
 		// Select only the posts with the given post type that also have panels_data
@@ -157,29 +140,20 @@ add_action('wp_ajax_so_panels_prebuilt_layouts', 'siteorigin_panels_ajax_prebuil
  * Ajax handler to get an individual prebuilt layout
  */
 function siteorigin_panels_ajax_get_prebuilt_layout(){
-	// Verify the nonce
-	$nonce = filter_input( INPUT_GET, '_panelsnonce', FILTER_DEFAULT );
-	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
-
-	$request = filter_input_array( INPUT_POST, array(
-		'type' => FILTER_SANITIZE_STRING,
-		'lid' => FILTER_SANITIZE_STRING,
-	) );
-
-
-	if( empty( $request['type'] ) ) wp_die();
-	if( empty( $request['lid'] ) ) wp_die();
+	if( empty( $_REQUEST['type'] ) ) wp_die();
+	if( empty( $_REQUEST['lid'] ) ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	header('content-type: application/json');
 
-	if( $request['type'] == 'prebuilt' ) {
+	if( $_REQUEST['type'] == 'prebuilt' ) {
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
-		if( empty( $layouts[ $request['lid'] ] ) ) {
+		if( empty( $layouts[ $_REQUEST['lid'] ] ) ) {
 			// Display an error message
 			wp_die();
 		}
 
-		$layout = $layouts[ $request['lid'] ];
+		$layout = $layouts[ $_REQUEST['lid'] ];
 		if( isset($layout['name']) ) unset($layout['name']);
 
 		$layout = apply_filters('siteorigin_panels_prebuilt_layout', $layout);
@@ -187,8 +161,8 @@ function siteorigin_panels_ajax_get_prebuilt_layout(){
 		echo json_encode( $layout );
 		wp_die();
 	}
-	elseif( current_user_can('edit_post', $request['lid']) ) {
-		$panels_data = get_post_meta( $request['lid'], 'panels_data', true );
+	elseif( current_user_can('edit_post', $_REQUEST['lid']) ) {
+		$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
 		$panels_data = apply_filters('siteorigin_panels_data', $panels_data);
 		echo json_encode( $panels_data );
 		wp_die();
@@ -200,8 +174,7 @@ add_action('wp_ajax_so_panels_get_prebuilt_layout', 'siteorigin_panels_ajax_get_
  * Ajax handler to import a layout
  */
 function siteorigin_panels_ajax_import_layout(){
-	$nonce = filter_input( INPUT_GET, '_panelsnonce', FILTER_DEFAULT );
-	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	if( !empty($_FILES['panels_import_data']['tmp_name']) ) {
 		header('content-type:application/json');
@@ -217,13 +190,12 @@ add_action('wp_ajax_so_panels_import_layout', 'siteorigin_panels_ajax_import_lay
  * Ajax handler to export a layout
  */
 function siteorigin_panels_ajax_export_layout(){
-	$nonce = filter_input( INPUT_POST, '_panelsnonce', FILTER_DEFAULT );
-	if( !wp_verify_nonce($nonce, 'panels_action') ) wp_die();
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
 
 	header('content-type: application/json');
 	header('Content-Disposition: attachment; filename=layout-' . date('dmY') . '.json');
 
-	$export_data = filter_input( INPUT_POST, 'panels_export_data' );
+	$export_data = wp_unslash( $_POST['panels_export_data'] );
 	echo $export_data;
 
 	wp_die();
