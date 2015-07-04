@@ -66,7 +66,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		$post_id = url_to_postid( add_query_arg( false, false ) );
 		if( empty($post_id) ) {
 			// Maybe this is the home page
-			if( add_query_arg(false, false) == '/' && get_option('page_on_front') != 0 ) {
+			$home_url_parts = parse_url( trailingslashit( home_url() ) );
+			if( add_query_arg( false, false ) === $home_url_parts['path'] && get_option('page_on_front') != 0 ) {
 				$post_id = get_option( 'page_on_front' );
 			}
 		}
