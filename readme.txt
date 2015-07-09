@@ -97,6 +97,16 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.1.3 =
+* Removed use of filter_input for compatibility with HHVM
+* Fixed checkbox handling in forms.
+* Removed unnecessary sprintf calls to lower chance of translations causing issues.
+* More generic handling of builder instances to allow them to be used in different places.
+* Use implicit check for whether editor is undefined or null.
+* Added optional $widget_id parameter to siteorigin_panels_render_form.
+* Improved checking for home page in sidebars emulator.
+* Added a builder "type" to allow more targetted instances.
+
 = 2.1.2 =
 * Removed rendered content cache introduced in 2.1.1
 
