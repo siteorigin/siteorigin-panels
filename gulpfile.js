@@ -34,8 +34,9 @@ gulp.task('version', ['clean'], function() {
         console.log("E.g. gulp release 1.2.3");
         return;
     }
-    return gulp.src('siteorigin-panels.php')
-        .pipe(replace(/(Version: ).*/, '$1'+args.v))
+    return gulp.src(['siteorigin-panels.php', 'readme.txt'])
+        .pipe(replace(/(Stable tag:).*/, '$1 '+args.v))
+        .pipe(replace(/(Version:).*/, '$1 '+args.v))
         .pipe(replace(/(define\('SITEORIGIN_PANELS_VERSION', ').*('\);)/, '$1'+args.v+'$2'))
         .pipe(replace(/(define\('SITEORIGIN_PANELS_JS_SUFFIX', ').*('\);)/, '$1' + jsMinSuffix + '$2'))
         .pipe(gulp.dest(outDir));
@@ -85,7 +86,8 @@ gulp.task('build:release', ['version', 'less', 'minify'], function () {
             '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{dist,dist/**}',                  // Ignore dist/ and contents
             '!phpunit.xml',                     // Not the unit tests configuration file.
-            '!so-widgets-bundle.php'            // Not the base plugin file. It is copied by the 'version' task.
+            '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
+            '!readme.txt'                       // Not the readme.txt file. It is copied by the 'version' task.
         ], {base: '.'})
         .pipe(gulp.dest(outDir));
 });
