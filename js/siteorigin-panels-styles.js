@@ -26,10 +26,15 @@
          * @param type
          * @param postId
          */
-        render: function( stylesType, postId ){
+        render: function( stylesType, postId, args ){
             if( typeof stylesType === 'undefined' ) {
                 return false;
             }
+
+            // Add in the default args
+            args  = _.extend( {
+                builderType : ''
+            }, args );
 
             this.$el.addClass('so-visual-styles');
 
@@ -41,6 +46,7 @@
                     action: 'so_panels_style_form',
                     type: stylesType,
                     style: this.model.get('style'),
+                    args : JSON.stringify( args ),
                     postId: postId
                 },
                 function( response ){

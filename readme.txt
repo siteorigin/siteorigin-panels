@@ -2,7 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 3.9
 Tested up to: 4.2
-Stable tag: 2.1.1
+Stable tag: trunk
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
@@ -96,6 +96,16 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.1.3 =
+* Removed use of filter_input for compatibility with HHVM
+* Fixed checkbox handling in forms.
+* Removed unnecessary sprintf calls to lower chance of translations causing issues.
+* More generic handling of builder instances to allow them to be used in different places.
+* Use implicit check for whether editor is undefined or null.
+* Added optional $widget_id parameter to siteorigin_panels_render_form.
+* Improved checking for home page in sidebars emulator.
+* Added a builder "type" to allow more targetted instances.
 
 = 2.1.2 =
 * Removed rendered content cache introduced in 2.1.1

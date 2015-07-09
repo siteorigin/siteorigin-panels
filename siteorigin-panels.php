@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: https://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: 2.1.2
+Version: dev
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 License: GPL3
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', '2.1.2');
+define('SITEORIGIN_PANELS_VERSION', 'dev');
 define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
@@ -224,16 +224,29 @@ function siteorigin_panels_metabox_render( $post ) {
 }
 
 /**
+ * Check if we should load the SiteOrigin scripts and styles
+ *
+ * @return mixed|void
+ */
+function siteorigin_panels_is_admin_page(){
+	$screen = get_current_screen();
+	$is_panels_page = ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize';
+	return apply_filters('siteorigin_panels_is_admin_page', $is_panels_page );
+}
+
+/**
  * Enqueue the panels admin scripts
+ *
+ * @param string $prefix
+ * @param bool $force Should we force the enqueues
  *
  * @action admin_print_scripts-post-new.php
  * @action admin_print_scripts-post.php
  * @action admin_print_scripts-appearance_page_so_panels_home_page
  */
-function siteorigin_panels_admin_enqueue_scripts($prefix) {
+function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false ) {
 	$screen = get_current_screen();
-
-	if ( ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting('post-types') ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize' ) {
+	if ( $force || siteorigin_panels_is_admin_page() ) {
 		// Media is required for row styles
 		wp_enqueue_media();
 
@@ -434,12 +447,14 @@ function siteorigin_panels_js_templates(){
 /**
  * Enqueue the admin panel styles
  *
+ * @param string $prefix
+ * @param bool $force Should we force the enqueue
+ *
  * @action admin_print_styles-post-new.php
  * @action admin_print_styles-post.php
  */
-function siteorigin_panels_admin_enqueue_styles() {
-	$screen = get_current_screen();
-	if ( in_array( $screen->id, siteorigin_panels_setting('post-types') ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize') {
+function siteorigin_panels_admin_enqueue_styles( $prefix = '', $force = false ) {
+	if ( $force || siteorigin_panels_is_admin_page() ) {
 		wp_enqueue_style( 'so-panels-admin', plugin_dir_url(__FILE__) . 'css/admin.css', array( 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION );
 		do_action( 'siteorigin_panel_enqueue_admin_styles' );
 	}
@@ -757,9 +772,11 @@ function siteorigin_panels_filter_content( $content ) {
 
 	if ( empty( $post ) ) return $content;
 	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
-	if ( in_array( $post->post_type, siteorigin_panels_setting('post-types') ) ) {
-		$panel_content = siteorigin_panels_render( $post->ID );
 
+	// Check if this post has panels_data
+	$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+	if ( !empty( $panels_data ) ) {
+		$panel_content = siteorigin_panels_render( $post->ID );
 		if ( !empty( $panel_content ) ) $content = $panel_content;
 	}
 
@@ -1188,9 +1205,10 @@ add_action('wp_enqueue_scripts', 'siteorigin_panels_enqueue_styles', 1);
  * @param string $widget The class of the widget
  * @param array $instance Widget values
  * @param bool $raw
+ * @param string $widget_number
  * @return mixed|string The form
  */
-function siteorigin_panels_render_form($widget, $instance = array(), $raw = false){
+function siteorigin_panels_render_form($widget, $instance = array(), $raw = false, $widget_number = '{$id}' ){
 	global $wp_widget_factory;
 
 	// This is a chance for plugins to replace missing widgets
@@ -1253,7 +1271,7 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 	if( $raw ) $instance = $the_widget->update($instance, $instance);
 
 	$the_widget->id = 'temp';
-	$the_widget->number = '{$id}';
+	$the_widget->number = $widget_number;
 
 	ob_start();
 	$the_widget->form($instance);
@@ -1262,7 +1280,7 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 	// Convert the widget field naming into ones that Page Builder uses
 	$exp = preg_quote( $the_widget->get_field_name('____') );
 	$exp = str_replace('____', '(.*?)', $exp);
-	$form = preg_replace( '/'.$exp.'/', 'widgets[{$id}][$1]', $form );
+	$form = preg_replace( '/'.$exp.'/', 'widgets[' . preg_replace('/\$(\d)/', '\\\$$1', $widget_number) . '][$1]', $form );
 
 	$form = apply_filters('siteorigin_panels_widget_form', $form, $widget, $instance);
 

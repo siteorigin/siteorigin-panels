@@ -1290,6 +1290,9 @@ String.prototype.panelsProcessTemplate = function(){
         attachedToEditor: false,
         liveEditor: false,
 
+        /* The builderType is sent with all requests to the server */
+        builderType: '',
+
         events: {
             'click .so-tool-button.so-widget-add': 'displayAddWidgetDialog',
             'click .so-tool-button.so-row-add': 'displayAddRowDialog',
@@ -1340,6 +1343,8 @@ String.prototype.panelsProcessTemplate = function(){
             this.on('content_change', this.handleContentChange, this);
             this.on('display_builder', this.handleDisplayBuilder, this);
             this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
+
+            return this;
         },
 
         /**
@@ -1365,7 +1370,11 @@ String.prototype.panelsProcessTemplate = function(){
          */
         attach: function(options) {
 
-            options = _.extend({ container: false, dialog: false }, options);
+            options = _.extend({
+                type: '',
+                container: false,
+                dialog: false
+            }, options);
 
             if( options.dialog ) {
                 // We're going to add this to a dialog
@@ -1379,6 +1388,9 @@ String.prototype.panelsProcessTemplate = function(){
                 this.initSortable();
                 this.trigger('attached_to_container', options.container);
             }
+
+            // Store the builder type
+            this.builderType = options.type;
 
             return this;
         },
@@ -2266,7 +2278,7 @@ String.prototype.panelsProcessTemplate = function(){
                         // Set value to false when checkboxes aren't checked.
                         // If they are null when you have repeater items containing only a checkbox, the repeater item
                         // is lost when the page is updated.
-                        fieldValue = false;
+                        fieldValue = '';
                     }
                 }
                 else if( fieldType === 'radio' ){
@@ -2662,7 +2674,9 @@ String.prototype.panelsProcessTemplate = function(){
             // Now we need to attach the style window
             this.styles = new panels.view.styles();
             this.styles.model = this.model;
-            this.styles.render( 'widget', $('#post_ID').val() );
+            this.styles.render( 'widget', $('#post_ID').val(), {
+                builderType : this.builder.builderType
+            } );
             this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
 
             // Handle the loading class
@@ -3113,7 +3127,6 @@ String.prototype.panelsProcessTemplate = function(){
         dialogClass : 'so-panels-dialog-row-edit',
         styleType : 'row',
 
-        /* This is used by  */
         dialogType : 'edit',
 
         /**
@@ -3163,7 +3176,9 @@ String.prototype.panelsProcessTemplate = function(){
                 // Now we need to attach the style window
                 this.styles = new panels.view.styles();
                 this.styles.model = this.model;
-                this.styles.render( 'row', $('#post_ID').val() );
+                this.styles.render( 'row', $('#post_ID').val(), {
+                    'builderType' : this.builder.builderType
+                } );
                 this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
 
                 // Handle the loading class
@@ -3638,21 +3653,24 @@ String.prototype.panelsProcessTemplate = function(){
 // Set up Page Builder if we're on the main interface
 jQuery( function($){
 
-    var container = false, field = false, form = false, postId = false;
+    var container = false, field = false, form = false, postId = false, builderType = '';
 
     if( $('#siteorigin-panels-metabox').length && $('form#post').length ) {
+        // This is usually the case when we're in the post edit interface
         container = $( '#siteorigin-panels-metabox' );
         field = $( '#siteorigin-panels-metabox .siteorigin-panels-data-field' );
         form = $('form#post');
         postId = $('#post_ID').val();
+        builderType = 'editor_attached';
     }
-    else if( $('div#panels-home-page.wrap').length ) {
-        // We're dealing with the custom home page interface
-        var $$ = $('div#panels-home-page.wrap');
+    else if( $('.siteorigin-panels-builder-form').length ) {
+        // We're dealing with another interface like the custom home page interface
+        var $$ = $('.siteorigin-panels-builder-form');
         container = $$.find('.siteorigin-panels-builder');
         field = $$.find('input[name="panels_data"]');
-        form = $$.find('form');
+        form = $$;
         postId = $('#panels-home-page').data('post-id');
+        builderType = $$.data('type');
     }
 
     if( container !== false ) {
@@ -3670,7 +3688,10 @@ jQuery( function($){
         // Set up the builder view
         builderView
             .render()
-            .attach( { container: container } )
+            .attach( {
+                container: container,
+                type : builderType
+            } )
             .setDataField( field )
             .attachToEditor()
             .addLiveEditor( postId )
@@ -3738,7 +3759,11 @@ jQuery( function($){
             var isWidget = Boolean( $$.closest('.widget-content').length );
             builderView
                 .render()
-                .attach( { container: $$, dialog: isWidget } )
+                .attach( {
+                    container: $$,
+                    dialog: isWidget,
+                    type: $$.data('type')
+                } )
                 .setDataField( $$.find('input.panels-data') );
 
             if( isWidget ) {
@@ -3759,15 +3784,15 @@ jQuery( function($){
     };
 
     // Setup new widgets when they're added in the standard widget interface
-    $(document).on('widget-added', function(e, widget) {
+    $(document).on( 'widget-added', function(e, widget) {
         $(widget).find('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
-    });
+    } );
 
     // Setup existing widgets on the page (for the widgets interface)
-    if(!$('body').hasClass('wp-customizer')) {
-        $(function(){
+    if( !$('body').hasClass( 'wp-customizer' ) ) {
+        $( function(){
             $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
-        });
+        } );
     }
 
 })( jQuery );
