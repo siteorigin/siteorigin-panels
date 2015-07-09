@@ -33,7 +33,7 @@ function siteorigin_panels_ajax_widget_form(){
 
 	$instance = !empty($request['instance']) ? json_decode( $request['instance'] , true ) : array();
 
-	$form = siteorigin_panels_render_form( $widget, $instance, $_REQUEST['raw'] );
+	$form = siteorigin_panels_render_form( $widget, $instance, $_REQUEST['raw'] == 'true' );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
 
 	echo $form;
