@@ -66,7 +66,7 @@ gulp.task('minify', ['concat'], function () {
             'js/**/*.js',
             'settings/**/*.js',
             'widgets/**/*.js',
-            '!{dist,dist/**}'       // Ignore dist/ and contents
+            '!{tmp,tmp/**}'       // Ignore tmp/ and contents
         ], {base: '.'})
         // This will output the non-minified version
         .pipe(gulp.dest('tmp'))
@@ -84,7 +84,7 @@ gulp.task('copy', ['version', 'less', 'minify'], function () {
             '!widgets/**/styles/*.css',         // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',  // Ignore node_modules/ and contents
             '!{tests,tests/**}',                // Ignore tests/ and contents
-            '!{dist,dist/**}',                  // Ignore dist/ and contents
+            '!{tmp,tmp/**}',                  // Ignore dist/ and contents
             '!phpunit.xml',                     // Not the unit tests configuration file.
             '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
             '!readme.txt'                       // Not the readme.txt file. It is copied by the 'version' task.
