@@ -7,7 +7,7 @@ function siteorigin_panels_dump(){
 	echo "<!--\n\n";
 	echo "// Page Builder Data\n\n";
 
-	if( filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING ) == 'so_panels_home_page' ) {
+	if(isset($_GET['page']) && $_GET['page'] == 'so_panels_home_page') {
 		var_export( get_option( 'siteorigin_panels_home_page', null ) );
 	}
 	else{
