@@ -97,6 +97,9 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.1.4 =
+* Fixed handling of raw forms.
+
 = 2.1.3 =
 * Removed use of filter_input for compatibility with HHVM
 * Fixed checkbox handling in forms.
