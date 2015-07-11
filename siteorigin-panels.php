@@ -356,7 +356,8 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'silverlight_xap_url' => includes_url('js/plupload/plupload.silverlight.xap'),
 				'filter_title' => __('Page Builder layouts', 'siteorigin-panels'),
 				'error_message' => __('Error uploading or importing file.', 'siteorigin-panels'),
-			)
+			),
+			'wpColorPickerOptions' => apply_filters('siteorigin_panels_wpcolorpicker_options', array()),
 		));
 
 		if( $screen->base != 'widgets' ) {
