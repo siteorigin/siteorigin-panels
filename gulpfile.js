@@ -4,6 +4,7 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var less = require('gulp-less');
 var uglify = require('gulp-uglify');
+var zip = require('gulp-zip');
 
 var args = {};
 args.env = 'dev';
@@ -39,7 +40,7 @@ gulp.task('version', ['clean'], function() {
         .pipe(replace(/(Version:).*/, '$1 '+args.v))
         .pipe(replace(/(define\('SITEORIGIN_PANELS_VERSION', ').*('\);)/, '$1'+args.v+'$2'))
         .pipe(replace(/(define\('SITEORIGIN_PANELS_JS_SUFFIX', ').*('\);)/, '$1' + jsMinSuffix + '$2'))
-        .pipe(gulp.dest(outDir));
+        .pipe(gulp.dest('tmp'));
 });
 
 gulp.task('less', ['clean'], function() {
@@ -52,7 +53,7 @@ gulp.task('less', ['clean'], function() {
             '!widgets/less/*.less'
         ], {base: '.'})
         .pipe(less({paths: ['widgets/less'], compress: args.target == 'build:release'}))
-        .pipe(gulp.dest(outDir));
+        .pipe(gulp.dest('tmp'));
 });
 
 gulp.task('concat', ['clean'], function () {
@@ -65,17 +66,16 @@ gulp.task('minify', ['concat'], function () {
             'js/**/*.js',
             'settings/**/*.js',
             'widgets/**/*.js',
-            '!{dist,dist/**}'       // Ignore dist/ and contents
+            '!{tmp,tmp/**}'       // Ignore tmp/ and contents
         ], {base: '.'})
         // This will output the non-minified version
-        .pipe(gulp.dest(outDir))
+        .pipe(gulp.dest('tmp'))
         .pipe(rename({ suffix: jsMinSuffix }))
         .pipe(uglify())
-        .pipe(gulp.dest(outDir));
+        .pipe(gulp.dest('tmp'));
 });
 
-gulp.task('build:release', ['version', 'less', 'minify'], function () {
-    //Just copy remaining files.
+gulp.task('copy', ['version', 'less', 'minify'], function () {
     return gulp.src(
         [
             '**/!(*.js|*.less)',               // Everything except .js and .less files
@@ -84,11 +84,24 @@ gulp.task('build:release', ['version', 'less', 'minify'], function () {
             '!widgets/**/styles/*.css',         // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',  // Ignore node_modules/ and contents
             '!{tests,tests/**}',                // Ignore tests/ and contents
-            '!{dist,dist/**}',                  // Ignore dist/ and contents
+            '!{tmp,tmp/**}',                  // Ignore dist/ and contents
             '!phpunit.xml',                     // Not the unit tests configuration file.
             '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
             '!readme.txt'                       // Not the readme.txt file. It is copied by the 'version' task.
         ], {base: '.'})
+        .pipe(gulp.dest('tmp'));
+});
+
+gulp.task('move', ['copy'], function () {
+    return gulp.src('tmp/**')
+        .pipe(gulp.dest(outDir + '/siteorigin-panels'));
+});
+
+gulp.task('build:release', ['move'], function () {
+    del(['tmp']);
+    var versionNumber = args.hasOwnProperty('v') ? args.v : 'dev';
+    return gulp.src(outDir + '/**/*')
+        .pipe(zip('siteorigin-panels.' + versionNumber + '.zip'))
         .pipe(gulp.dest(outDir));
 });
 
