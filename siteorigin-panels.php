@@ -721,10 +721,10 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Add the bottom margins
 	$css->add_cell_css($post_id, false, false, '.so-panel', array(
-		'margin-bottom' => $panels_margin_bottom.'px'
+		'margin-bottom' => add_filter('siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 	));
 	$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
-		'margin-bottom' => 0
+		'margin-bottom' => add_filter('siteorigin_panels_css_cell_last_margin_bottom', 0, $grid, $gi, $panels_data, $post_id)
 	));
 
 	// Let other plugins customize various aspects of the rows (grids)
