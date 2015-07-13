@@ -40,21 +40,28 @@ test.describe('Page Builder', function() {
         driver.wait(until.elementLocated(By.className('so-row-add')), 500);
         driver.findElement(By.className('so-row-add')).click();
         driver.wait(until.elementLocated(By.className('so-panels-dialog-wrapper')), 500);
-        driver.wait(until.elementLocated(By.className('so-insert')));
+        driver.wait(until.elementLocated(By.className('so-insert')), 500);
         driver.findElement(By.className('so-insert')).click();
         driver.wait(until.elementLocated(By.className('so-row-container')), 500);
     });
 
     test.it('should successfully edit a row.', function () {
-        driver.get(baseUrl + 'wp-admin/post.php?post=410&action=edit');
-        driver.wait(until.elementLocated(By.css('span.so-dropdown-wrapper > a.so-row-settings')), 500);
+
+        driver.get(baseUrl + 'wp-admin/post-new.php?post_type=page');
+        driver.findElement(By.id('content-panels')).click();
+        driver.findElement(By.className('so-widget-add')).click();
+        driver.findElement(By.js('return jQuery(\'li.widget-type h3:contains("Text")\')')).click(); //0_o
+        driver.wait(until.elementLocated(By.css('.so-row-container > .so-cells > .cell > .cell-wrapper > .so-widget')), 500);
+        driver.findElement(By.id('publish')).click();
+
+        driver.wait(until.elementLocated(By.css('span.so-dropdown-wrapper > a.so-row-settings')), 5000);
         driver.findElement(By.css('span.so-dropdown-wrapper > a.so-row-settings')).click();
         driver.wait(until.elementLocated(By.css('div.so-content.panel-dialog > div.row-set-form > input[name="cells"]')), 500);
-        driver.findElement(By.css('div.so-content.panel-dialog > div.row-set-form > input[name="cells"]')).sendKeys(Key.chord(Key.CONTROL, 'a'), '3');
+        driver.findElement(By.css('div.so-content.panel-dialog > div.row-set-form > input[name="cells"]')).sendKeys(Key.chord(Key.CONTROL, 'a'), '2');
         driver.findElement(By.className('so-save')).click();
         driver.wait(until.elementLocated(By.css('div.so-row-container > div.so-cells')), 500);
         driver.findElements(By.css('div.so-row-container > div.so-cells > div.cell')).then(function (cells) {
-            assert.equal(cells.length, 3, 'Did not add one cell.');
+            assert.equal(cells.length, 2, 'Did not add one cell.');
         });
     });
 
@@ -70,7 +77,17 @@ test.describe('Page Builder', function() {
     });
 
     test.it('should successfully move a widget.', function () {
-        driver.get(baseUrl + 'wp-admin/post.php?post=410&action=edit');
+        driver.get(baseUrl + 'wp-admin/post-new.php?post_type=page');
+        driver.findElement(By.id('content-panels')).click();
+        driver.findElement(By.className('so-row-add')).click();
+        driver.wait(until.elementLocated(By.className('so-insert')), 500);
+        driver.findElement(By.className('so-insert')).click();
+        driver.findElement(By.css('.so-row-container > .so-cells > .cell > .cell-wrapper')).click();
+        driver.findElement(By.className('so-widget-add')).click();
+        driver.findElement(By.js('return jQuery(\'li.widget-type h3:contains("Text")\')')).click(); //0_o
+        driver.wait(until.elementLocated(By.css('.so-row-container > .so-cells > .cell > .cell-wrapper > .so-widget')), 500);
+        driver.findElement(By.id('publish')).click();
+
         var ofWidget = '.so-row-container > .so-cells > .cell > .cell-wrapper > .so-widget';
         driver.wait(until.elementLocated(By.css(ofWidget)), 500);
         var emptyCell = driver.findElement(By.js('return jQuery(\'.so-row-container > .so-cells > .cell > .cell-wrapper\')[1];')); //0_o
