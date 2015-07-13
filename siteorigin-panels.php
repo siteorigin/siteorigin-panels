@@ -356,7 +356,8 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'silverlight_xap_url' => includes_url('js/plupload/plupload.silverlight.xap'),
 				'filter_title' => __('Page Builder layouts', 'siteorigin-panels'),
 				'error_message' => __('Error uploading or importing file.', 'siteorigin-panels'),
-			)
+			),
+			'wpColorPickerOptions' => apply_filters('siteorigin_panels_wpcolorpicker_options', array()),
 		));
 
 		if( $screen->base != 'widgets' ) {
@@ -721,10 +722,10 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Add the bottom margins
 	$css->add_cell_css($post_id, false, false, '.so-panel', array(
-		'margin-bottom' => $panels_margin_bottom.'px'
+		'margin-bottom' => add_filter('siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 	));
 	$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
-		'margin-bottom' => 0
+		'margin-bottom' => add_filter('siteorigin_panels_css_cell_last_margin_bottom', 0, $grid, $gi, $panels_data, $post_id)
 	));
 
 	// Let other plugins customize various aspects of the rows (grids)
@@ -777,7 +778,29 @@ function siteorigin_panels_filter_content( $content ) {
 	$panels_data = get_post_meta( $post->ID, 'panels_data', true );
 	if ( !empty( $panels_data ) ) {
 		$panel_content = siteorigin_panels_render( $post->ID );
-		if ( !empty( $panel_content ) ) $content = $panel_content;
+
+		if ( !empty( $panel_content ) ) {
+			$content = $panel_content;
+
+			if( !is_singular() ) {
+				// This is an archive page, so try strip out anything after the more text
+
+				if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
+					$content = explode( $matches[0], $content, 2 );
+					$content = $content[0];
+					$content = force_balance_tags( $content );
+					if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) ) {
+						$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
+					}
+					else {
+						$more_link_text = __('Read More', 'siteorigin-panels');
+					}
+
+					$more_link = apply_filters( 'the_content_more_link', ' <a href="' . get_permalink() . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
+					$content .= '<p>' . $more_link . '</p>';
+				}
+			}
+		}
 	}
 
 	return $content;

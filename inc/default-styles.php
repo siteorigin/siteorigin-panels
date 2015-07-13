@@ -5,23 +5,10 @@
  */
 function siteorigin_panels_default_styles_register_scripts(){
 	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_register_script( 'siteorigin-panels-front-parallax', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
 	wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 		'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
 	) );
-
-	// Check if we need to enqueue the front styles
-	if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) != '' ) {
-		$panels_data = get_post_meta( get_the_ID(), 'panels_data', true );
-
-		if( !empty($panels_data['grids']) ) {
-
-			foreach( $panels_data['grids'] as $grid ) {
-				if( empty($grid['style']['row_stretch']) ) continue;
-				wp_enqueue_script( 'siteorigin-panels-front-styles' );
-				break;
-			}
-		}
-	}
 }
 add_action('wp_enqueue_scripts', 'siteorigin_panels_default_styles_register_scripts', 5);
 
@@ -142,6 +129,7 @@ class SiteOrigin_Panels_Default_Styling {
 				'tile' => __('Tiled Image', 'siteorigin-panels'),
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
+				'parallax' => __('Parallax', 'siteorigin-panels'),
 			),
 			'description' => __('How the background image is displayed.', 'siteorigin-panels'),
 			'priority' => 7,
@@ -210,6 +198,7 @@ class SiteOrigin_Panels_Default_Styling {
 				'tile' => __('Tiled Image', 'siteorigin-panels'),
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
+				'parallax' => __('Parallax', 'siteorigin-panels'),
 			),
 			'description' => __('How the background image is displayed.', 'siteorigin-panels'),
 			'priority' => 7,
@@ -267,19 +256,27 @@ class SiteOrigin_Panels_Default_Styling {
 			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
 
 			if( !empty($url) ) {
-				$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
-			}
 
-			switch( $args['background_display'] ) {
-				case 'tile':
-					$attributes['style'] .= 'background-repeat: repeat;';
-					break;
-				case 'cover':
-					$attributes['style'] .= 'background-size: cover;';
-					break;
-				case 'center':
-					$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
-					break;
+				if( $args['background_display'] == 'parallax' ) {
+					wp_enqueue_script('siteorigin-panels-front-parallax');
+					$attributes['data-parallax'] = 'scroll';
+					$attributes['data-image-src'] = $url[0];
+				}
+				else {
+					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
+
+					switch( $args['background_display'] ) {
+						case 'tile':
+							$attributes['style'] .= 'background-repeat: repeat;';
+							break;
+						case 'cover':
+							$attributes['style'] .= 'background-size: cover;';
+							break;
+						case 'center':
+							$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
+							break;
+					}
+				}
 			}
 		}
 
@@ -327,19 +324,28 @@ class SiteOrigin_Panels_Default_Styling {
 			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
 
 			if( !empty($url) ) {
-				$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
-			}
 
-			switch( $args['background_display'] ) {
-				case 'tile':
-					$attributes['style'] .= 'background-repeat: repeat;';
-					break;
-				case 'cover':
-					$attributes['style'] .= 'background-size: cover;';
-					break;
-				case 'center':
-					$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
-					break;
+				if( $args['background_display'] == 'parallax' ) {
+					wp_enqueue_script('siteorigin-panels-front-parallax');
+					$attributes['data-parallax'] = 'scroll';
+					$attributes['data-image-src'] = $url[0];
+				}
+				else {
+					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
+
+					switch( $args['background_display'] ) {
+						case 'tile':
+							$attributes['style'] .= 'background-repeat: repeat;';
+							break;
+						case 'cover':
+							$attributes['style'] .= 'background-size: cover;';
+							break;
+						case 'center':
+							$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
+							break;
+					}
+				}
+
 			}
 		}
 

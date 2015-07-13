@@ -91,7 +91,10 @@
 
             // Set up the color fields
             if(typeof $.fn.wpColorPicker !== 'undefined') {
-                this.$('.so-wp-color-field').wpColorPicker();
+                if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !jQuery.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+                    panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
+                }
+                this.$('.so-wp-color-field').wpColorPicker(soPanelsOptions.wpColorPickerOptions);
             }
 
             // Set up the image select fields
