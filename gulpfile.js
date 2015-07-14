@@ -32,7 +32,7 @@ gulp.task('clean', function () {
 gulp.task('version', ['clean'], function() {
     if(typeof args.v == "undefined") {
         console.log("version task requires version number argument.");
-        console.log("E.g. gulp release 1.2.3");
+        console.log("E.g. gulp build:release -v 1.2.3");
         return;
     }
     return gulp.src(['siteorigin-panels.php', 'readme.txt'])
