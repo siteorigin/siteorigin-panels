@@ -276,6 +276,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				)
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
+			'directoryEnabled' => false,
 			// General localization messages
 			'loc' => array(
 				'missing_widget' => array(

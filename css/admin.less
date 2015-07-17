@@ -1410,11 +1410,58 @@
 					height: auto;
 				}
 			}
+
+			// For a list of directory items
+
+			.so-directory-items {
+
+				.so-directory-item {
+
+					.box-sizing(border-box);
+					width: 25%;
+					float: left;
+					padding: 6px;
+
+					.so-directory-item-wrapper {
+						padding: 10px;
+						background: #F7F7F7;
+						border: 1px solid #d0d0d0;
+						.box-shadow(~"0 1px 1px rgba(0,0,0,0.1)");
+					}
+
+					.so-title {
+						margin: 0 0 10px 0;
+					}
+
+					.so-screenshot {
+						background: #c0c0c0;
+						margin-bottom: 10px;
+						border: 1px solid #d0d0d0;
+
+						img {
+							display: block;
+							width: 100%;
+							height: auto;
+						}
+					}
+
+					.so-description {
+						font-size: 0.9em;
+						color: #666;
+						margin-bottom: 10px;
+					}
+
+					.so-buttons {
+						text-align: right;
+					}
+
+				}
+			}
 		}
 
 	}
 
-	/* Everything we need for the style fields */
+	// Everything we need for the style fields
 
 	.so-visual-styles {
 

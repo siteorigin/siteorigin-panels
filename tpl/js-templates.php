@@ -351,6 +351,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e('Search', 'siteorigin-panels') ?>" />
 
 			<ul class="so-sidebar-tabs">
+				<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
 				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 				<?php
@@ -372,6 +373,38 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-enable">
+	<div class="so-enable-prebuilt">
+		This is a little dialog to enable prebuilt layouts.
+
+		<button class="button-primary so-panels-enable-directory">Enable</button>
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-items">
+	<div class="so-directory-items">
+		{{% _.each(items, function(item) { %}}
+			<div class="so-directory-item">
+				<div class="so-directory-item-wrapper">
+					<h4 class="so-title">{{%= item.title %}}</h4>
+					<div class="so-screenshot">
+						<img src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400" />
+					</div>
+					<div class="so-description">{{%- item.description %}}</div>
+					<div class="so-buttons">
+						<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+						<a href="#" class="button-primary so-button-use" data-layout-id="{{%- item.id %}}">Use</a>
+					</div>
+				</div>
+			</div>
+		{{% }); %}}
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-preview">
+
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt-importexport">

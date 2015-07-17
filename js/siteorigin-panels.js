@@ -2843,6 +2843,10 @@ String.prototype.panelsProcessTemplate = function(){
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
         entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
+
+        directoryTemplate : _.template( $('#siteorigin-panels-directory-items').html().panelsProcessTemplate() ),
+        directoryPreviewTemplate : _.template( $('#siteorigin-panels-directory-preview').html().panelsProcessTemplate() ),
+
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
@@ -2853,6 +2857,7 @@ String.prototype.panelsProcessTemplate = function(){
             'click .so-close': 'closeDialog',
             'click .so-sidebar-tabs li a' : 'tabClickHandler',
             'click .so-content .layout' : 'layoutClickHandler',
+            'click .so-content .so-directory-item .so-button-use' : 'directoryClickHandler',
             'keyup .so-sidebar-search' : 'searchHandler'
         },
 
@@ -2863,7 +2868,7 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
 
             this.on('open_dialog', function(){
-                thisView.$('.so-sidebar-tabs li a[href="#prebuilt"]').click();
+                thisView.$('.so-sidebar-tabs li a[href="#directory"]').click();
                 thisView.$('.so-status').removeClass('so-panels-loading');
             });
         },
@@ -2894,7 +2899,10 @@ String.prototype.panelsProcessTemplate = function(){
 
             thisView.currentTab = tab;
 
-            if( tab === 'import' ) {
+            if( tab === 'directory' ) {
+                this.displayLayoutDirectory();
+            }
+            else if( tab === 'import' ) {
                 // Display the import export
                 this.displayImportExport();
             }
@@ -3089,6 +3097,92 @@ String.prototype.panelsProcessTemplate = function(){
                 $$.find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
             } );
 
+        },
+
+        /**
+         * Display the layout directory tab.
+         *
+         * @param query
+         */
+        displayLayoutDirectory: function( query ){
+            var thisView = this;
+            var c = this.$( '.so-content').empty();
+
+            if( query === undefined ) {
+                query = {};
+            }
+
+            if( !panelsOptions.directoryEnabled ) {
+                // Display the button to enable the prebuilt layout
+                c.removeClass( 'so-panels-loading' ).html( $('#siteorigin-panels-directory-enable').html() );
+                c.find('.so-panels-enable-directory').click( function(e){
+                    e.preventDefault();
+                    // Sent the query to enable the directory, then enable the directory
+                    $.get(
+                        panelsOptions.ajaxurl,
+                        { action: 'so_panels_directory_enable' },
+                        function(){
+
+                        }
+                    );
+
+                    // Enable the layout directory
+                    panelsOptions.directoryEnabled = true;
+                    c.addClass( 'so-panels-loading' );
+                    thisView.displayLayoutDirectory(query);
+                } )
+                return;
+            }
+
+            // c.removeClass( 'so-panels-loading').html('FOO BAR!!!');
+
+            // Get all the items for the current query
+            $.post(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_query',
+                    query: JSON.stringify( query )
+                },
+                function( data ){
+                    c.removeClass( 'so-panels-loading').html(
+                        thisView.directoryTemplate( data )
+                    );
+                },
+                'json'
+            );
+        },
+
+        /**
+         * Display a specific layout item.
+         *
+         * @param id
+         */
+        directoryClickHandler: function( e ){
+            var $$ = $(e.currentTarget), thisView = this;
+            console.log( $$.data('layout-id') );
+
+            if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
+                return false;
+            }
+            this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
+
+            $.get(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_item',
+                    layout_id: $$.data('layout-id')
+                },
+                function(layout){
+                    console.log( layout );
+
+                    // TODO check for an error message
+                    thisView.setStatusMessage('', false);
+                    thisView.builder.addHistoryEntry('prebuilt_loaded');
+
+                    thisView.builder.model.loadPanelsData(layout);
+                    thisView.closeDialog();
+                }
+            );
         },
 
         /**
