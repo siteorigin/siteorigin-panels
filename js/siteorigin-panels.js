@@ -1871,10 +1871,10 @@ String.prototype.panelsProcessTemplate = function(){
                 if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
                 var widgetClass = '';
-                if( typeof panelsOptions.widgets.WP_Widget_Black_Studio_TinyMCE !== 'undefined' ) {
-                    widgetClass = 'WP_Widget_Black_Studio_TinyMCE';
-                }
                 // There is a small chance a theme will have removed this, so check
+                if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+                    widgetClass = 'SiteOrigin_Widget_Editor_Widget';
+                }
                 else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
                     widgetClass = 'WP_Widget_Text';
                 }
