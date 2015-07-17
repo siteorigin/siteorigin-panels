@@ -399,7 +399,7 @@
   color: #FF0000;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget .title .actions a.widget-delete:hover {
-  color: white;
+  color: #ffffff;
   background: #FF0000;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget:hover .title a {
@@ -588,7 +588,7 @@
   color: #FF0000;
 }
 .so-widget.ui-sortable-helper.widget-being-dragged .title .actions a.widget-delete:hover {
-  color: white;
+  color: #ffffff;
   background: #FF0000;
 }
 .so-widget.ui-sortable-helper.widget-being-dragged:hover .title a {
@@ -1321,7 +1321,7 @@
   border-bottom: 1px solid #ddd;
 }
 .so-panels-dialog .so-visual-styles .style-section-head {
-  background: white;
+  background: #ffffff;
   padding: 15px 10px;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
@@ -1532,7 +1532,7 @@
 }
 .so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section .section-header {
   cursor: pointer;
-  background: white;
+  background: #ffffff;
   padding: 15px 10px;
   border: solid #ddd;
   border-width: 1px 0;
@@ -1639,14 +1639,14 @@
   width: 68px;
   height: 24px;
   padding: 3px;
-  background-color: white;
+  background-color: #ffffff;
   border-radius: 24px;
-  box-shadow: inset 0 -1px white, inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 -1px #ffffff, inset 0 1px 1px rgba(0, 0, 0, 0.05);
   cursor: pointer;
-  background-image: -webkit-linear-gradient(top, #eeeeee, white 25px);
-  background-image: -moz-linear-gradient(top, #eeeeee, white 25px);
-  background-image: -o-linear-gradient(top, #eeeeee, white 25px);
-  background-image: linear-gradient(to bottom, #eeeeee, white 25px);
+  background-image: -webkit-linear-gradient(top, #eeeeee, #ffffff 25px);
+  background-image: -moz-linear-gradient(top, #eeeeee, #ffffff 25px);
+  background-image: -o-linear-gradient(top, #eeeeee, #ffffff 25px);
+  background-image: linear-gradient(to bottom, #eeeeee, #ffffff 25px);
 }
 #panels-home-page .switch .switch-input {
   position: absolute;
@@ -1692,7 +1692,7 @@
 #panels-home-page .switch .switch-label:after {
   content: attr(data-on);
   left: 13px;
-  color: white;
+  color: #ffffff;
   text-shadow: 0 1px rgba(0, 0, 0, 0.2);
   opacity: 0;
 }
@@ -1712,13 +1712,13 @@
   left: 4px;
   width: 22px;
   height: 22px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
-  background-image: -webkit-linear-gradient(top, white 40%, #f0f0f0);
-  background-image: -moz-linear-gradient(top, white 40%, #f0f0f0);
-  background-image: -o-linear-gradient(top, white 40%, #f0f0f0);
-  background-image: linear-gradient(to bottom, white 40%, #f0f0f0);
+  background-image: -webkit-linear-gradient(top, #ffffff 40%, #f0f0f0);
+  background-image: -moz-linear-gradient(top, #ffffff 40%, #f0f0f0);
+  background-image: -o-linear-gradient(top, #ffffff 40%, #f0f0f0);
+  background-image: linear-gradient(to bottom, #ffffff 40%, #f0f0f0);
   -webkit-transition: left 0.15s ease-out;
   -moz-transition: left 0.15s ease-out;
   -o-transition: left 0.15s ease-out;
@@ -1735,10 +1735,10 @@
   background: #f9f9f9;
   border-radius: 7px;
   box-shadow: inset 0 1px rgba(0, 0, 0, 0.02);
-  background-image: -webkit-linear-gradient(top, #eeeeee, white);
-  background-image: -moz-linear-gradient(top, #eeeeee, white);
-  background-image: -o-linear-gradient(top, #eeeeee, white);
-  background-image: linear-gradient(to bottom, #eeeeee, white);
+  background-image: -webkit-linear-gradient(top, #eeeeee, #ffffff);
+  background-image: -moz-linear-gradient(top, #eeeeee, #ffffff);
+  background-image: -o-linear-gradient(top, #eeeeee, #ffffff);
+  background-image: linear-gradient(to bottom, #eeeeee, #ffffff);
 }
 #panels-home-page .switch .switch-input:checked ~ .switch-handle {
   left: 48px;
