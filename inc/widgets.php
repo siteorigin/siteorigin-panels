@@ -206,7 +206,7 @@ function siteorigin_panels_restore_bundled_widget($object, $widget){
 			$object = new $widget();
 		}
 	}
-	elseif(!is_admin() && $widget == 'WP_Widget_Black_Studio_TinyMCE') {
+	elseif(!is_admin() && ( $widget == 'WP_Widget_Black_Studio_TinyMCE' || $widget == 'SiteOrigin_Widget_Editor_Widget' ) ) {
 		// If the visual editor is missing, we can replace it with the text widget for now
 		$object = new WP_Widget_Text();
 	}
