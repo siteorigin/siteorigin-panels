@@ -1418,12 +1418,18 @@
 				border-bottom: 1px solid #d0d0d0;
 				margin: -15px -10px 15px -10px;
 				padding: 15px;
+				font-weight: bold;
 			}
 
 			// For a list of directory items
 			.so-directory-items {
 
 				.clearfix();
+
+				.so-no-results {
+					margin: 20px 0;
+					padding: 0 5px;
+				}
 
 				.so-directory-item {
 
@@ -1440,19 +1446,37 @@
 					}
 
 					.so-title {
+						font-size: 15px;
 						margin: 0 0 13px 0;
-						font-size: 1.2em;
 					}
 
 					.so-screenshot {
-						background: #c0c0c0;
+						background: #ffffff;
 						margin-bottom: 10px;
 						border: 1px solid #d0d0d0;
+
+						&.so-loading {
+							background-image: url("images/wpspin_light.gif");
+							background-position: center center;
+							background-repeat: no-repeat;
+
+							@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+								& {
+									background-image: url(images/wpspin_light-2x.gif);
+									background-size: 16px 16px;
+								}
+							}
+						}
 
 						img {
 							display: block;
 							width: 100%;
 							height: auto;
+						}
+
+						a {
+							display: block;
+							min-height: 40px;
 						}
 					}
 
@@ -1479,7 +1503,8 @@
 			}
 
 			.so-directory-pages {
-				margin-top: 10px;
+				margin-top: 15px;
+				padding: 0 5px;
 
 				.button-disabled {
 					pointer-events: none;
