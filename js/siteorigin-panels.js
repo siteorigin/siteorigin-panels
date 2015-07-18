@@ -3180,6 +3180,18 @@ String.prototype.panelsProcessTemplate = function(){
                     if( search !== '' ) {
                         c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"<em>' + _.escape(search) + '</em>"' );
                     }
+
+                    // Handle nice preloading of the screenshots
+                    c.find('.so-screenshot').each( function(){
+                        // Set the initial height
+                        var $$ = $(this), $a = $$.find('a');
+                        $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
+
+                        var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
+                            $a.removeClass('so-loading').css('height', 'auto');
+                            $img.appendTo($a).hide().fadeIn('fast');
+                        });
+                    } );
                 },
                 'json'
             );

@@ -399,8 +399,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<div class="so-directory-item-wrapper">
 						<h4 class="so-title">{{%= item.title %}}</h4>
 						<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
-							<a href="{{%- item.preview %}}" target="_blank" class="panels-loading">
-							</a>
+							<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
 						</div>
 						<div class="so-description">{{%- item.description %}}</div>
 						<div class="so-buttons">
