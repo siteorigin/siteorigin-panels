@@ -3167,7 +3167,7 @@ String.prototype.panelsProcessTemplate = function(){
                             thisView.displayLayoutDirectory( search, page - 1 );
                         });
                     }
-                    if( page === data.max_num_pages ) {
+                    if( page === data.max_num_pages || data.max_num_pages == 0 ) {
                         next.addClass('button-disabled');
                     }
                     else {
@@ -3178,7 +3178,7 @@ String.prototype.panelsProcessTemplate = function(){
                     }
 
                     if( search !== '' ) {
-                        c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"' + _.escape(search) + '"' );
+                        c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"<em>' + _.escape(search) + '</em>"' );
                     }
                 },
                 'json'
@@ -3191,6 +3191,7 @@ String.prototype.panelsProcessTemplate = function(){
          * @param id
          */
         directoryClickHandler: function( e ){
+            e.preventDefault();
             var $$ = $(e.currentTarget), thisView = this;
 
             if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {

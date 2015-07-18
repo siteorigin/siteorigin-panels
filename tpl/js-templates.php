@@ -389,24 +389,28 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<?php _e('Newest Layouts', 'siteorigin-panels') ?>
 		</div>
 
-		{{% _.each(items, function(item) { %}}
-			<div class="so-directory-item">
-				<div class="so-directory-item-wrapper">
-					<h3 class="so-title">{{%= item.title %}}</h3>
-					<div class="so-screenshot">
-						<a href="{{%- item.preview %}}" target="_blank">
-							<img src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400" width="400" height="300" />
-							<!-- <img src="http://s.wordpress.com/mshots/v1/wordpress.org?w=400" width="400" height="300" /> -->
-						</a>
-					</div>
-					<div class="so-description">{{%- item.description %}}</div>
-					<div class="so-buttons">
-						<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
-						<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+		{{% if(items.length === 0) { %}}
+			<div class="so-no-results">
+				<?php _e( "Your search didn't return any results", 'siteorigin-panels' ); ?>
+			</div>
+		{{% } else { %}}
+			{{% _.each(items, function(item) { %}}
+				<div class="so-directory-item">
+					<div class="so-directory-item-wrapper">
+						<h4 class="so-title">{{%= item.title %}}</h4>
+						<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
+							<a href="{{%- item.preview %}}" target="_blank" class="panels-loading">
+							</a>
+						</div>
+						<div class="so-description">{{%- item.description %}}</div>
+						<div class="so-buttons">
+							<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+							<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+						</div>
 					</div>
 				</div>
-			</div>
-		{{% }); %}}
+			{{% }); %}}
+		{{% } %}}
 
 		<div class="clear"></div>
 
