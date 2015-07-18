@@ -1309,6 +1309,24 @@
   padding: 12px 30px;
   height: auto;
 }
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-browse {
+  background: #f3f3f3;
+  border-bottom: 1px solid #d0d0d0;
+  margin: -15px -10px 15px -10px;
+  padding: 15px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items {
+  zoom: 1;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items:before {
+  content: '';
+  display: block;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items:after {
+  content: '';
+  display: table;
+  clear: both;
+}
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
   -ms-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -1319,7 +1337,7 @@
   padding: 6px;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-directory-item-wrapper {
-  padding: 10px;
+  padding: 15px 10px;
   background: #F7F7F7;
   border: 1px solid #d0d0d0;
   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
@@ -1327,7 +1345,8 @@
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-title {
-  margin: 0 0 10px 0;
+  margin: 0 0 13px 0;
+  font-size: 1.2em;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot {
   background: #c0c0c0;
@@ -1346,6 +1365,20 @@
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-buttons {
   text-align: right;
+  margin: 10px -10px -15px -10px;
+  background: #fcfcfc;
+  padding: 10px;
+  border-top: 1px solid #d0d0d0;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-buttons .button-secondary {
+  float: left;
+  margin-right: 10px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-pages {
+  margin-top: 10px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-pages .button-disabled {
+  pointer-events: none;
 }
 .so-panels-dialog .so-visual-styles {
   margin: -15px;

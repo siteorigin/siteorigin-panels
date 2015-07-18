@@ -2843,22 +2843,23 @@ String.prototype.panelsProcessTemplate = function(){
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
         entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
-
         directoryTemplate : _.template( $('#siteorigin-panels-directory-items').html().panelsProcessTemplate() ),
-        directoryPreviewTemplate : _.template( $('#siteorigin-panels-directory-preview').html().panelsProcessTemplate() ),
 
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
         layoutCache : {},
         currentTab : false,
+        directoryPage : 1,
 
         events: {
             'click .so-close': 'closeDialog',
             'click .so-sidebar-tabs li a' : 'tabClickHandler',
             'click .so-content .layout' : 'layoutClickHandler',
+            'keyup .so-sidebar-search' : 'searchHandler',
+
+            // The directory items
             'click .so-content .so-directory-item .so-button-use' : 'directoryClickHandler',
-            'keyup .so-sidebar-search' : 'searchHandler'
         },
 
         /**
@@ -2930,6 +2931,8 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 thisView.displayLayouts(tab, this.layoutCache[tab]);
             }
+
+            thisView.$('.so-sidebar-search').val('');
 
             return false;
         },
@@ -3104,15 +3107,18 @@ String.prototype.panelsProcessTemplate = function(){
          *
          * @param query
          */
-        displayLayoutDirectory: function( query ){
+        displayLayoutDirectory: function( search, page ){
             var thisView = this;
-            var c = this.$( '.so-content').empty();
+            var c = this.$( '.so-content').empty().addClass('so-panels-loading');
 
-            if( query === undefined ) {
-                query = {};
+            if( search === undefined ) {
+                search = '';
+            }
+            if( page === undefined ) {
+                page = 1;
             }
 
-            if( !panelsOptions.directoryEnabled ) {
+            if( !panelsOptions.directory_enabled ) {
                 // Display the button to enable the prebuilt layout
                 c.removeClass( 'so-panels-loading' ).html( $('#siteorigin-panels-directory-enable').html() );
                 c.find('.so-panels-enable-directory').click( function(e){
@@ -3127,39 +3133,65 @@ String.prototype.panelsProcessTemplate = function(){
                     );
 
                     // Enable the layout directory
-                    panelsOptions.directoryEnabled = true;
+                    panelsOptions.directory_enabled = true;
                     c.addClass( 'so-panels-loading' );
-                    thisView.displayLayoutDirectory(query);
-                } )
+                    thisView.displayLayoutDirectory( search, page );
+                } );
                 return;
             }
 
-            // c.removeClass( 'so-panels-loading').html('FOO BAR!!!');
-
             // Get all the items for the current query
-            $.post(
+            $.get(
                 panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_directory_query',
-                    query: JSON.stringify( query )
+                    search: search,
+                    page: page
                 },
                 function( data ){
-                    c.removeClass( 'so-panels-loading').html(
-                        thisView.directoryTemplate( data )
-                    );
+                    // Skip this if we're no longer viewing the layout directory
+                    if( thisView.currentTab !== 'directory' ) return;
+
+                    // Add the directory items
+                    c.removeClass( 'so-panels-loading').html( thisView.directoryTemplate( data ) );
+
+                    // Lets setup the next and previous buttons
+                    var prev = c.find('.so-previous'), next = c.find('.so-next');
+
+                    if( page <= 1 ) {
+                        prev.addClass('button-disabled');
+                    }
+                    else {
+                        prev.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page - 1 );
+                        });
+                    }
+                    if( page === data.max_num_pages ) {
+                        next.addClass('button-disabled');
+                    }
+                    else {
+                        next.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page + 1 );
+                        });
+                    }
+
+                    if( search !== '' ) {
+                        c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"' + _.escape(search) + '"' );
+                    }
                 },
                 'json'
             );
         },
 
         /**
-         * Display a specific layout item.
+         * Load a particular layout into the builder.
          *
          * @param id
          */
         directoryClickHandler: function( e ){
             var $$ = $(e.currentTarget), thisView = this;
-            console.log( $$.data('layout-id') );
 
             if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
                 return false;
@@ -3170,17 +3202,20 @@ String.prototype.panelsProcessTemplate = function(){
                 panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_directory_item',
-                    layout_id: $$.data('layout-id')
+                    layout_slug: $$.data('layout-slug')
                 },
                 function(layout){
-                    console.log( layout );
 
-                    // TODO check for an error message
-                    thisView.setStatusMessage('', false);
-                    thisView.builder.addHistoryEntry('prebuilt_loaded');
-
-                    thisView.builder.model.loadPanelsData(layout);
-                    thisView.closeDialog();
+                    if( layout.error !== undefined ) {
+                        // There was an error
+                        alert( layout.error );
+                    }
+                    else {
+                        thisView.setStatusMessage('', false);
+                        thisView.builder.addHistoryEntry('prebuilt_loaded');
+                        thisView.builder.model.loadPanelsData(layout);
+                        thisView.closeDialog();
+                    }
                 }
             );
         },
@@ -3188,13 +3223,19 @@ String.prototype.panelsProcessTemplate = function(){
         /**
          * Handle an update to the search
          */
-        searchHandler: function(){
-            if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
-                return false;
+        searchHandler: function( e ){
+            if( this.currentTab !== 'directory' ) {
+                // This is for the tabs that support live search
+                if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+                    return false;
+                }
+                this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
             }
-            this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
+            else if( e.keyCode === 13 ) {
+                // Refresh the search results
+                this.displayLayoutDirectory( $(e.currentTarget).val(), 1 );
+            }
         }
-
     } );
 
     /**
