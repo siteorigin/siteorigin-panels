@@ -480,3 +480,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 	</div>
 </script>
+
+<script type="text/template" id="siteorigin-panels-context-menu">
+	<div class="so-panels-contextual-menu">
+		This is a test contextual menu.
+	</div>
+</script>

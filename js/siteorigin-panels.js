@@ -367,6 +367,16 @@ String.prototype.panelsProcessTemplate = function(){
                 thisView.cell.row.resize();
                 thisView.model.destroy();
             } );
+        },
+
+        /**
+         * Create the context menu for the widget.
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextMenu: function( e, menu ){
+            menu.addSection();
         }
 
     });
@@ -1289,6 +1299,7 @@ String.prototype.panelsProcessTemplate = function(){
 
         attachedToEditor: false,
         liveEditor: false,
+        menu: false,
 
         /* The builderType is sent with all requests to the server */
         builderType: '',
@@ -1343,6 +1354,10 @@ String.prototype.panelsProcessTemplate = function(){
             this.on('content_change', this.handleContentChange, this);
             this.on('display_builder', this.handleDisplayBuilder, this);
             this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
+
+            // Create the context menu for this builder
+            this.menu = new panels.utils.menu({});
+            this.menu.on('activate_context', this.activateContextMenu, this);
 
             return this;
         },
@@ -1927,6 +1942,29 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 this.$('.so-panels-welcome-message').show();
             }
+        },
+
+        activateContextMenu: function( e, menu ){
+            var builder = this;
+
+            // Skip this if any of the dialogs are open. They can handle their own contexts.
+            if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+                // Check if any of the widgets get the contextual menu
+                var overItem = false, overItemType = false;
+
+                var over = $([])
+                    .add( builder.$('.so-rows-container > .so-row-container') )
+                    .add( builder.$('.so-cells > .cell') )
+                    .add( builder.$('.cell-wrapper > .so-widget') )
+                    .filter( function(i){
+                        return menu.isOverEl( $(this), e );
+                    } );
+
+                var activeView = over.last().data('view');
+                if( typeof activeView.buildContextMenu !== 'undefined' ) {
+                    activeView.buildContextMenu( e, menu );
+                }
+            }
         }
 
     } );
@@ -1944,6 +1982,7 @@ String.prototype.panelsProcessTemplate = function(){
         className: 'so-panels-dialog-wrapper',
         dialogClass: '',
         parentDialog: false,
+        dialogOpen: false,
 
         events : {
             'click .so-close': 'closeDialog',
@@ -2146,6 +2185,9 @@ String.prototype.panelsProcessTemplate = function(){
         openDialog: function(){
             this.trigger('open_dialog');
 
+            this.dialogOpen = true;
+            window.panelsDialogOpen = true;
+
             this.refreshDialogNav();
 
             // Stop scrolling for the main body
@@ -2169,6 +2211,9 @@ String.prototype.panelsProcessTemplate = function(){
          */
         closeDialog: function(e){
             this.trigger('close_dialog');
+
+            this.dialogOpen = false;
+            window.panelsDialogOpen = false;
 
             // In the builder, trigger an update
             if(typeof this.builder !== 'undefined') {

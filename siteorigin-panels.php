@@ -251,6 +251,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 		wp_enqueue_media();
 
 		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin-utils', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-utils' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
