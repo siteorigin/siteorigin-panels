@@ -84,6 +84,14 @@
             $(window).on('keyup', {menu: this}, this.keyboardListen);
             $(window).on('click', {menu: this}, this.clickOutsideListen);
 
+            // Correct the left position
+            if( position.left + this.$el.outerWidth() >= $(window).width() ) {
+                position.left = $(window).width() - this.$el.outerWidth() - 10;
+            }
+            if( position.left <= 0 ) {
+                position.left = 10;
+            }
+
             // position the contextual menu
             this.$el.css({
                 left: position.left + 1,
