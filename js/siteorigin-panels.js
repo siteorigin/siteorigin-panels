@@ -369,16 +369,6 @@ String.prototype.panelsProcessTemplate = function(){
             } );
         },
 
-        /**
-         * Create the context menu for the widget.
-         *
-         * @param e
-         * @param menu
-         */
-        buildContextMenu: function( e, menu ){
-            menu.addSection();
-        }
-
     });
 
     /**
@@ -704,6 +694,33 @@ String.prototype.panelsProcessTemplate = function(){
          */
         handleActionClick : function(e){
             return false;
+        },
+
+        /**
+         * Build up the contextual menu for a cell
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.add_widget,
+                    searchPlaceholder: panelsOptions.loc.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+
+                    // Add the widget to the cell model
+                    widget.cell = thisView.model;
+                    widget.cell.widgets.add( widget );
+                }
+            );
         }
     } );
 
@@ -1961,8 +1978,8 @@ String.prototype.panelsProcessTemplate = function(){
                     } );
 
                 var activeView = over.last().data('view');
-                if( typeof activeView.buildContextMenu !== 'undefined' ) {
-                    activeView.buildContextMenu( e, menu );
+                if( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
+                    activeView.buildContextualMenu( e, menu );
                 }
             }
         }

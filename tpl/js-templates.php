@@ -483,6 +483,23 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-context-menu">
 	<div class="so-panels-contextual-menu">
-		This is a test contextual menu.
+
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-context-menu-section">
+	<div class="so-section">
+		<h5>{{%- settings.sectionTitle %}}</h5>
+
+		{{% if( settings.search ) { %}}
+			<div class="so-search-wrapper">
+				<input type="search" placeholder="{{%- settings.searchPlaceholder %}}" />
+			</div>
+		{{% } %}}
+		<ul class="so-items">
+			{{% for( var k in items ) { %}}
+				<li data-key="{{%- k %}}" class="so-item">{{%= items[k][settings.titleKey] %}}</li>
+			{{% } %}}
+		</ul>
 	</div>
 </script>

@@ -277,6 +277,18 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				)
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
+
+			// Settings for the contextual menu
+			'contextual' => array(
+				// Developers can change which widgets are displayed by default using this filter
+				'default_widgets' => apply_filters( 'siteorigin_panels_contextual_default_widgets', array(
+					'WP_Widget_Text',
+					'SiteOrigin_Widget_Editor_Widget',
+					'SiteOrigin_Widget_Button_Widget',
+					'SiteOrigin_Widget_Image_Widget',
+				) )
+			),
+
 			// General localization messages
 			'loc' => array(
 				'missing_widget' => array(
@@ -349,6 +361,9 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
+
+				'add_widget' => __('Add Widget', 'siteorigin-panels'),
+				'search_widgets' => __('Search Widgets', 'siteorigin-panels'),
 			),
 			'plupload' => array(
 				'max_file_size' => wp_max_upload_size().'b',

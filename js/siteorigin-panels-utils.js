@@ -18,9 +18,14 @@
      */
     panels.utils.menu = Backbone.View.extend({
         wrapperTemplate: _.template( $('#siteorigin-panels-context-menu').html().panelsProcessTemplate() ),
+        sectionTemplate: _.template( $('#siteorigin-panels-context-menu-section').html().panelsProcessTemplate() ),
 
         contexts: [],
         active: false,
+
+        events : {
+            'keyup .so-search-wrapper input' : 'searchKeyUp'
+        },
 
         /**
          * Intialize the context menu
@@ -35,6 +40,18 @@
             var thisView = this;
 
             $(window).on('contextmenu', function(e){
+                if( thisView.active && !thisView.isOverEl( thisView.$el, e ) ) {
+                    thisView.closeMenu();
+                    thisView.active = false;
+                    e.preventDefault();
+                    return false;
+                }
+
+                if( thisView.active ) {
+                    // Lets not double up on the context menu
+                    return true;
+                }
+
                 thisView.active = false;
 
                 // Other components should listen to activate_context
@@ -53,7 +70,6 @@
         },
 
         render: function(){
-            console.log( this.wrapperTemplate() );
             this.setElement( this.wrapperTemplate() );
         },
 
@@ -70,8 +86,8 @@
 
             // position the contextual menu
             this.$el.css({
-                left: position.left,
-                top: position.top
+                left: position.left + 1,
+                top: position.top + 1
             }).show();
         },
 
@@ -82,7 +98,8 @@
             $(window).off('keyup', this.keyboardListen);
             $(window).off('click', this.clickOutsideListen);
 
-            this.$el.hide();
+            this.active = false;
+            this.$el.empty().hide();
         },
 
         /**
@@ -103,7 +120,68 @@
         },
 
         addSection: function( settings, items, callback ){
+            var thisView = this;
+            settings = _.extend( {
+                display: 5,
+                defaultDisplay: false,
+                search: true,
+
+                // All the labels
+                sectionTitle : '',
+                searchPlaceholder : '',
+
+                // This is the key to be used in items for the title. Makes it easier to list objects
+                titleKey : 'title'
+            }, settings );
+
+            // Create the new section
+            var section = $( this.sectionTemplate( {
+                settings: settings,
+                items: items
+            } ) );
+            this.$el.append( section );
+
+            section.find('.so-item').click( function(){
+                var $$ = $(this);
+                callback( $$.data('key') );
+                thisView.closeMenu();
+            } );
+
+            section.data('settings', settings).find( '.so-search-wrapper input').trigger('keyup');
+
             this.active = true;
+        },
+
+        searchKeyUp: function(e){
+            var
+                $$ = $(e.currentTarget),
+                section = $$.closest('.so-section'),
+                settings = section.data('settings');
+
+            if( $$.val() === '' ) {
+                // We'll display the defaultDisplay items
+                if( settings.defaultDisplay ) {
+                    section.find('.so-item').hide();
+                    for( var i = 0; i < settings.defaultDisplay.length; i++ ) {
+                        section.find('.so-item[data-key="' + settings.defaultDisplay[i] + '"]').show();
+                    }
+                }
+                else {
+                    // We'll just display all the items
+                    section.find('.so-item').show();
+                }
+            }
+            else {
+                section.find('.so-item').hide().each( function(){
+                    var item = $(this);
+                    if( item.html().toLowerCase().indexOf( $$.val().toLowerCase() ) !== -1 ) {
+                        item.show();
+                    }
+                } );
+            }
+
+            // Now, we'll only show the first settings.display visible items
+            section.find('.so-item:visible:gt(' + (settings.display - 1) + ')').hide();
         },
 
         /**
