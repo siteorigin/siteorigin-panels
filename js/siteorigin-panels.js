@@ -750,6 +750,8 @@ String.prototype.panelsProcessTemplate = function(){
                     widget.cell.widgets.add( widget );
                 }
             );
+
+            this.row.buildContextualMenu( e, menu );
         }
     } );
 
@@ -1133,6 +1135,53 @@ String.prototype.panelsProcessTemplate = function(){
                     view.remove();
                 }
             } );
+        },
+
+        /**
+         * Build up the contextual menu for a row
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+
+            var options = [];
+            for( var i = 1; i < 5; i++ ) {
+                options.push({
+                    title: i + ' ' + panelsOptions.loc.contextual.column
+                });
+            }
+
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_row,
+                    search: false
+                },
+                options,
+                function(c){
+
+                    var columns = Number(c) + 1;
+                    var weights = [];
+                    for( var i = 0; i < columns; i++ ) {
+                        weights.push( 100/columns );
+                    }
+
+                    // Create the actual row
+                    var newRow = new panels.model.row( {
+                        collection: thisView.collection
+                    } );
+
+                    newRow.setCells( weights );
+                    newRow.builder = thisView.builder;
+
+                    thisView.builder.model.rows.add( newRow, {
+                        at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+                    } );
+
+
+                }
+            );
         }
 
     } );
