@@ -385,6 +385,8 @@ String.prototype.panelsProcessTemplate = function(){
                 },
                 panelsOptions.widgets,
                 function(c){
+                    thisView.cell.row.builder.addHistoryEntry('widget_added');
+
                     var widget = new panels.model.widget( {
                         class: c
                     } );
@@ -745,6 +747,8 @@ String.prototype.panelsProcessTemplate = function(){
                 },
                 panelsOptions.widgets,
                 function(c){
+                    thisView.row.builder.addHistoryEntry('widget_added');
+
                     var widget = new panels.model.widget( {
                         class: c
                     } );
@@ -1164,6 +1168,7 @@ String.prototype.panelsProcessTemplate = function(){
                 },
                 options,
                 function(c){
+                    thisView.builder.addHistoryEntry('row_added');
 
                     var columns = Number(c) + 1;
                     var weights = [];
