@@ -706,8 +706,8 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
             menu.addSection(
                 {
-                    sectionTitle: panelsOptions.loc.add_widget,
-                    searchPlaceholder: panelsOptions.loc.search_widgets,
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
                     defaultDisplay: panelsOptions.contextual.default_widgets
                 },
                 panelsOptions.widgets,

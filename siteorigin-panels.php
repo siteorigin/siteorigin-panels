@@ -362,8 +362,12 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
 
-				'add_widget' => __('Add Widget', 'siteorigin-panels'),
-				'search_widgets' => __('Search Widgets', 'siteorigin-panels'),
+				// Everything for the contextual menu
+				'contextual' => array(
+					'add_widget_below' => __('Add Widget Below', 'siteorigin-panels'),
+					'add_widget_cell' => __('Add Widget to Cell', 'siteorigin-panels'),
+					'search_widgets' => __('Search Widgets', 'siteorigin-panels'),
+				)
 			),
 			'plupload' => array(
 				'max_file_size' => wp_max_upload_size().'b',
