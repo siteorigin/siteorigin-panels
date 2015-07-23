@@ -396,6 +396,9 @@ String.prototype.panelsProcessTemplate = function(){
                     });
                 }
             );
+
+            // Lets also add the contextual menu for the entire row
+            this.cell.row.buildContextualMenu( e, menu );
         }
 
     });
