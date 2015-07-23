@@ -1176,9 +1176,35 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 		$after_title = '</h3>';
 	}
 
+	//mm16467 added
+		$bw = "";
+		$be = "";
+		$bb = $style_wrapper['surround_div_element'];
+		$c_attributes = array(
+				'id' => $id
+		);		
+		// If there is a style wrapper, add it.
+		if( !empty($style_wrapper) ) {
+			if(!empty($style_wrapper['class']) )
+			{
+				$classes = array_merge($classes,$style_wrapper['class']);
+				$bb = true;
+			}			
+
+			if(!empty($style_wrapper['style']) )
+			{
+				$c_attributes['style'] = $style_wrapper['style'];
+				$bb = true;
+			}
+		}
+		$c_attributes['class'] = esc_attr( implode( ' ', $classes ) );			
+		foreach ( $c_attributes as $name => $value ) {
+			$bw .= $name.'="'.esc_attr($value).'" ';
+		}
+	
 	$args = array(
-		'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '">',
-		'after_widget' => '</div>',
+		'before_widget' => '',
+		'after_widget' => '',
 		'before_title' => $before_title,
 		'after_title' => $after_title,
 		'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
@@ -1187,11 +1213,10 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 	// Let other themes and plugins change the arguments that go to the widget class.
 	$args = apply_filters('siteorigin_panels_widget_args', $args);
 
-	// If there is a style wrapper, add it.
-	if( !empty($style_wrapper) ) {
-		$args['before_widget'] = $args['before_widget'] . $style_wrapper;
-		$args['after_widget'] = '</div>' . $args['after_widget'];
-	}
+	if( $bb ) {
+		$args['before_widget'] = '<div '.$bw.$be. '>';
+		$args['after_widget'] = '</div>';
+	} //
 
 	if ( !empty($the_widget) && is_a($the_widget, 'WP_Widget')  ) {
 		$the_widget->widget($args , $instance );
