@@ -959,10 +959,6 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		foreach ( $grid_attributes as $name => $value ) {
 			echo ' '.$name.'="'.esc_attr($value).'"';
 		}
-		if( !empty($row_custom['custom_data']) )
-		{
-			echo ' '.$row_custom['custom_data'];
-		}
 		echo '>';
 
 
