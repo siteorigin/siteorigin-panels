@@ -252,6 +252,10 @@ class SiteOrigin_Panels_Default_Styling {
 			}
 		}
 
+		if( !empty( $args['extra_div_elements'] ) ) {
+			$attributes['extra_div_elements'] .= $args['extra_div_elements'];
+		}
+
 		if( !empty( $args['padding'] ) ) {
 			$attributes['style'] .= 'padding: ' . esc_attr($args['padding']) . ';';
 		}
