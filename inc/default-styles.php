@@ -40,6 +40,14 @@ class SiteOrigin_Panels_Default_Styling {
 	static function row_style_fields($fields) {
 		// Add the attribute fields
 
+		$fields['section_name'] = array(
+				'name' => __('Row Name', 'siteorigin-panels'),
+				'type' => 'text',
+				'group' => 'designer',
+				'description' => __('Name rows only for design time.', 'siteorigin-panels'),
+				'priority' => 1,
+		);
+
 		$fields['class'] = array(
 			'name' => __('Row Class', 'siteorigin-panels'),
 			'type' => 'text',
