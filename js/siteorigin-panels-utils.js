@@ -85,8 +85,16 @@
             $(window).on('click', {menu: this}, this.clickOutsideListen);
 
             // Correct the left position
-            if( position.left + this.$el.outerWidth() >= $(window).width() ) {
+            if( position.left + this.$el.outerWidth() + 10 >= $(window).width() ) {
                 position.left = $(window).width() - this.$el.outerWidth() - 10;
+            }
+            if( position.left <= 0 ) {
+                position.left = 10;
+            }
+
+            // Check top position
+            if( position.top + this.$el.outerHeight() - $(window).scrollTop() + 10 >= $(window).height() ) {
+                position.top = $(window).height() + $(window).scrollTop() - this.$el.outerHeight() - 10;
             }
             if( position.left <= 0 ) {
                 position.left = 10;
@@ -115,8 +123,13 @@
          */
         keyboardListen: function(e) {
             var menu = e.data.menu;
-            if (e.which === 27) {
-                menu.closeMenu();
+
+
+            switch( e.which ) {
+                case 27:
+                    menu.closeMenu();
+                    break;
+                // TODO we should implement up/down browsing
             }
         },
 
