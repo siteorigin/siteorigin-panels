@@ -959,6 +959,10 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		foreach ( $grid_attributes as $name => $value ) {
 			echo ' '.$name.'="'.esc_attr($value).'"';
 		}
+		if( !empty($row_custom['custom_data']) )
+		{
+			echo ' '.$row_custom['custom_data'];
+		}
 		echo '>';
 
 
@@ -1196,6 +1200,12 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 				$c_attributes['style'] = $style_wrapper['style'];
 				$bb = true;
 			}
+
+			if( !empty($style_wrapper['custom_data']) )
+			{
+				$be = ' '.$style_wrapper['custom_data'];
+				$bb = true;
+			}	
 		}
 		$c_attributes['class'] = esc_attr( implode( ' ', $classes ) );			
 		foreach ( $c_attributes as $name => $value ) {
