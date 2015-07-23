@@ -72,6 +72,14 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['custom_data'] = array(
+				'name' => __('Row Custom Data', 'siteorigin-panels'),
+				'type' => 'code',
+				'group' => 'attributes',
+				'description' => __('Custom Data added to row HTML element.', 'siteorigin-panels'),
+				'priority' => 6,
+		);
+
 		$fields['extra_div_elements'] = array(
 				'name' => __('Add Extra Div Elements', 'siteorigin-panels'),
 				'type' => 'checkbox',
@@ -179,6 +187,14 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['custom_data'] = array(
+				'name' => __('Widget Custom Data', 'siteorigin-panels'),
+				'type' => 'code',
+				'group' => 'attributes',
+				'description' => __('Custom Data added to widget HTML div element.', 'siteorigin-panels'),
+				'priority' => 6,
+		);
+
 		$fields['surround_div_element'] = array(
 				'name' => __('Add Surrounding Div Element', 'siteorigin-panels'),
 				'type' => 'checkbox',
@@ -268,6 +284,10 @@ class SiteOrigin_Panels_Default_Styling {
 			}
 		}
 
+		if( !empty( $args['custom_data'] ) ) {
+			$attributes['custom_data'] .= $args['custom_data'];
+		}
+
 		if( !empty( $args['extra_div_elements'] ) ) {
 			$attributes['extra_div_elements'] .= $args['extra_div_elements'];
 		}
@@ -338,6 +358,10 @@ class SiteOrigin_Panels_Default_Styling {
 					$attributes['style'] .= $matches[1][$i] . ':' . $matches[2][$i] . ';';
 				}
 			}
+		}
+
+		if( !empty( $args['custom_data'] ) ) {
+			$attributes['custom_data'] .= $args['custom_data'];
 		}
 
 		if( !empty( $args['surround_div_element'] ) ) {
