@@ -1006,7 +1006,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 			foreach ( $widgets as $pi => $widget_info ) {
 				// TODO this wrapper should go in the before/after widget arguments
-				$widget_style_wrapper = siteorigin_panels_start_style_wrapper( 'widget', array(), !empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
+				$widget_style_wrapper = siteorigin_panels_start_style_extractor( 'widget', array(), !empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
 				siteorigin_panels_the_widget( $widget_info['panels_info'], $widget_info, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
 			}
 			if ( empty( $widgets ) ) echo '&nbsp;';
