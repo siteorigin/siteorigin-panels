@@ -64,6 +64,14 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['extra_div_elements'] = array(
+				'name' => __('Add Extra Div Elements', 'siteorigin-panels'),
+				'type' => 'checkbox',
+				'group' => 'attributes',
+				'description' => __('Separate`s user defined classes into extra HTML div elements.', 'siteorigin-panels'),
+				'priority' => 6,
+		);
+
 		// Add the layout fields
 
 		$fields['bottom_margin'] = array(
