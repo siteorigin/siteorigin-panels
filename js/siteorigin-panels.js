@@ -369,6 +369,35 @@ String.prototype.panelsProcessTemplate = function(){
             } );
         },
 
+        /**
+         * Build up the contextual menu for a cell
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_below,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+
+                    // Insert the new widget below
+                    thisView.cell.model.widgets.add(widget, {
+                        // Add this after the existing model
+                        at: thisView.model.collection.indexOf( thisView.model ) + 1
+                    });
+                }
+            );
+        }
+
     });
 
     /**
