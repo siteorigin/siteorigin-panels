@@ -897,7 +897,7 @@ String.prototype.panelsProcessTemplate = function(){
          * @returns {panels.view.row}
          */
         render: function(){
-            this.setElement( this.template() );
+            this.setElement( this.template({rowname : this.model.get('style')["section_name"]}) );
             this.$el.data('view', this);
 
             // Create views for the cells in this row
@@ -1105,7 +1105,7 @@ String.prototype.panelsProcessTemplate = function(){
          *
          * @param weights
          */
-        addRow: function( weights, options ){
+        addRow: function( weights, options, style ){
             options = _.extend({
                 noAnimate : false
             }, options);
@@ -1116,6 +1116,9 @@ String.prototype.panelsProcessTemplate = function(){
 
             row.setCells( weights );
             row.builder = this;
+            if( typeof style !== 'undefined' ) {
+                row.set( 'style', style );
+            }
 
             this.rows.add(row, options);
 
@@ -1155,11 +1158,7 @@ String.prototype.panelsProcessTemplate = function(){
             var builderModel = this;
             _.each( rows, function(row, i){
                 // This will create and add the row model and its cells
-                var newRow = builderModel.addRow( row, { noAnimate: true } );
-
-                if( typeof data.grids[i].style !== 'undefined' ) {
-                    newRow.set( 'style', data.grids[i].style );
-                }
+                var newRow = builderModel.addRow( row, { noAnimate: true }, data.grids[i].style );
             } );
 
 
