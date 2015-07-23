@@ -388,6 +388,7 @@ String.prototype.panelsProcessTemplate = function(){
                     var widget = new panels.model.widget( {
                         class: c
                     } );
+                    widget.cell = thisView.cell.model;
 
                     // Insert the new widget below
                     thisView.cell.model.widgets.add(widget, {
