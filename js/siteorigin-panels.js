@@ -370,7 +370,7 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Build up the contextual menu for a cell
+         * Build up the contextual menu for a widget
          *
          * @param e
          * @param menu

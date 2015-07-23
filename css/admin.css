@@ -1766,16 +1766,17 @@
   display: none !important;
 }
 .so-panels-contextual-menu {
+  border: 1px solid #C0C0C0;
+  background: #f9f9f9;
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  outline: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
   position: absolute;
-  background: #fbfbfb;
-  border: 1px solid #aaa;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-  -webkit-box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
-  -moz-box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
-  box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
-  width: 220px;
+  width: 200px;
   top: 20px;
   left: 20px;
   z-index: 9991;
@@ -1786,32 +1787,40 @@
   font-size: 12px;
 }
 .so-panels-contextual-menu .so-section {
-  padding: 5px 0;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #c0c0c0;
 }
 .so-panels-contextual-menu .so-section:last-child {
   border-bottom: none;
 }
 .so-panels-contextual-menu .so-section h5 {
   margin: 0 0 5px 0;
-  padding: 5px 10px;
-  border-bottom: 1px solid #eee;
+  padding: 8px 10px 5px 10px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f6f6f6;
 }
 .so-panels-contextual-menu .so-section .so-search-wrapper {
-  padding: 5px 10px;
   margin: -5px 0 5px 0;
-  border-bottom: 1px solid #eee;
-  background: #f3f3f3;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f4f4f4;
 }
-.so-panels-contextual-menu .so-section .so-search-wrapper input[type="search"] {
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"] {
   box-sizing: border-box;
   display: block;
   width: 100%;
   margin: 0;
+  border: none;
+  padding: 5px 10px;
+  background: #fbfbfb;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:focus,
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:active {
+  border: none;
+  box-shadow: none;
+  background: #ffffff;
 }
 .so-panels-contextual-menu .so-section ul {
   margin: 5px 0 0 0;
-  padding: 0;
+  padding: 0 0 5px 0;
 }
 .so-panels-contextual-menu .so-section ul li {
   cursor: pointer;
@@ -1820,6 +1829,11 @@
   line-height: 1em;
 }
 .so-panels-contextual-menu .so-section ul li:hover {
-  color: #ffffff;
-  background: #00a0d2;
+  background: #F0F0F0;
+  color: #444;
+}
+.so-panels-contextual-menu .so-section .so-no-results {
+  padding: 0px 10px 5px 10px;
+  display: none;
+  font-style: italic;
 }

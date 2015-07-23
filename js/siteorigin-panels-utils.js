@@ -190,6 +190,14 @@
 
             // Now, we'll only show the first settings.display visible items
             section.find('.so-item:visible:gt(' + (settings.display - 1) + ')').hide();
+
+
+            if( section.find('.so-item:visible').length === 0 && $$.val() !== '' ) {
+                section.find('.so-no-results').show();
+            }
+            else {
+                section.find('.so-no-results').hide();
+            }
         },
 
         /**

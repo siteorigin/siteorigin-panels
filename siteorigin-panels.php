@@ -286,6 +286,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 					'SiteOrigin_Widget_Editor_Widget',
 					'SiteOrigin_Widget_Button_Widget',
 					'SiteOrigin_Widget_Image_Widget',
+					'SiteOrigin_Panels_Widgets_Layout',
 				) )
 			),
 
@@ -367,6 +368,9 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 					'add_widget_below' => __('Add Widget Below', 'siteorigin-panels'),
 					'add_widget_cell' => __('Add Widget to Cell', 'siteorigin-panels'),
 					'search_widgets' => __('Search Widgets', 'siteorigin-panels'),
+
+					'add_row' => __('Add Row', 'siteorigin-panels'),
+					'column' => __('Column', 'siteorigin-panels'),
 				)
 			),
 			'plupload' => array(

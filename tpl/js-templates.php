@@ -493,7 +493,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		{{% if( settings.search ) { %}}
 			<div class="so-search-wrapper">
-				<input type="search" placeholder="{{%- settings.searchPlaceholder %}}" />
+				<input type="text" placeholder="{{%- settings.searchPlaceholder %}}" />
 			</div>
 		{{% } %}}
 		<ul class="so-items">
@@ -501,5 +501,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<li data-key="{{%- k %}}" class="so-item">{{%= items[k][settings.titleKey] %}}</li>
 			{{% } %}}
 		</ul>
+		{{% if( settings.search ) { %}}
+		<div class="so-no-results">
+			<?php _e('No Results', 'siteorigin-panels') ?>
+		</div>
+		{{% } %}}
 	</div>
 </script>
