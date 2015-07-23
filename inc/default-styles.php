@@ -171,6 +171,14 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['surround_div_element'] = array(
+				'name' => __('Add Surrounding Div Element', 'siteorigin-panels'),
+				'type' => 'checkbox',
+				'group' => 'attributes',
+				'description' => __('Surrounding widget by HTML div element with some extra classes (widget base id, "so-panel", "widget", "panel-first-child", "panel-last-child").', 'siteorigin-panels'),
+				'priority' => 9,
+		);
+
 		$fields['padding'] = array(
 			'name' => __('Padding', 'siteorigin-panels'),
 			'type' => 'measurement',
@@ -322,6 +330,10 @@ class SiteOrigin_Panels_Default_Styling {
 					$attributes['style'] .= $matches[1][$i] . ':' . $matches[2][$i] . ';';
 				}
 			}
+		}
+
+		if( !empty( $args['surround_div_element'] ) ) {
+			$attributes['surround_div_element'] .= $args['surround_div_element'];
 		}
 
 		if( !empty( $args['padding'] ) ) {
