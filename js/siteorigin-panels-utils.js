@@ -125,18 +125,16 @@
         keyboardListen: function(e) {
             var menu = e.data.menu;
 
-
             switch( e.which ) {
                 case 27:
                     menu.closeMenu();
                     break;
-                // TODO we should implement up/down browsing
             }
         },
 
         clickOutsideListen: function(e){
             var menu = e.data.menu;
-            if( menu.$el.is(':visible') && !menu.isOverEl( menu.$el, e ) ) {
+            if( e.which !== 3 && menu.$el.is(':visible') && !menu.isOverEl( menu.$el, e ) ) {
                 menu.closeMenu();
             }
         },
