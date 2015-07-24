@@ -282,7 +282,6 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 			'contextual' => array(
 				// Developers can change which widgets are displayed by default using this filter
 				'default_widgets' => apply_filters( 'siteorigin_panels_contextual_default_widgets', array(
-					'WP_Widget_Text',
 					'SiteOrigin_Widget_Editor_Widget',
 					'SiteOrigin_Widget_Button_Widget',
 					'SiteOrigin_Widget_Image_Widget',

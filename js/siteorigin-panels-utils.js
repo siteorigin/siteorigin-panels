@@ -105,6 +105,7 @@
                 left: position.left + 1,
                 top: position.top + 1
             }).show();
+            this.$('.so-search-wrapper input').focus();
         },
 
         closeMenu: function(){
@@ -178,6 +179,54 @@
                 $$ = $(e.currentTarget),
                 section = $$.closest('.so-section'),
                 settings = section.data('settings');
+
+            if( e.which === 38 || e.which === 40 ) {
+                // First, lets check if this is an up, down or enter press
+                var
+                    items = section.find('ul li:visible'),
+                    activeItem = items.filter('.so-active').eq(0);
+
+                if( activeItem.length !== 0 ) {
+                    items.removeClass('so-active');
+
+                    var activeIndex = items.index( activeItem );
+
+                    if( e.which === 38 ) {
+                        if( activeIndex - 1 < 0 ) {
+                            activeItem = items.last();
+                        }
+                        else {
+                            activeItem = items.eq( activeIndex - 1 );
+                        }
+                    }
+                    else if( e.which === 40 ) {
+                        if( activeIndex + 1 >= items.length ) {
+                            activeItem = items.first();
+                        }
+                        else {
+                            activeItem = items.eq( activeIndex + 1 );
+                        }
+                    }
+                }
+                else if( e.which === 38 ) {
+                    activeItem = items.last();
+                }
+                else if( e.which === 40 ) {
+                    activeItem = items.first();
+                }
+
+                activeItem.addClass('so-active');
+                return false;
+            }
+            if(e.which === 13 ) {
+                if( section.find('ul li:visible').length === 1 ) {
+                    // We'll treat a single visible item as active when enter is clicked
+                    section.find('ul li:visible').trigger('click');
+                    return false;
+                }
+                section.find('ul li.so-active:visible').trigger('click');
+                return false;
+            }
 
             if( $$.val() === '' ) {
                 // We'll display the defaultDisplay items
