@@ -73,6 +73,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-row-container ui-draggable">
 
 		<div class="so-row-toolbar">
+			<span class="so-row-name">{{%= rowname %}}</span>
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows-v"></span></span>
 
 			<span class="so-dropdown-wrapper">

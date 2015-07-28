@@ -42,6 +42,10 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 	if( empty($fields) ) return false;
 
 	$groups = array(
+		'designer' => array(
+				'name' => __('Designer', 'siteorigin-panels'),
+				'priority' => 1
+		),
 		'attributes' => array(
 			'name' => __('Attributes', 'siteorigin-panels'),
 			'priority' => 5

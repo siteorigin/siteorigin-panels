@@ -40,6 +40,14 @@ class SiteOrigin_Panels_Default_Styling {
 	static function row_style_fields($fields) {
 		// Add the attribute fields
 
+		$fields['section_name'] = array(
+				'name' => __('Row Name', 'siteorigin-panels'),
+				'type' => 'text',
+				'group' => 'designer',
+				'description' => __('Name rows only for design time.', 'siteorigin-panels'),
+				'priority' => 1,
+		);
+
 		$fields['class'] = array(
 			'name' => __('Row Class', 'siteorigin-panels'),
 			'type' => 'text',
@@ -62,6 +70,22 @@ class SiteOrigin_Panels_Default_Styling {
 			'group' => 'attributes',
 			'description' => __('CSS Styles, given as one per row.', 'siteorigin-panels'),
 			'priority' => 10,
+		);
+
+		$fields['custom_data'] = array(
+				'name' => __('Row Custom Data', 'siteorigin-panels'),
+				'type' => 'code',
+				'group' => 'attributes',
+				'description' => __('Custom Data added to row HTML element.', 'siteorigin-panels'),
+				'priority' => 6,
+		);
+
+		$fields['extra_div_elements'] = array(
+				'name' => __('Add Extra Div Elements', 'siteorigin-panels'),
+				'type' => 'checkbox',
+				'group' => 'attributes',
+				'description' => __('Separate`s user defined classes into extra HTML div elements.', 'siteorigin-panels'),
+				'priority' => 6,
 		);
 
 		// Add the layout fields
@@ -163,6 +187,22 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['custom_data'] = array(
+				'name' => __('Widget Custom Data', 'siteorigin-panels'),
+				'type' => 'code',
+				'group' => 'attributes',
+				'description' => __('Custom Data added to widget HTML div element.', 'siteorigin-panels'),
+				'priority' => 6,
+		);
+
+		$fields['surround_div_element'] = array(
+				'name' => __('Add Surrounding Div Element', 'siteorigin-panels'),
+				'type' => 'checkbox',
+				'group' => 'attributes',
+				'description' => __('Surrounding widget by HTML div element with some extra classes (widget base id, "so-panel", "widget", "panel-first-child", "panel-last-child").', 'siteorigin-panels'),
+				'priority' => 9,
+		);
+
 		$fields['padding'] = array(
 			'name' => __('Padding', 'siteorigin-panels'),
 			'type' => 'measurement',
@@ -244,6 +284,14 @@ class SiteOrigin_Panels_Default_Styling {
 			}
 		}
 
+		if( !empty( $args['custom_data'] ) ) {
+			$attributes['custom_data'] .= $args['custom_data'];
+		}
+
+		if( !empty( $args['extra_div_elements'] ) ) {
+			$attributes['extra_div_elements'] .= $args['extra_div_elements'];
+		}
+
 		if( !empty( $args['padding'] ) ) {
 			$attributes['style'] .= 'padding: ' . esc_attr($args['padding']) . ';';
 		}
@@ -310,6 +358,14 @@ class SiteOrigin_Panels_Default_Styling {
 					$attributes['style'] .= $matches[1][$i] . ':' . $matches[2][$i] . ';';
 				}
 			}
+		}
+
+		if( !empty( $args['custom_data'] ) ) {
+			$attributes['custom_data'] .= $args['custom_data'];
+		}
+
+		if( !empty( $args['surround_div_element'] ) ) {
+			$attributes['surround_div_element'] .= $args['surround_div_element'];
 		}
 
 		if( !empty( $args['padding'] ) ) {
