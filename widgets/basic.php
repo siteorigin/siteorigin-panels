@@ -260,7 +260,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 
 		global $more; $old_more = $more; $more = empty($instance['more']);
-
+		self::$rendering_loop = true;
 		if(strpos('/'.$instance['template'], '/content') !== false) {
 			while( have_posts() ) {
 				the_post();
@@ -270,12 +270,19 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		else {
 			locate_template($instance['template'], true, false);
 		}
+		self::$rendering_loop = false;
 
 		echo $args['after_widget'];
 
 		// Reset everything
 		wp_reset_query();
 		$depth--;
+	}
+
+	static $rendering_loop;
+
+	static function is_rendering_loop() {
+		return self::$rendering_loop;
 	}
 
 	/**
