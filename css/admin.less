@@ -1409,11 +1409,111 @@
 					height: auto;
 				}
 			}
+
+
+			// For browsing the directory items
+			.so-directory-browse {
+				background: #f3f3f3;
+				border-bottom: 1px solid #d0d0d0;
+				margin: -15px -10px 15px -10px;
+				padding: 15px;
+				font-weight: bold;
+			}
+
+			// For a list of directory items
+			.so-directory-items {
+
+				.clearfix();
+
+				.so-no-results {
+					margin: 20px 0;
+					padding: 0 5px;
+				}
+
+				.so-directory-item {
+
+					.box-sizing(border-box);
+					width: 25%;
+					float: left;
+					padding: 6px;
+
+					.so-directory-item-wrapper {
+						padding: 15px 10px;
+						background: #F7F7F7;
+						border: 1px solid #d0d0d0;
+						.box-shadow(~"0 1px 1px rgba(0,0,0,0.1)");
+					}
+
+					.so-title {
+						font-size: 15px;
+						margin: 0 0 13px 0;
+					}
+
+					.so-screenshot {
+						background: #ffffff;
+						margin-bottom: 10px;
+						border: 1px solid #d0d0d0;
+
+						&.so-loading {
+							background-image: url("images/wpspin_light.gif");
+							background-position: center center;
+							background-repeat: no-repeat;
+
+							@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+								& {
+									background-image: url(images/wpspin_light-2x.gif);
+									background-size: 16px 16px;
+								}
+							}
+						}
+
+						img {
+							display: block;
+							width: 100%;
+							height: auto;
+						}
+
+						a {
+							display: block;
+							min-height: 40px;
+						}
+					}
+
+					.so-description {
+						font-size: 0.9em;
+						color: #666;
+						margin-bottom: 10px;
+					}
+
+					.so-buttons {
+						text-align: right;
+						margin: 10px -10px -15px -10px;
+						background: #fcfcfc;
+						padding: 10px;
+						border-top: 1px solid #d0d0d0;
+
+						.button-secondary {
+							float: left;
+							margin-right: 10px;
+						}
+					}
+
+				}
+			}
+
+			.so-directory-pages {
+				margin-top: 15px;
+				padding: 0 5px;
+
+				.button-disabled {
+					pointer-events: none;
+				}
+			}
 		}
 
 	}
 
-	/* Everything we need for the style fields */
+	// Everything we need for the style fields
 
 	.so-visual-styles {
 

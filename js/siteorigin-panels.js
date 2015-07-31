@@ -2992,17 +2992,23 @@ String.prototype.panelsProcessTemplate = function(){
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
         entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
+        directoryTemplate : _.template( $('#siteorigin-panels-directory-items').html().panelsProcessTemplate() ),
+
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
         layoutCache : {},
         currentTab : false,
+        directoryPage : 1,
 
         events: {
             'click .so-close': 'closeDialog',
             'click .so-sidebar-tabs li a' : 'tabClickHandler',
             'click .so-content .layout' : 'layoutClickHandler',
-            'keyup .so-sidebar-search' : 'searchHandler'
+            'keyup .so-sidebar-search' : 'searchHandler',
+
+            // The directory items
+            'click .so-content .so-directory-item .so-button-use' : 'directoryClickHandler',
         },
 
         /**
@@ -3012,7 +3018,7 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
 
             this.on('open_dialog', function(){
-                thisView.$('.so-sidebar-tabs li a[href="#prebuilt"]').click();
+                thisView.$('.so-sidebar-tabs li a[href="#directory"]').click();
                 thisView.$('.so-status').removeClass('so-panels-loading');
             });
         },
@@ -3043,7 +3049,10 @@ String.prototype.panelsProcessTemplate = function(){
 
             thisView.currentTab = tab;
 
-            if( tab === 'import' ) {
+            if( tab === 'directory' ) {
+                this.displayLayoutDirectory();
+            }
+            else if( tab === 'import' ) {
                 // Display the import export
                 this.displayImportExport();
             }
@@ -3071,6 +3080,8 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 thisView.displayLayouts(tab, this.layoutCache[tab]);
             }
+
+            thisView.$('.so-sidebar-search').val('');
 
             return false;
         },
@@ -3241,15 +3252,152 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Handle an update to the search
+         * Display the layout directory tab.
+         *
+         * @param query
          */
-        searchHandler: function(){
-            if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+        displayLayoutDirectory: function( search, page ){
+            var thisView = this;
+            var c = this.$( '.so-content').empty().addClass('so-panels-loading');
+
+            if( search === undefined ) {
+                search = '';
+            }
+            if( page === undefined ) {
+                page = 1;
+            }
+
+            if( !panelsOptions.directory_enabled ) {
+                // Display the button to enable the prebuilt layout
+                c.removeClass( 'so-panels-loading' ).html( $('#siteorigin-panels-directory-enable').html() );
+                c.find('.so-panels-enable-directory').click( function(e){
+                    e.preventDefault();
+                    // Sent the query to enable the directory, then enable the directory
+                    $.get(
+                        panelsOptions.ajaxurl,
+                        { action: 'so_panels_directory_enable' },
+                        function(){
+
+                        }
+                    );
+
+                    // Enable the layout directory
+                    panelsOptions.directory_enabled = true;
+                    c.addClass( 'so-panels-loading' );
+                    thisView.displayLayoutDirectory( search, page );
+                } );
+                return;
+            }
+
+            // Get all the items for the current query
+            $.get(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_query',
+                    search: search,
+                    page: page
+                },
+                function( data ){
+                    // Skip this if we're no longer viewing the layout directory
+                    if( thisView.currentTab !== 'directory' ) return;
+
+                    // Add the directory items
+                    c.removeClass( 'so-panels-loading').html( thisView.directoryTemplate( data ) );
+
+                    // Lets setup the next and previous buttons
+                    var prev = c.find('.so-previous'), next = c.find('.so-next');
+
+                    if( page <= 1 ) {
+                        prev.addClass('button-disabled');
+                    }
+                    else {
+                        prev.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page - 1 );
+                        });
+                    }
+                    if( page === data.max_num_pages || data.max_num_pages == 0 ) {
+                        next.addClass('button-disabled');
+                    }
+                    else {
+                        next.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page + 1 );
+                        });
+                    }
+
+                    if( search !== '' ) {
+                        c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"<em>' + _.escape(search) + '</em>"' );
+                    }
+
+                    // Handle nice preloading of the screenshots
+                    c.find('.so-screenshot').each( function(){
+                        // Set the initial height
+                        var $$ = $(this), $a = $$.find('a');
+                        $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
+
+                        var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
+                            $a.removeClass('so-loading').css('height', 'auto');
+                            $img.appendTo($a).hide().fadeIn('fast');
+                        });
+                    } );
+                },
+                'json'
+            );
+        },
+
+        /**
+         * Load a particular layout into the builder.
+         *
+         * @param id
+         */
+        directoryClickHandler: function( e ){
+            e.preventDefault();
+            var $$ = $(e.currentTarget), thisView = this;
+
+            if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
                 return false;
             }
-            this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
-        }
+            this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
+            $.get(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_item',
+                    layout_slug: $$.data('layout-slug')
+                },
+                function(layout){
+
+                    if( layout.error !== undefined ) {
+                        // There was an error
+                        alert( layout.error );
+                    }
+                    else {
+                        thisView.setStatusMessage('', false);
+                        thisView.builder.addHistoryEntry('prebuilt_loaded');
+                        thisView.builder.model.loadPanelsData(layout);
+                        thisView.closeDialog();
+                    }
+                }
+            );
+        },
+
+        /**
+         * Handle an update to the search
+         */
+        searchHandler: function( e ){
+            if( this.currentTab !== 'directory' ) {
+                // This is for the tabs that support live search
+                if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+                    return false;
+                }
+                this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
+            }
+            else if( e.keyCode === 13 ) {
+                // Refresh the search results
+                this.displayLayoutDirectory( $(e.currentTarget).val(), 1 );
+            }
+        }
     } );
 
     /**

@@ -1,5 +1,8 @@
 <?php
 
+define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.siteorigin.com/');
+// define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.localhost/');
+
 /**
  * Get builder content based on the submitted panels_data.
  */
@@ -201,3 +204,76 @@ function siteorigin_panels_ajax_export_layout(){
 	wp_die();
 }
 add_action('wp_ajax_so_panels_export_layout', 'siteorigin_panels_ajax_export_layout');
+
+/**
+ * We want users to be informed of what the layout directory is, so they need to enable it.
+ */
+function siteorigin_panels_ajax_directory_enable(){
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
+
+	$user = get_current_user_id();
+	update_user_meta( $user, 'so_panels_directory_enabled', true );
+
+	wp_die();
+}
+add_action('wp_ajax_so_panels_directory_enable', 'siteorigin_panels_ajax_directory_enable');
+
+/**
+ * Query the layout directory for a list of layouts
+ */
+function siteorigin_panels_ajax_directory_query(){
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
+
+	$query = array();
+	if( !empty($_GET['search']) ) {
+		$query['search'] = urlencode( $_GET['search'] );
+	}
+	if( !empty($_GET['page']) ) {
+		$query['page'] = intval( $_GET['page'] );
+	}
+
+	// Lets start by contacting the remote server
+	$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . '/wp-admin/admin-ajax.php?action=query_layouts');
+	$response = wp_remote_get( $url );
+
+	if( $response['response']['code'] == 200 ) {
+		$results = json_decode( $response['body'] );
+		if ( empty( $results ) ) {
+			$results = array();
+		}
+
+		// For now, we'll just create a pretend list of items
+		header( 'content-type: application/json' );
+		echo json_encode( $results );
+		wp_die();
+	}
+	else {
+		// Display some sort of error message
+	}
+}
+add_action('wp_ajax_so_panels_directory_query', 'siteorigin_panels_ajax_directory_query');
+
+/**
+ * Query the layout directory for a specific item
+ */
+function siteorigin_panels_ajax_directory_item_json(){
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
+	if( empty( $_REQUEST['layout_slug'] ) ) wp_die();
+
+	$response = wp_remote_get(
+		SITEORIGIN_PANELS_LAYOUT_URL . '/layout/' . urlencode($_REQUEST['layout_slug']) . '/?action=download'
+	);
+
+	// var_dump($response['body']);
+	if( $response['response']['code'] == 200 ) {
+		// For now, we'll just pretend to load this
+		header('content-type: application/json');
+		echo $response['body'];
+		wp_die();
+	}
+	else {
+		// Display some sort of error message
+	}
+
+}
+add_action('wp_ajax_so_panels_directory_item', 'siteorigin_panels_ajax_directory_item_json');

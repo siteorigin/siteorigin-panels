@@ -351,8 +351,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e('Search', 'siteorigin-panels') ?>" />
 
 			<ul class="so-sidebar-tabs">
-				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+				<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
+				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
 				foreach($post_types as $post_type) {
@@ -371,6 +372,51 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="buttons">
 		</div>
 
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-enable">
+	<div class="so-enable-prebuilt">
+		<?php _e('Do you want to use the Page Builder layouts directory?', 'siteorigin-panels') ?>
+		<button class="button-primary so-panels-enable-directory"><?php _e('Enable', 'siteorigin-panels') ?></button>
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-items">
+	<div class="so-directory-items">
+
+		<div class="so-directory-browse">
+			<?php _e('Newest Layouts', 'siteorigin-panels') ?>
+		</div>
+
+		{{% if(items.length === 0) { %}}
+			<div class="so-no-results">
+				<?php _e( "Your search didn't return any results", 'siteorigin-panels' ); ?>
+			</div>
+		{{% } else { %}}
+			{{% _.each(items, function(item) { %}}
+				<div class="so-directory-item">
+					<div class="so-directory-item-wrapper">
+						<h4 class="so-title">{{%= item.title %}}</h4>
+						<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
+							<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
+						</div>
+						<div class="so-description">{{%- item.description %}}</div>
+						<div class="so-buttons">
+							<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+							<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+						</div>
+					</div>
+				</div>
+			{{% }); %}}
+		{{% } %}}
+
+		<div class="clear"></div>
+
+		<div class="so-directory-pages">
+			<a href="#" class="so-previous button-secondary" data-direction="prev"><?php _e('Previous', 'siteorigin-panels') ?></a>
+			<a href="#" class="so-next button-secondary" data-direction="next"><?php _e('Next', 'siteorigin-panels') ?></a>
+		</div>
 	</div>
 </script>
 
