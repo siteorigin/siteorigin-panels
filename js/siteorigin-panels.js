@@ -367,6 +367,41 @@ String.prototype.panelsProcessTemplate = function(){
                 thisView.cell.row.resize();
                 thisView.model.destroy();
             } );
+        },
+
+        /**
+         * Build up the contextual menu for a widget
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_below,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    thisView.cell.row.builder.addHistoryEntry('widget_added');
+
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+                    widget.cell = thisView.cell.model;
+
+                    // Insert the new widget below
+                    thisView.cell.model.widgets.add(widget, {
+                        // Add this after the existing model
+                        at: thisView.model.collection.indexOf( thisView.model ) + 1
+                    });
+                }
+            );
+
+            // Lets also add the contextual menu for the entire row
+            this.cell.row.buildContextualMenu( e, menu );
         }
 
     });
@@ -694,6 +729,37 @@ String.prototype.panelsProcessTemplate = function(){
          */
         handleActionClick : function(e){
             return false;
+        },
+
+        /**
+         * Build up the contextual menu for a cell
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    thisView.row.builder.addHistoryEntry('widget_added');
+
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+
+                    // Add the widget to the cell model
+                    widget.cell = thisView.model;
+                    widget.cell.widgets.add( widget );
+                }
+            );
+
+            this.row.buildContextualMenu( e, menu );
         }
     } );
 
@@ -1077,6 +1143,54 @@ String.prototype.panelsProcessTemplate = function(){
                     view.remove();
                 }
             } );
+        },
+
+        /**
+         * Build up the contextual menu for a row
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+
+            var options = [];
+            for( var i = 1; i < 5; i++ ) {
+                options.push({
+                    title: i + ' ' + panelsOptions.loc.contextual.column
+                });
+            }
+
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_row,
+                    search: false
+                },
+                options,
+                function(c){
+                    thisView.builder.addHistoryEntry('row_added');
+
+                    var columns = Number(c) + 1;
+                    var weights = [];
+                    for( var i = 0; i < columns; i++ ) {
+                        weights.push( 100/columns );
+                    }
+
+                    // Create the actual row
+                    var newRow = new panels.model.row( {
+                        collection: thisView.collection
+                    } );
+
+                    newRow.setCells( weights );
+                    newRow.builder = thisView.builder;
+
+                    thisView.builder.model.rows.add( newRow, {
+                        at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+                    } );
+
+
+                }
+            );
         }
 
     } );
@@ -1289,6 +1403,7 @@ String.prototype.panelsProcessTemplate = function(){
 
         attachedToEditor: false,
         liveEditor: false,
+        menu: false,
 
         /* The builderType is sent with all requests to the server */
         builderType: '',
@@ -1343,6 +1458,10 @@ String.prototype.panelsProcessTemplate = function(){
             this.on('content_change', this.handleContentChange, this);
             this.on('display_builder', this.handleDisplayBuilder, this);
             this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
+
+            // Create the context menu for this builder
+            this.menu = new panels.utils.menu({});
+            this.menu.on('activate_context', this.activateContextMenu, this);
 
             return this;
         },
@@ -1871,10 +1990,10 @@ String.prototype.panelsProcessTemplate = function(){
                 if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
                 var widgetClass = '';
-                if( typeof panelsOptions.widgets.WP_Widget_Black_Studio_TinyMCE !== 'undefined' ) {
-                    widgetClass = 'WP_Widget_Black_Studio_TinyMCE';
-                }
                 // There is a small chance a theme will have removed this, so check
+                if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+                    widgetClass = 'SiteOrigin_Widget_Editor_Widget';
+                }
                 else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
                     widgetClass = 'WP_Widget_Text';
                 }
@@ -1927,6 +2046,29 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 this.$('.so-panels-welcome-message').show();
             }
+        },
+
+        activateContextMenu: function( e, menu ){
+            var builder = this;
+
+            // Skip this if any of the dialogs are open. They can handle their own contexts.
+            if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+                // Check if any of the widgets get the contextual menu
+                var overItem = false, overItemType = false;
+
+                var over = $([])
+                    .add( builder.$('.so-rows-container > .so-row-container') )
+                    .add( builder.$('.so-cells > .cell') )
+                    .add( builder.$('.cell-wrapper > .so-widget') )
+                    .filter( function(i){
+                        return menu.isOverEl( $(this), e );
+                    } );
+
+                var activeView = over.last().data('view');
+                if( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
+                    activeView.buildContextualMenu( e, menu );
+                }
+            }
         }
 
     } );
@@ -1944,6 +2086,7 @@ String.prototype.panelsProcessTemplate = function(){
         className: 'so-panels-dialog-wrapper',
         dialogClass: '',
         parentDialog: false,
+        dialogOpen: false,
 
         events : {
             'click .so-close': 'closeDialog',
@@ -2146,6 +2289,9 @@ String.prototype.panelsProcessTemplate = function(){
         openDialog: function(){
             this.trigger('open_dialog');
 
+            this.dialogOpen = true;
+            window.panelsDialogOpen = true;
+
             this.refreshDialogNav();
 
             // Stop scrolling for the main body
@@ -2169,6 +2315,9 @@ String.prototype.panelsProcessTemplate = function(){
          */
         closeDialog: function(e){
             this.trigger('close_dialog');
+
+            this.dialogOpen = false;
+            window.panelsDialogOpen = false;
 
             // In the builder, trigger an update
             if(typeof this.builder !== 'undefined') {

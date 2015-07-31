@@ -210,7 +210,6 @@
   text-decoration: none;
   color: #666;
   font-size: 11px;
-  font-weight: bold;
   outline: 0 !important;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -399,7 +398,7 @@
   color: #FF0000;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget .title .actions a.widget-delete:hover {
-  color: white;
+  color: #ffffff;
   background: #FF0000;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget:hover .title a {
@@ -588,7 +587,7 @@
   color: #FF0000;
 }
 .so-widget.ui-sortable-helper.widget-being-dragged .title .actions a.widget-delete:hover {
-  color: white;
+  color: #ffffff;
   background: #FF0000;
 }
 .so-widget.ui-sortable-helper.widget-being-dragged:hover .title a {
@@ -1412,7 +1411,7 @@
   border-bottom: 1px solid #ddd;
 }
 .so-panels-dialog .so-visual-styles .style-section-head {
-  background: white;
+  background: #ffffff;
   padding: 15px 10px;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
@@ -1623,7 +1622,7 @@
 }
 .so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section .section-header {
   cursor: pointer;
-  background: white;
+  background: #ffffff;
   padding: 15px 10px;
   border: solid #ddd;
   border-width: 1px 0;
@@ -1730,7 +1729,7 @@
   width: 68px;
   height: 24px;
   padding: 3px;
-  background-color: white;
+  background-color: #ffffff;
   border-radius: 24px;
   box-shadow: inset 0 -1px #ffffff, inset 0 1px 1px rgba(0, 0, 0, 0.05);
   cursor: pointer;
@@ -1783,7 +1782,7 @@
 #panels-home-page .switch .switch-label:after {
   content: attr(data-on);
   left: 13px;
-  color: white;
+  color: #ffffff;
   text-shadow: 0 1px rgba(0, 0, 0, 0.2);
   opacity: 0;
 }
@@ -1803,7 +1802,7 @@
   left: 4px;
   width: 22px;
   height: 22px;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
   background-image: -webkit-linear-gradient(top, #ffffff 40%, #f0f0f0);
@@ -1855,4 +1854,77 @@
 }
 .siteorigin-page-builder-widget .siteorigin-panels-no-builder {
   display: none !important;
+}
+.so-panels-contextual-menu {
+  border: 1px solid #C0C0C0;
+  background: #f9f9f9;
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  outline: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  position: absolute;
+  width: 180px;
+  top: 20px;
+  left: 20px;
+  z-index: 9991;
+  display: none;
+}
+.so-panels-contextual-menu,
+.so-panels-contextual-menu * {
+  font-size: 12px;
+}
+.so-panels-contextual-menu .so-section {
+  border-bottom: 1px solid #c0c0c0;
+}
+.so-panels-contextual-menu .so-section:last-child {
+  border-bottom: none;
+}
+.so-panels-contextual-menu .so-section h5 {
+  margin: 0 0 5px 0;
+  padding: 8px 10px 5px 10px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f6f6f6;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper {
+  margin: -5px 0 5px 0;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f4f4f4;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"] {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: none;
+  padding: 5px 10px;
+  background: #fbfbfb;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:focus,
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:active {
+  border: none;
+  box-shadow: none;
+  background: #ffffff;
+}
+.so-panels-contextual-menu .so-section ul {
+  margin: 5px 0 0 0;
+  padding: 0 0 5px 0;
+}
+.so-panels-contextual-menu .so-section ul li {
+  cursor: pointer;
+  margin: 0;
+  padding: 4px 10px;
+  line-height: 1em;
+}
+.so-panels-contextual-menu .so-section ul li:hover,
+.so-panels-contextual-menu .so-section ul li.so-active {
+  background: #F0F0F0;
+  color: #444;
+}
+.so-panels-contextual-menu .so-section .so-no-results {
+  padding: 0px 10px 5px 10px;
+  display: none;
+  font-style: italic;
 }

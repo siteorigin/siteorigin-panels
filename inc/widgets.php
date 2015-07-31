@@ -9,25 +9,7 @@
  */
 function siteorigin_panels_add_recommended_widgets($widgets){
 
-	if( empty( $widgets['WP_Widget_Black_Studio_TinyMCE'] ) ){
-
-		if( siteorigin_panels_setting('recommended-widgets') ) {
-			$widgets['WP_Widget_Black_Studio_TinyMCE'] = array(
-				'class' => 'WP_Widget_Black_Studio_TinyMCE',
-				'title' => __('Visual Editor', 'siteorigin-panels'),
-				'description' => __('Arbitrary text or HTML with visual editor', 'siteorigin-panels'),
-				'installed' => false,
-				'plugin' => array(
-					'name' => __('Black Studio TinyMCE', 'siteorigin-panels'),
-					'slug' => 'black-studio-tinymce-widget'
-				),
-				'groups' => array('recommended'),
-				'icon' => 'dashicons dashicons-edit',
-			);
-		}
-
-	}
-	else {
+	if( !empty( $widgets['WP_Widget_Black_Studio_TinyMCE'] ) ){
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['groups'] = array('recommended');
 		$widgets['WP_Widget_Black_Studio_TinyMCE']['icon'] = 'dashicons dashicons-edit';
 	}
@@ -224,7 +206,7 @@ function siteorigin_panels_restore_bundled_widget($object, $widget){
 			$object = new $widget();
 		}
 	}
-	elseif(!is_admin() && $widget == 'WP_Widget_Black_Studio_TinyMCE') {
+	elseif(!is_admin() && ( $widget == 'WP_Widget_Black_Studio_TinyMCE' || $widget == 'SiteOrigin_Widget_Editor_Widget' ) ) {
 		// If the visual editor is missing, we can replace it with the text widget for now
 		$object = new WP_Widget_Text();
 	}
