@@ -362,7 +362,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
-				'search_results_header' => __('Search Results For: ', 'siteorigin-panels')
+				'search_results_header' => __('Search Results For: ', 'siteorigin-panels'),
 
 				// Everything for the contextual menu
 				'contextual' => array(
