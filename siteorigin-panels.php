@@ -251,6 +251,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 		wp_enqueue_media();
 
 		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin-utils', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-utils' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
 
 		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
@@ -276,6 +277,18 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				)
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
+
+			// Settings for the contextual menu
+			'contextual' => array(
+				// Developers can change which widgets are displayed by default using this filter
+				'default_widgets' => apply_filters( 'siteorigin_panels_contextual_default_widgets', array(
+					'SiteOrigin_Widget_Editor_Widget',
+					'SiteOrigin_Widget_Button_Widget',
+					'SiteOrigin_Widget_Image_Widget',
+					'SiteOrigin_Panels_Widgets_Layout',
+				) )
+			),
+
 			// General localization messages
 			'loc' => array(
 				'missing_widget' => array(
@@ -348,6 +361,16 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
+
+				// Everything for the contextual menu
+				'contextual' => array(
+					'add_widget_below' => __('Add Widget Below', 'siteorigin-panels'),
+					'add_widget_cell' => __('Add Widget to Cell', 'siteorigin-panels'),
+					'search_widgets' => __('Search Widgets', 'siteorigin-panels'),
+
+					'add_row' => __('Add Row', 'siteorigin-panels'),
+					'column' => __('Column', 'siteorigin-panels'),
+				)
 			),
 			'plupload' => array(
 				'max_file_size' => wp_max_upload_size().'b',

@@ -217,7 +217,6 @@
 								text-decoration: none;
 								color: #666;
 								font-size: 11px;
-								font-weight: bold;
 
 								outline: 0 !important;
 								.box-shadow(none);
@@ -1925,5 +1924,88 @@
 
 	.siteorigin-panels-no-builder {
 		display: none !important;
+	}
+}
+
+.so-panels-contextual-menu {
+
+	border: 1px solid #C0C0C0;
+	background: #f9f9f9;
+	.box-shadow(~"0 1px 1px rgba(0,0,0,0.04)");
+	outline: none;
+	.rounded(2px);
+	position: absolute;
+
+	width: 180px;
+	top: 20px;
+	left: 20px;
+	z-index: 9991;
+	display: none;
+
+	&, * {
+		font-size: 12px;
+	}
+
+	.so-section {
+		border-bottom: 1px solid #c0c0c0;
+		&:last-child {
+			border-bottom: none;
+		}
+
+		h5 {
+			margin: 0 0 5px 0;
+			padding: 8px 10px 5px 10px;
+			border-bottom: 1px solid #d0d0d0;
+			background: #f6f6f6;
+		}
+
+		.so-search-wrapper {
+			margin: -5px 0 5px 0;
+			border-bottom: 1px solid #d0d0d0;
+			background: #f4f4f4;
+
+			input[type="text"] {
+				box-sizing: border-box;
+				display: block;
+				width: 100%;
+				margin: 0;
+				border: none;
+				padding: 5px 10px;
+				background: #fbfbfb;
+
+				&:focus,
+				&:active {
+					border: none;
+					box-shadow: none;
+					background: #ffffff;
+				}
+			}
+
+		}
+
+		ul {
+			margin: 5px 0 0 0;
+			padding: 0 0 5px 0;
+
+			li {
+				cursor: pointer;
+				margin: 0;
+				padding: 4px 10px;
+				line-height: 1em;
+
+				&:hover,
+				&.so-active {
+					background: #F0F0F0;
+					color: #444;
+				}
+			}
+		}
+		
+		.so-no-results {
+			padding: 0px 10px 5px 10px;
+			display: none;
+			font-style: italic;
+		}
+
 	}
 }
