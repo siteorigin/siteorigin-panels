@@ -2424,10 +2424,7 @@ String.prototype.panelsProcessTemplate = function(){
                         fieldValue = $$.val() !== '' ? $$.val() : true;
                     }
                     else {
-                        // Set value to false when checkboxes aren't checked.
-                        // If they are null when you have repeater items containing only a checkbox, the repeater item
-                        // is lost when the page is updated.
-                        fieldValue = '';
+                        fieldValue = null;
                     }
                 }
                 else if( fieldType === 'radio' ){
