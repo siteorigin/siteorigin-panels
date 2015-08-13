@@ -367,8 +367,8 @@ class SiteOrigin_Panels_Default_Styling {
 	static function filter_row_bottom_margin( $margin, $grid ){
 		if( !empty($grid['style']['bottom_margin']) ) {
 			$margin = $grid['style']['bottom_margin'];
+			return $margin;
 		}
-		return $margin;
 	}
 
 	static function filter_row_gutter( $gutter, $grid ) {
