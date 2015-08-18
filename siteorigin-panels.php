@@ -264,6 +264,9 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 
 		$widgets = siteorigin_panels_get_widgets();
 
+
+		$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
+
 		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
 			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php?action=so_panels_import_layout'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
@@ -277,7 +280,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				)
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
-			'directory_enabled' => !empty( get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true ) ),
+			'directory_enabled' => !empty( $directory_enabled ),
 
 			// Settings for the contextual menu
 			'contextual' => array(
