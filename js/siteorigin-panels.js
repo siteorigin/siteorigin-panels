@@ -2335,11 +2335,22 @@ String.prototype.panelsProcessTemplate = function(){
                 if(fieldValue !== null) {
                     for (var i = 0; i < parts.length; i++) {
                         if (i === parts.length - 1) {
-                            sub[parts[i]] = fieldValue;
+                            if( parts[i] === '' ) {
+                                // This needs to be an array
+                                sub.push(fieldValue);
+                            }
+                            else {
+                                sub[parts[i]] = fieldValue;
+                            }
                         }
                         else {
                             if (typeof sub[parts[i]] === 'undefined') {
-                                sub[parts[i]] = {};
+                                if ( parts[i+1] === '' ) {
+                                    sub[parts[i]] = [];
+                                }
+                                else {
+                                    sub[parts[i]] = {};
+                                }
                             }
                             sub = sub[parts[i]];
                         }
@@ -2348,6 +2359,7 @@ String.prototype.panelsProcessTemplate = function(){
 
             } ); // End of each through input fields
 
+            console.log(data);
             return data;
         },
 
