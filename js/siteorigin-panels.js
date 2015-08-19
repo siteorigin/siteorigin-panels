@@ -1649,7 +1649,6 @@ String.prototype.panelsProcessTemplate = function(){
          * Get the model for the currently selected cell
          */
         getActiveCell: function( options ){
-            console.log(options);
             options = _.extend( {
                 createCell: true,
                 defaultPosition: 'first'
@@ -2356,7 +2355,6 @@ String.prototype.panelsProcessTemplate = function(){
 
             } ); // End of each through input fields
 
-            console.log(data);
             return data;
         },
 
