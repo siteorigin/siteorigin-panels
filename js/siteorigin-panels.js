@@ -3027,7 +3027,7 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
 
             this.on('open_dialog', function(){
-                thisView.$('.so-sidebar-tabs li a[href="#directory"]').click();
+                thisView.$('.so-sidebar-tabs li a').first().click();
                 thisView.$('.so-status').removeClass('so-panels-loading');
             });
         },
