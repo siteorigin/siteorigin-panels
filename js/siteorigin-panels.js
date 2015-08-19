@@ -1420,7 +1420,7 @@ String.prototype.panelsProcessTemplate = function(){
                     $('#content-resize-handle' ).show();
                     thisView.trigger('hide_builder');
                 } ).end()
-                .prepend(
+                .append(
                 $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</a>' )
                     .click( function (e) {
                         // Switch to the Page Builder interface
@@ -1442,13 +1442,6 @@ String.prototype.panelsProcessTemplate = function(){
 
                     } )
             );
-
-            // WordPress 4.1 changed the float of the tabs. Reorder them here.
-            // After WP 4.3 is released we'll make the new ordering default
-            if( $('body').hasClass('branch-4-1') || $('body').hasClass('branch-4-2') ) {
-                $( '#wp-content-wrap .wp-editor-tabs #content-panels' )
-                    .appendTo( $( '#wp-content-wrap .wp-editor-tabs' ) );
-            }
 
             // Switch back to the standard editor
             metabox.find('.so-switch-to-standard').click(function(e){
@@ -1656,7 +1649,6 @@ String.prototype.panelsProcessTemplate = function(){
          * Get the model for the currently selected cell
          */
         getActiveCell: function( options ){
-            console.log(options);
             options = _.extend( {
                 createCell: true,
                 defaultPosition: 'first'
@@ -2275,10 +2267,7 @@ String.prototype.panelsProcessTemplate = function(){
                         fieldValue = $$.val() !== '' ? $$.val() : true;
                     }
                     else {
-                        // Set value to false when checkboxes aren't checked.
-                        // If they are null when you have repeater items containing only a checkbox, the repeater item
-                        // is lost when the page is updated.
-                        fieldValue = '';
+                        fieldValue = null;
                     }
                 }
                 else if( fieldType === 'radio' ){
@@ -2342,11 +2331,22 @@ String.prototype.panelsProcessTemplate = function(){
                 if(fieldValue !== null) {
                     for (var i = 0; i < parts.length; i++) {
                         if (i === parts.length - 1) {
-                            sub[parts[i]] = fieldValue;
+                            if( parts[i] === '' ) {
+                                // This needs to be an array
+                                sub.push(fieldValue);
+                            }
+                            else {
+                                sub[parts[i]] = fieldValue;
+                            }
                         }
                         else {
                             if (typeof sub[parts[i]] === 'undefined') {
-                                sub[parts[i]] = {};
+                                if ( parts[i+1] === '' ) {
+                                    sub[parts[i]] = [];
+                                }
+                                else {
+                                    sub[parts[i]] = {};
+                                }
                             }
                             sub = sub[parts[i]];
                         }
