@@ -1420,7 +1420,7 @@ String.prototype.panelsProcessTemplate = function(){
                     $('#content-resize-handle' ).show();
                     thisView.trigger('hide_builder');
                 } ).end()
-                .prepend(
+                .append(
                 $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</a>' )
                     .click( function (e) {
                         // Switch to the Page Builder interface
@@ -1442,13 +1442,6 @@ String.prototype.panelsProcessTemplate = function(){
 
                     } )
             );
-
-            // WordPress 4.1 changed the float of the tabs. Reorder them here.
-            // After WP 4.3 is released we'll make the new ordering default
-            if( $('body').hasClass('branch-4-1') || $('body').hasClass('branch-4-2') ) {
-                $( '#wp-content-wrap .wp-editor-tabs #content-panels' )
-                    .appendTo( $( '#wp-content-wrap .wp-editor-tabs' ) );
-            }
 
             // Switch back to the standard editor
             metabox.find('.so-switch-to-standard').click(function(e){
