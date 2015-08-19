@@ -380,7 +380,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-directory-enable">
 	<div class="so-enable-prebuilt">
-		<?php _e('Do you want to use the Page Builder layouts directory?', 'siteorigin-panels') ?>
+		<?php _e('Do you want to browse the Prebuilt Layouts directory?', 'siteorigin-panels') ?>
 		<button class="button-primary so-panels-enable-directory"><?php _e('Enable', 'siteorigin-panels') ?></button>
 	</div>
 </script>
@@ -400,14 +400,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% _.each(items, function(item) { %}}
 				<div class="so-directory-item">
 					<div class="so-directory-item-wrapper">
-						<h4 class="so-title">{{%= item.title %}}</h4>
 						<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
 							<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
 						</div>
 						<div class="so-description">{{%- item.description %}}</div>
-						<div class="so-buttons">
-							<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
-							<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+
+						<div class="so-bottom">
+							<h4 class="so-title">{{%= item.title %}}</h4>
+							<div class="so-buttons">
+								<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+								<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+							</div>
 						</div>
 					</div>
 				</div>

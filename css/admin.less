@@ -1485,17 +1485,39 @@
 						margin-bottom: 10px;
 					}
 
-					.so-buttons {
-						text-align: right;
+					.so-bottom {
+						height: 49px;
+						position: relative;
+
+						.so-title {
+							position: absolute;
+							top: 1em;
+							left: 10px;
+							z-index: 1;
+						}
+
+						.so-buttons {
+							position: absolute;
+							z-index: 2;
+							top: 0;
+							right: 0;
+
+							visibility: hidden;
+							.box-sizing(border-box);
+							padding: 11px 10px 10px 15px;
+							height: 49px;
+							border-left: 1px solid #d0d0d0;
+							background: #f6f6f6;
+							.box-shadow(-1px 0 1px rgba(0,0,0,0.05));
+						}
+
 						margin: 10px -10px -15px -10px;
 						background: #fcfcfc;
-						padding: 10px;
 						border-top: 1px solid #d0d0d0;
+					}
 
-						.button-secondary {
-							float: left;
-							margin-right: 10px;
-						}
+					&:hover .so-buttons {
+						visibility: visible;
 					}
 
 				}
