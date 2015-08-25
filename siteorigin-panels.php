@@ -1139,6 +1139,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	$classes = array( 'so-panel', 'widget' );
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
+	if ( !empty( $the_widget ) && is_array( $the_widget->widget_options ) && !empty( $the_widget->widget_options['classname'] ) ) $classes[] = $the_widget->widget_options['classname'];
 	if ( $is_first ) $classes[] = 'panel-first-child';
 	if ( $is_last ) $classes[] = 'panel-last-child';
 	$id = 'panel-' . $post_id . '-' . $grid . '-' . $cell . '-' . $panel;
