@@ -12,7 +12,7 @@ Donate link: http://siteorigin.com/page-builder/#donate
 */
 
 define('SITEORIGIN_PANELS_VERSION', 'dev');
-if ( ! defined('SITEORIGIN_PANELS_JS_SUFFIX' ) {
+if ( ! defined('SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 	define('SITEORIGIN_PANELS_JS_SUFFIX', '');
 }
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
