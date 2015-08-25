@@ -123,6 +123,7 @@ add_action( 'add_meta_boxes', 'siteorigin_panels_metaboxes' );
 function siteorigin_panels_save_home_page(){
 	if( !isset($_POST['_sopanels_home_nonce'] ) || !wp_verify_nonce($_POST['_sopanels_home_nonce'], 'save') ) return;
 	if( !current_user_can('edit_theme_options') ) return;
+	if( !isset( $_POST['panels_data'] ) ) return;
 
 	// Check that the home page ID is set and the home page exists
 	$page_id = get_option( 'page_on_front' );
