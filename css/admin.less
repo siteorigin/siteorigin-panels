@@ -1433,7 +1433,6 @@
 				.so-directory-item {
 
 					.box-sizing(border-box);
-					width: 25%;
 					float: left;
 					padding: 6px;
 
@@ -1520,6 +1519,46 @@
 						visibility: visible;
 					}
 
+				}
+
+				@media only screen and (min-width: 1680px) {
+					.so-directory-item {
+						width: 20%;
+
+						&:nth-of-type(5n+1) {
+							clear: both;
+						}
+					}
+				}
+
+				@media only screen and (max-width: 1679px) and (min-width: 1280px) {
+					.so-directory-item {
+						width: 25%;
+
+						&:nth-of-type(4n+1) {
+							clear: both;
+						}
+					}
+				}
+
+				@media only screen and (max-width: 1279px) and (min-width: 1140px) {
+					.so-directory-item {
+						width: 33.333%;
+
+						&:nth-of-type(3n+1) {
+							clear: both;
+						}
+					}
+				}
+
+				@media only screen and (max-width: 1139px) {
+					.so-directory-item {
+						width: 50%;
+
+						&:nth-of-type(2n+1) {
+							clear: both;
+						}
+					}
 				}
 			}
 

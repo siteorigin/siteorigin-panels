@@ -392,30 +392,32 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<?php _e('Newest Layouts', 'siteorigin-panels') ?>
 		</div>
 
-		{{% if(items.length === 0) { %}}
-			<div class="so-no-results">
-				<?php _e( "Your search didn't return any results", 'siteorigin-panels' ); ?>
-			</div>
-		{{% } else { %}}
-			{{% _.each(items, function(item) { %}}
-				<div class="so-directory-item">
-					<div class="so-directory-item-wrapper">
-						<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
-							<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
-						</div>
-						<div class="so-description">{{%- item.description %}}</div>
+		<div class="so-directory-items-wrapper">
+			{{% if(items.length === 0) { %}}
+				<div class="so-no-results">
+					<?php _e( "Your search didn't return any results", 'siteorigin-panels' ); ?>
+				</div>
+			{{% } else { %}}
+				{{% _.each(items, function(item) { %}}
+					<div class="so-directory-item">
+						<div class="so-directory-item-wrapper">
+							<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
+								<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
+							</div>
+							<div class="so-description">{{%- item.description %}}</div>
 
-						<div class="so-bottom">
-							<h4 class="so-title">{{%= item.title %}}</h4>
-							<div class="so-buttons">
-								<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
-								<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+							<div class="so-bottom">
+								<h4 class="so-title">{{%= item.title %}}</h4>
+								<div class="so-buttons">
+									<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+									<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			{{% }); %}}
-		{{% } %}}
+				{{% }); %}}
+			{{% } %}}
+		</div>
 
 		<div class="clear"></div>
 
