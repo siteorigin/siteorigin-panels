@@ -1,7 +1,6 @@
 <?php
 
 define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.siteorigin.com/');
-// define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.localhost/');
 
 /**
  * Get builder content based on the submitted panels_data.

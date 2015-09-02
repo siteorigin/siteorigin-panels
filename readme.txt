@@ -97,6 +97,12 @@ I've tried to ensure that Page Builder is compatible with most plugin widgets. I
 
 == Changelog ==
 
+= 2.2 - August 29 2015 =
+* Added prebuilt layout directory.
+* Added contextual menu for quick actions.
+* Added parallax background images.
+* Various minor bug fixes.
+
 = 2.1.5 - August 19 2015 =
 * Fixed handling of checkboxes and array fields.
 * Properly position Page Builder tab in WordPress 4.3.
