@@ -277,7 +277,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 		$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
 
 		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
-			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php?action=so_panels_import_layout'), 'panels_action', '_panelsnonce' ),
+			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 				0 => array(
