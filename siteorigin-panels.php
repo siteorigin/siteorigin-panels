@@ -148,7 +148,13 @@ function siteorigin_panels_save_home_page(){
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
-	update_post_meta( $page_id, '_wp_page_template', siteorigin_panels_setting( 'home-template' ) );
+
+	$template = get_post_meta( $page_id, '_wp_page_template', true );
+	$home_template = siteorigin_panels_setting( 'home-template' );
+	if( ( $template == '' || $template == 'default' ) && !empty($home_template) ) {
+		// Set the home page template
+		update_post_meta( $page_id, '_wp_page_template', $home_template );
+	}
 
 	if( !empty( $_POST['siteorigin_panels_home_enabled'] ) ) {
 		update_option('show_on_front', 'page');
