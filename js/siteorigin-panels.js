@@ -57,6 +57,13 @@ String.prototype.panelsProcessTemplate = function(){
             styles: {}
         },
 
+        initialize: function(){
+            var widgetClass = this.get('class');
+            if( typeof panelsOptions.widgets[widgetClass] === 'undefined' || !panelsOptions.widgets[widgetClass].installed ) {
+                this.set('missing', true);
+            }
+        },
+
         /**
          * @param field
          * @returns {*}
@@ -2928,17 +2935,21 @@ String.prototype.panelsProcessTemplate = function(){
          */
         saveWidget: function(){
             // Get the values from the form and assign the new values to the model
-            var values = this.getFormValues();
-            if(typeof values.widgets === 'undefined') {
-                values = { };
-            }
-            else {
-                values = values.widgets;
-                values = values[ Object.keys(values)[0] ];
-            }
 
-            this.model.setValues(values);
-            this.model.set('raw', true); // We've saved from the widget form, so this is now raw
+            if( !this.model.get('missing') ) {
+                // Only get the values for non missing widgets.
+                var values = this.getFormValues();
+                if (typeof values.widgets === 'undefined') {
+                    values = {};
+                }
+                else {
+                    values = values.widgets;
+                    values = values[Object.keys(values)[0]];
+                }
+
+                this.model.setValues(values);
+                this.model.set('raw', true); // We've saved from the widget form, so this is now raw
+            }
 
             if( this.styles.stylesLoaded ) {
                 // If the styles view has loaded
