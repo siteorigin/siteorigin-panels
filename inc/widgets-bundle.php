@@ -2,6 +2,18 @@
 
 // An array with all the SiteOrigin Widget Bundle widgets
 return array(
+	'SiteOrigin_Widget_Editor_Widget' => array(
+		'class' => 'SiteOrigin_Widget_Editor_Widget',
+		'title' => __('SiteOrigin Editor', 'siteorigin-panels'),
+		'description' => __('A rich text editor', 'siteorigin-panels'),
+		'installed' => false,
+		'plugin' => array(
+			'name' => __('SiteOrigin Widgets Bundle', 'siteorigin-panels'),
+			'slug' => 'so-widgets-bundle'
+		),
+		'groups' => array('so-widgets-bundle'),
+	),
+
 	'SiteOrigin_Widget_Button_Widget' => array(
 		'class' => 'SiteOrigin_Widget_Button_Widget',
 		'title' => __('SiteOrigin Button', 'siteorigin-panels'),

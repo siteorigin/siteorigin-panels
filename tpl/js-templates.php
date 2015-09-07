@@ -351,7 +351,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e('Search', 'siteorigin-panels') ?>" />
 
 			<ul class="so-sidebar-tabs">
-				<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+				<?php if( !empty( $layouts ) ) : ?>
+					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+				<?php endif; ?>
+
+				<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
@@ -371,6 +375,56 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="buttons">
 		</div>
 
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-enable">
+	<div class="so-enable-prebuilt">
+		<?php _e('Do you want to browse the Prebuilt Layouts directory?', 'siteorigin-panels') ?>
+		<button class="button-primary so-panels-enable-directory"><?php _e('Enable', 'siteorigin-panels') ?></button>
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-directory-items">
+	<div class="so-directory-items">
+
+		<div class="so-directory-browse">
+			<?php _e('Newest Layouts', 'siteorigin-panels') ?>
+		</div>
+
+		<div class="so-directory-items-wrapper">
+			{{% if(items.length === 0) { %}}
+				<div class="so-no-results">
+					<?php _e( "Your search didn't return any results", 'siteorigin-panels' ); ?>
+				</div>
+			{{% } else { %}}
+				{{% _.each(items, function(item) { %}}
+					<div class="so-directory-item">
+						<div class="so-directory-item-wrapper">
+							<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
+								<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
+							</div>
+							<div class="so-description">{{%- item.description %}}</div>
+
+							<div class="so-bottom">
+								<h4 class="so-title">{{%= item.title %}}</h4>
+								<div class="so-buttons">
+									<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+									<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				{{% }); %}}
+			{{% } %}}
+		</div>
+
+		<div class="clear"></div>
+
+		<div class="so-directory-pages">
+			<a href="#" class="so-previous button-secondary" data-direction="prev"><?php _e('Previous', 'siteorigin-panels') ?></a>
+			<a href="#" class="so-next button-secondary" data-direction="next"><?php _e('Next', 'siteorigin-panels') ?></a>
+		</div>
 	</div>
 </script>
 
@@ -478,5 +532,33 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 		<div class="section-widgets">
 		</div>
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-context-menu">
+	<div class="so-panels-contextual-menu">
+
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-context-menu-section">
+	<div class="so-section">
+		<h5>{{%- settings.sectionTitle %}}</h5>
+
+		{{% if( settings.search ) { %}}
+			<div class="so-search-wrapper">
+				<input type="text" placeholder="{{%- settings.searchPlaceholder %}}" />
+			</div>
+		{{% } %}}
+		<ul class="so-items">
+			{{% for( var k in items ) { %}}
+				<li data-key="{{%- k %}}" class="so-item">{{%= items[k][settings.titleKey] %}}</li>
+			{{% } %}}
+		</ul>
+		{{% if( settings.search ) { %}}
+		<div class="so-no-results">
+			<?php _e('No Results', 'siteorigin-panels') ?>
+		</div>
+		{{% } %}}
 	</div>
 </script>

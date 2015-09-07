@@ -50,4 +50,8 @@ jQuery(function($){
         });
     });
 
+    if( $('.siteorigin-panels-stretch.panel-row-style').length ) {
+        // This is to allow everything to reset after styling has changed
+        $(window).resize();
+    }
 });

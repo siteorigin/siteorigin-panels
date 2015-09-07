@@ -57,6 +57,13 @@ String.prototype.panelsProcessTemplate = function(){
             styles: {}
         },
 
+        initialize: function(){
+            var widgetClass = this.get('class');
+            if( typeof panelsOptions.widgets[widgetClass] === 'undefined' || !panelsOptions.widgets[widgetClass].installed ) {
+                this.set('missing', true);
+            }
+        },
+
         /**
          * @param field
          * @returns {*}
@@ -367,6 +374,41 @@ String.prototype.panelsProcessTemplate = function(){
                 thisView.cell.row.resize();
                 thisView.model.destroy();
             } );
+        },
+
+        /**
+         * Build up the contextual menu for a widget
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_below,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    thisView.cell.row.builder.addHistoryEntry('widget_added');
+
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+                    widget.cell = thisView.cell.model;
+
+                    // Insert the new widget below
+                    thisView.cell.model.widgets.add(widget, {
+                        // Add this after the existing model
+                        at: thisView.model.collection.indexOf( thisView.model ) + 1
+                    });
+                }
+            );
+
+            // Lets also add the contextual menu for the entire row
+            this.cell.row.buildContextualMenu( e, menu );
         }
 
     });
@@ -694,6 +736,37 @@ String.prototype.panelsProcessTemplate = function(){
          */
         handleActionClick : function(e){
             return false;
+        },
+
+        /**
+         * Build up the contextual menu for a cell
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+                    searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+                    defaultDisplay: panelsOptions.contextual.default_widgets
+                },
+                panelsOptions.widgets,
+                function(c){
+                    thisView.row.builder.addHistoryEntry('widget_added');
+
+                    var widget = new panels.model.widget( {
+                        class: c
+                    } );
+
+                    // Add the widget to the cell model
+                    widget.cell = thisView.model;
+                    widget.cell.widgets.add( widget );
+                }
+            );
+
+            this.row.buildContextualMenu( e, menu );
         }
     } );
 
@@ -1077,6 +1150,54 @@ String.prototype.panelsProcessTemplate = function(){
                     view.remove();
                 }
             } );
+        },
+
+        /**
+         * Build up the contextual menu for a row
+         *
+         * @param e
+         * @param menu
+         */
+        buildContextualMenu: function( e, menu ) {
+            var thisView = this;
+
+            var options = [];
+            for( var i = 1; i < 5; i++ ) {
+                options.push({
+                    title: i + ' ' + panelsOptions.loc.contextual.column
+                });
+            }
+
+            menu.addSection(
+                {
+                    sectionTitle: panelsOptions.loc.contextual.add_row,
+                    search: false
+                },
+                options,
+                function(c){
+                    thisView.builder.addHistoryEntry('row_added');
+
+                    var columns = Number(c) + 1;
+                    var weights = [];
+                    for( var i = 0; i < columns; i++ ) {
+                        weights.push( 100/columns );
+                    }
+
+                    // Create the actual row
+                    var newRow = new panels.model.row( {
+                        collection: thisView.collection
+                    } );
+
+                    newRow.setCells( weights );
+                    newRow.builder = thisView.builder;
+
+                    thisView.builder.model.rows.add( newRow, {
+                        at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+                    } );
+
+
+                }
+            );
         }
 
     } );
@@ -1289,6 +1410,7 @@ String.prototype.panelsProcessTemplate = function(){
 
         attachedToEditor: false,
         liveEditor: false,
+        menu: false,
 
         /* The builderType is sent with all requests to the server */
         builderType: '',
@@ -1344,13 +1466,17 @@ String.prototype.panelsProcessTemplate = function(){
             this.on('display_builder', this.handleDisplayBuilder, this);
             this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
 
+            // Create the context menu for this builder
+            this.menu = new panels.utils.menu({});
+            this.menu.on('activate_context', this.activateContextMenu, this);
+
             return this;
         },
 
         /**
          * Render the builder interface.
          *
-         * @return {siteoriginPanels.view.builder}
+         * @return {panels.view.builder}
          */
         render: function(){
             this.$el.html( this.template() );
@@ -1466,7 +1592,10 @@ String.prototype.panelsProcessTemplate = function(){
 
             // Switch to the Page Builder interface as soon as we load the page if there are widgets
             var data = this.model.get('data');
-            if( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) {
+            if(
+                ( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) ||
+                ( typeof data.grids !== 'undefined' && _.size(data.grids) !== 0 )
+            ) {
                 $('#content-panels.switch-panels').click();
             }
 
@@ -1863,10 +1992,10 @@ String.prototype.panelsProcessTemplate = function(){
                 if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
                 var widgetClass = '';
-                if( typeof panelsOptions.widgets.WP_Widget_Black_Studio_TinyMCE !== 'undefined' ) {
-                    widgetClass = 'WP_Widget_Black_Studio_TinyMCE';
-                }
                 // There is a small chance a theme will have removed this, so check
+                if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+                    widgetClass = 'SiteOrigin_Widget_Editor_Widget';
+                }
                 else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
                     widgetClass = 'WP_Widget_Text';
                 }
@@ -1919,6 +2048,29 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 this.$('.so-panels-welcome-message').show();
             }
+        },
+
+        activateContextMenu: function( e, menu ){
+            var builder = this;
+
+            // Skip this if any of the dialogs are open. They can handle their own contexts.
+            if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+                // Check if any of the widgets get the contextual menu
+                var overItem = false, overItemType = false;
+
+                var over = $([])
+                    .add( builder.$('.so-rows-container > .so-row-container') )
+                    .add( builder.$('.so-cells > .cell') )
+                    .add( builder.$('.cell-wrapper > .so-widget') )
+                    .filter( function(i){
+                        return menu.isOverEl( $(this), e );
+                    } );
+
+                var activeView = over.last().data('view');
+                if( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
+                    activeView.buildContextualMenu( e, menu );
+                }
+            }
         }
 
     } );
@@ -1936,6 +2088,7 @@ String.prototype.panelsProcessTemplate = function(){
         className: 'so-panels-dialog-wrapper',
         dialogClass: '',
         parentDialog: false,
+        dialogOpen: false,
 
         events : {
             'click .so-close': 'closeDialog',
@@ -2138,6 +2291,9 @@ String.prototype.panelsProcessTemplate = function(){
         openDialog: function(){
             this.trigger('open_dialog');
 
+            this.dialogOpen = true;
+            window.panelsDialogOpen = true;
+
             this.refreshDialogNav();
 
             // Stop scrolling for the main body
@@ -2161,6 +2317,9 @@ String.prototype.panelsProcessTemplate = function(){
          */
         closeDialog: function(e){
             this.trigger('close_dialog');
+
+            this.dialogOpen = false;
+            window.panelsDialogOpen = false;
 
             // In the builder, trigger an update
             if(typeof this.builder !== 'undefined') {
@@ -2355,6 +2514,7 @@ String.prototype.panelsProcessTemplate = function(){
 
             } ); // End of each through input fields
 
+            console.log(data);
             return data;
         },
 
@@ -2778,17 +2938,21 @@ String.prototype.panelsProcessTemplate = function(){
          */
         saveWidget: function(){
             // Get the values from the form and assign the new values to the model
-            var values = this.getFormValues();
-            if(typeof values.widgets === 'undefined') {
-                values = { };
-            }
-            else {
-                values = values.widgets;
-                values = values[ Object.keys(values)[0] ];
-            }
 
-            this.model.setValues(values);
-            this.model.set('raw', true); // We've saved from the widget form, so this is now raw
+            if( !this.model.get('missing') ) {
+                // Only get the values for non missing widgets.
+                var values = this.getFormValues();
+                if (typeof values.widgets === 'undefined') {
+                    values = {};
+                }
+                else {
+                    values = values.widgets;
+                    values = values[Object.keys(values)[0]];
+                }
+
+                this.model.setValues(values);
+                this.model.set('raw', true); // We've saved from the widget form, so this is now raw
+            }
 
             if( this.styles.stylesLoaded ) {
                 // If the styles view has loaded
@@ -2843,17 +3007,23 @@ String.prototype.panelsProcessTemplate = function(){
     panels.dialog.prebuilt = panels.view.dialog.extend( {
 
         entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
+        directoryTemplate : _.template( $('#siteorigin-panels-directory-items').html().panelsProcessTemplate() ),
+
         builder: null,
         dialogClass : 'so-panels-dialog-prebuilt-layouts',
 
         layoutCache : {},
         currentTab : false,
+        directoryPage : 1,
 
         events: {
             'click .so-close': 'closeDialog',
             'click .so-sidebar-tabs li a' : 'tabClickHandler',
             'click .so-content .layout' : 'layoutClickHandler',
-            'keyup .so-sidebar-search' : 'searchHandler'
+            'keyup .so-sidebar-search' : 'searchHandler',
+
+            // The directory items
+            'click .so-content .so-directory-item .so-button-use' : 'directoryClickHandler',
         },
 
         /**
@@ -2863,7 +3033,7 @@ String.prototype.panelsProcessTemplate = function(){
             var thisView = this;
 
             this.on('open_dialog', function(){
-                thisView.$('.so-sidebar-tabs li a[href="#prebuilt"]').click();
+                thisView.$('.so-sidebar-tabs li a').first().click();
                 thisView.$('.so-status').removeClass('so-panels-loading');
             });
         },
@@ -2894,7 +3064,10 @@ String.prototype.panelsProcessTemplate = function(){
 
             thisView.currentTab = tab;
 
-            if( tab === 'import' ) {
+            if( tab === 'directory' ) {
+                this.displayLayoutDirectory();
+            }
+            else if( tab === 'import' ) {
                 // Display the import export
                 this.displayImportExport();
             }
@@ -2922,6 +3095,8 @@ String.prototype.panelsProcessTemplate = function(){
             else {
                 thisView.displayLayouts(tab, this.layoutCache[tab]);
             }
+
+            thisView.$('.so-sidebar-search').val('');
 
             return false;
         },
@@ -3092,15 +3267,152 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Handle an update to the search
+         * Display the layout directory tab.
+         *
+         * @param query
          */
-        searchHandler: function(){
-            if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+        displayLayoutDirectory: function( search, page ){
+            var thisView = this;
+            var c = this.$( '.so-content').empty().addClass('so-panels-loading');
+
+            if( search === undefined ) {
+                search = '';
+            }
+            if( page === undefined ) {
+                page = 1;
+            }
+
+            if( !panelsOptions.directory_enabled ) {
+                // Display the button to enable the prebuilt layout
+                c.removeClass( 'so-panels-loading' ).html( $('#siteorigin-panels-directory-enable').html() );
+                c.find('.so-panels-enable-directory').click( function(e){
+                    e.preventDefault();
+                    // Sent the query to enable the directory, then enable the directory
+                    $.get(
+                        panelsOptions.ajaxurl,
+                        { action: 'so_panels_directory_enable' },
+                        function(){
+
+                        }
+                    );
+
+                    // Enable the layout directory
+                    panelsOptions.directory_enabled = true;
+                    c.addClass( 'so-panels-loading' );
+                    thisView.displayLayoutDirectory( search, page );
+                } );
+                return;
+            }
+
+            // Get all the items for the current query
+            $.get(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_query',
+                    search: search,
+                    page: page
+                },
+                function( data ){
+                    // Skip this if we're no longer viewing the layout directory
+                    if( thisView.currentTab !== 'directory' ) return;
+
+                    // Add the directory items
+                    c.removeClass( 'so-panels-loading').html( thisView.directoryTemplate( data ) );
+
+                    // Lets setup the next and previous buttons
+                    var prev = c.find('.so-previous'), next = c.find('.so-next');
+
+                    if( page <= 1 ) {
+                        prev.addClass('button-disabled');
+                    }
+                    else {
+                        prev.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page - 1 );
+                        });
+                    }
+                    if( page === data.max_num_pages || data.max_num_pages == 0 ) {
+                        next.addClass('button-disabled');
+                    }
+                    else {
+                        next.click(function(e){
+                            e.preventDefault();
+                            thisView.displayLayoutDirectory( search, page + 1 );
+                        });
+                    }
+
+                    if( search !== '' ) {
+                        c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"<em>' + _.escape(search) + '</em>"' );
+                    }
+
+                    // Handle nice preloading of the screenshots
+                    c.find('.so-screenshot').each( function(){
+                        // Set the initial height
+                        var $$ = $(this), $a = $$.find('a');
+                        $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
+
+                        var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
+                            $a.removeClass('so-loading').css('height', 'auto');
+                            $img.appendTo($a).hide().fadeIn('fast');
+                        });
+                    } );
+                },
+                'json'
+            );
+        },
+
+        /**
+         * Load a particular layout into the builder.
+         *
+         * @param id
+         */
+        directoryClickHandler: function( e ){
+            e.preventDefault();
+            var $$ = $(e.currentTarget), thisView = this;
+
+            if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
                 return false;
             }
-            this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
-        }
+            this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
+            $.get(
+                panelsOptions.ajaxurl,
+                {
+                    action: 'so_panels_directory_item',
+                    layout_slug: $$.data('layout-slug')
+                },
+                function(layout){
+
+                    if( layout.error !== undefined ) {
+                        // There was an error
+                        alert( layout.error );
+                    }
+                    else {
+                        thisView.setStatusMessage('', false);
+                        thisView.builder.addHistoryEntry('prebuilt_loaded');
+                        thisView.builder.model.loadPanelsData(layout);
+                        thisView.closeDialog();
+                    }
+                }
+            );
+        },
+
+        /**
+         * Handle an update to the search
+         */
+        searchHandler: function( e ){
+            if( this.currentTab !== 'directory' ) {
+                // This is for the tabs that support live search
+                if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
+                    return false;
+                }
+                this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
+            }
+            else if( e.keyCode === 13 ) {
+                // Refresh the search results
+                this.displayLayoutDirectory( $(e.currentTarget).val(), 1 );
+            }
+        }
     } );
 
     /**

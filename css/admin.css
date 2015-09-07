@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'siteorigin-panels';
-  src: url('icons/siteorigin-panels.eot?-yv2c11');
-  src: url('icons/siteorigin-panels.eot?#iefix-yv2c11') format('embedded-opentype'), url('icons/siteorigin-panels.woff?-yv2c11') format('woff'), url('icons/siteorigin-panels.ttf?-yv2c11') format('truetype'), url('icons/siteorigin-panels.svg?-yv2c11#siteorigin-panels') format('svg');
+  src: url('icons/siteorigin-panels.eot');
+  src: url('icons/siteorigin-panels.eot') format('embedded-opentype'), url('icons/siteorigin-panels.woff') format('woff'), url('icons/siteorigin-panels.ttf') format('truetype'), url('icons/siteorigin-panels.svg') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -210,7 +210,6 @@
   text-decoration: none;
   color: #666;
   font-size: 11px;
-  font-weight: bold;
   outline: 0 !important;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -627,7 +626,6 @@
   /* The add widget dialog */
   /* The row edit dialog */
   /* For prebuilt layouts */
-  /* Everything we need for the style fields */
   /* Special case of the builder interface being inside a dialog */
 }
 .so-panels-dialog .so-overlay,
@@ -1310,6 +1308,152 @@
   padding: 12px 30px;
   height: auto;
 }
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-browse {
+  background: #f3f3f3;
+  border-bottom: 1px solid #d0d0d0;
+  margin: -15px -10px 15px -10px;
+  padding: 15px;
+  font-weight: bold;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items {
+  zoom: 1;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items:before {
+  content: '';
+  display: block;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-no-results {
+  margin: 20px 0;
+  padding: 0 5px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  padding: 6px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-directory-item-wrapper {
+  padding: 15px 10px;
+  background: #F7F7F7;
+  border: 1px solid #d0d0d0;
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-title {
+  font-size: 15px;
+  margin: 0 0 13px 0;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot {
+  background: #ffffff;
+  margin-bottom: 10px;
+  border: 1px solid #d0d0d0;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot.so-loading {
+  background-image: url("images/wpspin_light.gif");
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot.so-loading {
+    background-image: url(images/wpspin_light-2x.gif);
+    background-size: 16px 16px;
+  }
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot a {
+  display: block;
+  min-height: 40px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-description {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 10px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom {
+  height: 49px;
+  position: relative;
+  margin: 10px -10px -15px -10px;
+  background: #fcfcfc;
+  border-top: 1px solid #d0d0d0;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-title {
+  position: absolute;
+  top: 1em;
+  left: 10px;
+  z-index: 1;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-buttons {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 11px 10px 10px 15px;
+  height: 49px;
+  border-left: 1px solid #d0d0d0;
+  background: #f6f6f6;
+  -webkit-box-shadow: -1px 0 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: -1px 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: -1px 0 1px rgba(0, 0, 0, 0.05);
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:hover .so-buttons {
+  visibility: visible;
+}
+@media only screen and (min-width: 1680px) {
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
+    width: 20%;
+  }
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:nth-of-type(5n+1) {
+    clear: both;
+  }
+}
+@media only screen and (max-width: 1679px) and (min-width: 1280px) {
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
+    width: 25%;
+  }
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:nth-of-type(4n+1) {
+    clear: both;
+  }
+}
+@media only screen and (max-width: 1279px) and (min-width: 1140px) {
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
+    width: 33.333%;
+  }
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:nth-of-type(3n+1) {
+    clear: both;
+  }
+}
+@media only screen and (max-width: 1139px) {
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {
+    width: 50%;
+  }
+  .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:nth-of-type(2n+1) {
+    clear: both;
+  }
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-pages {
+  margin-top: 15px;
+  padding: 0 5px;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-pages .button-disabled {
+  pointer-events: none;
+}
 .so-panels-dialog .so-visual-styles {
   margin: -15px;
   /* All the field types */
@@ -1764,4 +1908,77 @@
 }
 .siteorigin-page-builder-widget .siteorigin-panels-no-builder {
   display: none !important;
+}
+.so-panels-contextual-menu {
+  border: 1px solid #C0C0C0;
+  background: #f9f9f9;
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  outline: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  position: absolute;
+  width: 180px;
+  top: 20px;
+  left: 20px;
+  z-index: 9991;
+  display: none;
+}
+.so-panels-contextual-menu,
+.so-panels-contextual-menu * {
+  font-size: 12px;
+}
+.so-panels-contextual-menu .so-section {
+  border-bottom: 1px solid #c0c0c0;
+}
+.so-panels-contextual-menu .so-section:last-child {
+  border-bottom: none;
+}
+.so-panels-contextual-menu .so-section h5 {
+  margin: 0 0 5px 0;
+  padding: 8px 10px 5px 10px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f6f6f6;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper {
+  margin: -5px 0 5px 0;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f4f4f4;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"] {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: none;
+  padding: 5px 10px;
+  background: #fbfbfb;
+}
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:focus,
+.so-panels-contextual-menu .so-section .so-search-wrapper input[type="text"]:active {
+  border: none;
+  box-shadow: none;
+  background: #ffffff;
+}
+.so-panels-contextual-menu .so-section ul {
+  margin: 5px 0 0 0;
+  padding: 0 0 5px 0;
+}
+.so-panels-contextual-menu .so-section ul li {
+  cursor: pointer;
+  margin: 0;
+  padding: 4px 10px;
+  line-height: 1em;
+}
+.so-panels-contextual-menu .so-section ul li:hover,
+.so-panels-contextual-menu .so-section ul li.so-active {
+  background: #F0F0F0;
+  color: #444;
+}
+.so-panels-contextual-menu .so-section .so-no-results {
+  padding: 0px 10px 5px 10px;
+  display: none;
+  font-style: italic;
 }

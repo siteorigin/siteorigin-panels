@@ -37,8 +37,9 @@
 
 		</div>
 
-		<input name="panels_data" value="" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-home" />
 		<script type="text/javascript">
+			// Create the panels_data input
+			document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-home" />' );
 			document.getElementById('panels-data-field-home').value = decodeURIComponent("<?php echo rawurlencode( json_encode($panels_data) ); ?>");
 		</script>
 

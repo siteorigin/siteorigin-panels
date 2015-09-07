@@ -298,6 +298,8 @@ function siteorigin_panels_sanitize_style_fields( $section, $styles ){
 
 	$return = array();
 	foreach($fields as $k => $field) {
+		// Skip this if no field type is set
+		if( empty($field['type']) ) continue;
 
 		// Handle the special case of a checkbox
 		if( $field['type'] == 'checkbox' ) {
