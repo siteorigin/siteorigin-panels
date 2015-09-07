@@ -546,7 +546,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 			update_post_meta( $post_id, 'panels_data', $panels_data );
 		}
 		else {
-			// There are no widgets, so delete the panels data.
+			// There are no widgets or rows, so delete the panels data
 			delete_post_meta( $post_id, 'panels_data' );
 		}
 	}
