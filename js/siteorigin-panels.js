@@ -2514,7 +2514,6 @@ String.prototype.panelsProcessTemplate = function(){
 
             } ); // End of each through input fields
 
-            console.log(data);
             return data;
         },
 
