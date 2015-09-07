@@ -1476,7 +1476,7 @@ String.prototype.panelsProcessTemplate = function(){
         /**
          * Render the builder interface.
          *
-         * @return {siteoriginPanels.view.builder}
+         * @return {panels.view.builder}
          */
         render: function(){
             this.$el.html( this.template() );
@@ -1592,7 +1592,10 @@ String.prototype.panelsProcessTemplate = function(){
 
             // Switch to the Page Builder interface as soon as we load the page if there are widgets
             var data = this.model.get('data');
-            if( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) {
+            if(
+                ( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) ||
+                ( typeof data.grids !== 'undefined' && _.size(data.grids) !== 0 )
+            ) {
                 $('#content-panels.switch-panels').click();
             }
 
