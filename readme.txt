@@ -93,9 +93,17 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 
 = Will plugin X work with Page Builder? =
 
-I've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
+We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.2 - September 7 2015 =
+* Added prebuilt layout directory.
+* Added contextual menu for quick actions.
+* Added parallax background images.
+* Properly handle missing widgets when saving forms.
+* Don't revert to default page template when using custom home page interface.
+* Various minor bug fixes and improvements.
 
 = 2.1.5 - August 19 2015 =
 * Fixed handling of checkboxes and array fields.

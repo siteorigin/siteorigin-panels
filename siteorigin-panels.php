@@ -148,7 +148,13 @@ function siteorigin_panels_save_home_page(){
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
-	update_post_meta( $page_id, '_wp_page_template', siteorigin_panels_setting( 'home-template' ) );
+
+	$template = get_post_meta( $page_id, '_wp_page_template', true );
+	$home_template = siteorigin_panels_setting( 'home-template' );
+	if( ( $template == '' || $template == 'default' ) && !empty($home_template) ) {
+		// Set the home page template
+		update_post_meta( $page_id, '_wp_page_template', $home_template );
+	}
 
 	if( !empty( $_POST['siteorigin_panels_home_enabled'] ) ) {
 		update_option('show_on_front', 'page');
@@ -271,7 +277,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 		$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
 
 		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
-			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php?action=so_panels_import_layout'), 'panels_action', '_panelsnonce' ),
+			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 				0 => array(

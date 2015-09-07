@@ -1,7 +1,6 @@
 <?php
 
 define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.siteorigin.com/');
-// define('SITEORIGIN_PANELS_LAYOUT_URL', 'http://layouts.localhost/');
 
 /**
  * Get builder content based on the submitted panels_data.
@@ -17,7 +16,10 @@ function siteorigin_panels_ajax_builder_content(){
 	}
 
 	// echo the content
-	echo siteorigin_panels_render( intval($_POST['post_id']), false, json_decode( wp_unslash($_POST['panels_data']), true ) );
+	$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
+	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
+	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+	echo siteorigin_panels_render( intval($_POST['post_id']), false, $panels_data );
 
 	wp_die();
 }
