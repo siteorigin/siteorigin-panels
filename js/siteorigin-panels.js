@@ -2396,6 +2396,9 @@ String.prototype.panelsProcessTemplate = function(){
                 var $$ = $(this);
 
                 var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr('name') );
+                if( name === undefined ) {
+                    return true;
+                }
 
                 // Create an array with the parts of the name
                 if(typeof name[2] === 'undefined') {
