@@ -88,6 +88,8 @@ function siteorigin_panels_ajax_prebuilt_layouts(){
 		$post_type = str_replace('clone_', '', $_REQUEST['type'] );
 		global $wpdb;
 
+		$user_can_read_private = ( $post_type == 'post' && current_user_can( 'read_private_posts' ) || ( $post_type == 'page' && current_user_can( 'read_private_pages' ) ));
+		$include_private = $user_can_read_private ? "OR posts.post_status = 'private' " : "";
 		// Select only the posts with the given post type that also have panels_data
 		$results = $wpdb->get_results( $wpdb->prepare("
 			SELECT ID, post_title, meta.meta_value
@@ -96,10 +98,10 @@ function siteorigin_panels_ajax_prebuilt_layouts(){
 			WHERE
 				posts.post_type = %s
 				AND meta.meta_key = 'panels_data'
-				AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' )
+				AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
 			ORDER BY post_title
 			LIMIT 200
-		", $post_type) );
+		", $post_type ) );
 
 		foreach( $results as $result ) {
 			$meta_value = unserialize( $result->meta_value );
