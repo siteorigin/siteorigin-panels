@@ -212,6 +212,8 @@ String.prototype.panelsProcessTemplate = function(){
                     typeof values[titleFields[i]] !== 'undefined' &&
                     typeof values[titleFields[i]] === 'string' &&
                     values[titleFields[i]] !== '' &&
+                    values[titleFields[i]] !== 'on' &&
+                    titleFields[i][0] !== '_' &&
                     !$.isNumeric( values[titleFields[i]] )
                 ) {
                     var title = values[ titleFields[i] ];
