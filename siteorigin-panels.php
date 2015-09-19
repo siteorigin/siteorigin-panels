@@ -1156,6 +1156,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	// Filter and sanitize the classes
 	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info);
+	$classes = explode( ' ', implode( ' ', $classes ) );
 	$classes = array_map('sanitize_html_class', $classes);
 
 	$title_html = siteorigin_panels_setting( 'title-html' );
