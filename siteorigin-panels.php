@@ -470,8 +470,12 @@ function siteorigin_panels_get_widgets(){
 /**
  * @param $a
  * @param $b
+ *
+ * @return int
  */
 function siteorigin_panels_widgets_sorter($a, $b){
+	if( empty($a['title']) ) return -1;
+	if( empty($b['title']) ) return 1;
 	return $a['title'] > $b['title'] ? 1 : -1;
 }
 
