@@ -134,12 +134,15 @@ function siteorigin_panels_save_home_page(){
 		$page_id = wp_insert_post( array(
 			// TRANSLATORS: This is the default name given to a user's home page
 			'post_title' => __( 'Home Page', 'siteorigin-panels' ),
-			'post_status' => $_POST['siteorigin_panels_home_enabled'] == 'true' ? 'publish' : 'draft',
+			'post_status' => !empty($_POST['siteorigin_panels_home_enabled']) ? 'publish' : 'draft',
 			'post_type' => 'page',
 			'comment_status' => 'closed',
 		) );
 		update_option( 'page_on_front', $page_id );
 		update_option( 'siteorigin_panels_home_page_id', $page_id );
+
+		// Action triggered when creating a new home page through the custom home page interface
+		do_action( 'siteorigin_panels_create_home_page', $page_id );
 	}
 
 	// Save the updated page data
