@@ -266,6 +266,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="row-set-form">
 				<?php
 				$cells_field = '<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />';
+				$cells_field = apply_filters("siteorigin_panels_column_cells", $cells_field);
 				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
 					'Even' => 1,
 					'Golden' => 0.61803398,
