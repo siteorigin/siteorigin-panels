@@ -18,7 +18,8 @@ jQuery(function($){
                 'margin-left' : 0,
                 'margin-right' : 0,
                 'padding-left' : 0,
-                'padding-right' : 0
+                'padding-right' : 0,
+                'visibility' : 'visible'
             });
 
             var leftSpace = $$.offset().left - fullContainer.offset().left;
