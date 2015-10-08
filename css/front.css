@@ -47,3 +47,6 @@
   display: table;
   clear: both;
 }
+.siteorigin-panels-stretch {
+	visibility: hidden;
+}
