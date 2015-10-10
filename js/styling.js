@@ -18,7 +18,8 @@ jQuery(function($){
                 'margin-left' : 0,
                 'margin-right' : 0,
                 'padding-left' : 0,
-                'padding-right' : 0
+                'padding-right' : 0,
+                'visibility' : 'visible'
             });
 
             var leftSpace = $$.offset().left - fullContainer.offset().left;
@@ -28,7 +29,8 @@ jQuery(function($){
                 'margin-left' : -leftSpace,
                 'margin-right' : -rightSpace,
                 'padding-left' : $$.data('stretch-type') === 'full' ? leftSpace : 0,
-                'padding-right' : $$.data('stretch-type') === 'full' ? rightSpace : 0
+                'padding-right' : $$.data('stretch-type') === 'full' ? rightSpace : 0,
+                'visibility' : 'visible'
             });
 
             var cells = $$.find('> .panel-grid-cell');
