@@ -54,4 +54,8 @@ jQuery(function($){
         // This is to allow everything to reset after styling has changed
         $(window).resize();
     }
+
+    $.stellar({
+        horizontalScrolling: false
+    });
 });
