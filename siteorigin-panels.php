@@ -1150,7 +1150,8 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = array( 'so-panel', 'widget' );
+	$classes = array( 'so-panel' );
+	if( siteorigin_panels_setting( 'add-widget-class' ) ) $classes[] = 'widget';
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( !empty( $the_widget ) && is_array( $the_widget->widget_options ) && !empty( $the_widget->widget_options['classname'] ) ) $classes[] = $the_widget->widget_options['classname'];
 	if ( $is_first ) $classes[] = 'panel-first-child';

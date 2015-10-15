@@ -94,13 +94,14 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 			<div class="style-section-fields" style="display: none">
 				<?php
 				foreach( $fields as $field_id => $field ) {
+					$default = isset($field['default']) ? $field['default'] : false;
 
 					if($field['group'] == $group_id){
 						?>
 						<div class="style-field-wrapper">
 							<label><?php echo $field['name'] ?></label>
 							<div class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
-								<?php siteorigin_panels_render_style_field( $field, isset( $current[$field_id] ) ? $current[$field_id] : false, $field_id ) ?>
+								<?php siteorigin_panels_render_style_field( $field, isset( $current[$field_id] ) ? $current[$field_id] : $default, $field_id ) ?>
 							</div>
 						</div>
 						<?php
