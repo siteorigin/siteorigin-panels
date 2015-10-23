@@ -208,11 +208,11 @@ class SiteOrigin_Panels_Settings {
 			'description' => __('The HTML used for widget titles. {{title}} is replaced with the widget title.', 'siteorigin-panels'),
 		);
 
-		$fields['widgets']['fields']['add-widget-class'] = [
+		$fields['widgets']['fields']['add-widget-class'] = array(
 			'type' => 'checkbox',
 			'label' => __('Add Widget Class', 'siteorigin-panels'),
 			'description' => __("Add the widget class to Page Builder widgets. Disable this if you're experiencing conflicts.", 'siteorigin-panels'),
-		];
+		);
 
 		$fields['widgets']['fields']['bundled-widgets'] = array(
 			'type' => 'checkbox',

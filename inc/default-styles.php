@@ -130,6 +130,7 @@ class SiteOrigin_Panels_Default_Styling {
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
 				'parallax' => __('Parallax', 'siteorigin-panels'),
+				'parallax-original' => __('Parallax (Original Size)', 'siteorigin-panels'),
 			),
 			'description' => __('How the background image is displayed.', 'siteorigin-panels'),
 			'priority' => 7,
@@ -199,6 +200,7 @@ class SiteOrigin_Panels_Default_Styling {
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
 				'parallax' => __('Parallax', 'siteorigin-panels'),
+				'parallax-original' => __('Parallax (Original Size)', 'siteorigin-panels'),
 			),
 			'description' => __('How the background image is displayed.', 'siteorigin-panels'),
 			'priority' => 7,
@@ -252,15 +254,18 @@ class SiteOrigin_Panels_Default_Styling {
 			$attributes['style'] .= 'background-color:' . $args['background']. ';';
 		}
 
-		if( !empty( $args['background_image_attachment'] ) ) {
+		if( !empty($args['background_display']) && !empty( $args['background_image_attachment'] ) ) {
 			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
 
 			if( !empty($url) ) {
 
-				if( $args['background_display'] == 'parallax' ) {
+				if( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
 					wp_enqueue_script('siteorigin-panels-front-parallax');
 					$attributes['data-stellar-background-ratio'] = '0.5';
-					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-size:cover;  background-repeat: no-repeat;';
+					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center; background-repeat: no-repeat;';
+					if( $args['background_display'] == 'parallax' ) {
+						$attributes['style'] .= 'background-size: cover;';
+					}
 				}
 				else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
@@ -319,15 +324,18 @@ class SiteOrigin_Panels_Default_Styling {
 			$attributes['style'] .= 'background-color:' . $args['background']. ';';
 		}
 
-		if( !empty( $args['background_image_attachment'] ) ) {
+		if( !empty($args['background_display']) && !empty( $args['background_image_attachment'] ) ) {
 			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
 
 			if( !empty($url) ) {
 
-				if( $args['background_display'] == 'parallax' ) {
+				if( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
 					wp_enqueue_script('siteorigin-panels-front-parallax');
 					$attributes['data-stellar-background-ratio'] = '0.5';
-					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-size:cover;  background-repeat: no-repeat;';
+					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center; background-repeat: no-repeat;';
+					if( $args['background_display'] == 'parallax' ) {
+						$attributes['style'] .= 'background-size: cover;';
+					}
 				}
 				else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
