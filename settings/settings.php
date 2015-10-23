@@ -109,6 +109,7 @@ class SiteOrigin_Panels_Settings {
 
 		// Widgets fields
 		$defaults['title-html'] = '<h3 class="widget-title">{{title}}</h3>';
+		$defaults['add-widget-class'] = true;
 		$defaults['bundled-widgets'] = get_option( 'siteorigin_panels_is_using_bundled', false );
 		$defaults['recommended-widgets'] = true;
 
@@ -205,6 +206,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'html',
 			'label' => __('Widget Title HTML', 'siteorigin-panels'),
 			'description' => __('The HTML used for widget titles. {{title}} is replaced with the widget title.', 'siteorigin-panels'),
+		);
+
+		$fields['widgets']['fields']['add-widget-class'] = array(
+			'type' => 'checkbox',
+			'label' => __('Add Widget Class', 'siteorigin-panels'),
+			'description' => __("Add the widget class to Page Builder widgets. Disable this if you're experiencing conflicts.", 'siteorigin-panels'),
 		);
 
 		$fields['widgets']['fields']['bundled-widgets'] = array(
@@ -450,6 +457,5 @@ SiteOrigin_Panels_Settings::single();
  * @return array|bool|mixed|null
  */
 function siteorigin_panels_setting($key = ''){
-	$settings = SiteOrigin_Panels_Settings::single();
-	return $settings->get($key);
+	return SiteOrigin_Panels_Settings::single()->get($key);
 }

@@ -134,12 +134,15 @@ function siteorigin_panels_save_home_page(){
 		$page_id = wp_insert_post( array(
 			// TRANSLATORS: This is the default name given to a user's home page
 			'post_title' => __( 'Home Page', 'siteorigin-panels' ),
-			'post_status' => $_POST['siteorigin_panels_home_enabled'] == 'true' ? 'publish' : 'draft',
+			'post_status' => !empty($_POST['siteorigin_panels_home_enabled']) ? 'publish' : 'draft',
 			'post_type' => 'page',
 			'comment_status' => 'closed',
 		) );
 		update_option( 'page_on_front', $page_id );
 		update_option( 'siteorigin_panels_home_page_id', $page_id );
+
+		// Action triggered when creating a new home page through the custom home page interface
+		do_action( 'siteorigin_panels_create_home_page', $page_id );
 	}
 
 	// Save the updated page data
@@ -470,8 +473,12 @@ function siteorigin_panels_get_widgets(){
 /**
  * @param $a
  * @param $b
+ *
+ * @return int
  */
 function siteorigin_panels_widgets_sorter($a, $b){
+	if( empty($a['title']) ) return -1;
+	if( empty($b['title']) ) return 1;
 	return $a['title'] > $b['title'] ? 1 : -1;
 }
 
@@ -1143,7 +1150,8 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 
 	if( empty($post_id) ) $post_id = get_the_ID();
 
-	$classes = array( 'so-panel', 'widget' );
+	$classes = array( 'so-panel' );
+	if( siteorigin_panels_setting( 'add-widget-class' ) ) $classes[] = 'widget';
 	if ( !empty( $the_widget ) && !empty( $the_widget->id_base ) ) $classes[] = 'widget_' . $the_widget->id_base;
 	if ( !empty( $the_widget ) && is_array( $the_widget->widget_options ) && !empty( $the_widget->widget_options['classname'] ) ) $classes[] = $the_widget->widget_options['classname'];
 	if ( $is_first ) $classes[] = 'panel-first-child';
@@ -1151,8 +1159,11 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 	$id = 'panel-' . $post_id . '-' . $grid . '-' . $cell . '-' . $panel;
 
 	// Filter and sanitize the classes
-	$classes = apply_filters('siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info);
-	$classes = array_map('sanitize_html_class', $classes);
+	$classes = apply_filters( 'siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info );
+	$classes = explode( ' ', implode( ' ', $classes ) );
+	$classes = array_filter( $classes );
+	$classes = array_unique( $classes );
+	$classes = array_map( 'sanitize_html_class', $classes );
 
 	$title_html = siteorigin_panels_setting( 'title-html' );
 	if( strpos($title_html, '{{title}}') !== false ) {

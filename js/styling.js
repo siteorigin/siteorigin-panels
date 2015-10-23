@@ -3,17 +3,16 @@
 
 jQuery(function($){
 
-    var fullContainer = $( panelsStyles.fullContainer );
+    var fullContainer = $( panelsStyles.fullContainer);
     if( fullContainer.length === 0 ) {
         fullContainer = $('body');
     }
 
-    // This will handle stretching the cells.
-    $('.siteorigin-panels-stretch.panel-row-style').each(function(){
-        var $$ = $(this);
+    // Stretch all the full width rows
+    var stretchFullWidthRows = function(){
 
-        var onResize = function(){
-
+        $('.siteorigin-panels-stretch.panel-row-style').each(function(){
+            var $$ = $(this);
             $$.css({
                 'margin-left' : 0,
                 'margin-right' : 0,
@@ -39,19 +38,24 @@ jQuery(function($){
                     'padding-right' : 0
                 });
             }
-        };
 
-        $(window).resize( onResize );
-        onResize();
-
-        $$.css({
-            'border-left' : 0,
-            'border-right' : 0
+            $$.css({
+                'border-left' : 0,
+                'border-right' : 0
+            });
         });
-    });
-
-    if( $('.siteorigin-panels-stretch.panel-row-style').length ) {
-        // This is to allow everything to reset after styling has changed
-        $(window).resize();
     }
+    $(window).resize( stretchFullWidthRows );
+    stretchFullWidthRows();
+
+    if(  typeof $.stellar !== 'undefined' ) {
+        // Setup parallax after a small timeout to allow full width to take effect
+        setTimeout( function(){
+            $.stellar( {
+                horizontalScrolling: false,
+                responsive: true
+            } );
+        }, 100 );
+    }
+
 });
