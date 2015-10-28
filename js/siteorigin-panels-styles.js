@@ -127,13 +127,17 @@
                         frame.on( 'select', function(){
                             var attachment = frame.state().get('selection').first().attributes;
 
-                            try {
-                                $s.find( '.current-image' ).css( 'background-image', 'url(' + attachment.sizes.thumbnail.url + ')' );
+                            var url = attachment.url;
+                            if(!_.isUndefined(attachment.sizes)) {
+                                try {
+                                    url = attachment.sizes.thumbnail.url;
+                                }
+                                catch(e) {
+                                    // We'll use the full image instead
+                                    url = attachment.sizes.full.url;
+                                }
                             }
-                            catch(e) {
-                                // We'll use the full image instead
-                                $s.find( '.current-image' ).css( 'background-image', 'url(' + attachment.sizes.full.url + ')' );
-                            }
+                            $s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
 
                             // Store the ID
                             $s.find('input').val( attachment.id )
