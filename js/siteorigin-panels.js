@@ -1409,7 +1409,7 @@ String.prototype.panelsProcessTemplate = function(){
                     thisView.trigger('hide_builder');
                 } ).end()
                 .prepend(
-                $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h3.hndle span' ).html() + '</a>' )
+                $( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</a>' )
                     .click( function (e) {
                         // Switch to the Page Builder interface
                         e.preventDefault();
