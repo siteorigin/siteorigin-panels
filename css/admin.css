@@ -9,8 +9,8 @@
 #so-panels-panels.attached-to-editor {
   margin-top: 20px;
 }
-#so-panels-panels.attached-to-editor h3.hndle {
-  display: none;
+#so-panels-panels.attached-to-editor .hndle {
+  display: none !important;
 }
 #so-panels-panels.attached-to-editor .inside {
   margin: 0 !important;
