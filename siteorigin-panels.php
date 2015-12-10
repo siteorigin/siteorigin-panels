@@ -570,9 +570,12 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 
 		// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
-		// https://core.trac.wordpress.org/panels_data/20299
+		// https://core.trac.wordpress.org/ticket/20299
 		if( !empty( $panels_data['widgets'] ) ) {
 			update_post_meta( $post_id, '_panels_data_preview', $panels_data );
+		}
+		else {
+			delete_post_meta( $post_id, '_panels_data_preview' );
 		}
 	}
 }
