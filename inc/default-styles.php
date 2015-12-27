@@ -109,8 +109,8 @@ class SiteOrigin_Panels_Default_Styling {
 			'group' => 'layout',
 			'options' => array(
 				'' => __('Default', 'siteorigin-panels'),
-				'right-top' => __('Right on Top', 'siteorigin-panels'),
 				'left-top' => __('Left on Top', 'siteorigin-panels'),
+				'right-top' => __('Right on Top', 'siteorigin-panels'),
 			),
 			'priority' => 15,
 		);

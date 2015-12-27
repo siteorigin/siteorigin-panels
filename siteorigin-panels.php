@@ -732,11 +732,14 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			));
 		}
 
+
+		$collapse_order = !empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
+
 		if ( $cell_count > 1 ) {
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css( $post_id, $gi, false, '', array(
 				// Float right for RTL
-				'float' => !is_rtl() ? 'left' : 'right'
-			));
+				'float' => $collapse_order == 'left-top' ? 'left' : 'right'
+			) );
 		}
 
 		if ( $settings['responsive'] ) {
@@ -747,7 +750,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			), $panels_mobile_width);
 
 			for ( $i = 0; $i < $cell_count; $i++ ) {
-				if ( $i != $cell_count - 1 ) {
+				if ( ( $collapse_order == 'left-top' && $i != $cell_count - 1 ) || $collapse_order == 'right-top' &&  $i != 0 ) {
 					$css->add_cell_css($post_id, $gi, $i, '', array(
 						'margin-bottom' => $panels_margin_bottom . 'px',
 					), $panels_mobile_width);
@@ -925,7 +928,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		}
 	}
 
-	if( is_rtl() ) $panels_data = siteorigin_panels_make_rtl( $panels_data );
+	// A filter to change the panels_data right before the content is rendered.
+	$panels_data = apply_filters( 'siteorigin_panels_data_before_render', $panels_data, $post_id );
 
 	// Create the skeleton of the grids
 	$grids = array();
@@ -1008,7 +1012,16 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		$row_style_wrapper = siteorigin_panels_start_style_wrapper( 'row', $style_attributes, !empty($panels_data['grids'][$gi]['style']) ? $panels_data['grids'][$gi]['style'] : array() );
 		if( !empty($row_style_wrapper) ) echo $row_style_wrapper;
 
+		$collapse_order = !empty( $panels_data['grids'][$gi]['style']['collapse_order'] ) ? $panels_data['grids'][$gi]['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
+
+		// We will only use the cell buffer if we're in RTL mode
+		$cell_buffer = array();
+
 		foreach ( $cells as $ci => $widgets ) {
+			if( $collapse_order == 'right-top' ) {
+				ob_start();
+			}
+
 			// Themes can add their own styles to cells
 			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', array('panel-grid-cell'), $panels_data );
 			$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
@@ -1034,6 +1047,17 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 			if( !empty($cell_style_wrapper) ) echo '</div>';
 			echo '</div>';
+
+			if( $collapse_order == 'right-top' ) {
+				$cell_buffer[] = ob_get_clean();
+			}
+		}
+
+		if( !empty($cell_buffer) ) {
+			if( $collapse_order == 'right-top' ) {
+				$cell_buffer = array_reverse( $cell_buffer );
+			}
+			echo implode('', $cell_buffer);
 		}
 
 		echo '</div>';
@@ -1362,35 +1386,6 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 
 	// Add all the information fields
 	return $form;
-}
-
-/**
- * This takes existing Page Builder data and makes it RTL by reversing the content
- */
-function siteorigin_panels_make_rtl($panels_data){
-
-	// To start, we need a cell count for every row
-	foreach($panels_data['widgets'] as &$widget) {
-		// This reverses the cells of the widgets
-		$count = $panels_data['grids'][ $widget['panels_info']['grid'] ]['cells'];
-		$widget['panels_info']['cell'] = abs( $widget['panels_info']['cell'] - $count + 1 );
-	}
-
-	// Now we need to swap around the grid cells because we're going to use float right instead.
-	$grid_cells = array();
-	foreach( $panels_data['grid_cells'] as $cell) {
-		if( empty( $grid_cells[ $cell['grid'] ] ) ) $grid_cells[ $cell['grid'] ] = array();
-		array_unshift( $grid_cells[ $cell['grid'] ], $cell );
-	}
-	$new_grid_cells = array();
-	foreach( $grid_cells as $i => $cells ) {
-		foreach($cells as $cell) {
-			$new_grid_cells[] = $cell;
-		}
-	}
-	$panels_data['grid_cells'] = $new_grid_cells;
-
-	return $panels_data;
 }
 
 /**
