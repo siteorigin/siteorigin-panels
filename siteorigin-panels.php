@@ -1014,14 +1014,11 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 		$collapse_order = !empty( $panels_data['grids'][$gi]['style']['collapse_order'] ) ? $panels_data['grids'][$gi]['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
 
-		// We will only use the cell buffer if we're in RTL mode
-		$cell_buffer = array();
+		if( $collapse_order == 'right-top' ) {
+			$cells = array_reverse( $cells, true );
+		}
 
 		foreach ( $cells as $ci => $widgets ) {
-			if( $collapse_order == 'right-top' ) {
-				ob_start();
-			}
-
 			// Themes can add their own styles to cells
 			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', array('panel-grid-cell'), $panels_data );
 			$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
@@ -1047,17 +1044,6 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 			if( !empty($cell_style_wrapper) ) echo '</div>';
 			echo '</div>';
-
-			if( $collapse_order == 'right-top' ) {
-				$cell_buffer[] = ob_get_clean();
-			}
-		}
-
-		if( !empty($cell_buffer) ) {
-			if( $collapse_order == 'right-top' ) {
-				$cell_buffer = array_reverse( $cell_buffer );
-			}
-			echo implode('', $cell_buffer);
 		}
 
 		echo '</div>';
