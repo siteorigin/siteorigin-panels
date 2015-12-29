@@ -182,7 +182,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		//If Widgets Bundle post selector is available and a posts query has been saved using it.
 		if ( function_exists( 'siteorigin_widget_post_selector_process_query' ) && ! empty( $instance['posts'] ) ) {
 			$query_args = siteorigin_widget_post_selector_process_query($instance['posts']);
-			$instance['additional'] = empty($query_args['additional']) ? array() : $query_args['additional'];
+			$query_args['additional'] = empty($instance['additional']) ? array() : $instance['additional'];
 		}
 		else {
 			if ( ! empty( $instance['posts'] ) ) {
