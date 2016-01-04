@@ -802,6 +802,15 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		}
 	}
 
+	foreach ($panels_data['widgets'] as $widget_id => $widget) {
+		if (!empty($widget['panels_info']['style']['link_color'])) {
+			$selector = '#panel-' . $post_id . '-' . $widget['panels_info']['grid'] . '-' . $widget['panels_info']['cell'] . '-' . $widget['panels_info']['panel'] . ' a';
+			$css->add_css($selector, array(
+				'color' => $widget['panels_info']['style']['link_color']
+			));
+		}
+	}
+
 	// Let other plugins and components filter the CSS object.
 	$css = apply_filters('siteorigin_panels_css_object', $css, $panels_data, $post_id);
 	return $css->get_css();
