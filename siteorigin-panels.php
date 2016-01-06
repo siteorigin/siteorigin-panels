@@ -710,6 +710,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	foreach ( $panels_data['grids'] as $gi => $grid ) {
 
 		$cell_count = intval( $grid['cells'] );
+		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
 
 		// Add the cell sizing
 		for ( $i = 0; $i < $cell_count; $i++ ) {
@@ -720,7 +721,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 				$width = apply_filters('siteorigin_panels_css_cell_width', $width, $grid, $gi, $cell, $ci - 1, $panels_data, $post_id);
 
 				// Add the width and ensure we have correct formatting for CSS.
-				$css->add_cell_css($post_id, $gi, $i, '', array(
+				$css->add_cell_css($post_id, $grid_id, $i, '', array(
 					'width' => str_replace(',', '.', $width)
 				));
 			}
@@ -729,13 +730,13 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		// Add the bottom margin to any grids that aren't the last
 		if($gi != count($panels_data['grids'])-1){
 			// Filter the bottom margin for this row with the arguments
-			$css->add_row_css($post_id, $gi, '', array(
+			$css->add_row_css($post_id, $grid_id, '', array(
 				'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 			));
 		}
 
 		if ( $cell_count > 1 ) {
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
 				// Float right for RTL
 				'float' => !is_rtl() ? 'left' : 'right'
 			));
@@ -743,14 +744,14 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 		if ( $settings['responsive'] ) {
 			// Mobile Responsive
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
 				'float' => 'none',
 				'width' => 'auto'
 			), $panels_mobile_width);
 
 			for ( $i = 0; $i < $cell_count; $i++ ) {
 				if ( $i != $cell_count - 1 ) {
-					$css->add_cell_css($post_id, $gi, $i, '', array(
+					$css->add_cell_css($post_id, $grid_id, $i, '', array(
 						'margin-bottom' => $panels_margin_bottom . 'px',
 					), $panels_mobile_width);
 				}
@@ -783,6 +784,8 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		// Rows with only one cell don't need gutters
 		if($grid['cells'] <= 1) continue;
 
+		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
+
 		// Let other themes and plugins change the gutter.
 		$gutter = apply_filters('siteorigin_panels_css_row_gutter', $settings['margin-sides'].'px', $grid, $gi, $panels_data);
 
@@ -791,11 +794,11 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			preg_match('/([0-9\.,]+)(.*)/', $gutter, $match);
 			if( !empty( $match[1] ) ) {
 				$margin_half = (floatval($match[1])/2) . $match[2];
-				$css->add_row_css($post_id, $gi, '', array(
+				$css->add_row_css($post_id, $grid_id, '', array(
 					'margin-left' => '-' . $margin_half,
 					'margin-right' => '-' . $margin_half,
 				) );
-				$css->add_cell_css($post_id, $gi, false, '', array(
+				$css->add_cell_css($post_id, $grid_id, false, '', array(
 					'padding-left' => $margin_half,
 					'padding-right' => $margin_half,
 				) );
@@ -807,9 +810,9 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	foreach ($panels_data['widgets'] as $widget_id => $widget) {
 		if (!empty($widget['panels_info']['style']['link_color'])) {
 			$selector = '#panel-' . $post_id . '-' . $widget['panels_info']['grid'] . '-' . $widget['panels_info']['cell'] . '-' . $widget['panels_info']['cell_index'] . ' a';
-			$css->add_css($selector, array(
+			$css->add_css( $selector, array(
 				'color' => $widget['panels_info']['style']['link_color']
-			));
+			) );
 		}
 	}
 
@@ -976,9 +979,11 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	foreach ( $grids as $gi => $cells ) {
 
 		$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array('panel-grid'), $panels_data['grids'][$gi] );
+		$grid_id = !empty($panels_data['grids'][$gi]['style']['id']) ? sanitize_html_class( $panels_data['grids'][$gi]['style']['id'] ) : false;
+
 		$grid_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
 			'class' => implode( ' ', $grid_classes ),
-			'id' => 'pg-' . $post_id . '-' . $gi
+			'id' => !empty($grid_id) ? $grid_id : 'pg-' . $post_id . '-' . $gi,
 		), $panels_data['grids'][$gi] );
 
 		// This allows other themes and plugins to add html before the row
@@ -1004,7 +1009,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', array('panel-grid-cell'), $panels_data );
 			$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 				'class' => implode( ' ', $cell_classes ),
-				'id' => 'pgc-' . $post_id . '-' . $gi  . '-' . $ci
+				'id' => 'pgc-' . $post_id . '-' . ( !empty($grid_id) ? $grid_id : $gi )  . '-' . $ci
 			), $panels_data );
 
 			echo '<div ';
