@@ -38,7 +38,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * Add CSS that applies to a row or group of rows.
 	 *
 	 * @param int $li The layout ID. If false, then the CSS applies to all layouts.
-	 * @param int|bool $ri The row index. If false, then the CSS applies to all rows.
+	 * @param int|bool|string $ri The row index. If false, then the CSS applies to all rows.
 	 * @param string $sub_selector A sub selector if we need one.
 	 * @param array $attributes An array of attributes.
 	 * @param int $resolution The pixel resolution that this applies to
@@ -55,7 +55,13 @@ class SiteOrigin_Panels_Css_Builder {
 		else {
 			// This applies to a specific row
 			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			$selector[] = '#pg-'.$li.'-'.$ri;
+			if( is_string($ri) ) {
+				$selector[] = '#' . $ri;
+			}
+			else {
+				$selector[] = '#pg-'.$li.'-'.$ri;
+			}
+
 		}
 
 		// Add in the sub selector
@@ -85,13 +91,13 @@ class SiteOrigin_Panels_Css_Builder {
 		elseif( $ri !== false && $ci === false ) {
 			// This applies to all cells in a row
 			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			$selector[] = '#pg-'.$li.'-'.$ri;
+			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-'.$li.'-'.$ri;
 			$selector[] = '.panel-grid-cell';
 		}
 		elseif( $ri !== false && $ci !== false ) {
 			// This applies to a specific cell
 			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			$selector[] = '#pgc-'.$li.'-'.$ri.'-'.$ci;
+			$selector[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
 		}
 
 		// Add in the sub selector
