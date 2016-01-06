@@ -726,8 +726,8 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			}
 		}
 
-		// Add the bottom margin to any grids that aren't the last
-		if($gi != count($panels_data['grids'])-1){
+		// Add the bottom margin to any grids
+		if($gi != count($panels_data['grids'])){
 			// Filter the bottom margin for this row with the arguments
 			$css->add_row_css($post_id, $gi, '', array(
 				'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
