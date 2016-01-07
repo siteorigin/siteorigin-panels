@@ -326,7 +326,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% if( dialogType == 'create' ) { %}}
 				<input type="button" class="button-primary so-insert" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" />
 			{{% } else { %}}
-				<input type="button" class="button-primary so-save" value="<?php esc_attr_e('Save', 'siteorigin-panels') ?>" />
+				<input type="button" class="button-primary so-save" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
 			{{% } %}}
 		</div>
 
