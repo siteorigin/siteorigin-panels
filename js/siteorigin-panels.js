@@ -1928,7 +1928,7 @@ String.prototype.panelsProcessTemplate = function(){
         handleContentChange: function(){
 
             // Make sure we actually need to copy content.
-            if( this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0) {
+            if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0 ) {
 
                 // We're going to create a copy of page builder content into the post content
                 $.post(
