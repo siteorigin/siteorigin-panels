@@ -2799,6 +2799,7 @@ String.prototype.panelsProcessTemplate = function(){
         sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
         dialogClass : 'so-panels-dialog-edit-widget',
         widgetView : false,
+        savingWidget: false,
 
         events: {
             'click .so-close': 'saveHistory',
@@ -2811,7 +2812,8 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         initializeDialog: function(){
-            this.model.on('destroy', this.remove, this);
+            this.model.on( 'change:values', this.handleChangeValues, this );
+            this.model.on( 'destroy', this.remove, this );
         },
 
         /**
@@ -2936,6 +2938,7 @@ String.prototype.panelsProcessTemplate = function(){
          */
         saveWidget: function(){
             // Get the values from the form and assign the new values to the model
+            this.savingWidget = true;
 
             if( !this.model.get('missing') ) {
                 // Only get the values for non missing widgets.
@@ -2962,13 +2965,35 @@ String.prototype.panelsProcessTemplate = function(){
                 }
                 this.model.set('style', style);
             }
+
+            this.savingWidget = false;
         },
 
+        /**
+         *
+         */
+        handleChangeValues: function(){
+            console.log('Handle Change');
+            if( !this.savingWidget ) {
+                // Reload the form when we've changed the model and we're not currently saving from the form
+                console.log('Load the form');
+                this.loadForm();
+            }
+        },
+
+        /**
+         * Save a history entry for this widget. Called when the dialog is closed.
+         */
         saveHistory: function(){
             this.builder.addHistoryEntry('widget_edited');
             this.closeDialog();
         },
 
+        /**
+         * When the user clicks delete.
+         *
+         * @returns {boolean}
+         */
         deleteHandler: function(){
 
             if(this.builder.liveEditor.displayed) {
