@@ -1781,6 +1781,76 @@ module.exports = panels.view.dialog.extend( {
     }
 } );
 },{}],11:[function(require,module,exports){
+var panels = window.panels, $ = jQuery;
+
+module.exports = function () {
+
+    return this.each(function(){
+        var $$ = $(this);
+        var widgetId = $$.closest('form').find('.widget-id').val();
+
+        // Exit if this isn't a real widget
+        if( typeof widgetId !== 'undefined' && widgetId.indexOf('__i__') > -1 ) {
+            return;
+        }
+
+        // Create the main builder model
+        var builderModel = new panels.model.builder();
+
+        // Now for the view to display the builder
+        var builderView = new panels.view.builder( {
+            model: builderModel
+        } );
+
+        // Save panels data when we close the dialog, if we're in a dialog
+        var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
+        if( typeof dialog !== 'undefined' ) {
+            dialog.on('close_dialog', function(){
+                builderModel.refreshPanelsData();
+            } );
+
+            dialog.on('open_dialog_complete', function(){
+                // Make sure the new layout widget is always properly setup
+                builderView.trigger('builder_resize');
+            });
+
+            dialog.model.on('destroy', function(){
+                // Destroy the builder
+                builderModel.emptyRows().destroy();
+            } );
+
+            // Set the parent for all the sub dialogs
+            builderView.setDialogParents(panelsOptions.loc.layout_widget, dialog);
+        }
+
+        // Basic setup for the builder
+        var isWidget = Boolean( $$.closest('.widget-content').length );
+        builderView
+            .render()
+            .attach( {
+                container: $$,
+                dialog: isWidget,
+                type: $$.data('type')
+            } )
+            .setDataField( $$.find('input.panels-data') );
+
+        if( isWidget ) {
+            // Set up the dialog opening
+            builderView.setDialogParents(panelsOptions.loc.layout_widget, builderView.dialog);
+            $$.find( '.siteorigin-panels-display-builder').click(function(){
+                builderView.dialog.openDialog();
+            });
+        }
+        else {
+            // Remove the dialog opener button, this is already being displayed in a page builder dialog.
+            $$.find( '.siteorigin-panels-display-builder').parent().remove();
+        }
+
+        // Trigger a global jQuery event after we've setup the builder view
+        $(document).trigger( 'panels_setup', builderView );
+    });
+};
+},{}],12:[function(require,module,exports){
 /**
  * Everything we need for SiteOrigin Page Builder.
  *
@@ -1848,6 +1918,9 @@ panels.dialog.history = require('./dialog/history');
 panels.utils = {}
 panels.utils.menu = require('./utils/menu');
 
+// jQuery Plugins
+jQuery.fn.soPanelsSetupBuilderWidget = require('./jquery/setup-builder-widget');
+
 
 // Set up Page Builder if we're on the main interface
 jQuery( function($){
@@ -1907,86 +1980,6 @@ jQuery( function($){
         // Trigger a global jQuery event after we've setup the builder view. Everything is accessible form there
         $(document).trigger( 'panels_setup', builderView, window.panels );
     }
-} );
-
-// A basic jQuery plugin for setting up a Page Builder widget.
-(function ( $ ) {
-
-    var panels = window.siteoriginPanels;
-
-    /**
-     * jQuery initialization plugin for a builder widget.
-     *
-     *
-     * @returns {*}
-     */
-    $.fn.soPanelsSetupBuilderWidget = function () {
-
-        return this.each(function(){
-            var $$ = $(this);
-            var widgetId = $$.closest('form').find('.widget-id').val();
-
-            // Exit if this isn't a real widget
-            if( typeof widgetId !== 'undefined' && widgetId.indexOf('__i__') > -1 ) {
-                return;
-            }
-
-            // Create the main builder model
-            var builderModel = new panels.model.builder();
-
-            // Now for the view to display the builder
-            var builderView = new panels.view.builder( {
-                model: builderModel
-            } );
-
-            // Save panels data when we close the dialog, if we're in a dialog
-            var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-            if( typeof dialog !== 'undefined' ) {
-                dialog.on('close_dialog', function(){
-                    builderModel.refreshPanelsData();
-                } );
-
-                dialog.on('open_dialog_complete', function(){
-                    // Make sure the new layout widget is always properly setup
-                    builderView.trigger('builder_resize');
-                });
-
-                dialog.model.on('destroy', function(){
-                    // Destroy the builder
-                    builderModel.emptyRows().destroy();
-                } );
-
-                // Set the parent for all the sub dialogs
-                builderView.setDialogParents(panelsOptions.loc.layout_widget, dialog);
-            }
-
-            // Basic setup for the builder
-            var isWidget = Boolean( $$.closest('.widget-content').length );
-            builderView
-                .render()
-                .attach( {
-                    container: $$,
-                    dialog: isWidget,
-                    type: $$.data('type')
-                } )
-                .setDataField( $$.find('input.panels-data') );
-
-            if( isWidget ) {
-                // Set up the dialog opening
-                builderView.setDialogParents(panelsOptions.loc.layout_widget, builderView.dialog);
-                $$.find( '.siteorigin-panels-display-builder').click(function(){
-                    builderView.dialog.openDialog();
-                });
-            }
-            else {
-                // Remove the dialog opener button, this is already being displayed in a page builder dialog.
-                $$.find( '.siteorigin-panels-display-builder').parent().remove();
-            }
-
-            // Trigger a global jQuery event after we've setup the builder view
-            $(document).trigger( 'panels_setup', builderView );
-        });
-    };
 
     // Setup new widgets when they're added in the standard widget interface
     $(document).on( 'widget-added', function(e, widget) {
@@ -1999,10 +1992,8 @@ jQuery( function($){
             $('.siteorigin-page-builder-widget').soPanelsSetupBuilderWidget();
         } );
     }
-
-})( jQuery );
-
-},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./model/builder":12,"./model/cell":13,"./model/history-entry":14,"./model/row":15,"./model/widget":16,"./utils/menu":17,"./view/builder":18,"./view/cell":19,"./view/dialog":20,"./view/live-editor":21,"./view/row":22,"./view/styles":23,"./view/widget":24}],12:[function(require,module,exports){
+} );
+},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/menu":18,"./view/builder":19,"./view/cell":20,"./view/dialog":21,"./view/live-editor":22,"./view/row":23,"./view/styles":24,"./view/widget":25}],13:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
     rows: {},
 
@@ -2195,7 +2186,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
     /* A collection of widgets */
     widgets: {},
@@ -2247,7 +2238,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
     defaults: {
         text : '',
@@ -2256,7 +2247,7 @@ module.exports = Backbone.Model.extend( {
         count: 1
     }
 } );
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
     /* A collection of the cells in this row */
     cells: {},
@@ -2388,7 +2379,7 @@ module.exports = Backbone.Model.extend( {
         return clone;
     }
 } );
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Model for an instance of a widget
  */
@@ -2588,7 +2579,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend({
@@ -2872,7 +2863,7 @@ module.exports = Backbone.View.extend({
     }
 
 });
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -3572,7 +3563,7 @@ module.exports = Backbone.View.extend( {
     }
 
 } );
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -3840,7 +3831,7 @@ module.exports = Backbone.View.extend( {
         this.row.buildContextualMenu( e, menu );
     }
 } );
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -4304,7 +4295,7 @@ module.exports = Backbone.View.extend( {
         };
     }
 } );
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -4614,7 +4605,7 @@ module.exports = Backbone.View.extend( {
         return this.$('form.live-editor-form').attr('action') !== '';
     }
 } );
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -4890,7 +4881,7 @@ module.exports = Backbone.View.extend( {
     }
 
 } );
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -5077,7 +5068,7 @@ module.exports = Backbone.View.extend( {
     }
 
 } );
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend({
@@ -5263,4 +5254,4 @@ module.exports = Backbone.View.extend({
     }
 
 });
-},{}]},{},[11]);
+},{}]},{},[12]);
