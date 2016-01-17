@@ -489,7 +489,6 @@ String.prototype.panelsProcessTemplate = function(){
         model: panels.cell,
 
         initialize: function(){
-            this.on('add', this.onAddCell, this);
         },
 
         /**
