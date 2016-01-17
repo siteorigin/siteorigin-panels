@@ -375,6 +375,7 @@ String.prototype.panelsProcessTemplate = function(){
             this.$el.fadeOut('fast', function(){
                 thisView.cell.row.resize();
                 thisView.model.destroy();
+                thisView.remove();
             } );
         },
 
