@@ -33,7 +33,8 @@
 
             // Add in the default args
             args  = _.extend( {
-                builderType : ''
+                builderType : '',
+                widgetClass : this.model.toJSON().class
             }, args );
 
             this.$el.addClass('so-visual-styles');
