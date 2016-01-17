@@ -256,7 +256,6 @@
 
                     var thisWidgetIndex = (widgetIndex++);
                     var getHoverWidget = function(){
-                        // TODO this should target the #pl-x selector
                         return previewFrame.contents()
                             .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .so-panel')
                             .filter(function(){
