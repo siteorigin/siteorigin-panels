@@ -94,7 +94,7 @@ module.exports = panels.view.dialog.extend( {
 
         // Handle loading and selecting
         c.find('.history-entry').click(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             c.find('.history-entry').not($$).removeClass('so-selected');
             $$.addClass('so-selected');
 
@@ -159,7 +159,7 @@ module.exports = panels.view.dialog.extend( {
         var thisView = this;
 
         this.$('.history-entries .history-entry').each(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
 
             var time = $$.find('.timesince');
             var entry = $$.data('historyEntry');

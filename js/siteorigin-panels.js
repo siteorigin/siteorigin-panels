@@ -123,7 +123,7 @@ module.exports = panels.view.dialog.extend( {
 
     render: function(){
         // Render the dialog and attach it to the builder interface
-        this.renderDialog( this.parseDialogContent( jQuery('#siteorigin-panels-dialog-builder').html(), {} ) );
+        this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-builder').html(), {} ) );
         this.$('.so-content .siteorigin-panels-builder').append( this.builder.$el );
     },
 
@@ -235,7 +235,7 @@ module.exports = panels.view.dialog.extend( {
 
         // Handle loading and selecting
         c.find('.history-entry').click(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             c.find('.history-entry').not($$).removeClass('so-selected');
             $$.addClass('so-selected');
 
@@ -300,7 +300,7 @@ module.exports = panels.view.dialog.extend( {
         var thisView = this;
 
         this.$('.history-entries .history-entry').each(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
 
             var time = $$.find('.timesince');
             var entry = $$.data('historyEntry');
@@ -411,7 +411,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function(e){
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
 
-        var $$ = $(e.target);
+        var $$ = jQuery(e.target);
         var tab = $$.attr('href').split('#')[1];
         $$.parent().addClass( 'tab-active' );
 
@@ -618,7 +618,7 @@ module.exports = panels.view.dialog.extend( {
 
         // Handle exporting the file
         c.find('.so-export').submit( function(e){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             $$.find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
         } );
 
@@ -706,7 +706,7 @@ module.exports = panels.view.dialog.extend( {
                 // Handle nice preloading of the screenshots
                 c.find('.so-screenshot').each( function(){
                     // Set the initial height
-                    var $$ = $(this), $a = $$.find('a');
+                    var $$ = jQuery(this), $a = $$.find('a');
                     $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
 
                     var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
@@ -726,7 +726,7 @@ module.exports = panels.view.dialog.extend( {
      */
     directoryClickHandler: function( e ){
         e.preventDefault();
-        var $$ = $(e.currentTarget), thisView = this;
+        var $$ = jQuery(e.currentTarget), thisView = this;
 
         if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
             return false;
@@ -1004,7 +1004,7 @@ module.exports = panels.view.dialog.extend( {
                 thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
 
                 rowPreview.find('.preview-cell-weight').each( function(){
-                    var $$ = $(this).hide();
+                    var $$ = jQuery(this).hide();
                     $('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
                         .val( parseFloat( $$.html() ) ).insertAfter( $$ )
                         .focus( function(){
@@ -1319,7 +1319,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
     builder: null,
-    sidebarWidgetTemplate: _.template( jQuery('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
+    sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
     dialogClass : 'so-panels-dialog-edit-widget',
     widgetView : false,
     savingWidget: false,
@@ -1556,7 +1556,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
     builder: null,
-    widgetTemplate: _.template( jQuery('#siteorigin-panels-dialog-widgets-widget').html().panelsProcessTemplate() ),
+    widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html().panelsProcessTemplate() ),
     filter: {},
 
     dialogClass : 'so-panels-dialog-add-widget',
@@ -1669,7 +1669,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.$el.find('.widget-type-list .widget-type').each(function(){
-            var $$ = $(this), showWidget;
+            var $$ = jQuery(this), showWidget;
             var widgetClass = $$.data('class');
 
             var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
@@ -1786,7 +1786,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = function () {
 
     return this.each(function(){
-        var $$ = $(this);
+        var $$ = jQuery(this);
         var widgetId = $$.closest('form').find('.widget-id').val();
 
         // Exit if this isn't a real widget
@@ -1937,7 +1937,7 @@ jQuery( function($){
     }
     else if( $('.siteorigin-panels-builder-form').length ) {
         // We're dealing with another interface like the custom home page interface
-        var $$ = $('.siteorigin-panels-builder-form');
+        var $$ = jQuery('.siteorigin-panels-builder-form');
         container = $$.find('.siteorigin-panels-builder');
         field = $$.find('input[name="panels_data"]');
         form = $$;
@@ -2564,7 +2564,7 @@ module.exports = Backbone.Model.extend( {
                 values[titleFields[i]] !== '' &&
                 values[titleFields[i]] !== 'on' &&
                 titleFields[i][0] !== '_' &&
-                !jQuery.isNumeric( values[titleFields[i]] )
+                !$.isNumeric( values[titleFields[i]] )
             ) {
                 var title = values[ titleFields[i] ];
                 title = title.replace(/<\/?[^>]+(>|$)/g, "");
@@ -2740,7 +2740,7 @@ module.exports = Backbone.View.extend({
         this.$el.append( section );
 
         section.find('.so-item').click( function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             callback( $$.data('key') );
             thisView.closeMenu();
         } );
@@ -2758,7 +2758,7 @@ module.exports = Backbone.View.extend({
      */
     searchKeyUp: function(e){
         var
-            $$ = $(e.currentTarget),
+            $$ = jQuery(e.currentTarget),
             section = $$.closest('.so-section'),
             settings = section.data('settings');
 
@@ -2867,7 +2867,7 @@ module.exports = Backbone.View.extend({
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
     dialogs: {  },
     rowsSortable: null,
     dataField : false,
@@ -3015,7 +3015,7 @@ module.exports = Backbone.View.extend( {
                     // Switch to the Page Builder interface
                     e.preventDefault();
 
-                    var $$ = $( this );
+                    var $$ = jQuery( this );
 
                     // Hide the standard content editor
                     $( '#wp-content-wrap, #post-status-info' ).hide();
@@ -3567,7 +3567,7 @@ module.exports = Backbone.View.extend( {
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
     events : {
         'click .cell-wrapper' : 'handleCellClick'
     },
@@ -3835,8 +3835,8 @@ module.exports = Backbone.View.extend( {
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    dialogTemplate: _.template( jQuery('#siteorigin-panels-dialog').html().panelsProcessTemplate() ),
-    dialogTabTemplate: _.template( jQuery('#siteorigin-panels-dialog-tab').html().panelsProcessTemplate() ),
+    dialogTemplate: _.template( $('#siteorigin-panels-dialog').html().panelsProcessTemplate() ),
+    dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html().panelsProcessTemplate() ),
 
     tabbed: false,
     rendered: false,
@@ -3923,7 +3923,7 @@ module.exports = Backbone.View.extend( {
         args = _.extend({cid: this.cid}, args);
 
 
-        var c = jQuery( ( _.template( html.panelsProcessTemplate() ) )( args ) );
+        var c = $( ( _.template( html.panelsProcessTemplate() ) )( args ) );
         var r = {
             title : c.find('.title').html(),
             buttons : c.find('.buttons').html(),
@@ -4087,8 +4087,8 @@ module.exports = Backbone.View.extend( {
 
         if( !$('.so-panels-dialog-wrapper').is(':visible') ){
             // Restore scrolling to the main body if there are no more dialogs
-            jQuery('body').css({'overflow':'auto'});
-            jQuery('body').scrollTop( this.bodyScrollTop );
+            $('body').css({'overflow':'auto'});
+            $('body').scrollTop( this.bodyScrollTop );
         }
 
         // Stop listen for keyboard keypresses.
@@ -4106,7 +4106,7 @@ module.exports = Backbone.View.extend( {
     keyboardListen: function(e) {
         // [Esc] to close
         if (e.which === 27) {
-            jQuery('.so-panels-dialog-wrapper .so-close').trigger('click');
+            $('.so-panels-dialog-wrapper .so-close').trigger('click');
         }
     },
 
@@ -4219,7 +4219,7 @@ module.exports = Backbone.View.extend( {
                 else if( selected.length > 1 ) {
                     // This is a mutli-select field
                     fieldValue = _.map( $$.find('option:selected'), function(n ,i){
-                        return jQuery(n).val();
+                        return $(n).val();
                     } );
                 }
 
@@ -4299,9 +4299,9 @@ module.exports = Backbone.View.extend( {
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
 
-    sectionTemplate: _.template( jQuery('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
+    sectionTemplate: _.template( $('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
 
     postId: false,
     bodyScrollTop : null,
@@ -4329,7 +4329,7 @@ module.exports = Backbone.View.extend( {
             .load(function(){
                 $(this).show();
 
-                var ifc = jQuery(this).contents();
+                var ifc = $(this).contents();
 
                 // Lets find all the first level grids. This is to account for the Page Builder layout widget.
                 ifc.find('.panel-grid .panel-grid-cell .so-panel')
@@ -4399,7 +4399,7 @@ module.exports = Backbone.View.extend( {
         this.refreshPreview();
 
         // Disable page scrolling
-        this.bodyScrollTop = jQuery('body').scrollTop();
+        this.bodyScrollTop = $('body').scrollTop();
         $('body').css( {overflow:'hidden'} );
 
         this.displayed = true;
@@ -4609,7 +4609,7 @@ module.exports = Backbone.View.extend( {
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
 
     events: {
         'click .so-row-settings' : 'editSettingsHandler',
@@ -4753,11 +4753,11 @@ module.exports = Backbone.View.extend( {
      * Handles deleting the row with a confirmation.
      */
     confirmedDeleteHandler: function(e){
-        var $$ = $(e.target);
+        var $$ = jQuery(e.target);
 
         // The user clicked on the dashicon
         if( $$.hasClass('dashicons') ) {
-            $$ = $$.parent();
+            $$ = jQuery$.parent();
         }
 
         if( $$.hasClass('so-confirmed') ) {
@@ -4963,7 +4963,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up the color fields
         if(typeof $.fn.wpColorPicker !== 'undefined') {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !jQuery.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);
@@ -5030,7 +5030,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up all the measurement fields
         this.$('.style-field-measurement').each(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
 
             var text = $$.find('input[type="text"]');
             var unit = $$.find('select');
@@ -5072,7 +5072,7 @@ module.exports = Backbone.View.extend( {
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend({
-    template: _.template( jQuery('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
 
     // The cell view that this widget belongs to
     cell: null,

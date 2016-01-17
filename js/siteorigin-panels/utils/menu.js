@@ -158,7 +158,7 @@ module.exports = Backbone.View.extend({
         this.$el.append( section );
 
         section.find('.so-item').click( function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             callback( $$.data('key') );
             thisView.closeMenu();
         } );
@@ -176,7 +176,7 @@ module.exports = Backbone.View.extend({
      */
     searchKeyUp: function(e){
         var
-            $$ = $(e.currentTarget),
+            $$ = jQuery(e.currentTarget),
             section = $$.closest('.so-section'),
             settings = section.data('settings');
 

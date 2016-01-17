@@ -1,9 +1,9 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
 
-    sectionTemplate: _.template( jQuery('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
+    sectionTemplate: _.template( $('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
 
     postId: false,
     bodyScrollTop : null,
@@ -31,7 +31,7 @@ module.exports = Backbone.View.extend( {
             .load(function(){
                 $(this).show();
 
-                var ifc = jQuery(this).contents();
+                var ifc = $(this).contents();
 
                 // Lets find all the first level grids. This is to account for the Page Builder layout widget.
                 ifc.find('.panel-grid .panel-grid-cell .so-panel')
@@ -101,7 +101,7 @@ module.exports = Backbone.View.extend( {
         this.refreshPreview();
 
         // Disable page scrolling
-        this.bodyScrollTop = jQuery('body').scrollTop();
+        this.bodyScrollTop = $('body').scrollTop();
         $('body').css( {overflow:'hidden'} );
 
         this.displayed = true;

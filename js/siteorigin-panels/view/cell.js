@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
     events : {
         'click .cell-wrapper' : 'handleCellClick'
     },

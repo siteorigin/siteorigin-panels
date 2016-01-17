@@ -5,7 +5,7 @@ module.exports = panels.view.dialog.extend( {
 
     render: function(){
         // Render the dialog and attach it to the builder interface
-        this.renderDialog( this.parseDialogContent( jQuery('#siteorigin-panels-dialog-builder').html(), {} ) );
+        this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-builder').html(), {} ) );
         this.$('.so-content .siteorigin-panels-builder').append( this.builder.$el );
     },
 

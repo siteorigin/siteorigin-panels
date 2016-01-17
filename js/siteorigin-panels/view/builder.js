@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
     dialogs: {  },
     rowsSortable: null,
     dataField : false,
@@ -149,7 +149,7 @@ module.exports = Backbone.View.extend( {
                     // Switch to the Page Builder interface
                     e.preventDefault();
 
-                    var $$ = $( this );
+                    var $$ = jQuery( this );
 
                     // Hide the standard content editor
                     $( '#wp-content-wrap, #post-status-info' ).hide();
