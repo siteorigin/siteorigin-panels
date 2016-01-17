@@ -261,25 +261,14 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 	if ( $force || siteorigin_panels_is_admin_page() ) {
 		// Media is required for row styles
 		wp_enqueue_media();
-
 		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
-		wp_enqueue_script( 'so-panels-admin-utils', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-utils' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
-		wp_enqueue_script( 'so-panels-admin-styles', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-styles' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION, true );
-
-		if( $screen->base != 'widgets' && $screen->base != 'customize' ) {
-			// We don't use the history browser and live editor in the widgets interface
-			wp_enqueue_script( 'so-panels-admin-history', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-history' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
-			wp_enqueue_script( 'so-panels-admin-live-editor', plugin_dir_url(__FILE__) . 'js/siteorigin-panels-live-editor' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'so-panels-admin', 'jquery', 'underscore', 'backbone' ), SITEORIGIN_PANELS_VERSION, true );
-		}
-
 		add_action( 'admin_footer', 'siteorigin_panels_js_templates' );
 
 		$widgets = siteorigin_panels_get_widgets();
 
-
 		$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
 
-		wp_localize_script( 'so-panels-admin', 'soPanelsOptions', array(
+		wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 			'ajaxurl' => wp_nonce_url( admin_url('admin-ajax.php'), 'panels_action', '_panelsnonce' ),
 			'widgets' => $widgets,
 			'widget_dialog_tabs' => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
