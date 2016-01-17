@@ -511,8 +511,7 @@ String.prototype.panelsProcessTemplate = function(){
     panels.view.cell = Backbone.View.extend( {
         template: _.template( $('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
         events : {
-            'click .cell-wrapper' : 'handleCellClick',
-            'click .so-cell-actions a' : 'handleActionClick'
+            'click .cell-wrapper' : 'handleCellClick'
         },
 
         /* The row view that this cell is a part of */
@@ -731,12 +730,14 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Handle an action click on this cell
+         * Handle this cell being clicked on
          *
          * @param e
          * @returns {boolean}
          */
-        handleActionClick : function(e){
+        handleCellClick : function(e){
+            var cells = this.$el.closest('.so-rows-container').find('.so-cells .cell').removeClass('cell-selected');
+            $(e.target).parent().addClass('cell-selected');
             return false;
         },
 
@@ -1423,8 +1424,6 @@ String.prototype.panelsProcessTemplate = function(){
             'click .so-tool-button.so-prebuilt-add': 'displayAddPrebuiltDialog',
             'click .so-tool-button.so-history': 'displayHistoryDialog',
             'click .so-tool-button.so-live-editor': 'displayLiveEditor',
-
-            'click .so-cells .cell .cell-wrapper' : 'cellClickHandler'
         },
 
         /* A row collection */
@@ -1769,11 +1768,6 @@ String.prototype.panelsProcessTemplate = function(){
         displayHistoryDialog: function(){
             this.dialogs.history.openDialog();
             return false;
-        },
-
-        cellClickHandler: function(e){
-            var cells = this.$el.find('.so-cells .cell').removeClass('cell-selected');
-            $(e.target).parent().addClass('cell-selected');
         },
 
         /**
