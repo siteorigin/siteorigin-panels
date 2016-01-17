@@ -2895,9 +2895,15 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Load the widget form from the server
+         * Load the widget form from the server.
+         * This is called when rendering the dialog for the first time.
          */
         loadForm: function(){
+            // don't load the form if this dialog hasn't been rendered yet
+            if( this.$el.find('> *').length == 0 ) {
+                return;
+            }
+
             var thisView = this;
             this.$el.find('.so-content').addClass('so-panels-loading');
 
