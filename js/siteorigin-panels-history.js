@@ -126,7 +126,7 @@
         },
 
         /**
-         * Set the origianl entry. This should be set when creating the dialog.
+         * Set the original entry. This should be set when creating the dialog.
          *
          * @param {panels.model.builder} builder
          */
@@ -152,15 +152,13 @@
         },
 
         /**
-         * Render the history entries
+         * Render the history entries in the sidebar
          */
         renderHistoryEntries: function(){
-            var c = this.$('.history-entries');
-
             // Set up an interval that will display the time since every 10 seconds
             var thisView = this;
 
-            c.empty();
+            var c = this.$('.history-entries').empty();
 
             if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
                 $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))

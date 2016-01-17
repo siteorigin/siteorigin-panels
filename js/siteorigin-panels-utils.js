@@ -36,6 +36,9 @@
             this.attach();
         },
 
+        /**
+         * Listen for the right click context menu
+         */
         listenContextMenu: function(){
             var thisView = this;
 
@@ -77,6 +80,11 @@
             this.$el.appendTo('body');
         },
 
+        /**
+         * Display the actual context menu.
+         *
+         * @param position
+         */
         openMenu: function( position ){
             this.trigger('open_menu');
 
@@ -132,6 +140,10 @@
             }
         },
 
+        /**
+         * Listen for a click outside the menu to close it.
+         * @param e
+         */
         clickOutsideListen: function(e){
             var menu = e.data.menu;
             if( e.which !== 3 && menu.$el.is(':visible') && !menu.isOverEl( menu.$el, e ) ) {
@@ -172,6 +184,12 @@
             this.active = true;
         },
 
+        /**
+         * Handle searching inside a section.
+         *
+         * @param e
+         * @returns {boolean}
+         */
         searchKeyUp: function(e){
             var
                 $$ = $(e.currentTarget),

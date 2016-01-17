@@ -293,6 +293,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 			) ),
 			'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 			'directory_enabled' => !empty( $directory_enabled ),
+			'copy_content' => siteorigin_panels_setting( 'copy-content' ),
 
 			// Settings for the contextual menu
 			'contextual' => array(

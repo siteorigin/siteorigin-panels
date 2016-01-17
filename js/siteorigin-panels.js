@@ -23,6 +23,10 @@ String.prototype.panelsProcessTemplate = function(){
 
 ( function( $, _, panelsOptions ){
 
+    /**
+     * The main SiteOrigin Panels object
+     * @type {{model: {}, collection: {}, view: {}, dialog: {}, fn: {}}}
+     */
     var panels = {
         model : { },
         collection : { },
@@ -30,7 +34,6 @@ String.prototype.panelsProcessTemplate = function(){
         dialog : { },
         fn : { }
     };
-
     window.panels = panels;
 
     /**
@@ -44,7 +47,7 @@ String.prototype.panelsProcessTemplate = function(){
             // The PHP Class of the widget
             class : null,
 
-            // Is this class missing?
+            // Is this class missing? Missing widgets are a special case.
             missing : false,
 
             // The values of the widget
@@ -83,7 +86,7 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Move this widget model to a new cell
+         * Move this widget model to a new cell. Called by the views.
          *
          * @param panels.model.cell newCell
          *
@@ -140,7 +143,7 @@ String.prototype.panelsProcessTemplate = function(){
         /**
          * Create a clone of this widget attached to the given cell.
          *
-         * @param {panels.model.cell} cell
+         * @param {panels.model.cell} cell The cell model we're attaching this widget clone to.
          * @returns {panels.model.widget}
          */
         clone: function( cell, options ){
@@ -174,7 +177,10 @@ String.prototype.panelsProcessTemplate = function(){
             clone.set( 'values', cloneValues, { silent: true } );
             clone.set( 'collection', cell.widgets, { silent: true } );
             clone.cell = cell;
+
+            // This is used to force a form reload later on
             clone.isDuplicate = true;
+
             return clone;
         },
 
@@ -236,9 +242,10 @@ String.prototype.panelsProcessTemplate = function(){
     panels.view.widget = Backbone.View.extend({
         template: _.template( $('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
 
-        // The cell view that
+        // The cell view that this widget belongs to
         cell: null,
 
+        // The edit dialog
         dialog: null,
 
         events: {
@@ -253,8 +260,8 @@ String.prototype.panelsProcessTemplate = function(){
          */
         initialize: function(){
             // The 2 user actions on the model that this view will handle.
-            this.model.on('user_edit', this.editHandler, this);
-            this.model.on('user_duplicate', this.duplicateHandler, this);
+            this.model.on('user_edit', this.editHandler, this);                 // When a user wants to edit the widget model
+            this.model.on('user_duplicate', this.duplicateHandler, this);       // When a user wants to duplicate the widget model
             this.model.on('destroy', this.onModelDestroy, this);
             this.model.on('visual_destroy', this.visualDestroyModel, this);
 
@@ -375,6 +382,7 @@ String.prototype.panelsProcessTemplate = function(){
             this.$el.fadeOut('fast', function(){
                 thisView.cell.row.resize();
                 thisView.model.destroy();
+                thisView.remove();
             } );
         },
 
@@ -488,7 +496,6 @@ String.prototype.panelsProcessTemplate = function(){
         model: panels.cell,
 
         initialize: function(){
-            this.on('add', this.onAddCell, this);
         },
 
         /**
@@ -511,8 +518,7 @@ String.prototype.panelsProcessTemplate = function(){
     panels.view.cell = Backbone.View.extend( {
         template: _.template( $('#siteorigin-panels-builder-cell').html().panelsProcessTemplate() ),
         events : {
-            'click .cell-wrapper' : 'handleCellClick',
-            'click .so-cell-actions a' : 'handleActionClick'
+            'click .cell-wrapper' : 'handleCellClick'
         },
 
         /* The row view that this cell is a part of */
@@ -555,6 +561,7 @@ String.prototype.panelsProcessTemplate = function(){
         initSortable: function(){
             var cellView = this;
 
+            // Go up the view heirarchy until we find the ID attribute
             var builderID = cellView.row.builder.$el.attr('id');
 
             // Create a widget sortable that's connected with all other cells
@@ -731,12 +738,14 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Handle an action click on this cell
+         * Handle this cell being clicked on
          *
          * @param e
          * @returns {boolean}
          */
-        handleActionClick : function(e){
+        handleCellClick : function(e){
+            var cells = this.$el.closest('.so-rows-container').find('.so-cells .cell').removeClass('cell-selected');
+            $(e.target).parent().addClass('cell-selected');
             return false;
         },
 
@@ -1205,7 +1214,7 @@ String.prototype.panelsProcessTemplate = function(){
     } );
 
     /**
-     * The builder model
+     * The model that oversees the entire Page Builder interface.
      */
     panels.model.builder = Backbone.Model.extend( {
         rows: {},
@@ -1422,9 +1431,7 @@ String.prototype.panelsProcessTemplate = function(){
             'click .so-tool-button.so-row-add': 'displayAddRowDialog',
             'click .so-tool-button.so-prebuilt-add': 'displayAddPrebuiltDialog',
             'click .so-tool-button.so-history': 'displayHistoryDialog',
-            'click .so-tool-button.so-live-editor': 'displayLiveEditor',
-
-            'click .so-cells .cell .cell-wrapper' : 'cellClickHandler'
+            'click .so-tool-button.so-live-editor': 'displayLiveEditor'
         },
 
         /* A row collection */
@@ -1524,7 +1531,7 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * This will move the Page Builder Metabox into the editor
+         * This will move the Page Builder meta box into the editor
          *
          * @returns {panels.view.builder}
          */
@@ -1723,6 +1730,13 @@ String.prototype.panelsProcessTemplate = function(){
             }
         },
 
+        /**
+         * HAndle the visual side of adding a new row to the builder.
+         *
+         * @param row
+         * @param collection
+         * @param options
+         */
         onAddRow: function(row, collection, options){
             options = _.extend( {noAnimate: false}, options );
             // Create a view for the row
@@ -1750,30 +1764,45 @@ String.prototype.panelsProcessTemplate = function(){
             rowView.resize();
         },
 
+        /**
+         * Display the dialog to add a new widget.
+         *
+         * @returns {boolean}
+         */
         displayAddWidgetDialog: function(){
             this.dialogs.widgets.openDialog();
             return false;
         },
 
+        /**
+         * Display the dialog to add a new row.
+         *
+         * @returns {boolean}
+         */
         displayAddRowDialog: function(){
             this.dialogs.row.openDialog();
             this.dialogs.row.setRowModel(); // Set this to an empty row model
             return false;
         },
 
+        /**
+         * Display the dialog to add prebuilt layouts.
+         *
+         * @returns {boolean}
+         */
         displayAddPrebuiltDialog: function(){
             this.dialogs.prebuilt.openDialog();
             return false;
         },
 
+        /**
+         * Display the history dialog.
+         *
+         * @returns {boolean}
+         */
         displayHistoryDialog: function(){
             this.dialogs.history.openDialog();
             return false;
-        },
-
-        cellClickHandler: function(e){
-            var cells = this.$el.find('.so-cells .cell').removeClass('cell-selected');
-            $(e.target).parent().addClass('cell-selected');
         },
 
         /**
@@ -1928,7 +1957,7 @@ String.prototype.panelsProcessTemplate = function(){
         handleContentChange: function(){
 
             // Make sure we actually need to copy content.
-            if( this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0) {
+            if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0 ) {
 
                 // We're going to create a copy of page builder content into the post content
                 $.post(
@@ -1990,7 +2019,7 @@ String.prototype.panelsProcessTemplate = function(){
             }
 
             if( _.isEmpty( this.model.get('data') ) && editorContent !== '') {
-                // Confirm with the user first
+                // Confirm that the user wants to copy their content to Page Builder.
                 if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
                 var widgetClass = '';
@@ -2043,6 +2072,9 @@ String.prototype.panelsProcessTemplate = function(){
             }, this);
         },
 
+        /**
+         * This shows or hides the welcome display depending on whether there are any rows in the collection.
+         */
         toggleWelcomeDisplay: function(){
             if( this.model.rows.length ) {
                 this.$('.so-panels-welcome-message').hide();
@@ -2070,6 +2102,7 @@ String.prototype.panelsProcessTemplate = function(){
 
                 var activeView = over.last().data('view');
                 if( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
+                    // We'll pass this to the current active view so it can popular the contextual menu
                     activeView.buildContextualMenu( e, menu );
                 }
             }
@@ -2568,7 +2601,7 @@ String.prototype.panelsProcessTemplate = function(){
     } );
 
     /**
-     * The dialog for selecting a widget to add to the page
+     * The dialog for selecting a widget to add to the builder
      */
     panels.dialog.widgets = panels.view.dialog.extend( {
 
@@ -2805,6 +2838,7 @@ String.prototype.panelsProcessTemplate = function(){
         sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
         dialogClass : 'so-panels-dialog-edit-widget',
         widgetView : false,
+        savingWidget: false,
 
         events: {
             'click .so-close': 'saveHistory',
@@ -2817,7 +2851,8 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         initializeDialog: function(){
-            this.model.on('destroy', this.remove, this);
+            this.model.on( 'change:values', this.handleChangeValues, this );
+            this.model.on( 'destroy', this.remove, this );
         },
 
         /**
@@ -2899,9 +2934,15 @@ String.prototype.panelsProcessTemplate = function(){
         },
 
         /**
-         * Load the widget form from the server
+         * Load the widget form from the server.
+         * This is called when rendering the dialog for the first time.
          */
         loadForm: function(){
+            // don't load the form if this dialog hasn't been rendered yet
+            if( !this.$el.find('> *').length ) {
+                return;
+            }
+
             var thisView = this;
             this.$el.find('.so-content').addClass('so-panels-loading');
 
@@ -2942,6 +2983,7 @@ String.prototype.panelsProcessTemplate = function(){
          */
         saveWidget: function(){
             // Get the values from the form and assign the new values to the model
+            this.savingWidget = true;
 
             if( !this.model.get('missing') ) {
                 // Only get the values for non missing widgets.
@@ -2968,13 +3010,33 @@ String.prototype.panelsProcessTemplate = function(){
                 }
                 this.model.set('style', style);
             }
+
+            this.savingWidget = false;
         },
 
+        /**
+         *
+         */
+        handleChangeValues: function(){
+            if( !this.savingWidget ) {
+                // Reload the form when we've changed the model and we're not currently saving from the form
+                this.loadForm();
+            }
+        },
+
+        /**
+         * Save a history entry for this widget. Called when the dialog is closed.
+         */
         saveHistory: function(){
             this.builder.addHistoryEntry('widget_edited');
             this.closeDialog();
         },
 
+        /**
+         * When the user clicks delete.
+         *
+         * @returns {boolean}
+         */
         deleteHandler: function(){
 
             if(this.builder.liveEditor.displayed) {
@@ -3961,7 +4023,7 @@ String.prototype.panelsProcessTemplate = function(){
 
     } );
 
-    // Return the SiteOrigin Panels app
+    // Make the SiteOrigin Panels app global for other components
     window.siteoriginPanels = panels;
 
 } )( jQuery, _, soPanelsOptions );
@@ -4031,6 +4093,12 @@ jQuery( function($){
 
     var panels = window.siteoriginPanels;
 
+    /**
+     * jQuery initialization plugin for a builder widget.
+     *
+     *
+     * @returns {*}
+     */
     $.fn.soPanelsSetupBuilderWidget = function () {
 
         return this.each(function(){

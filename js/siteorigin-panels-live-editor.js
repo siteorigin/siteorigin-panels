@@ -48,7 +48,7 @@
                     var ifc = $(this).contents();
 
                     // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-                    ifc.find('.panel-grid .panel-grid-cell .so-panel.widget')
+                    ifc.find('.panel-grid .panel-grid-cell .so-panel')
                         .filter(function(){
                             // Filter to only include non nested
                             return $(this).parents('.widget_siteorigin-panels-builder').length == 0;
@@ -256,9 +256,8 @@
 
                     var thisWidgetIndex = (widgetIndex++);
                     var getHoverWidget = function(){
-                        // TODO this should target the #pl-x selector
                         return previewFrame.contents()
-                            .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .widget')
+                            .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .so-panel')
                             .filter(function(){
                                 // Filter to only include non nested
                                 return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
