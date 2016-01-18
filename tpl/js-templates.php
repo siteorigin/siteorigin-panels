@@ -477,10 +477,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-history-iframe-{{%= cid ?>" class="history-form">
+			<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
 				<input type="hidden" name="siteorigin_panels_data" value="">
 			</form>
-			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid ?>" src=""></iframe>
+			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid %}}" src=""></iframe>
 		</div>
 
 		<div class="buttons">
