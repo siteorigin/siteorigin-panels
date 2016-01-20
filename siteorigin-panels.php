@@ -735,11 +735,14 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			));
 		}
 
+
+		$collapse_order = !empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
+
 		if ( $cell_count > 1 ) {
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css( $post_id, $gi, false, '', array(
 				// Float right for RTL
-				'float' => !is_rtl() ? 'left' : 'right'
-			));
+				'float' => $collapse_order == 'left-top' ? 'left' : 'right'
+			) );
 		}
 
 		if ( $settings['responsive'] ) {
@@ -750,7 +753,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			), $panels_mobile_width);
 
 			for ( $i = 0; $i < $cell_count; $i++ ) {
-				if ( $i != $cell_count - 1 ) {
+				if ( ( $collapse_order == 'left-top' && $i != $cell_count - 1 ) || $collapse_order == 'right-top' &&  $i != 0 ) {
 					$css->add_cell_css($post_id, $gi, $i, '', array(
 						'margin-bottom' => $panels_margin_bottom . 'px',
 					), $panels_mobile_width);
@@ -917,6 +920,26 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 	if( empty( $panels_data ) || empty( $panels_data['grids'] ) ) return '';
 
+	// Filter the widgets to add indexes
+	if ( !empty( $panels_data['widgets'] ) ) {
+		$last_gi = 0;
+		$last_ci = 0;
+		$last_wi = 0;
+		foreach ( $panels_data['widgets'] as $wid => &$widget_info ) {
+
+			if ( $widget_info['panels_info']['grid'] != $last_gi ) {
+				$last_gi = $widget_info['panels_info']['grid'];
+				$last_ci = 0;
+				$last_wi = 0;
+			}
+			elseif ( $widget_info['panels_info']['cell'] != $last_ci ) {
+				$last_ci = $widget_info['panels_info']['cell'];
+				$last_wi = 0;
+			}
+			$widget_info['panels_info']['cell_index'] = $last_wi++;
+		}
+	}
+
 	if( is_rtl() ) $panels_data = siteorigin_panels_make_rtl( $panels_data );
 
 	// Create the skeleton of the grids
@@ -999,6 +1022,12 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		// Themes can add their own attributes to the style wrapper
 		$row_style_wrapper = siteorigin_panels_start_style_wrapper( 'row', $style_attributes, !empty($panels_data['grids'][$gi]['style']) ? $panels_data['grids'][$gi]['style'] : array() );
 		if( !empty($row_style_wrapper) ) echo $row_style_wrapper;
+
+		$collapse_order = !empty( $panels_data['grids'][$gi]['style']['collapse_order'] ) ? $panels_data['grids'][$gi]['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
+
+		if( $collapse_order == 'right-top' ) {
+			$cells = array_reverse( $cells, true );
+		}
 
 		foreach ( $cells as $ci => $widgets ) {
 			// Themes can add their own styles to cells
@@ -1354,35 +1383,6 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 
 	// Add all the information fields
 	return $form;
-}
-
-/**
- * This takes existing Page Builder data and makes it RTL by reversing the content
- */
-function siteorigin_panels_make_rtl($panels_data){
-
-	// To start, we need a cell count for every row
-	foreach($panels_data['widgets'] as &$widget) {
-		// This reverses the cells of the widgets
-		$count = $panels_data['grids'][ $widget['panels_info']['grid'] ]['cells'];
-		$widget['panels_info']['cell'] = abs( $widget['panels_info']['cell'] - $count + 1 );
-	}
-
-	// Now we need to swap around the grid cells because we're going to use float right instead.
-	$grid_cells = array();
-	foreach( $panels_data['grid_cells'] as $cell) {
-		if( empty( $grid_cells[ $cell['grid'] ] ) ) $grid_cells[ $cell['grid'] ] = array();
-		array_unshift( $grid_cells[ $cell['grid'] ], $cell );
-	}
-	$new_grid_cells = array();
-	foreach( $grid_cells as $i => $cells ) {
-		foreach($cells as $cell) {
-			$new_grid_cells[] = $cell;
-		}
-	}
-	$panels_data['grid_cells'] = $new_grid_cells;
-
-	return $panels_data;
 }
 
 /**
