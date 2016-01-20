@@ -1969,6 +1969,8 @@ jQuery( function($){
             .addLiveEditor( postId )
             .addHistoryBrowser();
 
+        builderView.handleContentChange();
+
         // When the form is submitted, update the panels data
         form.submit( function(e){
             // Refresh the data
@@ -3435,23 +3437,37 @@ module.exports = Backbone.View.extend( {
                     });
                     content = t.html();
 
-                    // Set the content of the editor
-                    if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-                        $('#content').val( content );
-                    }
-                    else {
-                        tinyMCE.get("content").setContent(content);
-                    }
-
-                    // Trigger a focusout (mainly for Yoast SEO)
-                    $('#content').focusout();
-                }
+                    this.updateEditorContent(content);
+                }.bind(this)
             );
         }
 
         if( this.liveEditor !== false ) {
             // Refresh the content of the builder
             this.liveEditor.refreshPreview();
+        }
+    },
+
+    updateEditorContent:function (content, retry) {
+        retry = retry || 0;
+        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+            // Retry 3 times in case TinyMCE just hasn't loaded properly yet.
+            if(retry < 3) {
+                setTimeout(function(){
+                    this.updateEditorContent(content, ++retry);
+                }.bind(this), 200);
+            } else {
+                var contentArea = $('#content');
+                contentArea.val(content);
+                // Trigger a focusout (mainly for older versions of Yoast SEO)
+                contentArea.focusout();
+            }
+        }
+        else {
+            var contentEd = tinyMCE.get("content");
+            contentEd.setContent(content);
+            // Trigger a change (mainly for newer versions of Yoast SEO) :/
+            contentEd.fire('change');
         }
     },
 
