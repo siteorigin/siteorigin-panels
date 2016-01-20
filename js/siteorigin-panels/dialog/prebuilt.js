@@ -49,7 +49,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function(e){
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
 
-        var $$ = $(e.target);
+        var $$ = jQuery(e.target);
         var tab = $$.attr('href').split('#')[1];
         $$.parent().addClass( 'tab-active' );
 
@@ -256,7 +256,7 @@ module.exports = panels.view.dialog.extend( {
 
         // Handle exporting the file
         c.find('.so-export').submit( function(e){
-            var $$ = $(this);
+            var $$ = jQuery(this);
             $$.find('input[name="panels_export_data"]').val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
         } );
 
@@ -344,7 +344,7 @@ module.exports = panels.view.dialog.extend( {
                 // Handle nice preloading of the screenshots
                 c.find('.so-screenshot').each( function(){
                     // Set the initial height
-                    var $$ = $(this), $a = $$.find('a');
+                    var $$ = jQuery(this), $a = $$.find('a');
                     $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
 
                     var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
@@ -364,7 +364,7 @@ module.exports = panels.view.dialog.extend( {
      */
     directoryClickHandler: function( e ){
         e.preventDefault();
-        var $$ = $(e.currentTarget), thisView = this;
+        var $$ = jQuery(e.currentTarget), thisView = this;
 
         if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
             return false;

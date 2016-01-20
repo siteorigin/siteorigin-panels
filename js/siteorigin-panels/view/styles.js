@@ -79,7 +79,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up the color fields
         if(typeof $.fn.wpColorPicker !== 'undefined') {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !jQuery.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);
@@ -146,7 +146,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up all the measurement fields
         this.$('.style-field-measurement').each(function(){
-            var $$ = $(this);
+            var $$ = jQuery(this);
 
             var text = $$.find('input[type="text"]');
             var unit = $$.find('select');

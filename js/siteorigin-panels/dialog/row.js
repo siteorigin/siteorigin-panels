@@ -229,7 +229,7 @@ module.exports = panels.view.dialog.extend( {
                 thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
 
                 rowPreview.find('.preview-cell-weight').each( function(){
-                    var $$ = $(this).hide();
+                    var $$ = jQuery(this).hide();
                     $('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
                         .val( parseFloat( $$.html() ) ).insertAfter( $$ )
                         .focus( function(){

@@ -3,7 +3,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = function () {
 
     return this.each(function(){
-        var $$ = $(this);
+        var $$ = jQuery(this);
         var widgetId = $$.closest('form').find('.widget-id').val();
 
         // Exit if this isn't a real widget

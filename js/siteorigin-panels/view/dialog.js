@@ -1,8 +1,8 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    dialogTemplate: _.template( jQuery('#siteorigin-panels-dialog').html().panelsProcessTemplate() ),
-    dialogTabTemplate: _.template( jQuery('#siteorigin-panels-dialog-tab').html().panelsProcessTemplate() ),
+    dialogTemplate: _.template( $('#siteorigin-panels-dialog').html().panelsProcessTemplate() ),
+    dialogTabTemplate: _.template( $('#siteorigin-panels-dialog-tab').html().panelsProcessTemplate() ),
 
     tabbed: false,
     rendered: false,
@@ -89,7 +89,7 @@ module.exports = Backbone.View.extend( {
         args = _.extend({cid: this.cid}, args);
 
 
-        var c = jQuery( ( _.template( html.panelsProcessTemplate() ) )( args ) );
+        var c = $( ( _.template( html.panelsProcessTemplate() ) )( args ) );
         var r = {
             title : c.find('.title').html(),
             buttons : c.find('.buttons').html(),
@@ -253,8 +253,8 @@ module.exports = Backbone.View.extend( {
 
         if( !$('.so-panels-dialog-wrapper').is(':visible') ){
             // Restore scrolling to the main body if there are no more dialogs
-            jQuery('body').css({'overflow':'auto'});
-            jQuery('body').scrollTop( this.bodyScrollTop );
+            $('body').css({'overflow':'auto'});
+            $('body').scrollTop( this.bodyScrollTop );
         }
 
         // Stop listen for keyboard keypresses.
@@ -272,7 +272,7 @@ module.exports = Backbone.View.extend( {
     keyboardListen: function(e) {
         // [Esc] to close
         if (e.which === 27) {
-            jQuery('.so-panels-dialog-wrapper .so-close').trigger('click');
+            $('.so-panels-dialog-wrapper .so-close').trigger('click');
         }
     },
 
@@ -385,7 +385,7 @@ module.exports = Backbone.View.extend( {
                 else if( selected.length > 1 ) {
                     // This is a mutli-select field
                     fieldValue = _.map( $$.find('option:selected'), function(n ,i){
-                        return jQuery(n).val();
+                        return $(n).val();
                     } );
                 }
 

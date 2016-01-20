@@ -3,7 +3,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
     builder: null,
-    widgetTemplate: _.template( jQuery('#siteorigin-panels-dialog-widgets-widget').html().panelsProcessTemplate() ),
+    widgetTemplate: _.template( $('#siteorigin-panels-dialog-widgets-widget').html().panelsProcessTemplate() ),
     filter: {},
 
     dialogClass : 'so-panels-dialog-add-widget',
@@ -116,7 +116,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.$el.find('.widget-type-list .widget-type').each(function(){
-            var $$ = $(this), showWidget;
+            var $$ = jQuery(this), showWidget;
             var widgetClass = $$.data('class');
 
             var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;

@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend({
-    template: _.template( jQuery('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-widget').html().panelsProcessTemplate() ),
 
     // The cell view that this widget belongs to
     cell: null,

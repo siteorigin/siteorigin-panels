@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( jQuery('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
+    template: _.template( $('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
 
     events: {
         'click .so-row-settings' : 'editSettingsHandler',
@@ -145,11 +145,11 @@ module.exports = Backbone.View.extend( {
      * Handles deleting the row with a confirmation.
      */
     confirmedDeleteHandler: function(e){
-        var $$ = $(e.target);
+        var $$ = jQuery(e.target);
 
         // The user clicked on the dashicon
         if( $$.hasClass('dashicons') ) {
-            $$ = $$.parent();
+            $$ = jQuery$.parent();
         }
 
         if( $$.hasClass('so-confirmed') ) {
