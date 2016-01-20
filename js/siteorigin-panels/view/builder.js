@@ -569,17 +569,6 @@ module.exports = Backbone.View.extend( {
                     });
                     content = t.html();
 
-                    // Set the content of the editor
-                    if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-                        $('#content').val( content );
-                    }
-                    else {
-                        tinyMCE.get("content").setContent(content);
-                    }
-
-                    // Trigger a focusout (mainly for Yoast SEO)
-                    $('#content').focusout();
-
                     this.updateEditorContent(content);
                 }.bind(this)
             );
