@@ -502,7 +502,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-overlay"></div>
 
-		<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-live-editor-iframe" class="live-editor-form">
+		<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_the_permalink() ) ) ?>" target="siteorigin-panels-live-editor-iframe" class="live-editor-form">
 			<input type="hidden" name="siteorigin_panels_data" value="">
 		</form>
 
