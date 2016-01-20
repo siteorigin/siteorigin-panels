@@ -700,6 +700,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Get some of the default settings
 	$settings = siteorigin_panels_setting();
+	$panels_tablet_width = $settings['tablet-width'];
 	$panels_mobile_width = $settings['mobile-width'];
 	$panels_margin_bottom = $settings['margin-bottom'];
 
@@ -746,6 +747,11 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		}
 
 		if ( $settings['responsive'] ) {
+			// Tablet Responsive
+			$css->add_cell_css($post_id, $gi, false, '', array(
+				'width' => '50%'
+			), $panels_tablet_width);
+
 			// Mobile Responsive
 			$css->add_cell_css($post_id, $gi, false, '', array(
 				'float' => 'none',
@@ -754,6 +760,9 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 			for ( $i = 0; $i < $cell_count; $i++ ) {
 				if ( ( $collapse_order == 'left-top' && $i != $cell_count - 1 ) || $collapse_order == 'right-top' &&  $i != 0 ) {
+					$css->add_cell_css($post_id, $gi, $i, '', array(
+						'margin-bottom' => $panels_margin_bottom . 'px',
+					), $panels_tablet_width);
 					$css->add_cell_css($post_id, $gi, $i, '', array(
 						'margin-bottom' => $panels_margin_bottom . 'px',
 					), $panels_mobile_width);
