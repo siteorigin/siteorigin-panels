@@ -1,0 +1,275 @@
+var panels = window.panels, $ = jQuery;
+
+module.exports = Backbone.View.extend( {
+    template: _.template( jQuery('#siteorigin-panels-builder-row').html().panelsProcessTemplate() ),
+
+    events: {
+        'click .so-row-settings' : 'editSettingsHandler',
+        'click .so-row-duplicate' : 'duplicateHandler',
+        'click .so-row-delete' : 'confirmedDeleteHandler'
+    },
+
+    builder: null,
+    dialog: null,
+
+    /**
+     * Initialize the row view
+     */
+    initialize: function(){
+
+        this.model.cells.on('add', this.handleCellAdd, this);
+        this.model.cells.on('remove', this.handleCellRemove, this);
+        this.model.on('reweight_cells', this.resize, this);
+
+        this.model.on('destroy', this.onModelDestroy, this);
+        this.model.on('visual_destroy', this.visualDestroyModel, this);
+
+        var thisView = this;
+        this.model.cells.each(function(cell){
+            thisView.listenTo(cell.widgets, 'add', thisView.resize);
+        });
+
+        // When ever a new cell is added, listen to it for new widgets
+        this.model.cells.on('add', function(cell){
+            thisView.listenTo(cell.widgets, 'add', thisView.resize);
+        }, this);
+
+    },
+
+    /**
+     * Render the row.
+     *
+     * @returns {panels.view.row}
+     */
+    render: function(){
+        this.setElement( this.template() );
+        this.$el.data('view', this);
+
+        // Create views for the cells in this row
+        var thisView = this;
+        this.model.cells.each( function(cell){
+            var cellView = new panels.view.cell({
+                model: cell
+            });
+            cellView.row = thisView;
+            cellView.render();
+            cellView.$el.appendTo( thisView.$('.so-cells') );
+        } );
+
+        // Resize the rows when ever the widget sortable moves
+        this.builder.on('widget_sortable_move', this.resize, this);
+        this.builder.on('builder_resize', this.resize, this);
+
+        this.resize();
+
+        return this;
+    },
+
+    /**
+     * Give a visual indication of the creation of this row
+     */
+    visualCreate: function(){
+        this.$el.hide().fadeIn('fast');
+    },
+
+    /**
+     * Visually resize the row so that all cell heights are the same and the widths so that they balance to 100%
+     *
+     * @param e
+     */
+    resize: function(e){
+        // Don't resize this
+        if( !this.$el.is(':visible') ) {
+            return false;
+        }
+
+        // Reset everything to have an automatic height
+        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
+
+        // We'll tie the values to the row view, to prevent issue with values going to different rows
+        var height = 0;
+        this.$el.find('.so-cells .cell').each( function () {
+            height = Math.max(
+                height,
+                $(this ).height()
+            );
+
+            $( this ).css( 'width', ( $(this).data('view').model.get('weight') * 100 ) + "%" );
+        } );
+
+        // Resize all the grids and cell wrappers
+        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 70 ) );
+    },
+
+    /**
+     * Remove the view from the dom.
+     */
+    onModelDestroy: function() {
+        this.remove();
+    },
+
+    /**
+     * Fade out the view and destroy the model
+     */
+    visualDestroyModel: function(){
+        this.builder.addHistoryEntry('row_deleted');
+        var thisView = this;
+        this.$el.fadeOut('normal', function(){
+            thisView.model.destroy();
+            thisView.builder.model.refreshPanelsData();
+
+            if(thisView.builder.liveEditor.displayed) {
+                thisView.builder.liveEditor.refreshWidgets();
+            }
+        });
+    },
+
+    /**
+     * Duplicate this row.
+     *
+     * @return {boolean}
+     */
+    duplicateHandler: function(){
+        this.builder.addHistoryEntry('row_duplicated');
+
+        var duplicateRow = this.model.clone( this.builder.model );
+
+        this.builder.model.rows.add( duplicateRow, {
+            at: this.builder.model.rows.indexOf( this.model ) + 1
+        } );
+
+        return false;
+    },
+
+    /**
+     * Handles deleting the row with a confirmation.
+     */
+    confirmedDeleteHandler: function(e){
+        var $$ = $(e.target);
+
+        // The user clicked on the dashicon
+        if( $$.hasClass('dashicons') ) {
+            $$ = $$.parent();
+        }
+
+        if( $$.hasClass('so-confirmed') ) {
+            this.visualDestroyModel();
+        }
+        else {
+            var originalText = $$.html();
+
+            $$.addClass('so-confirmed').html(
+                '<span class="dashicons dashicons-yes"></span>' + panelsOptions.loc.dropdown_confirm
+            );
+
+            setTimeout(function(){
+                $$.removeClass('so-confirmed').html(originalText);
+            }, 2500);
+        }
+
+        return false;
+    },
+
+    /**
+     * Handle displaying the settings dialog
+     */
+    editSettingsHandler: function(){
+        // Lets open up an instance of the settings dialog
+        if( this.dialog === null ) {
+            // Create the dialog
+            this.dialog = new panels.dialog.row();
+            this.dialog.setBuilder( this.builder).setRowModel( this.model );
+        }
+
+        this.dialog.openDialog();
+
+        return false;
+    },
+
+    /**
+     * Handle deleting this entire row.
+     */
+    deleteHandler: function(){
+        this.model.destroy();
+        return false;
+    },
+
+    /**
+     * Handle a new cell being added to this row view. For now we'll assume the new cell is always last
+     */
+    handleCellAdd: function(cell){
+        var cellView = new panels.view.cell({
+            model: cell
+        });
+        cellView.row = this;
+        cellView.render();
+        cellView.$el.appendTo( this.$('.so-cells') );
+    },
+
+    /**
+     * Handle a cell being removed from this row view
+     */
+    handleCellRemove: function(cell){
+        // Find the view that ties in to the cell we're removing
+        this.$el.find('.so-cells > .cell').each( function(){
+            var view = $(this).data('view');
+            if(typeof view === 'undefined') {
+                return false;
+            }
+
+            if( view.model.cid === cell.cid ) {
+                // Remove this view
+                view.remove();
+            }
+        } );
+    },
+
+    /**
+     * Build up the contextual menu for a row
+     *
+     * @param e
+     * @param menu
+     */
+    buildContextualMenu: function( e, menu ) {
+        var thisView = this;
+
+        var options = [];
+        for( var i = 1; i < 5; i++ ) {
+            options.push({
+                title: i + ' ' + panelsOptions.loc.contextual.column
+            });
+        }
+
+        menu.addSection(
+            {
+                sectionTitle: panelsOptions.loc.contextual.add_row,
+                search: false
+            },
+            options,
+            function(c){
+                thisView.builder.addHistoryEntry('row_added');
+
+                var columns = Number(c) + 1;
+                var weights = [];
+                for( var i = 0; i < columns; i++ ) {
+                    weights.push( 100/columns );
+                }
+
+                // Create the actual row
+                var newRow = new panels.model.row( {
+                    collection: thisView.collection
+                } );
+
+                newRow.setCells( weights );
+                newRow.builder = thisView.builder;
+
+                thisView.builder.model.rows.add( newRow, {
+                    at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+                } );
+
+
+            }
+        );
+    }
+
+} );

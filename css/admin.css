@@ -41,12 +41,12 @@
   visibility: visible;
   position: relative;
   border: 1px solid #C0C0C0;
-  background: #f0f0f0;
-  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #f0f0f0), color-stop(1, #f9f9f9));
-  background: -ms-linear-gradient(bottom, #f0f0f0, #f9f9f9);
-  background: -moz-linear-gradient(center bottom, #f0f0f0 0%, #f9f9f9 100%);
-  background: -o-linear-gradient(#f9f9f9, #f0f0f0);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#f0f0f0', GradientType=0);
+  background: #F0F0F0;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #F0F0F0), color-stop(1, #F9F9F9));
+  background: -ms-linear-gradient(bottom, #F0F0F0, #F9F9F9);
+  background: -moz-linear-gradient(center bottom, #F0F0F0 0%, #F9F9F9 100%);
+  background: -o-linear-gradient(#F9F9F9, #F0F0F0);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#F0F0F0', GradientType=0);
   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
   -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
   box-shadow: 0 1px 1px rgba(0,0,0,0.04);
@@ -680,7 +680,7 @@
   top: 30px;
   height: 50px;
   background-color: #fafafa;
-  border-bottom: 1px solid #d8d8d8;
+  border-bottom: 1px solid #D8D8D8;
   /* These are the action buttons in the title bar */
 }
 .so-panels-dialog .so-title-bar h3.so-title {
@@ -781,7 +781,7 @@
   bottom: 30px;
   height: 58px;
   background-color: #fafafa;
-  border-top: 1px solid #d8d8d8;
+  border-top: 1px solid #D8D8D8;
 }
 .so-panels-dialog .so-toolbar .so-status {
   float: left;
@@ -831,7 +831,7 @@
   left: 30px;
   bottom: 30px;
   width: 290px;
-  border-right: 1px solid #d8d8d8;
+  border-right: 1px solid #D8D8D8;
 }
 .so-panels-dialog .so-left-sidebar h4 {
   margin: 0 0 20px 0;
@@ -873,7 +873,7 @@
   right: 30px;
   bottom: 88px;
   width: 290px;
-  border-left: 1px solid #d8d8d8;
+  border-left: 1px solid #D8D8D8;
 }
 .so-panels-dialog .so-right-sidebar h3 {
   color: #333;
