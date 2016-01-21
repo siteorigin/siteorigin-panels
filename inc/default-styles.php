@@ -111,6 +111,18 @@ class SiteOrigin_Panels_Default_Styling {
 			'priority' => 10,
 		);
 
+		$fields['collapse_order'] = array(
+			'name' => __('Collapse Order', 'siteorigin-panels'),
+			'type' => 'select',
+			'group' => 'layout',
+			'options' => array(
+				'' => __('Default', 'siteorigin-panels'),
+				'left-top' => __('Left on Top', 'siteorigin-panels'),
+				'right-top' => __('Right on Top', 'siteorigin-panels'),
+			),
+			'priority' => 15,
+		);
+
 		// How lets add the design fields
 
 		$fields['background'] = array(

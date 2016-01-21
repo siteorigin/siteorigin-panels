@@ -28,7 +28,16 @@ module.exports = {
             'js/**/*.js',
             'settings/**/*.js',
             'widgets/**/*.js',
-            '!{tmp,tmp/**}'       // Ignore tmp/ and contents
+            '!js/siteorigin-panels/**',   // Ignore the SiteOrigin Panels JS, they're handled by Browserify
+            '!{tmp,tmp/**}'                 // Ignore tmp/ and contents
+        ]
+    },
+    browserify : {
+        src: 'js/siteorigin-panels/main.js',
+        dest: 'js/',
+        fileName: 'siteorigin-panels.js',
+        watchFiles: [
+            'js/siteorigin-panels/**',
         ]
     },
     copy: {
@@ -45,7 +54,8 @@ module.exports = {
             '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
             '!package.json',                    // Ignore the package.json file..
             '!readme.txt',                       // Not the readme.txt file. It is copied by the 'version' task.
-            '!readme.md'                        // Ignore the readme.md file. It is for the github repo.
+            '!readme.md',                        // Ignore the readme.md file. It is for the github repo.
+            '!{js/siteorigin-panels,js/siteorigin-panels/**}'
         ]
     }
 };
