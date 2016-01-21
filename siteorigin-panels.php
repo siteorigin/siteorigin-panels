@@ -738,7 +738,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 		if ( $settings['responsive'] ) {
 			// Tablet Responsive
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
 				'width' => '50%'
 			), $panels_tablet_width);
 
