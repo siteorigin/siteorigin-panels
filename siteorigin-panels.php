@@ -730,7 +730,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		$collapse_order = !empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
 
 		if ( $cell_count > 1 ) {
-			$css->add_cell_css($post_id, $gi, false, '', array(
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
 				// Float right for RTL
 				'float' => $collapse_order == 'left-top' ? 'left' : 'right'
 			) );
@@ -750,7 +750,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 			for ( $i = 0; $i < $cell_count; $i++ ) {
 				if ( $i != $cell_count - 1 ) {
-					$css->add_cell_css($post_id, $gi, $i, '', array(
+					$css->add_cell_css($post_id, $grid_id, $i, '', array(
 						'margin-bottom' => $panels_margin_bottom . 'px',
 					), $panels_mobile_width);
 				}
