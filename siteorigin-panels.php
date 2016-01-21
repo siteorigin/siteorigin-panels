@@ -1435,6 +1435,30 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 		}
 	}
 
+	// Process the IDs of the grids
+	if( !empty($panels_data['grids']) && is_array($panels_data['grids']) ) {
+		$unique_grid_ids = array();
+		foreach( $panels_data['grids'] as &$grid ) {
+			// Make sure that the row ID is unique and non-numeric
+			if( !empty( $grid['style']['id'] ) ) {
+				if( is_numeric($grid['style']['id']) ) {
+					$grid['style']['id'] = false;
+				}
+				else if( isset( $unique_grid_ids[ $grid['style']['id'] ] ) ) {
+					$original_id = $grid['style']['id'];
+					$i = 1;
+					do {
+						$grid['style']['id'] = $original_id . '-' . (++$i);
+					} while( isset( $unique_grid_ids[ $grid['style']['id'] ] ) );
+				}
+
+				if( !empty( $grid['style']['id'] ) ) {
+					$unique_grid_ids[ $grid['style']['id'] ] = true;
+				}
+			}
+		}
+	}
+
 	return $panels_data;
 }
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
