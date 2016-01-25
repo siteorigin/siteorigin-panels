@@ -85,13 +85,16 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
 	foreach( $groups as $group_id => $group ) {
 
 		if( empty( $group_counts[$group_id] ) ) continue;
+		
+		$open_style = "display: none";
+		if( isset( $group['open'] ) && $group['open'] ) $open_style = "display: block";
 
 		?>
 		<div class="style-section-wrapper">
 			<div class="style-section-head">
 				<h4><?php echo esc_html($group['name']) ?></h4>
 			</div>
-			<div class="style-section-fields" style="display: none">
+			<div class="style-section-fields" style="<?php echo $open_style ?>">
 				<?php
 				foreach( $fields as $field_id => $field ) {
 					$default = isset($field['default']) ? $field['default'] : false;
