@@ -40,6 +40,14 @@ class SiteOrigin_Panels_Default_Styling {
 	static function row_style_fields($fields) {
 		// Add the attribute fields
 
+		$fields['id'] = array(
+			'name' => __('Row ID', 'siteorigin-panels'),
+			'type' => 'text',
+			'group' => 'attributes',
+			'description' => __('A custom ID used for this row.', 'siteorigin-panels'),
+			'priority' => 4,
+		);
+
 		$fields['class'] = array(
 			'name' => __('Row Class', 'siteorigin-panels'),
 			'type' => 'text',
