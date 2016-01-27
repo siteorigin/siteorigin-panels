@@ -1435,16 +1435,19 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 		}
 	}
 
-	// Process the IDs of the grids
+	// Process the IDs of the grids. Make sure that each is unique.
+
 	if( !empty($panels_data['grids']) && is_array($panels_data['grids']) ) {
 		$unique_grid_ids = array();
 		foreach( $panels_data['grids'] as &$grid ) {
 			// Make sure that the row ID is unique and non-numeric
 			if( !empty( $grid['style']['id'] ) ) {
 				if( is_numeric($grid['style']['id']) ) {
+					// Numeric IDs will cause problems, so we'll ignore them
 					$grid['style']['id'] = false;
 				}
 				else if( isset( $unique_grid_ids[ $grid['style']['id'] ] ) ) {
+					// This ID already exists, so add a suffix to make sure it's unique
 					$original_id = $grid['style']['id'];
 					$i = 1;
 					do {
