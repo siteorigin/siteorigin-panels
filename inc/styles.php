@@ -134,6 +134,7 @@ function siteorigin_panels_style_get_measurements_list() {
 		'ex',
 		'pt',
 		'pc',
+		'rem'
 	);
 
 	// Allow themes and plugins to trim or enhance the list.
