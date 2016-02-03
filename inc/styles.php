@@ -11,8 +11,7 @@ function siteorigin_panels_ajax_action_style_form(){
 	$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
 	$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
 
-	$args = filter_input( INPUT_POST, 'args', FILTER_DEFAULT );
-	$args = json_decode($args, true);
+	$args = !empty( $_POST['args'] ) ? json_decode( $_POST['args'], true) : array();
 
 	switch($type) {
 		case 'row':
