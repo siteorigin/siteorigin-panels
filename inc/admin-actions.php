@@ -240,7 +240,7 @@ function siteorigin_panels_ajax_directory_query(){
 	$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . '/wp-admin/admin-ajax.php?action=query_layouts');
 	$response = wp_remote_get( $url );
 
-	if( $response['response']['code'] == 200 ) {
+	if( is_array($response) && $response['response']['code'] == 200 ) {
 		$results = json_decode( $response['body'] );
 		if ( empty( $results ) ) {
 			$results = array();
@@ -249,11 +249,12 @@ function siteorigin_panels_ajax_directory_query(){
 		// For now, we'll just create a pretend list of items
 		header( 'content-type: application/json' );
 		echo json_encode( $results );
-		wp_die();
 	}
 	else {
 		// Display some sort of error message
+		echo $response->get_error_message();
 	}
+	wp_die();
 }
 add_action('wp_ajax_so_panels_directory_query', 'siteorigin_panels_ajax_directory_query');
 
