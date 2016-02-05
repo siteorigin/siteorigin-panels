@@ -44,6 +44,10 @@ jQuery(function($){
                 'border-right' : 0
             });
         });
+
+        if( $('.siteorigin-panels-stretch.panel-row-style').length ) {
+            $(window).trigger('panelsStretchRows');
+        }
     }
     $(window).resize( stretchFullWidthRows );
     stretchFullWidthRows();
