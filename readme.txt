@@ -95,6 +95,20 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.3 - December 09 2015 =
+* Delete preview panels data if there are no widgets.
+* Added a collapse order field.
+* Added custom row ID field.
+* Fixed copy content setting.
+* Added tablet responsive level.
+* Fixed admin templates.
+* Fix to ensure live editor works with HTTPs admin requests.
+* Fix for Yoast SEO compatibility.
+* Removed use of filter_input for HHVM issues.
+* Added panelsStretchRows event after frontend row stretch event.
+* Minor performance enhancements.
+* Merged all separate JS files into a single Browserify compiled file.
+
 = 2.2.2 - December 09 2015 =
 * Fix tab name for WordPress 4.4. Was displaying undefined.
 * Fix to ensure siteorigin-panels class is added to Page Builder pages.
