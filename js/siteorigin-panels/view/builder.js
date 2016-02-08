@@ -567,7 +567,10 @@ module.exports = Backbone.View.extend( {
                         var c = $(this).contents();
                         $(this).replaceWith(c);
                     });
-                    content = t.html().replace(/[\r\n]+/g, "\n").replace(/\n\s+/g, "\n").trim();
+                    content = t.html()
+                        .replace(/[\r\n]+/g, "\n")
+                        .replace(/\n\s+/g, "\n")
+                        .trim();
 
                     this.updateEditorContent(content);
                 }.bind(this)
@@ -582,21 +585,22 @@ module.exports = Backbone.View.extend( {
 
     /**
      * Update editor content with the given content.
-     * 
+     *
      * @param content
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
         if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
             var contentArea = $('#content');
-            contentArea.val(content).trigger( 'change').trigger( 'keyup' );
+            contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
         }
         else {
             var contentEd = tinyMCE.get("content");
+
             contentEd.setContent(content);
 
-            contentEd.fire('change');
-            contentEd.fire('keyup');
+            contentEd.fire( 'change' );
+            contentEd.fire( 'keyup' );
         }
 
         this.triggerYoastSeoChange();
