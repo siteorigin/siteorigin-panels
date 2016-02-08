@@ -138,7 +138,7 @@ module.exports = Backbone.View.extend( {
             .click(function (e) {
                 e.preventDefault();
                 $( '#wp-content-editor-container, #post-status-info' ).show();
-                metabox.hide();
+                // metabox.hide();
                 $( '#wp-content-wrap' ).removeClass('panels-active');
                 $('#content-resize-handle' ).show();
                 thisView.trigger('hide_builder');
@@ -567,7 +567,7 @@ module.exports = Backbone.View.extend( {
                         var c = $(this).contents();
                         $(this).replaceWith(c);
                     });
-                    content = t.html();
+                    content = t.html().replace(/[\r\n]+/g, "\n").replace(/\n\s+/g, "\n").trim();
 
                     this.updateEditorContent(content);
                 }.bind(this)
@@ -580,26 +580,50 @@ module.exports = Backbone.View.extend( {
         }
     },
 
-    updateEditorContent:function (content, retry) {
-        retry = retry || 0;
+    /**
+     * Update editor content with the given content.
+     * 
+     * @param content
+     */
+    updateEditorContent:function ( content ) {
+        // Switch back to the standard editor
         if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-            // Retry 3 times in case TinyMCE just hasn't loaded properly yet.
-            if(retry < 3) {
-                setTimeout(function(){
-                    this.updateEditorContent(content, ++retry);
-                }.bind(this), 200);
-            } else {
-                var contentArea = $('#content');
-                contentArea.val(content);
-                // Trigger a focusout (mainly for older versions of Yoast SEO)
-                contentArea.focusout();
-            }
+            var contentArea = $('#content');
+            contentArea.val(content).trigger( 'change').trigger( 'keyup' );
         }
         else {
             var contentEd = tinyMCE.get("content");
             contentEd.setContent(content);
-            // Trigger a change (mainly for newer versions of Yoast SEO) :/
+
             contentEd.fire('change');
+            contentEd.fire('keyup');
+        }
+
+        this.triggerYoastSeoChange();
+    },
+
+    /**
+     * Trigger a change on Yoast SEO
+     */
+    triggerYoastSeoChange: function(){
+        if( $('#yoast_wpseo_focuskw_text_input').length ) {
+            var element = document.getElementById( 'yoast_wpseo_focuskw_text_input'), event;
+
+            if (document.createEvent) {
+                event = document.createEvent("HTMLEvents");
+                event.initEvent("keyup", true, true);
+            } else {
+                event = document.createEventObject();
+                event.eventType = "keyup";
+            }
+
+            event.eventName = "keyup";
+
+            if (document.createEvent) {
+                element.dispatchEvent(event);
+            } else {
+                element.fireEvent("on" + event.eventType, event);
+            }
         }
     },
 
