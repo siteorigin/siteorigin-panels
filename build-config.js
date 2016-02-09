@@ -29,7 +29,7 @@ module.exports = {
             'settings/**/*.js',
             'widgets/**/*.js',
             '!js/siteorigin-panels/**',   // Ignore the SiteOrigin Panels JS, they're handled by Browserify
-            '!{tmp,tmp/**}'                 // Ignore tmp/ and contents
+            '!{tmp,tmp/**}'               // Ignore tmp/ and contents
         ]
     },
     browserify : {
@@ -40,6 +40,12 @@ module.exports = {
             'js/siteorigin-panels/**',
         ]
     },
+	bust : {
+		src: [
+			'js/siteorigin-panels.js',
+			'js/styling.js',
+		]
+	},
     copy: {
         src: [
             '**/!(*.js|*.less)',               // Everything except .js and .less files
