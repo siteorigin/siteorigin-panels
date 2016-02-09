@@ -170,11 +170,13 @@ module.exports = Backbone.View.extend( {
         metabox.find('.so-switch-to-standard').click(function(e){
             e.preventDefault();
 
-            if( confirm(panelsOptions.loc.confirm_stop_builder) ) {
-                // User is switching to the standard visual editor
-                thisView.addHistoryEntry( 'back_to_editor' );
-                thisView.model.loadPanelsData( false );
+            if( !confirm(panelsOptions.loc.confirm_stop_builder) ) {
+                return;
             }
+
+            // User is switching to the standard visual editor
+            thisView.addHistoryEntry( 'back_to_editor' );
+            thisView.model.loadPanelsData( false );
 
             // Switch back to the standard editor
             $( '#wp-content-wrap, #post-status-info' ).show();
