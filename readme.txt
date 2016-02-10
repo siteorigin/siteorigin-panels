@@ -108,6 +108,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Added panelsStretchRows event after frontend row stretch event.
 * Minor performance enhancements.
 * Merged all separate JS files into a single Browserify compiled file.
+* Added version numbers to some JS files to ensure cache busting.
 
 = 2.2.2 - December 09 2015 =
 * Fix tab name for WordPress 4.4. Was displaying undefined.
