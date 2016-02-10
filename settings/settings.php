@@ -118,6 +118,7 @@ class SiteOrigin_Panels_Settings {
 
 		// The layout fields
 		$defaults['responsive'] = true;
+		$defaults['tablet-layout'] = false;
 		$defaults['tablet-width'] = 1024;
 		$defaults['mobile-width'] = 780;
 		$defaults['margin-bottom'] = 30;
@@ -240,6 +241,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'checkbox',
 			'label' => __('Responsive Layout', 'siteorigin-panels'),
 			'description' => __('Collapse widgets, rows and columns on mobile devices.', 'siteorigin-panels'),
+		);
+
+		$fields['layout']['fields']['tablet-layout'] = array(
+			'type' => 'checkbox',
+			'label' => __('Use Tablet Layout', 'siteorigin-panels'),
+			'description' => __('Collapses columns differently on tablet devices.', 'siteorigin-panels'),
 		);
 
 		$fields['layout']['fields']['tablet-width'] = array(
