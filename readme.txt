@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.0
-Tested up to: 4.4
+Tested up to: 4.4.2
 Stable tag: trunk
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -94,6 +94,21 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.3 - December 09 2015 =
+* Delete preview panels data if there are no widgets.
+* Added a collapse order field.
+* Added custom row ID field.
+* Fixed copy content setting.
+* Added tablet responsive level.
+* Fixed admin templates.
+* Fix to ensure live editor works with HTTPs admin requests.
+* Fix for Yoast SEO compatibility.
+* Removed use of filter_input for HHVM issues.
+* Added panelsStretchRows event after frontend row stretch event.
+* Minor performance enhancements.
+* Merged all separate JS files into a single Browserify compiled file.
+* Added version numbers to some JS files to ensure cache busting.
 
 = 2.2.2 - December 09 2015 =
 * Fix tab name for WordPress 4.4. Was displaying undefined.
