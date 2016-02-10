@@ -4,7 +4,7 @@
  * Register the custom styles scripts
  */
 function siteorigin_panels_default_styles_register_scripts(){
-	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
 	wp_register_script( 'siteorigin-panels-front-parallax', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/jquery.stellar' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
 	wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 		'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
@@ -241,7 +241,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'description' => __('Color of text inside this widget.', 'siteorigin-panels'),
 			'priority' => 15,
 		);
-		
+
 		$fields['link_color'] = array(
 			'name' => __('Links Color', 'siteorigin-panels'),
 			'type' => 'color',
