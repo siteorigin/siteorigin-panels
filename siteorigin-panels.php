@@ -941,8 +941,6 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		}
 	}
 
-	if( is_rtl() ) $panels_data = siteorigin_panels_make_rtl( $panels_data );
-
 	// Create the skeleton of the grids
 	$grids = array();
 	if( !empty( $panels_data['grids'] ) && !empty( $panels_data['grids'] ) ) {
