@@ -95,11 +95,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.3.1 - February 10 2015 =
+= 2.3.1 - February 10 2016 =
 * Fixed fatal error on RTL sites.
 * Made setting to enable tablet layout. Disabled by default.
 
-= 2.3 - February 10 2015 =
+= 2.3 - February 10 2016 =
 * Delete preview panels data if there are no widgets.
 * Added a collapse order field.
 * Added custom row ID field.
