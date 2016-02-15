@@ -36,17 +36,21 @@ module.exports = Backbone.Model.extend( {
         return row;
     },
 
-    /**
-     * Load the panels data into the builder
-     *
-     * @param data
-     */
-    loadPanelsData: function(data){
+	/**
+	 * Load the panels data into the builder
+	 *
+	 * @param data Object the layout and widgets data to load.
+	 * @param append boolean If true, append to the existing layout and widgets instead of overwriting.
+	 */
+    loadPanelsData: function(data, append){
+		if(append) {
+			data = this.concatPanelsData(this.getPanelsData(), data);
+		}
         // Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
-        this.emptyRows();
+		this.emptyRows();
 
-        // This will empty out the current rows and reload the builder data.
-        this.set( 'data', data, {silent: true} );
+		// This will empty out the current rows and reload the builder data.
+		this.set( 'data', data, {silent: true} );
 
         var cit = 0;
         var rows = [];
@@ -113,6 +117,57 @@ module.exports = Backbone.Model.extend( {
 
         this.trigger('load_panels_data');
     },
+
+	/**
+	 * Concatenate the second set of Page Builder data to the first. There is some validation of input, but for the most
+	 * part it's up to the caller to ensure the Page Builder data is well formed.
+	 */
+	concatPanelsData: function(panelsDataA, panelsDataB) {
+
+		if(_.isUndefined(panelsDataB) || _.isUndefined(panelsDataB.grids) || _.isEmpty(panelsDataB.grids) ||
+			_.isUndefined(panelsDataB.grid_cells) || _.isEmpty(panelsDataB.grid_cells)) {
+			return panelsDataA;
+		}
+
+		if(_.isUndefined(panelsDataA) || _.isUndefined(panelsDataA.grids) || _.isEmpty(panelsDataA.grids)) {
+			return panelsDataB;
+		}
+
+		var gridsBOffset = panelsDataA.grids.length;
+		var widgetsBOffset = !_.isUndefined(panelsDataA.widgets) ? panelsDataA.widgets.length : 0;
+		var newPanelsData = {grids:[], 'grid_cells' : [], 'widgets' : []};
+
+		// Concatenate grids (rows)
+		newPanelsData.grids = panelsDataA.grids.concat(panelsDataB.grids);
+
+		// Create a copy of panelsDataA grid_cells and widgets
+		if(!_.isUndefined(panelsDataA.grid_cells)) {
+			newPanelsData.grid_cells = panelsDataA.grid_cells.slice();
+		}
+		if(!_.isUndefined(panelsDataA.widgets)) {
+			newPanelsData.widgets = panelsDataA.widgets.slice();
+		}
+
+		var i;
+		// Concatenate grid cells (row columns)
+		for(i = 0; i < panelsDataB.grid_cells.length; i++) {
+			var gridCellB = panelsDataB.grid_cells[i];
+			gridCellB.grid += gridsBOffset;
+			newPanelsData.grid_cells.push(gridCellB);
+		}
+
+		// Concatenate widgets
+		if(!_.isUndefined(panelsDataB.widgets)) {
+			for (i = 0; i < panelsDataB.widgets.length; i++) {
+				var widgetB = panelsDataB.widgets[i];
+				widgetB.panels_info.grid += gridsBOffset;
+				widgetB.panels_info.id += widgetsBOffset;
+				newPanelsData.widgets.push(widgetB);
+			}
+		}
+
+		return newPanelsData;
+	},
 
     /**
      * Convert the content of the builder into a object that represents the page builder data
