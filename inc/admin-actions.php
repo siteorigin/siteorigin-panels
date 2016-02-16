@@ -126,7 +126,6 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 
 		foreach( $results as $result ) {
 			$thumbnail = get_the_post_thumbnail_url( $result->ID, array( 400,300 ) );
-			error_log( $thumbnail );
 			$return['items'][] = array(
 				'id' => $result->ID,
 				'title' => $result->post_title,
