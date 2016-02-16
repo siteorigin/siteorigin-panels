@@ -1192,62 +1192,6 @@
   padding-left: 10px;
   padding-right: 10px;
 }
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout {
-  -ms-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  float: left;
-  width: 33.333%;
-  padding: 0 5px 10px 5px;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside {
-  padding: 10px 15px;
-  cursor: pointer;
-  border: 1px solid #cccccc;
-  background: #F8F8F8;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.075);
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside:hover {
-  border: 1px solid #BBBBBB;
-  background: #FFFFFF;
-  -webkit-box-shadow: 0 2px 2px rgba(0,0,0,0.075);
-  -moz-box-shadow: 0 2px 2px rgba(0,0,0,0.075);
-  box-shadow: 0 2px 2px rgba(0,0,0,0.075);
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside h4 {
-  font-size: 15px;
-  margin: 0;
-  line-height: 1.2em;
-  height: 1.2em;
-  overflow: hidden;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside .description {
-  line-height: 1.2em;
-  height: 1.2em;
-  margin-top: 0.7em;
-  font-size: 12px;
-  color: #888;
-  overflow: hidden;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout .layout-inside .dashicons {
-  display: none;
-  float: left;
-  margin-top: 10px;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout.so-selected .layout-inside {
-  border: 1px solid #aaaaaa;
-  background: #F2F2F2;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout.so-selected .layout-inside h4,
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout.so-selected .layout-inside .description {
-  margin-left: 35px;
-}
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .layout.so-selected .layout-inside .dashicons {
-  display: inline-block;
-}
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-error-message {
   font-size: 14px;
   border: 1px solid #cccccc;

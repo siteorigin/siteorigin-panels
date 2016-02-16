@@ -71,21 +71,6 @@ module.exports = panels.view.dialog.extend( {
     },
 
     /**
-     * Make the layout selected.
-     * @param e
-     */
-    layoutClickHandler: function(e){
-        var layout = $(e.target).closest('.layout');
-
-        this.loadLayout(
-            layout.data('type'),
-            layout.data('lid')
-        );
-
-        return false;
-    },
-
-    /**
      * Display and setup the import/export form
      */
     displayImportExport: function(){
