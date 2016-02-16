@@ -389,6 +389,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'error_message' => __('Error uploading or importing file.', 'siteorigin-panels'),
 			),
 			'wpColorPickerOptions' => apply_filters('siteorigin_panels_wpcolorpicker_options', array()),
+			'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . 'css/images/prebuilt-default.png',
 		));
 
 		if( $screen->base != 'widgets' ) {
@@ -1417,7 +1418,7 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 		$last_wi = 0;
 
 		foreach( $panels_data['widgets'] as &$widget ) {
-
+			// Transfer legacy content
 			if( empty($widget['panels_info']) && !empty($widget['info']) ) {
 				$widget['panels_info'] = $widget['info'];
 				unset( $widget['info'] );
@@ -1434,6 +1435,14 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 				$last_wi = 0;
 			}
 			$widget['panels_info']['cell_index'] = $last_wi++;
+		}
+
+		foreach( $panels_data['grids'] as &$grid ) {
+			if( !empty( $grid['style'] ) && is_string( $grid['style'] ) ) {
+				$grid['style'] = array(
+
+				);
+			}
 		}
 	}
 

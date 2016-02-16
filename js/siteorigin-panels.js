@@ -364,7 +364,6 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-    entryTemplate : _.template( $('#siteorigin-panels-dialog-prebuilt-entry').html().panelsProcessTemplate() ),
     directoryTemplate : _.template( $('#siteorigin-panels-directory-items').html().panelsProcessTemplate() ),
 
     builder: null,
@@ -411,7 +410,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function(e){
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
 
-        var $$ = jQuery(e.target);
+        var $$ = $(e.target);
         var tab = $$.attr('href').split('#')[1];
         $$.parent().addClass( 'tab-active' );
 
@@ -421,80 +420,16 @@ module.exports = panels.view.dialog.extend( {
         this.$('.so-content').empty();
 
         thisView.currentTab = tab;
-
-        if( tab === 'directory' ) {
-            this.displayLayoutDirectory();
-        }
-        else if( tab === 'import' ) {
-            // Display the import export
+        if( tab == 'import' ) {
             this.displayImportExport();
         }
-        else if( typeof this.layoutCache[tab] === 'undefined' ) {
-            // We need to load the tab items from the server
-            this.$('.so-content').addClass('so-panels-loading');
-
-            $.get(
-                panelsOptions.ajaxurl,
-                {
-                    action: 'so_panels_prebuilt_layouts',
-                    type: tab
-                },
-                function(layouts){
-                    thisView.layoutCache[ tab ] = layouts;
-
-                    if( thisView.currentTab === tab ) {
-                        // If the current tab is selected
-                        thisView.$( '.so-content' ).removeClass( 'so-panels-loading' );
-                        thisView.displayLayouts( tab, layouts );
-                    }
-                }
-            );
-        }
         else {
-            thisView.displayLayouts(tab, this.layoutCache[tab]);
+            this.displayLayoutDirectory('', 1, tab);
         }
 
         thisView.$('.so-sidebar-search').val('');
 
         return false;
-    },
-
-    /**
-     * Display a list of layouts taking into account the search argument
-     */
-    displayLayouts: function(type, layouts){
-        var c = this.$('.so-content').empty();
-        var query = this.$('.so-sidebar-search').val().toLowerCase();
-
-        if( typeof layouts.error_message !== 'undefined' ) {
-            this.$('.so-content').append(
-                $('<div class="so-error-message">').html( layouts.error_message )
-            );
-            return;
-        }
-
-        if( _.size(layouts) ) {
-            for (var lid in layouts) {
-                if( layouts.hasOwnProperty(lid) ) {
-                    // Exclude the current post if we have one
-                    if (type !== 'prebuilt' && lid === $('#post_ID').val()) {
-                        continue;
-                    }
-                    if (query !== '' && layouts[lid].name.toLowerCase().indexOf(query) === -1) {
-                        continue;
-                    }
-
-                    // Create the layout item to display in the list
-                    var $l = $(this.entryTemplate({
-                        name: layouts[lid].name,
-                        description: layouts[lid].description
-                    }));
-
-                    // Create and append the
-                    $l.appendTo(c).data({'type': type, 'lid': lid});
-                }
-            }
-        }
     },
 
     /**
@@ -510,35 +445,6 @@ module.exports = panels.view.dialog.extend( {
         );
 
         return false;
-    },
-
-    /**
-     * Load the layout into the main builder
-     */
-    loadLayout: function(type, lid){
-        var thisView = this;
-
-        if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
-            return false;
-        }
-        this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
-
-        $.post(
-            panelsOptions.ajaxurl,
-            {
-                action: 'so_panels_get_prebuilt_layout',
-                type: type,
-                lid: lid
-            },
-            function(layout){
-                // TODO check for an error message
-                thisView.setStatusMessage('', false);
-                thisView.builder.addHistoryEntry('prebuilt_loaded');
-
-                thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
-                thisView.closeDialog();
-            }
-        );
     },
 
     /**
@@ -629,7 +535,7 @@ module.exports = panels.view.dialog.extend( {
      *
      * @param query
      */
-    displayLayoutDirectory: function( search, page ){
+    displayLayoutDirectory: function( search, page, type ){
         var thisView = this;
         var c = this.$( '.so-content').empty().addClass('so-panels-loading');
 
@@ -639,8 +545,11 @@ module.exports = panels.view.dialog.extend( {
         if( page === undefined ) {
             page = 1;
         }
+        if( type === undefined ) {
+            type = 'directory';
+        }
 
-        if( !panelsOptions.directory_enabled ) {
+        if( type === 'directory' && !panelsOptions.directory_enabled ) {
             // Display the button to enable the prebuilt layout
             c.removeClass( 'so-panels-loading' ).html( $('#siteorigin-panels-directory-enable').html() );
             c.find('.so-panels-enable-directory').click( function(e){
@@ -666,13 +575,14 @@ module.exports = panels.view.dialog.extend( {
         $.get(
             panelsOptions.ajaxurl,
             {
-                action: 'so_panels_directory_query',
+                action: 'so_panels_layouts_query',
                 search: search,
-                page: page
+                page: page,
+                type: type,
             },
             function( data ){
                 // Skip this if we're no longer viewing the layout directory
-                if( thisView.currentTab !== 'directory' ) return;
+                if( thisView.currentTab !== type ) return;
 
                 // Add the directory items
                 c.removeClass( 'so-panels-loading').html( thisView.directoryTemplate( data ) );
@@ -705,14 +615,19 @@ module.exports = panels.view.dialog.extend( {
 
                 // Handle nice preloading of the screenshots
                 c.find('.so-screenshot').each( function(){
-                    // Set the initial height
-                    var $$ = jQuery(this), $a = $$.find('a');
+                    var $$ = $(this), $a = $$.find('a');
                     $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
 
-                    var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
-                        $a.removeClass('so-loading').css('height', 'auto');
-                        $img.appendTo($a).hide().fadeIn('fast');
-                    });
+                    if( $$.data('src') !== '' ) {
+                        // Set the initial height
+                        var $img = $('<img/>').attr('src', $$.data('src')).load(function(){
+                            $a.removeClass('so-loading').css('height', 'auto');
+                            $img.appendTo($a).hide().fadeIn('fast');
+                        });
+                    }
+                    else {
+                        $('<img/>').attr('src', panelsOptions.prebuiltDefaultScreenshot).appendTo($a).hide().fadeIn('fast');
+                    }
                 } );
             },
             'json'
@@ -726,7 +641,7 @@ module.exports = panels.view.dialog.extend( {
      */
     directoryClickHandler: function( e ){
         e.preventDefault();
-        var $$ = jQuery(e.currentTarget), thisView = this;
+        var $$ = $(e.currentTarget), thisView = this;
 
         if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
             return false;
@@ -736,10 +651,12 @@ module.exports = panels.view.dialog.extend( {
         $.get(
             panelsOptions.ajaxurl,
             {
-                action: 'so_panels_directory_item',
-                layout_slug: $$.data('layout-slug')
+                action : 'so_panels_get_layout',
+                lid : $$.data('layout-id'),
+                type : $$.data('layout-type')
             },
             function(layout){
+                console.log(layout);
 
                 if( layout.error !== undefined ) {
                     // There was an error
@@ -759,16 +676,8 @@ module.exports = panels.view.dialog.extend( {
      * Handle an update to the search
      */
     searchHandler: function( e ){
-        if( this.currentTab !== 'directory' ) {
-            // This is for the tabs that support live search
-            if( this.currentTab === false || typeof this.layoutCache[ this.currentTab ] === 'undefined') {
-                return false;
-            }
-            this.displayLayouts(this.currentTab, this.layoutCache[ this.currentTab ] );
-        }
-        else if( e.keyCode === 13 ) {
-            // Refresh the search results
-            this.displayLayoutDirectory( $(e.currentTarget).val(), 1 );
+        if( e.keyCode === 13 ) {
+            this.displayLayoutDirectory( $(e.currentTarget).val(), 1, this.currentTab );
         }
     }
 } );
