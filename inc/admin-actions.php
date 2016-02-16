@@ -54,6 +54,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 	header('content-type: application/json');
 
 	$type = !empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory';
+	$search = !empty($_REQUEST['search']) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
 
 	$return = array(
 		'items' => array()
@@ -66,6 +67,9 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 
 		$return['title'] = __( 'Theme Defined Layouts', 'siteorigin-panels' );
 		foreach($layouts as $id => $vals) {
+			if( !empty($search) && strpos( strtolower($vals['name']), $search ) === false ) {
+				continue;
+			}
 
 			$return['items'][] = array(
 				'title' => $vals['name'],
@@ -80,7 +84,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 	elseif( $type == 'directory' ) {
 		// This is a query of the prebuilt layout directory
 		$query = array();
-		if( !empty($_REQUEST['search']) ) $query['search'] = $_REQUEST['search'];
+		if( !empty($search) ) $query['search'] = $search;
 		if( !empty($_REQUEST['page']) ) $query['page'] = $_REQUEST['page'];
 
 		$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . '/wp-admin/admin-ajax.php?action=query_layouts');
@@ -100,8 +104,6 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 
 	}
 	elseif ( strpos( $type, 'clone_' ) !== false ) {
-		$search = !empty($_REQUEST['search']) ? $_REQUEST['search'] : '';
-
 		// Check that the user can view the given page types
 		$post_type = str_replace('clone_', '', $type );
 		global $wpdb;
@@ -118,15 +120,18 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 				AND meta.meta_key = 'panels_data'
 				" . ( !empty($search) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
 				AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
-			ORDER BY post_title
-			LIMIT 200
+			ORDER BY post_date DESC
+			LIMIT 40
 		" );
 
 		foreach( $results as $result ) {
+			$thumbnail = get_the_post_thumbnail_url( $result->ID, array( 400,300 ) );
+			error_log( $thumbnail );
 			$return['items'][] = array(
 				'id' => $result->ID,
 				'title' => $result->post_title,
 				'type' => $type,
+				'screenshot' => !empty($thumbnail) ? $thumbnail : ''
 			);
 		}
 
