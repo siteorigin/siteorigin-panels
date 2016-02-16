@@ -401,14 +401,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<div class="so-directory-item">
 						<div class="so-directory-item-wrapper">
 							<div class="so-screenshot" data-src="{{%- item.screenshot %}}">
-								<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
+								{{% if( item.preview ) { %}}
+									<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading so-screenshot-wrapper"></a>
+								{{% } else { %}}
+									<div class="so-panels-loading so-screenshot-wrapper"></div>
+								{{% } %}}
 							</div>
 							<div class="so-description">{{%- item.description %}}</div>
 
 							<div class="so-bottom">
 								<h4 class="so-title">{{%= item.title %}}</h4>
 								<div class="so-buttons">
-									<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+									{{% if( item.preview ) { %}}
+										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+									{{% } %}}
 									<a href="#" class="button-primary so-button-use" data-layout-id="{{%- item.id %}}" data-layout-type="{{%- item.type %}}">Use</a>
 								</div>
 							</div>

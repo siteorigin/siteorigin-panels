@@ -234,16 +234,16 @@ module.exports = panels.view.dialog.extend( {
                 else {
                     prev.click(function(e){
                         e.preventDefault();
-                        thisView.displayLayoutDirectory( search, page - 1 );
+                        thisView.displayLayoutDirectory( search, page - 1, thisView.currentTab );
                     });
                 }
-                if( page === data.max_num_pages || data.max_num_pages == 0 ) {
+                if( page === data.max_num_pages || data.max_num_pages === 0 ) {
                     next.addClass('button-disabled');
                 }
                 else {
                     next.click(function(e){
                         e.preventDefault();
-                        thisView.displayLayoutDirectory( search, page + 1 );
+                        thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
                     });
                 }
 
@@ -253,7 +253,7 @@ module.exports = panels.view.dialog.extend( {
 
                 // Handle nice preloading of the screenshots
                 c.find('.so-screenshot').each( function(){
-                    var $$ = $(this), $a = $$.find('a');
+                    var $$ = $(this), $a = $$.find('.so-screenshot-wrapper');
                     $a.css( 'height', ($a.width()/4*3) + 'px' ).addClass('so-loading');
 
                     if( $$.data('src') !== '' ) {
@@ -266,6 +266,7 @@ module.exports = panels.view.dialog.extend( {
                     else {
                         $('<img/>').attr('src', panelsOptions.prebuiltDefaultScreenshot).appendTo($a).hide().fadeIn('fast');
                     }
+
                 } );
             },
             'json'
@@ -294,8 +295,6 @@ module.exports = panels.view.dialog.extend( {
                 type : $$.data('layout-type')
             },
             function(layout){
-                console.log(layout);
-
                 if( layout.error !== undefined ) {
                     // There was an error
                     alert( layout.error );

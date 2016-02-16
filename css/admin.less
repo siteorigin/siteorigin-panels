@@ -1472,7 +1472,7 @@
 							height: auto;
 						}
 
-						a {
+						.so-screenshot-wrapper {
 							display: block;
 							min-height: 40px;
 						}
@@ -1485,26 +1485,24 @@
 					}
 
 					.so-bottom {
-						height: 49px;
 						position: relative;
 
 						.so-title {
-							position: absolute;
-							top: 1em;
-							left: 10px;
-							z-index: 1;
+							margin: 0;
+							padding: 16px 10px;
 						}
 
 						.so-buttons {
 							position: absolute;
 							z-index: 2;
 							top: 0;
+							bottom: 0;
 							right: 0;
+							height: 100%;
 
 							visibility: hidden;
 							.box-sizing(border-box);
 							padding: 11px 10px 10px 15px;
-							height: 49px;
 							border-left: 1px solid #d0d0d0;
 							background: #f6f6f6;
 							.box-shadow(-1px 0 1px rgba(0,0,0,0.05));

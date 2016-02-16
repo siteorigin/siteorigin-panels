@@ -1372,7 +1372,7 @@
   width: 100%;
   height: auto;
 }
-.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot a {
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot .so-screenshot-wrapper {
   display: block;
   min-height: 40px;
 }
@@ -1382,30 +1382,28 @@
   margin-bottom: 10px;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom {
-  height: 49px;
   position: relative;
   margin: 10px -10px -15px -10px;
   background: #fcfcfc;
   border-top: 1px solid #d0d0d0;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-title {
-  position: absolute;
-  top: 1em;
-  left: 10px;
-  z-index: 1;
+  margin: 0;
+  padding: 16px 10px;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-buttons {
   position: absolute;
   z-index: 2;
   top: 0;
+  bottom: 0;
   right: 0;
+  height: 100%;
   visibility: hidden;
   -ms-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 11px 10px 10px 15px;
-  height: 49px;
   border-left: 1px solid #d0d0d0;
   background: #f6f6f6;
   -webkit-box-shadow: -1px 0 1px rgba(0, 0, 0, 0.05);

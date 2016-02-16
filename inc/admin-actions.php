@@ -63,8 +63,6 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 		// This is for theme bundled prebuilt directories
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
-		// TODO take into account the search
-
 		$return['title'] = __( 'Theme Defined Layouts', 'siteorigin-panels' );
 		foreach($layouts as $id => $vals) {
 			if( !empty($search) && strpos( strtolower($vals['name']), $search ) === false ) {
@@ -78,8 +76,9 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 				'description' => isset($vals['description']) ? $vals['description'] : '',
 				'screenshot' => !empty($vals['screenshot']) ? $vals['screenshot'] : ''
 			);
-			
 		}
+
+		$return['max_num_pages'] = 1;
 	}
 	elseif( $type == 'directory' ) {
 		// This is a query of the prebuilt layout directory
@@ -100,8 +99,9 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 					$return['items'][] = $item;
 				}
 			}
-		}
 
+			$return['max_num_pages'] = $results['max_num_pages'];
+		}
 	}
 	elseif ( strpos( $type, 'clone_' ) !== false ) {
 		// Check that the user can view the given page types
@@ -134,6 +134,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 				'screenshot' => !empty($thumbnail) ? $thumbnail : ''
 			);
 		}
+		$return['max_num_pages'] = 1;
 
 	}
 	else {
