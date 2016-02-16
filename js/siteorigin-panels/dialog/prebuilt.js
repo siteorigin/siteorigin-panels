@@ -173,7 +173,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.setStatusMessage('', false);
                 thisView.builder.addHistoryEntry('prebuilt_loaded');
 
-                thisView.builder.model.loadPanelsData(layout);
+                thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                 thisView.closeDialog();
             }
         );
@@ -231,7 +231,7 @@ module.exports = panels.view.dialog.extend( {
                     var layout = JSON.parse( response.response );
                     if( typeof layout.widgets !== 'undefined' ) {
                         thisView.builder.addHistoryEntry('prebuilt_loaded');
-                        thisView.builder.model.loadPanelsData(layout);
+                        thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                         thisView.closeDialog();
                     }
                     else {
@@ -386,7 +386,7 @@ module.exports = panels.view.dialog.extend( {
                 else {
                     thisView.setStatusMessage('', false);
                     thisView.builder.addHistoryEntry('prebuilt_loaded');
-                    thisView.builder.model.loadPanelsData(layout);
+                    thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                     thisView.closeDialog();
                 }
             }

@@ -1,4 +1,9 @@
 module.exports = Backbone.Model.extend( {
+	layoutPosition: {
+		BEFORE: 'before',
+		AFTER: 'after',
+	},
+
     rows: {},
 
     defaults : {
@@ -40,12 +45,17 @@ module.exports = Backbone.Model.extend( {
 	 * Load the panels data into the builder
 	 *
 	 * @param data Object the layout and widgets data to load.
-	 * @param append boolean If true, append to the existing layout and widgets instead of overwriting.
+	 * @param position string Where to place the new layout. Allowed options are 'before', 'after'. Anything else will
+	 * 						  cause the new layout to replace the old one.
 	 */
-    loadPanelsData: function(data, append){
-		if(append) {
+    loadPanelsData: function(data, position){
+
+		if(position === this.layoutPosition.BEFORE) {
+			data = this.concatPanelsData(data, this.getPanelsData());
+		} else if(position === this.layoutPosition.AFTER) {
 			data = this.concatPanelsData(this.getPanelsData(), data);
 		}
+
         // Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
 		this.emptyRows();
 

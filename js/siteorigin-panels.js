@@ -535,7 +535,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.setStatusMessage('', false);
                 thisView.builder.addHistoryEntry('prebuilt_loaded');
 
-                thisView.builder.model.loadPanelsData(layout);
+                thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                 thisView.closeDialog();
             }
         );
@@ -593,7 +593,7 @@ module.exports = panels.view.dialog.extend( {
                     var layout = JSON.parse( response.response );
                     if( typeof layout.widgets !== 'undefined' ) {
                         thisView.builder.addHistoryEntry('prebuilt_loaded');
-                        thisView.builder.model.loadPanelsData(layout);
+                        thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                         thisView.closeDialog();
                     }
                     else {
@@ -748,7 +748,7 @@ module.exports = panels.view.dialog.extend( {
                 else {
                     thisView.setStatusMessage('', false);
                     thisView.builder.addHistoryEntry('prebuilt_loaded');
-                    thisView.builder.model.loadPanelsData(layout);
+                    thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
                     thisView.closeDialog();
                 }
             }
@@ -772,6 +772,7 @@ module.exports = panels.view.dialog.extend( {
         }
     }
 } );
+
 },{}],8:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -1915,7 +1916,7 @@ panels.dialog.row = require('./dialog/row');
 panels.dialog.history = require('./dialog/history');
 
 // The utils
-panels.utils = {}
+panels.utils = {};
 panels.utils.menu = require('./utils/menu');
 
 // jQuery Plugins
@@ -1996,8 +1997,14 @@ jQuery( function($){
         } );
     }
 } );
+
 },{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/menu":18,"./view/builder":19,"./view/cell":20,"./view/dialog":21,"./view/live-editor":22,"./view/row":23,"./view/styles":24,"./view/widget":25}],13:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
+	layoutPosition: {
+		BEFORE: 'before',
+		AFTER: 'after',
+	},
+
     rows: {},
 
     defaults : {
@@ -2039,12 +2046,17 @@ module.exports = Backbone.Model.extend( {
 	 * Load the panels data into the builder
 	 *
 	 * @param data Object the layout and widgets data to load.
-	 * @param append boolean If true, append to the existing layout and widgets instead of overwriting.
+	 * @param position string Where to place the new layout. Allowed options are 'before', 'after'. Anything else will
+	 * 						  cause the new layout to replace the old one.
 	 */
-    loadPanelsData: function(data, append){
-		if(append) {
+    loadPanelsData: function(data, position){
+
+		if(position === this.layoutPosition.BEFORE) {
+			data = this.concatPanelsData(data, this.getPanelsData());
+		} else if(position === this.layoutPosition.AFTER) {
 			data = this.concatPanelsData(this.getPanelsData(), data);
 		}
+
         // Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
 		this.emptyRows();
 
