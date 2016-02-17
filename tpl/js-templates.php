@@ -389,7 +389,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-directory-items">
 
 		<div class="so-directory-browse">
-			<?php _e('Newest Layouts', 'siteorigin-panels') ?>
 		</div>
 
 		<div class="so-directory-items-wrapper">
@@ -401,16 +400,22 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				{{% _.each(items, function(item) { %}}
 					<div class="so-directory-item">
 						<div class="so-directory-item-wrapper">
-							<div class="so-screenshot" data-src="http://s.wordpress.com/mshots/v1/{{% print( encodeURIComponent(item.preview) ) %}}?w=400">
-								<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading"></a>
+							<div class="so-screenshot" data-src="{{%- item.screenshot %}}">
+								{{% if( item.preview ) { %}}
+									<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading so-screenshot-wrapper"></a>
+								{{% } else { %}}
+									<div class="so-panels-loading so-screenshot-wrapper"></div>
+								{{% } %}}
 							</div>
 							<div class="so-description">{{%- item.description %}}</div>
 
 							<div class="so-bottom">
 								<h4 class="so-title">{{%= item.title %}}</h4>
 								<div class="so-buttons">
-									<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
-									<a href="#" class="button-primary so-button-use" data-layout-slug="{{%- item.slug %}}">Use</a>
+									{{% if( item.preview ) { %}}
+										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+									{{% } %}}
+									<a href="#" class="button-primary so-button-use" data-layout-id="{{%- item.id %}}" data-layout-type="{{%- item.type %}}">Use</a>
 								</div>
 							</div>
 						</div>
@@ -453,16 +458,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<input type="hidden" name="panels_export_data" value="" />
 				<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
 			</form>
-		</div>
-	</div>
-</script>
-
-<script type="text/template" id="siteorigin-panels-dialog-prebuilt-entry">
-	<div class="layout">
-		<div class="layout-inside">
-			<div class="dashicons dashicons-migrate"></div>
-			<h4>{{%= name %}}</h4>
-			<div class="description">{{%= description %}}</div>
 		</div>
 	</div>
 </script>

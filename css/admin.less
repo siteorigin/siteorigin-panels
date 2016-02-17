@@ -1286,69 +1286,6 @@
 			padding-left: 10px;
 			padding-right: 10px;
 
-			.layout {
-				.box-sizing(border-box);
-				float: left;
-				width: 33.333%;
-				padding: 0 5px 10px 5px;
-
-				.layout-inside {
-					padding: 10px 15px;
-					cursor: pointer;
-					border: 1px solid #cccccc;
-					background: #F8F8F8;
-					.box-shadow(~"0 1px 2px rgba(0,0,0,0.075)");
-
-					&:hover {
-						border: 1px solid #BBBBBB;
-						background: #FFFFFF;
-						.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
-					}
-
-					h4 {
-						font-size: 15px;
-						margin: 0;
-						line-height: 1.2em;
-						height: 1.2em;
-						overflow: hidden;
-					}
-
-					.description {
-						line-height: 1.2em;
-						height: 1.2em;
-						margin-top: 0.7em;
-						font-size: 12px;
-						color: #888;
-						overflow: hidden;
-					}
-
-					.dashicons {
-						display: none;
-						float: left;
-						margin-top: 10px;
-					}
-
-				}
-
-				&.so-selected {
-
-					.layout-inside {
-						border: 1px solid #aaaaaa;
-						background: #F2F2F2;
-
-						h4, .description {
-							margin-left: 35px;
-						}
-
-						.dashicons {
-							display: inline-block;
-						}
-					}
-
-				}
-
-			}
-
 			.so-error-message {
 				font-size: 14px;
 				border: 1px solid #cccccc;
@@ -1472,7 +1409,7 @@
 							height: auto;
 						}
 
-						a {
+						.so-screenshot-wrapper {
 							display: block;
 							min-height: 40px;
 						}
@@ -1485,26 +1422,24 @@
 					}
 
 					.so-bottom {
-						height: 49px;
 						position: relative;
 
 						.so-title {
-							position: absolute;
-							top: 1em;
-							left: 10px;
-							z-index: 1;
+							margin: 0;
+							padding: 16px 10px;
 						}
 
 						.so-buttons {
 							position: absolute;
 							z-index: 2;
 							top: 0;
+							bottom: 0;
 							right: 0;
+							height: 100%;
 
 							visibility: hidden;
 							.box-sizing(border-box);
 							padding: 11px 10px 10px 15px;
-							height: 49px;
 							border-left: 1px solid #d0d0d0;
 							background: #f6f6f6;
 							.box-shadow(-1px 0 1px rgba(0,0,0,0.05));
