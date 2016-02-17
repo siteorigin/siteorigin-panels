@@ -2093,7 +2093,7 @@ module.exports = Backbone.Model.extend( {
 		// Concatenate grid cells (row columns)
 		for(i = 0; i < panelsDataB.grid_cells.length; i++) {
 			var gridCellB = panelsDataB.grid_cells[i];
-			gridCellB.grid += gridsBOffset;
+			gridCellB.grid = parseInt(gridCellB.grid) + gridsBOffset;
 			newPanelsData.grid_cells.push(gridCellB);
 		}
 
@@ -2101,8 +2101,8 @@ module.exports = Backbone.Model.extend( {
 		if(!_.isUndefined(panelsDataB.widgets)) {
 			for (i = 0; i < panelsDataB.widgets.length; i++) {
 				var widgetB = panelsDataB.widgets[i];
-				widgetB.panels_info.grid += gridsBOffset;
-				widgetB.panels_info.id += widgetsBOffset;
+				widgetB.panels_info.grid = parseInt(widgetB.panels_info.grid) + gridsBOffset;
+				widgetB.panels_info.id = parseInt(widgetB.panels_info.id) + widgetsBOffset;
 				newPanelsData.widgets.push(widgetB);
 			}
 		}
