@@ -17,8 +17,11 @@ module.exports = panels.view.dialog.extend( {
         'click .so-content .layout' : 'layoutClickHandler',
         'keyup .so-sidebar-search' : 'searchHandler',
 
+		//Toolbar buttons
+		'click .so-buttons .button-primary' : 'toolbarButtonClickHandler',
+
         // The directory items
-        'click .so-content .so-directory-item .so-button-use' : 'directoryClickHandler',
+		'click .so-screenshot' : 'directoryItemClickHandler'
     },
 
     /**
@@ -46,6 +49,10 @@ module.exports = panels.view.dialog.extend( {
      * @return {boolean}
      */
     tabClickHandler: function(e){
+		// Reset selected item state when changing tabs
+		this.selectedLayoutItem = null;
+		this.setButtonsEnabled(false);
+
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
 
         var $$ = $(e.target);
@@ -258,39 +265,59 @@ module.exports = panels.view.dialog.extend( {
         );
     },
 
+	/**
+	 * Set the selected state for the clicked layout directory item and remove previously selected item.
+	 * Enable the toolbar buttons.
+	 */
+	directoryItemClickHandler: function( e ) {
+		var $directoryItem = this.$(e.target).closest('.so-directory-item');
+		this.$('.so-directory-items').find('.selected').removeClass('selected');
+		$directoryItem.addClass('selected');
+		this.setButtonsEnabled(true);
+		this.selectedLayoutItem = {lid: $directoryItem.data('layout-id'), type : $directoryItem.data('layout-type')};
+
+	},
+
     /**
      * Load a particular layout into the builder.
      *
      * @param id
      */
-    directoryClickHandler: function( e ){
+	toolbarButtonClickHandler: function( e ){
         e.preventDefault();
-        var $$ = $(e.currentTarget), thisView = this;
+		this.setButtonsEnabled(false);
+		var builderModel = this.builder.model;
+		var $button = $(e.currentTarget);
+		var position;
+		if($button.hasClass('js-so-append')) {
+			position = builderModel.layoutPosition.AFTER;
+		} else if($button.hasClass('js-so-prepend')) {
+			position = builderModel.layoutPosition.BEFORE;
+		}
 
-        if( !confirm(panelsOptions.loc.prebuilt_confirm) ) {
+        if(_.isUndefined(position) && !confirm(panelsOptions.loc.prebuilt_confirm) ) {
+			this.setButtonsEnabled(true);
             return false;
         }
         this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
+		var args = _.extend(this.selectedLayoutItem, {action: 'so_panels_get_layout'});
+
         $.get(
             panelsOptions.ajaxurl,
-            {
-                action : 'so_panels_get_layout',
-                lid : $$.data('layout-id'),
-                type : $$.data('layout-type')
-            },
+			args,
             function(layout){
                 if( layout.error !== undefined ) {
                     // There was an error
                     alert( layout.error );
                 }
                 else {
-                    thisView.setStatusMessage('', false);
-                    thisView.builder.addHistoryEntry('prebuilt_loaded');
-                    thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
-                    thisView.closeDialog();
+					this.setStatusMessage('', false);
+					this.builder.addHistoryEntry('prebuilt_loaded');
+					builderModel.loadPanelsData(layout, position);
+                    this.closeDialog();
                 }
-            }
+			}.bind(this)
         );
     },
 
@@ -301,5 +328,15 @@ module.exports = panels.view.dialog.extend( {
         if( e.keyCode === 13 ) {
             this.displayLayoutDirectory( $(e.currentTarget).val(), 1, this.currentTab );
         }
-    }
+    },
+
+	setButtonsEnabled: function(enabled) {
+		var $buttons = this.$('.so-buttons .button-primary');
+		$buttons.prop( "disabled", !enabled);
+		if(enabled) {
+			$buttons.removeClass('disabled');
+		} else {
+			$buttons.addClass('disabled');
+		}
+	},
 } );

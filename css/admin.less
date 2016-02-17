@@ -569,7 +569,7 @@
 }
 
 /* This is to display a draggable widget  */
-.so-widget.ui-sortable-helper.widget-being-dragged {    
+.so-widget.ui-sortable-helper.widget-being-dragged {
 	/* Need a high z-index for layout builder widget */
 	z-index: 500002 !important;
 
@@ -1389,6 +1389,7 @@
 						background: #ffffff;
 						margin-bottom: 10px;
 						border: 1px solid #d0d0d0;
+						cursor: pointer;
 
 						&.so-loading {
 							background-image: url("images/wpspin_light.gif");
@@ -1454,6 +1455,9 @@
 						visibility: visible;
 					}
 
+					&.selected {
+						background: #eeeeee;
+					}
 				}
 
 				@media only screen and (min-width: 1680px) {
@@ -2096,7 +2100,7 @@
 				}
 			}
 		}
-		
+
 		.so-no-results {
 			padding: 0px 10px 5px 10px;
 			display: none;

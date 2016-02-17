@@ -1299,6 +1299,7 @@
   background: #ffffff;
   margin-bottom: 10px;
   border: 1px solid #d0d0d0;
+  cursor: pointer;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-screenshot.so-loading {
   background-image: url("images/wpspin_light.gif");
@@ -1356,6 +1357,9 @@
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item:hover .so-buttons {
   visibility: visible;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected {
+  background: #eeeeee;
 }
 @media only screen and (min-width: 1680px) {
   .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {

@@ -373,6 +373,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
+			<input type="button" class="button-primary js-so-append disabled" value="<?php esc_attr_e('Append', 'siteorigin-panels') ?>" disabled="disabled"/>
+			<input type="button" class="button-primary js-so-prepend disabled" value="<?php esc_attr_e('Prepend', 'siteorigin-panels') ?>" disabled="disabled"/>
+			<input type="button" class="button-primary js-so-replace disabled" value="<?php esc_attr_e('Replace', 'siteorigin-panels') ?>" disabled="disabled"/>
 		</div>
 
 	</div>
@@ -398,25 +401,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				</div>
 			{{% } else { %}}
 				{{% _.each(items, function(item) { %}}
-					<div class="so-directory-item">
+					<div class="so-directory-item" data-layout-id="{{%- item.id %}}" data-layout-type="{{%- item.type %}}">
 						<div class="so-directory-item-wrapper">
 							<div class="so-screenshot" data-src="{{%- item.screenshot %}}">
-								{{% if( item.preview ) { %}}
-									<a href="{{%- item.preview %}}" target="_blank" class="so-panels-loading so-screenshot-wrapper"></a>
-								{{% } else { %}}
-									<div class="so-panels-loading so-screenshot-wrapper"></div>
-								{{% } %}}
+								<div class="so-panels-loading so-screenshot-wrapper"></div>
 							</div>
 							<div class="so-description">{{%- item.description %}}</div>
 
 							<div class="so-bottom">
 								<h4 class="so-title">{{%= item.title %}}</h4>
-								<div class="so-buttons">
-									{{% if( item.preview ) { %}}
+								{{% if( item.preview ) { %}}
+									<div class="so-buttons">
 										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
-									{{% } %}}
-									<a href="#" class="button-primary so-button-use" data-layout-id="{{%- item.id %}}" data-layout-type="{{%- item.type %}}">Use</a>
-								</div>
+									</div>
+								{{% } %}}
 							</div>
 						</div>
 					</div>
