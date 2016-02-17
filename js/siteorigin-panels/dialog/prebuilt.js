@@ -128,9 +128,10 @@ module.exports = panels.view.dialog.extend( {
                 FileUploaded : function(uploader, file, response){
                     var layout = JSON.parse( response.response );
                     if( typeof layout.widgets !== 'undefined' ) {
-                        thisView.builder.addHistoryEntry('prebuilt_loaded');
-                        thisView.builder.model.loadPanelsData(layout, thisView.builder.model.layoutPosition.AFTER);
-                        thisView.closeDialog();
+
+						thisView.uploadedLayout = layout;
+						thisView.$('.js-so-selected-file').text(file.name);
+						thisView.setButtonsEnabled(true);
                     }
                     else {
                         alert( panelsOptions.plupload.error_message );
@@ -283,25 +284,38 @@ module.exports = panels.view.dialog.extend( {
      *
      * @param id
      */
-	toolbarButtonClickHandler: function( e ){
-        e.preventDefault();
+	toolbarButtonClickHandler: function( e ) {
+		e.preventDefault();
 		this.setButtonsEnabled(false);
 		var builderModel = this.builder.model;
 		var $button = $(e.currentTarget);
 		var position;
-		if($button.hasClass('js-so-append')) {
+		if ($button.hasClass('js-so-append')) {
 			position = builderModel.layoutPosition.AFTER;
-		} else if($button.hasClass('js-so-prepend')) {
+		} else if ($button.hasClass('js-so-prepend')) {
 			position = builderModel.layoutPosition.BEFORE;
 		}
 
-        if(_.isUndefined(position) && !confirm(panelsOptions.loc.prebuilt_confirm) ) {
+		if (_.isUndefined(position) && !confirm(panelsOptions.loc.prebuilt_confirm)) {
 			this.setButtonsEnabled(true);
-            return false;
-        }
+			return false;
+		}
+
+		if (this.currentTab === 'directory') {
+			this.loadSelectedLayout().then(
+				function(layout) {
+					this.addLayoutToBuilder(layout, position);
+				}.bind(this));
+		} else if (this.currentTab === 'import') {
+			this.addLayoutToBuilder(this.uploadedLayout, position);
+		}
+	},
+
+	loadSelectedLayout: function() {
         this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
 		var args = _.extend(this.selectedLayoutItem, {action: 'so_panels_get_layout'});
+		var deferredLayout = new $.Deferred();
 
         $.get(
             panelsOptions.ajaxurl,
@@ -310,15 +324,15 @@ module.exports = panels.view.dialog.extend( {
                 if( layout.error !== undefined ) {
                     // There was an error
                     alert( layout.error );
+					deferredLayout.reject(layout);
                 }
                 else {
 					this.setStatusMessage('', false);
-					this.builder.addHistoryEntry('prebuilt_loaded');
-					builderModel.loadPanelsData(layout, position);
-                    this.closeDialog();
+					deferredLayout.resolve(layout);
                 }
 			}.bind(this)
         );
+		return deferredLayout.promise();
     },
 
     /**
@@ -339,4 +353,10 @@ module.exports = panels.view.dialog.extend( {
 			$buttons.addClass('disabled');
 		}
 	},
+
+	addLayoutToBuilder: function(layout, position) {
+		this.builder.addHistoryEntry('prebuilt_loaded');
+		this.builder.model.loadPanelsData(layout, position);
+		this.closeDialog();
+	}
 } );

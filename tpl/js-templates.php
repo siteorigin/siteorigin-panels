@@ -443,6 +443,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
 				</p>
 
+				<p class="drag-drop-message js-so-selected-file"></p>
+
 				<div class="progress-bar">
 					<div class="progress-percent"></div>
 				</div>
