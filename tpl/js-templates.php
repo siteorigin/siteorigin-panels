@@ -375,7 +375,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="buttons">
 			<input type="button" class="button-primary js-so-append disabled" value="<?php esc_attr_e('Append', 'siteorigin-panels') ?>" disabled="disabled"/>
 			<input type="button" class="button-primary js-so-prepend disabled" value="<?php esc_attr_e('Prepend', 'siteorigin-panels') ?>" disabled="disabled"/>
-			<input type="button" class="button-primary js-so-replace disabled" value="<?php esc_attr_e('Replace', 'siteorigin-panels') ?>" disabled="disabled"/>
+			<input type="button" class="button-primary js-so-replace disabled" value="<?php esc_attr_e('Replace', 'siteorigin-panels') ?>" disabled="disabled" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"/>
 		</div>
 
 	</div>

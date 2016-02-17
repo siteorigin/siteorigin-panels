@@ -51,6 +51,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function(e){
 		// Reset selected item state when changing tabs
 		this.selectedLayoutItem = null;
+		this.uploadedLayout = null;
 		this.setButtonsEnabled(false);
 
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
@@ -296,18 +297,23 @@ module.exports = panels.view.dialog.extend( {
 			position = builderModel.layoutPosition.BEFORE;
 		}
 
-		if (_.isUndefined(position) && !confirm(panelsOptions.loc.prebuilt_confirm)) {
+		if (_.isUndefined(position) && !$button.hasClass('so-confirmed')) {
 			this.setButtonsEnabled(true);
+			$button.addClass('so-confirmed');
+			var originalText = $button.val();
+			$button.val($button.data('confirm'));
+			setTimeout(function(){
+				$button.removeClass('so-confirmed').val(originalText);
+			}, 2500);
 			return false;
 		}
 
-		if (this.currentTab === 'directory') {
-			this.loadSelectedLayout().then(
-				function(layout) {
-					this.addLayoutToBuilder(layout, position);
-				}.bind(this));
-		} else if (this.currentTab === 'import') {
+		if (this.currentTab === 'import') {
 			this.addLayoutToBuilder(this.uploadedLayout, position);
+		} else {
+			this.loadSelectedLayout().then(function(layout) {
+				this.addLayoutToBuilder(layout, position);
+			}.bind(this));
 		}
 	},
 
