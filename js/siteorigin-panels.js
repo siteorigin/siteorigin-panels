@@ -383,7 +383,7 @@ module.exports = panels.view.dialog.extend( {
 		'click .so-buttons .button-primary' : 'toolbarButtonClickHandler',
 
         // The directory items
-		'click .so-screenshot' : 'directoryItemClickHandler'
+		'click .so-screenshot, .so-title' : 'directoryItemClickHandler'
     },
 
     /**

@@ -1335,6 +1335,7 @@
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-title {
   margin: 0;
   padding: 16px 10px;
+  cursor: pointer;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item .so-bottom .so-buttons {
   position: absolute;
@@ -1359,7 +1360,22 @@
   visibility: visible;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected {
-  background: #eeeeee;
+  background-color: #e5f4fa;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected .so-directory-item-wrapper {
+  background: #cae7f4;
+  border-color: #9abcc7;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected .so-bottom {
+  background: #e4eff4;
+  border-color: #bcccd2;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected .so-bottom .so-title {
+  color: #3e484c;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item.selected .so-bottom .so-buttons {
+  background: #dce7ec;
+  border-color: #bcccd2;
 }
 @media only screen and (min-width: 1680px) {
   .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-items .so-directory-item {

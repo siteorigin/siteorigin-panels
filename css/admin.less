@@ -1428,6 +1428,7 @@
 						.so-title {
 							margin: 0;
 							padding: 16px 10px;
+							cursor: pointer;
 						}
 
 						.so-buttons {
@@ -1456,7 +1457,27 @@
 					}
 
 					&.selected {
-						background: #eeeeee;
+
+						background-color: #e5f4fa;
+
+						.so-directory-item-wrapper {
+							background: #cae7f4;
+							border-color: #9abcc7;
+						}
+
+						.so-bottom {
+							background: #e4eff4;
+							border-color: #bcccd2;
+
+							.so-title {
+								color: #3e484c;
+							}
+
+							.so-buttons {
+								background: #dce7ec;
+								border-color: #bcccd2;
+							}
+						}
 					}
 				}
 
