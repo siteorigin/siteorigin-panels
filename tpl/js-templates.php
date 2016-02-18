@@ -373,14 +373,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<div class="so-import-text"><?php esc_html_e('Import', 'siteorigin-panels') ?></div>
 			<select name="so-layout-position" class="so-row-field so-layout-position">
-				<option value="after"><?php esc_html_e('after', 'siteorigin-panels') ?></option>
-				<option value="before"><?php esc_html_e('before', 'siteorigin-panels') ?></option>
-				<option value="replace"><?php esc_html_e('in place of', 'siteorigin-panels') ?></option>
+				<option value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></option>
+				<option value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></option>
+				<option value="replace"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></option>
 			</select>
-			<div class="so-import-text"><?php esc_html_e('current layout.', 'siteorigin-panels') ?></div>
-			<input type="button" class="button-primary so-import-layout disabled" value="<?php esc_attr_e('Import', 'siteorigin-panels') ?>" disabled="disabled" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"/>
+			<input type="button" class="button-primary so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"/>
 		</div>
 
 	</div>
