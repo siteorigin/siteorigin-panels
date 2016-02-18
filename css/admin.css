@@ -1416,6 +1416,12 @@
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .so-directory-pages .button-disabled {
   pointer-events: none;
 }
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-toolbar .so-buttons .so-import-text {
+  display: inline-block;
+}
+.so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-toolbar .so-buttons select.so-layout-position {
+  vertical-align: baseline;
+}
 .so-panels-dialog .so-visual-styles {
   margin: -15px;
   /* All the field types */

@@ -18,7 +18,7 @@ module.exports = panels.view.dialog.extend( {
         'keyup .so-sidebar-search' : 'searchHandler',
 
 		//Toolbar buttons
-		'click .so-buttons .button-primary' : 'toolbarButtonClickHandler',
+		'click .so-import-layout' : 'toolbarButtonClickHandler',
 
         // The directory items
 		'click .so-screenshot, .so-title' : 'directoryItemClickHandler'
@@ -289,16 +289,10 @@ module.exports = panels.view.dialog.extend( {
 	toolbarButtonClickHandler: function( e ) {
 		e.preventDefault();
 		this.setButtonsEnabled(false);
-		var builderModel = this.builder.model;
 		var $button = $(e.currentTarget);
-		var position;
-		if ($button.hasClass('js-so-append')) {
-			position = builderModel.layoutPosition.AFTER;
-		} else if ($button.hasClass('js-so-prepend')) {
-			position = builderModel.layoutPosition.BEFORE;
-		}
+		var position = this.$('.so-layout-position').val();
 
-		if (_.isUndefined(position) && !$button.hasClass('so-confirmed')) {
+		if (position === 'replace' && !$button.hasClass('so-confirmed')) {
 			this.setButtonsEnabled(true);
 			$button.addClass('so-confirmed');
 			var originalText = $button.val();
@@ -352,12 +346,12 @@ module.exports = panels.view.dialog.extend( {
     },
 
 	setButtonsEnabled: function(enabled) {
-		var $buttons = this.$('.so-buttons .button-primary');
-		$buttons.prop( "disabled", !enabled);
+		var $button = this.$('.so-import-layout');
+		$button.prop( "disabled", !enabled);
 		if(enabled) {
-			$buttons.removeClass('disabled');
+			$button.removeClass('disabled');
 		} else {
-			$buttons.addClass('disabled');
+			$button.addClass('disabled');
 		}
 	},
 
