@@ -58,13 +58,15 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 	$page = !empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
 	$return = array(
+		'title' => '',
 		'items' => array()
 	);
 	if( $type == 'prebuilt' ) {
+		$return['title'] = __( 'Theme Defined Layouts', 'siteorigin-panels' );
+
 		// This is for theme bundled prebuilt directories
 		$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
-		$return['title'] = __( 'Theme Defined Layouts', 'siteorigin-panels' );
 		foreach($layouts as $id => $vals) {
 			if( !empty($search) && strpos( strtolower($vals['name']), $search ) === false ) {
 				continue;
@@ -82,6 +84,8 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 		$return['max_num_pages'] = 1;
 	}
 	elseif( $type == 'directory' ) {
+		$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
+
 		// This is a query of the prebuilt layout directory
 		$query = array();
 		if( !empty($search) ) $query['search'] = $search;
@@ -107,6 +111,9 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 	elseif ( strpos( $type, 'clone_' ) !== false ) {
 		// Check that the user can view the given page types
 		$post_type = str_replace('clone_', '', $type );
+
+		$return['title'] = sprintf( __( 'Clone %s', 'siteorigin-panels' ), esc_html( ucfirst( $post_type ) ) );
+
 		global $wpdb;
 		$user_can_read_private = ( $post_type == 'post' && current_user_can( 'read_private_posts' ) || ( $post_type == 'page' && current_user_can( 'read_private_pages' ) ));
 		$include_private = $user_can_read_private ? "OR posts.post_status = 'private' " : "";
@@ -140,6 +147,11 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 	}
 	else {
 		// An invalid type. Display an error message.
+	}
+
+	// Add the search part to the title
+	if( !empty($search) ) {
+		$return['title'] .= __(' - Results For:', 'siteorigin-panels') . ' <em>' . esc_html( $search ) . '</em>';
 	}
 
 	echo json_encode( $return );

@@ -576,7 +576,9 @@ module.exports = panels.view.dialog.extend( {
             },
             function( data ){
                 // Skip this if we're no longer viewing the layout directory
-                if( thisView.currentTab !== type ) return;
+                if( thisView.currentTab !== type ) {
+                    return;
+                }
 
                 // Add the directory items
                 c.removeClass( 'so-panels-loading').html( thisView.directoryTemplate( data ) );
@@ -603,10 +605,6 @@ module.exports = panels.view.dialog.extend( {
                     });
                 }
 
-                if( search !== '' ) {
-                    c.find('.so-directory-browse').html( panelsOptions.loc.search_results_header + '"<em>' + _.escape(search) + '</em>"' );
-                }
-
                 // Handle nice preloading of the screenshots
                 c.find('.so-screenshot').each( function(){
                     var $$ = $(this), $a = $$.find('.so-screenshot-wrapper');
@@ -624,6 +622,9 @@ module.exports = panels.view.dialog.extend( {
                     }
 
                 } );
+
+                // Set the title
+                c.find('.so-directory-browse').html( data.title );
             },
             'json'
         );
