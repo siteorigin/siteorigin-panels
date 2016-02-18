@@ -55,6 +55,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 
 	$type = !empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory';
 	$search = !empty($_REQUEST['search']) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
+	$page = !empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
 	$return = array(
 		'items' => array()
@@ -84,7 +85,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 		// This is a query of the prebuilt layout directory
 		$query = array();
 		if( !empty($search) ) $query['search'] = $search;
-		if( !empty($_REQUEST['page']) ) $query['page'] = $_REQUEST['page'];
+		$query['page'] = $page;
 
 		$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . '/wp-admin/admin-ajax.php?action=query_layouts');
 		$response = wp_remote_get( $url );
@@ -112,7 +113,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 
 		// Select only the posts with the given post type that also have panels_data
 		$results = $wpdb->get_results( "
-			SELECT ID, post_title, meta.meta_value
+			SELECT SQL_CALC_FOUND_ROWS DISTINCT ID, post_title, meta.meta_value
 			FROM {$wpdb->posts} AS posts
 			JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 			WHERE
@@ -121,8 +122,8 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 				" . ( !empty($search) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
 				AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
 			ORDER BY post_date DESC
-			LIMIT 40
-		" );
+			LIMIT 16 OFFSET " . intval( ( $page - 1 ) * 16 ) );
+		$total_posts = $wpdb->get_var( "SELECT FOUND_ROWS();" );
 
 		foreach( $results as $result ) {
 			$thumbnail = get_the_post_thumbnail_url( $result->ID, array( 400,300 ) );
@@ -133,7 +134,8 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 				'screenshot' => !empty($thumbnail) ? $thumbnail : ''
 			);
 		}
-		$return['max_num_pages'] = 1;
+
+		$return['max_num_pages'] = ceil( $total_posts / 16 );
 
 	}
 	else {
