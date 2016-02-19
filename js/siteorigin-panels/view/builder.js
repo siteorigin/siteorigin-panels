@@ -56,7 +56,7 @@ module.exports = Backbone.View.extend( {
         });
 
         // When the data changes in the model, store it in the field
-        this.model.on('change:data', this.storeModelData, this);
+        this.model.on('change:data load_panels_data', this.storeModelData, this);
 
         // Handle a content change
         this.on('content_change', this.handleContentChange, this);
@@ -547,7 +547,7 @@ module.exports = Backbone.View.extend( {
     handleContentChange: function(){
 
         // Make sure we actually need to copy content.
-        if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible') && this.model.rows.length > 0 ) {
+        if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
 
             // We're going to create a copy of page builder content into the post content
             $.post(
@@ -558,10 +558,6 @@ module.exports = Backbone.View.extend( {
                     post_id : $('#post_ID').val()
                 },
                 function(content){
-
-                    if( content === '' ) {
-                        return;
-                    }
 
                     // Strip all the known layout divs
                     var t = $('<div />').html( content );
