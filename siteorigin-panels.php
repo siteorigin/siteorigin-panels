@@ -396,7 +396,8 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 			$original_post = isset($GLOBALS['post']) ? $GLOBALS['post'] : null; // Make sure widgets don't change the global post.
 			foreach($GLOBALS['wp_widget_factory']->widgets as $class => $widget_obj){
 				ob_start();
-				$widget_obj->form( array() );
+				$return = $widget_obj->form( array() );
+				do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
 				ob_clean();
 			}
 			$GLOBALS['post'] = $original_post;
@@ -1373,7 +1374,8 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
 	$the_widget->number = $widget_number;
 
 	ob_start();
-	$the_widget->form($instance);
+	$return = $the_widget->form($instance);
+	do_action_ref_array( 'in_widget_form', array( &$the_widget, &$return, $instance ) );
 	$form = ob_get_clean();
 
 	// Convert the widget field naming into ones that Page Builder uses
