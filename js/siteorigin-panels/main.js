@@ -62,7 +62,7 @@ panels.dialog.row = require('./dialog/row');
 panels.dialog.history = require('./dialog/history');
 
 // The utils
-panels.utils = {}
+panels.utils = {};
 panels.utils.menu = require('./utils/menu');
 
 // jQuery Plugins
