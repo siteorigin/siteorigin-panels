@@ -665,12 +665,19 @@ module.exports = panels.view.dialog.extend( {
 
 		if (position === 'replace' && !$button.hasClass('so-confirmed')) {
 			this.updateButtonState(true);
-			$button.addClass('so-confirmed');
+			if($button.hasClass('so-confirming')) {
+				return;
+			}
+			$button.addClass('so-confirming');
 			var originalText = $button.val();
 			$button.val($button.data('confirm'));
 			setTimeout(function(){
 				$button.removeClass('so-confirmed').val(originalText);
 			}, 2500);
+			setTimeout(function(){
+				$button.removeClass('so-confirming');
+				$button.addClass('so-confirmed');
+			}, 200);
 			return false;
 		}
 

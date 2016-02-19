@@ -374,7 +374,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<select name="so-layout-position" class="so-row-field so-layout-position">
-				<option selected disabled hidden value=''></option>
+				<option selected disabled value=''><?php esc_html_e('Select position', 'siteorigin-panels') ?></option>
 				<option value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></option>
 				<option value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></option>
 				<option value="replace"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></option>
