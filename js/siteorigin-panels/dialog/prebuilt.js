@@ -17,7 +17,8 @@ module.exports = panels.view.dialog.extend( {
         'click .so-content .layout' : 'layoutClickHandler',
         'keyup .so-sidebar-search' : 'searchHandler',
 
-		//Toolbar buttons
+		//Toolbar elements
+		'change .so-layout-position' : 'toolbarSelectChangeHandler',
 		'click .so-import-layout' : 'toolbarButtonClickHandler',
 
         // The directory items
@@ -52,7 +53,7 @@ module.exports = panels.view.dialog.extend( {
 		// Reset selected item state when changing tabs
 		this.selectedLayoutItem = null;
 		this.uploadedLayout = null;
-		this.setButtonsEnabled(false);
+		this.updateButtonState(false);
 
         this.$('.so-sidebar-tabs li').removeClass('tab-active');
 
@@ -132,7 +133,7 @@ module.exports = panels.view.dialog.extend( {
 
 						thisView.uploadedLayout = layout;
 						thisView.$('.js-so-selected-file').text(file.name);
-						thisView.setButtonsEnabled(true);
+						thisView.updateButtonState(true);
                     }
                     else {
                         alert( panelsOptions.plupload.error_message );
@@ -276,9 +277,17 @@ module.exports = panels.view.dialog.extend( {
 		var $directoryItem = this.$(e.target).closest('.so-directory-item');
 		this.$('.so-directory-items').find('.selected').removeClass('selected');
 		$directoryItem.addClass('selected');
-		this.setButtonsEnabled(true);
 		this.selectedLayoutItem = {lid: $directoryItem.data('layout-id'), type : $directoryItem.data('layout-type')};
+		this.updateButtonState(true);
 
+	},
+
+	/**
+	 * Set the selected position to insert the layout and enable the 'Insert' button if possible.
+	 */
+	toolbarSelectChangeHandler: function( e ) {
+		this.selectedPosition = $(e.currentTarget).val();
+		this.updateButtonState(true);
 	},
 
     /**
@@ -288,12 +297,12 @@ module.exports = panels.view.dialog.extend( {
      */
 	toolbarButtonClickHandler: function( e ) {
 		e.preventDefault();
-		this.setButtonsEnabled(false);
+		this.updateButtonState(false);
 		var $button = $(e.currentTarget);
 		var position = this.$('.so-layout-position').val();
 
 		if (position === 'replace' && !$button.hasClass('so-confirmed')) {
-			this.setButtonsEnabled(true);
+			this.updateButtonState(true);
 			$button.addClass('so-confirmed');
 			var originalText = $button.val();
 			$button.val($button.data('confirm'));
@@ -312,6 +321,9 @@ module.exports = panels.view.dialog.extend( {
 		}
 	},
 
+	/**
+	 * Load the layout according to selectedLayoutItem.
+	 */
 	loadSelectedLayout: function() {
         this.setStatusMessage(panelsOptions.loc.prebuilt_loading, true);
 
@@ -345,7 +357,13 @@ module.exports = panels.view.dialog.extend( {
         }
     },
 
-	setButtonsEnabled: function(enabled) {
+	/**
+	 * Attempt to set the 'Insert' button's state according to the `enabled` argument, also checking whether the
+	 * requirements for inserting a layout have valid values.
+	 */
+	updateButtonState: function(enabled) {
+		var positionValid = this.builder.model.isValidLayoutPosition(this.selectedPosition);
+		enabled = enabled && positionValid && (this.selectedLayoutItem || this.uploadedLayout);
 		var $button = this.$('.so-import-layout');
 		$button.prop( "disabled", !enabled);
 		if(enabled) {

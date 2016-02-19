@@ -2,6 +2,13 @@ module.exports = Backbone.Model.extend( {
 	layoutPosition: {
 		BEFORE: 'before',
 		AFTER: 'after',
+		REPLACE: 'replace',
+	},
+
+	isValidLayoutPosition: function(position) {
+		return position === this.layoutPosition.BEFORE ||
+				position === this.layoutPosition.AFTER ||
+				position === this.layoutPosition.REPLACE;
 	},
 
     rows: {},
