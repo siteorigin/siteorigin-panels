@@ -3,6 +3,7 @@ Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, 
 Requires at least: 4.0
 Tested up to: 4.4.2
 Stable tag: trunk
+Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
