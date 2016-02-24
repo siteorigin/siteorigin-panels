@@ -3469,13 +3469,23 @@ module.exports = Backbone.View.extend( {
         // Make sure we actually need to copy content.
         if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
 
+			var postId;
+			// This might be the custom home page builder
+			var $customHomePageWrapper = $('#panels-home-page');
+			var isCustomHomePage = $customHomePageWrapper.length;
+			if(isCustomHomePage) {
+				postId = $customHomePageWrapper.data('postId');
+			} else {
+				postId = $('#post_ID').val();
+			}
+
             // We're going to create a copy of page builder content into the post content
             $.post(
                 panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_builder_content',
                     panels_data: JSON.stringify( this.model.getPanelsData() ),
-                    post_id : $('#post_ID').val()
+                    post_id: postId
                 },
                 function(content){
 
@@ -3489,8 +3499,11 @@ module.exports = Backbone.View.extend( {
                         .replace(/[\r\n]+/g, "\n")
                         .replace(/\n\s+/g, "\n")
                         .trim();
-
-                    this.updateEditorContent(content);
+					if(isCustomHomePage) {
+						$customHomePageWrapper.find('#post_content').val(content);
+					} else {
+                    	this.updateEditorContent(content);
+					}
                 }.bind(this)
             );
         }

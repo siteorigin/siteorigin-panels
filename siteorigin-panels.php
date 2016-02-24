@@ -130,6 +130,8 @@ function siteorigin_panels_save_home_page(){
 	$page_id = get_option( 'page_on_front' );
 	if( empty($page_id) ) $page_id = get_option( 'siteorigin_panels_home_page_id' );
 
+	$post_content = wp_unslash( $_POST['post_content'] );
+
 	if ( !$page_id || get_post_meta( $page_id, 'panels_data', true ) == '' ) {
 		// Lets create a new page
 		$page_id = wp_insert_post( array(
@@ -137,6 +139,7 @@ function siteorigin_panels_save_home_page(){
 			'post_title' => __( 'Home Page', 'siteorigin-panels' ),
 			'post_status' => !empty($_POST['siteorigin_panels_home_enabled']) ? 'publish' : 'draft',
 			'post_type' => 'page',
+			'post_content' => $post_content,
 			'comment_status' => 'closed',
 		) );
 		update_option( 'page_on_front', $page_id );
@@ -144,6 +147,12 @@ function siteorigin_panels_save_home_page(){
 
 		// Action triggered when creating a new home page through the custom home page interface
 		do_action( 'siteorigin_panels_create_home_page', $page_id );
+	} else {
+		// `wp_insert_post` does it's own sanitization, but it seems `wp_update_post` doesn't.
+		$post_content = sanitize_post_field( $post_content, $page_id, 'db' );
+
+		// Update the post with changed content to save revision if necessary.
+		wp_update_post( array( 'ID' => $page_id, 'post_content' => $post_content ) );
 	}
 
 	// Save the updated page data
@@ -187,7 +196,6 @@ function siteorigin_panels_save_home_page(){
 			do_action( 'save_post', $post->ID, $post, true );
 			do_action( 'wp_insert_post', $post->ID, $post, true );
 		}
-
 	}
 }
 add_action('admin_init', 'siteorigin_panels_save_home_page');

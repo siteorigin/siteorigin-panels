@@ -44,8 +44,8 @@
 		</script>
 
 		<p><input type="submit" class="button button-primary" id="panels-save-home-page" value="<?php esc_attr_e('Save Home Page', 'siteorigin-panels') ?>" /></p>
-
+		<input type="hidden" id="post_content" name="post_content"/>
 		<?php wp_nonce_field('save', '_sopanels_home_nonce') ?>
 	</form>
 	<noscript><p><?php _e('This interface requires Javascript', 'siteorigin-panels') ?></p></noscript>
-</div> 
+</div>
