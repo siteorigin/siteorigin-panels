@@ -149,7 +149,7 @@ function siteorigin_panels_save_home_page(){
 		do_action( 'siteorigin_panels_create_home_page', $page_id );
 	} else {
 		// `wp_insert_post` does it's own sanitization, but it seems `wp_update_post` doesn't.
-		$post_content = sanitize_post_field( $post_content, $page_id, 'db' );
+		$post_content = sanitize_post_field( 'post_content', $post_content, $page_id, 'db' );
 
 		// Update the post with changed content to save revision if necessary.
 		wp_update_post( array( 'ID' => $page_id, 'post_content' => $post_content ) );
