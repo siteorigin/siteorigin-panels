@@ -3044,7 +3044,8 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-        if( typeof this.metabox === 'undefined' ) {
+		// No metabox. This is probably the Custom Home Page Builder.
+        if( typeof this.metabox === 'undefined' || this.metabox.length === 0) {
             return this;
         }
 
@@ -3467,16 +3468,19 @@ module.exports = Backbone.View.extend( {
     handleContentChange: function(){
 
         // Make sure we actually need to copy content.
-        if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
+        if( panelsOptions.copy_content && this.$el.is(':visible')) {
 
-			var postId;
 			// This might be the custom home page builder
 			var $customHomePageWrapper = $('#panels-home-page');
-			var isCustomHomePage = $customHomePageWrapper.length;
+			var isCustomHomePage = $customHomePageWrapper.length > 0;
+			var postId;
 			if(isCustomHomePage) {
 				postId = $customHomePageWrapper.data('postId');
-			} else {
+			} else if(this.attachedToEditor) {
 				postId = $('#post_ID').val();
+			} else {
+				// Not a custom home page and not attached to an editor. I'm out...
+				return;
 			}
 
             // We're going to create a copy of page builder content into the post content
@@ -3495,10 +3499,12 @@ module.exports = Backbone.View.extend( {
                         var c = $(this).contents();
                         $(this).replaceWith(c);
                     });
+
                     content = t.html()
                         .replace(/[\r\n]+/g, "\n")
                         .replace(/\n\s+/g, "\n")
                         .trim();
+
 					if(isCustomHomePage) {
 						$customHomePageWrapper.find('#post_content').val(content);
 					} else {
