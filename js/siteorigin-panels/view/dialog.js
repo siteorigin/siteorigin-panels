@@ -171,6 +171,16 @@ module.exports = Backbone.View.extend( {
         return this;
     },
 
+	initToolbar: function() {
+		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+
+		buttons.click(function (e) {
+			e.preventDefault();
+
+			this.trigger('button_click', $(e.currentTarget));
+		}.bind(this));
+	},
+
     /**
      * Quickly setup the dialog by opening and closing it.
      */

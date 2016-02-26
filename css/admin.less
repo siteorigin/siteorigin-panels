@@ -784,6 +784,7 @@
 		height: @toolbar_height;
 		background-color: #fafafa;
 		border-top: 1px solid @border_color;
+		z-index: 100001; // 1 more than the rest to ensure dropdowns etc appear above the other content.
 
 		.so-status {
 			float: left;
@@ -1701,6 +1702,90 @@
 				padding-right: 0;
 			}
 		}
+	}
+
+
+	.so-dropdown-wrapper {
+		position: relative;
+		float: right;
+
+		@btn_width: 125px;
+		@btn_height: 28px;
+
+		input[type="button"].button-primary {
+			width: @btn_width;
+			height: @btn_height;
+		}
+
+		.so-dropdown-links-wrapper,
+		// Keep hidden on hover when the button is disabled.
+		input[type="button"][disabled].button-primary:hover+.so-dropdown-links-wrapper {
+			display: none;
+			z-index: 11;
+			position:absolute;
+			padding: 6px 0 0 0;
+			bottom: @btn_height;
+			width: @btn_width;
+
+			ul {
+				margin: 0;
+				border: 1px solid #C0C0C0;
+				background: #F9F9F9;
+				.rounded(2px);
+				padding: 4px 0;
+				.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+
+				li {
+					margin: 0;
+
+					&:first-child {
+						border-top-width: 1px;
+					}
+
+					a {
+						display: block;
+						padding: 2px 8px;
+						text-decoration: none;
+						color: #666;
+						font-size: 11px;
+
+						outline: 0 !important;
+						.box-shadow(none);
+
+						&:hover {
+							background: #F0F0F0;
+							color: #444;
+						}
+
+						.dashicons {
+							font-size: 16px;
+							margin: 0;
+							float: right;
+							line-height: 16px;
+						}
+
+					}
+				}
+
+				.so-pointer {
+					width: 12px;
+					height: 6px;
+					position: absolute;
+					z-index: 12;
+					background: url("./images/dropdown-pointer.png");
+					background-size: 12px 6px;
+					top: 1px;
+					right: 18px;
+				}
+			}
+		}
+
+		&:hover {
+			.so-dropdown-links-wrapper {
+				display: block;
+			}
+		}
+
 	}
 }
 
