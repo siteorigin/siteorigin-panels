@@ -274,7 +274,10 @@ module.exports = Backbone.View.extend( {
      * @returns {boolean}
      */
     closeDialog: function(e){
-		e.preventDefault();
+        if( e !== null && e !== undefined ) {
+            e.preventDefault();
+        }
+
         this.trigger('close_dialog');
 
         this.dialogOpen = false;
