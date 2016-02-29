@@ -379,10 +379,6 @@ module.exports = panels.view.dialog.extend( {
         'click .so-content .layout' : 'layoutClickHandler',
         'keyup .so-sidebar-search' : 'searchHandler',
 
-		//Toolbar elements
-		'change .so-layout-position' : 'toolbarSelectChangeHandler',
-		'click .so-import-layout' : 'toolbarButtonClickHandler',
-
         // The directory items
 		'click .so-screenshot, .so-title' : 'directoryItemClickHandler'
     },
@@ -397,6 +393,8 @@ module.exports = panels.view.dialog.extend( {
             thisView.$('.so-sidebar-tabs li a').first().click();
             thisView.$('.so-status').removeClass('so-panels-loading');
         });
+
+		this.on('button_click', this.toolbarButtonClick, this);
     },
 
     /**
@@ -404,6 +402,8 @@ module.exports = panels.view.dialog.extend( {
      */
     render: function(){
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-prebuilt').html(), {} ) );
+
+		this.initToolbar();
     },
 
     /**
@@ -412,6 +412,7 @@ module.exports = panels.view.dialog.extend( {
      * @return {boolean}
      */
     tabClickHandler: function(e){
+		e.preventDefault();
 		// Reset selected item state when changing tabs
 		this.selectedLayoutItem = null;
 		this.uploadedLayout = null;
@@ -437,8 +438,6 @@ module.exports = panels.view.dialog.extend( {
         }
 
         thisView.$('.so-sidebar-search').val('');
-
-        return false;
     },
 
     /**
@@ -644,35 +643,31 @@ module.exports = panels.view.dialog.extend( {
 
 	},
 
-	/**
-	 * Set the selected position to insert the layout and enable the 'Insert' button if possible.
-	 */
-	toolbarSelectChangeHandler: function( e ) {
-		this.selectedPosition = $(e.currentTarget).val();
-		this.updateButtonState(true);
-	},
-
     /**
      * Load a particular layout into the builder.
      *
      * @param id
      */
-	toolbarButtonClickHandler: function( e ) {
-		e.preventDefault();
+	toolbarButtonClick: function($button) {
+		if(!this.canAddLayout()) {
+			return false;
+		}
+		var position = $button.data('value');
+		if(typeof position === 'undefined') {
+			return false;
+		}
 		this.updateButtonState(false);
-		var $button = $(e.currentTarget);
-		var position = this.$('.so-layout-position').val();
 
-		if (position === 'replace' && !$button.hasClass('so-confirmed')) {
+		if ($button.hasClass('so-needs-confirm') && !$button.hasClass('so-confirmed')) {
 			this.updateButtonState(true);
 			if($button.hasClass('so-confirming')) {
 				return;
 			}
 			$button.addClass('so-confirming');
-			var originalText = $button.val();
-			$button.val($button.data('confirm'));
+			var originalText = $button.html();
+			$button.html('<span class="dashicons dashicons-yes"></span>' + $button.data('confirm'));
 			setTimeout(function(){
-				$button.removeClass('so-confirmed').val(originalText);
+				$button.removeClass('so-confirmed').html(originalText);
 			}, 2500);
 			setTimeout(function(){
 				$button.removeClass('so-confirming');
@@ -680,7 +675,7 @@ module.exports = panels.view.dialog.extend( {
 			}, 200);
 			return false;
 		}
-
+		this.addingLayout = true;
 		if (this.currentTab === 'import') {
 			this.addLayoutToBuilder(this.uploadedLayout, position);
 		} else {
@@ -688,6 +683,10 @@ module.exports = panels.view.dialog.extend( {
 				this.addLayoutToBuilder(layout, position);
 			}.bind(this));
 		}
+	},
+
+	canAddLayout: function() {
+		return (this.selectedLayoutItem || this.uploadedLayout) && !this.addingLayout;
 	},
 
 	/**
@@ -731,8 +730,7 @@ module.exports = panels.view.dialog.extend( {
 	 * requirements for inserting a layout have valid values.
 	 */
 	updateButtonState: function(enabled) {
-		var positionValid = this.builder.model.isValidLayoutPosition(this.selectedPosition);
-		enabled = enabled && positionValid && (this.selectedLayoutItem || this.uploadedLayout);
+		enabled = enabled && (this.selectedLayoutItem || this.uploadedLayout);
 		var $button = this.$('.so-import-layout');
 		$button.prop( "disabled", !enabled);
 		if(enabled) {
@@ -745,6 +743,7 @@ module.exports = panels.view.dialog.extend( {
 	addLayoutToBuilder: function(layout, position) {
 		this.builder.addHistoryEntry('prebuilt_loaded');
 		this.builder.model.loadPanelsData(layout, position);
+		this.addingLayout = false;
 		this.closeDialog();
 	}
 } );
@@ -4100,6 +4099,42 @@ module.exports = Backbone.View.extend( {
         return this;
     },
 
+	initToolbar: function() {
+		// Trigger simplified click event for elements marked as toolbar buttons.
+		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+		buttons.click(function (e) {
+			e.preventDefault();
+
+			this.trigger('button_click', $(e.currentTarget));
+		}.bind(this));
+
+		// Handle showing and hiding the dropdown list items
+		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		$dropdowns.click(function (e) {
+			e.preventDefault();
+			var $dropdownButton = $(e.currentTarget);
+			var $dropdownList = $dropdownButton.siblings('.so-dropdown-links-wrapper');
+			if($dropdownList.is('.hidden')) {
+				$dropdownList.removeClass('hidden');
+			} else {
+				$dropdownList.addClass('hidden');
+			}
+
+		}.bind(this));
+
+		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
+		// unconfirmed state.
+		$('html').click(function (e) {
+			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+				var $dropdownList = $(el);
+				var $trgt = $(e.target);
+				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {
+					$dropdownList.addClass('hidden');
+				}
+			})
+		}.bind(this));
+	},
+
     /**
      * Quickly setup the dialog by opening and closing it.
      */
@@ -4167,6 +4202,10 @@ module.exports = Backbone.View.extend( {
      * @returns {boolean}
      */
     closeDialog: function(e){
+        if( e !== null && e !== undefined ) {
+            e.preventDefault();
+        }
+
         this.trigger('close_dialog');
 
         this.dialogOpen = false;
@@ -4191,8 +4230,6 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
-
-        return false;
     },
 
     /**
@@ -4390,6 +4427,7 @@ module.exports = Backbone.View.extend( {
         };
     }
 } );
+
 },{}],22:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 

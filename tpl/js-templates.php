@@ -373,13 +373,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<select name="so-layout-position" class="so-row-field so-layout-position">
-				<option selected disabled value=''><?php esc_html_e('Select position', 'siteorigin-panels') ?></option>
-				<option value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></option>
-				<option value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></option>
-				<option value="replace"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></option>
-			</select>
-			<input type="button" class="button-primary so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"/>
+			<span class="so-dropdown-wrapper">
+				<input type="button" class="button-primary so-dropdown-button so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled"/>
+
+				<div class="so-dropdown-links-wrapper hidden">
+					<ul class="so-layout-position">
+						<li><a href="#" class="so-toolbar-button" data-value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-toolbar-button" data-value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></a></li>
+						<li><a href="#" class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></a></li>
+					</ul>
+				</div>
+			</span>
 		</div>
 
 	</div>
