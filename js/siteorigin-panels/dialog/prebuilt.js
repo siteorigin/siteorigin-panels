@@ -291,8 +291,11 @@ module.exports = panels.view.dialog.extend( {
 		if(!this.canAddLayout()) {
 			return false;
 		}
-		this.updateButtonState(false);
 		var position = $button.data('value');
+		if(typeof position === 'undefined') {
+			return false;
+		}
+		this.updateButtonState(false);
 
 		if ($button.hasClass('so-needs-confirm') && !$button.hasClass('so-confirmed')) {
 			this.updateButtonState(true);
@@ -379,6 +382,7 @@ module.exports = panels.view.dialog.extend( {
 	addLayoutToBuilder: function(layout, position) {
 		this.builder.addHistoryEntry('prebuilt_loaded');
 		this.builder.model.loadPanelsData(layout, position);
+		this.addingLayout = false;
 		this.closeDialog();
 	}
 } );
