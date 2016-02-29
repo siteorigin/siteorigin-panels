@@ -50,6 +50,7 @@ module.exports = panels.view.dialog.extend( {
      * @return {boolean}
      */
     tabClickHandler: function(e){
+		e.preventDefault();
 		// Reset selected item state when changing tabs
 		this.selectedLayoutItem = null;
 		this.uploadedLayout = null;
@@ -75,8 +76,6 @@ module.exports = panels.view.dialog.extend( {
         }
 
         thisView.$('.so-sidebar-search').val('');
-
-        return false;
     },
 
     /**

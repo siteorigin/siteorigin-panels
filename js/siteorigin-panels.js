@@ -412,6 +412,7 @@ module.exports = panels.view.dialog.extend( {
      * @return {boolean}
      */
     tabClickHandler: function(e){
+		e.preventDefault();
 		// Reset selected item state when changing tabs
 		this.selectedLayoutItem = null;
 		this.uploadedLayout = null;
@@ -437,8 +438,6 @@ module.exports = panels.view.dialog.extend( {
         }
 
         thisView.$('.so-sidebar-search').val('');
-
-        return false;
     },
 
     /**
@@ -4101,12 +4100,38 @@ module.exports = Backbone.View.extend( {
     },
 
 	initToolbar: function() {
+		// Trigger simplified click event for elements marked as toolbar buttons.
 		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
-
 		buttons.click(function (e) {
 			e.preventDefault();
 
 			this.trigger('button_click', $(e.currentTarget));
+		}.bind(this));
+
+		// Handle showing and hiding the dropdown list items
+		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		$dropdowns.click(function (e) {
+			e.preventDefault();
+			var $dropdownButton = $(e.currentTarget);
+			var $dropdownList = $dropdownButton.siblings('.so-dropdown-links-wrapper');
+			if($dropdownList.is('.hidden')) {
+				$dropdownList.removeClass('hidden');
+			} else {
+				$dropdownList.addClass('hidden');
+			}
+
+		}.bind(this));
+
+		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
+		// unconfirmed state.
+		$('html').click(function (e) {
+			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+				var $dropdownList = $(el);
+				var $trgt = $(e.target);
+				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {
+					$dropdownList.addClass('hidden');
+				}
+			})
 		}.bind(this));
 	},
 
@@ -4177,6 +4202,7 @@ module.exports = Backbone.View.extend( {
      * @returns {boolean}
      */
     closeDialog: function(e){
+		e.preventDefault();
         this.trigger('close_dialog');
 
         this.dialogOpen = false;
@@ -4201,8 +4227,6 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
-
-        return false;
     },
 
     /**

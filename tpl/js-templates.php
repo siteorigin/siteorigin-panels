@@ -374,10 +374,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<span class="so-dropdown-wrapper">
-				<input type="button" class="button-primary so-toolbar-button so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled"/>
+				<input type="button" class="button-primary so-dropdown-button so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled"/>
 
-				<div class="so-dropdown-links-wrapper">
-					<ul class="so-layout-position disabled">
+				<div class="so-dropdown-links-wrapper hidden">
+					<ul class="so-layout-position">
 						<li><a href="#" class="so-toolbar-button" data-value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></a></li>
 						<li><a href="#" class="so-toolbar-button" data-value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></a></li>
 						<li><a href="#" class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></a></li>

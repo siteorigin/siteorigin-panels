@@ -1717,10 +1717,8 @@
 			height: @btn_height;
 		}
 
-		.so-dropdown-links-wrapper,
-		// Keep hidden on hover when the button is disabled.
-		input[type="button"][disabled].button-primary:hover+.so-dropdown-links-wrapper {
-			display: none;
+		.so-dropdown-links-wrapper{
+			display: block;
 			z-index: 11;
 			position:absolute;
 			padding: 6px 0 0 0;
@@ -1778,14 +1776,10 @@
 					right: 18px;
 				}
 			}
-		}
-
-		&:hover {
-			.so-dropdown-links-wrapper {
-				display: block;
+			&.hidden {
+				display: none;
 			}
 		}
-
 	}
 }
 
