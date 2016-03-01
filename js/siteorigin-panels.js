@@ -2921,6 +2921,11 @@ module.exports = Backbone.View.extend({
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
+	builderTypes: {
+		EDITOR_ATTACHED: 'editor_attached',
+		CUSTOM_HOME_PAGE: 'custom_home_page',
+	},
+
     template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
     dialogs: {  },
     rowsSortable: null,
@@ -3039,12 +3044,20 @@ module.exports = Backbone.View.extend( {
     },
 
     /**
-     * This will move the Page Builder meta box into the editor
+     * This will move the Page Builder meta box into the editor if we're in the post/page edit interface.
      *
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-		// No metabox. This is probably the Custom Home Page Builder.
+		if(this.builderType !== this.builderTypes.EDITOR_ATTACHED) {
+			if(this.builderType == this.builderTypes.CUSTOM_HOME_PAGE) {
+				// We still have a hidden 'editor' field for the custom home page builder.
+				this.attachedToEditor = true;
+			}
+			return this;
+		}
+
+		// No metabox... :/
         if( typeof this.metabox === 'undefined' || this.metabox.length === 0) {
             return this;
         }
@@ -3468,18 +3481,15 @@ module.exports = Backbone.View.extend( {
     handleContentChange: function(){
 
         // Make sure we actually need to copy content.
-        if( panelsOptions.copy_content && this.$el.is(':visible')) {
+        if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
 
-			// This might be the custom home page builder
-			var $customHomePageWrapper = $('#panels-home-page');
-			var isCustomHomePage = $customHomePageWrapper.length > 0;
 			var postId;
-			if(isCustomHomePage) {
-				postId = $customHomePageWrapper.data('postId');
-			} else if(this.attachedToEditor) {
+			if(this.builderType === this.builderTypes.EDITOR_ATTACHED) {
 				postId = $('#post_ID').val();
+			} else if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
+				postId = $('#panels-home-page').data('postId');
 			} else {
-				// Not a custom home page and not attached to an editor. I'm out...
+				// This shouldn't happen.
 				return;
 			}
 
@@ -3505,11 +3515,7 @@ module.exports = Backbone.View.extend( {
                         .replace(/\n\s+/g, "\n")
                         .trim();
 
-					if(isCustomHomePage) {
-						$customHomePageWrapper.find('#post_content').val(content);
-					} else {
-                    	this.updateEditorContent(content);
-					}
+					this.updateEditorContent(content);
                 }.bind(this)
             );
         }
@@ -3526,6 +3532,11 @@ module.exports = Backbone.View.extend( {
      * @param content
      */
     updateEditorContent:function ( content ) {
+		// If we're in the custom home page builder use the hidden content field.
+		if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
+			$('#post_content').val(content);
+			return;
+		}
         // Switch back to the standard editor
         if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
             var contentArea = $('#content');
