@@ -693,6 +693,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	$panels_tablet_width = $settings['tablet-width'];
 	$panels_mobile_width = $settings['mobile-width'];
 	$panels_margin_bottom = $settings['margin-bottom'];
+	$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
 
 	$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 
@@ -719,12 +720,19 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			}
 		}
 
-		// Add the bottom margin to any grids that aren't the last
-		if($gi != count($panels_data['grids'])-1){
+		if($panels_margin_bottom_last_row) {
 			// Filter the bottom margin for this row with the arguments
 			$css->add_row_css($post_id, $grid_id, '', array(
 				'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 			));
+		} else {
+			// Add the bottom margin to any grids that aren't the last
+			if($gi != count($panels_data['grids'])-1 || !empty($grid['style']['bottom_margin'])){
+				// Filter the bottom margin for this row with the arguments
+				$css->add_row_css($post_id, $grid_id, '', array(
+					'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
+				));
+			}			
 		}
 
 
