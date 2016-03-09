@@ -130,20 +130,6 @@
   border: 1px solid #999999;
   color: #444444;
 }
-@media screen and (max-width: 600px) {
-  .siteorigin-panels-builder .so-builder-toolbar {
-    padding: 10px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button {
-    padding-right: 2px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button .so-panels-icon {
-    font-size: 20px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button span.so-button-text {
-    display: none;
-  }
-}
 .siteorigin-panels-builder .so-rows-container {
   padding: 20px 15px 0 15px;
 }
@@ -307,7 +293,7 @@
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .cell-wrapper {
   background: #e4eff4;
   border: 1px solid #bcccd2;
-  padding: 10px 10px 4px 10px;
+  padding: 7px 7px 1px 7px;
   /* 6px bottom to remove bottom margin from panels */
   height: 100%;
   min-height: 70px;
@@ -417,10 +403,6 @@
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget .form {
   display: none;
 }
-.siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget.widget-being-dragged {
-  opacity: 0.9;
-  pointer-events: none;
-}
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget-sortable-highlight {
   border: 1px solid;
   -ms-box-sizing: border-box;
@@ -515,10 +497,27 @@
   color: #777;
   font-size: 0.8em;
 }
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar {
+  padding: 10px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button {
+  padding-right: 2px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button .so-panels-icon {
+  font-size: 14px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button span.so-button-text {
+  display: none;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar .so-switch-to-standard {
+  display: none !important;
+}
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
   /* Need a high z-index for layout builder widget */
   z-index: 500002 !important;
+  opacity: 0.9;
+  pointer-events: none;
   cursor: move;
   margin-bottom: 5px;
   background: #f9f9fb;
@@ -605,10 +604,6 @@
 }
 .so-widget.ui-sortable-helper.widget-being-dragged .form {
   display: none;
-}
-.so-widget.ui-sortable-helper.widget-being-dragged.widget-being-dragged {
-  opacity: 0.9;
-  pointer-events: none;
 }
 /* Handles displaying a builder in the WordPress widget interface */
 .widgets-holder-wrap .widget-inside .siteorigin-panels-builder .so-builder-container {
