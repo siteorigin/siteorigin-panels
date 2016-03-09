@@ -1723,8 +1723,6 @@ module.exports = panels.view.dialog.extend( {
 
         var $w = $(e.currentTarget);
 
-        console.log( panels );
-
         var widget = new panels.model.widget( {
             class: $w.data('class')
         } );
@@ -1781,6 +1779,7 @@ module.exports = panels.view.dialog.extend( {
         } );
     }
 } );
+
 },{}],11:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
