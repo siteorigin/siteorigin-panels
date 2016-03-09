@@ -512,6 +512,9 @@
 .siteorigin-panels-builder .so-display-narrow .so-builder-toolbar .so-switch-to-standard {
   display: none !important;
 }
+.siteorigin-panels-builder .so-display-narrow .widgets-container .so-widget .actions {
+  display: none !important;
+}
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
   /* Need a high z-index for layout builder widget */
