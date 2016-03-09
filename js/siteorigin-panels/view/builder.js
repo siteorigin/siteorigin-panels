@@ -59,8 +59,9 @@ module.exports = Backbone.View.extend( {
         this.model.on('change:data load_panels_data', this.storeModelData, this);
 
         // Handle a content change
-        this.on('content_change', this.handleContentChange, this);
-        this.on('display_builder', this.handleDisplayBuilder, this);
+        this.on( 'content_change', this.handleContentChange, this );
+        this.on( 'display_builder', this.handleDisplayBuilder, this );
+	    this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
         this.model.on('change:data load_panels_data', this.toggleWelcomeDisplay, this);
 
         // Create the context menu for this builder
@@ -682,6 +683,22 @@ module.exports = Backbone.View.extend( {
             this.model.trigger('change:data');
         }
     },
+
+	handleBuilderSizing: function(){
+		var width = this.$el.width();
+
+		if( ! width ) {
+			return this;
+		}
+
+		if( width < 480 ) {
+			this.$el.addClass( 'so-display-narrow' );
+		}
+		else {
+			this.$el.removeClass( 'so-display-narrow' );
+		}
+
+	},
 
     /**
      * Set the parent dialog for all the dialogs in this builder.

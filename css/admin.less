@@ -142,27 +142,6 @@
 		}
 	}
 
-	@media screen and (max-width: 600px) {
-		.so-builder-toolbar {
-
-			padding: 10px;
-
-			> .so-tool-button {
-				padding-right: 2px;
-
-				.so-panels-icon {
-					font-size: 20px;
-				}
-
-				span.so-button-text {
-					display: none;
-				}
-			}
-
-		}
-
-	}
-
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
@@ -320,7 +299,7 @@
 					.cell-wrapper{
 						background: #e4eff4;
 						border: 1px solid #bcccd2;
-						padding: 10px 10px 4px 10px; /* 6px bottom to remove bottom margin from panels */
+						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
 						height: 100%;
 						min-height: 70px;
 					}
@@ -446,11 +425,6 @@
 								display: none;
 							}
 
-							&.widget-being-dragged {
-								opacity: 0.9;
-								pointer-events: none;
-							}
-
 						}
 
 						.so-widget-sortable-highlight{
@@ -566,12 +540,44 @@
 		}
 	}
 
+	// This is for the special narrow display
+
+	.so-display-narrow {
+
+		.so-builder-toolbar {
+			padding: 10px;
+			> .so-tool-button {
+				padding-right: 2px;
+
+				.so-panels-icon {
+					font-size: 14px;
+				}
+
+				span.so-button-text {
+					display: none;
+				}
+			}
+
+			.so-switch-to-standard {
+				display: none !important;
+			}
+		}
+
+		.widgets-container .so-widget .actions {
+			display: none !important;
+		}
+
+	}
+
 }
 
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
 	/* Need a high z-index for layout builder widget */
 	z-index: 500002 !important;
+
+	opacity: 0.9;
+	pointer-events: none;
 
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
