@@ -2,7 +2,7 @@
 var panels = window.panels;
 
 module.exports = Backbone.Collection.extend( {
-    model: panels.cell,
+    model: panels.model.cell,
 
     initialize: function(){
     },
@@ -20,6 +20,7 @@ module.exports = Backbone.Collection.extend( {
         return totalWeight;
     }
 } );
+
 },{}],2:[function(require,module,exports){
 var panels = window.panels;
 
