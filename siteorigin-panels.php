@@ -720,20 +720,14 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			}
 		}
 
-		if($panels_margin_bottom_last_row) {
+		// Add the bottom margin to any grids that aren't the last
+		if($gi != count($panels_data['grids'])-1 || !empty($grid['style']['bottom_margin']) || !empty($panels_margin_bottom_last_row)){
 			// Filter the bottom margin for this row with the arguments
 			$css->add_row_css($post_id, $grid_id, '', array(
 				'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 			));
-		} else {
-			// Add the bottom margin to any grids that aren't the last
-			if($gi != count($panels_data['grids'])-1 || !empty($grid['style']['bottom_margin'])){
-				// Filter the bottom margin for this row with the arguments
-				$css->add_row_css($post_id, $grid_id, '', array(
-					'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
-				));
-			}			
-		}
+		}			
+
 
 
 		$collapse_order = !empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
