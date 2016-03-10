@@ -270,6 +270,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __('Default margin below rows.', 'siteorigin-panels'),
 		);
 
+		$fields['layout']['fields']['margin-bottom-last-row'] = array(
+			'type' => 'checkbox',
+			'label' => __('Last Row With Margin', 'siteorigin-panels'),
+			'description' => __('Allow margin in last row.', 'siteorigin-panels'),
+		);
+
 		$fields['layout']['fields']['margin-sides'] = array(
 			'type' => 'number',
 			'unit' => 'px',
