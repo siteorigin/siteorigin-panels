@@ -2,7 +2,7 @@
 var panels = window.panels;
 
 module.exports = Backbone.Collection.extend( {
-    model: panels.cell,
+    model: panels.model.cell,
 
     initialize: function(){
     },
@@ -20,6 +20,7 @@ module.exports = Backbone.Collection.extend( {
         return totalWeight;
     }
 } );
+
 },{}],2:[function(require,module,exports){
 var panels = window.panels;
 
@@ -1722,8 +1723,6 @@ module.exports = panels.view.dialog.extend( {
 
         var $w = $(e.currentTarget);
 
-        console.log( panels );
-
         var widget = new panels.model.widget( {
             class: $w.data('class')
         } );
@@ -1780,6 +1779,7 @@ module.exports = panels.view.dialog.extend( {
         } );
     }
 } );
+
 },{}],11:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -2481,8 +2481,9 @@ module.exports = Backbone.Model.extend( {
         this.set( 'values', values, {silent: true} );
 
         if( hasChanged ) {
-            // We'll trigger our own change events
-            this.trigger('change');
+            // We'll trigger our own change events.
+			// NB: Must include the model being changed (i.e. `this`) as a workaround for a bug in Backbone 1.2.3
+            this.trigger('change', this);
             this.trigger('change:values');
         }
     },
@@ -2582,6 +2583,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
+
 },{}],18:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
