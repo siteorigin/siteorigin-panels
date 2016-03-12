@@ -77,7 +77,8 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     render: function(){
-        this.$el.html( this.template() );
+        // this.$el.html( this.template() );
+	    this.setElement( this.template() );
         this.$el
             .attr( 'id', 'siteorigin-panels-builder-' + this.cid )
             .addClass('so-builder-container');
@@ -201,6 +202,8 @@ module.exports = Backbone.View.extend( {
 
         // We will also make this sticky if its attached to an editor.
         var stickToolbar = function(){
+	        return;
+
             var toolbar = thisView.$('.so-builder-toolbar');
             var newTop = $(window).scrollTop() - thisView.$el.offset().top;
 

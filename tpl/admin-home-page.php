@@ -33,7 +33,7 @@
 			</div>
 		<?php endif; ?>
 
-		<div class="siteorigin-panels-builder so-panels-loading">
+		<div class="siteorigin-panels-builder-container so-panels-loading">
 
 		</div>
 
@@ -48,4 +48,4 @@
 		<?php wp_nonce_field('save', '_sopanels_home_nonce') ?>
 	</form>
 	<noscript><p><?php _e('This interface requires Javascript', 'siteorigin-panels') ?></p></noscript>
-</div> 
+</div>

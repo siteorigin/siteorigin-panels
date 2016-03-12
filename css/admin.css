@@ -9,7 +9,8 @@
 #so-panels-panels.attached-to-editor {
   margin-top: 20px;
 }
-#so-panels-panels.attached-to-editor .hndle {
+#so-panels-panels.attached-to-editor .hndle,
+#so-panels-panels.attached-to-editor .handlediv {
   display: none !important;
 }
 #so-panels-panels.attached-to-editor .inside {
@@ -76,10 +77,10 @@
   border-bottom: 1px solid #D0D0D0;
   background: #F5F5F5;
   line-height: 1em;
-  position: absolute;
   z-index: 101;
   white-space: nowrap;
   overflow-x: hidden;
+  position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
   top: 0;
   left: 0;
@@ -497,22 +498,22 @@
   color: #777;
   font-size: 0.8em;
 }
-.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar {
+.siteorigin-panels-builder.so-display-narrow .so-builder-toolbar {
   padding: 10px;
 }
-.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button {
+.siteorigin-panels-builder.so-display-narrow .so-builder-toolbar > .so-tool-button {
   padding-right: 2px;
 }
-.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button .so-panels-icon {
+.siteorigin-panels-builder.so-display-narrow .so-builder-toolbar > .so-tool-button .so-panels-icon {
   font-size: 14px;
 }
-.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button span.so-button-text {
+.siteorigin-panels-builder.so-display-narrow .so-builder-toolbar > .so-tool-button span.so-button-text {
   display: none;
 }
-.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar .so-switch-to-standard {
+.siteorigin-panels-builder.so-display-narrow .so-builder-toolbar .so-switch-to-standard {
   display: none !important;
 }
-.siteorigin-panels-builder .so-display-narrow .widgets-container .so-widget .actions {
+.siteorigin-panels-builder.so-display-narrow .widgets-container .so-widget .actions {
   display: none !important;
 }
 /* This is to display a draggable widget  */
@@ -1667,7 +1668,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 260px;
+  width: 360px;
   overflow-y: auto;
   background: #F2F2F2;
   border-right: 1px solid #D0D0D0;
@@ -1706,85 +1707,11 @@
   top: 7px;
   left: 13px;
 }
-.so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section .section-header {
-  cursor: pointer;
-  background: #ffffff;
-  padding: 15px 10px;
-  border: solid #ddd;
-  border-width: 1px 0;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section .section-header h4 {
-  margin: 0;
-  font-size: 16px;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section .section-widgets {
-  padding: 10px;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .page-widgets-section:first-child .section-header {
-  border-top: 0;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget {
-  border: 1px solid #cccccc;
-  cursor: pointer;
-  padding: 10px;
-  background: #F8F8F8;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF;
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF;
-  margin-bottom: 6px;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget:hover,
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget.so-hovered {
-  -webkit-box-shadow: 0 2px 2px rgba(0,0,0,0.0125), inset 0 1px 0 #FFFFFF;
-  -moz-box-shadow: 0 2px 2px rgba(0,0,0,0.0125), inset 0 1px 0 #FFFFFF;
-  box-shadow: 0 2px 2px rgba(0,0,0,0.0125), inset 0 1px 0 #FFFFFF;
-  border: 1px solid #9bafb5;
-  background: #f4f9fd;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget.so-current {
-  border-color: #0074a2;
-  background: #2ea2cc;
-  cursor: auto;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget.so-current h4 {
-  color: #FFFFFF;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget.so-current small {
-  color: #eeeeee;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget.so-current:hover {
-  border-color: #0074a2;
-  background: #2ea2cc;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget:last-child {
-  margin-bottom: 0;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget h4 {
-  margin: 0 0 7px 0;
-  padding: 0;
-  height: 1.2em;
-  color: #222222;
-  font-size: 14px;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget .actions {
-  display: none;
-}
-.so-panels-live-editor .so-sidebar .page-widgets .so-widget small {
-  font-size: 11px;
-  line-height: 1.2em;
-  height: 1.2em;
-  display: block;
-  overflow: hidden;
-  color: #888888;
-}
 .so-panels-live-editor .so-preview {
   top: 0;
   right: 0;
   bottom: 0;
-  left: 260px;
+  left: 360px;
   background: #F4F4F4;
 }
 .so-panels-live-editor .so-preview iframe {

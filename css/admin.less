@@ -21,7 +21,7 @@
 
 		margin-top: 20px;
 
-		.hndle {
+		.hndle, .handlediv {
 			display: none !important;
 		}
 
@@ -89,10 +89,10 @@
 		border-bottom: 1px solid #D0D0D0;
 		background: #F5F5F5;
 		line-height: 1em;
-		position: absolute;
 		z-index: 101;
 		white-space: nowrap;
 		overflow-x: hidden;
+		position: relative;
 
 		box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 
@@ -542,7 +542,7 @@
 
 	// This is for the special narrow display
 
-	.so-display-narrow {
+	&.so-display-narrow {
 
 		.so-builder-toolbar {
 			padding: 10px;
@@ -1797,6 +1797,8 @@
 }
 
 .so-panels-live-editor {
+	@live_editor_width: 360px;
+
 	> div {
 		position: fixed;
 		z-index: 99999;
@@ -1818,7 +1820,7 @@
 		top: 0;
 		left: 0;
 		bottom: 0;
-		width: 260px;
+		width: @live_editor_width;
 		overflow-y: auto;
 
 		background: #F2F2F2;
@@ -1858,104 +1860,13 @@
 
 		}
 
-		.page-widgets {
-
-			.page-widgets-section {
-
-				.section-header {
-					cursor: pointer;
-					background: #ffffff;
-					padding: 15px 10px;
-					border: solid #ddd;
-					border-width: 1px 0;
-
-					h4 {
-						margin: 0;
-						font-size: 16px;
-					}
-				}
-
-				.section-widgets {
-					padding: 10px;
-				}
-
-
-				&:first-child {
-					.section-header {
-						border-top: 0;
-					}
-				}
-			}
-
-			.so-widget {
-				border: 1px solid #cccccc;
-				cursor: pointer;
-				padding: 10px;
-				background: #F8F8F8;
-				.box-shadow(~"0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF");
-				margin-bottom: 6px;
-
-				&:hover, &.so-hovered {
-					.box-shadow(~"0 2px 2px rgba(0,0,0,0.0125), inset 0 1px 0 #FFFFFF");
-					border: 1px solid #9bafb5;
-					background: #f4f9fd;
-				}
-
-				&.so-current {
-					border-color: #0074a2;
-					background: #2ea2cc;
-					cursor: auto;
-					.box-shadow(~"0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)");
-
-					h4 {
-						color: #FFFFFF;
-					}
-
-					small {
-						color: #eeeeee;
-					}
-
-					&:hover {
-						border-color: #0074a2;
-						background: #2ea2cc;
-					}
-				}
-
-				&:last-child {
-					margin-bottom: 0;
-				}
-
-				h4 {
-					margin: 0 0 7px 0;
-					padding: 0;
-					height: 1.2em;
-					color: #222222;
-					font-size: 14px;
-				}
-
-				.actions {
-					display: none;
-				}
-
-				small{
-					font-size: 11px;
-					line-height: 1.2em;
-					height: 1.2em;
-					display: block;
-					overflow: hidden;
-					color: #888888;
-				}
-
-			}
-
-		}
 	}
 
 	.so-preview {
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: 260px;
+		left: @live_editor_width;
 
 		background: #F4F4F4;
 

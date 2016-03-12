@@ -84,8 +84,8 @@ jQuery( function($){
     }
     else if( $('.siteorigin-panels-builder-form').length ) {
         // We're dealing with another interface like the custom home page interface
-        var $$ = jQuery('.siteorigin-panels-builder-form');
-        container = $$.find('.siteorigin-panels-builder');
+        var $$ = $('.siteorigin-panels-builder-form');
+        container = $$.find('.siteorigin-panels-builder-container');
         field = $$.find('input[name="panels_data"]');
         form = $$;
         postId = $('#panels-home-page').data('post-id');

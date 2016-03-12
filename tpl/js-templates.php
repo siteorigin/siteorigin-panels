@@ -5,66 +5,70 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-builder">
 
-	<div class="so-builder-toolbar">
+	<div class="siteorigin-panels-builder">
 
-		<a href="#" class="so-tool-button so-widget-add">
-			<span class="so-panels-icon so-panels-icon-plus"></span>
-			<span class="so-button-text"><?php esc_attr_e('Add Widget', 'siteorigin-panels') ?></span>
-		</a>
+		<div class="so-builder-toolbar">
 
-		<a href="#" class="so-tool-button so-row-add">
-			<span class="so-panels-icon so-panels-icon-columns"></span>
-			<span class="so-button-text"><?php esc_attr_e('Add Row', 'siteorigin-panels') ?></span>
-		</a>
-
-		<a href="#" class="so-tool-button so-prebuilt-add">
-			<span class="so-panels-icon so-panels-icon-cubes"></span>
-			<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
-		</a>
-
-		<?php if( !empty($post) ) : ?>
-
-			<a href="#" class="so-tool-button so-history" style="display: none">
-				<span class="so-panels-icon so-panels-icon-rotate-left"></span>
-				<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
+			<a href="#" class="so-tool-button so-widget-add">
+				<span class="so-panels-icon so-panels-icon-plus"></span>
+				<span class="so-button-text"><?php esc_attr_e('Add Widget', 'siteorigin-panels') ?></span>
 			</a>
 
-			<a href="#" class="so-tool-button so-live-editor" style="display: none">
-				<span class="so-panels-icon so-panels-icon-eye"></span>
-				<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
+			<a href="#" class="so-tool-button so-row-add">
+				<span class="so-panels-icon so-panels-icon-columns"></span>
+				<span class="so-button-text"><?php esc_attr_e('Add Row', 'siteorigin-panels') ?></span>
 			</a>
 
-		<?php endif; ?>
+			<a href="#" class="so-tool-button so-prebuilt-add">
+				<span class="so-panels-icon so-panels-icon-cubes"></span>
+				<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
+			</a>
 
-		<a href="#" class="so-switch-to-standard"><?php _e('Switch to Editor', 'siteorigin-panels') ?></a>
+			<?php if( !empty($post) ) : ?>
 
-	</div>
+				<a href="#" class="so-tool-button so-history" style="display: none">
+					<span class="so-panels-icon so-panels-icon-rotate-left"></span>
+					<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
+				</a>
 
-	<div class="so-rows-container">
+				<a href="#" class="so-tool-button so-live-editor" style="display: none">
+					<span class="so-panels-icon so-panels-icon-eye"></span>
+					<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
+				</a>
 
-	</div>
+			<?php endif; ?>
 
-	<div class="so-panels-welcome-message">
-		<div class="so-message-wrapper">
-			<?php
-			echo preg_replace(
-				array(
-					'/1\{ *(.*?) *\}/',
-					'/2\{ *(.*?) *\}/',
-					'/3\{ *(.*?) *\}/',
-					'/4\{ *(.*?) *\}/',
-				),
-				array(
-					"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
-					"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-columns'></span> $1</a>",
-					"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-cubes'></span> $1</a>",
-					"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
-				),
-				// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
-				__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
-			);
-			?>
+			<a href="#" class="so-switch-to-standard"><?php _e('Switch to Editor', 'siteorigin-panels') ?></a>
+
 		</div>
+
+		<div class="so-rows-container">
+
+		</div>
+
+		<div class="so-panels-welcome-message">
+			<div class="so-message-wrapper">
+				<?php
+				echo preg_replace(
+					array(
+						'/1\{ *(.*?) *\}/',
+						'/2\{ *(.*?) *\}/',
+						'/3\{ *(.*?) *\}/',
+						'/4\{ *(.*?) *\}/',
+					),
+					array(
+						"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
+						"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-columns'></span> $1</a>",
+						"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-cubes'></span> $1</a>",
+						"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
+					),
+					// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
+					__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
+				);
+				?>
+			</div>
+		</div>
+
 	</div>
 
 </script>
@@ -503,8 +507,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-live-editor">
 	<div class="so-panels-live-editor">
 
-		<div class="so-overlay"></div>
-
 		<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_the_permalink() ) ) ?>" target="siteorigin-panels-live-editor-iframe" class="live-editor-form">
 			<input type="hidden" name="siteorigin_panels_data" value="">
 		</form>
@@ -515,7 +517,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<a href="#" class="live-editor-close" title="<?php esc_attr_e('Close Live Editor', 'siteorigin-panels') ?>"></a>
 			</div>
 
-			<div class="page-widgets">
+			<div class="so-live-editor-builder">
 
 			</div>
 
@@ -525,16 +527,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<iframe id="siteorigin-panels-live-editor-iframe" name="siteorigin-panels-live-editor-iframe" src=""></iframe>
 		</div>
 
-	</div>
-</script>
-
-<script type="text/template" id="siteorigin-panels-live-editor-sidebar-section">
-	<div class="page-widgets-section">
-		<div class="section-header">
-			<h4>{{%= title %}}</h4>
-		</div>
-		<div class="section-widgets">
-		</div>
 	</div>
 </script>
 
