@@ -20,6 +20,7 @@ module.exports = Backbone.View.extend( {
      */
     render: function(){
         this.$el.html( this.template() );
+	    this.$el.hide();
     },
 
     /**
@@ -44,41 +45,39 @@ module.exports = Backbone.View.extend( {
             this.attach();
         }
 
+	    // Disable page scrolling
+	    this.bodyScrollTop = $('body').scrollTop();
+	    $('body').css( {overflow:'hidden'} );
+
+	    if( this.$el.is(':visible') ) {
+		    return this;
+	    }
+
         // Refresh the preview display
         this.$el.show();
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
+	    this.builder.$el.find('.so-tool-button.so-live-editor' ).hide();
 	    this.builder.trigger('builder_resize');
-
-        // Refresh the preview after we show the editor
-        this.refreshPreview();
-
-        // Disable page scrolling
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css( {overflow:'hidden'} );
-
-        this.displayed = true;
     },
 
     close: function(){
-        this.$el.hide();
         $('body').css( {overflow:'auto'} );
         $('body').scrollTop( this.bodyScrollTop );
 
+	    if( !this.$el.is(':visible') ) {
+		    return this;
+	    }
+
+	    this.$el.hide();
+
 	    // Move the builder back to its original container
 	    this.builder.$el.appendTo( this.originalContainer );
+	    this.builder.$el.find('.so-tool-button.so-live-editor' ).show();
 	    this.builder.trigger('builder_resize');
 
-        this.displayed = false;
-
         return false;
-    },
-
-    /**
-     * Refresh the preview display
-     */
-    refreshPreview: function(){
     },
 
     /**

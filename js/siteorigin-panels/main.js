@@ -116,9 +116,6 @@ jQuery( function($){
             .addLiveEditor( postId )
             .addHistoryBrowser();
 
-        // Refresh the live editor view
-        builderView.liveEditor.refreshPreview();
-
         // When the form is submitted, update the panels data
         form.submit( function(e){
             // Refresh the data

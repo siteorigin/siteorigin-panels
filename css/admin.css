@@ -166,7 +166,7 @@
 }
 .siteorigin-panels-builder .so-rows-container .so-row-toolbar .so-dropdown-wrapper .so-dropdown-links-wrapper {
   display: none;
-  z-index: 11;
+  z-index: 101;
   position: absolute;
   right: -10px;
   padding: 6px 0 0 0;
@@ -1882,7 +1882,7 @@
   width: 180px;
   top: 20px;
   left: 20px;
-  z-index: 9991;
+  z-index: 999999;
   display: none;
 }
 .so-panels-contextual-menu,
