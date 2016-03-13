@@ -202,42 +202,36 @@ module.exports = Backbone.View.extend( {
 
         // We will also make this sticky if its attached to an editor.
         var stickToolbar = function(){
-	        return;
+            var toolbar = thisView.$('.so-builder-toolbar' );
+	        toolbar.css('top', 0);
 
-            var toolbar = thisView.$('.so-builder-toolbar');
-            var newTop = $(window).scrollTop() - thisView.$el.offset().top;
+            var newTop = $(window ).scrollTop() - toolbar.offset().top;
 
             if( $('#wpadminbar').css('position') === 'fixed' ) {
                 newTop += $('#wpadminbar').outerHeight();
             }
+
+	        console.log(newTop);
+
+	        if( newTop < 0 ) {
+		        toolbar.css('top', 0);
+		        return false;
+	        }
 
             var limits = {
                 top: 0,
                 bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
             };
 
-            if( newTop > limits.top && newTop < limits.bottom ) {
-                if( toolbar.css('position') !== 'fixed' ) {
-                    // The toolbar needs to stick to the top, over the interface
-                    toolbar.css({
-                        top: $('#wpadminbar').outerHeight(),
-                        left: thisView.$el.offset().left,
-                        width: thisView.$el.outerWidth(),
-                        position: 'fixed'
-                    });
-                }
+            if( newTop < limits.top ) {
+	            toolbar.css('top', limits.top);
+            }
+            else if( newTop > limits.bottom ) {
+	            toolbar.css('top', limits.bottom);
             }
             else {
-                // The toolbar needs to be at the top or bottom of the interface
-                toolbar.css({
-                    top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
-                    left: 0,
-                    width: '100%',
-                    position: 'absolute'
-                });
+	            toolbar.css('top', newTop);
             }
-
-            thisView.$el.css('padding-top', toolbar.outerHeight() );
         };
 
         $( window ).resize( stickToolbar );
