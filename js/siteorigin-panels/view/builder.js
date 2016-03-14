@@ -231,8 +231,8 @@ module.exports = Backbone.View.extend( {
 	            toolbar.css('top', newTop);
             }
         };
-
-        $( window ).resize( stickToolbar );
+	    
+	    this.on('builder_resize', stickToolbar, this );
         $( document ).scroll( stickToolbar );
         stickToolbar();
 

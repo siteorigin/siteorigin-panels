@@ -3151,8 +3151,8 @@ module.exports = Backbone.View.extend( {
 	            toolbar.css('top', newTop);
             }
         };
-
-        $( window ).resize( stickToolbar );
+	    
+	    this.on('builder_resize', stickToolbar, this );
         $( document ).scroll( stickToolbar );
         stickToolbar();
 
@@ -4470,7 +4470,47 @@ module.exports = Backbone.View.extend( {
 		    // Scroll to the correct position
 		    thisView.$el.find( '.so-preview iframe' ).contents().scrollTop( thisView.previewScrollTop );
 
+		    var $$ = $(this ),
+			    ifc = $$.contents();
+
 		    $( this ).fadeIn( 500 );
+
+		    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
+		    ifc.find('.panel-grid .panel-grid-cell .so-panel')
+			    .filter(function(){
+				    // Filter to only include non nested
+				    return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
+			    })
+			    .each(function(i, el){
+				    var $$ = $(el);
+				    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
+				    var overlay;
+
+				    $$
+					    .css({
+						    'cursor' : 'pointer'
+					    })
+					    .mouseenter(function(){
+						    widgetEdit.addClass('so-hovered');
+						    overlay = thisView.createPreviewOverlay( $(this) );
+					    })
+					    .mouseleave( function(){
+						    widgetEdit.removeClass('so-hovered');
+						    overlay.fadeOut('fast', function(){ $(this).remove(); });
+					    } )
+					    .click(function(e){
+						    console.log( i );
+						    e.preventDefault();
+						    // When we click a widget, send that click to the form
+						    widgetEdit.find('.title h4').click();
+					    });
+			    });
+
+		    // Prevent default clicks
+		    ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
+			    e.preventDefault();
+		    });
+
 	    } );
     },
 
