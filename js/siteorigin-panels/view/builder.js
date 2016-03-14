@@ -211,8 +211,6 @@ module.exports = Backbone.View.extend( {
                 newTop += $('#wpadminbar').outerHeight();
             }
 
-	        console.log(newTop);
-
 	        if( newTop < 0 ) {
 		        toolbar.css('top', 0);
 		        return false;
