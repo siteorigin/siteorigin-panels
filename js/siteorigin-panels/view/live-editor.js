@@ -189,7 +189,6 @@ module.exports = Backbone.View.extend( {
 			form = this.$el.find('.so-preview form' );
 
 		this.previewScrollTop = iframe.contents().scrollTop();
-		console.log( this.previewScrollTop );
 
 		iframe.fadeOut();
 
