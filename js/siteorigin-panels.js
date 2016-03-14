@@ -3127,8 +3127,6 @@ module.exports = Backbone.View.extend( {
                 newTop += $('#wpadminbar').outerHeight();
             }
 
-	        console.log(newTop);
-
 	        if( newTop < 0 ) {
 		        toolbar.css('top', 0);
 		        return false;
@@ -4445,7 +4443,8 @@ module.exports = Backbone.View.extend( {
     displayed: false,
 
     events: {
-        'click .live-editor-close': 'close'
+        'click .live-editor-close': 'close',
+        'click .live-editor-collapse': 'collapse'
     },
     frameScrollTop: 0,
 
@@ -4456,7 +4455,7 @@ module.exports = Backbone.View.extend( {
      * Render the live editor
      */
     render: function(){
-        this.$el.html( this.template() );
+        this.setElement( this.template() );
 	    this.$el.hide();
     },
 
@@ -4516,6 +4515,13 @@ module.exports = Backbone.View.extend( {
 
         return false;
     },
+
+	collapse: function(){
+		this.$el.toggleClass('so-collapsed');
+
+		var text = this.$el.find('.live-editor-collapse span');
+		text.html( text.data( this.$el.hasClass('so-collapsed') ?  'expand' : 'collapse' ) );
+	},
 
     /**
      * Create an overlay in the preview.

@@ -1808,6 +1808,42 @@
 		display: none;
 	}
 
+	.live-editor-collapse {
+
+		position: fixed;
+		top: 17px;
+		left: 65px;
+		line-height: 1em;
+		cursor: pointer;
+		z-index: 999999;
+
+		.collapse-icon {
+			float: left;
+			margin: -4px 6px 0 0;
+			border-radius: 50%;
+			width: 20px;
+			height: 20px;
+			overflow: hidden;
+		}
+
+		.collapse-icon:before {
+			display: block;
+			content: "\f148";
+			background: #eee;
+			font: normal 20px/1 dashicons;
+			speak: none;
+			padding: 0;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		&:hover {
+			color: #0073aa;
+			.collapse-icon {
+				box-shadow: 0 0 3px rgba(30, 140, 190, .8);
+			}
+		}
+	}
+
 	.so-overlay {
 		top: 0;
 		right: 0;
@@ -1829,6 +1865,7 @@
 		.box-sizing(border-box);
 
 		.so-sidebar-tools {
+			position: relative;
 			background: #eee;
 			border-bottom: 1px solid #ddd;
 
@@ -1857,7 +1894,6 @@
 					left: 13px;
 				}
 			}
-
 		}
 
 	}
@@ -1876,6 +1912,32 @@
 		}
 	}
 
+	.so-sidebar,
+	.so-preview,
+	.live-editor-collapse,
+	.live-editor-collapse .collapse-icon {
+		.transition( 0.5s );
+	}
+
+
+	&.so-collapsed {
+
+		.live-editor-collapse {
+			left: 17px;
+
+			.collapse-icon {
+				transform: rotate(180deg);
+			}
+		}
+
+		.so-sidebar {
+			left: -@live_editor_width;
+		}
+
+		.so-preview {
+			left: 0;
+		}
+	}
 }
 
 .so-panels-loading {

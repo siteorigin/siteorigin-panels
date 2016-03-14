@@ -507,6 +507,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-live-editor">
 	<div class="so-panels-live-editor">
 
+		<div class="live-editor-collapse">
+			<div class="collapse-icon"></div>
+			<span data-collapse="<?php esc_attr_e( 'Collapse', 'siteorigin-panels' ) ?>" data-expand="<?php esc_attr_e( 'Expand', 'siteorigin-panels' ) ?>">
+				<?php _e( 'Collapse', 'siteorigin-panels' ) ?>
+			</span>
+		</div>
+
 		<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_the_permalink() ) ) ?>" target="siteorigin-panels-live-editor-iframe" class="live-editor-form">
 			<input type="hidden" name="siteorigin_panels_data" value="">
 		</form>
@@ -524,7 +531,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="so-preview">
-			<iframe id="siteorigin-panels-live-editor-iframe" name="siteorigin-panels-live-editor-iframe" src=""></iframe>
+			<iframe id="siteorigin-panels-live-editor-iframe" name="siteorigin-panels-live-editor-iframe" src="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_the_permalink() ) ) ?>"></iframe>
 		</div>
 
 	</div>
