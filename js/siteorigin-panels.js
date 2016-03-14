@@ -2,7 +2,7 @@
 var panels = window.panels;
 
 module.exports = Backbone.Collection.extend( {
-    model: panels.cell,
+    model: panels.model.cell,
 
     initialize: function(){
     },
@@ -20,6 +20,7 @@ module.exports = Backbone.Collection.extend( {
         return totalWeight;
     }
 } );
+
 },{}],2:[function(require,module,exports){
 var panels = window.panels;
 
@@ -112,9 +113,11 @@ module.exports = Backbone.Collection.extend( {
     model : panels.model.widget,
 
     initialize: function(){
+
     }
 
 } );
+
 },{}],5:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -1448,12 +1451,12 @@ module.exports = panels.view.dialog.extend( {
         if( !this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
-            if (typeof values.widgets === 'undefined') {
+            if ( typeof values.widgets === 'undefined' ) {
                 values = {};
             }
             else {
                 values = values.widgets;
-                values = values[Object.keys(values)[0]];
+                values = values[ Object.keys(values)[0] ];
             }
 
             this.model.setValues(values);
@@ -1526,6 +1529,7 @@ module.exports = panels.view.dialog.extend( {
     }
 
 } );
+
 },{}],10:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -1978,13 +1982,7 @@ module.exports = Backbone.Model.extend( {
 		REPLACE: 'replace',
 	},
 
-	isValidLayoutPosition: function(position) {
-		return position === this.layoutPosition.BEFORE ||
-				position === this.layoutPosition.AFTER ||
-				position === this.layoutPosition.REPLACE;
-	},
-
-    rows: {},
+    rows: { },
 
     defaults : {
         'data' : {
@@ -2219,8 +2217,8 @@ module.exports = Backbone.Model.extend( {
 
         if( JSON.stringify( newData ) !== oldData ) {
             // The default change event doesn't trigger on deep changes, so we'll trigger our own
-            this.trigger('change');
-            this.trigger('change:data');
+            this.trigger( 'change' );
+            this.trigger( 'change:data' );
         }
     },
 
@@ -2228,11 +2226,17 @@ module.exports = Backbone.Model.extend( {
      * Empty all the rows and the cells/widgets they contain.
      */
     emptyRows: function(){
-        _.invoke(this.rows.toArray(), 'destroy');
+        _.invoke( this.rows.toArray(), 'destroy' );
         this.rows.reset();
 
         return this;
-    }
+    },
+
+	isValidLayoutPosition: function( position ) {
+		return position === this.layoutPosition.BEFORE ||
+		       position === this.layoutPosition.AFTER ||
+		       position === this.layoutPosition.REPLACE;
+	}
 
 } );
 
@@ -3363,11 +3367,12 @@ module.exports = Backbone.View.extend( {
             });
         });
 
-        // Sort everything
+        // Sort the rows based on their visual position
         this.model.rows.models = this.model.rows.sortBy(function(model){
             return indexes[model.cid];
         });
 
+	    // Sort the widgets in the rows
         this.model.rows.each(function(row){
             row.cells.each(function(cell){
                 cell.widgets.models = cell.widgets.sortBy(function(widget){
@@ -3391,10 +3396,8 @@ module.exports = Backbone.View.extend( {
         }
 
         // Create the live editor and set the builder to this.
-        this.liveEditor = new panels.view.liveEditor();
-        this.liveEditor.setPostId(postId);
-
-        this.liveEditor.builder = this;
+        this.liveEditor = new panels.view.liveEditor( { builder: this } );
+        this.liveEditor.setPostId( postId );
 
         // Display the live editor button in the toolbar
         if( this.liveEditor.hasPreviewUrl() ) {
@@ -4442,13 +4445,17 @@ module.exports = Backbone.View.extend( {
     bodyScrollTop : null,
     displayed: false,
 
+	previewScrollTop: 0,
+
     events: {
         'click .live-editor-close': 'close',
         'click .live-editor-collapse': 'collapse'
     },
     frameScrollTop: 0,
 
-    initialize: function(){
+    initialize: function( options ){
+	    this.builder = options.builder;
+	    this.builder.model.on( 'change', this.refreshPreview, this );
     },
 
     /**
@@ -4457,6 +4464,14 @@ module.exports = Backbone.View.extend( {
     render: function(){
         this.setElement( this.template() );
 	    this.$el.hide();
+	    var thisView = this;
+
+	    this.$el.find( '.so-preview iframe' ).on( 'load', function(){
+		    // Scroll to the correct position
+		    thisView.$el.find( '.so-preview iframe' ).contents().scrollTop( thisView.previewScrollTop );
+
+		    $( this ).fadeIn( 500 );
+	    } );
     },
 
     /**
@@ -4491,6 +4506,7 @@ module.exports = Backbone.View.extend( {
 
         // Refresh the preview display
         this.$el.show();
+	    this.refreshPreview();
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
@@ -4498,6 +4514,9 @@ module.exports = Backbone.View.extend( {
 	    this.builder.trigger('builder_resize');
     },
 
+	/**
+	 * Close the live editor
+	 */
     close: function(){
         $('body').css( {overflow:'auto'} );
         $('body').scrollTop( this.bodyScrollTop );
@@ -4594,6 +4613,29 @@ module.exports = Backbone.View.extend( {
         previewFrame.contents().find('body').append(overlayContainer);
         return overlayContainer;
     },
+
+	/**
+	 * Refresh the Live Editor preview.
+	 * @returns {exports}
+	 */
+	refreshPreview: function(){
+		if( !this.$el.is(':visible') ) {
+			return this;
+		}
+
+		var iframe = this.$el.find('.so-preview iframe' ),
+			form = this.$el.find('.so-preview form' );
+
+		this.previewScrollTop = iframe.contents().scrollTop();
+
+		iframe.fadeOut();
+
+		// Set the preview data
+		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
+
+		// Submit the form
+		form.submit();
+	},
 
     /**
      * Return true if the live editor has a valid preview URL.

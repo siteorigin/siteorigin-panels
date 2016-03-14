@@ -447,11 +447,12 @@ module.exports = Backbone.View.extend( {
             });
         });
 
-        // Sort everything
+        // Sort the rows based on their visual position
         this.model.rows.models = this.model.rows.sortBy(function(model){
             return indexes[model.cid];
         });
 
+	    // Sort the widgets in the rows
         this.model.rows.each(function(row){
             row.cells.each(function(cell){
                 cell.widgets.models = cell.widgets.sortBy(function(widget){
@@ -475,10 +476,8 @@ module.exports = Backbone.View.extend( {
         }
 
         // Create the live editor and set the builder to this.
-        this.liveEditor = new panels.view.liveEditor();
-        this.liveEditor.setPostId(postId);
-
-        this.liveEditor.builder = this;
+        this.liveEditor = new panels.view.liveEditor( { builder: this } );
+        this.liveEditor.setPostId( postId );
 
         // Display the live editor button in the toolbar
         if( this.liveEditor.hasPreviewUrl() ) {

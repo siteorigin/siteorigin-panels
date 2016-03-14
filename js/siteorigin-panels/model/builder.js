@@ -5,13 +5,7 @@ module.exports = Backbone.Model.extend( {
 		REPLACE: 'replace',
 	},
 
-	isValidLayoutPosition: function(position) {
-		return position === this.layoutPosition.BEFORE ||
-				position === this.layoutPosition.AFTER ||
-				position === this.layoutPosition.REPLACE;
-	},
-
-    rows: {},
+    rows: { },
 
     defaults : {
         'data' : {
@@ -246,8 +240,8 @@ module.exports = Backbone.Model.extend( {
 
         if( JSON.stringify( newData ) !== oldData ) {
             // The default change event doesn't trigger on deep changes, so we'll trigger our own
-            this.trigger('change');
-            this.trigger('change:data');
+            this.trigger( 'change' );
+            this.trigger( 'change:data' );
         }
     },
 
@@ -255,10 +249,16 @@ module.exports = Backbone.Model.extend( {
      * Empty all the rows and the cells/widgets they contain.
      */
     emptyRows: function(){
-        _.invoke(this.rows.toArray(), 'destroy');
+        _.invoke( this.rows.toArray(), 'destroy' );
         this.rows.reset();
 
         return this;
-    }
+    },
+
+	isValidLayoutPosition: function( position ) {
+		return position === this.layoutPosition.BEFORE ||
+		       position === this.layoutPosition.AFTER ||
+		       position === this.layoutPosition.REPLACE;
+	}
 
 } );

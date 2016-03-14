@@ -156,12 +156,12 @@ module.exports = panels.view.dialog.extend( {
         if( !this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
-            if (typeof values.widgets === 'undefined') {
+            if ( typeof values.widgets === 'undefined' ) {
                 values = {};
             }
             else {
                 values = values.widgets;
-                values = values[Object.keys(values)[0]];
+                values = values[ Object.keys(values)[0] ];
             }
 
             this.model.setValues(values);

@@ -7,13 +7,17 @@ module.exports = Backbone.View.extend( {
     bodyScrollTop : null,
     displayed: false,
 
+	previewScrollTop: 0,
+
     events: {
         'click .live-editor-close': 'close',
         'click .live-editor-collapse': 'collapse'
     },
     frameScrollTop: 0,
 
-    initialize: function(){
+    initialize: function( options ){
+	    this.builder = options.builder;
+	    this.builder.model.on( 'change', this.refreshPreview, this );
     },
 
     /**
@@ -22,6 +26,14 @@ module.exports = Backbone.View.extend( {
     render: function(){
         this.setElement( this.template() );
 	    this.$el.hide();
+	    var thisView = this;
+
+	    this.$el.find( '.so-preview iframe' ).on( 'load', function(){
+		    // Scroll to the correct position
+		    thisView.$el.find( '.so-preview iframe' ).contents().scrollTop( thisView.previewScrollTop );
+
+		    $( this ).fadeIn( 500 );
+	    } );
     },
 
     /**
@@ -56,6 +68,7 @@ module.exports = Backbone.View.extend( {
 
         // Refresh the preview display
         this.$el.show();
+	    this.refreshPreview();
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
@@ -63,6 +76,9 @@ module.exports = Backbone.View.extend( {
 	    this.builder.trigger('builder_resize');
     },
 
+	/**
+	 * Close the live editor
+	 */
     close: function(){
         $('body').css( {overflow:'auto'} );
         $('body').scrollTop( this.bodyScrollTop );
@@ -159,6 +175,30 @@ module.exports = Backbone.View.extend( {
         previewFrame.contents().find('body').append(overlayContainer);
         return overlayContainer;
     },
+
+	/**
+	 * Refresh the Live Editor preview.
+	 * @returns {exports}
+	 */
+	refreshPreview: function(){
+		if( !this.$el.is(':visible') ) {
+			return this;
+		}
+
+		var iframe = this.$el.find('.so-preview iframe' ),
+			form = this.$el.find('.so-preview form' );
+
+		this.previewScrollTop = iframe.contents().scrollTop();
+		console.log( this.previewScrollTop );
+
+		iframe.fadeOut();
+
+		// Set the preview data
+		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
+
+		// Submit the form
+		form.submit();
+	},
 
     /**
      * Return true if the live editor has a valid preview URL.

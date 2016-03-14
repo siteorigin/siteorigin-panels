@@ -1815,7 +1815,7 @@
 		left: 65px;
 		line-height: 1em;
 		cursor: pointer;
-		z-index: 999999;
+		z-index: 100000;
 
 		.collapse-icon {
 			float: left;
@@ -1904,7 +1904,11 @@
 		bottom: 0;
 		left: @live_editor_width;
 
-		background: #F4F4F4;
+		background-color: #F4F4F4;
+
+		form {
+			display: none;
+		}
 
 		iframe{
 			width: 100%;
