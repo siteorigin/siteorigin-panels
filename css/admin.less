@@ -1844,14 +1844,6 @@
 		}
 	}
 
-	.so-overlay {
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		background: rgba(0,0,0,0.75);
-	}
-
 	.so-sidebar {
 		top: 0;
 		left: 0;
@@ -1903,7 +1895,6 @@
 		right: 0;
 		bottom: 0;
 		left: @live_editor_width;
-
 		background-color: #F4F4F4;
 
 		form {
@@ -1914,6 +1905,16 @@
 			width: 100%;
 			height: 100%;
 		}
+	}
+
+	.so-preview-overlay {
+		display: none;
+		opacity: 0.85;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: @live_editor_width;
+		background-color: #F4F4F4;
 	}
 
 	.so-sidebar,
@@ -1938,7 +1939,7 @@
 			left: -@live_editor_width;
 		}
 
-		.so-preview {
+		.so-preview, .so-preview-overlay {
 			left: 0;
 		}
 	}

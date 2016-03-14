@@ -530,12 +530,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		</div>
 
-		<div class="so-preview so-panels-loading">
+		<div class="so-preview">
 			<form target="siteorigin-panels-live-editor-iframe" method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_the_permalink() ) ) ?>">
 				<input type="hidden" name="live_editor_panels_data" value="" />
 			</form>
 			<iframe id="siteorigin-panels-live-editor-iframe" name="siteorigin-panels-live-editor-iframe"></iframe>
 		</div>
+
+		<div class="so-preview-overlay so-panels-loading"></div>
 
 	</div>
 </script>

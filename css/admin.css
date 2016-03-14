@@ -1688,13 +1688,6 @@
 .so-panels-live-editor .live-editor-collapse:hover .collapse-icon {
   box-shadow: 0 0 3px rgba(30, 140, 190, 0.8);
 }
-.so-panels-live-editor .so-overlay {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.75);
-}
 .so-panels-live-editor .so-sidebar {
   top: 0;
   left: 0;
@@ -1753,6 +1746,15 @@
   width: 100%;
   height: 100%;
 }
+.so-panels-live-editor .so-preview-overlay {
+  display: none;
+  opacity: 0.85;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 360px;
+  background-color: #F4F4F4;
+}
 .so-panels-live-editor .so-sidebar,
 .so-panels-live-editor .so-preview,
 .so-panels-live-editor .live-editor-collapse,
@@ -1771,7 +1773,8 @@
 .so-panels-live-editor.so-collapsed .so-sidebar {
   left: -360px;
 }
-.so-panels-live-editor.so-collapsed .so-preview {
+.so-panels-live-editor.so-collapsed .so-preview,
+.so-panels-live-editor.so-collapsed .so-preview-overlay {
   left: 0;
 }
 .so-panels-loading {

@@ -3151,7 +3151,7 @@ module.exports = Backbone.View.extend( {
 	            toolbar.css('top', newTop);
             }
         };
-	    
+
 	    this.on('builder_resize', stickToolbar, this );
         $( document ).scroll( stickToolbar );
         stickToolbar();
@@ -4473,7 +4473,8 @@ module.exports = Backbone.View.extend( {
 		    var $$ = $(this ),
 			    ifc = $$.contents();
 
-		    $( this ).fadeIn( 500 );
+
+		    thisView.$el.find('.so-preview-overlay').fadeOut( 500 );
 
 		    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
 		    ifc.find('.panel-grid .panel-grid-cell .so-panel')
@@ -4668,7 +4669,7 @@ module.exports = Backbone.View.extend( {
 
 		this.previewScrollTop = iframe.contents().scrollTop();
 
-		iframe.fadeOut();
+		this.$el.find('.so-preview-overlay').fadeIn();
 
 		// Set the preview data
 		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
