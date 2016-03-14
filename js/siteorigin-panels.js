@@ -3488,11 +3488,6 @@ module.exports = Backbone.View.extend( {
                 }.bind(this)
             );
         }
-
-        if( this.liveEditor !== false ) {
-            // Refresh the content of the builder
-            this.liveEditor.refreshPreview();
-        }
     },
 
     /**
