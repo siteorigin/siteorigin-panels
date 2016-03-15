@@ -1664,7 +1664,7 @@
 .so-panels-live-editor .live-editor-collapse {
   position: absolute;
   top: 18px;
-  left: 60px;
+  left: 10px;
   line-height: 1em;
   cursor: pointer;
   z-index: 100000;
@@ -1702,30 +1702,8 @@
   width: 360px;
 }
 .so-panels-live-editor .so-sidebar-tools .live-editor-close {
-  -ms-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  display: block;
-  width: 45px;
-  height: 45px;
-  background: #eee;
-  border-right: 1px solid #ddd;
-  color: #444;
-  cursor: pointer;
-  text-decoration: none;
-  position: relative;
-  text-align: center;
-  padding-top: 12px;
-}
-.so-panels-live-editor .so-sidebar-tools .live-editor-close:hover {
-  background: #FFFFFF;
-}
-.so-panels-live-editor .so-sidebar-tools .live-editor-close:before {
-  font: 400 22px/1 dashicons;
-  content: "\f341";
-  top: 7px;
-  left: 13px;
+  margin: 10px 10px 0 0;
+  float: right;
 }
 .so-panels-live-editor .so-sidebar {
   top: 46px;
@@ -1768,10 +1746,6 @@
   -moz-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
   transition: all 0.5s ease;
-}
-.so-panels-live-editor.so-collapsed .live-editor-collapse {
-  left: 17px;
-  position: fixed;
 }
 .so-panels-live-editor.so-collapsed .live-editor-collapse .collapse-icon {
   transform: rotate(180deg);

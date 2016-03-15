@@ -519,7 +519,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</form>
 
 		<div class="so-sidebar-tools">
-			<a href="#" class="live-editor-close" title="<?php esc_attr_e('Close Live Editor', 'siteorigin-panels') ?>"></a>
+			<button href="#" class="live-editor-close button-primary"><?php esc_attr_e('Done', 'siteorigin-panels') ?></button>
 		</div>
 
 		<div class="so-sidebar">

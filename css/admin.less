@@ -1812,7 +1812,7 @@
 	.live-editor-collapse {
 		position: absolute;
 		top: 18px;
-		left: 60px;
+		left: 10px;
 		line-height: 1em;
 		cursor: pointer;
 		z-index: 100000;
@@ -1854,29 +1854,8 @@
 		width: @live_editor_width;
 
 		.live-editor-close {
-			.box-sizing(border-box);
-			display: block;
-			width: 45px;
-			height: 45px;
-			background: #eee;
-			border-right: 1px solid #ddd;
-			color: #444;
-			cursor: pointer;
-			text-decoration: none;
-			position: relative;
-			text-align: center;
-			padding-top: 12px;
-
-			&:hover {
-				background: #FFFFFF;
-			}
-
-			&:before {
-				font: 400 22px/1 dashicons;
-				content: "\f341";
-				top: 7px;
-				left: 13px;
-			}
+			margin: 10px 10px 0 0;
+			float: right;
 		}
 	}
 
@@ -1931,9 +1910,6 @@
 	&.so-collapsed {
 
 		.live-editor-collapse {
-			left: 17px;
-			position: fixed;
-
 			.collapse-icon {
 				transform: rotate(180deg);
 			}
