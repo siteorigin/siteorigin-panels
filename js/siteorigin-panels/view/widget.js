@@ -143,6 +143,7 @@ module.exports = Backbone.View.extend({
         this.$el.fadeOut('fast', function(){
             thisView.cell.row.resize();
             thisView.model.destroy();
+	        thisView.cell.row.builder.model.refreshPanelsData();
             thisView.remove();
         } );
     },
