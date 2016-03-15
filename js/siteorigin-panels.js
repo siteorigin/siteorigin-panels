@@ -4663,7 +4663,7 @@ module.exports = Backbone.View.extend( {
 	 * Refresh the Live Editor preview.
 	 * @returns {exports}
 	 */
-	refreshPreview: function(){
+	refreshPreview: function( ){
 		if( !this.$el.is(':visible') ) {
 			return this;
 		}
@@ -4671,8 +4671,7 @@ module.exports = Backbone.View.extend( {
 		var iframe = this.$el.find('.so-preview iframe' ),
 			form = this.$el.find('.so-preview form' );
 
-		var scrollTop = iframe.contents().scrollTop();
-		if( scrollTop != 0 ) {
+		if( !this.$el.find('.so-preview-overlay' ).is(':visible') ) {
 			this.previewScrollTop = iframe.contents().scrollTop();
 		}
 
