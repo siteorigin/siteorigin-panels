@@ -1809,10 +1809,9 @@
 	}
 
 	.live-editor-collapse {
-
-		position: fixed;
-		top: 17px;
-		left: 65px;
+		position: absolute;
+		bottom: 16px;
+		left: 17px;
 		line-height: 1em;
 		cursor: pointer;
 		z-index: 100000;
@@ -1842,6 +1841,18 @@
 				box-shadow: 0 0 3px rgba(30, 140, 190, .8);
 			}
 		}
+	}
+
+	.so-collapse-space {
+		border-top: 1px solid #ddd;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: @live_editor_width;
+		height: 50px;
+		background: #eee;
+		z-index: 100000;
+
 	}
 
 	.so-sidebar {
@@ -1888,6 +1899,9 @@
 			}
 		}
 
+		.so-live-editor-builder {
+			padding-bottom: 51px;
+		}
 	}
 
 	.so-preview {
@@ -1909,7 +1923,7 @@
 
 	.so-preview-overlay {
 		display: none;
-		opacity: 0.85;
+		opacity: 0.975;
 		top: 0;
 		right: 0;
 		bottom: 0;
@@ -1919,6 +1933,7 @@
 
 	.so-sidebar,
 	.so-preview,
+	.so-collapse-space,
 	.live-editor-collapse,
 	.live-editor-collapse .collapse-icon {
 		.transition( 0.5s );
@@ -1929,10 +1944,15 @@
 
 		.live-editor-collapse {
 			left: 17px;
+			position: fixed;
 
 			.collapse-icon {
 				transform: rotate(180deg);
 			}
+		}
+
+		.so-collapse-space {
+			left: -@live_editor_width;
 		}
 
 		.so-sidebar {

@@ -174,6 +174,9 @@ module.exports = Backbone.View.extend( {
                 }
 
                 ui.helper.css('left', -handle.outerWidth()/2);
+
+	            // Refresh the panels data
+	            cellView.row.builder.model.refreshPanelsData();
             }
         });
 

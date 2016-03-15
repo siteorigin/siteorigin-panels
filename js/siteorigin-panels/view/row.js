@@ -138,6 +138,8 @@ module.exports = Backbone.View.extend( {
             at: this.builder.model.rows.indexOf( this.model ) + 1
         } );
 
+	    this.builder.model.refreshPanelsData();
+
         return false;
     },
 

@@ -3841,6 +3841,9 @@ module.exports = Backbone.View.extend( {
                 }
 
                 ui.helper.css('left', -handle.outerWidth()/2);
+
+	            // Refresh the panels data
+	            cellView.row.builder.model.refreshPanelsData();
             }
         });
 
@@ -3932,6 +3935,7 @@ module.exports = Backbone.View.extend( {
         this.row.buildContextualMenu( e, menu );
     }
 } );
+
 },{}],21:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -4667,7 +4671,10 @@ module.exports = Backbone.View.extend( {
 		var iframe = this.$el.find('.so-preview iframe' ),
 			form = this.$el.find('.so-preview form' );
 
-		this.previewScrollTop = iframe.contents().scrollTop();
+		var scrollTop = iframe.contents().scrollTop();
+		if( scrollTop != 0 ) {
+			this.previewScrollTop = iframe.contents().scrollTop();
+		}
 
 		this.$el.find('.so-preview-overlay').fadeIn();
 
@@ -4827,6 +4834,8 @@ module.exports = Backbone.View.extend( {
         this.builder.model.rows.add( duplicateRow, {
             at: this.builder.model.rows.indexOf( this.model ) + 1
         } );
+
+	    this.builder.model.refreshPanelsData();
 
         return false;
     },

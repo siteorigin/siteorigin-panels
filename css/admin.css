@@ -1658,9 +1658,9 @@
   display: none;
 }
 .so-panels-live-editor .live-editor-collapse {
-  position: fixed;
-  top: 17px;
-  left: 65px;
+  position: absolute;
+  bottom: 16px;
+  left: 17px;
   line-height: 1em;
   cursor: pointer;
   z-index: 100000;
@@ -1687,6 +1687,16 @@
 }
 .so-panels-live-editor .live-editor-collapse:hover .collapse-icon {
   box-shadow: 0 0 3px rgba(30, 140, 190, 0.8);
+}
+.so-panels-live-editor .so-collapse-space {
+  border-top: 1px solid #ddd;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 360px;
+  height: 50px;
+  background: #eee;
+  z-index: 100000;
 }
 .so-panels-live-editor .so-sidebar {
   top: 0;
@@ -1732,6 +1742,9 @@
   top: 7px;
   left: 13px;
 }
+.so-panels-live-editor .so-sidebar .so-live-editor-builder {
+  padding-bottom: 51px;
+}
 .so-panels-live-editor .so-preview {
   top: 0;
   right: 0;
@@ -1748,7 +1761,7 @@
 }
 .so-panels-live-editor .so-preview-overlay {
   display: none;
-  opacity: 0.85;
+  opacity: 0.975;
   top: 0;
   right: 0;
   bottom: 0;
@@ -1757,6 +1770,7 @@
 }
 .so-panels-live-editor .so-sidebar,
 .so-panels-live-editor .so-preview,
+.so-panels-live-editor .so-collapse-space,
 .so-panels-live-editor .live-editor-collapse,
 .so-panels-live-editor .live-editor-collapse .collapse-icon {
   -webkit-transition: all 0.5s ease;
@@ -1766,9 +1780,13 @@
 }
 .so-panels-live-editor.so-collapsed .live-editor-collapse {
   left: 17px;
+  position: fixed;
 }
 .so-panels-live-editor.so-collapsed .live-editor-collapse .collapse-icon {
   transform: rotate(180deg);
+}
+.so-panels-live-editor.so-collapsed .so-collapse-space {
+  left: -360px;
 }
 .so-panels-live-editor.so-collapsed .so-sidebar {
   left: -360px;

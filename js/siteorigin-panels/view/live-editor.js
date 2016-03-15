@@ -229,7 +229,10 @@ module.exports = Backbone.View.extend( {
 		var iframe = this.$el.find('.so-preview iframe' ),
 			form = this.$el.find('.so-preview form' );
 
-		this.previewScrollTop = iframe.contents().scrollTop();
+		var scrollTop = iframe.contents().scrollTop();
+		if( scrollTop != 0 ) {
+			this.previewScrollTop = iframe.contents().scrollTop();
+		}
 
 		this.$el.find('.so-preview-overlay').fadeIn();
 
