@@ -827,13 +827,21 @@ module.exports = panels.view.dialog.extend( {
             this.styles.render( 'row', $('#post_ID').val(), {
                 'builderType' : this.builder.builderType
             } );
-            this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
+
+			var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
+            this.styles.attach( $rightSidebar );
 
             // Handle the loading class
-            this.styles.on('styles_loaded', function(){
-                this.$('.so-sidebar.so-right-sidebar').removeClass('so-panels-loading');
+            this.styles.on('styles_loaded', function(hasStyles){
+				// If we have styles remove the loading spinner, else remove the whole empty sidebar.
+				if(hasStyles) {
+					$rightSidebar.removeClass('so-panels-loading');
+				} else {
+					$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
+					$rightSidebar.remove();
+				}
             }, this);
-            this.$('.so-sidebar.so-right-sidebar').addClass('so-panels-loading');
+            $rightSidebar.addClass('so-panels-loading');
         }
 
         if( typeof this.model !== 'undefined' ) {
@@ -1292,6 +1300,7 @@ module.exports = panels.view.dialog.extend( {
     }
 
 } );
+
 },{}],9:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -1339,13 +1348,21 @@ module.exports = panels.view.dialog.extend( {
         this.styles.render( 'widget', $('#post_ID').val(), {
             builderType : this.builder.builderType
         } );
-        this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
+
+		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
+        this.styles.attach( $rightSidebar );
 
         // Handle the loading class
-        this.styles.on('styles_loaded', function(){
-            this.$('.so-sidebar.so-right-sidebar').removeClass('so-panels-loading');
+        this.styles.on('styles_loaded', function(hasStyles){
+			// If we have styles remove the loading spinner, else remove the whole empty sidebar.
+			if(hasStyles) {
+				$rightSidebar.removeClass('so-panels-loading');
+			} else {
+				$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
+				$rightSidebar.remove();
+			}
         }, this);
-        this.$('.so-sidebar.so-right-sidebar').addClass('so-panels-loading');
+		$rightSidebar.addClass('so-panels-loading');
     },
 
     /**
@@ -1702,8 +1719,6 @@ module.exports = panels.view.dialog.extend( {
 
         var $w = $(e.currentTarget);
 
-        console.log( panels );
-
         var widget = new panels.model.widget( {
             class: $w.data('class')
         } );
@@ -1760,6 +1775,7 @@ module.exports = panels.view.dialog.extend( {
         } );
     }
 } );
+
 },{}],11:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -2532,8 +2548,9 @@ module.exports = Backbone.Model.extend( {
         this.set( 'values', values, {silent: true} );
 
         if( hasChanged ) {
-            // We'll trigger our own change events
-            this.trigger('change');
+            // We'll trigger our own change events.
+			// NB: Must include the model being changed (i.e. `this`) as a workaround for a bug in Backbone 1.2.3
+            this.trigger('change', this);
             this.trigger('change:values');
         }
     },
@@ -2633,6 +2650,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
+
 },{}],18:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -5016,7 +5034,7 @@ module.exports = Backbone.View.extend( {
                 thisView.$el.html( response );
                 thisView.setupFields();
                 thisView.stylesLoaded = true;
-                thisView.trigger('styles_loaded');
+                thisView.trigger('styles_loaded', !_.isEmpty(response));
             }
         );
     },
@@ -5159,6 +5177,7 @@ module.exports = Backbone.View.extend( {
     }
 
 } );
+
 },{}],25:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
