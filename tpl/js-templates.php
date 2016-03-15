@@ -507,7 +507,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-live-editor">
 	<div class="so-panels-live-editor">
 
-		<div class="so-collapse-space"></div>
 		<div class="live-editor-collapse">
 			<div class="collapse-icon"></div>
 			<span data-collapse="<?php esc_attr_e( 'Collapse', 'siteorigin-panels' ) ?>" data-expand="<?php esc_attr_e( 'Expand', 'siteorigin-panels' ) ?>">
@@ -519,12 +518,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="hidden" name="siteorigin_panels_data" value="">
 		</form>
 
+		<div class="so-sidebar-tools">
+			<a href="#" class="live-editor-close" title="<?php esc_attr_e('Close Live Editor', 'siteorigin-panels') ?>"></a>
+		</div>
+
 		<div class="so-sidebar">
-
-			<div class="so-sidebar-tools">
-				<a href="#" class="live-editor-close" title="<?php esc_attr_e('Close Live Editor', 'siteorigin-panels') ?>"></a>
-			</div>
-
 			<div class="so-live-editor-builder"></div>
 		</div>
 

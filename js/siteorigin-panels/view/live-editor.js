@@ -101,7 +101,7 @@ module.exports = Backbone.View.extend( {
 
 	    // Disable page scrolling
 	    this.bodyScrollTop = $('body').scrollTop();
-	    $('body').css( {overflow:'hidden'} );
+	    $('body,html').css( {overflow:'hidden'} );
 
 	    if( this.$el.is(':visible') ) {
 		    return this;
@@ -121,7 +121,7 @@ module.exports = Backbone.View.extend( {
 	 * Close the live editor
 	 */
     close: function(){
-        $('body').css( {overflow:'auto'} );
+        $('body,html').css( {overflow:'auto'} );
         $('body').scrollTop( this.bodyScrollTop );
 
 	    if( !this.$el.is(':visible') ) {

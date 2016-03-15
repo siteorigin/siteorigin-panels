@@ -1653,14 +1653,18 @@
 .so-panels-live-editor > div {
   position: fixed;
   z-index: 99999;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .so-panels-live-editor .live-editor-form {
   display: none;
 }
 .so-panels-live-editor .live-editor-collapse {
   position: absolute;
-  bottom: 16px;
-  left: 17px;
+  top: 18px;
+  left: 60px;
   line-height: 1em;
   cursor: pointer;
   z-index: 100000;
@@ -1688,35 +1692,16 @@
 .so-panels-live-editor .live-editor-collapse:hover .collapse-icon {
   box-shadow: 0 0 3px rgba(30, 140, 190, 0.8);
 }
-.so-panels-live-editor .so-collapse-space {
-  border-top: 1px solid #ddd;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 360px;
-  height: 50px;
-  background: #eee;
-  z-index: 100000;
-}
-.so-panels-live-editor .so-sidebar {
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 360px;
-  overflow-y: auto;
-  background: #F2F2F2;
-  border-right: 1px solid #D0D0D0;
-  -ms-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-.so-panels-live-editor .so-sidebar .so-sidebar-tools {
-  position: relative;
+.so-panels-live-editor .so-sidebar-tools {
   background: #eee;
   border-bottom: 1px solid #ddd;
+  border-right: 1px solid #D0D0D0;
+  top: 0;
+  left: 0;
+  height: 46px;
+  width: 360px;
 }
-.so-panels-live-editor .so-sidebar .so-sidebar-tools .live-editor-close {
+.so-panels-live-editor .so-sidebar-tools .live-editor-close {
   -ms-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -1733,17 +1718,23 @@
   text-align: center;
   padding-top: 12px;
 }
-.so-panels-live-editor .so-sidebar .so-sidebar-tools .live-editor-close:hover {
+.so-panels-live-editor .so-sidebar-tools .live-editor-close:hover {
   background: #FFFFFF;
 }
-.so-panels-live-editor .so-sidebar .so-sidebar-tools .live-editor-close:before {
+.so-panels-live-editor .so-sidebar-tools .live-editor-close:before {
   font: 400 22px/1 dashicons;
   content: "\f341";
   top: 7px;
   left: 13px;
 }
-.so-panels-live-editor .so-sidebar .so-live-editor-builder {
-  padding-bottom: 51px;
+.so-panels-live-editor .so-sidebar {
+  top: 46px;
+  left: 0;
+  bottom: 0;
+  width: 360px;
+  overflow-y: auto;
+  background: #F2F2F2;
+  border-right: 1px solid #D0D0D0;
 }
 .so-panels-live-editor .so-preview {
   top: 0;
@@ -1770,7 +1761,7 @@
 }
 .so-panels-live-editor .so-sidebar,
 .so-panels-live-editor .so-preview,
-.so-panels-live-editor .so-collapse-space,
+.so-panels-live-editor .so-sidebar-tools,
 .so-panels-live-editor .live-editor-collapse,
 .so-panels-live-editor .live-editor-collapse .collapse-icon {
   -webkit-transition: all 0.5s ease;
@@ -1785,7 +1776,7 @@
 .so-panels-live-editor.so-collapsed .live-editor-collapse .collapse-icon {
   transform: rotate(180deg);
 }
-.so-panels-live-editor.so-collapsed .so-collapse-space {
+.so-panels-live-editor.so-collapsed .so-sidebar-tools {
   left: -360px;
 }
 .so-panels-live-editor.so-collapsed .so-sidebar {
