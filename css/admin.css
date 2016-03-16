@@ -1702,7 +1702,7 @@
   width: 360px;
 }
 .so-panels-live-editor .so-sidebar-tools .live-editor-close {
-  margin: 10px 10px 0 0;
+  margin: 9px 10px 0 0;
   float: right;
 }
 .so-panels-live-editor .so-sidebar {
@@ -1740,6 +1740,7 @@
 .so-panels-live-editor .so-sidebar,
 .so-panels-live-editor .so-preview,
 .so-panels-live-editor .so-sidebar-tools,
+.so-panels-live-editor .so-preview-overlay,
 .so-panels-live-editor .live-editor-collapse,
 .so-panels-live-editor .live-editor-collapse .collapse-icon {
   -webkit-transition: all 0.5s ease;

@@ -1854,7 +1854,7 @@
 		width: @live_editor_width;
 
 		.live-editor-close {
-			margin: 10px 10px 0 0;
+			margin: 9px 10px 0 0;
 			float: right;
 		}
 	}
@@ -1901,6 +1901,7 @@
 	.so-sidebar,
 	.so-preview,
 	.so-sidebar-tools,
+	.so-preview-overlay,
 	.live-editor-collapse,
 	.live-editor-collapse .collapse-icon {
 		.transition( 0.5s );
@@ -1923,7 +1924,8 @@
 			left: -@live_editor_width;
 		}
 
-		.so-preview, .so-preview-overlay {
+		.so-preview,
+		.so-preview-overlay {
 			left: 0;
 		}
 	}
