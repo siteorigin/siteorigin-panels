@@ -4514,15 +4514,14 @@ module.exports = Backbone.View.extend( {
 						    'cursor' : 'pointer'
 					    })
 					    .mouseenter(function(){
-						    widgetEdit.addClass('so-hovered');
+						    widgetEdit.parent().addClass('so-hovered');
 						    overlay = thisView.createPreviewOverlay( $(this) );
 					    })
 					    .mouseleave( function(){
-						    widgetEdit.removeClass('so-hovered');
+						    widgetEdit.parent().removeClass('so-hovered');
 						    overlay.fadeOut('fast', function(){ $(this).remove(); });
 					    } )
 					    .click(function(e){
-						    console.log( i );
 						    e.preventDefault();
 						    // When we click a widget, send that click to the form
 						    widgetEdit.find('.title h4').click();
