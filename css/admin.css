@@ -130,20 +130,6 @@
   border: 1px solid #999999;
   color: #444444;
 }
-@media screen and (max-width: 600px) {
-  .siteorigin-panels-builder .so-builder-toolbar {
-    padding: 10px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button {
-    padding-right: 2px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button .so-panels-icon {
-    font-size: 20px;
-  }
-  .siteorigin-panels-builder .so-builder-toolbar > .so-tool-button span.so-button-text {
-    display: none;
-  }
-}
 .siteorigin-panels-builder .so-rows-container {
   padding: 20px 15px 0 15px;
 }
@@ -307,7 +293,7 @@
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .cell-wrapper {
   background: #e4eff4;
   border: 1px solid #bcccd2;
-  padding: 10px 10px 4px 10px;
+  padding: 7px 7px 1px 7px;
   /* 6px bottom to remove bottom margin from panels */
   height: 100%;
   min-height: 70px;
@@ -417,10 +403,6 @@
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget .form {
   display: none;
 }
-.siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget.widget-being-dragged {
-  opacity: 0.9;
-  pointer-events: none;
-}
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget-sortable-highlight {
   border: 1px solid;
   -ms-box-sizing: border-box;
@@ -515,10 +497,30 @@
   color: #777;
   font-size: 0.8em;
 }
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar {
+  padding: 10px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button {
+  padding-right: 2px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button .so-panels-icon {
+  font-size: 14px;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar > .so-tool-button span.so-button-text {
+  display: none;
+}
+.siteorigin-panels-builder .so-display-narrow .so-builder-toolbar .so-switch-to-standard {
+  display: none !important;
+}
+.siteorigin-panels-builder .so-display-narrow .widgets-container .so-widget .actions {
+  display: none !important;
+}
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
   /* Need a high z-index for layout builder widget */
   z-index: 500002 !important;
+  opacity: 0.9;
+  pointer-events: none;
   cursor: move;
   margin-bottom: 5px;
   background: #f9f9fb;
@@ -605,10 +607,6 @@
 }
 .so-widget.ui-sortable-helper.widget-being-dragged .form {
   display: none;
-}
-.so-widget.ui-sortable-helper.widget-being-dragged.widget-being-dragged {
-  opacity: 0.9;
-  pointer-events: none;
 }
 /* Handles displaying a builder in the WordPress widget interface */
 .widgets-holder-wrap .widget-inside .siteorigin-panels-builder .so-builder-container {
@@ -782,6 +780,7 @@
   height: 58px;
   background-color: #fafafa;
   border-top: 1px solid #D8D8D8;
+  z-index: 100001;
 }
 .so-panels-dialog .so-toolbar .so-status {
   float: left;
@@ -1572,6 +1571,74 @@
 .so-panels-dialog .so-content .siteorigin-panels-builder .so-panels-welcome-message {
   padding-left: 0;
   padding-right: 0;
+}
+.so-panels-dialog .so-dropdown-wrapper {
+  position: relative;
+  float: right;
+}
+.so-panels-dialog .so-dropdown-wrapper input[type="button"].button-primary {
+  width: 125px;
+  height: 28px;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper {
+  display: block;
+  z-index: 11;
+  position: absolute;
+  padding: 6px 0 0 0;
+  bottom: 28px;
+  width: 125px;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul {
+  margin: 0;
+  border: 1px solid #C0C0C0;
+  background: #F9F9F9;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  padding: 4px 0;
+  -webkit-box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul li {
+  margin: 0;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul li:first-child {
+  border-top-width: 1px;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul li a {
+  display: block;
+  padding: 2px 8px;
+  text-decoration: none;
+  color: #666;
+  font-size: 11px;
+  outline: 0 !important;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul li a:hover {
+  background: #F0F0F0;
+  color: #444;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul li a .dashicons {
+  font-size: 16px;
+  margin: 0;
+  float: right;
+  line-height: 16px;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper ul .so-pointer {
+  width: 12px;
+  height: 6px;
+  position: absolute;
+  z-index: 12;
+  background: url("images/dropdown-pointer.png");
+  background-size: 12px 6px;
+  top: 1px;
+  right: 18px;
+}
+.so-panels-dialog .so-dropdown-wrapper .so-dropdown-links-wrapper.hidden {
+  display: none;
 }
 /* Display the dialog with a proper z-index in the customizer */
 .wp-customizer .so-panels-dialog .so-overlay,

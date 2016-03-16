@@ -98,7 +98,7 @@ module.exports = Backbone.View.extend( {
         } );
 
         // Resize all the grids and cell wrappers
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 70 ) );
+        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
     },
 
     /**

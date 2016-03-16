@@ -96,8 +96,9 @@ module.exports = Backbone.Model.extend( {
         this.set( 'values', values, {silent: true} );
 
         if( hasChanged ) {
-            // We'll trigger our own change events
-            this.trigger('change');
+            // We'll trigger our own change events.
+			// NB: Must include the model being changed (i.e. `this`) as a workaround for a bug in Backbone 1.2.3
+            this.trigger('change', this);
             this.trigger('change:values');
         }
     },

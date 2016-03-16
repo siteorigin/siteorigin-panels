@@ -1,7 +1,7 @@
 var panels = window.panels;
 
 module.exports = Backbone.Collection.extend( {
-    model: panels.cell,
+    model: panels.model.cell,
 
     initialize: function(){
     },

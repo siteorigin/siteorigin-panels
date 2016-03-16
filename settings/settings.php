@@ -122,6 +122,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['tablet-width'] = 1024;
 		$defaults['mobile-width'] = 780;
 		$defaults['margin-bottom'] = 30;
+		$defaults['margin-bottom-last-row'] = false;
 		$defaults['margin-sides'] = 30;
 		$defaults['full-width-container'] = 'body';
 
@@ -268,6 +269,12 @@ class SiteOrigin_Panels_Settings {
 			'unit' => 'px',
 			'label' => __('Row Bottom Margin', 'siteorigin-panels'),
 			'description' => __('Default margin below rows.', 'siteorigin-panels'),
+		);
+
+		$fields['layout']['fields']['margin-bottom-last-row'] = array(
+			'type' => 'checkbox',
+			'label' => __('Last Row With Margin', 'siteorigin-panels'),
+			'description' => __('Allow margin in last row.', 'siteorigin-panels'),
 		);
 
 		$fields['layout']['fields']['margin-sides'] = array(

@@ -169,8 +169,6 @@ module.exports = panels.view.dialog.extend( {
 
         var $w = $(e.currentTarget);
 
-        console.log( panels );
-
         var widget = new panels.model.widget( {
             class: $w.data('class')
         } );

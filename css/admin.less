@@ -142,27 +142,6 @@
 		}
 	}
 
-	@media screen and (max-width: 600px) {
-		.so-builder-toolbar {
-
-			padding: 10px;
-
-			> .so-tool-button {
-				padding-right: 2px;
-
-				.so-panels-icon {
-					font-size: 20px;
-				}
-
-				span.so-button-text {
-					display: none;
-				}
-			}
-
-		}
-
-	}
-
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
@@ -320,7 +299,7 @@
 					.cell-wrapper{
 						background: #e4eff4;
 						border: 1px solid #bcccd2;
-						padding: 10px 10px 4px 10px; /* 6px bottom to remove bottom margin from panels */
+						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
 						height: 100%;
 						min-height: 70px;
 					}
@@ -446,11 +425,6 @@
 								display: none;
 							}
 
-							&.widget-being-dragged {
-								opacity: 0.9;
-								pointer-events: none;
-							}
-
 						}
 
 						.so-widget-sortable-highlight{
@@ -566,12 +540,44 @@
 		}
 	}
 
+	// This is for the special narrow display
+
+	.so-display-narrow {
+
+		.so-builder-toolbar {
+			padding: 10px;
+			> .so-tool-button {
+				padding-right: 2px;
+
+				.so-panels-icon {
+					font-size: 14px;
+				}
+
+				span.so-button-text {
+					display: none;
+				}
+			}
+
+			.so-switch-to-standard {
+				display: none !important;
+			}
+		}
+
+		.widgets-container .so-widget .actions {
+			display: none !important;
+		}
+
+	}
+
 }
 
 /* This is to display a draggable widget  */
 .so-widget.ui-sortable-helper.widget-being-dragged {
 	/* Need a high z-index for layout builder widget */
 	z-index: 500002 !important;
+
+	opacity: 0.9;
+	pointer-events: none;
 
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
@@ -784,6 +790,7 @@
 		height: @toolbar_height;
 		background-color: #fafafa;
 		border-top: 1px solid @border_color;
+		z-index: 100001; // 1 more than the rest to ensure dropdowns etc appear above the other content.
 
 		.so-status {
 			float: left;
@@ -1699,6 +1706,84 @@
 			.so-panels-welcome-message {
 				padding-left: 0;
 				padding-right: 0;
+			}
+		}
+	}
+
+
+	.so-dropdown-wrapper {
+		position: relative;
+		float: right;
+
+		@btn_width: 125px;
+		@btn_height: 28px;
+
+		input[type="button"].button-primary {
+			width: @btn_width;
+			height: @btn_height;
+		}
+
+		.so-dropdown-links-wrapper{
+			display: block;
+			z-index: 11;
+			position:absolute;
+			padding: 6px 0 0 0;
+			bottom: @btn_height;
+			width: @btn_width;
+
+			ul {
+				margin: 0;
+				border: 1px solid #C0C0C0;
+				background: #F9F9F9;
+				.rounded(2px);
+				padding: 4px 0;
+				.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+
+				li {
+					margin: 0;
+
+					&:first-child {
+						border-top-width: 1px;
+					}
+
+					a {
+						display: block;
+						padding: 2px 8px;
+						text-decoration: none;
+						color: #666;
+						font-size: 11px;
+
+						outline: 0 !important;
+						.box-shadow(none);
+
+						&:hover {
+							background: #F0F0F0;
+							color: #444;
+						}
+
+						.dashicons {
+							font-size: 16px;
+							margin: 0;
+							float: right;
+							line-height: 16px;
+						}
+
+					}
+				}
+
+				.so-pointer {
+					width: 12px;
+					height: 6px;
+					position: absolute;
+					z-index: 12;
+					background: url("./images/dropdown-pointer.png");
+					background-size: 12px 6px;
+					top: 1px;
+					right: 18px;
+				}
+			}
+			&.hidden {
+				display: none;
 			}
 		}
 	}
