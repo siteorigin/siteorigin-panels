@@ -9,29 +9,29 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-builder-toolbar">
 
-			<a href="#" class="so-tool-button so-widget-add">
+			<a href="#" class="so-tool-button so-widget-add" title="<?php esc_attr_e( 'Add Widget', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-plus"></span>
 				<span class="so-button-text"><?php esc_attr_e('Add Widget', 'siteorigin-panels') ?></span>
 			</a>
 
-			<a href="#" class="so-tool-button so-row-add">
+			<a href="#" class="so-tool-button so-row-add" title="<?php esc_attr_e( 'Add Row', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-columns"></span>
 				<span class="so-button-text"><?php esc_attr_e('Add Row', 'siteorigin-panels') ?></span>
 			</a>
 
-			<a href="#" class="so-tool-button so-prebuilt-add">
+			<a href="#" class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-cubes"></span>
 				<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
 			</a>
 
 			<?php if( !empty($post) ) : ?>
 
-				<a href="#" class="so-tool-button so-history" style="display: none">
+				<a href="#" class="so-tool-button so-history" style="display: none" title="<?php esc_attr_e( 'Edit History', 'siteorigin-panels' ) ?>">
 					<span class="so-panels-icon so-panels-icon-rotate-left"></span>
 					<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
 				</a>
 
-				<a href="#" class="so-tool-button so-live-editor" style="display: none">
+				<a href="#" class="so-tool-button so-live-editor" style="display: none" title="<?php esc_attr_e( 'Live Editor', 'siteorigin-panels' ) ?>">
 					<span class="so-panels-icon so-panels-icon-eye"></span>
 					<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
 				</a>
