@@ -1844,6 +1844,7 @@ module.exports = function () {
         $(document).trigger( 'panels_setup', builderView );
     });
 };
+
 },{}],12:[function(require,module,exports){
 /**
  * Everything we need for SiteOrigin Page Builder.
@@ -1919,13 +1920,15 @@ jQuery.fn.soPanelsSetupBuilderWidget = require('./jquery/setup-builder-widget');
 // Set up Page Builder if we're on the main interface
 jQuery( function($){
 
-    var container = false, field = false, form = false, postId = false, builderType = '';
+    var container, field, form, editorType, editorId, postId, builderType;
 
     if( $('#siteorigin-panels-metabox').length && $('form#post').length ) {
         // This is usually the case when we're in the post edit interface
         container = $( '#siteorigin-panels-metabox' );
         field = $( '#siteorigin-panels-metabox .siteorigin-panels-data-field' );
         form = $('form#post');
+		editorType = 'tinymce';
+		editorId = '#content';
         postId = $('#post_ID').val();
         builderType = 'editor_attached';
     }
@@ -1935,20 +1938,30 @@ jQuery( function($){
         container = $$.find('.siteorigin-panels-builder');
         field = $$.find('input[name="panels_data"]');
         form = $$;
+		editorId = '#post_content';
         postId = $('#panels-home-page').data('post-id');
         builderType = $$.data('type');
     }
 
-    if( container !== false ) {
+    if(!_.isUndefined(container)) {
         // If we have a container, then set up the main builder
         var panels = window.siteoriginPanels;
 
         // Create the main builder model
         var builderModel = new panels.model.builder();
 
+		// Create the builder config
+		var builderConfig = {
+			editorType: editorType,
+			postId: postId,
+			editorId: editorId,
+			builderType: builderType,
+		};
+
         // Now for the view to display the builder
         var builderView = new panels.view.builder( {
-            model: builderModel
+            model: builderModel,
+			config: builderConfig,
         } );
 
         // Set up the builder view
@@ -2940,10 +2953,11 @@ module.exports = Backbone.View.extend({
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	builderTypes: {
-		EDITOR_ATTACHED: 'editor_attached',
-		CUSTOM_HOME_PAGE: 'custom_home_page',
-	},
+
+	// Config options
+	editorType: null,
+	postId: null,
+	editorId: null,
 
     template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
     dialogs: {  },
@@ -2972,8 +2986,15 @@ module.exports = Backbone.View.extend( {
     /**
      * Initialize the builder
      */
-    initialize: function(){
+    initialize: function(options){
         var builder = this;
+
+		if(!_.isUndefined(options.config)) {
+			this.editorType = options.config.editorType;
+			this.editorId = options.config.editorId;
+			this.builderType = options.config.builderType;
+			this.postId = options.config.postId;
+		}
 
         // Now lets create all the dialog boxes that the main builder interface uses
         this.dialogs = {
@@ -3069,11 +3090,8 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-		if(this.builderType !== this.builderTypes.EDITOR_ATTACHED) {
-			if(this.builderType == this.builderTypes.CUSTOM_HOME_PAGE) {
-				// We still have a hidden 'editor' field for the custom home page builder.
-				this.attachedToEditor = true;
-			}
+		if(this.editorType !== 'tinymce') {
+			this.attachedToEditor = !_.isUndefined(this.editorId);
 			return this;
 		}
 
@@ -3503,23 +3521,13 @@ module.exports = Backbone.View.extend( {
         // Make sure we actually need to copy content.
         if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
 
-			var postId;
-			if(this.builderType === this.builderTypes.EDITOR_ATTACHED) {
-				postId = $('#post_ID').val();
-			} else if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
-				postId = $('#panels-home-page').data('postId');
-			} else {
-				// This shouldn't happen.
-				return;
-			}
-
             // We're going to create a copy of page builder content into the post content
             $.post(
                 panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_builder_content',
                     panels_data: JSON.stringify( this.model.getPanelsData() ),
-                    post_id: postId
+                    post_id: this.postId
                 },
                 function(content){
 
@@ -3552,15 +3560,10 @@ module.exports = Backbone.View.extend( {
      * @param content
      */
     updateEditorContent:function ( content ) {
-		// If we're in the custom home page builder use the hidden content field.
-		if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
-			$('#post_content').val(content);
-			return;
-		}
         // Switch back to the standard editor
-        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-            var contentArea = $('#content');
-            contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
+        if( this.editorType !== 'tinymce' || typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+			var $editor = $(this.editorId);
+			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
         }
         else {
             var contentEd = tinyMCE.get("content");

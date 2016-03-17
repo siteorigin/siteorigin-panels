@@ -1,10 +1,11 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	builderTypes: {
-		EDITOR_ATTACHED: 'editor_attached',
-		CUSTOM_HOME_PAGE: 'custom_home_page',
-	},
+
+	// Config options
+	editorType: null,
+	postId: null,
+	editorId: null,
 
     template: _.template( $('#siteorigin-panels-builder').html().panelsProcessTemplate() ),
     dialogs: {  },
@@ -33,8 +34,15 @@ module.exports = Backbone.View.extend( {
     /**
      * Initialize the builder
      */
-    initialize: function(){
+    initialize: function(options){
         var builder = this;
+
+		if(!_.isUndefined(options.config)) {
+			this.editorType = options.config.editorType;
+			this.editorId = options.config.editorId;
+			this.builderType = options.config.builderType;
+			this.postId = options.config.postId;
+		}
 
         // Now lets create all the dialog boxes that the main builder interface uses
         this.dialogs = {
@@ -130,11 +138,8 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-		if(this.builderType !== this.builderTypes.EDITOR_ATTACHED) {
-			if(this.builderType == this.builderTypes.CUSTOM_HOME_PAGE) {
-				// We still have a hidden 'editor' field for the custom home page builder.
-				this.attachedToEditor = true;
-			}
+		if(this.editorType !== 'tinymce') {
+			this.attachedToEditor = !_.isUndefined(this.editorId);
 			return this;
 		}
 
@@ -564,23 +569,13 @@ module.exports = Backbone.View.extend( {
         // Make sure we actually need to copy content.
         if( panelsOptions.copy_content && this.attachedToEditor && this.$el.is(':visible')) {
 
-			var postId;
-			if(this.builderType === this.builderTypes.EDITOR_ATTACHED) {
-				postId = $('#post_ID').val();
-			} else if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
-				postId = $('#panels-home-page').data('postId');
-			} else {
-				// This shouldn't happen.
-				return;
-			}
-
             // We're going to create a copy of page builder content into the post content
             $.post(
                 panelsOptions.ajaxurl,
                 {
                     action: 'so_panels_builder_content',
                     panels_data: JSON.stringify( this.model.getPanelsData() ),
-                    post_id: postId
+                    post_id: this.postId
                 },
                 function(content){
 
@@ -613,15 +608,10 @@ module.exports = Backbone.View.extend( {
      * @param content
      */
     updateEditorContent:function ( content ) {
-		// If we're in the custom home page builder use the hidden content field.
-		if(this.builderType === this.builderTypes.CUSTOM_HOME_PAGE) {
-			$('#post_content').val(content);
-			return;
-		}
         // Switch back to the standard editor
-        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-            var contentArea = $('#content');
-            contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
+        if( this.editorType !== 'tinymce' || typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+			var $editor = $(this.editorId);
+			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
         }
         else {
             var contentEd = tinyMCE.get("content");

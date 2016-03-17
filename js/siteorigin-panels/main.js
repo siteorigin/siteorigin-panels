@@ -72,13 +72,15 @@ jQuery.fn.soPanelsSetupBuilderWidget = require('./jquery/setup-builder-widget');
 // Set up Page Builder if we're on the main interface
 jQuery( function($){
 
-    var container = false, field = false, form = false, postId = false, builderType = '';
+    var container, field, form, editorType, editorId, postId, builderType;
 
     if( $('#siteorigin-panels-metabox').length && $('form#post').length ) {
         // This is usually the case when we're in the post edit interface
         container = $( '#siteorigin-panels-metabox' );
         field = $( '#siteorigin-panels-metabox .siteorigin-panels-data-field' );
         form = $('form#post');
+		editorType = 'tinymce';
+		editorId = '#content';
         postId = $('#post_ID').val();
         builderType = 'editor_attached';
     }
@@ -88,20 +90,30 @@ jQuery( function($){
         container = $$.find('.siteorigin-panels-builder');
         field = $$.find('input[name="panels_data"]');
         form = $$;
+		editorId = '#post_content';
         postId = $('#panels-home-page').data('post-id');
         builderType = $$.data('type');
     }
 
-    if( container !== false ) {
+    if(!_.isUndefined(container)) {
         // If we have a container, then set up the main builder
         var panels = window.siteoriginPanels;
 
         // Create the main builder model
         var builderModel = new panels.model.builder();
 
+		// Create the builder config
+		var builderConfig = {
+			editorType: editorType,
+			postId: postId,
+			editorId: editorId,
+			builderType: builderType,
+		};
+
         // Now for the view to display the builder
         var builderView = new panels.view.builder( {
-            model: builderModel
+            model: builderModel,
+			config: builderConfig,
         } );
 
         // Set up the builder view
