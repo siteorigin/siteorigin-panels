@@ -4496,7 +4496,7 @@ module.exports = Backbone.View.extend( {
 			    ifc = $$.contents();
 
 
-		    thisView.$el.find('.so-preview-overlay').fadeOut( 500 );
+		    thisView.$el.find('.so-preview-overlay' ).hide();
 
 		    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
 		    ifc.find('.panel-grid .panel-grid-cell .so-panel')
@@ -4692,12 +4692,10 @@ module.exports = Backbone.View.extend( {
 			this.previewScrollTop = iframe.contents().scrollTop();
 		}
 
-		this.$el.find('.so-preview-overlay').fadeIn();
+		this.$el.find('.so-preview-overlay' ).show();
 
-		// Set the preview data
+		// Set the preview data and submit the form
 		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
-
-		// Submit the form
 		form.submit();
 	},
 
