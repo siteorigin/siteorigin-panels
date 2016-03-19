@@ -3144,13 +3144,14 @@ module.exports = Backbone.View.extend( {
 
 	        if( thisView.$el.hasClass( 'so-display-narrow' ) ){
 		        // In this case, we don't want to stick the toolbar.
-		        toolbar.css({
+		        toolbar.css( {
 			        top: 0,
 			        left: 0,
 			        width: '100%',
 			        position: 'absolute'
-		        });
+		        } );
 		        thisView.$el.css('padding-top', toolbar.outerHeight() );
+		        return;
 	        }
 
 	        var newTop = $(window).scrollTop() - thisView.$el.offset().top;
@@ -3696,7 +3697,34 @@ module.exports = Backbone.View.extend( {
                 activeView.buildContextualMenu( e, menu );
             }
         }
-    }
+    },
+
+	/**
+	 * Lock window scrolling for the main overlay
+	 */
+	lockPageScroll: function(){
+		// lock scroll position, but retain settings for later
+		var scrollPosition = [
+			self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
+			self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop
+		];
+		$('body')
+			.data( {
+				'scroll-position': scrollPosition,
+				'previous-overflow': $('body' ).css('overflow'),
+			} )
+			.css('overflow', 'hidden');
+		window.scrollTo(scrollPosition[0], scrollPosition[1] );
+	},
+
+	/**
+	 * Unlock window scrolling
+	 */
+	unlockPageScroll: function(){
+		$('body').css('overflow', $('body').data('previous-overflow'));
+		var scrollPosition = $('body').data('scroll-position');
+		window.scrollTo(scrollPosition[0], scrollPosition[1])
+	}
 
 } );
 
@@ -4230,8 +4258,7 @@ module.exports = Backbone.View.extend( {
         this.refreshDialogNav();
 
         // Stop scrolling for the main body
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css({'overflow':'hidden'});
+	    this.builder.lockPageScroll();
 
         // Start listen for keyboard keypresses.
         $(window).on('keyup', this.keyboardListen);
@@ -4268,8 +4295,7 @@ module.exports = Backbone.View.extend( {
 
         if( !$('.so-panels-dialog-wrapper').is(':visible') ){
             // Restore scrolling to the main body if there are no more dialogs
-            $('body').css({'overflow':'auto'});
-            $('body').scrollTop( this.bodyScrollTop );
+	        this.builder.unlockPageScroll();
         }
 
         // Stop listen for keyboard keypresses.
@@ -4577,8 +4603,7 @@ module.exports = Backbone.View.extend( {
         }
 
 	    // Disable page scrolling
-	    this.bodyScrollTop = $('body').scrollTop();
-	    $('body,html').css( {overflow:'hidden'} );
+	    this.builder.lockPageScroll();
 
 	    if( this.$el.is(':visible') ) {
 		    return this;
@@ -4598,8 +4623,7 @@ module.exports = Backbone.View.extend( {
 	 * Close the live editor
 	 */
     close: function(){
-        $('body,html').css( {overflow:'auto'} );
-        $('body').scrollTop( this.bodyScrollTop );
+        this.builder.unlockPageScroll();
 
 	    if( !this.$el.is(':visible') ) {
 		    return this;

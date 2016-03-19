@@ -206,13 +206,14 @@ module.exports = Backbone.View.extend( {
 
 	        if( thisView.$el.hasClass( 'so-display-narrow' ) ){
 		        // In this case, we don't want to stick the toolbar.
-		        toolbar.css({
+		        toolbar.css( {
 			        top: 0,
 			        left: 0,
 			        width: '100%',
 			        position: 'absolute'
-		        });
+		        } );
 		        thisView.$el.css('padding-top', toolbar.outerHeight() );
+		        return;
 	        }
 
 	        var newTop = $(window).scrollTop() - thisView.$el.offset().top;
@@ -758,6 +759,33 @@ module.exports = Backbone.View.extend( {
                 activeView.buildContextualMenu( e, menu );
             }
         }
-    }
+    },
+
+	/**
+	 * Lock window scrolling for the main overlay
+	 */
+	lockPageScroll: function(){
+		// lock scroll position, but retain settings for later
+		var scrollPosition = [
+			self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
+			self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop
+		];
+		$('body')
+			.data( {
+				'scroll-position': scrollPosition,
+				'previous-overflow': $('body' ).css('overflow'),
+			} )
+			.css('overflow', 'hidden');
+		window.scrollTo(scrollPosition[0], scrollPosition[1] );
+	},
+
+	/**
+	 * Unlock window scrolling
+	 */
+	unlockPageScroll: function(){
+		$('body').css('overflow', $('body').data('previous-overflow'));
+		var scrollPosition = $('body').data('scroll-position');
+		window.scrollTo(scrollPosition[0], scrollPosition[1])
+	}
 
 } );

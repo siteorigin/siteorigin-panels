@@ -255,8 +255,7 @@ module.exports = Backbone.View.extend( {
         this.refreshDialogNav();
 
         // Stop scrolling for the main body
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css({'overflow':'hidden'});
+	    this.builder.lockPageScroll();
 
         // Start listen for keyboard keypresses.
         $(window).on('keyup', this.keyboardListen);
@@ -293,8 +292,7 @@ module.exports = Backbone.View.extend( {
 
         if( !$('.so-panels-dialog-wrapper').is(':visible') ){
             // Restore scrolling to the main body if there are no more dialogs
-            $('body').css({'overflow':'auto'});
-            $('body').scrollTop( this.bodyScrollTop );
+	        this.builder.unlockPageScroll();
         }
 
         // Stop listen for keyboard keypresses.
