@@ -1676,8 +1676,8 @@
   display: none;
 }
 .so-panels-live-editor .live-editor-collapse {
-  position: absolute;
-  top: 24px;
+  position: fixed;
+  top: 18px;
   left: 10px;
   line-height: 1em;
   cursor: pointer;
