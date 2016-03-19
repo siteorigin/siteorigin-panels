@@ -765,17 +765,21 @@ module.exports = Backbone.View.extend( {
 	 * Lock window scrolling for the main overlay
 	 */
 	lockPageScroll: function(){
+		if( $( 'body' ).css('overflow') === 'hidden' ) {
+			return;
+		}
+
 		// lock scroll position, but retain settings for later
 		var scrollPosition = [
 			self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
 			self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop
 		];
-		$('body')
+
+		$( 'body' )
 			.data( {
-				'scroll-position': scrollPosition,
-				'previous-overflow': $('body' ).css('overflow'),
+				'scroll-position': scrollPosition
 			} )
-			.css('overflow', 'hidden');
+			.css( 'overflow', 'hidden' );
 		window.scrollTo(scrollPosition[0], scrollPosition[1] );
 	},
 
@@ -783,9 +787,13 @@ module.exports = Backbone.View.extend( {
 	 * Unlock window scrolling
 	 */
 	unlockPageScroll: function(){
-		$('body').css('overflow', $('body').data('previous-overflow'));
-		var scrollPosition = $('body').data('scroll-position');
-		window.scrollTo(scrollPosition[0], scrollPosition[1])
+		if( $( 'body' ).css('overflow') !== 'hidden' ) {
+			return;
+		}
+
+		$( 'body' ).css( 'overflow', 'visible' );
+		var scrollPosition = $('body').data( 'scroll-position' );
+		window.scrollTo( scrollPosition[0], scrollPosition[1] );
 	}
 
 } );
