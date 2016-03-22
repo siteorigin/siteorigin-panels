@@ -367,6 +367,8 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 				'layout_widget' => __('Layout Builder Widget', 'siteorigin-panels'),
 				// TRANSLATORS: A standard confirmation message
 				'dropdown_confirm' => __('Are you sure?', 'siteorigin-panels'),
+				// TRANSLATORS: When a layout file is ready to be inserted. %s is the filename.
+				'ready_to_insert' => __('%s is ready to insert.', 'siteorigin-panels'),
 
 				// Everything for the contextual menu
 				'contextual' => array(

@@ -1226,7 +1226,8 @@
   display: block;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui p.drag-drop-message {
-  font-size: 0.9em;
+  font-size: 1em;
+  margin-bottom: 0;
 }
 .so-panels-dialog.so-panels-dialog-prebuilt-layouts .so-content .import-upload-ui .drag-upload-area {
   display: block;
