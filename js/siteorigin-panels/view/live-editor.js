@@ -4,16 +4,12 @@ module.exports = Backbone.View.extend( {
     template: _.template( $('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
 
     postId: false,
-    bodyScrollTop : null,
-    displayed: false,
-
 	previewScrollTop: 0,
 
     events: {
         'click .live-editor-close': 'close',
         'click .live-editor-collapse': 'collapse'
     },
-    frameScrollTop: 0,
 
     initialize: function( options ){
 	    this.builder = options.builder;
@@ -29,13 +25,11 @@ module.exports = Backbone.View.extend( {
 	    var thisView = this;
 
 	    this.$el.find( '.so-preview iframe' ).on( 'load', function(){
-		    // Scroll to the correct position
-		    thisView.$el.find( '.so-preview iframe' ).contents().scrollTop( thisView.previewScrollTop );
-
 		    var $$ = $(this ),
 			    ifc = $$.contents();
 
-
+		    // Scroll to the correct position
+		    ifc.scrollTop( thisView.previewScrollTop );
 		    thisView.$el.find('.so-preview-overlay' ).hide();
 
 		    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
