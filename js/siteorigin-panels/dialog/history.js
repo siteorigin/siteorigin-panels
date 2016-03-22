@@ -9,6 +9,8 @@ module.exports = panels.view.dialog.extend( {
     revertEntry: null,
     selectedEntry: null,
 
+	previewScrollTop : null,
+
     dialogClass: 'so-panels-dialog-history',
 
     events: {
@@ -24,11 +26,16 @@ module.exports = panels.view.dialog.extend( {
     },
 
     render: function(){
+	    var thisView = this;
+
         // Render the dialog and attach it to the builder interface
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-history').html(), {} ) );
 
         this.$('iframe.siteorigin-panels-history-iframe').load(function(){
-            $(this).show();
+	        var $$ = $(this);
+            $$.show();
+
+	        $$.contents().scrollTop( thisView.previewScrollTop );
         });
     },
 
@@ -121,8 +128,11 @@ module.exports = panels.view.dialog.extend( {
      * @param entry
      */
     previewEntry: function(entry){
-        this.$('iframe.siteorigin-panels-history-iframe').hide();
-        this.$('form.history-form input[name="siteorigin_panels_data"]').val( entry.get('data') );
+	    var iframe = this.$('iframe.siteorigin-panels-history-iframe');
+	    iframe.hide();
+	    this.previewScrollTop = iframe.contents().scrollTop();
+
+        this.$('form.history-form input[name="live_editor_panels_data"]').val( entry.get('data') );
         this.$('form.history-form').submit();
     },
 
