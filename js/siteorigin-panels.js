@@ -4770,7 +4770,8 @@ module.exports = Backbone.View.extend( {
 
 		// Add a loading bar
 		this.$('.so-preview-overlay .so-loading-bar')
-			.css('width', '0%')
+			.clearQueue()
+			.css( 'width', '0%' )
 			.animate( { width: '100%' }, parseInt (loadTimePrediction)  );
 
 		// Set the preview data and submit the form
