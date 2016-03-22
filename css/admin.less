@@ -1903,6 +1903,27 @@
 		bottom: 0;
 		left: @live_editor_width;
 		background-color: #F4F4F4;
+
+		.so-loading-container {
+			opacity: 0.6;
+			position: absolute;
+			top: 50%;
+			width: 200px;
+			padding: 2px;
+			border-radius: 5px;
+			left: 50%;
+			margin-left: -104px;
+			margin-top: -9px;
+
+			border: 2px solid #aaa;
+
+			.so-loading-bar {
+				width: 50%;
+				border-radius: 3px;
+				height: 10px;
+				background: #aaa;
+			}
+		}
 	}
 
 	.so-sidebar,

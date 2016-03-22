@@ -5,6 +5,7 @@ module.exports = Backbone.View.extend( {
 
     postId: false,
 	previewScrollTop: 0,
+	loadTimes: [ ],
 
     events: {
         'click .live-editor-close': 'close',
@@ -24,50 +25,59 @@ module.exports = Backbone.View.extend( {
 	    this.$el.hide();
 	    var thisView = this;
 
-	    this.$el.find( '.so-preview iframe' ).on( 'load', function(){
-		    var $$ = $(this ),
-			    ifc = $$.contents();
+	    this.$( '.so-preview iframe' )
+		    .on( 'load', function(){
+			    var $$ = $(this ),
+				    ifc = $$.contents();
 
-		    // Scroll to the correct position
-		    ifc.scrollTop( thisView.previewScrollTop );
-		    thisView.$el.find('.so-preview-overlay' ).hide();
+			    if( $$.data('load-start') !== undefined ) {
+				    thisView.loadTimes.unshift( new Date().getTime() - $$.data('load-start') );
 
-		    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-		    ifc.find('.panel-grid .panel-grid-cell .so-panel')
-			    .filter(function(){
-				    // Filter to only include non nested
-				    return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
-			    })
-			    .each(function(i, el){
-				    var $$ = $(el);
-				    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
-				    var overlay;
+				    if ( thisView.loadTimes.length ) {
+					    thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
+				    }
+			    }
 
-				    $$
-					    .css({
-						    'cursor' : 'pointer'
-					    })
-					    .mouseenter(function(){
-						    widgetEdit.parent().addClass('so-hovered');
-						    overlay = thisView.createPreviewOverlay( $(this) );
-					    })
-					    .mouseleave( function(){
-						    widgetEdit.parent().removeClass('so-hovered');
-						    overlay.fadeOut('fast', function(){ $(this).remove(); });
-					    } )
-					    .click(function(e){
-						    e.preventDefault();
-						    // When we click a widget, send that click to the form
-						    widgetEdit.find('.title h4').click();
-					    });
+			    // Scroll to the correct position
+			    ifc.scrollTop( thisView.previewScrollTop );
+			    thisView.$el.find('.so-preview-overlay' ).hide();
+
+			    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
+			    ifc.find('.panel-grid .panel-grid-cell .so-panel')
+				    .filter(function(){
+					    // Filter to only include non nested
+					    return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
+				    })
+				    .each(function(i, el){
+					    var $$ = $(el);
+					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
+					    var overlay;
+
+					    $$
+						    .css({
+							    'cursor' : 'pointer'
+						    })
+						    .mouseenter(function(){
+							    widgetEdit.parent().addClass('so-hovered');
+							    overlay = thisView.createPreviewOverlay( $(this) );
+						    })
+						    .mouseleave( function(){
+							    widgetEdit.parent().removeClass('so-hovered');
+							    overlay.fadeOut('fast', function(){ $(this).remove(); });
+						    } )
+						    .click(function(e){
+							    e.preventDefault();
+							    // When we click a widget, send that click to the form
+							    widgetEdit.find('.title h4').click();
+						    });
+				    });
+
+			    // Prevent default clicks
+			    ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
+				    e.preventDefault();
 			    });
 
-		    // Prevent default clicks
-		    ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
-			    e.preventDefault();
-		    });
-
-	    } );
+		    } );
     },
 
     /**
@@ -224,11 +234,23 @@ module.exports = Backbone.View.extend( {
 			this.previewScrollTop = iframe.contents().scrollTop();
 		}
 
-		this.$el.find('.so-preview-overlay' ).show();
+		var loadTimePrediction = this.loadTimes.length ?
+			_.reduce( this.loadTimes, function( memo, num ){
+				return memo + num
+			}, 0 ) / this.loadTimes.length : 1000;
+
+		this.$('.so-preview-overlay' ).show();
+
+		// Add a loading bar
+		this.$('.so-preview-overlay .so-loading-bar')
+			.css('width', '0%')
+			.animate( { width: '100%' }, parseInt (loadTimePrediction)  );
 
 		// Set the preview data and submit the form
 		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
-		form.submit();
+		form.submit()
+
+		iframe.data( 'load-start', new Date().getTime() );
 	},
 
     /**

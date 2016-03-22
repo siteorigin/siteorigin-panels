@@ -533,7 +533,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<iframe id="siteorigin-panels-live-editor-iframe" name="siteorigin-panels-live-editor-iframe"></iframe>
 		</div>
 
-		<div class="so-preview-overlay so-panels-loading"></div>
+		<div class="so-preview-overlay">
+			<div class="so-loading-container"><div class="so-loading-bar"></div></div>
+		</div>
 
 	</div>
 </script>
