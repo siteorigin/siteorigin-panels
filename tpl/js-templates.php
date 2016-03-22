@@ -11,17 +11,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<a href="#" class="so-tool-button so-widget-add" title="<?php esc_attr_e( 'Add Widget', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-plus"></span>
-				<span class="so-button-text"><?php esc_attr_e('Add Widget', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e('Add Widget', 'siteorigin-panels') ?></span>
 			</a>
 
 			<a href="#" class="so-tool-button so-row-add" title="<?php esc_attr_e( 'Add Row', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-columns"></span>
-				<span class="so-button-text"><?php esc_attr_e('Add Row', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e('Add Row', 'siteorigin-panels') ?></span>
 			</a>
 
 			<a href="#" class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-cubes"></span>
-				<span class="so-button-text"><?php esc_attr_e('Prebuilt', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e('Prebuilt', 'siteorigin-panels') ?></span>
 			</a>
 
 			<?php if( !empty($post) ) : ?>
@@ -31,7 +31,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
 				</a>
 
-				<a href="#" class="so-tool-button so-live-editor" style="display: none" title="<?php esc_attr_e( 'Live Editor', 'siteorigin-panels' ) ?>">
+				<a href="#" class="so-tool-button so-live-editor" style="display: none" title="<?php esc_html_e( 'Live Editor', 'siteorigin-panels' ) ?>">
 					<span class="so-panels-icon so-panels-icon-eye"></span>
 					<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
 				</a>
@@ -519,7 +519,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</form>
 
 		<div class="so-sidebar-tools">
-			<button href="#" class="live-editor-close button-primary"><?php esc_attr_e('Done', 'siteorigin-panels') ?></button>
+			<button href="#" class="live-editor-close button-primary"><?php esc_html_e('Done', 'siteorigin-panels') ?></button>
 		</div>
 
 		<div class="so-sidebar">
