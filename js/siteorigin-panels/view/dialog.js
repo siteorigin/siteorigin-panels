@@ -297,6 +297,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
+	    this.builder.trigger( 'close_dialog', this );
     },
 
     /**

@@ -192,7 +192,7 @@ module.exports = Backbone.View.extend({
 			    },
 			    'delete': {
 				    title: panelsOptions.loc.contextual.widget_delete,
-				    warning: true
+				    confirm: true
 			    },
 		    },
 		    function( c ){

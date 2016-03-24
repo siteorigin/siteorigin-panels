@@ -555,7 +555,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		{{% } %}}
 		<ul class="so-items">
 			{{% for( var k in items ) { %}}
-				<li data-key="{{%- k %}}" class="so-item {{% if( !_.isUndefined( items[k].warning ) && items[k].warning ) { print( 'so-warning' ); } %}}">{{%= items[k][settings.titleKey] %}}</li>
+				<li data-key="{{%- k %}}" class="so-item {{% if( !_.isUndefined( items[k].confirm ) && items[k].confirm ) { print( 'so-confirm' ); } %}}">{{%= items[k][settings.titleKey] %}}</li>
 			{{% } %}}
 		</ul>
 		{{% if( settings.search ) { %}}

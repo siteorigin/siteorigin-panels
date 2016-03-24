@@ -280,7 +280,7 @@ module.exports = Backbone.View.extend( {
 			    },
 			    'delete': {
 				    title: panelsOptions.loc.contextual.row_delete,
-				    warning: true
+				    confirm: true
 			    },
 		    },
 		    function( c ){

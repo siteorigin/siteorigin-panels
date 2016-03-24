@@ -42,6 +42,8 @@ module.exports = Backbone.View.extend( {
 			    $iframeContents.scrollTop( thisView.previewScrollTop );
 			    thisView.$('.so-preview-overlay' ).hide();
 
+			    var overlay = false;
+
 			    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
 			    $iframeContents.find('.panel-grid .panel-grid-cell .so-panel')
 				    .filter(function(){
@@ -51,7 +53,6 @@ module.exports = Backbone.View.extend( {
 				    .each(function(i, el){
 					    var $$ = $(el);
 					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
-					    var overlay = false;
 
 					    widgetEdit.data( 'live-editor-preview-widget', $$ );
 

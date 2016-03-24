@@ -2804,6 +2804,13 @@ module.exports = Backbone.View.extend({
         }
     },
 
+	/**
+	 * Add a new section to the contextual menu.
+	 *
+	 * @param settings
+	 * @param items
+	 * @param callback
+	 */
     addSection: function( settings, items, callback ){
         var thisView = this;
         settings = _.extend( {
@@ -2826,11 +2833,31 @@ module.exports = Backbone.View.extend({
         } ) );
         this.$el.append( section );
 
-        section.find('.so-item').click( function(){
-            var $$ = jQuery(this);
+        section.find('.so-item:not(.so-confirm)' ).click( function(){
+            var $$ = $(this);
             callback( $$.data('key') );
             thisView.closeMenu();
         } );
+
+		section.find('.so-item.so-confirm' ).click( function(){
+			var $$ = $(this);
+
+			if( $$.hasClass('so-confirming') ) {
+				callback( $$.data('key') );
+				thisView.closeMenu();
+				return;
+			}
+
+			$$
+				.data( 'original-text', $$.html() )
+				.addClass( 'so-confirming' )
+				.html( '<span class="dashicons dashicons-yes"></span> ' + panelsOptions.loc.dropdown_confirm );
+
+			setTimeout( function(){
+				$$.removeClass( 'so-confirming' );
+				$$.html( $$.data('original-text') );
+			}, 2500 );
+		} );
 
         section.data('settings', settings).find( '.so-search-wrapper input').trigger('keyup');
 
@@ -2950,6 +2977,7 @@ module.exports = Backbone.View.extend({
     }
 
 });
+
 },{}],19:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
@@ -4321,6 +4349,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
+	    this.builder.trigger( 'close_dialog', this );
     },
 
     /**
@@ -4564,6 +4593,8 @@ module.exports = Backbone.View.extend( {
 			    $iframeContents.scrollTop( thisView.previewScrollTop );
 			    thisView.$('.so-preview-overlay' ).hide();
 
+			    var overlay = false;
+
 			    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
 			    $iframeContents.find('.panel-grid .panel-grid-cell .so-panel')
 				    .filter(function(){
@@ -4573,7 +4604,6 @@ module.exports = Backbone.View.extend( {
 				    .each(function(i, el){
 					    var $$ = $(el);
 					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
-					    var overlay = false;
 
 					    widgetEdit.data( 'live-editor-preview-widget', $$ );
 
@@ -5115,7 +5145,7 @@ module.exports = Backbone.View.extend( {
 			    },
 			    'delete': {
 				    title: panelsOptions.loc.contextual.row_delete,
-				    warning: true
+				    confirm: true
 			    },
 		    },
 		    function( c ){
@@ -5521,7 +5551,7 @@ module.exports = Backbone.View.extend({
 			    },
 			    'delete': {
 				    title: panelsOptions.loc.contextual.widget_delete,
-				    warning: true
+				    confirm: true
 			    },
 		    },
 		    function( c ){
