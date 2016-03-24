@@ -80,7 +80,7 @@ module.exports = Backbone.View.extend( {
     resize: function(e){
         // Don't resize this
         if( !this.$el.is(':visible') ) {
-            return false;
+            return;
         }
 
         // Reset everything to have an automatic height
@@ -139,8 +139,6 @@ module.exports = Backbone.View.extend( {
         } );
 
 	    this.builder.model.refreshPanelsData();
-
-        return false;
     },
 
     /**
@@ -168,8 +166,6 @@ module.exports = Backbone.View.extend( {
                 $$.removeClass('so-confirmed').html(originalText);
             }, 2500);
         }
-
-        return false;
     },
 
     /**
@@ -184,8 +180,6 @@ module.exports = Backbone.View.extend( {
         }
 
         this.dialog.openDialog();
-
-        return false;
     },
 
     /**
@@ -193,7 +187,6 @@ module.exports = Backbone.View.extend( {
      */
     deleteHandler: function(){
         this.model.destroy();
-        return false;
     },
 
     /**
@@ -216,7 +209,7 @@ module.exports = Backbone.View.extend( {
         this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
             if(typeof view === 'undefined') {
-                return false;
+                return;
             }
 
             if( view.model.cid === cell.cid ) {

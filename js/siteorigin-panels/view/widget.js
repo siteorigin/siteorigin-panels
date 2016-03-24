@@ -89,7 +89,6 @@ module.exports = Backbone.View.extend({
     editHandler: function(){
         // Create a new dialog for editing this
         this.getEditDialog().openDialog();
-        return false;
     },
 
     /**
@@ -108,8 +107,6 @@ module.exports = Backbone.View.extend({
             // Add this after the existing model
             at: this.model.collection.indexOf( this.model ) + 1
         });
-
-        return false;
     },
 
     /**
@@ -119,7 +116,6 @@ module.exports = Backbone.View.extend({
      */
     deleteHandler: function(){
         this.model.trigger('visual_destroy');
-        return false;
     },
 
     onModelChange: function(){

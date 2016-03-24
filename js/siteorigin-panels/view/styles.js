@@ -16,7 +16,7 @@ module.exports = Backbone.View.extend( {
      */
     render: function( stylesType, postId, args ){
         if( typeof stylesType === 'undefined' ) {
-            return false;
+            return;
         }
 
         // Add in the default args

@@ -137,8 +137,6 @@ module.exports = Backbone.View.extend( {
 	    this.builder.$el.appendTo( this.originalContainer );
 	    this.builder.$('.so-tool-button.so-live-editor' ).show();
 	    this.builder.trigger('builder_resize');
-
-        return false;
     },
 
 	collapse: function(){

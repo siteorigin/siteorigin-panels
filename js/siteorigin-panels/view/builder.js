@@ -377,7 +377,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddWidgetDialog: function(){
         this.dialogs.widgets.openDialog();
-        return false;
     },
 
     /**
@@ -388,7 +387,6 @@ module.exports = Backbone.View.extend( {
     displayAddRowDialog: function(){
         this.dialogs.row.openDialog();
         this.dialogs.row.setRowModel(); // Set this to an empty row model
-        return false;
     },
 
     /**
@@ -398,7 +396,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddPrebuiltDialog: function(){
         this.dialogs.prebuilt.openDialog();
-        return false;
     },
 
     /**
@@ -408,7 +405,6 @@ module.exports = Backbone.View.extend( {
      */
     displayHistoryDialog: function(){
         this.dialogs.history.openDialog();
-        return false;
     },
 
     /**
@@ -512,11 +508,10 @@ module.exports = Backbone.View.extend( {
      */
     displayLiveEditor: function(){
         if(typeof this.liveEditor === 'undefined') {
-            return false;
+            return;
         }
 
         this.liveEditor.open();
-        return false;
     },
 
     /**

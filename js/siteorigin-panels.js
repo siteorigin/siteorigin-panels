@@ -3330,7 +3330,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddWidgetDialog: function(){
         this.dialogs.widgets.openDialog();
-        return false;
     },
 
     /**
@@ -3341,7 +3340,6 @@ module.exports = Backbone.View.extend( {
     displayAddRowDialog: function(){
         this.dialogs.row.openDialog();
         this.dialogs.row.setRowModel(); // Set this to an empty row model
-        return false;
     },
 
     /**
@@ -3351,7 +3349,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddPrebuiltDialog: function(){
         this.dialogs.prebuilt.openDialog();
-        return false;
     },
 
     /**
@@ -3361,7 +3358,6 @@ module.exports = Backbone.View.extend( {
      */
     displayHistoryDialog: function(){
         this.dialogs.history.openDialog();
-        return false;
     },
 
     /**
@@ -3465,11 +3461,10 @@ module.exports = Backbone.View.extend( {
      */
     displayLiveEditor: function(){
         if(typeof this.liveEditor === 'undefined') {
-            return false;
+            return;
         }
 
         this.liveEditor.open();
-        return false;
     },
 
     /**
@@ -3875,7 +3870,9 @@ module.exports = Backbone.View.extend( {
             start: function(e, ui){
                 // Set the containment to the cell parent
                 previousCell = cellView.$el.prev().data('view');
-                if( typeof previousCell === 'undefined' ) { return false; }
+                if( typeof previousCell === 'undefined' ) {
+	                return;
+                }
 
                 // Create the clone for the current cell
                 var newCellClone = cellView.$el.clone().appendTo(ui.helper).css({
@@ -3991,7 +3988,6 @@ module.exports = Backbone.View.extend( {
     handleCellClick : function(e){
         var cells = this.$el.closest('.so-rows-container').find('.so-cells .cell').removeClass('cell-selected');
         $(e.target).parent().addClass('cell-selected');
-        return false;
     },
 
     /**
@@ -4667,8 +4663,6 @@ module.exports = Backbone.View.extend( {
 	    this.builder.$el.appendTo( this.originalContainer );
 	    this.builder.$('.so-tool-button.so-live-editor' ).show();
 	    this.builder.trigger('builder_resize');
-
-        return false;
     },
 
 	collapse: function(){
@@ -4878,7 +4872,7 @@ module.exports = Backbone.View.extend( {
     resize: function(e){
         // Don't resize this
         if( !this.$el.is(':visible') ) {
-            return false;
+            return;
         }
 
         // Reset everything to have an automatic height
@@ -4937,8 +4931,6 @@ module.exports = Backbone.View.extend( {
         } );
 
 	    this.builder.model.refreshPanelsData();
-
-        return false;
     },
 
     /**
@@ -4966,8 +4958,6 @@ module.exports = Backbone.View.extend( {
                 $$.removeClass('so-confirmed').html(originalText);
             }, 2500);
         }
-
-        return false;
     },
 
     /**
@@ -4982,8 +4972,6 @@ module.exports = Backbone.View.extend( {
         }
 
         this.dialog.openDialog();
-
-        return false;
     },
 
     /**
@@ -4991,7 +4979,6 @@ module.exports = Backbone.View.extend( {
      */
     deleteHandler: function(){
         this.model.destroy();
-        return false;
     },
 
     /**
@@ -5014,7 +5001,7 @@ module.exports = Backbone.View.extend( {
         this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
             if(typeof view === 'undefined') {
-                return false;
+                return;
             }
 
             if( view.model.cid === cell.cid ) {
@@ -5125,7 +5112,7 @@ module.exports = Backbone.View.extend( {
      */
     render: function( stylesType, postId, args ){
         if( typeof stylesType === 'undefined' ) {
-            return false;
+            return;
         }
 
         // Add in the default args
@@ -5388,7 +5375,6 @@ module.exports = Backbone.View.extend({
     editHandler: function(){
         // Create a new dialog for editing this
         this.getEditDialog().openDialog();
-        return false;
     },
 
     /**
@@ -5407,8 +5393,6 @@ module.exports = Backbone.View.extend({
             // Add this after the existing model
             at: this.model.collection.indexOf( this.model ) + 1
         });
-
-        return false;
     },
 
     /**
@@ -5418,7 +5402,6 @@ module.exports = Backbone.View.extend({
      */
     deleteHandler: function(){
         this.model.trigger('visual_destroy');
-        return false;
     },
 
     onModelChange: function(){

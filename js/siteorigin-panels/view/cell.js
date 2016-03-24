@@ -120,7 +120,9 @@ module.exports = Backbone.View.extend( {
             start: function(e, ui){
                 // Set the containment to the cell parent
                 previousCell = cellView.$el.prev().data('view');
-                if( typeof previousCell === 'undefined' ) { return false; }
+                if( typeof previousCell === 'undefined' ) {
+	                return;
+                }
 
                 // Create the clone for the current cell
                 var newCellClone = cellView.$el.clone().appendTo(ui.helper).css({
@@ -236,7 +238,6 @@ module.exports = Backbone.View.extend( {
     handleCellClick : function(e){
         var cells = this.$el.closest('.so-rows-container').find('.so-cells .cell').removeClass('cell-selected');
         $(e.target).parent().addClass('cell-selected');
-        return false;
     },
 
     /**
