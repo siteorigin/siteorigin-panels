@@ -2030,6 +2030,14 @@
   background: #F0F0F0;
   color: #444;
 }
+.so-panels-contextual-menu .so-section ul li.so-warning {
+  color: #a00;
+}
+.so-panels-contextual-menu .so-section ul li.so-warning:hover,
+.so-panels-contextual-menu .so-section ul li.so-warning.so-active {
+  background: #a00;
+  color: #fff;
+}
 .so-panels-contextual-menu .so-section .so-no-results {
   padding: 0px 10px 5px 10px;
   display: none;

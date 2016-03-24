@@ -286,7 +286,8 @@ module.exports = Backbone.View.extend( {
 				    title: panelsOptions.loc.contextual.row_duplicate
 			    },
 			    'delete': {
-				    title: panelsOptions.loc.contextual.row_delete
+				    title: panelsOptions.loc.contextual.row_delete,
+				    warning: true
 			    },
 		    },
 		    function( c ){

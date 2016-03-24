@@ -5084,7 +5084,8 @@ module.exports = Backbone.View.extend( {
 				    title: panelsOptions.loc.contextual.row_duplicate
 			    },
 			    'delete': {
-				    title: panelsOptions.loc.contextual.row_delete
+				    title: panelsOptions.loc.contextual.row_delete,
+				    warning: true
 			    },
 		    },
 		    function( c ){
@@ -5493,7 +5494,8 @@ module.exports = Backbone.View.extend({
 				    title: panelsOptions.loc.contextual.widget_duplicate
 			    },
 			    'delete': {
-				    title: panelsOptions.loc.contextual.widget_delete
+				    title: panelsOptions.loc.contextual.widget_delete,
+				    warning: true
 			    },
 		    },
 		    function( c ){
