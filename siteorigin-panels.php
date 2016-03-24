@@ -378,6 +378,14 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 
 					'add_row' => __('Add Row', 'siteorigin-panels'),
 					'column' => __('Column', 'siteorigin-panels'),
+
+					'widget_actions' => __( 'Widget Actions', 'siteorigin-panels' ),
+					'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
+					'widget_delete' => __( 'Delete Widget', 'siteorigin-panels' ),
+
+					'row_actions' => __( 'Row Actions', 'siteorigin-panels' ),
+					'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
+					'row_delete' => __( 'Delete Row', 'siteorigin-panels' ),
 				)
 			),
 			'plupload' => array(
@@ -728,7 +736,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			$css->add_row_css($post_id, $grid_id, '', array(
 				'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 			));
-		}			
+		}
 
 
 

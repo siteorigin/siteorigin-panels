@@ -272,6 +272,31 @@ module.exports = Backbone.View.extend( {
 
             }
         );
+
+	    menu.addSection (
+		    {
+			    sectionTitle: panelsOptions.loc.contextual.row_actions,
+			    search: false,
+		    },
+		    {
+			    'duplicate': {
+				    title: panelsOptions.loc.contextual.row_duplicate
+			    },
+			    'delete': {
+				    title: panelsOptions.loc.contextual.row_delete
+			    },
+		    },
+		    function( c ){
+			    switch( c ) {
+				    case 'duplicate':
+					    thisView.duplicateHandler();
+					    break;
+				    case 'delete':
+					    thisView.visualDestroyModel();
+					    break;
+			    }
+		    }
+	    );
     }
 
 } );

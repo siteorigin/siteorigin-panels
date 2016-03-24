@@ -158,6 +158,7 @@ module.exports = Backbone.View.extend({
      */
     buildContextualMenu: function( e, menu ) {
         var thisView = this;
+
         menu.addSection(
             {
                 sectionTitle: panelsOptions.loc.contextual.add_widget_below,
@@ -180,6 +181,31 @@ module.exports = Backbone.View.extend({
                 });
             }
         );
+
+	    menu.addSection (
+		    {
+			    sectionTitle: panelsOptions.loc.contextual.widget_actions,
+			    search: false,
+		    },
+		    {
+			    'duplicate': {
+				    title: panelsOptions.loc.contextual.widget_duplicate
+			    },
+			    'delete': {
+				    title: panelsOptions.loc.contextual.widget_delete
+			    },
+		    },
+		    function( c ){
+			    switch( c ) {
+				    case 'duplicate':
+					    thisView.duplicateHandler();
+					    break;
+				    case 'delete':
+					    thisView.visualDestroyModel();
+					    break;
+			    }
+		    }
+	    );
 
         // Lets also add the contextual menu for the entire row
         this.cell.row.buildContextualMenu( e, menu );
