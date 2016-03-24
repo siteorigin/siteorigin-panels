@@ -44,6 +44,8 @@ module.exports = Backbone.View.extend( {
                 thisView.trigger('styles_loaded', !_.isEmpty(response));
             }
         );
+
+	    return this;
     },
 
     /**

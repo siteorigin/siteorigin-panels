@@ -38,6 +38,8 @@ module.exports = Backbone.View.extend( {
 
         this.initSortable();
         this.initResizable();
+
+	    return this;
     },
 
     /**
@@ -46,11 +48,11 @@ module.exports = Backbone.View.extend( {
     initSortable: function(){
         var cellView = this;
 
-        // Go up the view heirarchy until we find the ID attribute
+        // Go up the view hierarchy until we find the ID attribute
         var builderID = cellView.row.builder.$el.attr('id');
 
         // Create a widget sortable that's connected with all other cells
-        this.widgetSortable = this.$el.find('.widgets-container').sortable( {
+        this.widgetSortable = this.$('.widgets-container').sortable( {
             placeholder: "so-widget-sortable-highlight",
             connectWith: '#' + builderID + ' .so-cells .cell .widgets-container',
             tolerance:'pointer',

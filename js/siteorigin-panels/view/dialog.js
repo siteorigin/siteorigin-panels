@@ -138,7 +138,7 @@ module.exports = Backbone.View.extend( {
      * Initialize the sidebar tabs
      */
     initTabs: function(){
-        var tabs = this.$el.find('.so-sidebar-tabs li a');
+        var tabs = this.$('.so-sidebar-tabs li a');
 
         if(tabs.length === 0) {
             return this;
@@ -167,13 +167,13 @@ module.exports = Backbone.View.extend( {
         });
 
         // Trigger a click on the first tab
-        this.$el.find('.so-sidebar-tabs li a').first().click();
+        this.$('.so-sidebar-tabs li a').first().click();
         return this;
     },
 
 	initToolbar: function() {
 		// Trigger simplified click event for elements marked as toolbar buttons.
-		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+		var buttons = this.$('.so-toolbar .so-buttons .so-toolbar-button');
 		buttons.click(function (e) {
 			e.preventDefault();
 
@@ -181,7 +181,7 @@ module.exports = Backbone.View.extend( {
 		}.bind(this));
 
 		// Handle showing and hiding the dropdown list items
-		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		var $dropdowns = this.$('.so-toolbar .so-buttons .so-dropdown-button');
 		$dropdowns.click(function (e) {
 			e.preventDefault();
 			var $dropdownButton = $(e.currentTarget);
@@ -197,7 +197,7 @@ module.exports = Backbone.View.extend( {
 		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
 		// unconfirmed state.
 		$('html').click(function (e) {
-			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+			this.$('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
 				var $dropdownList = $(el);
 				var $trgt = $(e.target);
 				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {

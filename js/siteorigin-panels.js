@@ -1143,9 +1143,9 @@ module.exports = panels.view.dialog.extend( {
      */
     setCellsFromForm: function(){
         var f = {
-            'cells' : parseInt( this.$el.find('.row-set-form input[name="cells"]').val() ),
-            'ratio' : parseFloat( this.$el.find('.row-set-form select[name="ratio"]').val() ),
-            'direction' : this.$el.find('.row-set-form select[name="ratio_direction"]').val()
+            'cells' : parseInt( this.$('.row-set-form input[name="cells"]').val() ),
+            'ratio' : parseFloat( this.$('.row-set-form select[name="ratio"]').val() ),
+            'direction' : this.$('.row-set-form select[name="ratio_direction"]').val()
         };
         var cells = [];
 
@@ -1157,11 +1157,11 @@ module.exports = panels.view.dialog.extend( {
         var cellCountChanged = ( this.row.cells.length !== f.cells );
 
         if( f.cells < 1 ) {
-            this.$el.find('.row-set-form input[name="cells"]').val(1);
+            this.$('.row-set-form input[name="cells"]').val(1);
             f.cells = 1;
         }
         else if (f.cells > 20) {
-            this.$el.find('.row-set-form input[name="cells"]').val(20);
+            this.$('.row-set-form input[name="cells"]').val(20);
             f.cells = 20;
         }
 
@@ -1197,13 +1197,13 @@ module.exports = panels.view.dialog.extend( {
             var thisDialog = this;
 
             // Now lets animate the cells into their new widths
-            this.$el.find( '.preview-cell').each(function(i, el){
+            this.$( '.preview-cell').each(function(i, el){
                 $(el).animate({ 'width': Math.round(thisDialog.row.cells[i]*1000)/10 + "%"}, 250 );
                 $(el).find('.preview-cell-weight').html( Math.round(thisDialog.row.cells[i]*1000)/10 );
             });
 
             // So the draggable handle is not hidden.
-            this.$el.find( '.preview-cell').css('overflow', 'visible');
+            this.$( '.preview-cell').css('overflow', 'visible');
 
             setTimeout(function(){
                 thisDialog.regenerateRowPreview();
@@ -1212,7 +1212,7 @@ module.exports = panels.view.dialog.extend( {
 
 
         // Remove the button primary class
-        this.$el.find('.row-set-form .so-button-row-set').removeClass('button-primary');
+        this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
     },
 
     /**
@@ -1434,12 +1434,12 @@ module.exports = panels.view.dialog.extend( {
      */
     loadForm: function(){
         // don't load the form if this dialog hasn't been rendered yet
-        if( !this.$el.find('> *').length ) {
+        if( !this.$('> *').length ) {
             return;
         }
 
         var thisView = this;
-        this.$el.find('.so-content').addClass('so-panels-loading');
+        this.$('.so-content').addClass('so-panels-loading');
 
         var data = {
             'action' : 'so_panels_widget_form',
@@ -1456,7 +1456,7 @@ module.exports = panels.view.dialog.extend( {
                 var html = result.replace( /{\$id}/g, thisView.model.cid );
 
                 // Load this content into the form
-                thisView.$el.find('.so-content')
+                thisView.$('.so-content')
                     .removeClass('so-panels-loading')
                     .html(html);
 
@@ -1464,7 +1464,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.trigger('form_loaded', thisView);
 
                 // For legacy compatibility, trigger a panelsopen event
-                thisView.$el.find('.panel-dialog').trigger('panelsopen');
+                thisView.$('.panel-dialog').trigger('panelsopen');
 
                 // If the main dialog is closed from this point on, save the widget content
                 thisView.on('close_dialog', thisView.saveWidget, thisView);
@@ -1618,11 +1618,11 @@ module.exports = panels.view.dialog.extend( {
                 $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
             }
 
-            $w.data('class', widget.class).appendTo( this.$el.find('.widget-type-list') );
+            $w.data('class', widget.class).appendTo( this.$('.widget-type-list') );
         }, this );
 
         // Add the sidebar tabs
-        var tabs = this.$el.find('.so-sidebar-tabs');
+        var tabs = this.$('.so-sidebar-tabs');
         _.each(panelsOptions.widget_dialog_tabs, function(tab){
             $( this.dialogTabTemplate( { 'title' : tab.title } )).data({
                 'message' : tab.message,
@@ -1645,7 +1645,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function($t){
         // Get the filter from the tab, and filter the widgets
         this.filter = $t.parent().data('filter');
-        this.filter.search = this.$el.find('.so-sidebar-search').val();
+        this.filter.search = this.$('.so-sidebar-search').val();
 
         var message = $t.parent().data('message');
         if( _.isEmpty( message ) ) {
@@ -1680,8 +1680,8 @@ module.exports = panels.view.dialog.extend( {
             filter.groups = '';
         }
 
-        this.$el.find('.widget-type-list .widget-type').each(function(){
-            var $$ = jQuery(this), showWidget;
+        this.$('.widget-type-list .widget-type').each(function(){
+            var $$ = $(this), showWidget;
             var widgetClass = $$.data('class');
 
             var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
@@ -3037,6 +3037,7 @@ module.exports = Backbone.View.extend( {
             .addClass('so-builder-container');
 
         this.trigger( 'builder_rendered' );
+
         return this;
     },
 
@@ -3219,7 +3220,7 @@ module.exports = Backbone.View.extend( {
         var $el = this.$el;
         var builderView = this;
 
-        this.rowsSortable = this.$el.find('.so-rows-container').sortable( {
+        this.rowsSortable = this.$('.so-rows-container').sortable( {
             appendTo: '#wpwrap',
             items: '.so-row-container',
             handle: '.so-row-move',
@@ -3792,6 +3793,8 @@ module.exports = Backbone.View.extend( {
 
         this.initSortable();
         this.initResizable();
+
+	    return this;
     },
 
     /**
@@ -3800,11 +3803,11 @@ module.exports = Backbone.View.extend( {
     initSortable: function(){
         var cellView = this;
 
-        // Go up the view heirarchy until we find the ID attribute
+        // Go up the view hierarchy until we find the ID attribute
         var builderID = cellView.row.builder.$el.attr('id');
 
         // Create a widget sortable that's connected with all other cells
-        this.widgetSortable = this.$el.find('.widgets-container').sortable( {
+        this.widgetSortable = this.$('.widgets-container').sortable( {
             placeholder: "so-widget-sortable-highlight",
             connectWith: '#' + builderID + ' .so-cells .cell .widgets-container',
             tolerance:'pointer',
@@ -4164,7 +4167,7 @@ module.exports = Backbone.View.extend( {
      * Initialize the sidebar tabs
      */
     initTabs: function(){
-        var tabs = this.$el.find('.so-sidebar-tabs li a');
+        var tabs = this.$('.so-sidebar-tabs li a');
 
         if(tabs.length === 0) {
             return this;
@@ -4193,13 +4196,13 @@ module.exports = Backbone.View.extend( {
         });
 
         // Trigger a click on the first tab
-        this.$el.find('.so-sidebar-tabs li a').first().click();
+        this.$('.so-sidebar-tabs li a').first().click();
         return this;
     },
 
 	initToolbar: function() {
 		// Trigger simplified click event for elements marked as toolbar buttons.
-		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+		var buttons = this.$('.so-toolbar .so-buttons .so-toolbar-button');
 		buttons.click(function (e) {
 			e.preventDefault();
 
@@ -4207,7 +4210,7 @@ module.exports = Backbone.View.extend( {
 		}.bind(this));
 
 		// Handle showing and hiding the dropdown list items
-		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		var $dropdowns = this.$('.so-toolbar .so-buttons .so-dropdown-button');
 		$dropdowns.click(function (e) {
 			e.preventDefault();
 			var $dropdownButton = $(e.currentTarget);
@@ -4223,7 +4226,7 @@ module.exports = Backbone.View.extend( {
 		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
 		// unconfirmed state.
 		$('html').click(function (e) {
-			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+			this.$('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
 				var $dropdownList = $(el);
 				var $trgt = $(e.target);
 				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {
@@ -4555,7 +4558,7 @@ module.exports = Backbone.View.extend( {
 	    this.$( '.so-preview iframe' )
 		    .on( 'load', function(){
 			    var $$ = $(this ),
-				    ifc = $$.contents();
+				    $iframeContents = $$.contents();
 
 			    if( $$.data('load-start') !== undefined ) {
 				    thisView.loadTimes.unshift( new Date().getTime() - $$.data('load-start') );
@@ -4566,11 +4569,11 @@ module.exports = Backbone.View.extend( {
 			    }
 
 			    // Scroll to the correct position
-			    ifc.scrollTop( thisView.previewScrollTop );
-			    thisView.$el.find('.so-preview-overlay' ).hide();
+			    $iframeContents.scrollTop( thisView.previewScrollTop );
+			    thisView.$('.so-preview-overlay' ).hide();
 
 			    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-			    ifc.find('.panel-grid .panel-grid-cell .so-panel')
+			    $iframeContents.find('.panel-grid .panel-grid-cell .so-panel')
 				    .filter(function(){
 					    // Filter to only include non nested
 					    return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
@@ -4600,11 +4603,13 @@ module.exports = Backbone.View.extend( {
 				    });
 
 			    // Prevent default clicks
-			    ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
+			    $iframeContents.find( "a").css({'pointer-events' : 'none'}).click(function(e){
 				    e.preventDefault();
 			    });
 
 		    } );
+
+	    return this;
     },
 
     /**
@@ -4642,7 +4647,7 @@ module.exports = Backbone.View.extend( {
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
-	    this.builder.$el.find('.so-tool-button.so-live-editor' ).hide();
+	    this.builder.$('.so-tool-button.so-live-editor' ).hide();
 	    this.builder.trigger('builder_resize');
     },
 
@@ -4660,7 +4665,7 @@ module.exports = Backbone.View.extend( {
 
 	    // Move the builder back to its original container
 	    this.builder.$el.appendTo( this.originalContainer );
-	    this.builder.$el.find('.so-tool-button.so-live-editor' ).show();
+	    this.builder.$('.so-tool-button.so-live-editor' ).show();
 	    this.builder.trigger('builder_resize');
 
         return false;
@@ -4669,7 +4674,7 @@ module.exports = Backbone.View.extend( {
 	collapse: function(){
 		this.$el.toggleClass('so-collapsed');
 
-		var text = this.$el.find('.live-editor-collapse span');
+		var text = this.$('.live-editor-collapse span');
 		text.html( text.data( this.$el.hasClass('so-collapsed') ?  'expand' : 'collapse' ) );
 	},
 
@@ -4754,10 +4759,10 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
-		var iframe = this.$el.find('.so-preview iframe' ),
-			form = this.$el.find('.so-preview form' );
+		var iframe = this.$('.so-preview iframe' ),
+			form = this.$('.so-preview form' );
 
-		if( !this.$el.find('.so-preview-overlay' ).is(':visible') ) {
+		if( !this.$('.so-preview-overlay' ).is(':visible') ) {
 			this.previewScrollTop = iframe.contents().scrollTop();
 		}
 
@@ -4877,11 +4882,11 @@ module.exports = Backbone.View.extend( {
         }
 
         // Reset everything to have an automatic height
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
 
         // We'll tie the values to the row view, to prevent issue with values going to different rows
         var height = 0;
-        this.$el.find('.so-cells .cell').each( function () {
+        this.$('.so-cells .cell').each( function () {
             height = Math.max(
                 height,
                 $(this ).height()
@@ -4891,7 +4896,7 @@ module.exports = Backbone.View.extend( {
         } );
 
         // Resize all the grids and cell wrappers
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
     },
 
     /**
@@ -5006,7 +5011,7 @@ module.exports = Backbone.View.extend( {
      */
     handleCellRemove: function(cell){
         // Find the view that ties in to the cell we're removing
-        this.$el.find('.so-cells > .cell').each( function(){
+        this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
             if(typeof view === 'undefined') {
                 return false;
@@ -5116,6 +5121,8 @@ module.exports = Backbone.View.extend( {
                 thisView.trigger('styles_loaded', !_.isEmpty(response));
             }
         );
+
+	    return this;
     },
 
     /**
@@ -5312,6 +5319,8 @@ module.exports = Backbone.View.extend({
             // Setup the dialog to load the form
             dialog.setupDialog();
         }
+
+	    return this;
     },
 
     /**

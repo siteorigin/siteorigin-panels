@@ -52,6 +52,8 @@ module.exports = Backbone.View.extend({
             // Setup the dialog to load the form
             dialog.setupDialog();
         }
+
+	    return this;
     },
 
     /**

@@ -28,7 +28,7 @@ module.exports = Backbone.View.extend( {
 	    this.$( '.so-preview iframe' )
 		    .on( 'load', function(){
 			    var $$ = $(this ),
-				    ifc = $$.contents();
+				    $iframeContents = $$.contents();
 
 			    if( $$.data('load-start') !== undefined ) {
 				    thisView.loadTimes.unshift( new Date().getTime() - $$.data('load-start') );
@@ -39,11 +39,11 @@ module.exports = Backbone.View.extend( {
 			    }
 
 			    // Scroll to the correct position
-			    ifc.scrollTop( thisView.previewScrollTop );
-			    thisView.$el.find('.so-preview-overlay' ).hide();
+			    $iframeContents.scrollTop( thisView.previewScrollTop );
+			    thisView.$('.so-preview-overlay' ).hide();
 
 			    // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-			    ifc.find('.panel-grid .panel-grid-cell .so-panel')
+			    $iframeContents.find('.panel-grid .panel-grid-cell .so-panel')
 				    .filter(function(){
 					    // Filter to only include non nested
 					    return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
@@ -73,11 +73,13 @@ module.exports = Backbone.View.extend( {
 				    });
 
 			    // Prevent default clicks
-			    ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
+			    $iframeContents.find( "a").css({'pointer-events' : 'none'}).click(function(e){
 				    e.preventDefault();
 			    });
 
 		    } );
+
+	    return this;
     },
 
     /**
@@ -115,7 +117,7 @@ module.exports = Backbone.View.extend( {
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
-	    this.builder.$el.find('.so-tool-button.so-live-editor' ).hide();
+	    this.builder.$('.so-tool-button.so-live-editor' ).hide();
 	    this.builder.trigger('builder_resize');
     },
 
@@ -133,7 +135,7 @@ module.exports = Backbone.View.extend( {
 
 	    // Move the builder back to its original container
 	    this.builder.$el.appendTo( this.originalContainer );
-	    this.builder.$el.find('.so-tool-button.so-live-editor' ).show();
+	    this.builder.$('.so-tool-button.so-live-editor' ).show();
 	    this.builder.trigger('builder_resize');
 
         return false;
@@ -142,7 +144,7 @@ module.exports = Backbone.View.extend( {
 	collapse: function(){
 		this.$el.toggleClass('so-collapsed');
 
-		var text = this.$el.find('.live-editor-collapse span');
+		var text = this.$('.live-editor-collapse span');
 		text.html( text.data( this.$el.hasClass('so-collapsed') ?  'expand' : 'collapse' ) );
 	},
 
@@ -227,10 +229,10 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
-		var iframe = this.$el.find('.so-preview iframe' ),
-			form = this.$el.find('.so-preview form' );
+		var iframe = this.$('.so-preview iframe' ),
+			form = this.$('.so-preview form' );
 
-		if( !this.$el.find('.so-preview-overlay' ).is(':visible') ) {
+		if( !this.$('.so-preview-overlay' ).is(':visible') ) {
 			this.previewScrollTop = iframe.contents().scrollTop();
 		}
 

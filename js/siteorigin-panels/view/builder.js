@@ -84,6 +84,7 @@ module.exports = Backbone.View.extend( {
             .addClass('so-builder-container');
 
         this.trigger( 'builder_rendered' );
+
         return this;
     },
 
@@ -266,7 +267,7 @@ module.exports = Backbone.View.extend( {
         var $el = this.$el;
         var builderView = this;
 
-        this.rowsSortable = this.$el.find('.so-rows-container').sortable( {
+        this.rowsSortable = this.$('.so-rows-container').sortable( {
             appendTo: '#wpwrap',
             items: '.so-row-container',
             handle: '.so-row-move',

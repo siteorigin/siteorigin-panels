@@ -84,11 +84,11 @@ module.exports = Backbone.View.extend( {
         }
 
         // Reset everything to have an automatic height
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
 
         // We'll tie the values to the row view, to prevent issue with values going to different rows
         var height = 0;
-        this.$el.find('.so-cells .cell').each( function () {
+        this.$('.so-cells .cell').each( function () {
             height = Math.max(
                 height,
                 $(this ).height()
@@ -98,7 +98,7 @@ module.exports = Backbone.View.extend( {
         } );
 
         // Resize all the grids and cell wrappers
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
     },
 
     /**
@@ -213,7 +213,7 @@ module.exports = Backbone.View.extend( {
      */
     handleCellRemove: function(cell){
         // Find the view that ties in to the cell we're removing
-        this.$el.find('.so-cells > .cell').each( function(){
+        this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
             if(typeof view === 'undefined') {
                 return false;
