@@ -125,13 +125,12 @@ module.exports = Backbone.View.extend( {
 	 * Close the live editor
 	 */
     close: function(){
-        this.builder.unlockPageScroll();
-
 	    if( !this.$el.is(':visible') ) {
 		    return this;
 	    }
 
 	    this.$el.hide();
+		this.builder.unlockPageScroll();
 
 	    // Move the builder back to its original container
 	    this.builder.$el.appendTo( this.originalContainer );

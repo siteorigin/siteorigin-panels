@@ -289,11 +289,7 @@ module.exports = Backbone.View.extend( {
         }
 
         this.$el.hide();
-
-        if( !$('.so-panels-dialog-wrapper').is(':visible') ){
-            // Restore scrolling to the main body if there are no more dialogs
-	        this.builder.unlockPageScroll();
-        }
+        this.builder.unlockPageScroll();
 
         // Stop listen for keyboard keypresses.
         $(window).off('keyup', this.keyboardListen);

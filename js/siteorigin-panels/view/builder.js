@@ -487,10 +487,6 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     addLiveEditor: function(postId){
-        if( typeof panels.view.liveEditor === 'undefined' ) {
-            return this;
-        }
-
         // Create the live editor and set the builder to this.
         this.liveEditor = new panels.view.liveEditor( { builder: this } );
         this.liveEditor.setPostId( postId );
@@ -787,9 +783,12 @@ module.exports = Backbone.View.extend( {
 			return;
 		}
 
-		$( 'body' ).css( 'overflow', 'visible' );
-		var scrollPosition = $('body').data( 'scroll-position' );
-		window.scrollTo( scrollPosition[0], scrollPosition[1] );
+		// Check that there are no more dialogs or a live editor
+		if( !$('.so-panels-dialog-wrapper').is(':visible') && !$('.so-panels-live-editor').is(':visible') ) {
+			$( 'body' ).css( 'overflow', 'visible' );
+			var scrollPosition = $('body').data( 'scroll-position' );
+			window.scrollTo( scrollPosition[0], scrollPosition[1] );
+		}
 	}
 
 } );
