@@ -4610,14 +4610,23 @@ module.exports = Backbone.View.extend( {
 
 		    } );
 
+	    var isMouseDown = false;
+
+	    $(document )
+		    .mousedown(function() {
+			    isMouseDown = true;
+		    })
+		    .mouseup(function() {
+			    isMouseDown = false;
+		    });
+
 	    // Handle highlighting the relevant widget in the live editor preview
 
 	    var previewOverlay = false;
 	    thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function(){
 		    var $$ = $(this ), previewWidget = $(this ).data( 'live-editor-preview-widget' );
 
-
-			if( previewWidget !== undefined && previewWidget.length && !thisView.$('.so-preview-overlay' ).is(':visible') ) {
+			if( !isMouseDown && previewWidget !== undefined && previewWidget.length && !thisView.$('.so-preview-overlay' ).is(':visible') ) {
 				previewOverlay = thisView.createPreviewOverlay( previewWidget );
 			}
 	    } );
@@ -4626,7 +4635,7 @@ module.exports = Backbone.View.extend( {
 		    if( previewOverlay !== false ) {
 			    previewOverlay.fadeOut( 'fast', function () {
 				    $( this ).remove();
-				    overlay = false;
+				    previewOverlay = false;
 			    } );
 		    }
 	    } );
