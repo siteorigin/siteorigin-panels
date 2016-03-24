@@ -151,7 +151,7 @@ module.exports = Backbone.View.extend( {
 
         // The user clicked on the dashicon
         if( $$.hasClass('dashicons') ) {
-            $$ = jQuery$.parent();
+            $$ = $.parent();
         }
 
         if( $$.hasClass('so-confirmed') ) {
