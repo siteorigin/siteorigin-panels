@@ -665,7 +665,7 @@
 .so-panels-dialog .so-toolbar,
 .so-panels-dialog .so-left-sidebar,
 .so-panels-dialog .so-right-sidebar {
-  z-index: 100000;
+  z-index: 100001;
   position: fixed;
   -ms-box-sizing: border-box;
   -moz-box-sizing: border-box;
