@@ -264,6 +264,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is visible
         this.trigger('open_dialog_complete');
+	    this.builder.trigger( 'open_dialog', this );
     },
 
     /**

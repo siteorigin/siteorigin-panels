@@ -4288,6 +4288,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is visible
         this.trigger('open_dialog_complete');
+	    this.builder.trigger( 'open_dialog', this );
     },
 
     /**
@@ -4572,7 +4573,9 @@ module.exports = Backbone.View.extend( {
 				    .each(function(i, el){
 					    var $$ = $(el);
 					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
-					    var overlay;
+					    var overlay = false;
+
+					    widgetEdit.data( 'live-editor-preview-widget', $$ );
 
 					    $$
 						    .css({
@@ -4584,7 +4587,14 @@ module.exports = Backbone.View.extend( {
 						    })
 						    .mouseleave( function(){
 							    widgetEdit.parent().removeClass('so-hovered');
-							    overlay.fadeOut('fast', function(){ $(this).remove(); });
+
+							    if( overlay !== false ) {
+								    overlay.fadeOut( 'fast', function () {
+									    $( this ).remove();
+									    overlay = false;
+								    } );
+							    }
+
 						    } )
 						    .click(function(e){
 							    e.preventDefault();
@@ -4599,6 +4609,36 @@ module.exports = Backbone.View.extend( {
 			    });
 
 		    } );
+
+	    // Handle highlighting the relevant widget in the live editor preview
+
+	    var previewOverlay = false;
+	    thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function(){
+		    var $$ = $(this ), previewWidget = $(this ).data( 'live-editor-preview-widget' );
+
+
+			if( previewWidget !== undefined && previewWidget.length && !thisView.$('.so-preview-overlay' ).is(':visible') ) {
+				previewOverlay = thisView.createPreviewOverlay( previewWidget );
+			}
+	    } );
+
+	    thisView.$el.on( 'mouseleave', '.so-widget-wrapper', function(){
+		    if( previewOverlay !== false ) {
+			    previewOverlay.fadeOut( 'fast', function () {
+				    $( this ).remove();
+				    overlay = false;
+			    } );
+		    }
+	    } );
+
+	    thisView.builder.on('open_dialog', function(){
+		    if( previewOverlay !== false ) {
+			    previewOverlay.fadeOut( 'fast', function () {
+				    $( this ).remove();
+				    previewOverlay = false;
+			    } );
+		    }
+	    });
 
 	    return this;
     },
