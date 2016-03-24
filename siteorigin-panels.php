@@ -380,10 +380,12 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 					'column' => __('Column', 'siteorigin-panels'),
 
 					'widget_actions' => __( 'Widget Actions', 'siteorigin-panels' ),
+					'widget_edit' => __( 'Edit Widget', 'siteorigin-panels' ),
 					'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
 					'widget_delete' => __( 'Delete Widget', 'siteorigin-panels' ),
 
 					'row_actions' => __( 'Row Actions', 'siteorigin-panels' ),
+					'row_edit' => __( 'Edit Row', 'siteorigin-panels' ),
 					'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
 					'row_delete' => __( 'Delete Row', 'siteorigin-panels' ),
 				)

@@ -279,6 +279,9 @@ module.exports = Backbone.View.extend( {
 			    search: false,
 		    },
 		    {
+			    'edit': {
+				    title: panelsOptions.loc.contextual.row_edit
+			    },
 			    'duplicate': {
 				    title: panelsOptions.loc.contextual.row_duplicate
 			    },
@@ -288,6 +291,9 @@ module.exports = Backbone.View.extend( {
 		    },
 		    function( c ){
 			    switch( c ) {
+				    case 'edit':
+					    thisView.editHandler();
+					    break;
 				    case 'duplicate':
 					    thisView.duplicateHandler();
 					    break;
