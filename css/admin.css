@@ -813,7 +813,7 @@
   height: 58px;
   background-color: #fafafa;
   border-top: 1px solid #D8D8D8;
-  z-index: 100001;
+  z-index: 100002;
 }
 .so-panels-dialog .so-toolbar .so-status {
   float: left;
