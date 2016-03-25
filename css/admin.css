@@ -1649,6 +1649,7 @@
   text-decoration: none;
   color: #666;
   font-size: 11px;
+  cursor: pointer;
   outline: 0 !important;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
