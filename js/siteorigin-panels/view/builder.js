@@ -742,20 +742,25 @@ module.exports = Backbone.View.extend( {
     activateContextMenu: function( e, menu ){
         var builder = this;
 
-        // Skip this if any of the dialogs are open. They can handle their own contexts.
-        if( _.isEmpty( window.panelsDialogOpen ) ) {
-            // Check if any of the widgets get the contextual menu
-            var overItem = false, overItemType = false;
+	    // Of all the visible builders, find the topmost
+	    var topmostBuilder = $('.siteorigin-panels-builder:visible')
+		    .sort( function( a, b ){
+			    return $( a ).zIndex() > $( b ).zIndex() ? 1 : -1;
+		    } )
+		    .last( );
 
+        // Only run this if its element is the topmost builder
+        if( builder.$el.is( topmostBuilder ) ) {
+	        // Get the element we're currently hovering over
             var over = $([])
-                .add( builder.$('.so-rows-container > .so-row-container') )
-                .add( builder.$('.so-cells > .cell') )
-                .add( builder.$('.cell-wrapper > .so-widget') )
-                .filter( function(i){
+                .add( builder.$( '.so-rows-container > .so-row-container' ) )
+                .add( builder.$( '.so-cells > .cell' ) )
+                .add( builder.$( '.cell-wrapper > .so-widget' ) )
+                .filter( function( i ){
                     return menu.isOverEl( $(this), e );
                 } );
 
-            var activeView = over.last().data('view');
+            var activeView = over.last().data( 'view' );
             if( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
                 // We'll pass this to the current active view so it can popular the contextual menu
                 activeView.buildContextualMenu( e, menu );
