@@ -118,7 +118,7 @@ module.exports = Backbone.View.extend( {
             thisView.model.destroy();
             thisView.builder.model.refreshPanelsData();
 
-            if(thisView.builder.liveEditor.displayed) {
+            if( ! _.isUndefined( thisView.builder.liveEditor ) && thisView.builder.liveEditor.displayed ) {
                 thisView.builder.liveEditor.refreshWidgets();
             }
         });

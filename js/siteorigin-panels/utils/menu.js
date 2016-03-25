@@ -39,9 +39,8 @@ module.exports = Backbone.View.extend({
                 return true;
             }
 
-            thisView.active = false;
-
             // Other components should listen to activate_context
+	        thisView.active = false;
             thisView.trigger('activate_context', e, thisView);
 
             if( thisView.active ) {
@@ -216,7 +215,7 @@ module.exports = Backbone.View.extend({
                 items = section.find('ul li:visible'),
                 activeItem = items.filter('.so-active').eq(0);
 
-            if( ! _.isEmpty( activeItem ) ) {
+            if( activeItem.length ) {
                 items.removeClass('so-active');
 
                 var activeIndex = items.index( activeItem );

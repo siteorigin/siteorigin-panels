@@ -33,7 +33,7 @@ module.exports = Backbone.View.extend( {
             {
                 action: 'so_panels_style_form',
                 type: stylesType,
-                style: this.model.get('style'),
+                style: this.model.get( 'style' ),
                 args : JSON.stringify( args ),
                 postId: postId
             },
@@ -41,7 +41,7 @@ module.exports = Backbone.View.extend( {
                 thisView.$el.html( response );
                 thisView.setupFields();
                 thisView.stylesLoaded = true;
-                thisView.trigger('styles_loaded', !_.isEmpty(response));
+                thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
             }
         );
 

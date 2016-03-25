@@ -140,7 +140,7 @@ module.exports = Backbone.View.extend( {
     initTabs: function(){
         var tabs = this.$('.so-sidebar-tabs li a');
 
-        if( _.isEmpty( tabs ) ) {
+        if( tabs.length === 0 ) {
             return this;
         }
 

@@ -429,7 +429,7 @@ module.exports = Backbone.View.extend( {
             defaultPosition: 'first'
         }, options );
 
-        if( _.isEmpty( this.$('.so-cells .cell') ) ) {
+        if( this.$('.so-cells .cell' ).length === 0 ) {
 
             if( options.createCell ) {
                 // Create a row with a single cell
@@ -443,7 +443,7 @@ module.exports = Backbone.View.extend( {
 
         var activeCell = this.$('.so-cells .cell.cell-selected');
 
-        if( ! _.isEmpty( activeCell ) ) {
+        if( activeCell.length === 0 ) {
             if( options.defaultPosition === 'last' ){
                 activeCell = this.$('.so-cells .cell').first();
             }
@@ -657,7 +657,7 @@ module.exports = Backbone.View.extend( {
             editorContent = $('textarea#content').val();
         }
 
-        if( _.isEmpty( this.model.get('data') ) && editorContent !== '') {
+        if( _.isEmpty( this.model.get('data') ) && editorContent !== '' ) {
             // Confirm that the user wants to copy their content to Page Builder.
             if( !confirm( panelsOptions.loc.confirm_use_builder ) ) { return; }
 
@@ -731,7 +731,7 @@ module.exports = Backbone.View.extend( {
      * This shows or hides the welcome display depending on whether there are any rows in the collection.
      */
     toggleWelcomeDisplay: function(){
-        if( !_.isEmpty( this.model.rows ) ) {
+        if( ! this.model.rows.isEmpty() ) {
             this.$('.so-panels-welcome-message').hide();
         }
         else {

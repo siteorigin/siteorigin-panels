@@ -148,7 +148,7 @@ module.exports = panels.view.dialog.extend( {
             var prevCell = newCell.prev();
             var handle;
 
-            if( ! _.isEmpty( prevCell ) ) {
+            if( prevCell.length ) {
                 handle = $('<div class="resize-handle"></div>');
                 handle
                     .appendTo( newCell )
@@ -279,7 +279,7 @@ module.exports = panels.view.dialog.extend( {
 
                             timeout = setTimeout( function(){
                                 // If there are no weight inputs, then skip this
-                                if( _.isEmpty( rowPreview.find( '.preview-cell-weight-input') ) ) {
+                                if( rowPreview.find( '.preview-cell-weight-input' ).legnth === 0 ) {
                                     return false;
                                 }
 
