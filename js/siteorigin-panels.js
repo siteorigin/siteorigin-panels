@@ -3139,7 +3139,7 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-        if( typeof this.metabox === 'undefined' ) {
+	    if( this.editorType !== 'tinymce' ) {
             return this;
         }
 
@@ -3598,10 +3598,10 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-            var contentArea = $('#content');
-            contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
-        }
+	    if( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || tinyMCE.get("content") === null ) {
+			var $editor = $(this.editorId);
+			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
+	    }
         else {
             var contentEd = tinyMCE.get("content");
 
