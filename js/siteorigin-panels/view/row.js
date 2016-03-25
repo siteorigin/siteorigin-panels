@@ -80,15 +80,15 @@ module.exports = Backbone.View.extend( {
     resize: function(e){
         // Don't resize this
         if( !this.$el.is(':visible') ) {
-            return false;
+            return;
         }
 
         // Reset everything to have an automatic height
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
 
         // We'll tie the values to the row view, to prevent issue with values going to different rows
         var height = 0;
-        this.$el.find('.so-cells .cell').each( function () {
+        this.$('.so-cells .cell').each( function () {
             height = Math.max(
                 height,
                 $(this ).height()
@@ -98,7 +98,7 @@ module.exports = Backbone.View.extend( {
         } );
 
         // Resize all the grids and cell wrappers
-        this.$el.find( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
+        this.$( '.so-cells .cell-wrapper' ).css( 'min-height',  Math.max( height, 64 ) );
     },
 
     /**
@@ -138,7 +138,7 @@ module.exports = Backbone.View.extend( {
             at: this.builder.model.rows.indexOf( this.model ) + 1
         } );
 
-        return false;
+	    this.builder.model.refreshPanelsData();
     },
 
     /**
@@ -149,7 +149,7 @@ module.exports = Backbone.View.extend( {
 
         // The user clicked on the dashicon
         if( $$.hasClass('dashicons') ) {
-            $$ = jQuery$.parent();
+            $$ = $.parent();
         }
 
         if( $$.hasClass('so-confirmed') ) {
@@ -166,8 +166,6 @@ module.exports = Backbone.View.extend( {
                 $$.removeClass('so-confirmed').html(originalText);
             }, 2500);
         }
-
-        return false;
     },
 
     /**
@@ -182,8 +180,6 @@ module.exports = Backbone.View.extend( {
         }
 
         this.dialog.openDialog();
-
-        return false;
     },
 
     /**
@@ -191,7 +187,6 @@ module.exports = Backbone.View.extend( {
      */
     deleteHandler: function(){
         this.model.destroy();
-        return false;
     },
 
     /**
@@ -211,10 +206,10 @@ module.exports = Backbone.View.extend( {
      */
     handleCellRemove: function(cell){
         // Find the view that ties in to the cell we're removing
-        this.$el.find('.so-cells > .cell').each( function(){
+        this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
-            if(typeof view === 'undefined') {
-                return false;
+            if( _.isUndefined( view ) ) {
+                return;
             }
 
             if( view.model.cid === cell.cid ) {
@@ -270,6 +265,38 @@ module.exports = Backbone.View.extend( {
 
             }
         );
+
+	    menu.addSection (
+		    {
+			    sectionTitle: panelsOptions.loc.contextual.row_actions,
+			    search: false,
+		    },
+		    {
+			    'edit': {
+				    title: panelsOptions.loc.contextual.row_edit
+			    },
+			    'duplicate': {
+				    title: panelsOptions.loc.contextual.row_duplicate
+			    },
+			    'delete': {
+				    title: panelsOptions.loc.contextual.row_delete,
+				    confirm: true
+			    },
+		    },
+		    function( c ){
+			    switch( c ) {
+				    case 'edit':
+					    thisView.editHandler();
+					    break;
+				    case 'duplicate':
+					    thisView.duplicateHandler();
+					    break;
+				    case 'delete':
+					    thisView.visualDestroyModel();
+					    break;
+			    }
+		    }
+	    );
     }
 
 } );

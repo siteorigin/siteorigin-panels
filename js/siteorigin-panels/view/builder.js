@@ -14,7 +14,7 @@ module.exports = Backbone.View.extend( {
     currentData: '',
 
     attachedToEditor: false,
-    liveEditor: false,
+    liveEditor: undefined,
     menu: false,
 
     /* The builderType is sent with all requests to the server */
@@ -90,12 +90,14 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     render: function(){
-        this.$el.html( this.template() );
+        // this.$el.html( this.template() );
+	    this.setElement( this.template() );
         this.$el
             .attr( 'id', 'siteorigin-panels-builder-' + this.cid )
             .addClass('so-builder-container');
 
         this.trigger( 'builder_rendered' );
+
         return this;
     },
 
@@ -138,13 +140,7 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-		if(this.editorType !== 'tinymce') {
-			this.attachedToEditor = !_.isUndefined(this.editorId);
-			return this;
-		}
-
-		// No metabox... :/
-        if( typeof this.metabox === 'undefined' || this.metabox.length === 0) {
+        if( typeof this.metabox === 'undefined' ) {
             return this;
         }
 
@@ -212,51 +208,64 @@ module.exports = Backbone.View.extend( {
         // Switch to the Page Builder interface as soon as we load the page if there are widgets
         var data = this.model.get('data');
         if(
-            ( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) ||
-            ( typeof data.grids !== 'undefined' && _.size(data.grids) !== 0 )
+            ( ! _.isUndefined( data.widgets ) && _.size(data.widgets) !== 0 ) ||
+            ( ! _.isUndefined( data.grids ) && _.size(data.grids) !== 0 )
         ) {
             $('#content-panels.switch-panels').click();
         }
 
         // We will also make this sticky if its attached to an editor.
         var stickToolbar = function(){
-            var toolbar = thisView.$('.so-builder-toolbar');
-            var newTop = $(window).scrollTop() - thisView.$el.offset().top;
+	        var toolbar = thisView.$('.so-builder-toolbar');
 
-            if( $('#wpadminbar').css('position') === 'fixed' ) {
-                newTop += $('#wpadminbar').outerHeight();
-            }
+	        if( thisView.$el.hasClass( 'so-display-narrow' ) ){
+		        // In this case, we don't want to stick the toolbar.
+		        toolbar.css( {
+			        top: 0,
+			        left: 0,
+			        width: '100%',
+			        position: 'absolute'
+		        } );
+		        thisView.$el.css('padding-top', toolbar.outerHeight() );
+		        return;
+	        }
 
-            var limits = {
-                top: 0,
-                bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
-            };
+	        var newTop = $(window).scrollTop() - thisView.$el.offset().top;
 
-            if( newTop > limits.top && newTop < limits.bottom ) {
-                if( toolbar.css('position') !== 'fixed' ) {
-                    // The toolbar needs to stick to the top, over the interface
-                    toolbar.css({
-                        top: $('#wpadminbar').outerHeight(),
-                        left: thisView.$el.offset().left,
-                        width: thisView.$el.outerWidth(),
-                        position: 'fixed'
-                    });
-                }
-            }
-            else {
-                // The toolbar needs to be at the top or bottom of the interface
-                toolbar.css({
-                    top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
-                    left: 0,
-                    width: '100%',
-                    position: 'absolute'
-                });
-            }
+	        if( $('#wpadminbar').css('position') === 'fixed' ) {
+		        newTop += $('#wpadminbar').outerHeight();
+	        }
 
-            thisView.$el.css('padding-top', toolbar.outerHeight() );
+	        var limits = {
+		        top: 0,
+		        bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
+	        };
+
+	        if( newTop > limits.top && newTop < limits.bottom ) {
+		        if( toolbar.css('position') !== 'fixed' ) {
+			        // The toolbar needs to stick to the top, over the interface
+			        toolbar.css({
+				        top: $('#wpadminbar').outerHeight(),
+				        left: thisView.$el.offset().left,
+				        width: thisView.$el.outerWidth(),
+				        position: 'fixed'
+			        });
+		        }
+	        }
+	        else {
+		        // The toolbar needs to be at the top or bottom of the interface
+		        toolbar.css({
+			        top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+			        left: 0,
+			        width: '100%',
+			        position: 'absolute'
+		        });
+	        }
+
+	        thisView.$el.css('padding-top', toolbar.outerHeight() );
         };
 
-        $( window ).resize( stickToolbar );
+	    this.on('builder_resize', stickToolbar, this );
         $( document ).scroll( stickToolbar );
         stickToolbar();
 
@@ -271,7 +280,7 @@ module.exports = Backbone.View.extend( {
         var $el = this.$el;
         var builderView = this;
 
-        this.rowsSortable = this.$el.find('.so-rows-container').sortable( {
+        this.rowsSortable = this.$('.so-rows-container').sortable( {
             appendTo: '#wpwrap',
             items: '.so-row-container',
             handle: '.so-row-move',
@@ -355,7 +364,7 @@ module.exports = Backbone.View.extend( {
         rowView.render();
 
         // Attach the row elements to this builder
-        if( typeof options.at === 'undefined' || collection.length <= 1 ) {
+        if( _.isUndefined( options.at ) || collection.length <= 1 ) {
             // Insert this at the end of the widgets container
             rowView.$el.appendTo( this.$( '.so-rows-container' ) );
         }
@@ -381,7 +390,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddWidgetDialog: function(){
         this.dialogs.widgets.openDialog();
-        return false;
     },
 
     /**
@@ -392,7 +400,6 @@ module.exports = Backbone.View.extend( {
     displayAddRowDialog: function(){
         this.dialogs.row.openDialog();
         this.dialogs.row.setRowModel(); // Set this to an empty row model
-        return false;
     },
 
     /**
@@ -402,7 +409,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddPrebuiltDialog: function(){
         this.dialogs.prebuilt.openDialog();
-        return false;
     },
 
     /**
@@ -412,7 +418,6 @@ module.exports = Backbone.View.extend( {
      */
     displayHistoryDialog: function(){
         this.dialogs.history.openDialog();
-        return false;
     },
 
     /**
@@ -424,7 +429,7 @@ module.exports = Backbone.View.extend( {
             defaultPosition: 'first'
         }, options );
 
-        if( this.$('.so-cells .cell').length === 0 ) {
+        if( _.isEmpty( this.$('.so-cells .cell') ) ) {
 
             if( options.createCell ) {
                 // Create a row with a single cell
@@ -438,7 +443,7 @@ module.exports = Backbone.View.extend( {
 
         var activeCell = this.$('.so-cells .cell.cell-selected');
 
-        if(!activeCell.length) {
+        if( ! _.isEmpty( activeCell ) ) {
             if( options.defaultPosition === 'last' ){
                 activeCell = this.$('.so-cells .cell').first();
             }
@@ -471,11 +476,12 @@ module.exports = Backbone.View.extend( {
             });
         });
 
-        // Sort everything
+        // Sort the rows based on their visual position
         this.model.rows.models = this.model.rows.sortBy(function(model){
             return indexes[model.cid];
         });
 
+	    // Sort the widgets in the rows
         this.model.rows.each(function(row){
             row.cells.each(function(cell){
                 cell.widgets.models = cell.widgets.sortBy(function(widget){
@@ -494,15 +500,9 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     addLiveEditor: function(postId){
-        if( typeof panels.view.liveEditor === 'undefined' ) {
-            return this;
-        }
-
         // Create the live editor and set the builder to this.
-        this.liveEditor = new panels.view.liveEditor();
-        this.liveEditor.setPostId(postId);
-
-        this.liveEditor.builder = this;
+        this.liveEditor = new panels.view.liveEditor( { builder: this } );
+        this.liveEditor.setPostId( postId );
 
         // Display the live editor button in the toolbar
         if( this.liveEditor.hasPreviewUrl() ) {
@@ -516,12 +516,11 @@ module.exports = Backbone.View.extend( {
      * Show the current live editor
      */
     displayLiveEditor: function(){
-        if(typeof this.liveEditor === 'undefined') {
-            return false;
+        if( _.isUndefined( this.liveEditor ) ) {
+            return;
         }
 
         this.liveEditor.open();
-        return false;
     },
 
     /**
@@ -530,10 +529,6 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     addHistoryBrowser: function(){
-        if(typeof panels.dialog.history === 'undefined') {
-            return this;
-        }
-
         this.dialogs.history = new panels.dialog.history();
         this.dialogs.history.builder = this;
         this.dialogs.history.entries.builder = this.model;
@@ -552,11 +547,11 @@ module.exports = Backbone.View.extend( {
      * @param data
      */
     addHistoryEntry: function(text, data){
-        if(typeof data === 'undefined') {
+        if( _.isUndefined( data ) ) {
             data = null;
         }
 
-        if( typeof this.dialogs.history !== 'undefined' ) {
+        if( ! _.isUndefined( this.dialogs.history ) ) {
             this.dialogs.history.entries.addEntry(text, data);
         }
     },
@@ -595,11 +590,6 @@ module.exports = Backbone.View.extend( {
                 }.bind(this)
             );
         }
-
-        if( this.liveEditor !== false ) {
-            // Refresh the content of the builder
-            this.liveEditor.refreshPreview();
-        }
     },
 
     /**
@@ -609,9 +599,9 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-        if( this.editorType !== 'tinymce' || typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
-			var $editor = $(this.editorId);
-			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
+        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+            var contentArea = $('#content');
+            contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
         }
         else {
             var contentEd = tinyMCE.get("content");
@@ -657,7 +647,7 @@ module.exports = Backbone.View.extend( {
         var editorContent = '';
         var editor;
 
-        if ( typeof tinyMCE !== 'undefined' ) {
+        if ( ! _.isUndefined( tinyMCE ) ) {
             editor = tinyMCE.get( 'content' );
         }
         if( editor && typeof( editor.getContent ) === "function" ) {
@@ -673,10 +663,10 @@ module.exports = Backbone.View.extend( {
 
             var widgetClass = '';
             // There is a small chance a theme will have removed this, so check
-            if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+            if( ! _.isUndefined( panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget ) ) {
                 widgetClass = 'SiteOrigin_Widget_Editor_Widget';
             }
-            else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
+            else if( ! _.isUndefined( panelsOptions.widgets.WP_Widget_Text ) ) {
                 widgetClass = 'WP_Widget_Text';
             }
 
@@ -741,7 +731,7 @@ module.exports = Backbone.View.extend( {
      * This shows or hides the welcome display depending on whether there are any rows in the collection.
      */
     toggleWelcomeDisplay: function(){
-        if( this.model.rows.length ) {
+        if( !_.isEmpty( this.model.rows ) ) {
             this.$('.so-panels-welcome-message').hide();
         }
         else {
@@ -753,7 +743,7 @@ module.exports = Backbone.View.extend( {
         var builder = this;
 
         // Skip this if any of the dialogs are open. They can handle their own contexts.
-        if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+        if( _.isEmpty( window.panelsDialogOpen ) ) {
             // Check if any of the widgets get the contextual menu
             var overItem = false, overItemType = false;
 
@@ -771,6 +761,44 @@ module.exports = Backbone.View.extend( {
                 activeView.buildContextualMenu( e, menu );
             }
         }
-    }
+    },
+
+	/**
+	 * Lock window scrolling for the main overlay
+	 */
+	lockPageScroll: function(){
+		if( $( 'body' ).css('overflow') === 'hidden' ) {
+			return;
+		}
+
+		// lock scroll position, but retain settings for later
+		var scrollPosition = [
+			self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
+			self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop
+		];
+
+		$( 'body' )
+			.data( {
+				'scroll-position': scrollPosition
+			} )
+			.css( 'overflow', 'hidden' );
+		window.scrollTo(scrollPosition[0], scrollPosition[1] );
+	},
+
+	/**
+	 * Unlock window scrolling
+	 */
+	unlockPageScroll: function(){
+		if( $( 'body' ).css('overflow') !== 'hidden' ) {
+			return;
+		}
+
+		// Check that there are no more dialogs or a live editor
+		if( !$('.so-panels-dialog-wrapper').is(':visible') && !$('.so-panels-live-editor').is(':visible') ) {
+			$( 'body' ).css( 'overflow', 'visible' );
+			var scrollPosition = $('body').data( 'scroll-position' );
+			window.scrollTo( scrollPosition[0], scrollPosition[1] );
+		}
+	}
 
 } );

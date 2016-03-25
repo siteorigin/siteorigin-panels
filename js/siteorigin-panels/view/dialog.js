@@ -26,7 +26,7 @@ module.exports = Backbone.View.extend( {
 
         this.trigger('initialize_dialog', this);
 
-        if(typeof this.initializeDialog !== 'undefined') {
+        if( ! _.isUndefined( this.initializeDialog ) ) {
             this.initializeDialog();
         }
     },
@@ -138,9 +138,9 @@ module.exports = Backbone.View.extend( {
      * Initialize the sidebar tabs
      */
     initTabs: function(){
-        var tabs = this.$el.find('.so-sidebar-tabs li a');
+        var tabs = this.$('.so-sidebar-tabs li a');
 
-        if(tabs.length === 0) {
+        if( _.isEmpty( tabs ) ) {
             return this;
         }
 
@@ -155,7 +155,7 @@ module.exports = Backbone.View.extend( {
             $$.parent().addClass('tab-active');
 
             var url = $$.attr('href');
-            if(typeof url !== 'undefined' && url.charAt(0) === '#') {
+            if( !_.isUndefined( url ) && url.charAt(0) === '#') {
                 // Display the new tab
                 var tabName = url.split('#')[1];
                 thisDialog.$('.so-content .so-content-tabs .tab-' + tabName).show();
@@ -167,13 +167,13 @@ module.exports = Backbone.View.extend( {
         });
 
         // Trigger a click on the first tab
-        this.$el.find('.so-sidebar-tabs li a').first().click();
+        this.$('.so-sidebar-tabs li a').first().click();
         return this;
     },
 
 	initToolbar: function() {
 		// Trigger simplified click event for elements marked as toolbar buttons.
-		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+		var buttons = this.$('.so-toolbar .so-buttons .so-toolbar-button');
 		buttons.click(function (e) {
 			e.preventDefault();
 
@@ -181,7 +181,7 @@ module.exports = Backbone.View.extend( {
 		}.bind(this));
 
 		// Handle showing and hiding the dropdown list items
-		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		var $dropdowns = this.$('.so-toolbar .so-buttons .so-dropdown-button');
 		$dropdowns.click(function (e) {
 			e.preventDefault();
 			var $dropdownButton = $(e.currentTarget);
@@ -197,7 +197,7 @@ module.exports = Backbone.View.extend( {
 		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
 		// unconfirmed state.
 		$('html').click(function (e) {
-			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+			this.$('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
 				var $dropdownList = $(el);
 				var $trgt = $(e.target);
 				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {
@@ -255,8 +255,7 @@ module.exports = Backbone.View.extend( {
         this.refreshDialogNav();
 
         // Stop scrolling for the main body
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css({'overflow':'hidden'});
+	    this.builder.lockPageScroll();
 
         // Start listen for keyboard keypresses.
         $(window).on('keyup', this.keyboardListen);
@@ -265,6 +264,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is visible
         this.trigger('open_dialog_complete');
+	    this.builder.trigger( 'open_dialog', this );
     },
 
     /**
@@ -284,24 +284,20 @@ module.exports = Backbone.View.extend( {
         window.panelsDialogOpen = false;
 
         // In the builder, trigger an update
-        if(typeof this.builder !== 'undefined') {
+        if( ! _.isUndefined( this.builder ) ) {
             // Store the model data when a dialog is closed.
             this.builder.model.refreshPanelsData();
         }
 
         this.$el.hide();
-
-        if( !$('.so-panels-dialog-wrapper').is(':visible') ){
-            // Restore scrolling to the main body if there are no more dialogs
-            $('body').css({'overflow':'auto'});
-            $('body').scrollTop( this.bodyScrollTop );
-        }
+        this.builder.unlockPageScroll();
 
         // Stop listen for keyboard keypresses.
         $(window).off('keyup', this.keyboardListen);
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
+	    this.builder.trigger( 'close_dialog', this );
     },
 
     /**
@@ -342,7 +338,7 @@ module.exports = Backbone.View.extend( {
      * Get the values from the form and convert them into a data array
      */
     getFormValues: function(formSelector){
-        if(typeof formSelector === 'undefined') {
+        if( _.isUndefined( formSelector ) ) {
             formSelector = '.so-content';
         }
 
@@ -360,7 +356,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Create an array with the parts of the name
-            if(typeof name[2] === 'undefined') {
+            if( _.isUndefined( name[2] ) ) {
                 parts = $$.attr('name');
             }
             else {
@@ -403,7 +399,7 @@ module.exports = Backbone.View.extend( {
             else if( $$.prop('tagName') === 'TEXTAREA' && $$.hasClass('wp-editor-area') ){
                 // This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
                 var editor = null;
-                if ( typeof tinyMCE !== 'undefined' ) {
+                if ( ! _.isUndefined( tinyMCE ) ) {
                     editor = tinyMCE.get( $$.attr('id') );
                 }
 
@@ -434,7 +430,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Now, we need to filter this value if necessary
-            if( typeof $$.data('panels-filter') !== 'undefined' ) {
+            if( ! _.isUndefined( $$.data('panels-filter') ) ) {
                 switch( $$.data('panels-filter') ) {
                     case 'json_parse':
                         // Attempt to parse the JSON value of this field
@@ -461,7 +457,7 @@ module.exports = Backbone.View.extend( {
                         }
                     }
                     else {
-                        if (typeof sub[parts[i]] === 'undefined') {
+                        if ( _.isUndefined( sub[parts[i]] ) ) {
                             if ( parts[i+1] === '' ) {
                                 sub[parts[i]] = [];
                             }
@@ -484,7 +480,7 @@ module.exports = Backbone.View.extend( {
      */
     setStatusMessage: function(message, loading){
         this.$('.so-toolbar .so-status').html( message );
-        if( typeof loading !== 'undefined' && loading ) {
+        if( ! _.isUndefined( loading ) && loading ) {
             this.$('.so-toolbar .so-status').addClass('so-panels-loading');
         }
     },

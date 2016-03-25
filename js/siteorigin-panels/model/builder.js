@@ -5,13 +5,7 @@ module.exports = Backbone.Model.extend( {
 		REPLACE: 'replace',
 	},
 
-	isValidLayoutPosition: function(position) {
-		return position === this.layoutPosition.BEFORE ||
-				position === this.layoutPosition.AFTER ||
-				position === this.layoutPosition.REPLACE;
-	},
-
-    rows: {},
+    rows: { },
 
     defaults : {
         'data' : {
@@ -72,7 +66,7 @@ module.exports = Backbone.Model.extend( {
         var cit = 0;
         var rows = [];
 
-        if( typeof data.grid_cells === 'undefined' ) {
+        if( _.isUndefined( data.grid_cells ) ) {
             this.trigger('load_panels_data');
             return;
         }
@@ -80,7 +74,7 @@ module.exports = Backbone.Model.extend( {
         var gi;
         for(var ci = 0; ci < data.grid_cells.length; ci++) {
             gi = parseInt(data.grid_cells[ci].grid);
-            if(typeof rows[gi] === 'undefined') {
+            if( _.isUndefined( rows[gi] ) ) {
                 rows[gi] = [];
             }
 
@@ -92,19 +86,21 @@ module.exports = Backbone.Model.extend( {
             // This will create and add the row model and its cells
             var newRow = builderModel.addRow( row, { noAnimate: true } );
 
-            if( typeof data.grids[i].style !== 'undefined' ) {
+            if( ! _.isUndefined( data.grids[i].style ) ) {
                 newRow.set( 'style', data.grids[i].style );
             }
         } );
 
 
-        if( typeof data.widgets === 'undefined' ) { return; }
+        if( _.isUndefined( data.widgets ) ) {
+	        return;
+        }
 
         // Add the widgets
         _.each(data.widgets, function(widgetData){
             try {
                 var panels_info = null;
-                if (typeof widgetData.panels_info !== 'undefined') {
+                if ( ! _.isUndefined( widgetData.panels_info ) ) {
                     panels_info = widgetData.panels_info;
                     delete widgetData.panels_info;
                 }
@@ -121,7 +117,7 @@ module.exports = Backbone.Model.extend( {
                     values: widgetData
                 });
 
-                if( typeof panels_info.style !== 'undefined' ) {
+                if( ! _.isUndefined( panels_info.style ) ) {
                     newWidget.set('style', panels_info.style );
                 }
 
@@ -246,8 +242,8 @@ module.exports = Backbone.Model.extend( {
 
         if( JSON.stringify( newData ) !== oldData ) {
             // The default change event doesn't trigger on deep changes, so we'll trigger our own
-            this.trigger('change');
-            this.trigger('change:data');
+            this.trigger( 'change' );
+            this.trigger( 'change:data' );
         }
     },
 
@@ -255,10 +251,16 @@ module.exports = Backbone.Model.extend( {
      * Empty all the rows and the cells/widgets they contain.
      */
     emptyRows: function(){
-        _.invoke(this.rows.toArray(), 'destroy');
+        _.invoke( this.rows.toArray(), 'destroy' );
         this.rows.reset();
 
         return this;
-    }
+    },
+
+	isValidLayoutPosition: function( position ) {
+		return position === this.layoutPosition.BEFORE ||
+		       position === this.layoutPosition.AFTER ||
+		       position === this.layoutPosition.REPLACE;
+	}
 
 } );

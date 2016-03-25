@@ -9,6 +9,8 @@ module.exports = panels.view.dialog.extend( {
     revertEntry: null,
     selectedEntry: null,
 
+	previewScrollTop : null,
+
     dialogClass: 'so-panels-dialog-history',
 
     events: {
@@ -24,11 +26,16 @@ module.exports = panels.view.dialog.extend( {
     },
 
     render: function(){
+	    var thisView = this;
+
         // Render the dialog and attach it to the builder interface
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-history').html(), {} ) );
 
         this.$('iframe.siteorigin-panels-history-iframe').load(function(){
-            $(this).show();
+	        var $$ = $(this);
+            $$.show();
+
+	        $$.contents().scrollTop( thisView.previewScrollTop );
         });
     },
 
@@ -67,7 +74,7 @@ module.exports = panels.view.dialog.extend( {
 
         var c = this.$('.history-entries').empty();
 
-        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
+        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || !_.isEmpty( this.entries.models ) ) {
             $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
                 .data('historyEntry', this.revertEntry)
                 .prependTo(c);
@@ -121,8 +128,11 @@ module.exports = panels.view.dialog.extend( {
      * @param entry
      */
     previewEntry: function(entry){
-        this.$('iframe.siteorigin-panels-history-iframe').hide();
-        this.$('form.history-form input[name="siteorigin_panels_data"]').val( entry.get('data') );
+	    var iframe = this.$('iframe.siteorigin-panels-history-iframe');
+	    iframe.hide();
+	    this.previewScrollTop = iframe.contents().scrollTop();
+
+        this.$('form.history-form input[name="live_editor_panels_data"]').val( entry.get('data') );
         this.$('form.history-form').submit();
     },
 
@@ -213,7 +223,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         // Return the amount of time ago
-        return parts.length === 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
+        return _.isEmpty( parts ) ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
 
     }
 

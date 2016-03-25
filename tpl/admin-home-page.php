@@ -33,7 +33,7 @@
 			</div>
 		<?php endif; ?>
 
-		<div class="siteorigin-panels-builder so-panels-loading">
+		<div class="siteorigin-panels-builder-container so-panels-loading">
 
 		</div>
 

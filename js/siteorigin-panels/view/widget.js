@@ -52,6 +52,8 @@ module.exports = Backbone.View.extend({
             // Setup the dialog to load the form
             dialog.setupDialog();
         }
+
+	    return this;
     },
 
     /**
@@ -87,7 +89,6 @@ module.exports = Backbone.View.extend({
     editHandler: function(){
         // Create a new dialog for editing this
         this.getEditDialog().openDialog();
-        return false;
     },
 
     /**
@@ -106,8 +107,6 @@ module.exports = Backbone.View.extend({
             // Add this after the existing model
             at: this.model.collection.indexOf( this.model ) + 1
         });
-
-        return false;
     },
 
     /**
@@ -117,7 +116,6 @@ module.exports = Backbone.View.extend({
      */
     deleteHandler: function(){
         this.model.trigger('visual_destroy');
-        return false;
     },
 
     onModelChange: function(){
@@ -143,6 +141,7 @@ module.exports = Backbone.View.extend({
         this.$el.fadeOut('fast', function(){
             thisView.cell.row.resize();
             thisView.model.destroy();
+	        thisView.cell.row.builder.model.refreshPanelsData();
             thisView.remove();
         } );
     },
@@ -155,6 +154,7 @@ module.exports = Backbone.View.extend({
      */
     buildContextualMenu: function( e, menu ) {
         var thisView = this;
+
         menu.addSection(
             {
                 sectionTitle: panelsOptions.loc.contextual.add_widget_below,
@@ -177,6 +177,38 @@ module.exports = Backbone.View.extend({
                 });
             }
         );
+
+	    menu.addSection (
+		    {
+			    sectionTitle: panelsOptions.loc.contextual.widget_actions,
+			    search: false,
+		    },
+		    {
+			    'edit': {
+				    title: panelsOptions.loc.contextual.widget_edit
+			    },
+			    'duplicate': {
+				    title: panelsOptions.loc.contextual.widget_duplicate
+			    },
+			    'delete': {
+				    title: panelsOptions.loc.contextual.widget_delete,
+				    confirm: true
+			    },
+		    },
+		    function( c ){
+			    switch( c ) {
+				    case 'edit':
+					    thisView.editHandler();
+					    break;
+				    case 'duplicate':
+					    thisView.duplicateHandler();
+					    break;
+				    case 'delete':
+					    thisView.visualDestroyModel();
+					    break;
+			    }
+		    }
+	    );
 
         // Lets also add the contextual menu for the entire row
         this.cell.row.buildContextualMenu( e, menu );

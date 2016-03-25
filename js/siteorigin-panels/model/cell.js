@@ -29,7 +29,7 @@ module.exports = Backbone.Model.extend( {
      * Create a clone of the cell, along with all its widgets
      */
     clone: function(row, cloneOptions){
-        if( typeof row === 'undefined' ) {
+        if( _.isUndefined( row ) ) {
             row = this.row;
         }
         cloneOptions = _.extend({ cloneWidgets: true }, cloneOptions);

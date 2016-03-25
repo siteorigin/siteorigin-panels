@@ -45,19 +45,17 @@ module.exports = panels.view.dialog.extend( {
                 description : widget.description
             } ) ) ;
 
-            if(typeof widget.icon === 'undefined') {
+            if( _.isUndefined( widget.icon ) ) {
                 widget.icon = 'dashicons dashicons-admin-generic';
             }
 
-            if( typeof widget.icon !== 'undefined' ){
-                $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
-            }
+	        $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
 
-            $w.data('class', widget.class).appendTo( this.$el.find('.widget-type-list') );
+            $w.data('class', widget.class).appendTo( this.$('.widget-type-list') );
         }, this );
 
         // Add the sidebar tabs
-        var tabs = this.$el.find('.so-sidebar-tabs');
+        var tabs = this.$('.so-sidebar-tabs');
         _.each(panelsOptions.widget_dialog_tabs, function(tab){
             $( this.dialogTabTemplate( { 'title' : tab.title } )).data({
                 'message' : tab.message,
@@ -80,7 +78,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function($t){
         // Get the filter from the tab, and filter the widgets
         this.filter = $t.parent().data('filter');
-        this.filter.search = this.$el.find('.so-sidebar-search').val();
+        this.filter.search = this.$('.so-sidebar-search').val();
 
         var message = $t.parent().data('message');
         if( _.isEmpty( message ) ) {
@@ -107,25 +105,25 @@ module.exports = panels.view.dialog.extend( {
      * @param filter
      */
     filterWidgets: function(filter) {
-        if (typeof filter === 'undefined') {
+        if ( _.isUndefined( filter ) ) {
             filter = {};
         }
 
-        if(typeof filter.groups === 'undefined') {
+        if( _.isUndefined( filter.groups ) ) {
             filter.groups = '';
         }
 
-        this.$el.find('.widget-type-list .widget-type').each(function(){
-            var $$ = jQuery(this), showWidget;
+        this.$('.widget-type-list .widget-type').each(function(){
+            var $$ = $(this), showWidget;
             var widgetClass = $$.data('class');
 
-            var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
+            var widgetData = ( ! _.isUndefined( panelsOptions.widgets[widgetClass] ) ) ? panelsOptions.widgets[widgetClass] : null;
 
-            if( filter.groups.length === 0 ) {
+            if( _.isEmpty( filter.groups ) ) {
                 // This filter doesn't specify groups, so show all
                 showWidget = true;
             }
-            else if( widgetData !== null && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
+            else if( widgetData !== null && ! _.isEmpty( _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups) ) ) {
                 // This widget is in the filter group
                 showWidget = true;
             }
@@ -137,7 +135,7 @@ module.exports = panels.view.dialog.extend( {
             // This can probably be done with a more intelligent operator
             if( showWidget ) {
 
-                if( typeof filter.search !== 'undefined' && filter.search !== '' ) {
+                if( ! _.isUndefined( filter.search ) && filter.search !== '' ) {
                     // Check if the widget title contains the search term
                     if( widgetData.title.toLowerCase().indexOf( filter.search.toLowerCase() ) === -1 ) {
                         showWidget = false;

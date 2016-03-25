@@ -121,6 +121,7 @@ module.exports = panels.view.dialog.extend( {
                     uploadUi.find('.file-browse-button').blur();
                     uploadUi.find('.drag-upload-area').removeClass('file-dragover');
                     uploadUi.find('.progress-bar').fadeIn('fast');
+	                thisView.$('.js-so-selected-file').text( panelsOptions.loc.prebuilt_loading );
                     uploader.start();
                 },
                 UploadProgress: function(uploader, file){
@@ -128,10 +129,13 @@ module.exports = panels.view.dialog.extend( {
                 },
                 FileUploaded : function(uploader, file, response){
                     var layout = JSON.parse( response.response );
-                    if( typeof layout.widgets !== 'undefined' ) {
+                    if( !_.isUndefined( layout.widgets ) ) {
 
 						thisView.uploadedLayout = layout;
-						thisView.$('.js-so-selected-file').text(file.name);
+	                    uploadUi.find('.progress-bar').hide( );
+						thisView.$('.js-so-selected-file').text(
+							panelsOptions.loc.ready_to_insert.replace('%s', file.name)
+						);
 						thisView.updateButtonState(true);
                     }
                     else {
@@ -291,7 +295,7 @@ module.exports = panels.view.dialog.extend( {
 			return false;
 		}
 		var position = $button.data('value');
-		if(typeof position === 'undefined') {
+		if( _.isUndefined( position ) ) {
 			return false;
 		}
 		this.updateButtonState(false);

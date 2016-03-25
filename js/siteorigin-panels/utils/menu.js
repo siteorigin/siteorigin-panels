@@ -135,6 +135,13 @@ module.exports = Backbone.View.extend({
         }
     },
 
+	/**
+	 * Add a new section to the contextual menu.
+	 *
+	 * @param settings
+	 * @param items
+	 * @param callback
+	 */
     addSection: function( settings, items, callback ){
         var thisView = this;
         settings = _.extend( {
@@ -157,11 +164,31 @@ module.exports = Backbone.View.extend({
         } ) );
         this.$el.append( section );
 
-        section.find('.so-item').click( function(){
-            var $$ = jQuery(this);
+        section.find('.so-item:not(.so-confirm)' ).click( function(){
+            var $$ = $(this);
             callback( $$.data('key') );
             thisView.closeMenu();
         } );
+
+		section.find('.so-item.so-confirm' ).click( function(){
+			var $$ = $(this);
+
+			if( $$.hasClass('so-confirming') ) {
+				callback( $$.data('key') );
+				thisView.closeMenu();
+				return;
+			}
+
+			$$
+				.data( 'original-text', $$.html() )
+				.addClass( 'so-confirming' )
+				.html( '<span class="dashicons dashicons-yes"></span> ' + panelsOptions.loc.dropdown_confirm );
+
+			setTimeout( function(){
+				$$.removeClass( 'so-confirming' );
+				$$.html( $$.data('original-text') );
+			}, 2500 );
+		} );
 
         section.data('settings', settings).find( '.so-search-wrapper input').trigger('keyup');
 
@@ -186,7 +213,7 @@ module.exports = Backbone.View.extend({
                 items = section.find('ul li:visible'),
                 activeItem = items.filter('.so-active').eq(0);
 
-            if( activeItem.length !== 0 ) {
+            if( ! _.isEmpty( activeItem ) ) {
                 items.removeClass('so-active');
 
                 var activeIndex = items.index( activeItem );

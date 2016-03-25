@@ -4,6 +4,7 @@ module.exports = Backbone.Collection.extend( {
     model : panels.model.widget,
 
     initialize: function(){
+
     }
 
 } );

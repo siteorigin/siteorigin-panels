@@ -25,7 +25,7 @@ module.exports = Backbone.Collection.extend( {
      */
     addEntry: function(text, data) {
 
-        if(typeof data === 'undefined' || data === null) {
+        if( _.isEmpty( data ) ) {
             data = this.builder.getPanelsData();
         }
 

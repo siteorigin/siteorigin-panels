@@ -25,7 +25,7 @@ module.exports = Backbone.Model.extend( {
     setCells: function(cells){
         var thisModel = this;
 
-        if( this.cells.length === 0 ) {
+        if( _.isEmpty( this.cells ) ) {
             // We're adding the initial cells
             _.each(cells, function (cellWeight) {
                 // Add the new cell to the row
@@ -110,7 +110,7 @@ module.exports = Backbone.Model.extend( {
      * @return {panels.model.row} The cloned row.
      */
     clone: function( builder, cloneOptions ){
-        if(typeof builder === 'undefined') {
+        if( _.isUndefined( builder ) ) {
             builder = this.builder;
         }
         cloneOptions = _.extend({ cloneCells: true }, cloneOptions);

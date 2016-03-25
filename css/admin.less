@@ -21,7 +21,7 @@
 
 		margin-top: 20px;
 
-		.hndle {
+		.hndle, .handlediv {
 			display: none !important;
 		}
 
@@ -61,6 +61,8 @@
 		visibility: visible;
 		position: relative;
 
+		cursor: pointer;
+
 		border: 1px solid #C0C0C0;
 		.gradient(#F0F0F0, #F0F0F0, #F9F9F9);
 		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04)");
@@ -89,10 +91,10 @@
 		border-bottom: 1px solid #D0D0D0;
 		background: #F5F5F5;
 		line-height: 1em;
-		position: absolute;
 		z-index: 101;
 		white-space: nowrap;
 		overflow-x: hidden;
+		position: relative;
 
 		box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 
@@ -124,6 +126,7 @@
 			position: absolute;
 			top: 5px;
 			right: 10px;
+			cursor: pointer;
 
 			display: none;
 			text-decoration: none;
@@ -168,7 +171,7 @@
 
 				.so-dropdown-links-wrapper {
 					display: none;
-					z-index: 11;
+					z-index: 101;
 					position:absolute;
 					right: -10px;
 					padding: 6px 0 0 0;
@@ -196,6 +199,7 @@
 								text-decoration: none;
 								color: #666;
 								font-size: 11px;
+								cursor: pointer;
 
 								outline: 0 !important;
 								.box-shadow(none);
@@ -256,7 +260,7 @@
 		}
 
 		.so-row-container {
-			margin-bottom: 20px;
+			margin-bottom: 15px;
 			.user-select(none);
 
 			.so-cells {
@@ -336,8 +340,23 @@
 
 							&:hover {
 								border: 1px solid #93a7ad;
-								background: #feffff;
+								background: #fff;
 								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
+							}
+
+							&.so-hovered {
+								background: #3a7096;
+								border: 1px solid #39618c;
+								.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+
+								h4, span, small {
+									color: #fff;
+									text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+								}
+
+								small {
+									color: #eee;
+								}
 							}
 
 							.so-widget-wrapper{
@@ -542,7 +561,7 @@
 
 	// This is for the special narrow display
 
-	.so-display-narrow {
+	&.so-display-narrow {
 
 		.so-builder-toolbar {
 			padding: 10px;
@@ -616,7 +635,7 @@
 	@border_color: #D8D8D8;
 
 	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
-		z-index: 100000;
+		z-index: 100001;
 		position: fixed;
 		.box-sizing(border-box);
 		padding: @pane_padding;
@@ -790,7 +809,7 @@
 		height: @toolbar_height;
 		background-color: #fafafa;
 		border-top: 1px solid @border_color;
-		z-index: 100001; // 1 more than the rest to ensure dropdowns etc appear above the other content.
+		z-index: 100002; // 1 more than the rest to ensure dropdowns etc appear above the other content.
 
 		.so-status {
 			float: left;
@@ -1317,7 +1336,8 @@
 				}
 
 				p.drag-drop-message{
-					font-size: 0.9em;
+					font-size: 1em;
+					margin-bottom: 0;
 				}
 
 				.drag-upload-area {
@@ -1752,6 +1772,7 @@
 						text-decoration: none;
 						color: #666;
 						font-size: 11px;
+						cursor: pointer;
 
 						outline: 0 !important;
 						.box-shadow(none);
@@ -1797,167 +1818,90 @@
 }
 
 .so-panels-live-editor {
+	@live_editor_width: 360px;
+
 	> div {
 		position: fixed;
 		z-index: 99999;
+		.box-sizing(border-box);
 	}
 
 	.live-editor-form {
 		display: none;
 	}
 
-	.so-overlay {
+	.live-editor-collapse {
+		position: fixed;
+		top: 18px;
+		left: 10px;
+		line-height: 1em;
+		cursor: pointer;
+		z-index: 100000;
+
+		.collapse-icon {
+			float: left;
+			margin: -4px 6px 0 0;
+			border-radius: 50%;
+			width: 20px;
+			height: 20px;
+			overflow: hidden;
+		}
+
+		.collapse-icon:before {
+			display: block;
+			content: "\f148";
+			background: #eee;
+			font: normal 20px/1 dashicons;
+			speak: none;
+			padding: 0;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		&:hover {
+			color: #0073aa;
+			.collapse-icon {
+				box-shadow: 0 0 3px rgba(30, 140, 190, .8);
+			}
+		}
+	}
+
+	.so-sidebar-tools {
+		background: #eee;
+		border-bottom: 1px solid #ddd;
+		border-right: 1px solid #D0D0D0;
 		top: 0;
-		right: 0;
-		bottom: 0;
 		left: 0;
-		background: rgba(0,0,0,0.75);
+		height: 46px;
+		width: @live_editor_width;
+
+		.live-editor-close {
+			margin: 9px 10px 0 0;
+			float: right;
+		}
 	}
 
 	.so-sidebar {
-		top: 0;
+		top: 46px;
 		left: 0;
 		bottom: 0;
-		width: 260px;
+		width: @live_editor_width;
 		overflow-y: auto;
 
 		background: #F2F2F2;
 
 		border-right: 1px solid #D0D0D0;
-		.box-sizing(border-box);
-
-		.so-sidebar-tools {
-			background: #eee;
-			border-bottom: 1px solid #ddd;
-
-			.live-editor-close {
-				.box-sizing(border-box);
-				display: block;
-				width: 45px;
-				height: 45px;
-				background: #eee;
-				border-right: 1px solid #ddd;
-				color: #444;
-				cursor: pointer;
-				text-decoration: none;
-				position: relative;
-				text-align: center;
-				padding-top: 12px;
-
-				&:hover {
-					background: #FFFFFF;
-				}
-
-				&:before {
-					font: 400 22px/1 dashicons;
-					content: "\f341";
-					top: 7px;
-					left: 13px;
-				}
-			}
-
-		}
-
-		.page-widgets {
-
-			.page-widgets-section {
-
-				.section-header {
-					cursor: pointer;
-					background: #ffffff;
-					padding: 15px 10px;
-					border: solid #ddd;
-					border-width: 1px 0;
-
-					h4 {
-						margin: 0;
-						font-size: 16px;
-					}
-				}
-
-				.section-widgets {
-					padding: 10px;
-				}
-
-
-				&:first-child {
-					.section-header {
-						border-top: 0;
-					}
-				}
-			}
-
-			.so-widget {
-				border: 1px solid #cccccc;
-				cursor: pointer;
-				padding: 10px;
-				background: #F8F8F8;
-				.box-shadow(~"0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF");
-				margin-bottom: 6px;
-
-				&:hover, &.so-hovered {
-					.box-shadow(~"0 2px 2px rgba(0,0,0,0.0125), inset 0 1px 0 #FFFFFF");
-					border: 1px solid #9bafb5;
-					background: #f4f9fd;
-				}
-
-				&.so-current {
-					border-color: #0074a2;
-					background: #2ea2cc;
-					cursor: auto;
-					.box-shadow(~"0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)");
-
-					h4 {
-						color: #FFFFFF;
-					}
-
-					small {
-						color: #eeeeee;
-					}
-
-					&:hover {
-						border-color: #0074a2;
-						background: #2ea2cc;
-					}
-				}
-
-				&:last-child {
-					margin-bottom: 0;
-				}
-
-				h4 {
-					margin: 0 0 7px 0;
-					padding: 0;
-					height: 1.2em;
-					color: #222222;
-					font-size: 14px;
-				}
-
-				.actions {
-					display: none;
-				}
-
-				small{
-					font-size: 11px;
-					line-height: 1.2em;
-					height: 1.2em;
-					display: block;
-					overflow: hidden;
-					color: #888888;
-				}
-
-			}
-
-		}
 	}
 
 	.so-preview {
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: 260px;
+		left: @live_editor_width;
+		background-color: #F4F4F4;
 
-		background: #F4F4F4;
+		form {
+			display: none;
+		}
 
 		iframe{
 			width: 100%;
@@ -1965,6 +1909,68 @@
 		}
 	}
 
+	.so-preview-overlay {
+		display: none;
+		opacity: 0.975;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: @live_editor_width;
+		background-color: #F4F4F4;
+
+		.so-loading-container {
+			opacity: 0.6;
+			position: absolute;
+			top: 50%;
+			width: 200px;
+			padding: 2px;
+			border-radius: 5px;
+			left: 50%;
+			margin-left: -104px;
+			margin-top: -9px;
+
+			border: 2px solid #aaa;
+
+			.so-loading-bar {
+				width: 50%;
+				border-radius: 3px;
+				height: 10px;
+				background: #aaa;
+			}
+		}
+	}
+
+	.so-sidebar,
+	.so-preview,
+	.so-sidebar-tools,
+	.so-preview-overlay,
+	.live-editor-collapse,
+	.live-editor-collapse .collapse-icon {
+		.transition( 0.5s );
+	}
+
+
+	&.so-collapsed {
+
+		.live-editor-collapse {
+			.collapse-icon {
+				transform: rotate(180deg);
+			}
+		}
+
+		.so-sidebar-tools {
+			left: -@live_editor_width;
+		}
+
+		.so-sidebar {
+			left: -@live_editor_width;
+		}
+
+		.so-preview,
+		.so-preview-overlay {
+			left: 0;
+		}
+	}
 }
 
 .so-panels-loading {
@@ -2153,7 +2159,7 @@
 	width: 180px;
 	top: 20px;
 	left: 20px;
-	z-index: 9991;
+	z-index: 999999;
 	display: none;
 
 	&, * {
@@ -2211,6 +2217,25 @@
 				&.so-active {
 					background: #F0F0F0;
 					color: #444;
+				}
+
+				&.so-confirm {
+					color: #a00;
+
+					&:hover,
+					&.so-active {
+						background: #a00;
+						color: #fff;
+					}
+				}
+
+				.dashicons {
+					width: 12px;
+					height: 12px;
+					font-size: 12px;
+					margin: 0 4px 0 -2px;
+					float: left;
+					line-height: 12px;
 				}
 			}
 		}

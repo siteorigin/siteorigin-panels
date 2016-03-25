@@ -31,7 +31,7 @@ module.exports = panels.view.dialog.extend( {
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-widget').html(), {} ) );
         this.loadForm();
 
-        if( typeof panelsOptions.widgets[ this.model.get('class') ] !== 'undefined') {
+        if( ! _.isUndefined( panelsOptions.widgets[ this.model.get('class') ] ) ) {
             this.$('.so-title .widget-name').html( panelsOptions.widgets[ this.model.get('class')].title );
         }
         else {
@@ -77,7 +77,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex - 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -101,7 +101,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex + 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -115,12 +115,12 @@ module.exports = panels.view.dialog.extend( {
      */
     loadForm: function(){
         // don't load the form if this dialog hasn't been rendered yet
-        if( !this.$el.find('> *').length ) {
+        if( !this.$('> *').length ) {
             return;
         }
 
         var thisView = this;
-        this.$el.find('.so-content').addClass('so-panels-loading');
+        this.$('.so-content').addClass('so-panels-loading');
 
         var data = {
             'action' : 'so_panels_widget_form',
@@ -137,7 +137,7 @@ module.exports = panels.view.dialog.extend( {
                 var html = result.replace( /{\$id}/g, thisView.model.cid );
 
                 // Load this content into the form
-                thisView.$el.find('.so-content')
+                thisView.$('.so-content')
                     .removeClass('so-panels-loading')
                     .html(html);
 
@@ -145,7 +145,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.trigger('form_loaded', thisView);
 
                 // For legacy compatibility, trigger a panelsopen event
-                thisView.$el.find('.panel-dialog').trigger('panelsopen');
+                thisView.$('.panel-dialog').trigger('panelsopen');
 
                 // If the main dialog is closed from this point on, save the widget content
                 thisView.on('close_dialog', thisView.saveWidget, thisView);
@@ -164,12 +164,12 @@ module.exports = panels.view.dialog.extend( {
         if( !this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
-            if (typeof values.widgets === 'undefined') {
+            if ( _.isUndefined( values.widgets ) ) {
                 values = {};
             }
             else {
                 values = values.widgets;
-                values = values[Object.keys(values)[0]];
+                values = values[ Object.keys(values)[0] ];
             }
 
             this.model.setValues(values);
