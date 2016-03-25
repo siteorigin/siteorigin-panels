@@ -15,7 +15,7 @@ module.exports = Backbone.View.extend( {
      * @param postId
      */
     render: function( stylesType, postId, args ){
-        if( typeof stylesType === 'undefined' ) {
+        if( _.isUndefined( stylesType ) ) {
             return;
         }
 
@@ -80,8 +80,8 @@ module.exports = Backbone.View.extend( {
         });
 
         // Set up the color fields
-        if(typeof $.fn.wpColorPicker !== 'undefined') {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+        if( ! _.isUndefined( $.fn.wpColorPicker ) ) {
+            if (typeof(panelsOptions.wpColorPickerOptions.palettes) === 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);
@@ -161,9 +161,9 @@ module.exports = Backbone.View.extend( {
                 var valueListValue = [];
                 for (var i in valueList) {
                     var match = re.exec(valueList[i]);
-                    if (match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined') {
-                        valueListValue.push(match[1]);
-                        unit.val(match[2]);
+                    if ( _.isNull( match ) && ! _.isUndefined( match[1] ) && ! _.isUndefined( match[2] ) ) {
+                        valueListValue.push( match[1] );
+                        unit.val( match[2] );
                     }
                 }
                 text.val(valueListValue.join(' '));

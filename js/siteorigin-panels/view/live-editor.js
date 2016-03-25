@@ -33,7 +33,7 @@ module.exports = Backbone.View.extend( {
 			    if( $$.data('load-start') !== undefined ) {
 				    thisView.loadTimes.unshift( new Date().getTime() - $$.data('load-start') );
 
-				    if ( thisView.loadTimes.length ) {
+				    if ( ! _.isEmpty( thisView.loadTimes ) ) {
 					    thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
 				    }
 			    }

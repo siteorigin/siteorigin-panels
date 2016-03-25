@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend( {
     currentData: '',
 
     attachedToEditor: false,
-    liveEditor: false,
+    liveEditor: undefined,
     menu: false,
 
     /* The builderType is sent with all requests to the server */
@@ -127,7 +127,7 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-        if( typeof this.metabox === 'undefined' ) {
+        if( _.isUndefined( this.metabox ) ) {
             return this;
         }
 
@@ -195,8 +195,8 @@ module.exports = Backbone.View.extend( {
         // Switch to the Page Builder interface as soon as we load the page if there are widgets
         var data = this.model.get('data');
         if(
-            ( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) ||
-            ( typeof data.grids !== 'undefined' && _.size(data.grids) !== 0 )
+            ( ! _.isUndefined( data.widgets ) && _.size(data.widgets) !== 0 ) ||
+            ( ! _.isUndefined( data.grids ) && _.size(data.grids) !== 0 )
         ) {
             $('#content-panels.switch-panels').click();
         }
@@ -351,7 +351,7 @@ module.exports = Backbone.View.extend( {
         rowView.render();
 
         // Attach the row elements to this builder
-        if( typeof options.at === 'undefined' || collection.length <= 1 ) {
+        if( _.isUndefined( options.at ) || collection.length <= 1 ) {
             // Insert this at the end of the widgets container
             rowView.$el.appendTo( this.$( '.so-rows-container' ) );
         }
@@ -416,7 +416,7 @@ module.exports = Backbone.View.extend( {
             defaultPosition: 'first'
         }, options );
 
-        if( this.$('.so-cells .cell').length === 0 ) {
+        if( _.isEmpty( this.$('.so-cells .cell') ) ) {
 
             if( options.createCell ) {
                 // Create a row with a single cell
@@ -430,7 +430,7 @@ module.exports = Backbone.View.extend( {
 
         var activeCell = this.$('.so-cells .cell.cell-selected');
 
-        if(!activeCell.length) {
+        if( ! _.isEmpty( activeCell ) ) {
             if( options.defaultPosition === 'last' ){
                 activeCell = this.$('.so-cells .cell').first();
             }
@@ -503,7 +503,7 @@ module.exports = Backbone.View.extend( {
      * Show the current live editor
      */
     displayLiveEditor: function(){
-        if(typeof this.liveEditor === 'undefined') {
+        if( _.isUndefined( this.liveEditor ) ) {
             return;
         }
 
@@ -516,10 +516,6 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     addHistoryBrowser: function(){
-        if(typeof panels.dialog.history === 'undefined') {
-            return this;
-        }
-
         this.dialogs.history = new panels.dialog.history();
         this.dialogs.history.builder = this;
         this.dialogs.history.entries.builder = this.model;
@@ -538,11 +534,11 @@ module.exports = Backbone.View.extend( {
      * @param data
      */
     addHistoryEntry: function(text, data){
-        if(typeof data === 'undefined') {
+        if( _.isUndefined( data ) ) {
             data = null;
         }
 
-        if( typeof this.dialogs.history !== 'undefined' ) {
+        if( ! _.isUndefined( this.dialogs.history ) ) {
             this.dialogs.history.entries.addEntry(text, data);
         }
     },
@@ -589,11 +585,10 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+        if( _.isUndefined( tinyMCE ) || tinyMCE.get("content") === null ) {
             var contentArea = $('#content');
             contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
-        }
-        else {
+        } else {
             var contentEd = tinyMCE.get("content");
 
             contentEd.setContent(content);
@@ -637,7 +632,7 @@ module.exports = Backbone.View.extend( {
         var editorContent = '';
         var editor;
 
-        if ( typeof tinyMCE !== 'undefined' ) {
+        if ( ! _.isUndefined( tinyMCE ) ) {
             editor = tinyMCE.get( 'content' );
         }
         if( editor && typeof( editor.getContent ) === "function" ) {
@@ -653,10 +648,10 @@ module.exports = Backbone.View.extend( {
 
             var widgetClass = '';
             // There is a small chance a theme will have removed this, so check
-            if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+            if( ! _.isUndefined( panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget ) ) {
                 widgetClass = 'SiteOrigin_Widget_Editor_Widget';
             }
-            else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
+            else if( ! _.isUndefined( panelsOptions.widgets.WP_Widget_Text ) ) {
                 widgetClass = 'WP_Widget_Text';
             }
 
@@ -721,7 +716,7 @@ module.exports = Backbone.View.extend( {
      * This shows or hides the welcome display depending on whether there are any rows in the collection.
      */
     toggleWelcomeDisplay: function(){
-        if( this.model.rows.length ) {
+        if( !_.isEmpty( this.model.rows ) ) {
             this.$('.so-panels-welcome-message').hide();
         }
         else {
@@ -733,7 +728,7 @@ module.exports = Backbone.View.extend( {
         var builder = this;
 
         // Skip this if any of the dialogs are open. They can handle their own contexts.
-        if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+        if( _.isEmpty( window.panelsDialogOpen ) ) {
             // Check if any of the widgets get the contextual menu
             var overItem = false, overItemType = false;
 

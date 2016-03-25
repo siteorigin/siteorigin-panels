@@ -213,7 +213,7 @@ module.exports = Backbone.View.extend({
                 items = section.find('ul li:visible'),
                 activeItem = items.filter('.so-active').eq(0);
 
-            if( activeItem.length !== 0 ) {
+            if( ! _.isEmpty( activeItem ) ) {
                 items.removeClass('so-active');
 
                 var activeIndex = items.index( activeItem );

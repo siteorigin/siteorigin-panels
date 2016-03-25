@@ -35,7 +35,7 @@ module.exports = panels.view.dialog.extend( {
 
     initializeDialog: function(){
         this.on('open_dialog', function(){
-            if( typeof this.model !== 'undefined' && this.model.cells.length !== 0 ) {
+            if( !_.isUndefined( this.model ) && !_.isEmpty( this.model.cells ) ) {
                 this.setRowModel( this.model );
             }
             else {
@@ -90,7 +90,7 @@ module.exports = panels.view.dialog.extend( {
             $rightSidebar.addClass('so-panels-loading');
         }
 
-        if( typeof this.model !== 'undefined' ) {
+        if( !_.isUndefined( this.model ) ) {
             // Set the initial value of the
             this.$('input.so-row-field').val( this.model.cells.length );
         }
@@ -148,7 +148,7 @@ module.exports = panels.view.dialog.extend( {
             var prevCell = newCell.prev();
             var handle;
 
-            if( prevCell.length !== 0 ) {
+            if( ! _.isEmpty( prevCell ) ) {
                 handle = $('<div class="resize-handle"></div>');
                 handle
                     .appendTo( newCell )
@@ -279,7 +279,7 @@ module.exports = panels.view.dialog.extend( {
 
                             timeout = setTimeout( function(){
                                 // If there are no weight inputs, then skip this
-                                if( rowPreview.find( '.preview-cell-weight-input').length === 0 ) {
+                                if( _.isEmpty( rowPreview.find( '.preview-cell-weight-input') ) ) {
                                     return false;
                                 }
 
@@ -466,7 +466,7 @@ module.exports = panels.view.dialog.extend( {
         this.model.setCells( this.row.cells );
 
         // Update the styles if they've loaded
-        if ( typeof this.styles !== 'undefined' && this.styles.stylesLoaded ) {
+        if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
             // This is an edit dialog, so there are styles
             var style = {};
             try {

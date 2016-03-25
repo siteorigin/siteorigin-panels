@@ -49,7 +49,7 @@ module.exports = Backbone.Collection.extend( {
      */
     addEntry: function(text, data) {
 
-        if(typeof data === 'undefined' || data === null) {
+        if( _.isEmpty( data ) ) {
             data = this.builder.getPanelsData();
         }
 
@@ -87,6 +87,7 @@ module.exports = Backbone.Collection.extend( {
         }
     }
 } );
+
 },{}],3:[function(require,module,exports){
 var panels = window.panels;
 
@@ -218,7 +219,7 @@ module.exports = panels.view.dialog.extend( {
 
         var c = this.$('.history-entries').empty();
 
-        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
+        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || !_.isEmpty( this.entries.models ) ) {
             $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
                 .data('historyEntry', this.revertEntry)
                 .prependTo(c);
@@ -367,7 +368,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         // Return the amount of time ago
-        return parts.length === 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
+        return _.isEmpty( parts ) ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
 
     }
 
@@ -505,7 +506,7 @@ module.exports = panels.view.dialog.extend( {
                 },
                 FileUploaded : function(uploader, file, response){
                     var layout = JSON.parse( response.response );
-                    if( typeof layout.widgets !== 'undefined' ) {
+                    if( !_.isUndefined( layout.widgets ) ) {
 
 						thisView.uploadedLayout = layout;
 	                    uploadUi.find('.progress-bar').hide( );
@@ -671,7 +672,7 @@ module.exports = panels.view.dialog.extend( {
 			return false;
 		}
 		var position = $button.data('value');
-		if(typeof position === 'undefined') {
+		if( _.isUndefined( position ) ) {
 			return false;
 		}
 		this.updateButtonState(false);
@@ -804,7 +805,7 @@ module.exports = panels.view.dialog.extend( {
 
     initializeDialog: function(){
         this.on('open_dialog', function(){
-            if( typeof this.model !== 'undefined' && this.model.cells.length !== 0 ) {
+            if( !_.isUndefined( this.model ) && !_.isEmpty( this.model.cells ) ) {
                 this.setRowModel( this.model );
             }
             else {
@@ -859,7 +860,7 @@ module.exports = panels.view.dialog.extend( {
             $rightSidebar.addClass('so-panels-loading');
         }
 
-        if( typeof this.model !== 'undefined' ) {
+        if( !_.isUndefined( this.model ) ) {
             // Set the initial value of the
             this.$('input.so-row-field').val( this.model.cells.length );
         }
@@ -917,7 +918,7 @@ module.exports = panels.view.dialog.extend( {
             var prevCell = newCell.prev();
             var handle;
 
-            if( prevCell.length !== 0 ) {
+            if( ! _.isEmpty( prevCell ) ) {
                 handle = $('<div class="resize-handle"></div>');
                 handle
                     .appendTo( newCell )
@@ -1048,7 +1049,7 @@ module.exports = panels.view.dialog.extend( {
 
                             timeout = setTimeout( function(){
                                 // If there are no weight inputs, then skip this
-                                if( rowPreview.find( '.preview-cell-weight-input').length === 0 ) {
+                                if( _.isEmpty( rowPreview.find( '.preview-cell-weight-input') ) ) {
                                     return false;
                                 }
 
@@ -1235,7 +1236,7 @@ module.exports = panels.view.dialog.extend( {
         this.model.setCells( this.row.cells );
 
         // Update the styles if they've loaded
-        if ( typeof this.styles !== 'undefined' && this.styles.stylesLoaded ) {
+        if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
             // This is an edit dialog, so there are styles
             var style = {};
             try {
@@ -1350,7 +1351,7 @@ module.exports = panels.view.dialog.extend( {
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-widget').html(), {} ) );
         this.loadForm();
 
-        if( typeof panelsOptions.widgets[ this.model.get('class') ] !== 'undefined') {
+        if( ! _.isUndefined( panelsOptions.widgets[ this.model.get('class') ] ) ) {
             this.$('.so-title .widget-name').html( panelsOptions.widgets[ this.model.get('class')].title );
         }
         else {
@@ -1396,7 +1397,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex - 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -1420,7 +1421,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex + 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -1483,7 +1484,7 @@ module.exports = panels.view.dialog.extend( {
         if( !this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
-            if ( typeof values.widgets === 'undefined' ) {
+            if ( _.isUndefined( values.widgets ) ) {
                 values = {};
             }
             else {
@@ -1610,13 +1611,11 @@ module.exports = panels.view.dialog.extend( {
                 description : widget.description
             } ) ) ;
 
-            if(typeof widget.icon === 'undefined') {
+            if( _.isUndefined( widget.icon ) ) {
                 widget.icon = 'dashicons dashicons-admin-generic';
             }
 
-            if( typeof widget.icon !== 'undefined' ){
-                $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
-            }
+	        $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
 
             $w.data('class', widget.class).appendTo( this.$('.widget-type-list') );
         }, this );
@@ -1672,11 +1671,11 @@ module.exports = panels.view.dialog.extend( {
      * @param filter
      */
     filterWidgets: function(filter) {
-        if (typeof filter === 'undefined') {
+        if ( _.isUndefined( filter ) ) {
             filter = {};
         }
 
-        if(typeof filter.groups === 'undefined') {
+        if( _.isUndefined( filter.groups ) ) {
             filter.groups = '';
         }
 
@@ -1684,13 +1683,13 @@ module.exports = panels.view.dialog.extend( {
             var $$ = $(this), showWidget;
             var widgetClass = $$.data('class');
 
-            var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
+            var widgetData = ( ! _.isUndefined( panelsOptions.widgets[widgetClass] ) ) ? panelsOptions.widgets[widgetClass] : null;
 
-            if( filter.groups.length === 0 ) {
+            if( _.isEmpty( filter.groups ) ) {
                 // This filter doesn't specify groups, so show all
                 showWidget = true;
             }
-            else if( widgetData !== null && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
+            else if( widgetData !== null && ! _.isEmpty( _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups) ) ) {
                 // This widget is in the filter group
                 showWidget = true;
             }
@@ -1702,7 +1701,7 @@ module.exports = panels.view.dialog.extend( {
             // This can probably be done with a more intelligent operator
             if( showWidget ) {
 
-                if( typeof filter.search !== 'undefined' && filter.search !== '' ) {
+                if( ! _.isUndefined( filter.search ) && filter.search !== '' ) {
                     // Check if the widget title contains the search term
                     if( widgetData.title.toLowerCase().indexOf( filter.search.toLowerCase() ) === -1 ) {
                         showWidget = false;
@@ -2074,7 +2073,7 @@ module.exports = Backbone.Model.extend( {
         var cit = 0;
         var rows = [];
 
-        if( typeof data.grid_cells === 'undefined' ) {
+        if( _.isUndefined( data.grid_cells ) ) {
             this.trigger('load_panels_data');
             return;
         }
@@ -2082,7 +2081,7 @@ module.exports = Backbone.Model.extend( {
         var gi;
         for(var ci = 0; ci < data.grid_cells.length; ci++) {
             gi = parseInt(data.grid_cells[ci].grid);
-            if(typeof rows[gi] === 'undefined') {
+            if( _.isUndefined( rows[gi] ) ) {
                 rows[gi] = [];
             }
 
@@ -2094,19 +2093,21 @@ module.exports = Backbone.Model.extend( {
             // This will create and add the row model and its cells
             var newRow = builderModel.addRow( row, { noAnimate: true } );
 
-            if( typeof data.grids[i].style !== 'undefined' ) {
+            if( ! _.isUndefined( data.grids[i].style ) ) {
                 newRow.set( 'style', data.grids[i].style );
             }
         } );
 
 
-        if( typeof data.widgets === 'undefined' ) { return; }
+        if( _.isUndefined( data.widgets ) ) {
+	        return;
+        }
 
         // Add the widgets
         _.each(data.widgets, function(widgetData){
             try {
                 var panels_info = null;
-                if (typeof widgetData.panels_info !== 'undefined') {
+                if ( ! _.isUndefined( widgetData.panels_info ) ) {
                     panels_info = widgetData.panels_info;
                     delete widgetData.panels_info;
                 }
@@ -2123,7 +2124,7 @@ module.exports = Backbone.Model.extend( {
                     values: widgetData
                 });
 
-                if( typeof panels_info.style !== 'undefined' ) {
+                if( ! _.isUndefined( panels_info.style ) ) {
                     newWidget.set('style', panels_info.style );
                 }
 
@@ -2303,7 +2304,7 @@ module.exports = Backbone.Model.extend( {
      * Create a clone of the cell, along with all its widgets
      */
     clone: function(row, cloneOptions){
-        if( typeof row === 'undefined' ) {
+        if( _.isUndefined( row ) ) {
             row = this.row;
         }
         cloneOptions = _.extend({ cloneWidgets: true }, cloneOptions);
@@ -2323,6 +2324,7 @@ module.exports = Backbone.Model.extend( {
     }
 
 } );
+
 },{}],15:[function(require,module,exports){
 module.exports = Backbone.Model.extend( {
     defaults: {
@@ -2360,7 +2362,7 @@ module.exports = Backbone.Model.extend( {
     setCells: function(cells){
         var thisModel = this;
 
-        if( this.cells.length === 0 ) {
+        if( _.isEmpty( this.cells ) ) {
             // We're adding the initial cells
             _.each(cells, function (cellWeight) {
                 // Add the new cell to the row
@@ -2445,7 +2447,7 @@ module.exports = Backbone.Model.extend( {
      * @return {panels.model.row} The cloned row.
      */
     clone: function( builder, cloneOptions ){
-        if(typeof builder === 'undefined') {
+        if( _.isUndefined( builder ) ) {
             builder = this.builder;
         }
         cloneOptions = _.extend({ cloneCells: true }, cloneOptions);
@@ -2464,6 +2466,7 @@ module.exports = Backbone.Model.extend( {
         return clone;
     }
 } );
+
 },{}],17:[function(require,module,exports){
 /**
  * Model for an instance of a widget
@@ -2491,7 +2494,7 @@ module.exports = Backbone.Model.extend( {
 
     initialize: function(){
         var widgetClass = this.get('class');
-        if( typeof panelsOptions.widgets[widgetClass] === 'undefined' || !panelsOptions.widgets[widgetClass].installed ) {
+        if( _.isUndefined( panelsOptions.widgets[widgetClass] ) || !panelsOptions.widgets[widgetClass].installed ) {
             this.set('missing', true);
         }
     },
@@ -2501,7 +2504,7 @@ module.exports = Backbone.Model.extend( {
      * @returns {*}
      */
     getWidgetField: function(field) {
-        if(typeof panelsOptions.widgets[ this.get('class') ] === 'undefined') {
+        if( _.isUndefined( panelsOptions.widgets[ this.get('class') ] ) ) {
             if(field === 'title' || field === 'description') {
                 return panelsOptions.loc.missing_widget[field];
             }
@@ -2577,7 +2580,9 @@ module.exports = Backbone.Model.extend( {
      * @returns {panels.model.widget}
      */
     clone: function( cell, options ){
-        if( typeof cell === 'undefined' ) { cell = this.cell; }
+        if( _.isUndefined( cell ) ) {
+	        cell = this.cell;
+        }
 
         var clone = new this.constructor( this.attributes );
 
@@ -2620,10 +2625,10 @@ module.exports = Backbone.Model.extend( {
     getTitle: function(){
         var widgetData = panelsOptions.widgets[this.get('class')];
 
-        if( typeof widgetData === 'undefined' ) {
+        if( _.isUndefined( widgetData ) ) {
             return this.get('class').replace(/_/g, ' ');
         }
-        else if( typeof widgetData.panels_title !== 'undefined' ) {
+        else if( ! _.isUndefined( widgetData.panels_title ) ) {
             // This means that the widget has told us which field it wants us to use as a title
             if( widgetData.panels_title === false ) {
                 return panelsOptions.widgets[this.get('class')].description;
@@ -2645,7 +2650,7 @@ module.exports = Backbone.Model.extend( {
 
         for( var i in titleFields ) {
             if(
-                typeof values[titleFields[i]] !== 'undefined' &&
+                ! _.isUndefined( values[titleFields[i]] ) &&
                 typeof values[titleFields[i]] === 'string' &&
                 values[titleFields[i]] !== '' &&
                 values[titleFields[i]] !== 'on' &&
@@ -2882,7 +2887,7 @@ module.exports = Backbone.View.extend({
                 items = section.find('ul li:visible'),
                 activeItem = items.filter('.so-active').eq(0);
 
-            if( activeItem.length !== 0 ) {
+            if( ! _.isEmpty( activeItem ) ) {
                 items.removeClass('so-active');
 
                 var activeIndex = items.index( activeItem );
@@ -2989,7 +2994,7 @@ module.exports = Backbone.View.extend( {
     currentData: '',
 
     attachedToEditor: false,
-    liveEditor: false,
+    liveEditor: undefined,
     menu: false,
 
     /* The builderType is sent with all requests to the server */
@@ -3108,7 +3113,7 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     attachToEditor: function(){
-        if( typeof this.metabox === 'undefined' ) {
+        if( _.isUndefined( this.metabox ) ) {
             return this;
         }
 
@@ -3176,8 +3181,8 @@ module.exports = Backbone.View.extend( {
         // Switch to the Page Builder interface as soon as we load the page if there are widgets
         var data = this.model.get('data');
         if(
-            ( typeof data.widgets !== 'undefined' && _.size(data.widgets) !== 0 ) ||
-            ( typeof data.grids !== 'undefined' && _.size(data.grids) !== 0 )
+            ( ! _.isUndefined( data.widgets ) && _.size(data.widgets) !== 0 ) ||
+            ( ! _.isUndefined( data.grids ) && _.size(data.grids) !== 0 )
         ) {
             $('#content-panels.switch-panels').click();
         }
@@ -3332,7 +3337,7 @@ module.exports = Backbone.View.extend( {
         rowView.render();
 
         // Attach the row elements to this builder
-        if( typeof options.at === 'undefined' || collection.length <= 1 ) {
+        if( _.isUndefined( options.at ) || collection.length <= 1 ) {
             // Insert this at the end of the widgets container
             rowView.$el.appendTo( this.$( '.so-rows-container' ) );
         }
@@ -3397,7 +3402,7 @@ module.exports = Backbone.View.extend( {
             defaultPosition: 'first'
         }, options );
 
-        if( this.$('.so-cells .cell').length === 0 ) {
+        if( _.isEmpty( this.$('.so-cells .cell') ) ) {
 
             if( options.createCell ) {
                 // Create a row with a single cell
@@ -3411,7 +3416,7 @@ module.exports = Backbone.View.extend( {
 
         var activeCell = this.$('.so-cells .cell.cell-selected');
 
-        if(!activeCell.length) {
+        if( ! _.isEmpty( activeCell ) ) {
             if( options.defaultPosition === 'last' ){
                 activeCell = this.$('.so-cells .cell').first();
             }
@@ -3484,7 +3489,7 @@ module.exports = Backbone.View.extend( {
      * Show the current live editor
      */
     displayLiveEditor: function(){
-        if(typeof this.liveEditor === 'undefined') {
+        if( _.isUndefined( this.liveEditor ) ) {
             return;
         }
 
@@ -3497,10 +3502,6 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     addHistoryBrowser: function(){
-        if(typeof panels.dialog.history === 'undefined') {
-            return this;
-        }
-
         this.dialogs.history = new panels.dialog.history();
         this.dialogs.history.builder = this;
         this.dialogs.history.entries.builder = this.model;
@@ -3519,11 +3520,11 @@ module.exports = Backbone.View.extend( {
      * @param data
      */
     addHistoryEntry: function(text, data){
-        if(typeof data === 'undefined') {
+        if( _.isUndefined( data ) ) {
             data = null;
         }
 
-        if( typeof this.dialogs.history !== 'undefined' ) {
+        if( ! _.isUndefined( this.dialogs.history ) ) {
             this.dialogs.history.entries.addEntry(text, data);
         }
     },
@@ -3570,11 +3571,10 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-        if( typeof tinyMCE === 'undefined' || tinyMCE.get("content") === null ) {
+        if( _.isUndefined( tinyMCE ) || tinyMCE.get("content") === null ) {
             var contentArea = $('#content');
             contentArea.val(content).trigger( 'change' ).trigger( 'keyup' );
-        }
-        else {
+        } else {
             var contentEd = tinyMCE.get("content");
 
             contentEd.setContent(content);
@@ -3618,7 +3618,7 @@ module.exports = Backbone.View.extend( {
         var editorContent = '';
         var editor;
 
-        if ( typeof tinyMCE !== 'undefined' ) {
+        if ( ! _.isUndefined( tinyMCE ) ) {
             editor = tinyMCE.get( 'content' );
         }
         if( editor && typeof( editor.getContent ) === "function" ) {
@@ -3634,10 +3634,10 @@ module.exports = Backbone.View.extend( {
 
             var widgetClass = '';
             // There is a small chance a theme will have removed this, so check
-            if( typeof panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget !== 'undefined' ) {
+            if( ! _.isUndefined( panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget ) ) {
                 widgetClass = 'SiteOrigin_Widget_Editor_Widget';
             }
-            else if( typeof panelsOptions.widgets.WP_Widget_Text !== 'undefined' ) {
+            else if( ! _.isUndefined( panelsOptions.widgets.WP_Widget_Text ) ) {
                 widgetClass = 'WP_Widget_Text';
             }
 
@@ -3702,7 +3702,7 @@ module.exports = Backbone.View.extend( {
      * This shows or hides the welcome display depending on whether there are any rows in the collection.
      */
     toggleWelcomeDisplay: function(){
-        if( this.model.rows.length ) {
+        if( !_.isEmpty( this.model.rows ) ) {
             this.$('.so-panels-welcome-message').hide();
         }
         else {
@@ -3714,7 +3714,7 @@ module.exports = Backbone.View.extend( {
         var builder = this;
 
         // Skip this if any of the dialogs are open. They can handle their own contexts.
-        if( typeof window.panelsDialogOpen === 'undefined' || !window.panelsDialogOpen ) {
+        if( _.isEmpty( window.panelsDialogOpen ) ) {
             // Check if any of the widgets get the contextual menu
             var overItem = false, overItemType = false;
 
@@ -3897,7 +3897,7 @@ module.exports = Backbone.View.extend( {
             start: function(e, ui){
                 // Set the containment to the cell parent
                 previousCell = cellView.$el.prev().data('view');
-                if( typeof previousCell === 'undefined' ) {
+                if( _.isUndefined( previousCell ) ) {
 	                return;
                 }
 
@@ -3977,7 +3977,7 @@ module.exports = Backbone.View.extend( {
         } );
         view.cell = this;
 
-        if( typeof widget.isDuplicate === 'undefined' ) {
+        if( _.isUndefined( widget.isDuplicate ) ) {
             widget.isDuplicate = false;
         }
 
@@ -3986,7 +3986,7 @@ module.exports = Backbone.View.extend( {
             'loadForm': widget.isDuplicate
         });
 
-        if( typeof options.at === 'undefined' || collection.length <= 1 ) {
+        if( _.isUndefined( options.at ) || collection.length <= 1 ) {
             // Insert this at the end of the widgets container
             view.$el.appendTo( this.$( '.widgets-container' ) );
         }
@@ -4078,7 +4078,7 @@ module.exports = Backbone.View.extend( {
 
         this.trigger('initialize_dialog', this);
 
-        if(typeof this.initializeDialog !== 'undefined') {
+        if( ! _.isUndefined( this.initializeDialog ) ) {
             this.initializeDialog();
         }
     },
@@ -4192,7 +4192,7 @@ module.exports = Backbone.View.extend( {
     initTabs: function(){
         var tabs = this.$('.so-sidebar-tabs li a');
 
-        if(tabs.length === 0) {
+        if( _.isEmpty( tabs ) ) {
             return this;
         }
 
@@ -4207,7 +4207,7 @@ module.exports = Backbone.View.extend( {
             $$.parent().addClass('tab-active');
 
             var url = $$.attr('href');
-            if(typeof url !== 'undefined' && url.charAt(0) === '#') {
+            if( !_.isUndefined( url ) && url.charAt(0) === '#') {
                 // Display the new tab
                 var tabName = url.split('#')[1];
                 thisDialog.$('.so-content .so-content-tabs .tab-' + tabName).show();
@@ -4336,7 +4336,7 @@ module.exports = Backbone.View.extend( {
         window.panelsDialogOpen = false;
 
         // In the builder, trigger an update
-        if(typeof this.builder !== 'undefined') {
+        if( ! _.isUndefined( this.builder ) ) {
             // Store the model data when a dialog is closed.
             this.builder.model.refreshPanelsData();
         }
@@ -4390,7 +4390,7 @@ module.exports = Backbone.View.extend( {
      * Get the values from the form and convert them into a data array
      */
     getFormValues: function(formSelector){
-        if(typeof formSelector === 'undefined') {
+        if( _.isUndefined( formSelector ) ) {
             formSelector = '.so-content';
         }
 
@@ -4408,7 +4408,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Create an array with the parts of the name
-            if(typeof name[2] === 'undefined') {
+            if( _.isUndefined( name[2] ) ) {
                 parts = $$.attr('name');
             }
             else {
@@ -4451,7 +4451,7 @@ module.exports = Backbone.View.extend( {
             else if( $$.prop('tagName') === 'TEXTAREA' && $$.hasClass('wp-editor-area') ){
                 // This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
                 var editor = null;
-                if ( typeof tinyMCE !== 'undefined' ) {
+                if ( ! _.isUndefined( tinyMCE ) ) {
                     editor = tinyMCE.get( $$.attr('id') );
                 }
 
@@ -4482,7 +4482,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Now, we need to filter this value if necessary
-            if( typeof $$.data('panels-filter') !== 'undefined' ) {
+            if( ! _.isUndefined( $$.data('panels-filter') ) ) {
                 switch( $$.data('panels-filter') ) {
                     case 'json_parse':
                         // Attempt to parse the JSON value of this field
@@ -4509,7 +4509,7 @@ module.exports = Backbone.View.extend( {
                         }
                     }
                     else {
-                        if (typeof sub[parts[i]] === 'undefined') {
+                        if ( _.isUndefined( sub[parts[i]] ) ) {
                             if ( parts[i+1] === '' ) {
                                 sub[parts[i]] = [];
                             }
@@ -4532,7 +4532,7 @@ module.exports = Backbone.View.extend( {
      */
     setStatusMessage: function(message, loading){
         this.$('.so-toolbar .so-status').html( message );
-        if( typeof loading !== 'undefined' && loading ) {
+        if( ! _.isUndefined( loading ) && loading ) {
             this.$('.so-toolbar .so-status').addClass('so-panels-loading');
         }
     },
@@ -4584,7 +4584,7 @@ module.exports = Backbone.View.extend( {
 			    if( $$.data('load-start') !== undefined ) {
 				    thisView.loadTimes.unshift( new Date().getTime() - $$.data('load-start') );
 
-				    if ( thisView.loadTimes.length ) {
+				    if ( ! _.isEmpty( thisView.loadTimes ) ) {
 					    thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
 				    }
 			    }
@@ -5073,7 +5073,7 @@ module.exports = Backbone.View.extend( {
         // Find the view that ties in to the cell we're removing
         this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
-            if(typeof view === 'undefined') {
+            if( _.isUndefined( view ) ) {
                 return;
             }
 
@@ -5184,7 +5184,7 @@ module.exports = Backbone.View.extend( {
      * @param postId
      */
     render: function( stylesType, postId, args ){
-        if( typeof stylesType === 'undefined' ) {
+        if( _.isUndefined( stylesType ) ) {
             return;
         }
 
@@ -5249,8 +5249,8 @@ module.exports = Backbone.View.extend( {
         });
 
         // Set up the color fields
-        if(typeof $.fn.wpColorPicker !== 'undefined') {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+        if( ! _.isUndefined( $.fn.wpColorPicker ) ) {
+            if (typeof(panelsOptions.wpColorPickerOptions.palettes) === 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);
@@ -5330,9 +5330,9 @@ module.exports = Backbone.View.extend( {
                 var valueListValue = [];
                 for (var i in valueList) {
                     var match = re.exec(valueList[i]);
-                    if (match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined') {
-                        valueListValue.push(match[1]);
-                        unit.val(match[2]);
+                    if ( _.isNull( match ) && ! _.isUndefined( match[1] ) && ! _.isUndefined( match[2] ) ) {
+                        valueListValue.push( match[1] );
+                        unit.val( match[2] );
                     }
                 }
                 text.val(valueListValue.join(' '));

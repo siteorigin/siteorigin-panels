@@ -31,7 +31,7 @@ module.exports = panels.view.dialog.extend( {
         this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-widget').html(), {} ) );
         this.loadForm();
 
-        if( typeof panelsOptions.widgets[ this.model.get('class') ] !== 'undefined') {
+        if( ! _.isUndefined( panelsOptions.widgets[ this.model.get('class') ] ) ) {
             this.$('.so-title .widget-name').html( panelsOptions.widgets[ this.model.get('class')].title );
         }
         else {
@@ -77,7 +77,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex - 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -101,7 +101,7 @@ module.exports = panels.view.dialog.extend( {
         }
         else {
             var widgetView = widgets.eq(currentIndex + 1).data('view');
-            if(typeof widgetView === 'undefined') {
+            if( _.isUndefined( widgetView ) ) {
                 return false;
             }
 
@@ -164,7 +164,7 @@ module.exports = panels.view.dialog.extend( {
         if( !this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
-            if ( typeof values.widgets === 'undefined' ) {
+            if ( _.isUndefined( values.widgets ) ) {
                 values = {};
             }
             else {

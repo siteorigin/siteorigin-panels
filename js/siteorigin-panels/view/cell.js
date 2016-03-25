@@ -120,7 +120,7 @@ module.exports = Backbone.View.extend( {
             start: function(e, ui){
                 // Set the containment to the cell parent
                 previousCell = cellView.$el.prev().data('view');
-                if( typeof previousCell === 'undefined' ) {
+                if( _.isUndefined( previousCell ) ) {
 	                return;
                 }
 
@@ -200,7 +200,7 @@ module.exports = Backbone.View.extend( {
         } );
         view.cell = this;
 
-        if( typeof widget.isDuplicate === 'undefined' ) {
+        if( _.isUndefined( widget.isDuplicate ) ) {
             widget.isDuplicate = false;
         }
 
@@ -209,7 +209,7 @@ module.exports = Backbone.View.extend( {
             'loadForm': widget.isDuplicate
         });
 
-        if( typeof options.at === 'undefined' || collection.length <= 1 ) {
+        if( _.isUndefined( options.at ) || collection.length <= 1 ) {
             // Insert this at the end of the widgets container
             view.$el.appendTo( this.$( '.widgets-container' ) );
         }

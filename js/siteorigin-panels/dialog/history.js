@@ -74,7 +74,7 @@ module.exports = panels.view.dialog.extend( {
 
         var c = this.$('.history-entries').empty();
 
-        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
+        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || !_.isEmpty( this.entries.models ) ) {
             $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
                 .data('historyEntry', this.revertEntry)
                 .prependTo(c);
@@ -223,7 +223,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         // Return the amount of time ago
-        return parts.length === 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
+        return _.isEmpty( parts ) ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
 
     }
 

@@ -45,13 +45,11 @@ module.exports = panels.view.dialog.extend( {
                 description : widget.description
             } ) ) ;
 
-            if(typeof widget.icon === 'undefined') {
+            if( _.isUndefined( widget.icon ) ) {
                 widget.icon = 'dashicons dashicons-admin-generic';
             }
 
-            if( typeof widget.icon !== 'undefined' ){
-                $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
-            }
+	        $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
 
             $w.data('class', widget.class).appendTo( this.$('.widget-type-list') );
         }, this );
@@ -107,11 +105,11 @@ module.exports = panels.view.dialog.extend( {
      * @param filter
      */
     filterWidgets: function(filter) {
-        if (typeof filter === 'undefined') {
+        if ( _.isUndefined( filter ) ) {
             filter = {};
         }
 
-        if(typeof filter.groups === 'undefined') {
+        if( _.isUndefined( filter.groups ) ) {
             filter.groups = '';
         }
 
@@ -119,13 +117,13 @@ module.exports = panels.view.dialog.extend( {
             var $$ = $(this), showWidget;
             var widgetClass = $$.data('class');
 
-            var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;
+            var widgetData = ( ! _.isUndefined( panelsOptions.widgets[widgetClass] ) ) ? panelsOptions.widgets[widgetClass] : null;
 
-            if( filter.groups.length === 0 ) {
+            if( _.isEmpty( filter.groups ) ) {
                 // This filter doesn't specify groups, so show all
                 showWidget = true;
             }
-            else if( widgetData !== null && _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups).length ) {
+            else if( widgetData !== null && ! _.isEmpty( _.intersection(filter.groups, panelsOptions.widgets[widgetClass].groups) ) ) {
                 // This widget is in the filter group
                 showWidget = true;
             }
@@ -137,7 +135,7 @@ module.exports = panels.view.dialog.extend( {
             // This can probably be done with a more intelligent operator
             if( showWidget ) {
 
-                if( typeof filter.search !== 'undefined' && filter.search !== '' ) {
+                if( ! _.isUndefined( filter.search ) && filter.search !== '' ) {
                     // Check if the widget title contains the search term
                     if( widgetData.title.toLowerCase().indexOf( filter.search.toLowerCase() ) === -1 ) {
                         showWidget = false;

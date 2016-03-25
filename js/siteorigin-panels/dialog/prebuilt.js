@@ -129,7 +129,7 @@ module.exports = panels.view.dialog.extend( {
                 },
                 FileUploaded : function(uploader, file, response){
                     var layout = JSON.parse( response.response );
-                    if( typeof layout.widgets !== 'undefined' ) {
+                    if( !_.isUndefined( layout.widgets ) ) {
 
 						thisView.uploadedLayout = layout;
 	                    uploadUi.find('.progress-bar').hide( );
@@ -295,7 +295,7 @@ module.exports = panels.view.dialog.extend( {
 			return false;
 		}
 		var position = $button.data('value');
-		if(typeof position === 'undefined') {
+		if( _.isUndefined( position ) ) {
 			return false;
 		}
 		this.updateButtonState(false);

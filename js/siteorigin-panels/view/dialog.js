@@ -26,7 +26,7 @@ module.exports = Backbone.View.extend( {
 
         this.trigger('initialize_dialog', this);
 
-        if(typeof this.initializeDialog !== 'undefined') {
+        if( ! _.isUndefined( this.initializeDialog ) ) {
             this.initializeDialog();
         }
     },
@@ -140,7 +140,7 @@ module.exports = Backbone.View.extend( {
     initTabs: function(){
         var tabs = this.$('.so-sidebar-tabs li a');
 
-        if(tabs.length === 0) {
+        if( _.isEmpty( tabs ) ) {
             return this;
         }
 
@@ -155,7 +155,7 @@ module.exports = Backbone.View.extend( {
             $$.parent().addClass('tab-active');
 
             var url = $$.attr('href');
-            if(typeof url !== 'undefined' && url.charAt(0) === '#') {
+            if( !_.isUndefined( url ) && url.charAt(0) === '#') {
                 // Display the new tab
                 var tabName = url.split('#')[1];
                 thisDialog.$('.so-content .so-content-tabs .tab-' + tabName).show();
@@ -284,7 +284,7 @@ module.exports = Backbone.View.extend( {
         window.panelsDialogOpen = false;
 
         // In the builder, trigger an update
-        if(typeof this.builder !== 'undefined') {
+        if( ! _.isUndefined( this.builder ) ) {
             // Store the model data when a dialog is closed.
             this.builder.model.refreshPanelsData();
         }
@@ -338,7 +338,7 @@ module.exports = Backbone.View.extend( {
      * Get the values from the form and convert them into a data array
      */
     getFormValues: function(formSelector){
-        if(typeof formSelector === 'undefined') {
+        if( _.isUndefined( formSelector ) ) {
             formSelector = '.so-content';
         }
 
@@ -356,7 +356,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Create an array with the parts of the name
-            if(typeof name[2] === 'undefined') {
+            if( _.isUndefined( name[2] ) ) {
                 parts = $$.attr('name');
             }
             else {
@@ -399,7 +399,7 @@ module.exports = Backbone.View.extend( {
             else if( $$.prop('tagName') === 'TEXTAREA' && $$.hasClass('wp-editor-area') ){
                 // This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
                 var editor = null;
-                if ( typeof tinyMCE !== 'undefined' ) {
+                if ( ! _.isUndefined( tinyMCE ) ) {
                     editor = tinyMCE.get( $$.attr('id') );
                 }
 
@@ -430,7 +430,7 @@ module.exports = Backbone.View.extend( {
             }
 
             // Now, we need to filter this value if necessary
-            if( typeof $$.data('panels-filter') !== 'undefined' ) {
+            if( ! _.isUndefined( $$.data('panels-filter') ) ) {
                 switch( $$.data('panels-filter') ) {
                     case 'json_parse':
                         // Attempt to parse the JSON value of this field
@@ -457,7 +457,7 @@ module.exports = Backbone.View.extend( {
                         }
                     }
                     else {
-                        if (typeof sub[parts[i]] === 'undefined') {
+                        if ( _.isUndefined( sub[parts[i]] ) ) {
                             if ( parts[i+1] === '' ) {
                                 sub[parts[i]] = [];
                             }
@@ -480,7 +480,7 @@ module.exports = Backbone.View.extend( {
      */
     setStatusMessage: function(message, loading){
         this.$('.so-toolbar .so-status').html( message );
-        if( typeof loading !== 'undefined' && loading ) {
+        if( ! _.isUndefined( loading ) && loading ) {
             this.$('.so-toolbar .so-status').addClass('so-panels-loading');
         }
     },

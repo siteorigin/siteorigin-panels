@@ -24,7 +24,7 @@ module.exports = Backbone.Model.extend( {
 
     initialize: function(){
         var widgetClass = this.get('class');
-        if( typeof panelsOptions.widgets[widgetClass] === 'undefined' || !panelsOptions.widgets[widgetClass].installed ) {
+        if( _.isUndefined( panelsOptions.widgets[widgetClass] ) || !panelsOptions.widgets[widgetClass].installed ) {
             this.set('missing', true);
         }
     },
@@ -34,7 +34,7 @@ module.exports = Backbone.Model.extend( {
      * @returns {*}
      */
     getWidgetField: function(field) {
-        if(typeof panelsOptions.widgets[ this.get('class') ] === 'undefined') {
+        if( _.isUndefined( panelsOptions.widgets[ this.get('class') ] ) ) {
             if(field === 'title' || field === 'description') {
                 return panelsOptions.loc.missing_widget[field];
             }
@@ -110,7 +110,9 @@ module.exports = Backbone.Model.extend( {
      * @returns {panels.model.widget}
      */
     clone: function( cell, options ){
-        if( typeof cell === 'undefined' ) { cell = this.cell; }
+        if( _.isUndefined( cell ) ) {
+	        cell = this.cell;
+        }
 
         var clone = new this.constructor( this.attributes );
 
@@ -153,10 +155,10 @@ module.exports = Backbone.Model.extend( {
     getTitle: function(){
         var widgetData = panelsOptions.widgets[this.get('class')];
 
-        if( typeof widgetData === 'undefined' ) {
+        if( _.isUndefined( widgetData ) ) {
             return this.get('class').replace(/_/g, ' ');
         }
-        else if( typeof widgetData.panels_title !== 'undefined' ) {
+        else if( ! _.isUndefined( widgetData.panels_title ) ) {
             // This means that the widget has told us which field it wants us to use as a title
             if( widgetData.panels_title === false ) {
                 return panelsOptions.widgets[this.get('class')].description;
@@ -178,7 +180,7 @@ module.exports = Backbone.Model.extend( {
 
         for( var i in titleFields ) {
             if(
-                typeof values[titleFields[i]] !== 'undefined' &&
+                ! _.isUndefined( values[titleFields[i]] ) &&
                 typeof values[titleFields[i]] === 'string' &&
                 values[titleFields[i]] !== '' &&
                 values[titleFields[i]] !== 'on' &&

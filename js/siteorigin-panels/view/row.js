@@ -208,7 +208,7 @@ module.exports = Backbone.View.extend( {
         // Find the view that ties in to the cell we're removing
         this.$('.so-cells > .cell').each( function(){
             var view = $(this).data('view');
-            if(typeof view === 'undefined') {
+            if( _.isUndefined( view ) ) {
                 return;
             }
 
