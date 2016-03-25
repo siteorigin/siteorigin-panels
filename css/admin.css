@@ -1982,6 +1982,7 @@
   left: 20px;
   z-index: 999999;
   display: none;
+  overflow-y: scroll;
 }
 .so-panels-contextual-menu,
 .so-panels-contextual-menu * {

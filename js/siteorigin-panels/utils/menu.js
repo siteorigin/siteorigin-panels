@@ -1,8 +1,8 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend({
-    wrapperTemplate: _.template( jQuery('#siteorigin-panels-context-menu').html().panelsProcessTemplate() ),
-    sectionTemplate: _.template( jQuery('#siteorigin-panels-context-menu-section').html().panelsProcessTemplate() ),
+    wrapperTemplate: _.template( $('#siteorigin-panels-context-menu').html().panelsProcessTemplate() ),
+    sectionTemplate: _.template( $('#siteorigin-panels-context-menu-section').html().panelsProcessTemplate() ),
 
     contexts: [],
     active: false,
@@ -75,6 +75,9 @@ module.exports = Backbone.View.extend({
         // Start listening for situations when we should close the menu
         $(window).on('keyup', {menu: this}, this.keyboardListen);
         $(window).on('click', {menu: this}, this.clickOutsideListen);
+
+	    // Set the maximum height of the menu
+	    this.$el.css( 'max-height', $( window ).height() - 20 );
 
         // Correct the left position
         if( position.left + this.$el.outerWidth() + 10 >= $(window).width() ) {
@@ -203,7 +206,7 @@ module.exports = Backbone.View.extend({
      */
     searchKeyUp: function(e){
         var
-            $$ = jQuery(e.currentTarget),
+            $$ = $(e.currentTarget),
             section = $$.closest('.so-section'),
             settings = section.data('settings');
 
