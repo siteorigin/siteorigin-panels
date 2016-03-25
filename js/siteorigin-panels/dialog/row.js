@@ -374,9 +374,9 @@ module.exports = panels.view.dialog.extend( {
      */
     setCellsFromForm: function(){
         var f = {
-            'cells' : parseInt( this.$el.find('.row-set-form input[name="cells"]').val() ),
-            'ratio' : parseFloat( this.$el.find('.row-set-form select[name="ratio"]').val() ),
-            'direction' : this.$el.find('.row-set-form select[name="ratio_direction"]').val()
+            'cells' : parseInt( this.$('.row-set-form input[name="cells"]').val() ),
+            'ratio' : parseFloat( this.$('.row-set-form select[name="ratio"]').val() ),
+            'direction' : this.$('.row-set-form select[name="ratio_direction"]').val()
         };
         var cells = [];
 
@@ -388,11 +388,11 @@ module.exports = panels.view.dialog.extend( {
         var cellCountChanged = ( this.row.cells.length !== f.cells );
 
         if( f.cells < 1 ) {
-            this.$el.find('.row-set-form input[name="cells"]').val(1);
+            this.$('.row-set-form input[name="cells"]').val(1);
             f.cells = 1;
         }
         else if (f.cells > 20) {
-            this.$el.find('.row-set-form input[name="cells"]').val(20);
+            this.$('.row-set-form input[name="cells"]').val(20);
             f.cells = 20;
         }
 
@@ -428,13 +428,13 @@ module.exports = panels.view.dialog.extend( {
             var thisDialog = this;
 
             // Now lets animate the cells into their new widths
-            this.$el.find( '.preview-cell').each(function(i, el){
+            this.$( '.preview-cell').each(function(i, el){
                 $(el).animate({ 'width': Math.round(thisDialog.row.cells[i]*1000)/10 + "%"}, 250 );
                 $(el).find('.preview-cell-weight').html( Math.round(thisDialog.row.cells[i]*1000)/10 );
             });
 
             // So the draggable handle is not hidden.
-            this.$el.find( '.preview-cell').css('overflow', 'visible');
+            this.$( '.preview-cell').css('overflow', 'visible');
 
             setTimeout(function(){
                 thisDialog.regenerateRowPreview();
@@ -443,7 +443,7 @@ module.exports = panels.view.dialog.extend( {
 
 
         // Remove the button primary class
-        this.$el.find('.row-set-form .so-button-row-set').removeClass('button-primary');
+        this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
     },
 
     /**

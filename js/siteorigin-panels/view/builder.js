@@ -77,12 +77,14 @@ module.exports = Backbone.View.extend( {
      * @return {panels.view.builder}
      */
     render: function(){
-        this.$el.html( this.template() );
+        // this.$el.html( this.template() );
+	    this.setElement( this.template() );
         this.$el
             .attr( 'id', 'siteorigin-panels-builder-' + this.cid )
             .addClass('so-builder-container');
 
         this.trigger( 'builder_rendered' );
+
         return this;
     },
 
@@ -201,43 +203,56 @@ module.exports = Backbone.View.extend( {
 
         // We will also make this sticky if its attached to an editor.
         var stickToolbar = function(){
-            var toolbar = thisView.$('.so-builder-toolbar');
-            var newTop = $(window).scrollTop() - thisView.$el.offset().top;
+	        var toolbar = thisView.$('.so-builder-toolbar');
 
-            if( $('#wpadminbar').css('position') === 'fixed' ) {
-                newTop += $('#wpadminbar').outerHeight();
-            }
+	        if( thisView.$el.hasClass( 'so-display-narrow' ) ){
+		        // In this case, we don't want to stick the toolbar.
+		        toolbar.css( {
+			        top: 0,
+			        left: 0,
+			        width: '100%',
+			        position: 'absolute'
+		        } );
+		        thisView.$el.css('padding-top', toolbar.outerHeight() );
+		        return;
+	        }
 
-            var limits = {
-                top: 0,
-                bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
-            };
+	        var newTop = $(window).scrollTop() - thisView.$el.offset().top;
 
-            if( newTop > limits.top && newTop < limits.bottom ) {
-                if( toolbar.css('position') !== 'fixed' ) {
-                    // The toolbar needs to stick to the top, over the interface
-                    toolbar.css({
-                        top: $('#wpadminbar').outerHeight(),
-                        left: thisView.$el.offset().left,
-                        width: thisView.$el.outerWidth(),
-                        position: 'fixed'
-                    });
-                }
-            }
-            else {
-                // The toolbar needs to be at the top or bottom of the interface
-                toolbar.css({
-                    top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
-                    left: 0,
-                    width: '100%',
-                    position: 'absolute'
-                });
-            }
+	        if( $('#wpadminbar').css('position') === 'fixed' ) {
+		        newTop += $('#wpadminbar').outerHeight();
+	        }
 
-            thisView.$el.css('padding-top', toolbar.outerHeight() );
+	        var limits = {
+		        top: 0,
+		        bottom: thisView.$el.outerHeight() - toolbar.outerHeight() + 20
+	        };
+
+	        if( newTop > limits.top && newTop < limits.bottom ) {
+		        if( toolbar.css('position') !== 'fixed' ) {
+			        // The toolbar needs to stick to the top, over the interface
+			        toolbar.css({
+				        top: $('#wpadminbar').outerHeight(),
+				        left: thisView.$el.offset().left,
+				        width: thisView.$el.outerWidth(),
+				        position: 'fixed'
+			        });
+		        }
+	        }
+	        else {
+		        // The toolbar needs to be at the top or bottom of the interface
+		        toolbar.css({
+			        top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+			        left: 0,
+			        width: '100%',
+			        position: 'absolute'
+		        });
+	        }
+
+	        thisView.$el.css('padding-top', toolbar.outerHeight() );
         };
 
-        $( window ).resize( stickToolbar );
+	    this.on('builder_resize', stickToolbar, this );
         $( document ).scroll( stickToolbar );
         stickToolbar();
 
@@ -252,7 +267,7 @@ module.exports = Backbone.View.extend( {
         var $el = this.$el;
         var builderView = this;
 
-        this.rowsSortable = this.$el.find('.so-rows-container').sortable( {
+        this.rowsSortable = this.$('.so-rows-container').sortable( {
             appendTo: '#wpwrap',
             items: '.so-row-container',
             handle: '.so-row-move',
@@ -362,7 +377,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddWidgetDialog: function(){
         this.dialogs.widgets.openDialog();
-        return false;
     },
 
     /**
@@ -373,7 +387,6 @@ module.exports = Backbone.View.extend( {
     displayAddRowDialog: function(){
         this.dialogs.row.openDialog();
         this.dialogs.row.setRowModel(); // Set this to an empty row model
-        return false;
     },
 
     /**
@@ -383,7 +396,6 @@ module.exports = Backbone.View.extend( {
      */
     displayAddPrebuiltDialog: function(){
         this.dialogs.prebuilt.openDialog();
-        return false;
     },
 
     /**
@@ -393,7 +405,6 @@ module.exports = Backbone.View.extend( {
      */
     displayHistoryDialog: function(){
         this.dialogs.history.openDialog();
-        return false;
     },
 
     /**
@@ -452,11 +463,12 @@ module.exports = Backbone.View.extend( {
             });
         });
 
-        // Sort everything
+        // Sort the rows based on their visual position
         this.model.rows.models = this.model.rows.sortBy(function(model){
             return indexes[model.cid];
         });
 
+	    // Sort the widgets in the rows
         this.model.rows.each(function(row){
             row.cells.each(function(cell){
                 cell.widgets.models = cell.widgets.sortBy(function(widget){
@@ -475,15 +487,9 @@ module.exports = Backbone.View.extend( {
      * @returns {panels.view.builder}
      */
     addLiveEditor: function(postId){
-        if( typeof panels.view.liveEditor === 'undefined' ) {
-            return this;
-        }
-
         // Create the live editor and set the builder to this.
-        this.liveEditor = new panels.view.liveEditor();
-        this.liveEditor.setPostId(postId);
-
-        this.liveEditor.builder = this;
+        this.liveEditor = new panels.view.liveEditor( { builder: this } );
+        this.liveEditor.setPostId( postId );
 
         // Display the live editor button in the toolbar
         if( this.liveEditor.hasPreviewUrl() ) {
@@ -498,11 +504,10 @@ module.exports = Backbone.View.extend( {
      */
     displayLiveEditor: function(){
         if(typeof this.liveEditor === 'undefined') {
-            return false;
+            return;
         }
 
         this.liveEditor.open();
-        return false;
     },
 
     /**
@@ -574,11 +579,6 @@ module.exports = Backbone.View.extend( {
                     this.updateEditorContent(content);
                 }.bind(this)
             );
-        }
-
-        if( this.liveEditor !== false ) {
-            // Refresh the content of the builder
-            this.liveEditor.refreshPreview();
         }
     },
 
@@ -751,6 +751,44 @@ module.exports = Backbone.View.extend( {
                 activeView.buildContextualMenu( e, menu );
             }
         }
-    }
+    },
+
+	/**
+	 * Lock window scrolling for the main overlay
+	 */
+	lockPageScroll: function(){
+		if( $( 'body' ).css('overflow') === 'hidden' ) {
+			return;
+		}
+
+		// lock scroll position, but retain settings for later
+		var scrollPosition = [
+			self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
+			self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop
+		];
+
+		$( 'body' )
+			.data( {
+				'scroll-position': scrollPosition
+			} )
+			.css( 'overflow', 'hidden' );
+		window.scrollTo(scrollPosition[0], scrollPosition[1] );
+	},
+
+	/**
+	 * Unlock window scrolling
+	 */
+	unlockPageScroll: function(){
+		if( $( 'body' ).css('overflow') !== 'hidden' ) {
+			return;
+		}
+
+		// Check that there are no more dialogs or a live editor
+		if( !$('.so-panels-dialog-wrapper').is(':visible') && !$('.so-panels-live-editor').is(':visible') ) {
+			$( 'body' ).css( 'overflow', 'visible' );
+			var scrollPosition = $('body').data( 'scroll-position' );
+			window.scrollTo( scrollPosition[0], scrollPosition[1] );
+		}
+	}
 
 } );

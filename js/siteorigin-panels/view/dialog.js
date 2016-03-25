@@ -138,7 +138,7 @@ module.exports = Backbone.View.extend( {
      * Initialize the sidebar tabs
      */
     initTabs: function(){
-        var tabs = this.$el.find('.so-sidebar-tabs li a');
+        var tabs = this.$('.so-sidebar-tabs li a');
 
         if(tabs.length === 0) {
             return this;
@@ -167,13 +167,13 @@ module.exports = Backbone.View.extend( {
         });
 
         // Trigger a click on the first tab
-        this.$el.find('.so-sidebar-tabs li a').first().click();
+        this.$('.so-sidebar-tabs li a').first().click();
         return this;
     },
 
 	initToolbar: function() {
 		// Trigger simplified click event for elements marked as toolbar buttons.
-		var buttons = this.$el.find('.so-toolbar .so-buttons .so-toolbar-button');
+		var buttons = this.$('.so-toolbar .so-buttons .so-toolbar-button');
 		buttons.click(function (e) {
 			e.preventDefault();
 
@@ -181,7 +181,7 @@ module.exports = Backbone.View.extend( {
 		}.bind(this));
 
 		// Handle showing and hiding the dropdown list items
-		var $dropdowns = this.$el.find('.so-toolbar .so-buttons .so-dropdown-button');
+		var $dropdowns = this.$('.so-toolbar .so-buttons .so-dropdown-button');
 		$dropdowns.click(function (e) {
 			e.preventDefault();
 			var $dropdownButton = $(e.currentTarget);
@@ -197,7 +197,7 @@ module.exports = Backbone.View.extend( {
 		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
 		// unconfirmed state.
 		$('html').click(function (e) {
-			this.$el.find('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
+			this.$('.so-dropdown-links-wrapper').not('.hidden').each(function (index, el) {
 				var $dropdownList = $(el);
 				var $trgt = $(e.target);
 				if($trgt.length === 0 || !(($trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')) || $trgt.is('.so-dropdown-button'))) {
@@ -255,8 +255,7 @@ module.exports = Backbone.View.extend( {
         this.refreshDialogNav();
 
         // Stop scrolling for the main body
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css({'overflow':'hidden'});
+	    this.builder.lockPageScroll();
 
         // Start listen for keyboard keypresses.
         $(window).on('keyup', this.keyboardListen);
@@ -265,6 +264,7 @@ module.exports = Backbone.View.extend( {
 
         // This triggers once everything is visible
         this.trigger('open_dialog_complete');
+	    this.builder.trigger( 'open_dialog', this );
     },
 
     /**
@@ -290,18 +290,14 @@ module.exports = Backbone.View.extend( {
         }
 
         this.$el.hide();
-
-        if( !$('.so-panels-dialog-wrapper').is(':visible') ){
-            // Restore scrolling to the main body if there are no more dialogs
-            $('body').css({'overflow':'auto'});
-            $('body').scrollTop( this.bodyScrollTop );
-        }
+        this.builder.unlockPageScroll();
 
         // Stop listen for keyboard keypresses.
         $(window).off('keyup', this.keyboardListen);
 
         // This triggers once everything is hidden
         this.trigger('close_dialog_complete');
+	    this.builder.trigger( 'close_dialog', this );
     },
 
     /**

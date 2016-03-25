@@ -2,7 +2,7 @@
 $builder_id = uniqid();
 ?>
 
-<div id="siteorigin-panels-metabox" class="siteorigin-panels-builder">
+<div id="siteorigin-panels-metabox">
 	<?php do_action('siteorigin_panels_before_interface') ?>
 	<?php wp_nonce_field('save', '_sopanels_nonce') ?>
 

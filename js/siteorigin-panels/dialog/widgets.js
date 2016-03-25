@@ -53,11 +53,11 @@ module.exports = panels.view.dialog.extend( {
                 $('<span class="widget-icon" />').addClass( widget.icon ).prependTo( $w.find('.widget-type-wrapper') );
             }
 
-            $w.data('class', widget.class).appendTo( this.$el.find('.widget-type-list') );
+            $w.data('class', widget.class).appendTo( this.$('.widget-type-list') );
         }, this );
 
         // Add the sidebar tabs
-        var tabs = this.$el.find('.so-sidebar-tabs');
+        var tabs = this.$('.so-sidebar-tabs');
         _.each(panelsOptions.widget_dialog_tabs, function(tab){
             $( this.dialogTabTemplate( { 'title' : tab.title } )).data({
                 'message' : tab.message,
@@ -80,7 +80,7 @@ module.exports = panels.view.dialog.extend( {
     tabClickHandler: function($t){
         // Get the filter from the tab, and filter the widgets
         this.filter = $t.parent().data('filter');
-        this.filter.search = this.$el.find('.so-sidebar-search').val();
+        this.filter.search = this.$('.so-sidebar-search').val();
 
         var message = $t.parent().data('message');
         if( _.isEmpty( message ) ) {
@@ -115,8 +115,8 @@ module.exports = panels.view.dialog.extend( {
             filter.groups = '';
         }
 
-        this.$el.find('.widget-type-list .widget-type').each(function(){
-            var $$ = jQuery(this), showWidget;
+        this.$('.widget-type-list .widget-type').each(function(){
+            var $$ = $(this), showWidget;
             var widgetClass = $$.data('class');
 
             var widgetData = ( typeof panelsOptions.widgets[widgetClass] !== 'undefined' ) ? panelsOptions.widgets[widgetClass] : null;

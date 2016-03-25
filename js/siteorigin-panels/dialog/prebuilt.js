@@ -121,6 +121,7 @@ module.exports = panels.view.dialog.extend( {
                     uploadUi.find('.file-browse-button').blur();
                     uploadUi.find('.drag-upload-area').removeClass('file-dragover');
                     uploadUi.find('.progress-bar').fadeIn('fast');
+	                thisView.$('.js-so-selected-file').text( panelsOptions.loc.prebuilt_loading );
                     uploader.start();
                 },
                 UploadProgress: function(uploader, file){
@@ -131,7 +132,10 @@ module.exports = panels.view.dialog.extend( {
                     if( typeof layout.widgets !== 'undefined' ) {
 
 						thisView.uploadedLayout = layout;
-						thisView.$('.js-so-selected-file').text(file.name);
+	                    uploadUi.find('.progress-bar').hide( );
+						thisView.$('.js-so-selected-file').text(
+							panelsOptions.loc.ready_to_insert.replace('%s', file.name)
+						);
 						thisView.updateButtonState(true);
                     }
                     else {

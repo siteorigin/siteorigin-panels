@@ -16,7 +16,7 @@ module.exports = Backbone.View.extend( {
      */
     render: function( stylesType, postId, args ){
         if( typeof stylesType === 'undefined' ) {
-            return false;
+            return;
         }
 
         // Add in the default args
@@ -44,6 +44,8 @@ module.exports = Backbone.View.extend( {
                 thisView.trigger('styles_loaded', !_.isEmpty(response));
             }
         );
+
+	    return this;
     },
 
     /**
