@@ -38,7 +38,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<?php endif; ?>
 
-			<a class="so-switch-to-standard"><?php _e('Switch to Editor', 'siteorigin-panels') ?></a>
+			<a class="so-switch-to-standard"><?php _e('Revert to Editor', 'siteorigin-panels') ?></a>
 
 		</div>
 
