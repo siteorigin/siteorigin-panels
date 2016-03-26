@@ -2042,8 +2042,8 @@
   width: 12px;
   height: 12px;
   font-size: 12px;
-  margin: 0 4px 0 -2px;
-  float: left;
+  margin: 0;
+  float: right;
   line-height: 12px;
 }
 .so-panels-contextual-menu .so-section .so-no-results {
