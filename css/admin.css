@@ -26,11 +26,6 @@
   /* These are generic iconic buttons used in the page builder interface */
   /* Page Builder icons */
 }
-.siteorigin-panels-builder .so-builder-container {
-  /* Top padding for the toolbar */
-  padding-top: 38px;
-  position: relative;
-}
 .siteorigin-panels-builder .so-tool-button {
   padding: 6px 7px;
   font-size: 11px;
