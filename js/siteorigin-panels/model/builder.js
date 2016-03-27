@@ -61,7 +61,7 @@ module.exports = Backbone.Model.extend( {
 		this.emptyRows();
 
 		// This will empty out the current rows and reload the builder data.
-		this.set( 'data', data, {silent: true} );
+		this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
 
         var cit = 0;
         var rows = [];
@@ -97,7 +97,7 @@ module.exports = Backbone.Model.extend( {
         }
 
         // Add the widgets
-        _.each(data.widgets, function(widgetData){
+        _.each( data.widgets, function( widgetData ){
             try {
                 var panels_info = null;
                 if ( ! _.isUndefined( widgetData.panels_info ) ) {
@@ -112,10 +112,10 @@ module.exports = Backbone.Model.extend( {
                 var row = builderModel.rows.at( parseInt(panels_info.grid) );
                 var cell = row.cells.at(parseInt(panels_info.cell));
 
-                var newWidget = new panels.model.widget({
+                var newWidget = new panels.model.widget( {
                     class: panels_info.class,
                     values: widgetData
-                });
+                } );
 
                 if( ! _.isUndefined( panels_info.style ) ) {
                     newWidget.set('style', panels_info.style );

@@ -316,18 +316,18 @@ module.exports = Backbone.View.extend( {
         }, options);
 
         this.dataField = field;
-        this.dataField.data('builder', this);
+        this.dataField.data( 'builder', this );
 
         if( options.load && field.val() !== '') {
-            var data;
+            var data = this.dataField.val( );
             try {
-                data = JSON.parse( this.dataField.val( ) );
+                data = JSON.parse( data );
             }
             catch(err) {
-                data = '';
+                data = {};
             }
 
-            this.model.loadPanelsData(data);
+            this.model.loadPanelsData( data );
             this.currentData = data;
             this.toggleWelcomeDisplay();
         }
