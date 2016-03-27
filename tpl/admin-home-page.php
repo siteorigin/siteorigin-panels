@@ -38,9 +38,11 @@
 		</div>
 
 		<script type="text/javascript">
-			// Create the panels_data input
-			document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-home" />' );
-			document.getElementById('panels-data-field-home').value = decodeURIComponent("<?php echo rawurlencode( json_encode($panels_data) ); ?>");
+			( function( builderId, panelsData ){
+				// Create the panels_data input
+				document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-' + builderId + '" />' );
+				document.getElementById('panels-data-field-<?php echo esc_attr($builder_id) ?>').value = JSON.stringify( panelsData );
+			} )( "home-page", <?php echo json_encode( $panels_data ); ?> );
 		</script>
 
 		<p><input type="submit" class="button button-primary" id="panels-save-home-page" value="<?php esc_attr_e('Save Home Page', 'siteorigin-panels') ?>" /></p>
