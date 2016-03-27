@@ -41,7 +41,7 @@
 			( function( builderId, panelsData ){
 				// Create the panels_data input
 				document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-' + builderId + '" />' );
-				document.getElementById('panels-data-field-<?php echo esc_attr($builder_id) ?>').value = JSON.stringify( panelsData );
+				document.getElementById( 'panels-data-field-' + builderId ).value = JSON.stringify( panelsData );
 			} )( "home-page", <?php echo json_encode( $panels_data ); ?> );
 		</script>
 
