@@ -246,11 +246,16 @@ module.exports = Backbone.View.extend( {
     /**
      * Open the dialog
      */
-    openDialog: function(){
-        this.trigger('open_dialog');
+    openDialog: function( options ){
+	    options = _.extend( {
+		    silent: false
+	    }, options );
+
+	    if( ! options.silent ) {
+		    this.trigger('open_dialog');
+	    }
 
         this.dialogOpen = true;
-        window.panelsDialogOpen = true;
 
         this.refreshDialogNav();
 
@@ -262,9 +267,11 @@ module.exports = Backbone.View.extend( {
 
         this.$el.show();
 
-        // This triggers once everything is visible
-        this.trigger('open_dialog_complete');
-	    this.builder.trigger( 'open_dialog', this );
+	    if( ! options.silent ) {
+		    // This triggers once everything is visible
+		    this.trigger('open_dialog_complete');
+		    this.builder.trigger( 'open_dialog', this );
+	    }
     },
 
     /**
@@ -273,21 +280,16 @@ module.exports = Backbone.View.extend( {
      * @param e
      * @returns {boolean}
      */
-    closeDialog: function(e){
-        if( e !== null && e !== undefined ) {
-            e.preventDefault();
-        }
+    closeDialog: function( options ){
+	    options = _.extend( {
+		    silent: false
+	    }, options );
 
-        this.trigger('close_dialog');
+	    if( ! options.silent ) {
+		    this.trigger( 'close_dialog', event );
+	    }
 
         this.dialogOpen = false;
-        window.panelsDialogOpen = false;
-
-        // In the builder, trigger an update
-        if( ! _.isUndefined( this.builder ) ) {
-            // Store the model data when a dialog is closed.
-            this.builder.model.refreshPanelsData();
-        }
 
         this.$el.hide();
         this.builder.unlockPageScroll();
@@ -295,9 +297,11 @@ module.exports = Backbone.View.extend( {
         // Stop listen for keyboard keypresses.
         $(window).off('keyup', this.keyboardListen);
 
-        // This triggers once everything is hidden
-        this.trigger('close_dialog_complete');
-	    this.builder.trigger( 'close_dialog', this );
+	    if( ! options.silent ) {
+		    // This triggers once everything is hidden
+		    this.trigger( 'close_dialog_complete' );
+		    this.builder.trigger( 'close_dialog', this );
+	    }
     },
 
     /**
@@ -314,7 +318,7 @@ module.exports = Backbone.View.extend( {
      * Navigate to the previous dialog
      */
     navToPrevious: function(){
-        this.closeDialog(null);
+        this.closeDialog( );
 
         var prev = this.getPrevDialog();
         if(prev !== null && prev !== false){
@@ -326,7 +330,7 @@ module.exports = Backbone.View.extend( {
      * Navigate to the next dialog
      */
     navToNext: function(){
-        this.closeDialog(null);
+        this.closeDialog( );
 
         var next = this.getNextDialog();
         if(next !== null && next !== false){

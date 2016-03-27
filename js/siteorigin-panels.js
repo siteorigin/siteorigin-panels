@@ -1246,6 +1246,8 @@ module.exports = panels.view.dialog.extend( {
 
             this.model.set('style', style);
         }
+
+	    this.model.builder.refreshPanelsData();
     },
 
     /**
@@ -1273,6 +1275,8 @@ module.exports = panels.view.dialog.extend( {
 
         this.closeDialog();
 
+	    this.builder.model.refreshPanelsData();
+
         return false;
     },
 
@@ -1284,6 +1288,8 @@ module.exports = panels.view.dialog.extend( {
         this.updateModel();
         this.closeDialog();
 
+	    this.builder.model.refreshPanelsData();
+
         return false;
     },
 
@@ -1293,7 +1299,7 @@ module.exports = panels.view.dialog.extend( {
     deleteHandler: function(){
         // Trigger a destroy on the model that will happen with a visual indication to the user
         this.model.trigger('visual_destroy');
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
 
         return false;
     },
@@ -1310,7 +1316,7 @@ module.exports = panels.view.dialog.extend( {
             at: this.builder.model.rows.indexOf( this.model ) + 1
         } );
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
 
         return false;
     }
@@ -1329,7 +1335,7 @@ module.exports = panels.view.dialog.extend( {
     savingWidget: false,
 
     events: {
-        'click .so-close': 'saveHistory',
+        'click .so-close': 'saveHandler',
         'click .so-nav.so-previous': 'navToPrevious',
         'click .so-nav.so-next': 'navToNext',
 
@@ -1468,7 +1474,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.$('.panel-dialog').trigger('panelsopen');
 
                 // If the main dialog is closed from this point on, save the widget content
-                thisView.on('close_dialog', thisView.saveWidget, thisView);
+                thisView.on('close_dialog', thisView.updateModel, thisView);
             },
             'html'
         );
@@ -1477,11 +1483,11 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save the widget from the form to the model
      */
-    saveWidget: function(){
+    updateModel: function(){
         // Get the values from the form and assign the new values to the model
         this.savingWidget = true;
 
-        if( !this.model.get('missing') ) {
+        if( ! this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
             if ( _.isUndefined( values.widgets ) ) {
@@ -1508,6 +1514,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.savingWidget = false;
+	    this.builder.model.refreshPanelsData();
     },
 
     /**
@@ -1523,9 +1530,9 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save a history entry for this widget. Called when the dialog is closed.
      */
-    saveHistory: function(){
+    saveHandler: function(){
         this.builder.addHistoryEntry('widget_edited');
-        this.closeDialog();
+	    this.closeDialog();
     },
 
     /**
@@ -1544,7 +1551,8 @@ module.exports = panels.view.dialog.extend( {
             this.model.trigger('visual_destroy');
         }
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
+	    this.builder.model.refreshPanelsData();
 
         return false;
     },
@@ -1556,7 +1564,8 @@ module.exports = panels.view.dialog.extend( {
             this.builder.liveEditor.refreshWidgets();
         }
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
+	    this.builder.model.refreshPanelsData();
 
         return false;
     }
@@ -1742,6 +1751,7 @@ module.exports = panels.view.dialog.extend( {
         widget.cell.widgets.add( widget );
 
         this.closeDialog();
+	    this.builder.model.refreshPanelsData();
     },
 
     /**
@@ -4077,6 +4087,8 @@ module.exports = Backbone.View.extend( {
                 // Add the widget to the cell model
                 widget.cell = thisView.model;
                 widget.cell.widgets.add( widget );
+
+	            thisView.row.builder.model.refreshPanelsData();
             }
         );
 
@@ -4333,11 +4345,16 @@ module.exports = Backbone.View.extend( {
     /**
      * Open the dialog
      */
-    openDialog: function(){
-        this.trigger('open_dialog');
+    openDialog: function( options ){
+	    options = _.extend( {
+		    silent: false
+	    }, options );
+
+	    if( ! options.silent ) {
+		    this.trigger('open_dialog');
+	    }
 
         this.dialogOpen = true;
-        window.panelsDialogOpen = true;
 
         this.refreshDialogNav();
 
@@ -4349,9 +4366,11 @@ module.exports = Backbone.View.extend( {
 
         this.$el.show();
 
-        // This triggers once everything is visible
-        this.trigger('open_dialog_complete');
-	    this.builder.trigger( 'open_dialog', this );
+	    if( ! options.silent ) {
+		    // This triggers once everything is visible
+		    this.trigger('open_dialog_complete');
+		    this.builder.trigger( 'open_dialog', this );
+	    }
     },
 
     /**
@@ -4360,21 +4379,16 @@ module.exports = Backbone.View.extend( {
      * @param e
      * @returns {boolean}
      */
-    closeDialog: function(e){
-        if( e !== null && e !== undefined ) {
-            e.preventDefault();
-        }
+    closeDialog: function( options ){
+	    options = _.extend( {
+		    silent: false
+	    }, options );
 
-        this.trigger('close_dialog');
+	    if( ! options.silent ) {
+		    this.trigger( 'close_dialog', event );
+	    }
 
         this.dialogOpen = false;
-        window.panelsDialogOpen = false;
-
-        // In the builder, trigger an update
-        if( ! _.isUndefined( this.builder ) ) {
-            // Store the model data when a dialog is closed.
-            this.builder.model.refreshPanelsData();
-        }
 
         this.$el.hide();
         this.builder.unlockPageScroll();
@@ -4382,9 +4396,11 @@ module.exports = Backbone.View.extend( {
         // Stop listen for keyboard keypresses.
         $(window).off('keyup', this.keyboardListen);
 
-        // This triggers once everything is hidden
-        this.trigger('close_dialog_complete');
-	    this.builder.trigger( 'close_dialog', this );
+	    if( ! options.silent ) {
+		    // This triggers once everything is hidden
+		    this.trigger( 'close_dialog_complete' );
+		    this.builder.trigger( 'close_dialog', this );
+	    }
     },
 
     /**
@@ -4401,7 +4417,7 @@ module.exports = Backbone.View.extend( {
      * Navigate to the previous dialog
      */
     navToPrevious: function(){
-        this.closeDialog(null);
+        this.closeDialog( );
 
         var prev = this.getPrevDialog();
         if(prev !== null && prev !== false){
@@ -4413,7 +4429,7 @@ module.exports = Backbone.View.extend( {
      * Navigate to the next dialog
      */
     navToNext: function(){
-        this.closeDialog(null);
+        this.closeDialog( );
 
         var next = this.getNextDialog();
         if(next !== null && next !== false){
@@ -5162,7 +5178,7 @@ module.exports = Backbone.View.extend( {
                     at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
                 } );
 
-
+	            thisView.builder.model.refreshPanelsData();
             }
         );
 
@@ -5501,6 +5517,8 @@ module.exports = Backbone.View.extend({
             // Add this after the existing model
             at: this.model.collection.indexOf( this.model ) + 1
         });
+
+	    this.cell.row.builder.model.refreshPanelsData();
     },
 
     /**
@@ -5565,10 +5583,12 @@ module.exports = Backbone.View.extend({
                 widget.cell = thisView.cell.model;
 
                 // Insert the new widget below
-                thisView.cell.model.widgets.add(widget, {
+                thisView.cell.model.widgets.add( widget, {
                     // Add this after the existing model
                     at: thisView.model.collection.indexOf( thisView.model ) + 1
-                });
+                } );
+
+	            thisView.cell.row.builder.model.refreshPanelsData();
             }
         );
 
@@ -5601,6 +5621,8 @@ module.exports = Backbone.View.extend({
 					    thisView.visualDestroyModel();
 					    break;
 			    }
+
+			    thisView.cell.row.builder.model.refreshPanelsData();
 		    }
 	    );
 

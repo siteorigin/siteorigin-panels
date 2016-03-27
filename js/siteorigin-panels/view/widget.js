@@ -107,6 +107,8 @@ module.exports = Backbone.View.extend({
             // Add this after the existing model
             at: this.model.collection.indexOf( this.model ) + 1
         });
+
+	    this.cell.row.builder.model.refreshPanelsData();
     },
 
     /**
@@ -171,10 +173,12 @@ module.exports = Backbone.View.extend({
                 widget.cell = thisView.cell.model;
 
                 // Insert the new widget below
-                thisView.cell.model.widgets.add(widget, {
+                thisView.cell.model.widgets.add( widget, {
                     // Add this after the existing model
                     at: thisView.model.collection.indexOf( thisView.model ) + 1
-                });
+                } );
+
+	            thisView.cell.row.builder.model.refreshPanelsData();
             }
         );
 
@@ -207,6 +211,8 @@ module.exports = Backbone.View.extend({
 					    thisView.visualDestroyModel();
 					    break;
 			    }
+
+			    thisView.cell.row.builder.model.refreshPanelsData();
 		    }
 	    );
 

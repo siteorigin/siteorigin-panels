@@ -176,6 +176,7 @@ module.exports = panels.view.dialog.extend( {
         widget.cell.widgets.add( widget );
 
         this.closeDialog();
+	    this.builder.model.refreshPanelsData();
     },
 
     /**

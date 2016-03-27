@@ -262,7 +262,7 @@ module.exports = Backbone.View.extend( {
                     at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
                 } );
 
-
+	            thisView.builder.model.refreshPanelsData();
             }
         );
 

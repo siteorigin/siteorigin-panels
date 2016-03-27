@@ -476,6 +476,8 @@ module.exports = panels.view.dialog.extend( {
 
             this.model.set('style', style);
         }
+
+	    this.model.builder.refreshPanelsData();
     },
 
     /**
@@ -503,6 +505,8 @@ module.exports = panels.view.dialog.extend( {
 
         this.closeDialog();
 
+	    this.builder.model.refreshPanelsData();
+
         return false;
     },
 
@@ -514,6 +518,8 @@ module.exports = panels.view.dialog.extend( {
         this.updateModel();
         this.closeDialog();
 
+	    this.builder.model.refreshPanelsData();
+
         return false;
     },
 
@@ -523,7 +529,7 @@ module.exports = panels.view.dialog.extend( {
     deleteHandler: function(){
         // Trigger a destroy on the model that will happen with a visual indication to the user
         this.model.trigger('visual_destroy');
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
 
         return false;
     },
@@ -540,7 +546,7 @@ module.exports = panels.view.dialog.extend( {
             at: this.builder.model.rows.indexOf( this.model ) + 1
         } );
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
 
         return false;
     }

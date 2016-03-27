@@ -9,7 +9,7 @@ module.exports = panels.view.dialog.extend( {
     savingWidget: false,
 
     events: {
-        'click .so-close': 'saveHistory',
+        'click .so-close': 'saveHandler',
         'click .so-nav.so-previous': 'navToPrevious',
         'click .so-nav.so-next': 'navToNext',
 
@@ -148,7 +148,7 @@ module.exports = panels.view.dialog.extend( {
                 thisView.$('.panel-dialog').trigger('panelsopen');
 
                 // If the main dialog is closed from this point on, save the widget content
-                thisView.on('close_dialog', thisView.saveWidget, thisView);
+                thisView.on('close_dialog', thisView.updateModel, thisView);
             },
             'html'
         );
@@ -157,11 +157,11 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save the widget from the form to the model
      */
-    saveWidget: function(){
+    updateModel: function(){
         // Get the values from the form and assign the new values to the model
         this.savingWidget = true;
 
-        if( !this.model.get('missing') ) {
+        if( ! this.model.get('missing') ) {
             // Only get the values for non missing widgets.
             var values = this.getFormValues();
             if ( _.isUndefined( values.widgets ) ) {
@@ -188,6 +188,7 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.savingWidget = false;
+	    this.builder.model.refreshPanelsData();
     },
 
     /**
@@ -203,9 +204,9 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save a history entry for this widget. Called when the dialog is closed.
      */
-    saveHistory: function(){
+    saveHandler: function(){
         this.builder.addHistoryEntry('widget_edited');
-        this.closeDialog();
+	    this.closeDialog();
     },
 
     /**
@@ -224,7 +225,8 @@ module.exports = panels.view.dialog.extend( {
             this.model.trigger('visual_destroy');
         }
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
+	    this.builder.model.refreshPanelsData();
 
         return false;
     },
@@ -236,7 +238,8 @@ module.exports = panels.view.dialog.extend( {
             this.builder.liveEditor.refreshWidgets();
         }
 
-        this.closeDialog();
+        this.closeDialog( { silent: true } );
+	    this.builder.model.refreshPanelsData();
 
         return false;
     }
