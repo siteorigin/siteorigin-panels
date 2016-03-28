@@ -1617,15 +1617,7 @@ module.exports = panels.view.dialog.extend( {
      */
     deleteHandler: function(){
 
-        if(this.builder.liveEditor.displayed) {
-            // We need to instantly destroy the widget
-            this.model.destroy();
-            this.builder.liveEditor.refreshWidgets();
-        }
-        else {
-            this.model.trigger('visual_destroy');
-        }
-
+	    this.model.trigger('visual_destroy');
         this.closeDialog( { silent: true } );
 	    this.builder.model.refreshPanelsData();
 
@@ -1634,10 +1626,6 @@ module.exports = panels.view.dialog.extend( {
 
     duplicateHandler: function(){
         this.model.trigger('user_duplicate');
-
-        if(this.builder.liveEditor.displayed) {
-            this.builder.liveEditor.refreshWidgets();
-        }
 
         this.closeDialog( { silent: true } );
 	    this.builder.model.refreshPanelsData();
@@ -5142,10 +5130,6 @@ module.exports = Backbone.View.extend( {
         this.$el.fadeOut('normal', function(){
             thisView.model.destroy();
             thisView.builder.model.refreshPanelsData();
-
-            if( ! _.isUndefined( thisView.builder.liveEditor ) && thisView.builder.liveEditor.displayed ) {
-                thisView.builder.liveEditor.refreshWidgets();
-            }
         });
     },
 

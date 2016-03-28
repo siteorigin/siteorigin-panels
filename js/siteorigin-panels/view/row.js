@@ -117,10 +117,6 @@ module.exports = Backbone.View.extend( {
         this.$el.fadeOut('normal', function(){
             thisView.model.destroy();
             thisView.builder.model.refreshPanelsData();
-
-            if( ! _.isUndefined( thisView.builder.liveEditor ) && thisView.builder.liveEditor.displayed ) {
-                thisView.builder.liveEditor.refreshWidgets();
-            }
         });
     },
 
