@@ -4713,6 +4713,7 @@ module.exports = Backbone.View.extend( {
     initialize: function( options ){
 	    this.builder = options.builder;
 	    this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
+	    this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
     },
 
     /**
@@ -4970,6 +4971,14 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.refreshPreview( newData );
+	},
+
+	handleLoadData: function(){
+		if( !this.$el.is(':visible') ) {
+			return this;
+		}
+
+		this.refreshPreview( this.builder.model.getPanelsData() );
 	},
 
 	/**
