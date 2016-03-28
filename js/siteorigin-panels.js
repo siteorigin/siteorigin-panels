@@ -4654,7 +4654,7 @@ module.exports = Backbone.View.extend( {
 				    })
 				    .each(function(i, el){
 					    var $$ = $(el);
-					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq(i);
+					    var widgetEdit = thisView.$('.so-live-editor-builder .so-widget-wrapper').eq( $$.data('index') );
 
 					    widgetEdit.data( 'live-editor-preview-widget', $$ );
 

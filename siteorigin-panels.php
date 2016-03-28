@@ -983,6 +983,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 				$panels_data['widgets'][$i]['panels_info'] = $panels_data['widgets'][$i]['info'];
 				unset($panels_data['widgets'][$i]['info']);
 			}
+
+			$panels_data['widgets'][$i]['panels_info']['widget_index'] = $i;
 		}
 	}
 
@@ -1223,7 +1225,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 	}
 
 	$args = array(
-		'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '">',
+		'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '" data-index="' . $widget_info['widget_index'] . '">',
 		'after_widget' => '</div>',
 		'before_title' => $before_title,
 		'after_title' => $after_title,
