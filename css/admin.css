@@ -778,6 +778,7 @@
   margin-top: -0.65em;
 }
 .so-panels-dialog .so-toolbar .so-buttons .action-buttons a {
+  cursor: pointer;
   display: inline;
   padding: 0.2em 0.5em;
   line-height: 1em;
