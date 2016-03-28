@@ -1,3 +1,6 @@
+
+/* global _, jQuery, panels */
+
 var panels = window.panels, $ = jQuery;
 
 module.exports = function () {
@@ -7,7 +10,7 @@ module.exports = function () {
         var widgetId = $$.closest('form').find('.widget-id').val();
 
         // Exit if this isn't a real widget
-        if( typeof widgetId !== 'undefined' && widgetId.indexOf('__i__') > -1 ) {
+        if( !_.isUndefined( widgetId ) && widgetId.indexOf('__i__') > -1 ) {
             return;
         }
 
@@ -21,7 +24,7 @@ module.exports = function () {
 
         // Save panels data when we close the dialog, if we're in a dialog
         var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-        if( typeof dialog !== 'undefined' ) {
+        if( !_.isUndefined( dialog ) ) {
             dialog.on('close_dialog', function(){
                 builderModel.refreshPanelsData();
             } );

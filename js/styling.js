@@ -1,5 +1,5 @@
 
-/* global jQuery */
+/* global _, jQuery */
 
 jQuery(function($){
 
@@ -52,7 +52,7 @@ jQuery(function($){
     $(window).resize( stretchFullWidthRows );
     stretchFullWidthRows();
 
-    if(  typeof $.stellar !== 'undefined' ) {
+    if( !_.isUndefined( $.stellar ) ) {
         // Setup parallax after a small timeout to allow full width to take effect
         setTimeout( function(){
             $.stellar( {

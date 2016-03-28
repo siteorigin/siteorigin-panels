@@ -380,7 +380,7 @@ module.exports = Backbone.View.extend( {
             var sub = data;
             var fieldValue = null;
 
-            var fieldType = ( typeof $$.attr('type') === 'string' ? $$.attr('type').toLowerCase() : false );
+            var fieldType = ( _.isString( $$.attr('type') ) ? $$.attr('type').toLowerCase() : false );
 
             // First we need to get the value from the field
             if( fieldType === 'checkbox' ){
@@ -407,7 +407,7 @@ module.exports = Backbone.View.extend( {
                     editor = tinyMCE.get( $$.attr('id') );
                 }
 
-                if( editor !== null && typeof( editor.getContent ) === "function" && !editor.isHidden() ) {
+                if( editor !== null && _.isFunction( editor.getContent ) && !editor.isHidden() ) {
                     fieldValue = editor.getContent();
                 }
                 else {

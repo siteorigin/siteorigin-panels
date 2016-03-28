@@ -122,7 +122,7 @@ module.exports = Backbone.Model.extend( {
         // We want to exclude any fields that start with _ from the clone. Assuming these are internal.
         var cleanClone = function(vals){
             _.each( vals, function(el, i){
-                if( typeof i === 'string' && i[0] === '_' ) {
+                if( _.isString( i ) && i[0] === '_' ) {
                     delete vals[i];
                 }
                 else if ( _.isObject( vals[i] ) ) {
@@ -181,7 +181,7 @@ module.exports = Backbone.Model.extend( {
         for( var i in titleFields ) {
             if(
                 ! _.isUndefined( values[titleFields[i]] ) &&
-                typeof values[titleFields[i]] === 'string' &&
+                _.isString( values[titleFields[i]] ) &&
                 values[titleFields[i]] !== '' &&
                 values[titleFields[i]] !== 'on' &&
                 titleFields[i][0] !== '_' &&

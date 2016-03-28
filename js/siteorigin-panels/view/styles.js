@@ -81,7 +81,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up the color fields
         if( ! _.isUndefined( $.fn.wpColorPicker ) ) {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) === 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+            if (_.isObject( panelsOptions.wpColorPickerOptions.palettes ) && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);

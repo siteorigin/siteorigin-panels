@@ -1801,6 +1801,9 @@ module.exports = panels.view.dialog.extend( {
 } );
 
 },{}],11:[function(require,module,exports){
+
+/* global _, jQuery, panels */
+
 var panels = window.panels, $ = jQuery;
 
 module.exports = function () {
@@ -1810,7 +1813,7 @@ module.exports = function () {
         var widgetId = $$.closest('form').find('.widget-id').val();
 
         // Exit if this isn't a real widget
-        if( typeof widgetId !== 'undefined' && widgetId.indexOf('__i__') > -1 ) {
+        if( !_.isUndefined( widgetId ) && widgetId.indexOf('__i__') > -1 ) {
             return;
         }
 
@@ -1824,7 +1827,7 @@ module.exports = function () {
 
         // Save panels data when we close the dialog, if we're in a dialog
         var dialog = $$.closest('.so-panels-dialog-wrapper').data('view');
-        if( typeof dialog !== 'undefined' ) {
+        if( !_.isUndefined( dialog ) ) {
             dialog.on('close_dialog', function(){
                 builderModel.refreshPanelsData();
             } );
@@ -2615,7 +2618,7 @@ module.exports = Backbone.Model.extend( {
         // We want to exclude any fields that start with _ from the clone. Assuming these are internal.
         var cleanClone = function(vals){
             _.each( vals, function(el, i){
-                if( typeof i === 'string' && i[0] === '_' ) {
+                if( _.isString( i ) && i[0] === '_' ) {
                     delete vals[i];
                 }
                 else if ( _.isObject( vals[i] ) ) {
@@ -2674,7 +2677,7 @@ module.exports = Backbone.Model.extend( {
         for( var i in titleFields ) {
             if(
                 ! _.isUndefined( values[titleFields[i]] ) &&
-                typeof values[titleFields[i]] === 'string' &&
+                _.isString( values[titleFields[i]] ) &&
                 values[titleFields[i]] !== '' &&
                 values[titleFields[i]] !== 'on' &&
                 titleFields[i][0] !== '_' &&
@@ -3218,10 +3221,7 @@ module.exports = Backbone.View.extend( {
 
         // Switch to the Page Builder interface as soon as we load the page if there are widgets
         var data = this.model.get('data');
-        if(
-            ( ! _.isUndefined( data.widgets ) && _.size(data.widgets) !== 0 ) ||
-            ( ! _.isUndefined( data.grids ) && _.size(data.grids) !== 0 )
-        ) {
+        if( ( ! _.isEmpty( data.widgets ) ) || ( ! _.isEmpty( data.grids ) ) ) {
             $('#content-panels.switch-panels').click();
         }
 
@@ -3610,7 +3610,7 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-	    if( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || tinyMCE.get("content") === null ) {
+	    if( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || _.isNull( tinyMCE.get("content") ) ) {
 			var $editor = $(this.editorId);
 			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
 	    }
@@ -3661,7 +3661,7 @@ module.exports = Backbone.View.extend( {
         if ( ! _.isUndefined( tinyMCE ) ) {
             editor = tinyMCE.get( 'content' );
         }
-        if( editor && typeof( editor.getContent ) === "function" ) {
+        if( editor && _.isFunction( editor.getContent ) ) {
             editorContent = editor.getContent();
         }
         else {
@@ -4479,7 +4479,7 @@ module.exports = Backbone.View.extend( {
             var sub = data;
             var fieldValue = null;
 
-            var fieldType = ( typeof $$.attr('type') === 'string' ? $$.attr('type').toLowerCase() : false );
+            var fieldType = ( _.isString( $$.attr('type') ) ? $$.attr('type').toLowerCase() : false );
 
             // First we need to get the value from the field
             if( fieldType === 'checkbox' ){
@@ -4506,7 +4506,7 @@ module.exports = Backbone.View.extend( {
                     editor = tinyMCE.get( $$.attr('id') );
                 }
 
-                if( editor !== null && typeof( editor.getContent ) === "function" && !editor.isHidden() ) {
+                if( editor !== null && _.isFunction( editor.getContent ) && !editor.isHidden() ) {
                     fieldValue = editor.getContent();
                 }
                 else {
@@ -5301,7 +5301,7 @@ module.exports = Backbone.View.extend( {
 
         // Set up the color fields
         if( ! _.isUndefined( $.fn.wpColorPicker ) ) {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) === 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
+            if (_.isObject( panelsOptions.wpColorPickerOptions.palettes ) && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
                 panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
             }
             this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);

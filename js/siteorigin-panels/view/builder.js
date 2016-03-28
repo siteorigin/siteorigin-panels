@@ -207,10 +207,7 @@ module.exports = Backbone.View.extend( {
 
         // Switch to the Page Builder interface as soon as we load the page if there are widgets
         var data = this.model.get('data');
-        if(
-            ( ! _.isUndefined( data.widgets ) && _.size(data.widgets) !== 0 ) ||
-            ( ! _.isUndefined( data.grids ) && _.size(data.grids) !== 0 )
-        ) {
+        if( ( ! _.isEmpty( data.widgets ) ) || ( ! _.isEmpty( data.grids ) ) ) {
             $('#content-panels.switch-panels').click();
         }
 
@@ -599,7 +596,7 @@ module.exports = Backbone.View.extend( {
      */
     updateEditorContent:function ( content ) {
         // Switch back to the standard editor
-	    if( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || tinyMCE.get("content") === null ) {
+	    if( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || _.isNull( tinyMCE.get("content") ) ) {
 			var $editor = $(this.editorId);
 			$editor.val(content).trigger( 'change' ).trigger( 'keyup' );
 	    }
@@ -650,7 +647,7 @@ module.exports = Backbone.View.extend( {
         if ( ! _.isUndefined( tinyMCE ) ) {
             editor = tinyMCE.get( 'content' );
         }
-        if( editor && typeof( editor.getContent ) === "function" ) {
+        if( editor && _.isFunction( editor.getContent ) ) {
             editorContent = editor.getContent();
         }
         else {
