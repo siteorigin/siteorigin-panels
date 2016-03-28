@@ -27,7 +27,7 @@ module.exports = Backbone.View.extend( {
 	    var thisView = this;
 
 	    this.$( '.so-preview iframe' )
-		    .on( 'load', function(){
+		    .on( 'iframeready', function(){
 			    var $$ = $(this ),
 				    $iframeContents = $$.contents();
 

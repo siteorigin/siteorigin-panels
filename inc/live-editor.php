@@ -21,3 +21,16 @@ add_action('get_post_metadata', 'siteorigin_panels_live_editor', 10, 3);
 
 // Don't display the admin bar when in live editor mode
 add_filter('show_admin_bar', '__return_false');
+
+/**
+ * Load the frontend scripts for the live editor
+ */
+function siteorigin_panels_live_editor_frontend_scripts(){
+	wp_enqueue_script(
+		'live-editor-front',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+		array( 'jquery' ),
+		SITEORIGIN_PANELS_VERSION
+	);
+}
+add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_editor_frontend_scripts' );
