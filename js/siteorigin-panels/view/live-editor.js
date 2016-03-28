@@ -162,7 +162,7 @@ module.exports = Backbone.View.extend( {
 
         // Refresh the preview display
         this.$el.show();
-	    this.refreshPreview();
+	    this.refreshPreview( this.builder.model.getPanelsData() );
 
 	    this.originalContainer = this.builder.$el.parent();
 	    this.builder.$el.appendTo( this.$('.so-live-editor-builder') );
