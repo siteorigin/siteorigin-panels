@@ -160,87 +160,27 @@
 			margin-bottom: 4px;
 
 			.so-dropdown-wrapper {
-				position: relative;
-				float: right;
 
 				.so-dropdown-links-wrapper {
 					display: none;
 					z-index: 101;
-					position:absolute;
 					right: -10px;
-					padding: 6px 0 0 0;
 					top: 22px;
 					width: 125px;
 
-					ul {
-						margin: 0;
-						border: 1px solid #C0C0C0;
-						background: #F9F9F9;
-						.rounded(2px);
-						padding: 4px 0;
-						.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+					ul li a.so-row-delete {
+						color: #a00;
 
-						li {
-							margin: 0;
-
-							&:first-child {
-								border-top-width: 1px;
-							}
-
-							a {
-								display: block;
-								padding: 2px 8px;
-								text-decoration: none;
-								color: #666;
-								font-size: 11px;
-								cursor: pointer;
-
-								outline: 0 !important;
-								.box-shadow(none);
-
-								&:hover {
-									background: #F0F0F0;
-									color: #444;
-								}
-
-								.dashicons {
-									font-size: 16px;
-									margin: 0;
-									float: right;
-									line-height: 16px;
-								}
-
-								/* Specific drop down hovers */
-
-								&.so-row-delete {
-									color: #a00;
-
-									&:hover {
-										color: #FFF;
-										background: #a00;
-									}
-								}
-							}
-						}
-
-						.so-pointer {
-							width: 12px;
-							height: 6px;
-							position: absolute;
-							z-index: 12;
-							background: url("./images/dropdown-pointer.png");
-							background-size: 12px 6px;
-							top: 1px;
-							right: 18px;
+						&:hover {
+							color: #FFF;
+							background: #a00;
 						}
 					}
 
 				}
 
-				&:hover {
-					.so-dropdown-links-wrapper {
-						display: block;
-					}
+				&:hover .so-dropdown-links-wrapper {
+					display: block;
 				}
 
 			}
@@ -1726,8 +1666,6 @@
 
 
 	.so-dropdown-wrapper {
-		position: relative;
-		float: right;
 
 		@btn_width: 125px;
 		@btn_height: 28px;
@@ -1740,63 +1678,9 @@
 		.so-dropdown-links-wrapper{
 			display: block;
 			z-index: 11;
-			position:absolute;
-			padding: 6px 0 0 0;
 			bottom: @btn_height;
 			width: @btn_width;
 
-			ul {
-				margin: 0;
-				border: 1px solid #C0C0C0;
-				background: #F9F9F9;
-				.rounded(2px);
-				padding: 4px 0;
-				.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
-
-				li {
-					margin: 0;
-
-					&:first-child {
-						border-top-width: 1px;
-					}
-
-					a {
-						display: block;
-						padding: 2px 8px;
-						text-decoration: none;
-						color: #666;
-						font-size: 11px;
-						cursor: pointer;
-
-						outline: 0 !important;
-						.box-shadow(none);
-
-						&:hover {
-							background: #F0F0F0;
-							color: #444;
-						}
-
-						.dashicons {
-							font-size: 16px;
-							margin: 0;
-							float: right;
-							line-height: 16px;
-						}
-
-					}
-				}
-
-				.so-pointer {
-					width: 12px;
-					height: 6px;
-					position: absolute;
-					z-index: 12;
-					background: url("./images/dropdown-pointer.png");
-					background-size: 12px 6px;
-					top: 1px;
-					right: 18px;
-				}
-			}
 			&.hidden {
 				display: none;
 			}
@@ -2242,5 +2126,68 @@
 			font-style: italic;
 		}
 
+	}
+}
+
+.so-dropdown-wrapper {
+	position: relative;
+	float: right;
+
+	.so-dropdown-links-wrapper {
+		position:absolute;
+		padding: 6px 0 0 0;
+
+		ul {
+			margin: 0;
+			border: 1px solid #C0C0C0;
+			background: #F9F9F9;
+			.rounded(2px);
+			padding: 4px 0;
+			.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+
+			li {
+				margin: 0;
+
+				&:first-child {
+					border-top-width: 1px;
+				}
+
+				a {
+					display: block;
+					padding: 2px 8px;
+					text-decoration: none;
+					color: #666;
+					font-size: 11px;
+					cursor: pointer;
+
+					outline: 0 !important;
+					.box-shadow(none);
+
+					&:hover {
+						background: #F0F0F0;
+						color: #444;
+					}
+
+					.dashicons {
+						font-size: 16px;
+						margin: 0;
+						float: right;
+						line-height: 16px;
+					}
+
+				}
+			}
+
+			.so-pointer {
+				width: 12px;
+				height: 6px;
+				position: absolute;
+				z-index: 12;
+				background: url("./images/dropdown-pointer.png");
+				background-size: 12px 6px;
+				top: 1px;
+				right: 18px;
+			}
+		}
 	}
 }
