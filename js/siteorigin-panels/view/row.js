@@ -176,7 +176,7 @@ module.exports = Backbone.View.extend( {
         if( this.dialog === null ) {
             // Create the dialog
             this.dialog = new panels.dialog.row();
-            this.dialog.setBuilder( this.builder).setRowModel( this.model );
+            this.dialog.setBuilder( this.builder ).setRowModel( this.model );
         }
 
         this.dialog.openDialog();

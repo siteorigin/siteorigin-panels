@@ -14,7 +14,7 @@ module.exports = Backbone.View.extend( {
 
     initialize: function( options ){
 	    this.builder = options.builder;
-	    this.builder.model.on( 'change', this.refreshPreview, this );
+	    this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
     },
 
     /**
@@ -266,15 +266,19 @@ module.exports = Backbone.View.extend( {
         return overlayContainer;
     },
 
-	/**
-	 * Refresh the Live Editor preview.
-	 * @returns {exports}
-	 */
-	refreshPreview: function( ){
+	handleRefreshData: function( newData, args ){
 		if( !this.$el.is(':visible') ) {
 			return this;
 		}
 
+		this.refreshPreview( newData );
+	},
+
+	/**
+	 * Refresh the Live Editor preview.
+	 * @returns {exports}
+	 */
+	refreshPreview: function( data ){
 		var iframe = this.$('.so-preview iframe' ),
 			form = this.$('.so-preview form' );
 
@@ -296,7 +300,7 @@ module.exports = Backbone.View.extend( {
 			.animate( { width: '100%' }, parseInt (loadTimePrediction)  );
 
 		// Set the preview data and submit the form
-		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
+		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( data ) );
 		form.submit()
 
 		iframe.data( 'load-start', new Date().getTime() );

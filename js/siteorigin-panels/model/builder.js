@@ -235,15 +235,22 @@ module.exports = Backbone.Model.extend( {
     /**
      * This will check all the current entries and refresh the panels data
      */
-    refreshPanelsData: function(){
-        var oldData = JSON.stringify( this.get('data') );
+    refreshPanelsData: function( args ){
+	    args = _.extend( {
+		    silent: false
+	    }, args );
+
+        var oldData = this.get('data');
         var newData = this.getPanelsData();
         this.set( 'data', newData, { silent: true } );
 
-        if( JSON.stringify( newData ) !== oldData ) {
+	    console.log('refresh panels data');
+
+        if( !args.silent && JSON.stringify( newData ) !== JSON.stringify( oldData ) ) {
             // The default change event doesn't trigger on deep changes, so we'll trigger our own
             this.trigger( 'change' );
             this.trigger( 'change:data' );
+	        this.trigger( 'refresh_panels_data', newData, args );
         }
     },
 

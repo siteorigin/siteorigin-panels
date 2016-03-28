@@ -19,8 +19,22 @@ module.exports = panels.view.dialog.extend( {
     },
 
     initializeDialog: function(){
+	    var thisView = this;
         this.model.on( 'change:values', this.handleChangeValues, this );
         this.model.on( 'destroy', this.remove, this );
+
+	    // Refresh panels data after both dialog form components are loaded
+	    this.dialogFormsLoaded = 0;
+	    this.on( 'form_loaded styles_loaded', function(){
+		    this.dialogFormsLoaded++;
+		    if( this.dialogFormsLoaded === 2 ) {
+			    thisView.updateModel({
+				    refreshArgs: {
+					    silent: true
+				    }
+			    });
+		    }
+	    } );
     },
 
     /**
@@ -42,7 +56,8 @@ module.exports = panels.view.dialog.extend( {
         this.styles = new panels.view.styles();
         this.styles.model = this.model;
         this.styles.render( 'widget', $('#post_ID').val(), {
-            builderType : this.builder.builderType
+            builderType : this.builder.builderType,
+	        dialog: this
         } );
 
 		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
@@ -157,7 +172,12 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save the widget from the form to the model
      */
-    updateModel: function(){
+    updateModel: function( args ){
+	    args = _.extend( {
+		    refresh: true,
+		    refreshArgs: null
+	    }, args );
+
         // Get the values from the form and assign the new values to the model
         this.savingWidget = true;
 
@@ -188,7 +208,10 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.savingWidget = false;
-	    this.builder.model.refreshPanelsData();
+
+	    if( args.refresh ) {
+		    this.builder.model.refreshPanelsData( args.refreshArgs );
+	    }
     },
 
     /**

@@ -848,6 +848,20 @@ module.exports = panels.view.dialog.extend( {
             cells : [0.5, 0.5],
             style : { }
         };
+
+	    // Refresh panels data after both dialog form components are loaded
+	    this.dialogFormsLoaded = 0;
+	    var thisView = this;
+	    this.on( 'form_loaded styles_loaded', function(){
+		    this.dialogFormsLoaded++;
+		    if( this.dialogFormsLoaded === 2 ) {
+			    thisView.updateModel({
+				    refreshArgs: {
+					    silent: true
+				    }
+			    });
+		    }
+	    } );
     },
 
     /**
@@ -869,7 +883,8 @@ module.exports = panels.view.dialog.extend( {
             this.styles = new panels.view.styles();
             this.styles.model = this.model;
             this.styles.render( 'row', $('#post_ID').val(), {
-                'builderType' : this.builder.builderType
+                builderType : this.builder.builderType,
+	            dialog: this
             } );
 
 			var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
@@ -1153,6 +1168,8 @@ module.exports = panels.view.dialog.extend( {
             });
 
         }, this);
+
+	    this.trigger( 'form_loaded', this );
     },
 
     /**
@@ -1259,7 +1276,12 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Update the current model with what we have in the dialog
      */
-    updateModel: function(){
+    updateModel: function( args ){
+	    args = _.extend( {
+		    refresh: true,
+		    refreshArgs: null
+	    }, args );
+
         // Set the cells
         this.model.setCells( this.row.cells );
 
@@ -1275,7 +1297,9 @@ module.exports = panels.view.dialog.extend( {
             this.model.set('style', style);
         }
 
-	    this.model.builder.refreshPanelsData();
+	    if( args.refresh ) {
+		    this.builder.model.refreshPanelsData( args.refreshArgs );
+	    }
     },
 
     /**
@@ -1373,8 +1397,22 @@ module.exports = panels.view.dialog.extend( {
     },
 
     initializeDialog: function(){
+	    var thisView = this;
         this.model.on( 'change:values', this.handleChangeValues, this );
         this.model.on( 'destroy', this.remove, this );
+
+	    // Refresh panels data after both dialog form components are loaded
+	    this.dialogFormsLoaded = 0;
+	    this.on( 'form_loaded styles_loaded', function(){
+		    this.dialogFormsLoaded++;
+		    if( this.dialogFormsLoaded === 2 ) {
+			    thisView.updateModel({
+				    refreshArgs: {
+					    silent: true
+				    }
+			    });
+		    }
+	    } );
     },
 
     /**
@@ -1396,7 +1434,8 @@ module.exports = panels.view.dialog.extend( {
         this.styles = new panels.view.styles();
         this.styles.model = this.model;
         this.styles.render( 'widget', $('#post_ID').val(), {
-            builderType : this.builder.builderType
+            builderType : this.builder.builderType,
+	        dialog: this
         } );
 
 		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
@@ -1511,7 +1550,12 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Save the widget from the form to the model
      */
-    updateModel: function(){
+    updateModel: function( args ){
+	    args = _.extend( {
+		    refresh: true,
+		    refreshArgs: null
+	    }, args );
+
         // Get the values from the form and assign the new values to the model
         this.savingWidget = true;
 
@@ -1542,7 +1586,10 @@ module.exports = panels.view.dialog.extend( {
         }
 
         this.savingWidget = false;
-	    this.builder.model.refreshPanelsData();
+
+	    if( args.refresh ) {
+		    this.builder.model.refreshPanelsData( args.refreshArgs );
+	    }
     },
 
     /**
@@ -2296,15 +2343,22 @@ module.exports = Backbone.Model.extend( {
     /**
      * This will check all the current entries and refresh the panels data
      */
-    refreshPanelsData: function(){
-        var oldData = JSON.stringify( this.get('data') );
+    refreshPanelsData: function( args ){
+	    args = _.extend( {
+		    silent: false
+	    }, args );
+
+        var oldData = this.get('data');
         var newData = this.getPanelsData();
         this.set( 'data', newData, { silent: true } );
 
-        if( JSON.stringify( newData ) !== oldData ) {
+	    console.log('refresh panels data');
+
+        if( !args.silent && JSON.stringify( newData ) !== JSON.stringify( oldData ) ) {
             // The default change event doesn't trigger on deep changes, so we'll trigger our own
             this.trigger( 'change' );
             this.trigger( 'change:data' );
+	        this.trigger( 'refresh_panels_data', newData, args );
         }
     },
 
@@ -4658,7 +4712,7 @@ module.exports = Backbone.View.extend( {
 
     initialize: function( options ){
 	    this.builder = options.builder;
-	    this.builder.model.on( 'change', this.refreshPreview, this );
+	    this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
     },
 
     /**
@@ -4910,15 +4964,19 @@ module.exports = Backbone.View.extend( {
         return overlayContainer;
     },
 
-	/**
-	 * Refresh the Live Editor preview.
-	 * @returns {exports}
-	 */
-	refreshPreview: function( ){
+	handleRefreshData: function( newData, args ){
 		if( !this.$el.is(':visible') ) {
 			return this;
 		}
 
+		this.refreshPreview( newData );
+	},
+
+	/**
+	 * Refresh the Live Editor preview.
+	 * @returns {exports}
+	 */
+	refreshPreview: function( data ){
 		var iframe = this.$('.so-preview iframe' ),
 			form = this.$('.so-preview form' );
 
@@ -4940,7 +4998,7 @@ module.exports = Backbone.View.extend( {
 			.animate( { width: '100%' }, parseInt (loadTimePrediction)  );
 
 		// Set the preview data and submit the form
-		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( this.builder.model.getPanelsData() ) );
+		form.find('input[name="live_editor_panels_data"]' ).val( JSON.stringify( data ) );
 		form.submit()
 
 		iframe.data( 'load-start', new Date().getTime() );
@@ -5134,7 +5192,7 @@ module.exports = Backbone.View.extend( {
         if( this.dialog === null ) {
             // Create the dialog
             this.dialog = new panels.dialog.row();
-            this.dialog.setBuilder( this.builder).setRowModel( this.model );
+            this.dialog.setBuilder( this.builder ).setRowModel( this.model );
         }
 
         this.dialog.openDialog();
@@ -5283,7 +5341,8 @@ module.exports = Backbone.View.extend( {
 
         // Add in the default args
         args  = _.extend( {
-            builderType : ''
+            builderType : '',
+	        dialog: null
         }, args );
 
         this.$el.addClass('so-visual-styles');
@@ -5296,7 +5355,9 @@ module.exports = Backbone.View.extend( {
                 action: 'so_panels_style_form',
                 type: stylesType,
                 style: this.model.get( 'style' ),
-                args : JSON.stringify( args ),
+                args : JSON.stringify( {
+	                builderType: args.builderType
+                } ),
                 postId: postId
             },
             function( response ){
@@ -5304,6 +5365,9 @@ module.exports = Backbone.View.extend( {
                 thisView.setupFields();
                 thisView.stylesLoaded = true;
                 thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+	            if( ! _.isNull( args.dialog ) ) {
+		            args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+	            }
             }
         );
 

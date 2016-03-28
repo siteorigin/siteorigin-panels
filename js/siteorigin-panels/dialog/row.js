@@ -50,6 +50,20 @@ module.exports = panels.view.dialog.extend( {
             cells : [0.5, 0.5],
             style : { }
         };
+
+	    // Refresh panels data after both dialog form components are loaded
+	    this.dialogFormsLoaded = 0;
+	    var thisView = this;
+	    this.on( 'form_loaded styles_loaded', function(){
+		    this.dialogFormsLoaded++;
+		    if( this.dialogFormsLoaded === 2 ) {
+			    thisView.updateModel({
+				    refreshArgs: {
+					    silent: true
+				    }
+			    });
+		    }
+	    } );
     },
 
     /**
@@ -71,7 +85,8 @@ module.exports = panels.view.dialog.extend( {
             this.styles = new panels.view.styles();
             this.styles.model = this.model;
             this.styles.render( 'row', $('#post_ID').val(), {
-                'builderType' : this.builder.builderType
+                builderType : this.builder.builderType,
+	            dialog: this
             } );
 
 			var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
@@ -355,6 +370,8 @@ module.exports = panels.view.dialog.extend( {
             });
 
         }, this);
+
+	    this.trigger( 'form_loaded', this );
     },
 
     /**
@@ -461,7 +478,12 @@ module.exports = panels.view.dialog.extend( {
     /**
      * Update the current model with what we have in the dialog
      */
-    updateModel: function(){
+    updateModel: function( args ){
+	    args = _.extend( {
+		    refresh: true,
+		    refreshArgs: null
+	    }, args );
+
         // Set the cells
         this.model.setCells( this.row.cells );
 
@@ -477,7 +499,9 @@ module.exports = panels.view.dialog.extend( {
             this.model.set('style', style);
         }
 
-	    this.model.builder.refreshPanelsData();
+	    if( args.refresh ) {
+		    this.builder.model.refreshPanelsData( args.refreshArgs );
+	    }
     },
 
     /**

@@ -21,7 +21,8 @@ module.exports = Backbone.View.extend( {
 
         // Add in the default args
         args  = _.extend( {
-            builderType : ''
+            builderType : '',
+	        dialog: null
         }, args );
 
         this.$el.addClass('so-visual-styles');
@@ -34,7 +35,9 @@ module.exports = Backbone.View.extend( {
                 action: 'so_panels_style_form',
                 type: stylesType,
                 style: this.model.get( 'style' ),
-                args : JSON.stringify( args ),
+                args : JSON.stringify( {
+	                builderType: args.builderType
+                } ),
                 postId: postId
             },
             function( response ){
@@ -42,6 +45,9 @@ module.exports = Backbone.View.extend( {
                 thisView.setupFields();
                 thisView.stylesLoaded = true;
                 thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+	            if( ! _.isNull( args.dialog ) ) {
+		            args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+	            }
             }
         );
 
