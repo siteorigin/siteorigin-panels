@@ -4467,7 +4467,7 @@ module.exports = Backbone.View.extend( {
 	    }, options );
 
 	    if( ! options.silent ) {
-		    this.trigger( 'close_dialog', event );
+		    this.trigger( 'close_dialog' );
 	    }
 
         this.dialogOpen = false;
