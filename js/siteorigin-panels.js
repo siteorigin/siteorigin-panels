@@ -18,7 +18,16 @@ module.exports = Backbone.Collection.extend( {
         });
 
         return totalWeight;
-    }
+    },
+
+	comparator: function( item ){
+		if( ! _.isNull( item.indexes ) ) {
+			return item.indexes.builder;
+		}
+		else {
+			return null;
+		}
+	}
 } );
 
 },{}],2:[function(require,module,exports){
@@ -105,8 +114,18 @@ module.exports = Backbone.Collection.extend( {
 
             model.destroy();
         } while( true );
-    }
+    },
+
+	comparator: function( item ){
+		if( ! _.isNull( item.indexes ) ) {
+			return item.indexes.builder;
+		}
+		else {
+			return null;
+		}
+	}
 } );
+
 },{}],4:[function(require,module,exports){
 var panels = window.panels;
 
@@ -115,7 +134,16 @@ module.exports = Backbone.Collection.extend( {
 
     initialize: function(){
 
-    }
+    },
+
+	comparator: function( item ){
+		if( ! _.isNull( item.indexes ) ) {
+			return item.indexes.builder;
+		}
+		else {
+			return null;
+		}
+	}
 
 } );
 
@@ -2310,6 +2338,8 @@ module.exports = Backbone.Model.extend( {
         weight : 0
     },
 
+	indexes : null,
+
     /**
      * Set up the cell model
      */
@@ -2371,6 +2401,8 @@ module.exports = Backbone.Model.extend( {
     defaults :{
         style: {}
     },
+
+	indexes : null,
 
     /**
      * Initialize the row model
@@ -2517,6 +2549,8 @@ module.exports = Backbone.Model.extend( {
         // Visual style fields
         styles: {}
     },
+
+	indexes : null,
 
     initialize: function(){
         var widgetClass = this.get('class');
@@ -3312,7 +3346,7 @@ module.exports = Backbone.View.extend( {
      */
     refreshSortable: function(){
         // Refresh the sortable to account for the new row
-        if(this.rowsSortable !== null) {
+        if( ! _.isNull( this.rowsSortable ) ) {
             this.rowsSortable.sortable('refresh');
         }
     },
@@ -3341,6 +3375,7 @@ module.exports = Backbone.View.extend( {
             this.model.loadPanelsData( data );
             this.currentData = data;
             this.toggleWelcomeDisplay();
+	        this.sortCollections();
         }
 
         return this;
@@ -3470,36 +3505,43 @@ module.exports = Backbone.View.extend( {
      * Sort all widget and row collections based on their dom position
      */
     sortCollections: function(){
-        // Create an array that stores model indexes within the array
-        var indexes = {};
 
-        this.$('.so-rows-container .so-row-container').each(function(ri, el){
-            var $r = $(el);
-            indexes[ $r.data('view').model.cid ] = ri;
+	    // Give the widgets their indexes
+	    this.$( '.so-widget' ).each( function( i ){
+		    var $$ = $(this);
+		    $$.data( 'view' ).model.indexes = {
+			    builder: i,
+			    cell: $$.index()
+		    };
+	    } );
 
-            $r.find('.so-cells .cell').each(function(ci, el){
-                var $c = $(el);
+	    // Give the cells their indexes
+	    this.$( '.so-cells .cell' ).each( function( i ){
+		    var $$ = $(this);
+		    $$.data( 'view' ).model.indexes = {
+			    builder: i,
+			    row: $$.index()
+		    };
+	    } );
 
-                $c.find('.so-widget').each(function(wi, el) {
-                    var $w = $(el);
-                    indexes[ $w.data('view').model.cid ] = wi;
-                });
-            });
-        });
+	    // Give the rows their indexes
+	    this.$('.so-row-container' ).each( function( i ){
+		    var $$ = $(this);
+		    $$.data( 'view' ).model.indexes = {
+			    builder: i,
+		    };
+	    } );
 
-        // Sort the rows based on their visual position
-        this.model.rows.models = this.model.rows.sortBy(function(model){
-            return indexes[model.cid];
-        });
 
-	    // Sort the widgets in the rows
-        this.model.rows.each(function(row){
-            row.cells.each(function(cell){
-                cell.widgets.models = cell.widgets.sortBy(function(widget){
-                    return indexes[widget.cid];
-                });
-            });
-        });
+	    // Sort the rows by their visual index
+	    this.model.rows.sort();
+
+	    // Sort the widget collections by their visual index
+	    this.model.rows.each(function(row){
+		    row.cells.each(function(cell){
+			    cell.widgets.sort();
+		    });
+	    });
 
         // Update the builder model to reflect the newly ordered data.
         this.model.refreshPanelsData();

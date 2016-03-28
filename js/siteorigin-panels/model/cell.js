@@ -9,6 +9,8 @@ module.exports = Backbone.Model.extend( {
         weight : 0
     },
 
+	indexes : null,
+
     /**
      * Set up the cell model
      */

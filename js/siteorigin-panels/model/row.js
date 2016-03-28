@@ -9,6 +9,8 @@ module.exports = Backbone.Model.extend( {
         style: {}
     },
 
+	indexes : null,
+
     /**
      * Initialize the row model
      */

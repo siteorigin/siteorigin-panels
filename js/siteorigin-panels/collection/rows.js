@@ -14,5 +14,14 @@ module.exports = Backbone.Collection.extend( {
 
             model.destroy();
         } while( true );
-    }
+    },
+
+	comparator: function( item ){
+		if( ! _.isNull( item.indexes ) ) {
+			return item.indexes.builder;
+		}
+		else {
+			return null;
+		}
+	}
 } );
