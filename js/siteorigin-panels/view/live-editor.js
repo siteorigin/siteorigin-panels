@@ -218,7 +218,7 @@ module.exports = Backbone.View.extend( {
             'position' : 'absolute',
             'background' : '#000000',
             'z-index' : 10000,
-            'opacity' : 0.25
+            'opacity' : 0.15
         });
 
         var spacing = 15;
