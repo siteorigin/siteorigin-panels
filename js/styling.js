@@ -52,7 +52,7 @@ jQuery(function($){
     $(window).resize( stretchFullWidthRows );
     stretchFullWidthRows();
 
-    if( !_.isUndefined( $.stellar ) ) {
+    if( typeof $.stellar !== 'undefined' ) {
         // Setup parallax after a small timeout to allow full width to take effect
         setTimeout( function(){
             $.stellar( {
