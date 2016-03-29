@@ -1604,6 +1604,10 @@
   width: 20px;
   height: 20px;
   overflow: hidden;
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  -o-transition: all 0.25s ease;
+  transition: all 0.25s ease;
 }
 .so-panels-live-editor .live-editor-collapse .collapse-icon:before {
   display: block;
@@ -1682,17 +1686,6 @@
   border-radius: 3px;
   height: 10px;
   background: #aaa;
-}
-.so-panels-live-editor .so-sidebar,
-.so-panels-live-editor .so-preview,
-.so-panels-live-editor .so-sidebar-tools,
-.so-panels-live-editor .so-preview-overlay,
-.so-panels-live-editor .live-editor-collapse,
-.so-panels-live-editor .live-editor-collapse .collapse-icon {
-  -webkit-transition: all 0.5s ease;
-  -moz-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
 }
 .so-panels-live-editor.so-collapsed .live-editor-collapse .collapse-icon {
   transform: rotate(180deg);
