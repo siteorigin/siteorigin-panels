@@ -4890,6 +4890,10 @@ module.exports = Backbone.View.extend( {
 	 * @return {*|Object} The item we're hovering over.
 	 */
 	highlightElement: function ( over ) {
+		if( ! _.isUndefined( this.resetHighlightTimeout ) ) {
+			clearTimeout( this.resetHighlightTimeout );
+		}
+
 		// Remove any old overlays
 		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' ).css( 'position', 'relative' );
 		body.find( '.panel-grid .panel-grid-cell .so-panel' )
@@ -4904,9 +4908,12 @@ module.exports = Backbone.View.extend( {
 	},
 
 	resetHighlights: function() {
+
 		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
-		body.find( '.panel-grid .panel-grid-cell .so-panel' )
-			.removeClass( 'so-panels-faded so-panels-highlighted' );
+		this.resetHighlightTimeout = setTimeout( function(){
+			body.find( '.panel-grid .panel-grid-cell .so-panel' )
+				.removeClass( 'so-panels-faded so-panels-highlighted' );
+		}, 100 );
 	},
 
 	handleRefreshData: function ( newData, args ) {
