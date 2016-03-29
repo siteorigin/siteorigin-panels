@@ -4812,9 +4812,7 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		thisView.builder.on( 'open_dialog', function () {
-			if ( previewOverlay !== false ) {
-				previewOverlay.remove();
-			}
+			thisView.resetHighlights();
 		} );
 
 		return this;
