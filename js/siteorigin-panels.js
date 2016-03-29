@@ -328,7 +328,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// Add an entry for this restore event
 		if ( this.selectedEntry.get( 'text' ) !== 'restore' ) {
-			this.entries.addEntry( 'restore', this.builder.model.getPanelsData() );
+			this.builder.addHistoryEntry( 'restore', this.builder.model.getPanelsData() );
 		}
 
 		this.builder.model.loadPanelsData( JSON.parse( this.selectedEntry.get( 'data' ) ) );
