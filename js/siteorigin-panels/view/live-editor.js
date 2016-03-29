@@ -43,8 +43,6 @@ module.exports = Backbone.View.extend( {
 				$iframeContents.scrollTop( thisView.previewScrollTop );
 				thisView.$( '.so-preview-overlay' ).hide();
 
-				var overlay = false;
-
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
 					.filter( function () {
@@ -63,18 +61,11 @@ module.exports = Backbone.View.extend( {
 							} )
 							.mouseenter( function () {
 								widgetEdit.parent().addClass( 'so-hovered' );
-								overlay = thisView.createPreviewOverlay( $( this ) );
+								thisView.highlightElement( $$ );
 							} )
 							.mouseleave( function () {
 								widgetEdit.parent().removeClass( 'so-hovered' );
-
-								if ( overlay !== false ) {
-									overlay.fadeOut( 'fast', function () {
-										$( this ).remove();
-										overlay = false;
-									} );
-								}
-
+								thisView.resetHighlights();
 							} )
 							.click( function ( e ) {
 								e.preventDefault();
@@ -101,31 +92,21 @@ module.exports = Backbone.View.extend( {
 			} );
 
 		// Handle highlighting the relevant widget in the live editor preview
-
-		var previewOverlay = false;
 		thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
 			var $$ = $( this ), previewWidget = $( this ).data( 'live-editor-preview-widget' );
 
 			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! thisView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
-				previewOverlay = thisView.createPreviewOverlay( previewWidget );
+				thisView.highlightElement( previewWidget );
 			}
 		} );
 
 		thisView.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
-			if ( previewOverlay !== false ) {
-				previewOverlay.fadeOut( 'fast', function () {
-					$( this ).remove();
-					previewOverlay = false;
-				} );
-			}
+			thisView.resetHighlights();
 		} );
 
 		thisView.builder.on( 'open_dialog', function () {
 			if ( previewOverlay !== false ) {
-				previewOverlay.fadeOut( 'fast', function () {
-					$( this ).remove();
-					previewOverlay = false;
-				} );
+				previewOverlay.remove();
 			}
 		} );
 
@@ -201,70 +182,24 @@ module.exports = Backbone.View.extend( {
 	 * @param over
 	 * @return {*|Object} The item we're hovering over.
 	 */
-	createPreviewOverlay: function ( over ) {
-		var previewFrame = this.$( 'iframe#siteorigin-panels-live-editor-iframe' );
-
+	highlightElement: function ( over ) {
 		// Remove any old overlays
-		var body = previewFrame.contents().find( 'body' ).css( 'position', 'relative' );
-
-		previewFrame.contents().find( '.panels-live-editor-overlay' ).remove();
-
-		// Create the new overlay
-		var overlayContainer = $( '<div />' ).addClass( 'panels-live-editor-overlay' ).css( {
-			'pointer-events': 'none'
-		} );
-
-		// The overlay item used to highlight the current element
-		var overlay = $( '<div />' ).css( {
-			'position': 'absolute',
-			'background': '#000000',
-			'z-index': 10000,
-			'opacity': 0.15
-		} );
-
-		var spacing = 15;
-
-		overlayContainer
-			.append(
-			// The top overlay
-			overlay.clone().css( {
-				'top': - body.offset().top,
-				'left': 0,
-				'right': 0,
-				'height': over.offset().top - spacing
+		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' ).css( 'position', 'relative' );
+		body.find( '.panel-grid .panel-grid-cell .so-panel' )
+			.filter( function () {
+				// Filter to only include non nested
+				return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
 			} )
-		)
-			.append(
-			// The bottom overlay
-			overlay.clone().css( {
-				'bottom': 0,
-				'left': 0,
-				'right': 0,
-				'height': Math.round( body.height() - over.offset().top - over.outerHeight() - spacing + body.offset().top - 0.01 )
-			} )
-		)
-			.append(
-			// The left overlay
-			overlay.clone().css( {
-				'top': over.offset().top - spacing - body.offset().top,
-				'left': 0,
-				'width': over.offset().left - spacing,
-				'height': Math.ceil( over.outerHeight() + spacing * 2 )
-			} )
-		)
-			.append(
-			// The right overlay
-			overlay.clone().css( {
-				'top': over.offset().top - spacing - body.offset().top,
-				'right': 0,
-				'left': over.offset().left + over.outerWidth() + spacing,
-				'height': Math.ceil( over.outerHeight() + spacing * 2 )
-			} )
-		);
+			.not( over )
+			.addClass( 'so-panels-faded' );
 
-		// Create a new overlay
-		previewFrame.contents().find( 'body' ).append( overlayContainer );
-		return overlayContainer;
+		over.removeClass( 'so-panels-faded' ).addClass( 'so-panels-highlighted' );
+	},
+
+	resetHighlights: function() {
+		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
+		body.find( '.panel-grid .panel-grid-cell .so-panel' )
+			.removeClass( 'so-panels-faded so-panels-highlighted' );
 	},
 
 	handleRefreshData: function ( newData, args ) {

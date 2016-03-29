@@ -32,5 +32,12 @@ function siteorigin_panels_live_editor_frontend_scripts(){
 		array( 'jquery' ),
 		SITEORIGIN_PANELS_VERSION
 	);
+
+	wp_enqueue_style(
+		'live-editor-front',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/css/live-editor-front.css',
+		array(),
+		SITEORIGIN_PANELS_VERSION
+	);
 }
 add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_editor_frontend_scripts' );

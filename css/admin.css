@@ -270,6 +270,10 @@
   -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
   -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
   box-shadow: 0 1px 2px rgba(0,0,0,0.075);
+  -moz-transition-duration: 0.1s;
+  -webkit-transition-duration: 0.1s;
+  -o-transition-duration: 0.1s;
+  transition-duration: 0.1s;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-container .so-cells .cell .widgets-container .so-widget:hover {
   border: 1px solid #93a7ad;
@@ -491,6 +495,10 @@
   -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
   -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.075);
   box-shadow: 0 1px 2px rgba(0,0,0,0.075);
+  -moz-transition-duration: 0.1s;
+  -webkit-transition-duration: 0.1s;
+  -o-transition-duration: 0.1s;
+  transition-duration: 0.1s;
 }
 .so-widget.ui-sortable-helper.widget-being-dragged:hover {
   border: 1px solid #93a7ad;
