@@ -1714,11 +1714,9 @@
 }
 .so-panels-live-editor.live-editor-mobile-mode #siteorigin-panels-live-editor-iframe {
   max-width: 480px;
-  margin: 0 auto;
 }
 .so-panels-live-editor.live-editor-tablet-mode #siteorigin-panels-live-editor-iframe {
   max-width: 768px;
-  margin: 0 auto;
 }
 .so-panels-loading {
   background-image: url("images/wpspin_light.gif");
