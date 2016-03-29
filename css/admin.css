@@ -1865,7 +1865,7 @@
   left: 20px;
   z-index: 999999;
   display: none;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .so-panels-contextual-menu,
 .so-panels-contextual-menu * {
