@@ -1755,13 +1755,13 @@
 		width: @live_editor_width;
 
 		.live-editor-close {
-			margin: 9px 10px 0 0;
+			margin: 9px 10px 0 15px;
 			float: right;
 		}
 
-		.live-editor-mobile {
+		.live-editor-mode {
 			float: right;
-			margin: 9px 10px 0 0;
+			margin: 9px 4px 0 0;
 
 			.dashicons {
 				font-size: 30px;
@@ -1869,6 +1869,13 @@
 	&.live-editor-mobile-mode {
 		#siteorigin-panels-live-editor-iframe {
 			max-width: 480px;
+			margin: 0 auto;
+		}
+	}
+
+	&.live-editor-tablet-mode {
+		#siteorigin-panels-live-editor-iframe {
+			max-width: 768px;
 			margin: 0 auto;
 		}
 	}

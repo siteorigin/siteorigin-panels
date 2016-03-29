@@ -4717,7 +4717,7 @@ module.exports = Backbone.View.extend( {
 	events: {
 		'click .live-editor-close': 'close',
 		'click .live-editor-collapse': 'collapse',
-		'click .live-editor-mobile': 'mobileToggle'
+		'click .live-editor-mode': 'mobileToggle'
 	},
 
 	initialize: function ( options ) {
@@ -4971,16 +4971,15 @@ module.exports = Backbone.View.extend( {
 		return this.$( 'form.live-editor-form' ).attr( 'action' ) !== '';
 	},
 
-	mobileToggle: function(){
-		var toggle = this.$('.live-editor-mobile');
+	mobileToggle: function( e ){
+		var button = $( e.currentTarget );
+		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');
+		button.addClass( 'so-active' );
 
-		toggle.toggleClass( 'so-active' );
+		this.$el
+			.removeClass( 'live-editor-desktop-mode live-editor-tablet-mode live-editor-mobile-mode' )
+			.addClass( 'live-editor-' + button.data( 'mode' ) + '-mode' );
 
-		if( toggle.hasClass('so-active') ) {
-			this.$el.addClass('live-editor-mobile-mode');
-		} else {
-			this.$el.removeClass('live-editor-mobile-mode');
-		}
 	}
 } );
 

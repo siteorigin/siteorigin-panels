@@ -520,9 +520,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-sidebar-tools">
 			<button class="live-editor-close button-primary"><?php esc_html_e('Done', 'siteorigin-panels') ?></button>
-			<a class="live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ) ?>">
+
+			<a class="live-editor-mode live-editor-desktop so-active" title="<?php esc_attr_e( 'Toggle desktop mode', 'siteorigin-panels' ) ?>" data-mode="desktop">
+				<span class="dashicons dashicons-desktop"></span>
+			</a>
+			<a class="live-editor-mode live-editor-tablet" title="<?php esc_attr_e( 'Toggle tablet mode', 'siteorigin-panels' ) ?>" data-mode="tablet">
+				<span class="dashicons dashicons-tablet"></span>
+			</a>
+			<a class="live-editor-mode live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ) ?>" data-mode="mobile">
 				<span class="dashicons dashicons-smartphone"></span>
 			</a>
+
 		</div>
 
 		<div class="so-sidebar">
