@@ -1758,6 +1758,30 @@
 			margin: 9px 10px 0 0;
 			float: right;
 		}
+
+		.live-editor-mobile {
+			float: right;
+			margin: 9px 10px 0 0;
+
+			.dashicons {
+				font-size: 30px;
+				width: 30px;
+				height: 30px;
+				cursor: pointer;
+				color: #999;
+
+				&:hover {
+					color: #666;
+				}
+			}
+
+			&.so-active .dashicons {
+				color: #0073aa;
+				&:hover {
+					color: #0073aa;
+				}
+			}
+		}
 	}
 
 	.so-sidebar {
@@ -1839,6 +1863,13 @@
 		.so-preview,
 		.so-preview-overlay {
 			left: 0;
+		}
+	}
+
+	&.live-editor-mobile-mode {
+		#siteorigin-panels-live-editor-iframe {
+			max-width: 480px;
+			margin: 0 auto;
 		}
 	}
 }

@@ -9,7 +9,8 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .live-editor-close': 'close',
-		'click .live-editor-collapse': 'collapse'
+		'click .live-editor-collapse': 'collapse',
+		'click .live-editor-mobile': 'mobileToggle'
 	},
 
 	initialize: function ( options ) {
@@ -261,5 +262,17 @@ module.exports = Backbone.View.extend( {
 	 */
 	hasPreviewUrl: function () {
 		return this.$( 'form.live-editor-form' ).attr( 'action' ) !== '';
+	},
+
+	mobileToggle: function(){
+		var toggle = this.$('.live-editor-mobile');
+
+		toggle.toggleClass( 'so-active' );
+
+		if( toggle.hasClass('so-active') ) {
+			this.$el.addClass('live-editor-mobile-mode');
+		} else {
+			this.$el.removeClass('live-editor-mobile-mode');
+		}
 	}
 } );
