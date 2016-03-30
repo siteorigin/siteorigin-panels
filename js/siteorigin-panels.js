@@ -4747,9 +4747,11 @@ module.exports = Backbone.View.extend( {
 					}
 				}
 
-				// Scroll to the correct position
-				$iframeContents.scrollTop( thisView.previewScrollTop );
-				thisView.$( '.so-preview-overlay' ).hide();
+				setTimeout( function(){
+					// Scroll to the correct position
+					$iframeContents.scrollTop( thisView.previewScrollTop );
+					thisView.$( '.so-preview-overlay' ).hide();
+				}, 100 );
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
@@ -4954,7 +4956,7 @@ module.exports = Backbone.View.extend( {
 		this.$( '.so-preview-overlay .so-loading-bar' )
 			.clearQueue()
 			.css( 'width', '0%' )
-			.animate( {width: '100%'}, parseInt( loadTimePrediction ) );
+			.animate( {width: '100%'}, parseInt( loadTimePrediction ) + 100 );
 
 		// Set the preview data and submit the form
 		form.find( 'input[name="live_editor_panels_data"]' ).val( JSON.stringify( data ) );
