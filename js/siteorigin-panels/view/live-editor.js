@@ -96,10 +96,12 @@ module.exports = Backbone.View.extend( {
 
 		// Handle highlighting the relevant widget in the live editor preview
 		thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
-			var $$ = $( this ), previewWidget = $( this ).data( 'live-editor-preview-widget' );
+			var $$ = $( this ),
+				previewWidget = $( this ).data( 'live-editor-preview-widget' );
 
 			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! thisView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
 				thisView.highlightElement( previewWidget );
+				thisView.scrollToElement( previewWidget );
 			}
 		} );
 
@@ -189,7 +191,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Remove any old overlays
-		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' ).css( 'position', 'relative' );
+
+		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
 		body.find( '.panel-grid .panel-grid-cell .so-panel' )
 			.filter( function () {
 				// Filter to only include non nested
@@ -201,6 +204,9 @@ module.exports = Backbone.View.extend( {
 		over.removeClass( 'so-panels-faded' ).addClass( 'so-panels-highlighted' );
 	},
 
+	/**
+	 * Reset highlights in the live preview
+	 */
 	resetHighlights: function() {
 
 		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
@@ -208,6 +214,15 @@ module.exports = Backbone.View.extend( {
 			body.find( '.panel-grid .panel-grid-cell .so-panel' )
 				.removeClass( 'so-panels-faded so-panels-highlighted' );
 		}, 100 );
+	},
+
+	/**
+	 * Scroll over an element in the live preview
+	 * @param over
+	 */
+	scrollToElement: function( over ) {
+		var contentWindow = this.$( 'iframe#siteorigin-panels-live-editor-iframe' )[0].contentWindow;
+		contentWindow.liveEditorScrollTo( over );
 	},
 
 	handleRefreshData: function ( newData, args ) {

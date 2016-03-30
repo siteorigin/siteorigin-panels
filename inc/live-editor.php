@@ -28,7 +28,14 @@ add_filter('show_admin_bar', '__return_false');
 function siteorigin_panels_live_editor_frontend_scripts(){
 	wp_enqueue_script(
 		'live-editor-front',
-		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+		array( 'jquery' ),
+		SITEORIGIN_PANELS_VERSION
+	);
+
+	wp_enqueue_script(
+		'live-editor-scrollto',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
 		array( 'jquery' ),
 		SITEORIGIN_PANELS_VERSION
 	);
