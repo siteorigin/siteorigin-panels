@@ -279,9 +279,17 @@ module.exports = Backbone.View.extend( {
 	setupPreviewFrame: function( iframe ){
 		var thisView = this;
 		iframe
+			.data( 'iframeready', false )
 			.on( 'iframeready', function () {
 				var $$ = $( this ),
 					$iframeContents = $$.contents();
+
+				if( $$.data( 'iframeready' ) ) {
+					// Skip this if the iframeready function has already run
+					return;
+				}
+
+				$$.data( 'iframeready', true );
 
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
@@ -333,6 +341,12 @@ module.exports = Backbone.View.extend( {
 					e.preventDefault();
 				} );
 
+			} )
+			.on( 'load', function(){
+				var $$ = $( this );
+				if( ! $$.data( 'iframeready' )  ) {
+					$$.trigger('iframeready');
+				}
 			} );
 	},
 
