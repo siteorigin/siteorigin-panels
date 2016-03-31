@@ -68,7 +68,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('CSS Styles', 'siteorigin-panels'),
 			'type' => 'code',
 			'group' => 'attributes',
-			'description' => __('CSS Styles, given as one per row.', 'siteorigin-panels'),
+			'description' => __('One style attribute per line.', 'siteorigin-panels'),
 			'priority' => 10,
 		);
 
@@ -180,7 +180,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('CSS Styles', 'siteorigin-panels'),
 			'type' => 'code',
 			'group' => 'attributes',
-			'description' => __('CSS Styles, given as one per row.', 'siteorigin-panels'),
+			'description' => __('One style attribute per line.', 'siteorigin-panels'),
 			'priority' => 10,
 		);
 
