@@ -6,6 +6,8 @@ module.exports = Backbone.View.extend( {
 	postId: false,
 	previewScrollTop: 0,
 	loadTimes: [],
+	previewFrameId: 1,
+	previewIframe: null,
 
 	events: {
 		'click .live-editor-close': 'close',
@@ -26,63 +28,6 @@ module.exports = Backbone.View.extend( {
 		this.setElement( this.template() );
 		this.$el.hide();
 		var thisView = this;
-
-		this.$( '.so-preview iframe' )
-			.on( 'iframeready', function () {
-				var $$ = $( this ),
-					$iframeContents = $$.contents();
-
-				if ( $$.data( 'load-start' ) !== undefined ) {
-					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
-
-					if ( ! _.isEmpty( thisView.loadTimes ) ) {
-						thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
-					}
-				}
-
-				setTimeout( function(){
-					// Scroll to the correct position
-					$iframeContents.scrollTop( thisView.previewScrollTop );
-					thisView.$( '.so-preview-overlay' ).hide();
-				}, 100 );
-
-				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
-				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
-					.filter( function () {
-						// Filter to only include non nested
-						return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
-					} )
-					.each( function ( i, el ) {
-						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
-
-						widgetEdit.data( 'live-editor-preview-widget', $$ );
-
-						$$
-							.css( {
-								'cursor': 'pointer'
-							} )
-							.mouseenter( function () {
-								widgetEdit.parent().addClass( 'so-hovered' );
-								thisView.highlightElement( $$ );
-							} )
-							.mouseleave( function () {
-								widgetEdit.parent().removeClass( 'so-hovered' );
-								thisView.resetHighlights();
-							} )
-							.click( function ( e ) {
-								e.preventDefault();
-								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).click();
-							} );
-					} );
-
-				// Prevent default clicks
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
-					e.preventDefault();
-				} );
-
-			} );
 
 		var isMouseDown = false;
 
@@ -172,6 +117,9 @@ module.exports = Backbone.View.extend( {
 		this.builder.trigger( 'builder_resize' );
 	},
 
+	/**
+	 * Collapse the live editor
+	 */
 	collapse: function () {
 		this.$el.toggleClass( 'so-collapsed' );
 
@@ -192,7 +140,7 @@ module.exports = Backbone.View.extend( {
 
 		// Remove any old overlays
 
-		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
+		var body = this.previewIframe.contents().find( 'body' );
 		body.find( '.panel-grid .panel-grid-cell .so-panel' )
 			.filter( function () {
 				// Filter to only include non nested
@@ -209,7 +157,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	resetHighlights: function() {
 
-		var body = this.$( 'iframe#siteorigin-panels-live-editor-iframe' ).contents().find( 'body' );
+		var body = this.previewIframe.contents().find( 'body' );
 		this.resetHighlightTimeout = setTimeout( function(){
 			body.find( '.panel-grid .panel-grid-cell .so-panel' )
 				.removeClass( 'so-panels-faded so-panels-highlighted' );
@@ -221,7 +169,7 @@ module.exports = Backbone.View.extend( {
 	 * @param over
 	 */
 	scrollToElement: function( over ) {
-		var contentWindow = this.$( 'iframe#siteorigin-panels-live-editor-iframe' )[0].contentWindow;
+		var contentWindow = this.$( '.so-preview iframe' )[0].contentWindow;
 		contentWindow.liveEditorScrollTo( over );
 	},
 
@@ -246,16 +194,9 @@ module.exports = Backbone.View.extend( {
 	 * @returns {exports}
 	 */
 	refreshPreview: function ( data ) {
-		var iframe = this.$( '.so-preview iframe' ),
-			form = this.$( '.so-preview form' );
-
-		if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
-			this.previewScrollTop = iframe.contents().scrollTop();
-		}
-
 		var loadTimePrediction = this.loadTimes.length ?
 		_.reduce( this.loadTimes, function ( memo, num ) {
-			return memo + num
+			return memo + num;
 		}, 0 ) / this.loadTimes.length : 1000;
 
 		this.$( '.so-preview-overlay' ).show();
@@ -266,11 +207,130 @@ module.exports = Backbone.View.extend( {
 			.css( 'width', '0%' )
 			.animate( {width: '100%'}, parseInt( loadTimePrediction ) + 100 );
 
-		// Set the preview data and submit the form
-		form.find( 'input[name="live_editor_panels_data"]' ).val( JSON.stringify( data ) );
-		form.submit()
 
-		iframe.data( 'load-start', new Date().getTime() );
+		this.postToIframe(
+			{ live_editor_panels_data: JSON.stringify( data ) },
+			this.$el.data('preview-url'),
+			this.$('.so-preview')
+		);
+
+		this.previewIframe.data( 'load-start', new Date().getTime() );
+	},
+
+	/**
+	 * Use a temporary form to post data to an iframe.
+	 *
+	 * @param data The data to send
+	 * @param url The preview URL
+	 * @param target The target iframe
+	 */
+	postToIframe: function( data, url, target ){
+		// Store the old preview
+
+		if( ! _.isNull( this.previewIframe )  ) {
+			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
+				this.previewScrollTop = this.previewIframe.contents().scrollTop();
+			}
+			this.previewIframe.remove();
+		}
+
+		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
+
+		// Remove the old preview frame
+		this.previewIframe = $('<iframe src="javascript:false;" />')
+			.attr( {
+				'id' : iframeId,
+				'name' : iframeId,
+			} )
+			.appendTo( target )
+
+		this.setupPreviewFrame( this.previewIframe );
+
+		// We can use a normal POST form submit
+		var tempForm = $('<form id="soPostToPreviewFrame" method="post" />')
+			.attr( {
+				id: iframeId,
+				target: this.previewIframe.attr('id'),
+				action: url
+			} )
+			.appendTo( 'body' );
+
+		$.each( data, function( name, value ){
+			$('<input type="hidden" />')
+				.attr( {
+					name: name,
+					value: value
+				} )
+				.appendTo( tempForm );
+		} );
+
+		tempForm
+			.submit()
+			.remove();
+
+		this.previewFrameId++;
+
+		return this.previewIframe;
+	},
+
+	setupPreviewFrame: function( iframe ){
+		var thisView = this;
+		iframe
+			.on( 'iframeready', function () {
+				var $$ = $( this ),
+					$iframeContents = $$.contents();
+
+				if ( $$.data( 'load-start' ) !== undefined ) {
+					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
+
+					if ( ! _.isEmpty( thisView.loadTimes ) ) {
+						thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
+					}
+				}
+
+				setTimeout( function(){
+					// Scroll to the correct position
+					$iframeContents.scrollTop( thisView.previewScrollTop );
+					thisView.$( '.so-preview-overlay' ).hide();
+				}, 100 );
+
+				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
+				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
+					.filter( function () {
+						// Filter to only include non nested
+						return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+					} )
+					.each( function ( i, el ) {
+						var $$ = $( el );
+						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
+
+						widgetEdit.data( 'live-editor-preview-widget', $$ );
+
+						$$
+							.css( {
+								'cursor': 'pointer'
+							} )
+							.mouseenter( function () {
+								widgetEdit.parent().addClass( 'so-hovered' );
+								thisView.highlightElement( $$ );
+							} )
+							.mouseleave( function () {
+								widgetEdit.parent().removeClass( 'so-hovered' );
+								thisView.resetHighlights();
+							} )
+							.click( function ( e ) {
+								e.preventDefault();
+								// When we click a widget, send that click to the form
+								widgetEdit.find( '.title h4' ).click();
+							} );
+					} );
+
+				// Prevent default clicks
+				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
+					e.preventDefault();
+				} );
+
+			} );
 	},
 
 	/**
