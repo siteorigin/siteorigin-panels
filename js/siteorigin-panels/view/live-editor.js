@@ -199,9 +199,15 @@ module.exports = Backbone.View.extend( {
 			return memo + num;
 		}, 0 ) / this.loadTimes.length : 1000;
 
-		this.$( '.so-preview-overlay' ).show();
+		// Store the last preview iframe position
+		if( ! _.isNull( this.previewIframe )  ) {
+			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
+				this.previewScrollTop = this.previewIframe.contents().scrollTop();
+			}
+		}
 
 		// Add a loading bar
+		this.$( '.so-preview-overlay' ).show();
 		this.$( '.so-preview-overlay .so-loading-bar' )
 			.clearQueue()
 			.css( 'width', '0%' )
@@ -228,9 +234,6 @@ module.exports = Backbone.View.extend( {
 		// Store the old preview
 
 		if( ! _.isNull( this.previewIframe )  ) {
-			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
-				this.previewScrollTop = this.previewIframe.contents().scrollTop();
-			}
 			this.previewIframe.remove();
 		}
 
