@@ -3668,31 +3668,36 @@ module.exports = Backbone.View.extend( {
 		// Make sure we actually need to copy content.
 		if ( panelsOptions.copy_content && this.attachedToEditor && this.$el.is( ':visible' ) ) {
 
-			// We're going to create a copy of page builder content into the post content
-			$.post(
-				panelsOptions.ajaxurl,
-				{
-					action: 'so_panels_builder_content',
-					panels_data: JSON.stringify( this.model.getPanelsData() ),
-					post_id: this.postId
-				},
-				function ( content ) {
+			var panelsData = this.model.getPanelsData();
+			if( ! _.isEmpty( panelsData.widgets ) ) {
+				// We're going to create a copy of page builder content into the post content
+				$.post(
+					panelsOptions.ajaxurl,
+					{
+						action: 'so_panels_builder_content',
+						panels_data: JSON.stringify( panelsData ),
+						post_id: this.postId
+					},
+					function ( content ) {
 
-					// Strip all the known layout divs
-					var t = $( '<div />' ).html( content );
-					t.find( 'div' ).each( function () {
-						var c = $( this ).contents();
-						$( this ).replaceWith( c );
-					} );
+						// Strip all the known layout divs
+						var t = $( '<div />' ).html( content );
+						t.find( 'div' ).each( function () {
+							var c = $( this ).contents();
+							$( this ).replaceWith( c );
+						} );
 
-					content = t.html()
-						.replace( /[\r\n]+/g, "\n" )
-						.replace( /\n\s+/g, "\n" )
-						.trim();
+						content = t.html()
+							.replace( /[\r\n]+/g, "\n" )
+							.replace( /\n\s+/g, "\n" )
+							.trim();
 
-					this.updateEditorContent( content );
-				}.bind( this )
-			);
+						if( content !== '' ) {
+							this.updateEditorContent( content );
+						}
+					}.bind( this )
+				);
+			}
 		}
 	},
 
@@ -3759,7 +3764,10 @@ module.exports = Backbone.View.extend( {
 			editorContent = $( 'textarea#content' ).val();
 		}
 
-		if ( _.isEmpty( this.model.get( 'data' ) ) && editorContent !== '' ) {
+		if (
+			( _.isEmpty( this.model.get( 'data' ) ) || _.isEmpty( this.model.get( 'data' ).widgets ) ) &&
+			editorContent !== ''
+		) {
 			// Confirm that the user wants to copy their content to Page Builder.
 			if ( ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
 				return;
