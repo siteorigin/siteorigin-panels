@@ -361,7 +361,7 @@ module.exports = Backbone.View.extend( {
 			var $$ = jQuery( this );
 
 			var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
-			if ( name === undefined ) {
+			if ( _.isEmpty( name ) ) {
 				return true;
 			}
 
