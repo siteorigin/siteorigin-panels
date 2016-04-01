@@ -1208,25 +1208,28 @@ module.exports = panels.view.dialog.extend( {
 			'ratio': parseFloat( this.$( '.row-set-form select[name="ratio"]' ).val() ),
 			'direction': this.$( '.row-set-form select[name="ratio_direction"]' ).val()
 		};
-		var cells = [];
 
-		// Ignore this if the ratio or cell count is NaN
-		if ( isNaN( f.cells ) || isNaN( f.ratio ) ) {
-			return false;
-		}
-
-		var cellCountChanged = (
-		this.row.cells.length !== f.cells
-		);
-
-		if ( f.cells < 1 ) {
-			this.$( '.row-set-form input[name="cells"]' ).val( 1 );
+		if( _.isNaN( f.cells ) ) {
 			f.cells = 1;
 		}
-		else if ( f.cells > 20 ) {
-			this.$( '.row-set-form input[name="cells"]' ).val( 20 );
-			f.cells = 20;
+		if( isNaN( f.ratio ) ) {
+			f.ratio = 1;
 		}
+		if ( f.cells < 1 ) {
+			f.cells = 1;
+			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+		}
+		else if ( f.cells > 10 ) {
+			f.cells = 10;
+			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+		}
+
+		this.$( '.row-set-form input[name="ratio"]' ).val( f.ratio );
+
+		var cells = [];
+		var cellCountChanged = (
+			this.row.cells.length !== f.cells
+		);
 
 		// Now, lets create some cells
 		var currentWeight = 1;
@@ -1300,7 +1303,9 @@ module.exports = panels.view.dialog.extend( {
 		}, args );
 
 		// Set the cells
-		this.model.setCells( this.row.cells );
+		if( ! _.isUndefined( this.model ) ) {
+			this.model.setCells( this.row.cells );
+		}
 
 		// Update the styles if they've loaded
 		if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
