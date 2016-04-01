@@ -104,7 +104,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Fixed contextual menu in Layout Builder widget.
 * Added row/widget actions to contextual menu.
 * Clarified functionality of "Switch to Editor" button by renaming to "Revert to Editor".
-* refreshPanelsData function is called more consistenly.
+* refreshPanelsData function is called more consistently.
 * Various background performance enhancements.
 * Full JS code refactoring.
 * Fixed cell bottom margins with reverse collapse order.
