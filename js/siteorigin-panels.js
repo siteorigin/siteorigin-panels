@@ -5382,7 +5382,7 @@ module.exports = Backbone.View.extend( {
 			function ( c ) {
 				switch ( c ) {
 					case 'edit':
-						thisView.editHandler();
+						thisView.editSettingsHandler();
 						break;
 					case 'duplicate':
 						thisView.duplicateHandler();
