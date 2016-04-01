@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.4 - March 11 2016 =
+= 2.4 - April 1 2016 =
 * Created new Live Editor.
 * Changes to Page Builder admin HTML structure for Live Editor.
 * New layout for prebuilt dialog.
