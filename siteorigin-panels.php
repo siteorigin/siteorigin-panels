@@ -396,7 +396,8 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 					'row_edit' => __( 'Edit Row', 'siteorigin-panels' ),
 					'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
 					'row_delete' => __( 'Delete Row', 'siteorigin-panels' ),
-				)
+				),
+				'draft' => __( 'Draft', 'siteorigin-panels' ),
 			),
 			'plupload' => array(
 				'max_file_size' => wp_max_upload_size().'b',

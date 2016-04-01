@@ -4805,6 +4805,25 @@ module.exports = Backbone.View.extend( {
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
 		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
 		this.builder.trigger( 'builder_resize' );
+
+
+		if( $('#original_post_status' ).val() === 'auto-draft' && ! this.autoSaved ) {
+			// The live editor requires a saved draft post, so we'll create one for auto-draft posts
+			var thisView = this;
+
+			if ( wp.autosave ) {
+				// Set a temporary post title so the autosave triggers properly
+				if( $('#title[name="post_title"]' ).val() === '' ) {
+					$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
+				}
+
+				$( document ).one( 'heartbeat-tick.autosave', function(){
+					thisView.autoSaved = true;
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				} );
+				wp.autosave.server.triggerSave();
+			}
+		}
 	},
 
 	/**
