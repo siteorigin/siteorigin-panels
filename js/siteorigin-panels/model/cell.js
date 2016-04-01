@@ -1,51 +1,53 @@
 module.exports = Backbone.Model.extend( {
-    /* A collection of widgets */
-    widgets: {},
+	/* A collection of widgets */
+	widgets: {},
 
-    /* The row this model belongs to */
-    row: null,
+	/* The row this model belongs to */
+	row: null,
 
-    defaults: {
-        weight : 0
-    },
+	defaults: {
+		weight: 0
+	},
 
-    /**
-     * Set up the cell model
-     */
-    initialize: function(){
-        this.widgets = new panels.collection.widgets();
-        this.on('destroy', this.onDestroy, this);
-    },
+	indexes: null,
 
-    /**
-     * Triggered when we destroy a cell
-     */
-    onDestroy: function(){
-        _.invoke(this.widgets.toArray(), 'destroy');
-        this.widgets.reset();
-    },
+	/**
+	 * Set up the cell model
+	 */
+	initialize: function () {
+		this.widgets = new panels.collection.widgets();
+		this.on( 'destroy', this.onDestroy, this );
+	},
 
-    /**
-     * Create a clone of the cell, along with all its widgets
-     */
-    clone: function(row, cloneOptions){
-        if( typeof row === 'undefined' ) {
-            row = this.row;
-        }
-        cloneOptions = _.extend({ cloneWidgets: true }, cloneOptions);
+	/**
+	 * Triggered when we destroy a cell
+	 */
+	onDestroy: function () {
+		_.invoke( this.widgets.toArray(), 'destroy' );
+		this.widgets.reset();
+	},
 
-        var clone = new this.constructor( this.attributes );
-        clone.set('collection', row.cells, {silent: true});
-        clone.row = row;
+	/**
+	 * Create a clone of the cell, along with all its widgets
+	 */
+	clone: function ( row, cloneOptions ) {
+		if ( _.isUndefined( row ) ) {
+			row = this.row;
+		}
+		cloneOptions = _.extend( {cloneWidgets: true}, cloneOptions );
 
-        if( cloneOptions.cloneWidgets ) {
-            // Now we're going add all the widgets that belong to this, to the clone
-            this.widgets.each(function(widget){
-                clone.widgets.add( widget.clone( clone, cloneOptions ), {silent: true} );
-            });
-        }
+		var clone = new this.constructor( this.attributes );
+		clone.set( 'collection', row.cells, {silent: true} );
+		clone.row = row;
 
-        return clone;
-    }
+		if ( cloneOptions.cloneWidgets ) {
+			// Now we're going add all the widgets that belong to this, to the clone
+			this.widgets.each( function ( widget ) {
+				clone.widgets.add( widget.clone( clone, cloneOptions ), {silent: true} );
+			} );
+		}
+
+		return clone;
+	}
 
 } );

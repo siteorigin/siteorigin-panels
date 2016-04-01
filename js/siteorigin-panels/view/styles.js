@@ -2,185 +2,199 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
 
-    stylesLoaded: false,
+	stylesLoaded: false,
 
-    initialize: function(){
+	initialize: function () {
 
-    },
+	},
 
-    /**
-     * Render the visual styles object.
-     *
-     * @param type
-     * @param postId
-     */
-    render: function( stylesType, postId, args ){
-        if( typeof stylesType === 'undefined' ) {
-            return false;
-        }
+	/**
+	 * Render the visual styles object.
+	 *
+	 * @param type
+	 * @param postId
+	 */
+	render: function ( stylesType, postId, args ) {
+		if ( _.isUndefined( stylesType ) ) {
+			return;
+		}
 
-        // Add in the default args
-        args  = _.extend( {
-            builderType : ''
-        }, args );
+		// Add in the default args
+		args = _.extend( {
+			builderType: '',
+			dialog: null
+		}, args );
 
-        this.$el.addClass('so-visual-styles');
+		this.$el.addClass( 'so-visual-styles' );
 
-        // Load the form
-        var thisView = this;
-        $.post(
-            panelsOptions.ajaxurl,
-            {
-                action: 'so_panels_style_form',
-                type: stylesType,
-                style: this.model.get('style'),
-                args : JSON.stringify( args ),
-                postId: postId
-            },
-            function( response ){
-                thisView.$el.html( response );
-                thisView.setupFields();
-                thisView.stylesLoaded = true;
-                thisView.trigger('styles_loaded');
-            }
-        );
-    },
+		// Load the form
+		var thisView = this;
+		$.post(
+			panelsOptions.ajaxurl,
+			{
+				action: 'so_panels_style_form',
+				type: stylesType,
+				style: this.model.get( 'style' ),
+				args: JSON.stringify( {
+					builderType: args.builderType
+				} ),
+				postId: postId
+			},
+			function ( response ) {
+				thisView.$el.html( response );
+				thisView.setupFields();
+				thisView.stylesLoaded = true;
+				thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+				if ( ! _.isNull( args.dialog ) ) {
+					args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+				}
+			}
+		);
 
-    /**
-     * Attach the style view to the DOM.
-     *
-     * @param wrapper
-     */
-    attach: function( wrapper ){
-        wrapper.append( this.$el );
-    },
+		return this;
+	},
 
-    /**
-     * Detach the styles view from the DOM
-     */
-    detach: function(){
-        this.$el.detach();
-    },
+	/**
+	 * Attach the style view to the DOM.
+	 *
+	 * @param wrapper
+	 */
+	attach: function ( wrapper ) {
+		wrapper.append( this.$el );
+	},
 
-    /**
-     * Setup all the fields
-     */
-    setupFields: function(){
+	/**
+	 * Detach the styles view from the DOM
+	 */
+	detach: function () {
+		this.$el.detach();
+	},
 
-        // Set up the sections as collapsible
-        this.$('.style-section-wrapper').each(function(){
-            var $s = $(this);
+	/**
+	 * Setup all the fields
+	 */
+	setupFields: function () {
 
-            $s.find('.style-section-head').click( function(e){
-                e.preventDefault();
-                $s.find('.style-section-fields').slideToggle('fast');
-            } );
-        });
+		// Set up the sections as collapsible
+		this.$( '.style-section-wrapper' ).each( function () {
+			var $s = $( this );
 
-        // Set up the color fields
-        if(typeof $.fn.wpColorPicker !== 'undefined') {
-            if (typeof(panelsOptions.wpColorPickerOptions.palettes) == 'object' && !$.isArray(panelsOptions.wpColorPickerOptions.palettes)) {
-                panelsOptions.wpColorPickerOptions.palettes = $.map(panelsOptions.wpColorPickerOptions.palettes, function(el) { return el; });
-            }
-            this.$('.so-wp-color-field').wpColorPicker(panelsOptions.wpColorPickerOptions);
-        }
+			$s.find( '.style-section-head' ).click( function ( e ) {
+				e.preventDefault();
+				$s.find( '.style-section-fields' ).slideToggle( 'fast' );
+			} );
+		} );
 
-        // Set up the image select fields
-        this.$('.style-field-image').each( function(){
-            var frame = null;
-            var $s = $(this);
+		// Set up the color fields
+		if ( ! _.isUndefined( $.fn.wpColorPicker ) ) {
+			if ( _.isObject( panelsOptions.wpColorPickerOptions.palettes ) && ! $.isArray( panelsOptions.wpColorPickerOptions.palettes ) ) {
+				panelsOptions.wpColorPickerOptions.palettes = $.map( panelsOptions.wpColorPickerOptions.palettes, function ( el ) {
+					return el;
+				} );
+			}
+			this.$( '.so-wp-color-field' ).wpColorPicker( panelsOptions.wpColorPickerOptions );
+		}
 
-            $s.find('.so-image-selector').click( function( e ){
-                e.preventDefault();
+		// Set up the image select fields
+		this.$( '.style-field-image' ).each( function () {
+			var frame = null;
+			var $s = $( this );
 
-                if( frame === null ) {
-                    // Create the media frame.
-                    frame = wp.media({
-                        // Set the title of the modal.
-                        title: 'choose',
+			$s.find( '.so-image-selector' ).click( function ( e ) {
+				e.preventDefault();
 
-                        // Tell the modal to show only images.
-                        library: {
-                            type: 'image'
-                        },
+				if ( frame === null ) {
+					// Create the media frame.
+					frame = wp.media( {
+						// Set the title of the modal.
+						title: 'choose',
 
-                        // Customize the submit button.
-                        button: {
-                            // Set the text of the button.
-                            text: 'Done',
-                            close: true
-                        }
-                    });
+						// Tell the modal to show only images.
+						library: {
+							type: 'image'
+						},
 
-                    frame.on( 'select', function(){
-                        var attachment = frame.state().get('selection').first().attributes;
+						// Customize the submit button.
+						button: {
+							// Set the text of the button.
+							text: 'Done',
+							close: true
+						}
+					} );
 
-                        var url = attachment.url;
-                        if(!_.isUndefined(attachment.sizes)) {
-                            try {
-                                url = attachment.sizes.thumbnail.url;
-                            }
-                            catch(e) {
-                                // We'll use the full image instead
-                                url = attachment.sizes.full.url;
-                            }
-                        }
-                        $s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
+					frame.on( 'select', function () {
+						var attachment = frame.state().get( 'selection' ).first().attributes;
 
-                        // Store the ID
-                        $s.find('input').val( attachment.id )
-                    } );
-                }
+						var url = attachment.url;
+						if ( ! _.isUndefined( attachment.sizes ) ) {
+							try {
+								url = attachment.sizes.thumbnail.url;
+							}
+							catch ( e ) {
+								// We'll use the full image instead
+								url = attachment.sizes.full.url;
+							}
+						}
+						$s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
 
-                frame.open();
+						// Store the ID
+						$s.find( 'input' ).val( attachment.id )
+					} );
+				}
 
-            } );
+				frame.open();
 
-            // Handle clicking on remove
-            $s.find('.remove-image').click(function(e){
-                e.preventDefault();
-                $s.find( '.current-image').css('background-image', 'none');
-                $s.find('input').val( '' );
-            });
-        } );
+			} );
 
-        // Set up all the measurement fields
-        this.$('.style-field-measurement').each(function(){
-            var $$ = jQuery(this);
+			// Handle clicking on remove
+			$s.find( '.remove-image' ).click( function ( e ) {
+				e.preventDefault();
+				$s.find( '.current-image' ).css( 'background-image', 'none' );
+				$s.find( 'input' ).val( '' );
+			} );
+		} );
 
-            var text = $$.find('input[type="text"]');
-            var unit = $$.find('select');
-            var hidden = $$.find('input[type="hidden"]');
+		// Set up all the measurement fields
+		this.$( '.style-field-measurement' ).each( function () {
+			var $$ = jQuery( this );
 
-            // Load the value from the hidden field
-            if( hidden.val() !== '' ) {
-                var re = /(?:([0-9\.,]+)(.*))+/;
-                var valueList = hidden.val().split(' ');
-                var valueListValue = [];
-                for (var i in valueList) {
-                    var match = re.exec(valueList[i]);
-                    if (match != null && typeof match[1] !== 'undefined' && typeof match[2] !== 'undefined') {
-                        valueListValue.push(match[1]);
-                        unit.val(match[2]);
-                    }
-                }
-                text.val(valueListValue.join(' '));
-            }
+			var text = $$.find( 'input[type="text"]' );
+			var unit = $$.find( 'select' );
+			var hidden = $$.find( 'input[type="hidden"]' );
 
-            var setVal = function(){
-                var fullString = text
-                    .val()
-                    .split(' ')
-                    .filter(function(value) { return value !== '' })
-                    .map(function(value) { return value + unit.val(); })
-                    .join(' ');
-                hidden.val( fullString );
-            };
+			// Load the value from the hidden field
+			if ( hidden.val() !== '' ) {
+				var re = /(?:([0-9\.,]+)(.*))+/;
+				var valueList = hidden.val().split( ' ' );
+				var valueListValue = [];
+				for ( var i in valueList ) {
+					var match = re.exec( valueList[i] );
+					if ( _.isNull( match ) && ! _.isUndefined( match[1] ) && ! _.isUndefined( match[2] ) ) {
+						valueListValue.push( match[1] );
+						unit.val( match[2] );
+					}
+				}
+				text.val( valueListValue.join( ' ' ) );
+			}
 
-            // Set the value when ever anything changes
-            text.keyup(setVal).change(setVal);
-            unit.change(setVal);
-        } );
-    }
+			var setVal = function () {
+				var fullString = text
+					.val()
+					.split( ' ' )
+					.filter( function ( value ) {
+						return value !== ''
+					} )
+					.map( function ( value ) {
+						return value + unit.val();
+					} )
+					.join( ' ' );
+				hidden.val( fullString );
+			};
+
+			// Set the value when ever anything changes
+			text.keyup( setVal ).change( setVal );
+			unit.change( setVal );
+		} );
+	}
 
 } );

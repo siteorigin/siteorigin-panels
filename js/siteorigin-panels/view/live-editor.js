@@ -1,309 +1,390 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-    template: _.template( $('#siteorigin-panels-live-editor').html().panelsProcessTemplate() ),
+	template: _.template( $( '#siteorigin-panels-live-editor' ).html().panelsProcessTemplate() ),
 
-    sectionTemplate: _.template( $('#siteorigin-panels-live-editor-sidebar-section').html().panelsProcessTemplate() ),
+	postId: false,
+	previewScrollTop: 0,
+	loadTimes: [],
+	previewFrameId: 1,
+	previewIframe: null,
 
-    postId: false,
-    bodyScrollTop : null,
-    displayed: false,
+	events: {
+		'click .live-editor-close': 'close',
+		'click .live-editor-collapse': 'collapse',
+		'click .live-editor-mode': 'mobileToggle'
+	},
 
-    events: {
-        'click .live-editor-close': 'close'
-    },
-    frameScrollTop: 0,
+	initialize: function ( options ) {
+		this.builder = options.builder;
+		this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
+		this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
+	},
 
-    initialize: function(){
-    },
+	/**
+	 * Render the live editor
+	 */
+	render: function () {
+		this.setElement( this.template() );
+		this.$el.hide();
+		var thisView = this;
 
-    /**
-     * Render the live editor
-     */
-    render: function(){
-        this.setElement( this.template() );
-        this.$el.html( this.template() );
+		var isMouseDown = false;
 
-        var thisView = this;
+		$( document )
+			.mousedown( function () {
+				isMouseDown = true;
+			} )
+			.mouseup( function () {
+				isMouseDown = false;
+			} );
 
-        // Prevent clicks inside the iframe
-        this.$('iframe#siteorigin-panels-live-editor-iframe')
-            .load(function(){
-                $(this).show();
+		// Handle highlighting the relevant widget in the live editor preview
+		thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
+			var $$ = $( this ),
+				previewWidget = $( this ).data( 'live-editor-preview-widget' );
 
-                var ifc = $(this).contents();
+			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! thisView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
+				thisView.highlightElement( previewWidget );
+				thisView.scrollToElement( previewWidget );
+			}
+		} );
 
-                // Lets find all the first level grids. This is to account for the Page Builder layout widget.
-                ifc.find('.panel-grid .panel-grid-cell .so-panel')
-                    .filter(function(){
-                        // Filter to only include non nested
-                        return $(this).parents('.widget_siteorigin-panels-builder').length == 0;
-                    })
-                    .each(function(i, el){
-                        var $$ = jQuery(el);
-                        var widgetEdit = thisView.$('.page-widgets .so-widget').eq(i);
-                        var overlay;
+		thisView.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
+			thisView.resetHighlights();
+		} );
 
-                        $$
-                            .css({
-                                'cursor' : 'pointer'
-                            })
-                            .mouseenter(function(){
-                                widgetEdit.addClass('so-hovered');
-                                overlay = thisView.createPreviewOverlay( $(this) );
-                            })
-                            .mouseleave( function(){
-                                widgetEdit.removeClass('so-hovered');
-                                overlay.fadeOut('fast', function(){ $(this).remove(); });
-                            } )
-                            .click(function(e){
-                                e.preventDefault();
-                                // When we click a widget, send that click to the form
-                                widgetEdit.click();
-                            });
-                    });
+		thisView.builder.on( 'open_dialog', function () {
+			thisView.resetHighlights();
+		} );
 
-                // Prevent default clicks
-                ifc.find( "a").css({'pointer-events' : 'none'}).click(function(e){
-                    return false;
-                });
+		return this;
+	},
 
-            });
-    },
+	/**
+	 * Attach the live editor to the document
+	 */
+	attach: function () {
+		this.$el.appendTo( 'body' );
+	},
 
-    /**
-     * Attach the live editor to the document
-     */
-    attach: function(){
-        this.$el.appendTo('body');
-    },
+	setPostId: function ( postId ) {
+		this.postId = postId;
+	},
 
-    setPostId: function(postId){
-        this.postId = postId;
-    },
+	/**
+	 * Display the live editor
+	 */
+	open: function () {
+		if ( this.$el.html() === '' ) {
+			this.render();
+		}
+		if ( this.$el.closest( 'body' ).length === 0 ) {
+			this.attach();
+		}
 
-    /**
-     * Display the live editor
-     */
-    open: function(){
-        if( this.$el.html() === '' ) {
-            this.render();
-        }
-        if( this.$el.closest('body').length === 0 ) {
-            this.attach();
-        }
+		// Disable page scrolling
+		this.builder.lockPageScroll();
 
-        // Refresh the preview display
-        this.refreshWidgets();
-        this.$el.show();
+		if ( this.$el.is( ':visible' ) ) {
+			return this;
+		}
 
-        // Refresh the preview after we show the editor
-        this.refreshPreview();
+		// Refresh the preview display
+		this.$el.show();
+		this.refreshPreview( this.builder.model.getPanelsData() );
 
-        // Disable page scrolling
-        this.bodyScrollTop = $('body').scrollTop();
-        $('body').css( {overflow:'hidden'} );
+		this.originalContainer = this.builder.$el.parent();
+		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
+		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
+		this.builder.trigger( 'builder_resize' );
 
-        this.displayed = true;
-    },
 
-    close: function(){
-        this.$el.hide();
-        $('body').css( {overflow:'auto'} );
-        $('body').scrollTop( this.bodyScrollTop );
+		if( $('#original_post_status' ).val() === 'auto-draft' && ! this.autoSaved ) {
+			// The live editor requires a saved draft post, so we'll create one for auto-draft posts
+			var thisView = this;
 
-        this.displayed = false;
+			if ( wp.autosave ) {
+				// Set a temporary post title so the autosave triggers properly
+				if( $('#title[name="post_title"]' ).val() === '' ) {
+					$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
+				}
 
-        return false;
-    },
+				$( document ).one( 'heartbeat-tick.autosave', function(){
+					thisView.autoSaved = true;
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				} );
+				wp.autosave.server.triggerSave();
+			}
+		}
+	},
 
-    /**
-     * Refresh the preview display
-     */
-    refreshPreview: function(){
-        if( !this.$el.is(':visible') ) {
-            return false;
-        }
+	/**
+	 * Close the live editor
+	 */
+	close: function () {
+		if ( ! this.$el.is( ':visible' ) ) {
+			return this;
+		}
 
-        this.$('iframe#siteorigin-panels-live-editor-iframe').hide();
+		this.$el.hide();
+		this.builder.unlockPageScroll();
 
-        this.frameScrollTop = this.$('iframe#siteorigin-panels-live-editor-iframe').contents().find('body').scrollTop();
+		// Move the builder back to its original container
+		this.builder.$el.appendTo( this.originalContainer );
+		this.builder.$( '.so-tool-button.so-live-editor' ).show();
+		this.builder.trigger( 'builder_resize' );
+	},
 
-        this.$('form.live-editor-form input[name="siteorigin_panels_data"]').val( JSON.stringify( this.builder.model.getPanelsData() ) );
-        this.$('form.live-editor-form').submit();
-    },
+	/**
+	 * Collapse the live editor
+	 */
+	collapse: function () {
+		this.$el.toggleClass( 'so-collapsed' );
 
-    /**
-     * Create an overlay in the preview.
-     *
-     * @param over
-     * @return {*|Object} The item we're hovering over.
-     */
-    createPreviewOverlay: function(over) {
-        var previewFrame = this.$('iframe#siteorigin-panels-live-editor-iframe');
+		var text = this.$( '.live-editor-collapse span' );
+		text.html( text.data( this.$el.hasClass( 'so-collapsed' ) ? 'expand' : 'collapse' ) );
+	},
 
-        // Remove any old overlays
-        var body = previewFrame.contents().find('body').css('position', 'relative');
+	/**
+	 * Create an overlay in the preview.
+	 *
+	 * @param over
+	 * @return {*|Object} The item we're hovering over.
+	 */
+	highlightElement: function ( over ) {
+		if( ! _.isUndefined( this.resetHighlightTimeout ) ) {
+			clearTimeout( this.resetHighlightTimeout );
+		}
 
-        previewFrame.contents().find('.panels-live-editor-overlay').remove();
+		// Remove any old overlays
 
-        // Create the new overlay
-        var overlayContainer = $('<div />').addClass('panels-live-editor-overlay').css( {
-            'pointer-events' : 'none'
-        } );
+		var body = this.previewIframe.contents().find( 'body' );
+		body.find( '.panel-grid .panel-grid-cell .so-panel' )
+			.filter( function () {
+				// Filter to only include non nested
+				return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+			} )
+			.not( over )
+			.addClass( 'so-panels-faded' );
 
-        // The overlay item used to highlight the current element
-        var overlay = $('<div />').css({
-            'position' : 'absolute',
-            'background' : '#000000',
-            'z-index' : 10000,
-            'opacity' : 0.25
-        });
+		over.removeClass( 'so-panels-faded' ).addClass( 'so-panels-highlighted' );
+	},
 
-        var spacing = 15;
+	/**
+	 * Reset highlights in the live preview
+	 */
+	resetHighlights: function() {
 
-        overlayContainer
-            .append(
-            // The top overlay
-            overlay.clone().css({
-                'top' : -body.offset().top,
-                'left' : 0,
-                'right' : 0,
-                'height' : over.offset().top - spacing
-            })
-        )
-            .append(
-            // The bottom overlay
-            overlay.clone().css({
-                'bottom' : 0,
-                'left' : 0,
-                'right' : 0,
-                'height' : Math.round( body.height() - over.offset().top -  over.outerHeight() - spacing + body.offset().top - 0.01 )
-            })
-        )
-            .append(
-            // The left overlay
-            overlay.clone().css({
-                'top' : over.offset().top - spacing - body.offset().top,
-                'left' : 0,
-                'width' : over.offset().left - spacing,
-                'height' : Math.ceil(over.outerHeight() + spacing*2)
-            })
-        )
-            .append(
-            // The right overlay
-            overlay.clone().css({
-                'top' : over.offset().top - spacing - body.offset().top,
-                'right' : 0,
-                'left' : over.offset().left + over.outerWidth() + spacing,
-                'height' : Math.ceil(over.outerHeight() + spacing*2)
-            })
-        );
+		var body = this.previewIframe.contents().find( 'body' );
+		this.resetHighlightTimeout = setTimeout( function(){
+			body.find( '.panel-grid .panel-grid-cell .so-panel' )
+				.removeClass( 'so-panels-faded so-panels-highlighted' );
+		}, 100 );
+	},
 
-        // Create a new overlay
-        previewFrame.contents().find('body').append(overlayContainer);
-        return overlayContainer;
-    },
+	/**
+	 * Scroll over an element in the live preview
+	 * @param over
+	 */
+	scrollToElement: function( over ) {
+		var contentWindow = this.$( '.so-preview iframe' )[0].contentWindow;
+		contentWindow.liveEditorScrollTo( over );
+	},
 
-    /**
-     * Refresh the widgets in the left sidebar.
-     */
-    refreshWidgets: function(){
-        // Empty all the current widgets
-        this.$('.so-sidebar .page-widgets').empty();
-        var previewFrame = this.$('iframe#siteorigin-panels-live-editor-iframe');
+	handleRefreshData: function ( newData, args ) {
+		if ( ! this.$el.is( ':visible' ) ) {
+			return this;
+		}
 
-        // Now lets move all the widgets to the sidebar
-        var thisView = this;
-        var widgetIndex = 0;
+		this.refreshPreview( newData );
+	},
 
-        this.builder.$('.so-row-container').each(function(ri, el) {
-            var row = $(el);
-            var widgets = row.find('.so-cells .cell .so-widget');
+	handleLoadData: function () {
+		if ( ! this.$el.is( ':visible' ) ) {
+			return this;
+		}
 
-            var sectionWrapper = $( thisView.sectionTemplate({ title: 'Row ' + (ri+1) }) )
-                .appendTo( thisView.$('.so-sidebar .page-widgets') );
+		this.refreshPreview( this.builder.model.getPanelsData() );
+	},
 
-            sectionWrapper.find('.section-header').click(function(){
-                row.data('view').editSettingsHandler();
-            });
+	/**
+	 * Refresh the Live Editor preview.
+	 * @returns {exports}
+	 */
+	refreshPreview: function ( data ) {
+		var loadTimePrediction = this.loadTimes.length ?
+		_.reduce( this.loadTimes, function ( memo, num ) {
+			return memo + num;
+		}, 0 ) / this.loadTimes.length : 1000;
 
-            var widgetsWrapper = sectionWrapper.find('.section-widgets');
+		// Store the last preview iframe position
+		if( ! _.isNull( this.previewIframe )  ) {
+			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
+				this.previewScrollTop = this.previewIframe.contents().scrollTop();
+			}
+		}
 
-            widgets.each(function(i, el){
-                var widget = $(this);
-                var widgetClone = widget.clone().show().css({
-                    opacity : 1
-                });
+		// Add a loading bar
+		this.$( '.so-preview-overlay' ).show();
+		this.$( '.so-preview-overlay .so-loading-bar' )
+			.clearQueue()
+			.css( 'width', '0%' )
+			.animate( {width: '100%'}, parseInt( loadTimePrediction ) + 100 );
 
-                // Remove all the action buttons from the clone
-                widgetClone.find('.actions').remove();
-                widgetClone.find('.widget-icon').remove();
 
-                var thisWidgetIndex = (widgetIndex++);
-                var getHoverWidget = function(){
-                    return previewFrame.contents()
-                        .find('#pl-' + thisView.postId + ' .panel-grid .panel-grid-cell .so-panel')
-                        .filter(function(){
-                            // Filter to only include non nested
-                            return $(this).parents('.widget_siteorigin-panels-builder').length === 0;
-                        })
-                        .not('panel-hover-widget')
-                        .eq(thisWidgetIndex);
-                };
+		this.postToIframe(
+			{ live_editor_panels_data: JSON.stringify( data ) },
+			this.$el.data('preview-url'),
+			this.$('.so-preview')
+		);
 
-                var overlay = null, hoverWidget = null;
+		this.previewIframe.data( 'load-start', new Date().getTime() );
+	},
 
-                widgetClone
-                    .click(function(e){
-                        e.preventDefault();
-                        widget.data('view').editHandler();
-                        return false;
-                    })
-                    .mouseenter(function(){
-                        var hoverWidget = getHoverWidget();
+	/**
+	 * Use a temporary form to post data to an iframe.
+	 *
+	 * @param data The data to send
+	 * @param url The preview URL
+	 * @param target The target iframe
+	 */
+	postToIframe: function( data, url, target ){
+		// Store the old preview
 
-                        // Center the iframe on the over item
-                        if(hoverWidget && hoverWidget.offset()) {
-                            previewFrame.contents()
-                                .find('html,body')
-                                .clearQueue()
-                                .animate( {
-                                    scrollTop: hoverWidget.offset().top - Math.max(30, ( Math.min( previewFrame.contents().height(), previewFrame.height() ) - hoverWidget.outerHeight() ) /2 )
-                                }, 750);
+		if( ! _.isNull( this.previewIframe )  ) {
+			this.previewIframe.remove();
+		}
 
-                            // Create the overlay
-                            overlay = thisView.createPreviewOverlay( hoverWidget );
-                        }
+		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
-                    })
-                    .mouseleave(function(){
-                        // Stop any scroll animations that are currently happening
-                        previewFrame.contents()
-                            .find('html,body')
-                            .clearQueue();
+		// Remove the old preview frame
+		this.previewIframe = $('<iframe src="javascript:false;" />')
+			.attr( {
+				'id' : iframeId,
+				'name' : iframeId,
+			} )
+			.appendTo( target )
 
-                        if(overlay !== null) {
-                            overlay.fadeOut('fast', function(){
-                                $(this).remove();
-                            });
-                            overlay = null;
-                        }
-                        if(hoverWidget !== null) {
-                            hoverWidget.remove();
-                            hoverWidget = null;
-                        }
-                    })
-                    .appendTo( widgetsWrapper );
-            });
-        });
-    },
+		this.setupPreviewFrame( this.previewIframe );
 
-    /**
-     * Return true if the live editor has a valid preview URL.
-     * @return {boolean}
-     */
-    hasPreviewUrl: function(){
-        return this.$('form.live-editor-form').attr('action') !== '';
-    }
+		// We can use a normal POST form submit
+		var tempForm = $('<form id="soPostToPreviewFrame" method="post" />')
+			.attr( {
+				id: iframeId,
+				target: this.previewIframe.attr('id'),
+				action: url
+			} )
+			.appendTo( 'body' );
+
+		$.each( data, function( name, value ){
+			$('<input type="hidden" />')
+				.attr( {
+					name: name,
+					value: value
+				} )
+				.appendTo( tempForm );
+		} );
+
+		tempForm
+			.submit()
+			.remove();
+
+		this.previewFrameId++;
+
+		return this.previewIframe;
+	},
+
+	setupPreviewFrame: function( iframe ){
+		var thisView = this;
+		iframe
+			.data( 'iframeready', false )
+			.on( 'iframeready', function () {
+				var $$ = $( this ),
+					$iframeContents = $$.contents();
+
+				if( $$.data( 'iframeready' ) ) {
+					// Skip this if the iframeready function has already run
+					return;
+				}
+
+				$$.data( 'iframeready', true );
+
+				if ( $$.data( 'load-start' ) !== undefined ) {
+					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
+
+					if ( ! _.isEmpty( thisView.loadTimes ) ) {
+						thisView.loadTimes = thisView.loadTimes.slice( 0, 4 );
+					}
+				}
+
+				setTimeout( function(){
+					// Scroll to the correct position
+					$iframeContents.scrollTop( thisView.previewScrollTop );
+					thisView.$( '.so-preview-overlay' ).hide();
+				}, 100 );
+
+				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
+				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
+					.filter( function () {
+						// Filter to only include non nested
+						return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+					} )
+					.each( function ( i, el ) {
+						var $$ = $( el );
+						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
+
+						widgetEdit.data( 'live-editor-preview-widget', $$ );
+
+						$$
+							.css( {
+								'cursor': 'pointer'
+							} )
+							.mouseenter( function () {
+								widgetEdit.parent().addClass( 'so-hovered' );
+								thisView.highlightElement( $$ );
+							} )
+							.mouseleave( function () {
+								widgetEdit.parent().removeClass( 'so-hovered' );
+								thisView.resetHighlights();
+							} )
+							.click( function ( e ) {
+								e.preventDefault();
+								// When we click a widget, send that click to the form
+								widgetEdit.find( '.title h4' ).click();
+							} );
+					} );
+
+				// Prevent default clicks
+				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
+					e.preventDefault();
+				} );
+
+			} )
+			.on( 'load', function(){
+				var $$ = $( this );
+				if( ! $$.data( 'iframeready' )  ) {
+					$$.trigger('iframeready');
+				}
+			} );
+	},
+
+	/**
+	 * Return true if the live editor has a valid preview URL.
+	 * @return {boolean}
+	 */
+	hasPreviewUrl: function () {
+		return this.$( 'form.live-editor-form' ).attr( 'action' ) !== '';
+	},
+
+	mobileToggle: function( e ){
+		var button = $( e.currentTarget );
+		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');
+		button.addClass( 'so-active' );
+
+		this.$el
+			.removeClass( 'live-editor-desktop-mode live-editor-tablet-mode live-editor-mobile-mode' )
+			.addClass( 'live-editor-' + button.data( 'mode' ) + '-mode' );
+
+	}
 } );

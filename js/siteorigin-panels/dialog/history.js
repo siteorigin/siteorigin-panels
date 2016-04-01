@@ -2,219 +2,225 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-    historyEntryTemplate: _.template( $('#siteorigin-panels-dialog-history-entry').html().panelsProcessTemplate() ),
+	historyEntryTemplate: _.template( $( '#siteorigin-panels-dialog-history-entry' ).html().panelsProcessTemplate() ),
 
-    entries: {},
-    currentEntry: null,
-    revertEntry: null,
-    selectedEntry: null,
+	entries: {},
+	currentEntry: null,
+	revertEntry: null,
+	selectedEntry: null,
 
-    dialogClass: 'so-panels-dialog-history',
+	previewScrollTop: null,
 
-    events: {
-        'click .so-close': 'closeDialog',
-        'click .so-restore': 'restoreSelectedEntry'
-    },
+	dialogClass: 'so-panels-dialog-history',
 
-    initializeDialog: function(){
-        this.entries = new panels.collection.historyEntries();
+	events: {
+		'click .so-close': 'closeDialog',
+		'click .so-restore': 'restoreSelectedEntry'
+	},
 
-        this.on('open_dialog', this.setCurrentEntry, this);
-        this.on('open_dialog', this.renderHistoryEntries, this);
-    },
+	initializeDialog: function () {
+		this.entries = new panels.collection.historyEntries();
 
-    render: function(){
-        // Render the dialog and attach it to the builder interface
-        this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-history').html(), {} ) );
+		this.on( 'open_dialog', this.setCurrentEntry, this );
+		this.on( 'open_dialog', this.renderHistoryEntries, this );
+	},
 
-        this.$('iframe.siteorigin-panels-history-iframe').load(function(){
-            $(this).show();
-        });
-    },
+	render: function () {
+		var thisView = this;
 
-    /**
-     * Set the original entry. This should be set when creating the dialog.
-     *
-     * @param {panels.model.builder} builder
-     */
-    setRevertEntry: function(builder){
-        this.revertEntry = new panels.model.historyEntry( {
-            data: JSON.stringify( builder.getPanelsData() ),
-            time: parseInt( new Date().getTime() / 1000 )
-        } );
-    },
+		// Render the dialog and attach it to the builder interface
+		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-history' ).html(), {} ) );
 
-    /**
-     * This is triggered when the dialog is opened.
-     */
-    setCurrentEntry: function(){
-        this.currentEntry = new panels.model.historyEntry( {
-            data: JSON.stringify( this.builder.model.getPanelsData() ),
-            time: parseInt( new Date().getTime() / 1000 )
-        } );
+		this.$( 'iframe.siteorigin-panels-history-iframe' ).load( function () {
+			var $$ = $( this );
+			$$.show();
 
-        this.selectedEntry = this.currentEntry;
-        this.previewEntry( this.currentEntry );
-        this.$('.so-buttons .so-restore').addClass('disabled');
-    },
+			$$.contents().scrollTop( thisView.previewScrollTop );
+		} );
+	},
 
-    /**
-     * Render the history entries in the sidebar
-     */
-    renderHistoryEntries: function(){
-        // Set up an interval that will display the time since every 10 seconds
-        var thisView = this;
+	/**
+	 * Set the original entry. This should be set when creating the dialog.
+	 *
+	 * @param {panels.model.builder} builder
+	 */
+	setRevertEntry: function ( builder ) {
+		this.revertEntry = new panels.model.historyEntry( {
+			data: JSON.stringify( builder.getPanelsData() ),
+			time: parseInt( new Date().getTime() / 1000 )
+		} );
+	},
 
-        var c = this.$('.history-entries').empty();
+	/**
+	 * This is triggered when the dialog is opened.
+	 */
+	setCurrentEntry: function () {
+		this.currentEntry = new panels.model.historyEntry( {
+			data: JSON.stringify( this.builder.model.getPanelsData() ),
+			time: parseInt( new Date().getTime() / 1000 )
+		} );
 
-        if( this.currentEntry.get('data') !== this.revertEntry.get('data') || this.entries.models.length > 0 ) {
-            $(this.historyEntryTemplate({title: panelsOptions.loc.history.revert, count: 1}))
-                .data('historyEntry', this.revertEntry)
-                .prependTo(c);
-        }
+		this.selectedEntry = this.currentEntry;
+		this.previewEntry( this.currentEntry );
+		this.$( '.so-buttons .so-restore' ).addClass( 'disabled' );
+	},
 
-        // Now load all the entries in this.entries
-        this.entries.each(function(entry){
+	/**
+	 * Render the history entries in the sidebar
+	 */
+	renderHistoryEntries: function () {
+		// Set up an interval that will display the time since every 10 seconds
+		var thisView = this;
 
-            var html = thisView.historyEntryTemplate( {
-                title: panelsOptions.loc.history[ entry.get('text') ],
-                count: entry.get('count')
-            } );
+		var c = this.$( '.history-entries' ).empty();
 
-            $( html )
-                .data('historyEntry', entry)
-                .prependTo(c);
-        });
+		if ( this.currentEntry.get( 'data' ) !== this.revertEntry.get( 'data' ) || ! _.isEmpty( this.entries.models ) ) {
+			$( this.historyEntryTemplate( {title: panelsOptions.loc.history.revert, count: 1} ) )
+				.data( 'historyEntry', this.revertEntry )
+				.prependTo( c );
+		}
+
+		// Now load all the entries in this.entries
+		this.entries.each( function ( entry ) {
+
+			var html = thisView.historyEntryTemplate( {
+				title: panelsOptions.loc.history[entry.get( 'text' )],
+				count: entry.get( 'count' )
+			} );
+
+			$( html )
+				.data( 'historyEntry', entry )
+				.prependTo( c );
+		} );
 
 
-        $(this.historyEntryTemplate({title: panelsOptions.loc.history['current'], count: 1}))
-            .data('historyEntry', this.currentEntry)
-            .addClass('so-selected')
-            .prependTo(c);
+		$( this.historyEntryTemplate( {title: panelsOptions.loc.history['current'], count: 1} ) )
+			.data( 'historyEntry', this.currentEntry )
+			.addClass( 'so-selected' )
+			.prependTo( c );
 
-        // Handle loading and selecting
-        c.find('.history-entry').click(function(){
-            var $$ = jQuery(this);
-            c.find('.history-entry').not($$).removeClass('so-selected');
-            $$.addClass('so-selected');
+		// Handle loading and selecting
+		c.find( '.history-entry' ).click( function () {
+			var $$ = jQuery( this );
+			c.find( '.history-entry' ).not( $$ ).removeClass( 'so-selected' );
+			$$.addClass( 'so-selected' );
 
-            var entry = $$.data('historyEntry');
+			var entry = $$.data( 'historyEntry' );
 
-            thisView.selectedEntry = entry;
+			thisView.selectedEntry = entry;
 
-            if( thisView.selectedEntry.cid !== thisView.currentEntry.cid ) {
-                thisView.$('.so-buttons .so-restore').removeClass('disabled');
-            }
-            else {
-                thisView.$('.so-buttons .so-restore').addClass('disabled');
-            }
+			if ( thisView.selectedEntry.cid !== thisView.currentEntry.cid ) {
+				thisView.$( '.so-buttons .so-restore' ).removeClass( 'disabled' );
+			} else {
+				thisView.$( '.so-buttons .so-restore' ).addClass( 'disabled' );
+			}
 
-            thisView.previewEntry( entry );
-        });
+			thisView.previewEntry( entry );
+		} );
 
-        this.updateEntryTimes();
-    },
+		this.updateEntryTimes();
+	},
 
-    /**
-     * Preview an entry
-     *
-     * @param entry
-     */
-    previewEntry: function(entry){
-        this.$('iframe.siteorigin-panels-history-iframe').hide();
-        this.$('form.history-form input[name="siteorigin_panels_data"]').val( entry.get('data') );
-        this.$('form.history-form').submit();
-    },
+	/**
+	 * Preview an entry
+	 *
+	 * @param entry
+	 */
+	previewEntry: function ( entry ) {
+		var iframe = this.$( 'iframe.siteorigin-panels-history-iframe' );
+		iframe.hide();
+		this.previewScrollTop = iframe.contents().scrollTop();
 
-    /**
-     * Restore the current entry
-     */
-    restoreSelectedEntry: function(){
+		this.$( 'form.history-form input[name="live_editor_panels_data"]' ).val( entry.get( 'data' ) );
+		this.$( 'form.history-form' ).submit();
+	},
 
-        if( this.$('.so-buttons .so-restore').hasClass('disabled') ) {
-            return false;
-        }
+	/**
+	 * Restore the current entry
+	 */
+	restoreSelectedEntry: function () {
 
-        if( this.currentEntry.get('data') === this.selectedEntry.get('data') ) {
-            this.closeDialog();
-            return false;
-        }
+		if ( this.$( '.so-buttons .so-restore' ).hasClass( 'disabled' ) ) {
+			return false;
+		}
 
-        // Add an entry for this restore event
-        if( this.selectedEntry.get('text') !== 'restore' ) {
-            this.entries.addEntry( 'restore', this.builder.model.getPanelsData() );
-        }
+		if ( this.currentEntry.get( 'data' ) === this.selectedEntry.get( 'data' ) ) {
+			this.closeDialog();
+			return false;
+		}
 
-        this.builder.model.loadPanelsData( JSON.parse( this.selectedEntry.get('data') ) );
+		// Add an entry for this restore event
+		if ( this.selectedEntry.get( 'text' ) !== 'restore' ) {
+			this.builder.addHistoryEntry( 'restore', this.builder.model.getPanelsData() );
+		}
 
-        this.closeDialog();
+		this.builder.model.loadPanelsData( JSON.parse( this.selectedEntry.get( 'data' ) ) );
 
-        return false;
-    },
+		this.closeDialog();
 
-    /**
-     * Update the entry times for the list of entries down the side
-     */
-    updateEntryTimes: function(){
-        var thisView = this;
+		return false;
+	},
 
-        this.$('.history-entries .history-entry').each(function(){
-            var $$ = jQuery(this);
+	/**
+	 * Update the entry times for the list of entries down the side
+	 */
+	updateEntryTimes: function () {
+		var thisView = this;
 
-            var time = $$.find('.timesince');
-            var entry = $$.data('historyEntry');
+		this.$( '.history-entries .history-entry' ).each( function () {
+			var $$ = jQuery( this );
 
-            time.html( thisView.timeSince( entry.get('time') ) );
-        });
-    },
+			var time = $$.find( '.timesince' );
+			var entry = $$.data( 'historyEntry' );
 
-    /**
-     * Gets the time since as a nice string.
-     *
-     * @param date
-     */
-    timeSince: function(time){
-        var diff = parseInt( new Date().getTime() / 1000 ) - time;
+			time.html( thisView.timeSince( entry.get( 'time' ) ) );
+		} );
+	},
 
-        var parts = [];
-        var interval;
+	/**
+	 * Gets the time since as a nice string.
+	 *
+	 * @param date
+	 */
+	timeSince: function ( time ) {
+		var diff = parseInt( new Date().getTime() / 1000 ) - time;
 
-        // There are 3600 seconds in an hour
-        if( diff > 3600 ) {
-            interval = Math.floor( diff / 3600 );
-            if(interval === 1) {
-                parts.push(panelsOptions.loc.time.hour.replace('%d', interval ));
-            }
-            else  {
-                parts.push(panelsOptions.loc.time.hours.replace('%d', interval ));
-            }
-            diff -= interval * 3600;
-        }
+		var parts = [];
+		var interval;
 
-        // There are 60 seconds in a minute
-        if( diff > 60 ) {
-            interval = Math.floor( diff / 60 );
-            if(interval === 1) {
-                parts.push(panelsOptions.loc.time.minute.replace('%d', interval ));
-            }
-            else {
-                parts.push(panelsOptions.loc.time.minutes.replace('%d', interval ));
-            }
-            diff -= interval * 60;
-        }
+		// There are 3600 seconds in an hour
+		if ( diff > 3600 ) {
+			interval = Math.floor( diff / 3600 );
+			if ( interval === 1 ) {
+				parts.push( panelsOptions.loc.time.hour.replace( '%d', interval ) );
+			} else {
+				parts.push( panelsOptions.loc.time.hours.replace( '%d', interval ) );
+			}
+			diff -= interval * 3600;
+		}
 
-        if( diff > 0 ) {
-            if(diff === 1) {
-                parts.push(panelsOptions.loc.time.second.replace('%d', diff ));
-            }
-            else  {
-                parts.push(panelsOptions.loc.time.seconds.replace('%d', diff ));
-            }
-        }
+		// There are 60 seconds in a minute
+		if ( diff > 60 ) {
+			interval = Math.floor( diff / 60 );
+			if ( interval === 1 ) {
+				parts.push( panelsOptions.loc.time.minute.replace( '%d', interval ) );
+			} else {
+				parts.push( panelsOptions.loc.time.minutes.replace( '%d', interval ) );
+			}
+			diff -= interval * 60;
+		}
 
-        // Return the amount of time ago
-        return parts.length === 0 ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace('%s', parts.slice(0,2).join(', ') );
+		if ( diff > 0 ) {
+			if ( diff === 1 ) {
+				parts.push( panelsOptions.loc.time.second.replace( '%d', diff ) );
+			} else {
+				parts.push( panelsOptions.loc.time.seconds.replace( '%d', diff ) );
+			}
+		}
 
-    }
+		// Return the amount of time ago
+		return _.isEmpty( parts ) ? panelsOptions.loc.time.now : panelsOptions.loc.time.ago.replace( '%s', parts.slice( 0, 2 ).join( ', ' ) );
+
+	}
 
 } );

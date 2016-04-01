@@ -26,7 +26,7 @@ function siteorigin_panels_legacy_widget_migration($panels_data){
 						'text' => $shortcode,
 						'panels_info' => $widget['panels_info']
 					);
-					$widget['panels_info']['class'] = 'WP_Widget_Black_Studio_TinyMCE';
+					$widget['panels_info']['class'] = 'SiteOrigin_Widget_Editor_Widget';
 
 					break;
 
@@ -49,7 +49,7 @@ function siteorigin_panels_legacy_widget_migration($panels_data){
 							'panels_info' => $widget['panels_info']
 						);
 
-						$widget['panels_info']['class'] = 'WP_Widget_Black_Studio_TinyMCE';
+						$widget['panels_info']['class'] = 'SiteOrigin_Widget_Editor_Widget';
 					}
 
 					break;

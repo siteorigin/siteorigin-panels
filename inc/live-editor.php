@@ -10,8 +10,8 @@
  * @return array
  */
 function siteorigin_panels_live_editor($value, $post_id, $meta_key){
-	if( $meta_key == 'panels_data' && !empty( $_GET['siteorigin_panels_live_editor'] ) && current_user_can( 'edit_post', $post_id ) && !empty( $_POST['siteorigin_panels_data'] ) ) {
-		$data = json_decode( wp_unslash( $_POST['siteorigin_panels_data'] ), true );
+	if( $meta_key == 'panels_data' && current_user_can( 'edit_post', $post_id ) && !empty( $_POST['live_editor_panels_data'] ) ) {
+		$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
 		$value = array( $data );
 	}
 
@@ -19,12 +19,32 @@ function siteorigin_panels_live_editor($value, $post_id, $meta_key){
 }
 add_action('get_post_metadata', 'siteorigin_panels_live_editor', 10, 3);
 
+// Don't display the admin bar when in live editor mode
+add_filter('show_admin_bar', '__return_false');
+
 /**
- * Hide the admin bar for the live editor
- *
- * @return bool
+ * Load the frontend scripts for the live editor
  */
-function siteorigin_panels_live_editor_admin_bar() {
-	return empty( $_GET['siteorigin_panels_live_editor'] );
+function siteorigin_panels_live_editor_frontend_scripts(){
+	wp_enqueue_script(
+		'live-editor-front',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+		array( 'jquery' ),
+		SITEORIGIN_PANELS_VERSION
+	);
+
+	wp_enqueue_script(
+		'live-editor-scrollto',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+		array( 'jquery' ),
+		SITEORIGIN_PANELS_VERSION
+	);
+
+	wp_enqueue_style(
+		'live-editor-front',
+		plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . '/css/live-editor-front.css',
+		array(),
+		SITEORIGIN_PANELS_VERSION
+	);
 }
-add_filter('show_admin_bar', 'siteorigin_panels_live_editor_admin_bar');
+add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_editor_frontend_scripts' );

@@ -2,235 +2,253 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-    builder: null,
-    sidebarWidgetTemplate: _.template( $('#siteorigin-panels-dialog-widget-sidebar-widget').html().panelsProcessTemplate() ),
-    dialogClass : 'so-panels-dialog-edit-widget',
-    widgetView : false,
-    savingWidget: false,
+	builder: null,
+	sidebarWidgetTemplate: _.template( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html().panelsProcessTemplate() ),
+	dialogClass: 'so-panels-dialog-edit-widget',
+	widgetView: false,
+	savingWidget: false,
 
-    events: {
-        'click .so-close': 'saveHistory',
-        'click .so-nav.so-previous': 'navToPrevious',
-        'click .so-nav.so-next': 'navToNext',
+	events: {
+		'click .so-close': 'saveHandler',
+		'click .so-nav.so-previous': 'navToPrevious',
+		'click .so-nav.so-next': 'navToNext',
 
-        // Action handlers
-        'click .so-toolbar .so-delete': 'deleteHandler',
-        'click .so-toolbar .so-duplicate': 'duplicateHandler'
-    },
+		// Action handlers
+		'click .so-toolbar .so-delete': 'deleteHandler',
+		'click .so-toolbar .so-duplicate': 'duplicateHandler'
+	},
 
-    initializeDialog: function(){
-        this.model.on( 'change:values', this.handleChangeValues, this );
-        this.model.on( 'destroy', this.remove, this );
-    },
+	initializeDialog: function () {
+		var thisView = this;
+		this.model.on( 'change:values', this.handleChangeValues, this );
+		this.model.on( 'destroy', this.remove, this );
 
-    /**
-     * Render the widget dialog.
-     */
-    render: function() {
-        // Render the dialog and attach it to the builder interface
-        this.renderDialog( this.parseDialogContent( $('#siteorigin-panels-dialog-widget').html(), {} ) );
-        this.loadForm();
+		// Refresh panels data after both dialog form components are loaded
+		this.dialogFormsLoaded = 0;
+		this.on( 'form_loaded styles_loaded', function () {
+			this.dialogFormsLoaded ++;
+			if ( this.dialogFormsLoaded === 2 ) {
+				thisView.updateModel( {
+					refreshArgs: {
+						silent: true
+					}
+				} );
+			}
+		} );
+	},
 
-        if( typeof panelsOptions.widgets[ this.model.get('class') ] !== 'undefined') {
-            this.$('.so-title .widget-name').html( panelsOptions.widgets[ this.model.get('class')].title );
-        }
-        else {
-            this.$('.so-title .widget-name').html( panelsOptions.loc.missing_widget.title );
-        }
+	/**
+	 * Render the widget dialog.
+	 */
+	render: function () {
+		// Render the dialog and attach it to the builder interface
+		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
+		this.loadForm();
 
-        // Now we need to attach the style window
-        this.styles = new panels.view.styles();
-        this.styles.model = this.model;
-        this.styles.render( 'widget', $('#post_ID').val(), {
-            builderType : this.builder.builderType
-        } );
-        this.styles.attach( this.$('.so-sidebar.so-right-sidebar') );
+		if ( ! _.isUndefined( panelsOptions.widgets[this.model.get( 'class' )] ) ) {
+			this.$( '.so-title .widget-name' ).html( panelsOptions.widgets[this.model.get( 'class' )].title );
+		} else {
+			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
+		}
 
-        // Handle the loading class
-        this.styles.on('styles_loaded', function(){
-            this.$('.so-sidebar.so-right-sidebar').removeClass('so-panels-loading');
-        }, this);
-        this.$('.so-sidebar.so-right-sidebar').addClass('so-panels-loading');
-    },
+		// Now we need to attach the style window
+		this.styles = new panels.view.styles();
+		this.styles.model = this.model;
+		this.styles.render( 'widget', $( '#post_ID' ).val(), {
+			builderType: this.builder.builderType,
+			dialog: this
+		} );
 
-    /**
-     * Get the previous widget editing dialog by looking at the dom.
-     * @returns {*}
-     */
-    getPrevDialog: function(){
-        var widgets = this.builder.$('.so-cells .cell .so-widget');
-        if(widgets.length <= 1) {
-            return false;
-        }
-        var currentIndex = widgets.index( this.widgetView.$el );
+		var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
+		this.styles.attach( $rightSidebar );
 
-        if( currentIndex === 0 ) {
-            return false;
-        }
-        else {
-            var widgetView = widgets.eq(currentIndex - 1).data('view');
-            if(typeof widgetView === 'undefined') {
-                return false;
-            }
+		// Handle the loading class
+		this.styles.on( 'styles_loaded', function ( hasStyles ) {
+			// If we have styles remove the loading spinner, else remove the whole empty sidebar.
+			if ( hasStyles ) {
+				$rightSidebar.removeClass( 'so-panels-loading' );
+			} else {
+				$rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
+				$rightSidebar.remove();
+			}
+		}, this );
+		$rightSidebar.addClass( 'so-panels-loading' );
+	},
 
-            return widgetView.getEditDialog();
-        }
-    },
+	/**
+	 * Get the previous widget editing dialog by looking at the dom.
+	 * @returns {*}
+	 */
+	getPrevDialog: function () {
+		var widgets = this.builder.$( '.so-cells .cell .so-widget' );
+		if ( widgets.length <= 1 ) {
+			return false;
+		}
+		var currentIndex = widgets.index( this.widgetView.$el );
 
-    /**
-     * Get the next widget editing dialog by looking at the dom.
-     * @returns {*}
-     */
-    getNextDialog: function(){
-        var widgets = this.builder.$('.so-cells .cell .so-widget');
-        if(widgets.length <= 1) {
-            return false;
-        }
-        var currentIndex = widgets.index( this.widgetView.$el );
+		if ( currentIndex === 0 ) {
+			return false;
+		} else {
+			var widgetView = widgets.eq( currentIndex - 1 ).data( 'view' );
+			if ( _.isUndefined( widgetView ) ) {
+				return false;
+			}
 
-        if( currentIndex === widgets.length - 1 ) {
-            return false;
-        }
-        else {
-            var widgetView = widgets.eq(currentIndex + 1).data('view');
-            if(typeof widgetView === 'undefined') {
-                return false;
-            }
+			return widgetView.getEditDialog();
+		}
+	},
 
-            return widgetView.getEditDialog();
-        }
-    },
+	/**
+	 * Get the next widget editing dialog by looking at the dom.
+	 * @returns {*}
+	 */
+	getNextDialog: function () {
+		var widgets = this.builder.$( '.so-cells .cell .so-widget' );
+		if ( widgets.length <= 1 ) {
+			return false;
+		}
+		var currentIndex = widgets.index( this.widgetView.$el );
 
-    /**
-     * Load the widget form from the server.
-     * This is called when rendering the dialog for the first time.
-     */
-    loadForm: function(){
-        // don't load the form if this dialog hasn't been rendered yet
-        if( !this.$el.find('> *').length ) {
-            return;
-        }
+		if ( currentIndex === widgets.length - 1 ) {
+			return false;
+		} else {
+			var widgetView = widgets.eq( currentIndex + 1 ).data( 'view' );
+			if ( _.isUndefined( widgetView ) ) {
+				return false;
+			}
 
-        var thisView = this;
-        this.$el.find('.so-content').addClass('so-panels-loading');
+			return widgetView.getEditDialog();
+		}
+	},
 
-        var data = {
-            'action' : 'so_panels_widget_form',
-            'widget' : this.model.get('class'),
-            'instance' : JSON.stringify( this.model.get('values') ),
-            'raw' : this.model.get('raw')
-        };
+	/**
+	 * Load the widget form from the server.
+	 * This is called when rendering the dialog for the first time.
+	 */
+	loadForm: function () {
+		// don't load the form if this dialog hasn't been rendered yet
+		if ( ! this.$( '> *' ).length ) {
+			return;
+		}
 
-        $.post(
-            panelsOptions.ajaxurl,
-            data,
-            function(result){
-                // Add in the CID of the widget model
-                var html = result.replace( /{\$id}/g, thisView.model.cid );
+		var thisView = this;
+		this.$( '.so-content' ).addClass( 'so-panels-loading' );
 
-                // Load this content into the form
-                thisView.$el.find('.so-content')
-                    .removeClass('so-panels-loading')
-                    .html(html);
+		var data = {
+			'action': 'so_panels_widget_form',
+			'widget': this.model.get( 'class' ),
+			'instance': JSON.stringify( this.model.get( 'values' ) ),
+			'raw': this.model.get( 'raw' )
+		};
 
-                // Trigger all the necessary events
-                thisView.trigger('form_loaded', thisView);
+		$.post(
+			panelsOptions.ajaxurl,
+			data,
+			function ( result ) {
+				// Add in the CID of the widget model
+				var html = result.replace( /{\$id}/g, thisView.model.cid );
 
-                // For legacy compatibility, trigger a panelsopen event
-                thisView.$el.find('.panel-dialog').trigger('panelsopen');
+				// Load this content into the form
+				thisView.$( '.so-content' )
+					.removeClass( 'so-panels-loading' )
+					.html( html );
 
-                // If the main dialog is closed from this point on, save the widget content
-                thisView.on('close_dialog', thisView.saveWidget, thisView);
-            },
-            'html'
-        );
-    },
+				// Trigger all the necessary events
+				thisView.trigger( 'form_loaded', thisView );
 
-    /**
-     * Save the widget from the form to the model
-     */
-    saveWidget: function(){
-        // Get the values from the form and assign the new values to the model
-        this.savingWidget = true;
+				// For legacy compatibility, trigger a panelsopen event
+				thisView.$( '.panel-dialog' ).trigger( 'panelsopen' );
 
-        if( !this.model.get('missing') ) {
-            // Only get the values for non missing widgets.
-            var values = this.getFormValues();
-            if (typeof values.widgets === 'undefined') {
-                values = {};
-            }
-            else {
-                values = values.widgets;
-                values = values[Object.keys(values)[0]];
-            }
+				// If the main dialog is closed from this point on, save the widget content
+				thisView.on( 'close_dialog', thisView.updateModel, thisView );
+			},
+			'html'
+		);
+	},
 
-            this.model.setValues(values);
-            this.model.set('raw', true); // We've saved from the widget form, so this is now raw
-        }
+	/**
+	 * Save the widget from the form to the model
+	 */
+	updateModel: function ( args ) {
+		args = _.extend( {
+			refresh: true,
+			refreshArgs: null
+		}, args );
 
-        if( this.styles.stylesLoaded ) {
-            // If the styles view has loaded
-            var style = {};
-            try {
-                style = this.getFormValues('.so-sidebar .so-visual-styles').style;
-            }
-            catch (e) {
-            }
-            this.model.set('style', style);
-        }
+		// Get the values from the form and assign the new values to the model
+		this.savingWidget = true;
 
-        this.savingWidget = false;
-    },
+		if ( ! this.model.get( 'missing' ) ) {
+			// Only get the values for non missing widgets.
+			var values = this.getFormValues();
+			if ( _.isUndefined( values.widgets ) ) {
+				values = {};
+			} else {
+				values = values.widgets;
+				values = values[Object.keys( values )[0]];
+			}
 
-    /**
-     *
-     */
-    handleChangeValues: function(){
-        if( !this.savingWidget ) {
-            // Reload the form when we've changed the model and we're not currently saving from the form
-            this.loadForm();
-        }
-    },
+			this.model.setValues( values );
+			this.model.set( 'raw', true ); // We've saved from the widget form, so this is now raw
+		}
 
-    /**
-     * Save a history entry for this widget. Called when the dialog is closed.
-     */
-    saveHistory: function(){
-        this.builder.addHistoryEntry('widget_edited');
-        this.closeDialog();
-    },
+		if ( this.styles.stylesLoaded ) {
+			// If the styles view has loaded
+			var style = {};
+			try {
+				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
+			}
+			catch ( e ) {
+			}
+			this.model.set( 'style', style );
+		}
 
-    /**
-     * When the user clicks delete.
-     *
-     * @returns {boolean}
-     */
-    deleteHandler: function(){
+		this.savingWidget = false;
 
-        if(this.builder.liveEditor.displayed) {
-            // We need to instantly destroy the widget
-            this.model.destroy();
-            this.builder.liveEditor.refreshWidgets();
-        }
-        else {
-            this.model.trigger('visual_destroy');
-        }
+		if ( args.refresh ) {
+			this.builder.model.refreshPanelsData( args.refreshArgs );
+		}
+	},
 
-        this.closeDialog();
+	/**
+	 *
+	 */
+	handleChangeValues: function () {
+		if ( ! this.savingWidget ) {
+			// Reload the form when we've changed the model and we're not currently saving from the form
+			this.loadForm();
+		}
+	},
 
-        return false;
-    },
+	/**
+	 * Save a history entry for this widget. Called when the dialog is closed.
+	 */
+	saveHandler: function () {
+		this.builder.addHistoryEntry( 'widget_edited' );
+		this.closeDialog();
+	},
 
-    duplicateHandler: function(){
-        this.model.trigger('user_duplicate');
+	/**
+	 * When the user clicks delete.
+	 *
+	 * @returns {boolean}
+	 */
+	deleteHandler: function () {
 
-        if(this.builder.liveEditor.displayed) {
-            this.builder.liveEditor.refreshWidgets();
-        }
+		this.model.trigger( 'visual_destroy' );
+		this.closeDialog( {silent: true} );
+		this.builder.model.refreshPanelsData();
 
-        this.closeDialog();
+		return false;
+	},
 
-        return false;
-    }
+	duplicateHandler: function () {
+		this.model.trigger( 'user_duplicate' );
+
+		this.closeDialog( {silent: true} );
+		this.builder.model.refreshPanelsData();
+
+		return false;
+	}
 
 } );

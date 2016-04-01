@@ -33,19 +33,21 @@
 			</div>
 		<?php endif; ?>
 
-		<div class="siteorigin-panels-builder so-panels-loading">
+		<div class="siteorigin-panels-builder-container so-panels-loading">
 
 		</div>
 
 		<script type="text/javascript">
-			// Create the panels_data input
-			document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-home" />' );
-			document.getElementById('panels-data-field-home').value = decodeURIComponent("<?php echo rawurlencode( json_encode($panels_data) ); ?>");
+			( function( builderId, panelsData ){
+				// Create the panels_data input
+				document.write( '<input name="panels_data" type="hidden" class="siteorigin-panels-data-field" id="panels-data-field-' + builderId + '" />' );
+				document.getElementById( 'panels-data-field-' + builderId ).value = JSON.stringify( panelsData );
+			} )( "home-page", <?php echo json_encode( $panels_data ); ?> );
 		</script>
 
 		<p><input type="submit" class="button button-primary" id="panels-save-home-page" value="<?php esc_attr_e('Save Home Page', 'siteorigin-panels') ?>" /></p>
-
+		<input type="hidden" id="post_content" name="post_content"/>
 		<?php wp_nonce_field('save', '_sopanels_home_nonce') ?>
 	</form>
 	<noscript><p><?php _e('This interface requires Javascript', 'siteorigin-panels') ?></p></noscript>
-</div> 
+</div>
