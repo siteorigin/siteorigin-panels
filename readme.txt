@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.0
-Tested up to: 4.4.2
+Tested up to: 4.5
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,25 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.4 - March 11 2016 =
+* Created new Live Editor.
+* Changes to Page Builder admin HTML structure for Live Editor.
+* New layout for prebuilt dialog.
+* Now possible to append, prepend and replace layouts in prebuilt dialog.
+* Fixed contextual menu in Layout Builder widget.
+* Added row/widget actions to contextual menu.
+* Clarified functionality of "Switch to Editor" button by renaming to "Revert to Editor".
+* refreshPanelsData function is called more consistenly.
+* Various background performance enhancements.
+* Full JS code refactoring.
+* Fixed cell bottom margins with reverse collapse order.
+* Improved window scroll locking for dialogs.
+* Added `in_widget_form` action when rendering widget forms
+* Custom home page now saves revisions.
+
+= 2.3.2 - March 11 2016 =
+* Fixed compatibility with WordPress 4.5
 
 = 2.3.1 - February 10 2016 =
 * Fixed fatal error on RTL sites.

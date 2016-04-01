@@ -1712,10 +1712,10 @@
 .so-panels-live-editor.so-collapsed .so-preview-overlay {
   left: 0;
 }
-.so-panels-live-editor.live-editor-mobile-mode #siteorigin-panels-live-editor-iframe {
+.so-panels-live-editor.live-editor-mobile-mode .so-preview iframe {
   max-width: 480px;
 }
-.so-panels-live-editor.live-editor-tablet-mode #siteorigin-panels-live-editor-iframe {
+.so-panels-live-editor.live-editor-tablet-mode .so-preview iframe {
   max-width: 768px;
 }
 .so-panels-loading {
