@@ -1942,7 +1942,8 @@ module.exports = function () {
 		if ( isWidget ) {
 			// Set up the dialog opening
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, builderView.dialog );
-			$$.find( '.siteorigin-panels-display-builder' ).click( function () {
+			$$.find( '.siteorigin-panels-display-builder' ).click( function ( e ) {
+				e.preventDefault();
 				builderView.dialog.openDialog();
 			} );
 		} else {
