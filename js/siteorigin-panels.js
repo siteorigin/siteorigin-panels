@@ -2165,55 +2165,54 @@ module.exports = Backbone.Model.extend( {
 	 *                          cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
-
-		if ( position === this.layoutPosition.BEFORE ) {
-			data = this.concatPanelsData( data, this.getPanelsData() );
-		} else if ( position === this.layoutPosition.AFTER ) {
-			data = this.concatPanelsData( this.getPanelsData(), data );
-		}
-
-		// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
-		this.emptyRows();
-
-		// This will empty out the current rows and reload the builder data.
-		this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
-
-		var cit = 0;
-		var rows = [];
-
-		if ( _.isUndefined( data.grid_cells ) ) {
-			this.trigger( 'load_panels_data' );
-			return;
-		}
-
-		var gi;
-		for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
-			gi = parseInt( data.grid_cells[ci].grid );
-			if ( _.isUndefined( rows[gi] ) ) {
-				rows[gi] = [];
+		try {
+			if ( position === this.layoutPosition.BEFORE ) {
+				data = this.concatPanelsData( data, this.getPanelsData() );
+			} else if ( position === this.layoutPosition.AFTER ) {
+				data = this.concatPanelsData( this.getPanelsData(), data );
 			}
 
-			rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
-		}
+			// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
+			this.emptyRows();
 
-		var builderModel = this;
-		_.each( rows, function ( row, i ) {
-			// This will create and add the row model and its cells
-			var newRow = builderModel.addRow( row, {noAnimate: true} );
+			// This will empty out the current rows and reload the builder data.
+			this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
 
-			if ( ! _.isUndefined( data.grids[i].style ) ) {
-				newRow.set( 'style', data.grids[i].style );
+			var cit = 0;
+			var rows = [];
+
+			if ( _.isUndefined( data.grid_cells ) ) {
+				this.trigger( 'load_panels_data' );
+				return;
 			}
-		} );
+
+			var gi;
+			for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
+				gi = parseInt( data.grid_cells[ci].grid );
+				if ( _.isUndefined( rows[gi] ) ) {
+					rows[gi] = [];
+				}
+
+				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+			}
+
+			var builderModel = this;
+			_.each( rows, function ( row, i ) {
+				// This will create and add the row model and its cells
+				var newRow = builderModel.addRow( row, {noAnimate: true} );
+
+				if ( ! _.isUndefined( data.grids[i].style ) ) {
+					newRow.set( 'style', data.grids[i].style );
+				}
+			} );
 
 
-		if ( _.isUndefined( data.widgets ) ) {
-			return;
-		}
+			if ( _.isUndefined( data.widgets ) ) {
+				return;
+			}
 
-		// Add the widgets
-		_.each( data.widgets, function ( widgetData ) {
-			try {
+			// Add the widgets
+			_.each( data.widgets, function ( widgetData ) {
 				var panels_info = null;
 				if ( ! _.isUndefined( widgetData.panels_info ) ) {
 					panels_info = widgetData.panels_info;
@@ -2237,12 +2236,14 @@ module.exports = Backbone.Model.extend( {
 
 				newWidget.cell = cell;
 				cell.widgets.add( newWidget, {noAnimate: true} );
-			}
-			catch ( err ) {
-			}
-		} );
+			} );
 
-		this.trigger( 'load_panels_data' );
+			this.trigger( 'load_panels_data' );
+		}
+		catch ( err ) {
+			console.log( 'Error loading data: ' + err.message );
+
+		}
 	},
 
 	/**
@@ -4368,7 +4369,7 @@ module.exports = Backbone.View.extend( {
 		var thisDialog = this;
 		tabs.click( function ( e ) {
 			e.preventDefault();
-			var $$ = jQuery( this );
+			var $$ = $( this );
 
 			thisDialog.$( '.so-sidebar-tabs li' ).removeClass( 'tab-active' );
 			thisDialog.$( '.so-content .so-content-tabs > *' ).hide();
@@ -4577,119 +4578,126 @@ module.exports = Backbone.View.extend( {
 
 		// Find all the named fields in the form
 		$f.find( '[name]' ).each( function () {
-			var $$ = jQuery( this );
 
-			var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
-			if ( _.isEmpty( name ) ) {
-				return true;
-			}
+			try {
+				var $$ = $( this );
 
-			// Create an array with the parts of the name
-			if ( _.isUndefined( name[2] ) ) {
-				parts = $$.attr( 'name' );
-			} else {
-				parts = name[2].split( '][' );
-				parts.unshift( name[1] );
-			}
+				var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
+				if ( _.isEmpty( name ) ) {
+					return true;
+				}
 
-			parts = parts.map( function ( e ) {
-				if ( ! isNaN( parseFloat( e ) ) && isFinite( e ) ) {
-					return parseInt( e );
+				// Create an array with the parts of the name
+				if ( _.isUndefined( name[2] ) ) {
+					parts = $$.attr( 'name' );
 				} else {
-					return e;
-				}
-			} );
-
-			var sub = data;
-			var fieldValue = null;
-
-			var fieldType = (
-				_.isString( $$.attr( 'type' ) ) ? $$.attr( 'type' ).toLowerCase() : false
-			);
-
-			// First we need to get the value from the field
-			if ( fieldType === 'checkbox' ) {
-				if ( $$.is( ':checked' ) ) {
-					fieldValue = $$.val() !== '' ? $$.val() : true;
-				} else {
-					fieldValue = null;
-				}
-			}
-			else if ( fieldType === 'radio' ) {
-				if ( $$.is( ':checked' ) ) {
-					fieldValue = $$.val();
-				} else {
-					//skip over unchecked radios
-					return;
-				}
-			}
-			else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
-				// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
-				var editor = null;
-				if ( ! _.isUndefined( tinyMCE ) ) {
-					editor = tinyMCE.get( $$.attr( 'id' ) );
+					parts = name[2].split( '][' );
+					parts.unshift( name[1] );
 				}
 
-				if ( editor !== null && _.isFunction( editor.getContent ) && ! editor.isHidden() ) {
-					fieldValue = editor.getContent();
-				} else {
-					fieldValue = $$.val();
-				}
-			}
-			else if ( $$.prop( 'tagName' ) === 'SELECT' ) {
-				var selected = $$.find( 'option:selected' );
-
-				if ( selected.length === 1 ) {
-					fieldValue = $$.find( 'option:selected' ).val();
-				}
-				else if ( selected.length > 1 ) {
-					// This is a mutli-select field
-					fieldValue = _.map( $$.find( 'option:selected' ), function ( n, i ) {
-						return $( n ).val();
-					} );
-				}
-
-			} else {
-				// This is a fallback that will work for most fields
-				fieldValue = $$.val();
-			}
-
-			// Now, we need to filter this value if necessary
-			if ( ! _.isUndefined( $$.data( 'panels-filter' ) ) ) {
-				switch ( $$.data( 'panels-filter' ) ) {
-					case 'json_parse':
-						// Attempt to parse the JSON value of this field
-						try {
-							fieldValue = JSON.parse( fieldValue );
-						}
-						catch ( err ) {
-							fieldValue = '';
-						}
-						break;
-				}
-			}
-
-			// Now convert this into an array
-			if ( fieldValue !== null ) {
-				for ( var i = 0; i < parts.length; i ++ ) {
-					if ( i === parts.length - 1 ) {
-						if ( parts[i] === '' ) {
-							// This needs to be an array
-							sub.push( fieldValue );
-						} else {
-							sub[parts[i]] = fieldValue;
-						}
+				parts = parts.map( function ( e ) {
+					if ( ! isNaN( parseFloat( e ) ) && isFinite( e ) ) {
+						return parseInt( e );
 					} else {
-						if ( _.isUndefined( sub[parts[i]] ) ) {
-							if ( parts[i + 1] === '' ) {
-								sub[parts[i]] = [];
-							} else {
-								sub[parts[i]] = {};
-							}
-						}
-						sub = sub[parts[i]];
+						return e;
+					}
+				} );
+
+				var sub = data;
+				var fieldValue = null;
+
+				var fieldType = (
+					_.isString( $$.attr( 'type' ) ) ? $$.attr( 'type' ).toLowerCase() : false
+				);
+
+				// First we need to get the value from the field
+				if ( fieldType === 'checkbox' ) {
+					if ( $$.is( ':checked' ) ) {
+						fieldValue = $$.val() !== '' ? $$.val() : true;
+					} else {
+						fieldValue = null;
 					}
 				}
+				else if ( fieldType === 'radio' ) {
+					if ( $$.is( ':checked' ) ) {
+						fieldValue = $$.val();
+					} else {
+						//skip over unchecked radios
+						return;
+					}
+				}
+				else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
+					// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
+					var editor = null;
+					if ( ! _.isUndefined( tinyMCE ) ) {
+						editor = tinyMCE.get( $$.attr( 'id' ) );
+					}
+
+					if ( editor !== null && _.isFunction( editor.getContent ) && ! editor.isHidden() ) {
+						fieldValue = editor.getContent();
+					} else {
+						fieldValue = $$.val();
+					}
+				}
+				else if ( $$.prop( 'tagName' ) === 'SELECT' ) {
+					var selected = $$.find( 'option:selected' );
+
+					if ( selected.length === 1 ) {
+						fieldValue = $$.find( 'option:selected' ).val();
+					}
+					else if ( selected.length > 1 ) {
+						// This is a mutli-select field
+						fieldValue = _.map( $$.find( 'option:selected' ), function ( n, i ) {
+							return $( n ).val();
+						} );
+					}
+
+				} else {
+					// This is a fallback that will work for most fields
+					fieldValue = $$.val();
+				}
+
+				// Now, we need to filter this value if necessary
+				if ( ! _.isUndefined( $$.data( 'panels-filter' ) ) ) {
+					switch ( $$.data( 'panels-filter' ) ) {
+						case 'json_parse':
+							// Attempt to parse the JSON value of this field
+							try {
+								fieldValue = JSON.parse( fieldValue );
+							}
+							catch ( err ) {
+								fieldValue = '';
+							}
+							break;
+					}
+				}
+
+				// Now convert this into an array
+				if ( fieldValue !== null ) {
+					for ( var i = 0; i < parts.length; i ++ ) {
+						if ( i === parts.length - 1 ) {
+							if ( parts[i] === '' ) {
+								// This needs to be an array
+								sub.push( fieldValue );
+							} else {
+								sub[parts[i]] = fieldValue;
+							}
+						} else {
+							if ( _.isUndefined( sub[parts[i]] ) ) {
+								if ( parts[i + 1] === '' ) {
+									sub[parts[i]] = [];
+								} else {
+									sub[parts[i]] = {};
+								}
+							}
+							sub = sub[parts[i]];
+						}
+					}
+				}
+			}
+			catch ( error ) {
+				// Ignore this error, just log the message for debugging
+				console.log( error.message );
 			}
 
 		} ); // End of each through input fields
