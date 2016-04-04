@@ -1203,78 +1203,84 @@ module.exports = panels.view.dialog.extend( {
 	 * Get the weights from the
 	 */
 	setCellsFromForm: function () {
-		var f = {
-			'cells': parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ),
-			'ratio': parseFloat( this.$( '.row-set-form select[name="ratio"]' ).val() ),
-			'direction': this.$( '.row-set-form select[name="ratio_direction"]' ).val()
-		};
 
-		if( _.isNaN( f.cells ) ) {
-			f.cells = 1;
-		}
-		if( isNaN( f.ratio ) ) {
-			f.ratio = 1;
-		}
-		if ( f.cells < 1 ) {
-			f.cells = 1;
-			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
-		}
-		else if ( f.cells > 10 ) {
-			f.cells = 10;
-			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
-		}
+		try {
+			var f = {
+				'cells': parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ),
+				'ratio': parseFloat( this.$( '.row-set-form select[name="ratio"]' ).val() ),
+				'direction': this.$( '.row-set-form select[name="ratio_direction"]' ).val()
+			};
 
-		this.$( '.row-set-form input[name="ratio"]' ).val( f.ratio );
+			if ( _.isNaN( f.cells ) ) {
+				f.cells = 1;
+			}
+			if ( isNaN( f.ratio ) ) {
+				f.ratio = 1;
+			}
+			if ( f.cells < 1 ) {
+				f.cells = 1;
+				this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+			}
+			else if ( f.cells > 10 ) {
+				f.cells = 10;
+				this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+			}
 
-		var cells = [];
-		var cellCountChanged = (
-			this.row.cells.length !== f.cells
-		);
+			this.$( '.row-set-form input[name="ratio"]' ).val( f.ratio );
 
-		// Now, lets create some cells
-		var currentWeight = 1;
-		for ( var i = 0; i < f.cells; i ++ ) {
-			cells.push( currentWeight );
-			currentWeight *= f.ratio;
-		}
+			var cells = [];
+			var cellCountChanged = (
+				this.row.cells.length !== f.cells
+			);
 
-		// Now lets make sure that the row weights add up to 1
+			// Now, lets create some cells
+			var currentWeight = 1;
+			for ( var i = 0; i < f.cells; i ++ ) {
+				cells.push( currentWeight );
+				currentWeight *= f.ratio;
+			}
 
-		var totalRowWeight = _.reduce( cells, function ( memo, weight ) {
-			return memo + weight;
-		} );
-		cells = _.map( cells, function ( cell ) {
-			return cell / totalRowWeight;
-		} );
+			// Now lets make sure that the row weights add up to 1
 
-		// Don't return cells that are too small
-		cells = _.filter( cells, function ( cell ) {
-			return cell > 0.01;
-		} );
-
-		if ( f.direction === 'left' ) {
-			cells = cells.reverse();
-		}
-
-		this.row.cells = cells;
-
-		if ( cellCountChanged ) {
-			this.regenerateRowPreview();
-		} else {
-			var thisDialog = this;
-
-			// Now lets animate the cells into their new widths
-			this.$( '.preview-cell' ).each( function ( i, el ) {
-				$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-				$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+			var totalRowWeight = _.reduce( cells, function ( memo, weight ) {
+				return memo + weight;
+			} );
+			cells = _.map( cells, function ( cell ) {
+				return cell / totalRowWeight;
 			} );
 
-			// So the draggable handle is not hidden.
-			this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+			// Don't return cells that are too small
+			cells = _.filter( cells, function ( cell ) {
+				return cell > 0.01;
+			} );
 
-			setTimeout( function () {
-				thisDialog.regenerateRowPreview();
-			}, 260 );
+			if ( f.direction === 'left' ) {
+				cells = cells.reverse();
+			}
+
+			this.row.cells = cells;
+
+			if ( cellCountChanged ) {
+				this.regenerateRowPreview();
+			} else {
+				var thisDialog = this;
+
+				// Now lets animate the cells into their new widths
+				this.$( '.preview-cell' ).each( function ( i, el ) {
+					$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
+					$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+				} );
+
+				// So the draggable handle is not hidden.
+				this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+
+				setTimeout( function () {
+					thisDialog.regenerateRowPreview();
+				}, 260 );
+			}
+		}
+		catch (err) {
+			console.log( 'Error setting cells - ' + err.message );
 		}
 
 
@@ -1314,7 +1320,8 @@ module.exports = panels.view.dialog.extend( {
 			try {
 				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
 			}
-			catch ( e ) {
+			catch ( err ) {
+				console.log( 'Error retrieving styles - ' + err.message );
 			}
 
 			this.model.set( 'style', style );
@@ -1942,7 +1949,8 @@ module.exports = function () {
 		if ( isWidget ) {
 			// Set up the dialog opening
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, builderView.dialog );
-			$$.find( '.siteorigin-panels-display-builder' ).click( function () {
+			$$.find( '.siteorigin-panels-display-builder' ).click( function ( e ) {
+				e.preventDefault();
 				builderView.dialog.openDialog();
 			} );
 		} else {
@@ -2164,55 +2172,54 @@ module.exports = Backbone.Model.extend( {
 	 *                          cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
-
-		if ( position === this.layoutPosition.BEFORE ) {
-			data = this.concatPanelsData( data, this.getPanelsData() );
-		} else if ( position === this.layoutPosition.AFTER ) {
-			data = this.concatPanelsData( this.getPanelsData(), data );
-		}
-
-		// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
-		this.emptyRows();
-
-		// This will empty out the current rows and reload the builder data.
-		this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
-
-		var cit = 0;
-		var rows = [];
-
-		if ( _.isUndefined( data.grid_cells ) ) {
-			this.trigger( 'load_panels_data' );
-			return;
-		}
-
-		var gi;
-		for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
-			gi = parseInt( data.grid_cells[ci].grid );
-			if ( _.isUndefined( rows[gi] ) ) {
-				rows[gi] = [];
+		try {
+			if ( position === this.layoutPosition.BEFORE ) {
+				data = this.concatPanelsData( data, this.getPanelsData() );
+			} else if ( position === this.layoutPosition.AFTER ) {
+				data = this.concatPanelsData( this.getPanelsData(), data );
 			}
 
-			rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
-		}
+			// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
+			this.emptyRows();
 
-		var builderModel = this;
-		_.each( rows, function ( row, i ) {
-			// This will create and add the row model and its cells
-			var newRow = builderModel.addRow( row, {noAnimate: true} );
+			// This will empty out the current rows and reload the builder data.
+			this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
 
-			if ( ! _.isUndefined( data.grids[i].style ) ) {
-				newRow.set( 'style', data.grids[i].style );
+			var cit = 0;
+			var rows = [];
+
+			if ( _.isUndefined( data.grid_cells ) ) {
+				this.trigger( 'load_panels_data' );
+				return;
 			}
-		} );
+
+			var gi;
+			for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
+				gi = parseInt( data.grid_cells[ci].grid );
+				if ( _.isUndefined( rows[gi] ) ) {
+					rows[gi] = [];
+				}
+
+				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+			}
+
+			var builderModel = this;
+			_.each( rows, function ( row, i ) {
+				// This will create and add the row model and its cells
+				var newRow = builderModel.addRow( row, {noAnimate: true} );
+
+				if ( ! _.isUndefined( data.grids[i].style ) ) {
+					newRow.set( 'style', data.grids[i].style );
+				}
+			} );
 
 
-		if ( _.isUndefined( data.widgets ) ) {
-			return;
-		}
+			if ( _.isUndefined( data.widgets ) ) {
+				return;
+			}
 
-		// Add the widgets
-		_.each( data.widgets, function ( widgetData ) {
-			try {
+			// Add the widgets
+			_.each( data.widgets, function ( widgetData ) {
 				var panels_info = null;
 				if ( ! _.isUndefined( widgetData.panels_info ) ) {
 					panels_info = widgetData.panels_info;
@@ -2236,12 +2243,14 @@ module.exports = Backbone.Model.extend( {
 
 				newWidget.cell = cell;
 				cell.widgets.add( newWidget, {noAnimate: true} );
-			}
-			catch ( err ) {
-			}
-		} );
+			} );
 
-		this.trigger( 'load_panels_data' );
+			this.trigger( 'load_panels_data' );
+		}
+		catch ( err ) {
+			console.log( 'Error loading data: ' + err.message );
+
+		}
 	},
 
 	/**
@@ -3667,31 +3676,36 @@ module.exports = Backbone.View.extend( {
 		// Make sure we actually need to copy content.
 		if ( panelsOptions.copy_content && this.attachedToEditor && this.$el.is( ':visible' ) ) {
 
-			// We're going to create a copy of page builder content into the post content
-			$.post(
-				panelsOptions.ajaxurl,
-				{
-					action: 'so_panels_builder_content',
-					panels_data: JSON.stringify( this.model.getPanelsData() ),
-					post_id: this.postId
-				},
-				function ( content ) {
+			var panelsData = this.model.getPanelsData();
+			if( ! _.isEmpty( panelsData.widgets ) ) {
+				// We're going to create a copy of page builder content into the post content
+				$.post(
+					panelsOptions.ajaxurl,
+					{
+						action: 'so_panels_builder_content',
+						panels_data: JSON.stringify( panelsData ),
+						post_id: this.postId
+					},
+					function ( content ) {
 
-					// Strip all the known layout divs
-					var t = $( '<div />' ).html( content );
-					t.find( 'div' ).each( function () {
-						var c = $( this ).contents();
-						$( this ).replaceWith( c );
-					} );
+						// Strip all the known layout divs
+						var t = $( '<div />' ).html( content );
+						t.find( 'div' ).each( function () {
+							var c = $( this ).contents();
+							$( this ).replaceWith( c );
+						} );
 
-					content = t.html()
-						.replace( /[\r\n]+/g, "\n" )
-						.replace( /\n\s+/g, "\n" )
-						.trim();
+						content = t.html()
+							.replace( /[\r\n]+/g, "\n" )
+							.replace( /\n\s+/g, "\n" )
+							.trim();
 
-					this.updateEditorContent( content );
-				}.bind( this )
-			);
+						if( content !== '' ) {
+							this.updateEditorContent( content );
+						}
+					}.bind( this )
+				);
+			}
 		}
 	},
 
@@ -3758,7 +3772,10 @@ module.exports = Backbone.View.extend( {
 			editorContent = $( 'textarea#content' ).val();
 		}
 
-		if ( _.isEmpty( this.model.get( 'data' ) ) && editorContent !== '' ) {
+		if (
+			( _.isEmpty( this.model.get( 'data' ) ) || _.isEmpty( this.model.get( 'data' ).widgets ) ) &&
+			editorContent !== ''
+		) {
 			// Confirm that the user wants to copy their content to Page Builder.
 			if ( ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
 				return;
@@ -4359,7 +4376,7 @@ module.exports = Backbone.View.extend( {
 		var thisDialog = this;
 		tabs.click( function ( e ) {
 			e.preventDefault();
-			var $$ = jQuery( this );
+			var $$ = $( this );
 
 			thisDialog.$( '.so-sidebar-tabs li' ).removeClass( 'tab-active' );
 			thisDialog.$( '.so-content .so-content-tabs > *' ).hide();
@@ -4419,7 +4436,7 @@ module.exports = Backbone.View.extend( {
 					) ) {
 					$dropdownList.addClass( 'hidden' );
 				}
-			} )
+			} );
 		}.bind( this ) );
 	},
 
@@ -4568,119 +4585,126 @@ module.exports = Backbone.View.extend( {
 
 		// Find all the named fields in the form
 		$f.find( '[name]' ).each( function () {
-			var $$ = jQuery( this );
+			var $$ = $( this );
 
-			var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
-			if ( name === undefined ) {
-				return true;
-			}
+			try {
 
-			// Create an array with the parts of the name
-			if ( _.isUndefined( name[2] ) ) {
-				parts = $$.attr( 'name' );
-			} else {
-				parts = name[2].split( '][' );
-				parts.unshift( name[1] );
-			}
+				var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
+				if ( _.isEmpty( name ) ) {
+					return true;
+				}
 
-			parts = parts.map( function ( e ) {
-				if ( ! isNaN( parseFloat( e ) ) && isFinite( e ) ) {
-					return parseInt( e );
+				// Create an array with the parts of the name
+				if ( _.isUndefined( name[2] ) ) {
+					parts = $$.attr( 'name' );
 				} else {
-					return e;
-				}
-			} );
-
-			var sub = data;
-			var fieldValue = null;
-
-			var fieldType = (
-				_.isString( $$.attr( 'type' ) ) ? $$.attr( 'type' ).toLowerCase() : false
-			);
-
-			// First we need to get the value from the field
-			if ( fieldType === 'checkbox' ) {
-				if ( $$.is( ':checked' ) ) {
-					fieldValue = $$.val() !== '' ? $$.val() : true;
-				} else {
-					fieldValue = null;
-				}
-			}
-			else if ( fieldType === 'radio' ) {
-				if ( $$.is( ':checked' ) ) {
-					fieldValue = $$.val();
-				} else {
-					//skip over unchecked radios
-					return;
-				}
-			}
-			else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
-				// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
-				var editor = null;
-				if ( ! _.isUndefined( tinyMCE ) ) {
-					editor = tinyMCE.get( $$.attr( 'id' ) );
+					parts = name[2].split( '][' );
+					parts.unshift( name[1] );
 				}
 
-				if ( editor !== null && _.isFunction( editor.getContent ) && ! editor.isHidden() ) {
-					fieldValue = editor.getContent();
-				} else {
-					fieldValue = $$.val();
-				}
-			}
-			else if ( $$.prop( 'tagName' ) === 'SELECT' ) {
-				var selected = $$.find( 'option:selected' );
-
-				if ( selected.length === 1 ) {
-					fieldValue = $$.find( 'option:selected' ).val();
-				}
-				else if ( selected.length > 1 ) {
-					// This is a mutli-select field
-					fieldValue = _.map( $$.find( 'option:selected' ), function ( n, i ) {
-						return $( n ).val();
-					} );
-				}
-
-			} else {
-				// This is a fallback that will work for most fields
-				fieldValue = $$.val();
-			}
-
-			// Now, we need to filter this value if necessary
-			if ( ! _.isUndefined( $$.data( 'panels-filter' ) ) ) {
-				switch ( $$.data( 'panels-filter' ) ) {
-					case 'json_parse':
-						// Attempt to parse the JSON value of this field
-						try {
-							fieldValue = JSON.parse( fieldValue );
-						}
-						catch ( err ) {
-							fieldValue = '';
-						}
-						break;
-				}
-			}
-
-			// Now convert this into an array
-			if ( fieldValue !== null ) {
-				for ( var i = 0; i < parts.length; i ++ ) {
-					if ( i === parts.length - 1 ) {
-						if ( parts[i] === '' ) {
-							// This needs to be an array
-							sub.push( fieldValue );
-						} else {
-							sub[parts[i]] = fieldValue;
-						}
+				parts = parts.map( function ( e ) {
+					if ( ! isNaN( parseFloat( e ) ) && isFinite( e ) ) {
+						return parseInt( e );
 					} else {
-						if ( _.isUndefined( sub[parts[i]] ) ) {
-							if ( parts[i + 1] === '' ) {
-								sub[parts[i]] = [];
-							} else {
-								sub[parts[i]] = {};
-							}
-						}
-						sub = sub[parts[i]];
+						return e;
+					}
+				} );
+
+				var sub = data;
+				var fieldValue = null;
+
+				var fieldType = (
+					_.isString( $$.attr( 'type' ) ) ? $$.attr( 'type' ).toLowerCase() : false
+				);
+
+				// First we need to get the value from the field
+				if ( fieldType === 'checkbox' ) {
+					if ( $$.is( ':checked' ) ) {
+						fieldValue = $$.val() !== '' ? $$.val() : true;
+					} else {
+						fieldValue = null;
 					}
 				}
+				else if ( fieldType === 'radio' ) {
+					if ( $$.is( ':checked' ) ) {
+						fieldValue = $$.val();
+					} else {
+						//skip over unchecked radios
+						return;
+					}
+				}
+				else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
+					// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
+					var editor = null;
+					if ( ! _.isUndefined( tinyMCE ) ) {
+						editor = tinyMCE.get( $$.attr( 'id' ) );
+					}
+
+					if ( editor !== null && _.isFunction( editor.getContent ) && ! editor.isHidden() ) {
+						fieldValue = editor.getContent();
+					} else {
+						fieldValue = $$.val();
+					}
+				}
+				else if ( $$.prop( 'tagName' ) === 'SELECT' ) {
+					var selected = $$.find( 'option:selected' );
+
+					if ( selected.length === 1 ) {
+						fieldValue = $$.find( 'option:selected' ).val();
+					}
+					else if ( selected.length > 1 ) {
+						// This is a mutli-select field
+						fieldValue = _.map( $$.find( 'option:selected' ), function ( n, i ) {
+							return $( n ).val();
+						} );
+					}
+
+				} else {
+					// This is a fallback that will work for most fields
+					fieldValue = $$.val();
+				}
+
+				// Now, we need to filter this value if necessary
+				if ( ! _.isUndefined( $$.data( 'panels-filter' ) ) ) {
+					switch ( $$.data( 'panels-filter' ) ) {
+						case 'json_parse':
+							// Attempt to parse the JSON value of this field
+							try {
+								fieldValue = JSON.parse( fieldValue );
+							}
+							catch ( err ) {
+								fieldValue = '';
+							}
+							break;
+					}
+				}
+
+				// Now convert this into an array
+				if ( fieldValue !== null ) {
+					for ( var i = 0; i < parts.length; i ++ ) {
+						if ( i === parts.length - 1 ) {
+							if ( parts[i] === '' ) {
+								// This needs to be an array
+								sub.push( fieldValue );
+							} else {
+								sub[parts[i]] = fieldValue;
+							}
+						} else {
+							if ( _.isUndefined( sub[parts[i]] ) ) {
+								if ( parts[i + 1] === '' ) {
+									sub[parts[i]] = [];
+								} else {
+									sub[parts[i]] = {};
+								}
+							}
+							sub = sub[parts[i]];
+						}
+					}
+				}
+			}
+			catch ( error ) {
+				// Ignore this error, just log the message for debugging
+				console.log( 'Field [' + $$.attr('name') + '] could not be processed and was skipped - ' + error.message );
 			}
 
 		} ); // End of each through input fields
@@ -5198,9 +5222,10 @@ module.exports = Backbone.View.extend( {
 				$( this ).height()
 			);
 
-			$( this ).css( 'width', (
-			                        $( this ).data( 'view' ).model.get( 'weight' ) * 100
-			                        ) + "%" );
+			$( this ).css(
+				'width',
+				( $( this ).data( 'view' ).model.get( 'weight' ) * 100) + "%"
+			);
 		} );
 
 		// Resize all the grids and cell wrappers
@@ -5247,7 +5272,7 @@ module.exports = Backbone.View.extend( {
 	 * Handles deleting the row with a confirmation.
 	 */
 	confirmedDeleteHandler: function ( e ) {
-		var $$ = jQuery( e.target );
+		var $$ = $( e.target );
 
 		// The user clicked on the dashicon
 		if ( $$.hasClass( 'dashicons' ) ) {

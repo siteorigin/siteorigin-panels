@@ -96,7 +96,15 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.4 - March 11 2016 =
+= 2.4.2 - April 4 2016 =
+* Improved error handling and reporting.
+* Don't add widget class for TwentySixteen theme.
+
+= 2.4.1 - April 2 2016 =
+* Fixed: Copying content from standard editor to Page Builder
+* Fixed: Plugin conflict with Jetpack Widget Visibility and other plugins.
+
+= 2.4 - April 1 2016 =
 * Created new Live Editor.
 * Changes to Page Builder admin HTML structure for Live Editor.
 * New layout for prebuilt dialog.
@@ -104,7 +112,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Fixed contextual menu in Layout Builder widget.
 * Added row/widget actions to contextual menu.
 * Clarified functionality of "Switch to Editor" button by renaming to "Revert to Editor".
-* refreshPanelsData function is called more consistenly.
+* refreshPanelsData function is called more consistently.
 * Various background performance enhancements.
 * Full JS code refactoring.
 * Fixed cell bottom margins with reverse collapse order.

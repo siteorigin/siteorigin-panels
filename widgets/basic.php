@@ -53,7 +53,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		?>
 		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>" data-builder-id="<?php echo esc_attr( $instance['builder_id'] ) ?>" data-type="layout_widget">
 			<p>
-				<a href="#" class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></a>
+				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></button>
 			</p>
 
 			<input type="hidden" data-panels-filter="json_parse" value="" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" id="<?php echo $this->get_field_id('panels_data') ?>" />
@@ -63,10 +63,6 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 					// Create the panels_data input
 					document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = JSON.stringify( panelsData );
 				} )( <?php echo $instance['panels_data']; ?> );
-			</script>
-
-			<script type="text/javascript">
-				// document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = decodeURIComponent("<?php echo rawurlencode( $instance['panels_data'] ); ?>");
 			</script>
 
 			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />

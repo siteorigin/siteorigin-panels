@@ -50,55 +50,54 @@ module.exports = Backbone.Model.extend( {
 	 *                          cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
-
-		if ( position === this.layoutPosition.BEFORE ) {
-			data = this.concatPanelsData( data, this.getPanelsData() );
-		} else if ( position === this.layoutPosition.AFTER ) {
-			data = this.concatPanelsData( this.getPanelsData(), data );
-		}
-
-		// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
-		this.emptyRows();
-
-		// This will empty out the current rows and reload the builder data.
-		this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
-
-		var cit = 0;
-		var rows = [];
-
-		if ( _.isUndefined( data.grid_cells ) ) {
-			this.trigger( 'load_panels_data' );
-			return;
-		}
-
-		var gi;
-		for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
-			gi = parseInt( data.grid_cells[ci].grid );
-			if ( _.isUndefined( rows[gi] ) ) {
-				rows[gi] = [];
+		try {
+			if ( position === this.layoutPosition.BEFORE ) {
+				data = this.concatPanelsData( data, this.getPanelsData() );
+			} else if ( position === this.layoutPosition.AFTER ) {
+				data = this.concatPanelsData( this.getPanelsData(), data );
 			}
 
-			rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
-		}
+			// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
+			this.emptyRows();
 
-		var builderModel = this;
-		_.each( rows, function ( row, i ) {
-			// This will create and add the row model and its cells
-			var newRow = builderModel.addRow( row, {noAnimate: true} );
+			// This will empty out the current rows and reload the builder data.
+			this.set( 'data', JSON.parse( JSON.stringify( data ) ), {silent: true} );
 
-			if ( ! _.isUndefined( data.grids[i].style ) ) {
-				newRow.set( 'style', data.grids[i].style );
+			var cit = 0;
+			var rows = [];
+
+			if ( _.isUndefined( data.grid_cells ) ) {
+				this.trigger( 'load_panels_data' );
+				return;
 			}
-		} );
+
+			var gi;
+			for ( var ci = 0; ci < data.grid_cells.length; ci ++ ) {
+				gi = parseInt( data.grid_cells[ci].grid );
+				if ( _.isUndefined( rows[gi] ) ) {
+					rows[gi] = [];
+				}
+
+				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+			}
+
+			var builderModel = this;
+			_.each( rows, function ( row, i ) {
+				// This will create and add the row model and its cells
+				var newRow = builderModel.addRow( row, {noAnimate: true} );
+
+				if ( ! _.isUndefined( data.grids[i].style ) ) {
+					newRow.set( 'style', data.grids[i].style );
+				}
+			} );
 
 
-		if ( _.isUndefined( data.widgets ) ) {
-			return;
-		}
+			if ( _.isUndefined( data.widgets ) ) {
+				return;
+			}
 
-		// Add the widgets
-		_.each( data.widgets, function ( widgetData ) {
-			try {
+			// Add the widgets
+			_.each( data.widgets, function ( widgetData ) {
 				var panels_info = null;
 				if ( ! _.isUndefined( widgetData.panels_info ) ) {
 					panels_info = widgetData.panels_info;
@@ -122,12 +121,14 @@ module.exports = Backbone.Model.extend( {
 
 				newWidget.cell = cell;
 				cell.widgets.add( newWidget, {noAnimate: true} );
-			}
-			catch ( err ) {
-			}
-		} );
+			} );
 
-		this.trigger( 'load_panels_data' );
+			this.trigger( 'load_panels_data' );
+		}
+		catch ( err ) {
+			console.log( 'Error loading data: ' + err.message );
+
+		}
 	},
 
 	/**
