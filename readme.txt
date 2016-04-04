@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.2 - April 4 2016 =
+* Improved error handling and reporting.
+
 = 2.4.1 - April 2 2016 =
 * Fixed: Copying content from standard editor to Page Builder
 * Fixed: Plugin conflict with Jetpack Widget Visibility and other plugins.
