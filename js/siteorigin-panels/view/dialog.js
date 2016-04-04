@@ -209,7 +209,7 @@ module.exports = Backbone.View.extend( {
 					) ) {
 					$dropdownList.addClass( 'hidden' );
 				}
-			} )
+			} );
 		}.bind( this ) );
 	},
 
@@ -358,9 +358,9 @@ module.exports = Backbone.View.extend( {
 
 		// Find all the named fields in the form
 		$f.find( '[name]' ).each( function () {
+			var $$ = $( this );
 
 			try {
-				var $$ = $( this );
 
 				var name = /([A-Za-z_]+)\[(.*)\]/.exec( $$.attr( 'name' ) );
 				if ( _.isEmpty( name ) ) {
@@ -477,7 +477,7 @@ module.exports = Backbone.View.extend( {
 			}
 			catch ( error ) {
 				// Ignore this error, just log the message for debugging
-				console.log( error.message );
+				console.log( 'Field [' + $$.attr('name') + '] could not be processed and was skipped - ' + error.message );
 			}
 
 		} ); // End of each through input fields

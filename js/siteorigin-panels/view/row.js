@@ -94,9 +94,10 @@ module.exports = Backbone.View.extend( {
 				$( this ).height()
 			);
 
-			$( this ).css( 'width', (
-			                        $( this ).data( 'view' ).model.get( 'weight' ) * 100
-			                        ) + "%" );
+			$( this ).css(
+				'width',
+				( $( this ).data( 'view' ).model.get( 'weight' ) * 100) + "%"
+			);
 		} );
 
 		// Resize all the grids and cell wrappers
@@ -143,7 +144,7 @@ module.exports = Backbone.View.extend( {
 	 * Handles deleting the row with a confirmation.
 	 */
 	confirmedDeleteHandler: function ( e ) {
-		var $$ = jQuery( e.target );
+		var $$ = $( e.target );
 
 		// The user clicked on the dashicon
 		if ( $$.hasClass( 'dashicons' ) ) {
