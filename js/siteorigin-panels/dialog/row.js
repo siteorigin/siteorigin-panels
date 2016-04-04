@@ -404,78 +404,84 @@ module.exports = panels.view.dialog.extend( {
 	 * Get the weights from the
 	 */
 	setCellsFromForm: function () {
-		var f = {
-			'cells': parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ),
-			'ratio': parseFloat( this.$( '.row-set-form select[name="ratio"]' ).val() ),
-			'direction': this.$( '.row-set-form select[name="ratio_direction"]' ).val()
-		};
 
-		if( _.isNaN( f.cells ) ) {
-			f.cells = 1;
-		}
-		if( isNaN( f.ratio ) ) {
-			f.ratio = 1;
-		}
-		if ( f.cells < 1 ) {
-			f.cells = 1;
-			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
-		}
-		else if ( f.cells > 10 ) {
-			f.cells = 10;
-			this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
-		}
+		try {
+			var f = {
+				'cells': parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ),
+				'ratio': parseFloat( this.$( '.row-set-form select[name="ratio"]' ).val() ),
+				'direction': this.$( '.row-set-form select[name="ratio_direction"]' ).val()
+			};
 
-		this.$( '.row-set-form input[name="ratio"]' ).val( f.ratio );
+			if ( _.isNaN( f.cells ) ) {
+				f.cells = 1;
+			}
+			if ( isNaN( f.ratio ) ) {
+				f.ratio = 1;
+			}
+			if ( f.cells < 1 ) {
+				f.cells = 1;
+				this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+			}
+			else if ( f.cells > 10 ) {
+				f.cells = 10;
+				this.$( '.row-set-form input[name="cells"]' ).val( f.cells );
+			}
 
-		var cells = [];
-		var cellCountChanged = (
-			this.row.cells.length !== f.cells
-		);
+			this.$( '.row-set-form input[name="ratio"]' ).val( f.ratio );
 
-		// Now, lets create some cells
-		var currentWeight = 1;
-		for ( var i = 0; i < f.cells; i ++ ) {
-			cells.push( currentWeight );
-			currentWeight *= f.ratio;
-		}
+			var cells = [];
+			var cellCountChanged = (
+				this.row.cells.length !== f.cells
+			);
 
-		// Now lets make sure that the row weights add up to 1
+			// Now, lets create some cells
+			var currentWeight = 1;
+			for ( var i = 0; i < f.cells; i ++ ) {
+				cells.push( currentWeight );
+				currentWeight *= f.ratio;
+			}
 
-		var totalRowWeight = _.reduce( cells, function ( memo, weight ) {
-			return memo + weight;
-		} );
-		cells = _.map( cells, function ( cell ) {
-			return cell / totalRowWeight;
-		} );
+			// Now lets make sure that the row weights add up to 1
 
-		// Don't return cells that are too small
-		cells = _.filter( cells, function ( cell ) {
-			return cell > 0.01;
-		} );
-
-		if ( f.direction === 'left' ) {
-			cells = cells.reverse();
-		}
-
-		this.row.cells = cells;
-
-		if ( cellCountChanged ) {
-			this.regenerateRowPreview();
-		} else {
-			var thisDialog = this;
-
-			// Now lets animate the cells into their new widths
-			this.$( '.preview-cell' ).each( function ( i, el ) {
-				$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-				$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+			var totalRowWeight = _.reduce( cells, function ( memo, weight ) {
+				return memo + weight;
+			} );
+			cells = _.map( cells, function ( cell ) {
+				return cell / totalRowWeight;
 			} );
 
-			// So the draggable handle is not hidden.
-			this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+			// Don't return cells that are too small
+			cells = _.filter( cells, function ( cell ) {
+				return cell > 0.01;
+			} );
 
-			setTimeout( function () {
-				thisDialog.regenerateRowPreview();
-			}, 260 );
+			if ( f.direction === 'left' ) {
+				cells = cells.reverse();
+			}
+
+			this.row.cells = cells;
+
+			if ( cellCountChanged ) {
+				this.regenerateRowPreview();
+			} else {
+				var thisDialog = this;
+
+				// Now lets animate the cells into their new widths
+				this.$( '.preview-cell' ).each( function ( i, el ) {
+					$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
+					$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+				} );
+
+				// So the draggable handle is not hidden.
+				this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+
+				setTimeout( function () {
+					thisDialog.regenerateRowPreview();
+				}, 260 );
+			}
+		}
+		catch (err) {
+			console.log( 'Error setting cells - ' + err.message );
 		}
 
 
@@ -515,7 +521,8 @@ module.exports = panels.view.dialog.extend( {
 			try {
 				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
 			}
-			catch ( e ) {
+			catch ( err ) {
+				console.log( 'Error retrieving styles - ' + err.message );
 			}
 
 			this.model.set( 'style', style );

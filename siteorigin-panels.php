@@ -618,7 +618,12 @@ add_filter('get_post_metadata', 'siteorigin_panels_view_post_preview', 10, 3);
 function siteorigin_panels_process_raw_widgets($widgets) {
 	for($i = 0; $i < count($widgets); $i++) {
 
-		$info = isset($widgets[$i]['panels_info']) ? $widgets[$i]['panels_info'] : $widgets[$i]['info'];
+		if( is_array( $widgets[$i] ) ) {
+			$info = (array) ( is_array( $widgets[$i]['panels_info'] ) ? $widgets[$i]['panels_info'] : $widgets[$i]['info'] );
+		}
+		else {
+			$info = array();
+		}
 		unset($widgets[$i]['info']);
 
 		if( !empty($info['raw']) ) {
