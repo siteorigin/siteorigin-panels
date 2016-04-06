@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.3 - April 6 2016 =
+* Fixed measurement style fields.
+* Properly process raw widgets in Live Editor.
+* Remove empty widgets from raw widget processing.
+
 = 2.4.2 - April 4 2016 =
 * Improved error handling and reporting.
 * Don't add widget class for TwentySixteen theme.
