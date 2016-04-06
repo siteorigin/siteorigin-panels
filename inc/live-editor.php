@@ -13,7 +13,12 @@ function siteorigin_panels_live_editor($value, $post_id, $meta_key){
 	if( $meta_key == 'panels_data' && current_user_can( 'edit_post', $post_id ) && !empty( $_POST['live_editor_panels_data'] ) ) {
 		$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
 
-		if( !empty( $data['widgets'] ) ) {
+		if(
+			!empty( $data['widgets'] ) && (
+				!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
+				method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
+			)
+		) {
 			$data['widgets'] = siteorigin_panels_process_raw_widgets( $data['widgets'] );
 		}
 
