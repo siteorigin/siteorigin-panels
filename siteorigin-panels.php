@@ -618,6 +618,11 @@ add_filter('get_post_metadata', 'siteorigin_panels_view_post_preview', 10, 3);
 function siteorigin_panels_process_raw_widgets($widgets) {
 	for($i = 0; $i < count($widgets); $i++) {
 
+		if( !is_array( $widgets[$i] ) ) {
+			unset( $widgets[$i] );
+			continue;
+		}
+
 		if( is_array( $widgets[$i] ) ) {
 			$info = (array) ( is_array( $widgets[$i]['panels_info'] ) ? $widgets[$i]['panels_info'] : $widgets[$i]['info'] );
 		}
