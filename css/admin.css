@@ -1680,6 +1680,7 @@
   bottom: 0;
   left: 360px;
   background-color: #F4F4F4;
+  cursor: wait;
 }
 .so-panels-live-editor .so-preview-overlay .so-loading-container {
   opacity: 0.6;
