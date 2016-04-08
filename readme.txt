@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.4 - April 6 2016 =
+* Fixed ordering of new rows, widgets and cells in builder interface.
+* Fixed Layout Builder widget sanitization error. Was causing fatal error on older versions of PHP.
+
 = 2.4.3 - April 6 2016 =
 * Fixed measurement style fields.
 * Properly process raw widgets in Live Editor.
