@@ -614,12 +614,18 @@ add_filter('get_post_metadata', 'siteorigin_panels_view_post_preview', 10, 3);
  * Process raw widgets that have come from the Page Builder front end.
  *
  * @param $widgets
+ *
+ * @return array
  */
 function siteorigin_panels_process_raw_widgets($widgets) {
-	for($i = 0; $i < count($widgets); $i++) {
+	if( empty( $widgets ) || ! is_array( $widgets ) ) {
+		return array();
+	}
 
+	global $wp_widget_factory;
+
+	for($i = 0; $i < count($widgets); $i++) {
 		if( !is_array( $widgets[$i] ) ) {
-			unset( $widgets[$i] );
 			continue;
 		}
 
@@ -632,8 +638,8 @@ function siteorigin_panels_process_raw_widgets($widgets) {
 		unset($widgets[$i]['info']);
 
 		if( !empty($info['raw']) ) {
-			if ( class_exists( $info['class'] ) && method_exists( $info['class'], 'update' ) ) {
-				$the_widget = new $info['class'];
+			if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
+				$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
 				$widgets[$i] = $the_widget->update( $widgets[$i], $widgets[$i] );
 				unset($info['raw']);
 			}
@@ -641,7 +647,6 @@ function siteorigin_panels_process_raw_widgets($widgets) {
 
 		$info['class'] = addslashes( $info['class'] );
 		$widgets[$i]['panels_info'] = $info;
-
 	}
 
 	return $widgets;

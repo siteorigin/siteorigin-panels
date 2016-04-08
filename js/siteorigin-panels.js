@@ -20,12 +20,19 @@ module.exports = Backbone.Collection.extend( {
 		return totalWeight;
 	},
 
-	comparator: function ( item ) {
+	visualSortComparator: function ( item ) {
 		if ( ! _.isNull( item.indexes ) ) {
 			return item.indexes.builder;
 		} else {
 			return null;
 		}
+	},
+
+	visualSort: function(){
+		var oldComparator = this.comparator;
+		this.comparator = this.visualSortComparator;
+		this.sort();
+		this.comparator = oldComparator;
 	}
 } );
 
@@ -121,12 +128,19 @@ module.exports = Backbone.Collection.extend( {
 		} while ( true );
 	},
 
-	comparator: function ( item ) {
+	visualSortComparator: function ( item ) {
 		if ( ! _.isNull( item.indexes ) ) {
 			return item.indexes.builder;
 		} else {
 			return null;
 		}
+	},
+
+	visualSort: function(){
+		var oldComparator = this.comparator;
+		this.comparator = this.visualSortComparator;
+		this.sort();
+		this.comparator = oldComparator;
 	}
 } );
 
@@ -140,12 +154,19 @@ module.exports = Backbone.Collection.extend( {
 
 	},
 
-	comparator: function ( item ) {
+	visualSortComparator: function ( item ) {
 		if ( ! _.isNull( item.indexes ) ) {
 			return item.indexes.builder;
 		} else {
 			return null;
 		}
+	},
+
+	visualSort: function(){
+		var oldComparator = this.comparator;
+		this.comparator = this.visualSortComparator;
+		this.sort();
+		this.comparator = oldComparator;
 	}
 
 } );
@@ -3593,12 +3614,12 @@ module.exports = Backbone.View.extend( {
 
 
 		// Sort the rows by their visual index
-		this.model.rows.sort();
+		this.model.rows.visualSort();
 
 		// Sort the widget collections by their visual index
 		this.model.rows.each( function ( row ) {
 			row.cells.each( function ( cell ) {
-				cell.widgets.sort();
+				cell.widgets.visualSort();
 			} );
 		} );
 

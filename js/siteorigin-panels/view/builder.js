@@ -485,12 +485,12 @@ module.exports = Backbone.View.extend( {
 
 
 		// Sort the rows by their visual index
-		this.model.rows.sort();
+		this.model.rows.visualSort();
 
 		// Sort the widget collections by their visual index
 		this.model.rows.each( function ( row ) {
 			row.cells.each( function ( cell ) {
-				cell.widgets.sort();
+				cell.widgets.visualSort();
 			} );
 		} );
 

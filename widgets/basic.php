@@ -23,8 +23,9 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 	function widget($args, $instance) {
 		if( empty($instance['panels_data']) ) return;
 
-		if( is_string( $instance['panels_data'] ) )
+		if( is_string( $instance['panels_data'] ) ) {
 			$instance['panels_data'] = json_decode( $instance['panels_data'], true );
+		}
 		if(empty($instance['panels_data']['widgets'])) return;
 
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
@@ -36,9 +37,16 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 
 	function update($new, $old) {
 		$new['builder_id'] = uniqid();
+
+		if( is_string($new['panels_data']) && ! empty( $new['panels_data'] ) ) {
+			// This is still in a string format, so we'll convert it to an array for sanitization
+			$new['panels_data'] = json_decode( $new['panels_data'], true );
+		}
+
 		if ( ! empty( $new['panels_data'] ) && ! empty( $new['panels_data']['widgets'] ) ) {
 			$new['panels_data']['widgets'] = siteorigin_panels_process_raw_widgets( $new['panels_data']['widgets'] );
 		}
+
 		return $new;
 	}
 
@@ -48,7 +56,9 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 			'builder_id' => uniqid(),
 		) );
 
-		if( !is_string( $instance['panels_data'] ) ) $instance['panels_data'] = json_encode( $instance['panels_data'] );
+		if( ! is_string( $instance['panels_data'] ) ) {
+			$instance['panels_data'] = json_encode( $instance['panels_data'] );
+		}
 
 		?>
 		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>" data-builder-id="<?php echo esc_attr( $instance['builder_id'] ) ?>" data-type="layout_widget">
