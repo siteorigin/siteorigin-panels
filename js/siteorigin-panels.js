@@ -3892,8 +3892,22 @@ module.exports = Backbone.View.extend( {
 			} )
 			.last();
 
-		// Only run this if its element is the topmost builder
-		if ( builder.$el.is( topmostBuilder ) ) {
+		var topmostDialog = $( '.so-panels-dialog-wrapper:visible' )
+			.sort( function ( a, b ) {
+				return $( a ).zIndex() > $( b ).zIndex() ? 1 : - 1;
+			} )
+			.last();
+
+		var closestDialog = builder.$el.closest('.so-panels-dialog-wrapper');
+
+		// Only run this if its element is the topmost builder, in the topmost dialog
+		if (
+			builder.$el.is( topmostBuilder ) &&
+			(
+				topmostDialog.length === 0 ||
+				topmostDialog.is( closestDialog )
+			)
+		) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
 				.add( builder.$( '.so-rows-container > .so-row-container' ) )
