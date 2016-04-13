@@ -81,6 +81,12 @@ module.exports = Backbone.View.extend( {
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
 
+		if( options.config.loadLiveEditor ) {
+			this.on( 'builder_live_editor_added', function(){
+				this.displayLiveEditor();
+			} );
+		}
+
 		return this;
 	},
 
@@ -129,6 +135,8 @@ module.exports = Backbone.View.extend( {
 
 		// Store the builder type
 		this.builderType = options.type;
+
+		this.trigger( 'builder_attached' );
 
 		return this;
 	},
@@ -267,6 +275,8 @@ module.exports = Backbone.View.extend( {
 		this.on( 'builder_resize', stickToolbar, this );
 		$( document ).scroll( stickToolbar );
 		stickToolbar();
+
+		this.trigger('builder_attached_to_editor');
 
 		return this;
 	},
@@ -512,6 +522,8 @@ module.exports = Backbone.View.extend( {
 		if ( this.liveEditor.hasPreviewUrl() ) {
 			this.$( '.so-builder-toolbar .so-live-editor' ).show();
 		}
+
+		this.trigger('builder_live_editor_added');
 
 		return this;
 	},
@@ -763,8 +775,22 @@ module.exports = Backbone.View.extend( {
 			} )
 			.last();
 
-		// Only run this if its element is the topmost builder
-		if ( builder.$el.is( topmostBuilder ) ) {
+		var topmostDialog = $( '.so-panels-dialog-wrapper:visible' )
+			.sort( function ( a, b ) {
+				return $( a ).zIndex() > $( b ).zIndex() ? 1 : - 1;
+			} )
+			.last();
+
+		var closestDialog = builder.$el.closest('.so-panels-dialog-wrapper');
+
+		// Only run this if its element is the topmost builder, in the topmost dialog
+		if (
+			builder.$el.is( topmostBuilder ) &&
+			(
+				topmostDialog.length === 0 ||
+				topmostDialog.is( closestDialog )
+			)
+		) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
 				.add( builder.$( '.so-rows-container > .so-row-container' ) )

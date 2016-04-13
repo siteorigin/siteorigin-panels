@@ -1663,14 +1663,16 @@
   right: 0;
   bottom: 0;
   left: 360px;
-  background-color: #F4F4F4;
+  background-color: #191e23;
 }
 .so-panels-live-editor .so-preview form {
   display: none;
 }
 .so-panels-live-editor .so-preview iframe {
+  float: left;
   width: 100%;
   height: 100%;
+  margin: 0 auto;
 }
 .so-panels-live-editor .so-preview-overlay {
   display: none;
@@ -1680,6 +1682,7 @@
   bottom: 0;
   left: 360px;
   background-color: #F4F4F4;
+  cursor: wait;
 }
 .so-panels-live-editor .so-preview-overlay .so-loading-container {
   opacity: 0.6;
@@ -1714,9 +1717,40 @@
 }
 .so-panels-live-editor.live-editor-mobile-mode .so-preview iframe {
   max-width: 480px;
+  max-height: 640px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -240px;
+  margin-top: -320px;
+}
+@media (max-width: 840px) {
+  .so-panels-live-editor.live-editor-mobile-mode .so-preview iframe {
+    position: static;
+    margin-left: 0;
+    margin-top: 0;
+  }
+}
+@media (max-height: 640px) {
+  .so-panels-live-editor.live-editor-mobile-mode .so-preview iframe {
+    position: static;
+    margin-left: 0;
+    margin-top: 0;
+  }
 }
 .so-panels-live-editor.live-editor-tablet-mode .so-preview iframe {
+  position: absolute;
   max-width: 768px;
+  top: 0;
+  left: 50%;
+  margin-left: -384px;
+}
+@media (max-width: 1128px) {
+  .so-panels-live-editor.live-editor-tablet-mode .so-preview iframe {
+    position: static;
+    margin-left: 0;
+    margin-top: 0;
+  }
 }
 .so-panels-loading {
   background-image: url("images/wpspin_light.gif");
