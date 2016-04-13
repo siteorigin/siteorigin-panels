@@ -1433,11 +1433,39 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
  * @return array
  */
 function siteorigin_panels_plugin_action_links($links) {
+	unset( $links['edit'] );
 	$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __('Support Forum', 'siteorigin-panels') . '</a>';
 	$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __('Newsletter', 'siteorigin-panels') . '</a>';
 	return $links;
 }
 add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panels_plugin_action_links');
+
+function siteorigin_panels_live_edit_link( $wp_admin_bar ){
+	// Add a Live Edit link if this is a Page Builder page that the user can edit
+	if( is_singular() && current_user_can( 'edit_post', get_the_ID() ) && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+		$wp_admin_bar->add_node( array(
+			'id'    => 'so_live_editor',
+			'title' => __( 'Live Editor', 'siteorigin-panels' ),
+			'href'  => add_query_arg( 'so_live_editor', 1, get_edit_post_link( get_the_ID() ) ),
+			'meta'  => array(
+				'class' => 'live-edit-page'
+			)
+		) );
+	}
+}
+add_action( 'admin_bar_menu', 'siteorigin_panels_live_edit_link', 100 );
+
+function siteorigin_panels_live_edit_link_style(){
+	if( is_singular() && current_user_can( 'edit_post', get_the_ID() ) && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+		// Add the style for the eye icon before the Live Editor link
+		$css = '#wpadminbar #wp-admin-bar-so_live_editor > .ab-item:before {
+		    content: "\f177";
+		    top: 2px;
+		}';
+		wp_add_inline_style( 'siteorigin-panels-front', $css );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_edit_link_style' );
 
 /**
  * Process panels data to make sure everything is properly formatted

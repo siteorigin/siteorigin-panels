@@ -2,7 +2,7 @@
 $builder_id = uniqid();
 ?>
 
-<div id="siteorigin-panels-metabox">
+<div id="siteorigin-panels-metabox" <?php if( !empty( $_GET['so_live_editor'] ) ) echo 'data-live-editor="1"' ?>>
 	<?php do_action('siteorigin_panels_before_interface') ?>
 	<?php wp_nonce_field('save', '_sopanels_nonce') ?>
 
