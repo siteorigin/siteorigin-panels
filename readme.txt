@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.4.5.1 - April 13 2016 =
+= 2.4.6 - April 13 2016 =
 * Fixed Javascript errors with layout builder widget.
 
 = 2.4.5 - April 13 2016 =
