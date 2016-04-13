@@ -3174,6 +3174,12 @@ module.exports = Backbone.View.extend( {
 			this.editorId = options.config.editorId;
 			this.builderType = options.config.builderType;
 			this.postId = options.config.postId;
+
+			if( options.config.loadLiveEditor ) {
+				this.on( 'builder_live_editor_added', function(){
+					this.displayLiveEditor();
+				} );
+			}
 		}
 
 		// Now lets create all the dialog boxes that the main builder interface uses
@@ -3212,12 +3218,6 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
-
-		if( options.config.loadLiveEditor ) {
-			this.on( 'builder_live_editor_added', function(){
-				this.displayLiveEditor();
-			} );
-		}
 
 		return this;
 	},
@@ -3959,7 +3959,10 @@ module.exports = Backbone.View.extend( {
 				'scroll-position': scrollPosition
 			} )
 			.css( 'overflow', 'hidden' );
-		window.scrollTo( scrollPosition[0], scrollPosition[1] );
+
+		if( ! _.isUndefined( scrollPosition ) ) {
+			window.scrollTo( scrollPosition[0], scrollPosition[1] );
+		}
 	},
 
 	/**
@@ -3974,7 +3977,10 @@ module.exports = Backbone.View.extend( {
 		if ( ! $( '.so-panels-dialog-wrapper' ).is( ':visible' ) && ! $( '.so-panels-live-editor' ).is( ':visible' ) ) {
 			$( 'body' ).css( 'overflow', 'visible' );
 			var scrollPosition = $( 'body' ).data( 'scroll-position' );
-			window.scrollTo( scrollPosition[0], scrollPosition[1] );
+
+			if( ! _.isUndefined( scrollPosition ) ) {
+				window.scrollTo( scrollPosition[0], scrollPosition[1] );
+			}
 		}
 	}
 
