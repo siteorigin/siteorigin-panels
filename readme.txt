@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.5 - April 13 2016 =
+* Only trigger contextual menu for topmost dialog.
+* Improved design of Live Editor preview.
+* Added Live Editor link in the admin menu bar.
+
 = 2.4.4 - April 6 2016 =
 * Fixed ordering of new rows, widgets and cells in builder interface.
 * Fixed Layout Builder widget sanitization error. Was causing fatal error on older versions of PHP.
