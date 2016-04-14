@@ -1110,6 +1110,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 	echo '</div>';
 
+	do_action( 'siteorigin_panels_after_render', $panels_data, $post_id );
+
 	$html = ob_get_clean();
 
 	// Reset the current post
