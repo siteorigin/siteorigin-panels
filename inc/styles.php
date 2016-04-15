@@ -1,17 +1,17 @@
 <?php
 
-
 /**
  * Admin action for handling fetching the style fields
  */
 function siteorigin_panels_ajax_action_style_form(){
 	$type = $_REQUEST['type'];
 	if( !in_array($type, array('row', 'widget') ) ) exit();
+	if( empty( $_GET['_panelsnonce'] ) || !wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) exit();
 
 	$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
 	$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
 
-	$args = !empty( $_POST['args'] ) ? json_decode( $_POST['args'], true) : array();
+	$args = !empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true) : array();
 
 	switch($type) {
 		case 'row':
@@ -35,6 +35,8 @@ add_action('wp_ajax_so_panels_style_form', 'siteorigin_panels_ajax_action_style_
  * @param array $current
  * @param int $post_id
  * @param array $args Arguments passed by the builder
+ *
+ * @return bool
  */
 function siteorigin_panels_render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0, $args = array() ){
 	$fields = apply_filters('siteorigin_panels_' . $section . '_style_fields', array(), $post_id, $args );
