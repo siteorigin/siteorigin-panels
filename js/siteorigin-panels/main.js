@@ -1,7 +1,7 @@
 /**
  * Everything we need for SiteOrigin Page Builder.
  *
- * @copyright Greg Priday 2013 - 2014 - <https://siteorigin.com/>
+ * @copyright Greg Priday 2013 - 2016 - <https://siteorigin.com/>
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
