@@ -116,7 +116,7 @@ module.exports = Backbone.View.extend( {
 	attach: function ( options ) {
 
 		options = _.extend( {
-			type: '',
+			type: undefined,
 			container: false,
 			dialog: false
 		}, options );
@@ -134,7 +134,9 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Store the builder type
-		this.builderType = options.type;
+		if( ! _.isUndefined(options.type) ) {
+			this.builderType = options.type;
+		}
 
 		this.trigger( 'builder_attached' );
 
