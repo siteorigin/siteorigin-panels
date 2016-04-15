@@ -1962,12 +1962,12 @@ module.exports = function () {
 			.render()
 			.attach( {
 				container: $$,
-				dialog: isWidget,
+				dialog: isWidget || $$.data('mode') === 'dialog',
 				type: $$.data( 'type' )
 			} )
 			.setDataField( $$.find( 'input.panels-data' ) );
 
-		if ( isWidget ) {
+		if ( isWidget || $$.data('mode') === 'dialog' ) {
 			// Set up the dialog opening
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, builderView.dialog );
 			$$.find( '.siteorigin-panels-display-builder' ).click( function ( e ) {
