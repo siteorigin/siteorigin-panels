@@ -103,14 +103,10 @@
 				}
 			}
 			catch( err ) {
-				if( options.backgroundSizing === 'scaled' ) {
-					$$.css( 'background-size', 'cover' );
-					$$.css( 'background-position', '50% 50%' );
-				}
-				else {
-					$$.css( 'background-size', 'auto' );
-					$$.css( 'background-position', '50% 50%' );
-				}
+				$$.css( {
+					'background-size': options.backgroundSizing === 'scaled' ? 'cover' : 'auto',
+					'background-position': '50% 50%'
+				} );
 			}
 		};
 		setupParallax();
