@@ -82,7 +82,7 @@ jQuery( function ( $ ) {
 		editorType = 'tinymce';
 		editorId = '#content';
 		postId = $( '#post_ID' ).val();
-		builderType = 'editor_attached';
+		builderType = $( '#siteorigin-panels-metabox' ).data( 'builder-type' );
 		loadLiveEditor = $( '#siteorigin-panels-metabox' ).data('live-editor') == 1;
 	}
 	else if ( $( '.siteorigin-panels-builder-form' ).length ) {
