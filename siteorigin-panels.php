@@ -155,10 +155,13 @@ function siteorigin_panels_save_home_page(){
 		wp_update_post( array( 'ID' => $page_id, 'post_content' => $post_content ) );
 	}
 
+	$page = get_post( $page_id );
+
 	// Save the updated page data
 	$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+	$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page_id, $page );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
 
@@ -560,12 +563,13 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
 	if ( empty( $_POST['_sopanels_nonce'] ) || !wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ) return;
 	if ( !current_user_can( 'edit_post', $post_id ) ) return;
-	if ( !isset($_POST['panels_data']) ) return;
+	if ( !isset( $_POST['panels_data'] ) ) return;
 
 	if ( !wp_is_post_revision($post_id) ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post_id, $post );
 
 		if( !empty( $panels_data['widgets'] ) || !empty($panels_data['grids']) ) {
 			update_post_meta( $post_id, 'panels_data', $panels_data );
@@ -580,6 +584,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post_id, $post );
 
 		// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
 		// https://core.trac.wordpress.org/ticket/20299
