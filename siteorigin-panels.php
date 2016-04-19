@@ -161,7 +161,7 @@ function siteorigin_panels_save_home_page(){
 	$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
-	$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page_id, $page );
+	$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
 
@@ -569,7 +569,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
-		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post_id, $post );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 		if( !empty( $panels_data['widgets'] ) || !empty($panels_data['grids']) ) {
 			update_post_meta( $post_id, 'panels_data', $panels_data );
@@ -584,7 +584,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
-		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post_id, $post );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 		// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
 		// https://core.trac.wordpress.org/ticket/20299
