@@ -721,7 +721,10 @@ function siteorigin_panels_get_current_admin_panels_data( ){
  */
 function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	// Exit if we don't have panels data
-	if( empty($panels_data) ) $panels_data = get_post_meta( $post_id, 'panels_data', true );
+	if( empty($panels_data) ) {
+		$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
+	}
 	if ( empty( $panels_data ) || empty( $panels_data['grids'] ) ) return;
 
 	// Get some of the default settings
@@ -730,8 +733,6 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	$panels_mobile_width = $settings['mobile-width'];
 	$panels_margin_bottom = $settings['margin-bottom'];
 	$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
-
-	$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 
 	$css = new SiteOrigin_Panels_Css_Builder();
 
