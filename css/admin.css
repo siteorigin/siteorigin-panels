@@ -1526,6 +1526,15 @@
 .so-panels-dialog .so-visual-styles .style-field-image .remove-image .remove-image {
   color: #333;
 }
+.so-panels-dialog .so-visual-styles .style-field-checkbox label {
+  -webkit-user-select: none;
+  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  /* Firefox all */
+  -ms-user-select: none;
+  /* IE 10+ */
+  user-select: none;
+}
 .so-panels-dialog .so-visual-styles .so-field-code {
   font-size: 12px;
   font-family: "Courier 10 Pitch", Courier, monospace;
