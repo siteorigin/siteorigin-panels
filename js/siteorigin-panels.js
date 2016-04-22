@@ -2063,7 +2063,7 @@ jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' 
 // Set up Page Builder if we're on the main interface
 jQuery( function ( $ ) {
 
-	var container, field, form, editorType, editorId, postId, builderType, loadLiveEditor;
+	var container, field, form, editorType, editorId, postId, builderType, loadLiveEditor, liveEditorPreview;
 
 	if ( $( '#siteorigin-panels-metabox' ).length && $( 'form#post' ).length ) {
 		// This is usually the case when we're in the post edit interface
@@ -2075,6 +2075,7 @@ jQuery( function ( $ ) {
 		postId = $( '#post_ID' ).val();
 		builderType = $( '#siteorigin-panels-metabox' ).data( 'builder-type' );
 		loadLiveEditor = $( '#siteorigin-panels-metabox' ).data('live-editor') == 1;
+		liveEditorPreview = container.data('preview-url');
 	}
 	else if ( $( '.siteorigin-panels-builder-form' ).length ) {
 		// We're dealing with another interface like the custom home page interface
@@ -2083,6 +2084,7 @@ jQuery( function ( $ ) {
 		field = $$.find( 'input[name="panels_data"]' );
 		form = $$;
 		editorId = '#post_content';
+		liveEditorPreview = $( '#panels-home-page' ).data( 'preview-url' );
 		postId = $( '#panels-home-page' ).data( 'post-id' );
 		builderType = $$.data( 'type' );
 		loadLiveEditor = false;
@@ -2119,7 +2121,7 @@ jQuery( function ( $ ) {
 			} )
 			.setDataField( field )
 			.attachToEditor()
-			.addLiveEditor( postId )
+			.addLiveEditor( liveEditorPreview )
 			.addHistoryBrowser();
 
 		// When the form is submitted, update the panels data
@@ -3647,14 +3649,20 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Add a live editor
+	 * Add a live editor to the builder
 	 *
 	 * @returns {panels.view.builder}
 	 */
-	addLiveEditor: function ( postId ) {
+	addLiveEditor: function ( previewUrl ) {
+		if( _.isEmpty( previewUrl ) ) {
+			return this;
+		}
+
 		// Create the live editor and set the builder to this.
-		this.liveEditor = new panels.view.liveEditor( {builder: this} );
-		this.liveEditor.setPostId( postId );
+		this.liveEditor = new panels.view.liveEditor( {
+			builder: this,
+			previewUrl: previewUrl
+		} );
 
 		// Display the live editor button in the toolbar
 		if ( this.liveEditor.hasPreviewUrl() ) {
@@ -4801,10 +4809,10 @@ var panels = window.panels, $ = jQuery;
 module.exports = Backbone.View.extend( {
 	template: _.template( $( '#siteorigin-panels-live-editor' ).html().panelsProcessTemplate() ),
 
-	postId: false,
 	previewScrollTop: 0,
 	loadTimes: [],
 	previewFrameId: 1,
+	previewUrl: null,
 	previewIframe: null,
 
 	events: {
@@ -4814,7 +4822,18 @@ module.exports = Backbone.View.extend( {
 	},
 
 	initialize: function ( options ) {
+		options = _.extend( {
+			builder: false,
+			previewUrl: false,
+		}, options );
+
+		if( _.isEmpty( options.previewUrl ) ) {
+			options.previewUrl = panelsOptions.ajaxurl + "&action=so_panels_live_editor_preview";
+		}
+
 		this.builder = options.builder;
+		this.previewUrl = options.previewUrl;
+
 		this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
 		this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
 	},
@@ -5032,8 +5051,10 @@ module.exports = Backbone.View.extend( {
 
 
 		this.postToIframe(
-			{ live_editor_panels_data: JSON.stringify( data ) },
-			this.$el.data('preview-url'),
+			{
+				live_editor_panels_data: JSON.stringify( data )
+			},
+			this.previewUrl,
 			this.$('.so-preview')
 		);
 

@@ -72,7 +72,7 @@ jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' 
 // Set up Page Builder if we're on the main interface
 jQuery( function ( $ ) {
 
-	var container, field, form, editorType, editorId, postId, builderType, loadLiveEditor;
+	var container, field, form, editorType, editorId, postId, builderType, loadLiveEditor, liveEditorPreview;
 
 	if ( $( '#siteorigin-panels-metabox' ).length && $( 'form#post' ).length ) {
 		// This is usually the case when we're in the post edit interface
@@ -84,6 +84,7 @@ jQuery( function ( $ ) {
 		postId = $( '#post_ID' ).val();
 		builderType = $( '#siteorigin-panels-metabox' ).data( 'builder-type' );
 		loadLiveEditor = $( '#siteorigin-panels-metabox' ).data('live-editor') == 1;
+		liveEditorPreview = container.data('preview-url');
 	}
 	else if ( $( '.siteorigin-panels-builder-form' ).length ) {
 		// We're dealing with another interface like the custom home page interface
@@ -92,6 +93,7 @@ jQuery( function ( $ ) {
 		field = $$.find( 'input[name="panels_data"]' );
 		form = $$;
 		editorId = '#post_content';
+		liveEditorPreview = $( '#panels-home-page' ).data( 'preview-url' );
 		postId = $( '#panels-home-page' ).data( 'post-id' );
 		builderType = $$.data( 'type' );
 		loadLiveEditor = false;
@@ -128,7 +130,7 @@ jQuery( function ( $ ) {
 			} )
 			.setDataField( field )
 			.attachToEditor()
-			.addLiveEditor( postId )
+			.addLiveEditor( liveEditorPreview )
 			.addHistoryBrowser();
 
 		// When the form is submitted, update the panels data

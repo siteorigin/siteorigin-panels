@@ -511,14 +511,20 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Add a live editor
+	 * Add a live editor to the builder
 	 *
 	 * @returns {panels.view.builder}
 	 */
-	addLiveEditor: function ( postId ) {
+	addLiveEditor: function ( previewUrl ) {
+		if( _.isEmpty( previewUrl ) ) {
+			return this;
+		}
+
 		// Create the live editor and set the builder to this.
-		this.liveEditor = new panels.view.liveEditor( {builder: this} );
-		this.liveEditor.setPostId( postId );
+		this.liveEditor = new panels.view.liveEditor( {
+			builder: this,
+			previewUrl: previewUrl
+		} );
 
 		// Display the live editor button in the toolbar
 		if ( this.liveEditor.hasPreviewUrl() ) {

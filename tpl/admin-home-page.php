@@ -1,6 +1,6 @@
 <?php $settings = siteorigin_panels_setting(); ?>
 
-<div class="wrap" id="panels-home-page" data-post-id="<?php echo get_the_ID() ?>">
+<div class="wrap" id="panels-home-page" data-post-id="<?php echo get_the_ID() ?>" data-preview-url="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) ?>">
 	<form action="<?php echo add_query_arg('page', 'so_panels_home_page') ?>" class="hide-if-no-js siteorigin-panels-builder-form" method="post" id="panels-home-page-form" data-type="custom_home_page">
 		<div id="icon-index" class="icon32"><br></div>
 		<h2>

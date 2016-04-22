@@ -1475,6 +1475,24 @@ function siteorigin_panels_live_edit_link_style(){
 }
 add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_edit_link_style' );
 
+function siteorigin_panels_live_editor_preview_url(){
+	global $post, $wp_post_types;
+
+	if( empty( $wp_post_types[ $post->post_type ] ) || !$wp_post_types[ $post->post_type ]->public ) {
+		$preview_url = add_query_arg(
+			'siteorigin_panels_live_editor',
+			'true',
+			admin_url( 'admin-ajax.php?action=so_panels_live_editor_preview' )
+		);
+		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
+	}
+	else {
+		$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) );
+	}
+
+	return $preview_url;
+}
+
 /**
  * Process panels data to make sure everything is properly formatted
  *
