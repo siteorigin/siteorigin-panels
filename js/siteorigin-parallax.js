@@ -24,7 +24,7 @@
 			backgroundSizing: 'scaled',
 			// Should we limit the amount of motion in the background image
 			// The number of pixels the background image can move for every pixel of scrolling
-			limitMotion: 0.5,
+			limitMotion: 'auto',
 		}, options );
 
 		if( options.backgroundAspectRatio === null ) {
@@ -44,6 +44,20 @@
 					$$.css( {
 						'background-image' : 'url(' + options.backgroundUrl + ')'
 					} );
+				}
+
+				var limitMotion;
+				if( options.limitMotion === 'auto' ) {
+					var windowHeight = $(window ).outerHeight();
+					if( windowHeight < 720 ) {
+						limitMotion = 0.55;
+					} else if( windowHeight > 1300 ) {
+						limitMotion = 0.45;
+					} else {
+						limitMotion = (-0.00017 * ( windowHeight - 720 ) ) + 0.55;
+					}
+				} else {
+					limitMotion = options.limitMotion;
 				}
 
 				// What percent is this through a screen cycle
@@ -71,9 +85,9 @@
 							var backgroundHeight = options.backgroundSize[1] * scaleX;
 
 							// Check if we need to limit the amount of motion in the background image
-							if( options.limitMotion && backgroundHeight > $( window ).outerHeight() * options.limitMotion ) {
+							if( limitMotion && backgroundHeight > $( window ).outerHeight() * limitMotion ) {
 								// Work out how much to scale percent position based on how much motion we want.
-								limitScale = ( $( window ).outerHeight() * options.limitMotion ) / ( backgroundHeight );
+								limitScale = ( $( window ).outerHeight() * limitMotion ) / ( backgroundHeight );
 								// Percent is scaled so that the midpoint is still 0.5
 								percent = (percent * limitScale) + ( ( 1 - limitScale ) / 2 );
 							}
@@ -89,8 +103,8 @@
 					}
 				} else if( options.backgroundSizing === 'original' ) {
 					// See scaled version or explanation of this code.
-					if( options.limitMotion && options.backgroundSize[1] > $( window ).outerHeight() * options.limitMotion ) {
-						limitScale = ( $( window ).outerHeight() * options.limitMotion ) / ( options.backgroundSize[1] );
+					if( limitMotion && options.backgroundSize[1] > $( window ).outerHeight() * limitMotion ) {
+						limitScale = ( $( window ).outerHeight() * limitMotion ) / ( options.backgroundSize[1] );
 						percent = (percent * limitScale) + ( ( 1 - limitScale ) / 2 );
 					}
 
