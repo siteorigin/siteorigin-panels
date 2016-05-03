@@ -78,7 +78,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('Bottom Margin', 'siteorigin-panels'),
 			'type' => 'measurement',
 			'group' => 'layout',
-			'description' => __('Space below the row.', 'siteorigin-panels'),
+			'description' => sprintf( __('Space below the row. Default is %spx.', 'siteorigin-panels'), siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority' => 5,
 		);
 
@@ -86,7 +86,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('Gutter', 'siteorigin-panels'),
 			'type' => 'measurement',
 			'group' => 'layout',
-			'description' => __('Amount of space between columns.', 'siteorigin-panels'),
+			'description' => sprintf( __('Amount of space between columns. Default is %spx.', 'siteorigin-panels'), siteorigin_panels_setting( 'margin-sides' ) ),
 			'priority' => 6,
 		);
 
