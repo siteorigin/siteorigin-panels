@@ -174,7 +174,7 @@ module.exports = Backbone.View.extend( {
 		body.find( '.panel-grid .panel-grid-cell .so-panel' )
 			.filter( function () {
 				// Filter to only include non nested
-				return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+				return $( this ).parents( '.so-panel' ).length === 0;
 			} )
 			.not( over )
 			.addClass( 'so-panels-faded' );
@@ -341,7 +341,7 @@ module.exports = Backbone.View.extend( {
 				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
 					.filter( function () {
 						// Filter to only include non nested
-						return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+						return $( this ).parents( '.so-panel' ).length === 0;
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
