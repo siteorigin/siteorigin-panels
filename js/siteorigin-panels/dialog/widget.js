@@ -51,11 +51,18 @@ module.exports = panels.view.dialog.extend( {
 			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
 		}
 
+		if( ! this.builder.supports( 'addWidget' ) ) {
+			this.$( '.so-buttons .so-duplicate' ).remove();
+		}
+		if( ! this.builder.supports( 'deleteWidget' ) ) {
+			this.$( '.so-buttons .so-delete' ).remove();
+		}
+
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();
 		this.styles.model = this.model;
 		this.styles.render( 'widget', $( '#post_ID' ).val(), {
-			builderType: this.builder.builderType,
+			builderType: this.builder.config.builderType,
 			dialog: this
 		} );
 

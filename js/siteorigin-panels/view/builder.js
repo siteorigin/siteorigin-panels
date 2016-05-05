@@ -3,9 +3,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = Backbone.View.extend( {
 
 	// Config options
-	editorType: null,
-	postId: null,
-	editorId: null,
+	config: {},
 
 	template: _.template( $( '#siteorigin-panels-builder' ).html().panelsProcessTemplate() ),
 	dialogs: {},
@@ -16,9 +14,6 @@ module.exports = Backbone.View.extend( {
 	attachedToEditor: false,
 	liveEditor: undefined,
 	menu: false,
-
-	/* The builderType is sent with all requests to the server */
-	builderType: '',
 
 	events: {
 		'click .so-tool-button.so-widget-add': 'displayAddWidgetDialog',
@@ -37,18 +32,32 @@ module.exports = Backbone.View.extend( {
 	initialize: function ( options ) {
 		var builder = this;
 
-		if ( ! _.isUndefined( options.config ) ) {
-			this.editorType = options.config.editorType;
-			this.editorId = options.config.editorId;
-			this.builderType = options.config.builderType;
-			this.postId = options.config.postId;
+		this.config = _.extend( {
+			loadLiveEditor: false,
+			builderSupports : {}
+		}, options.config);
 
-			if( options.config.loadLiveEditor ) {
-				this.on( 'builder_live_editor_added', function(){
-					this.displayLiveEditor();
-				} );
+		this.config.builderSupports = _.extend( {
+			addRow: true,
+			editRow: true,
+			deleteRow: true,
+			moveRow: true,
+			addWidget: true,
+			editWidget: true,
+			deleteWidget: true,
+			moveWidget: true,
+			prebuilt: true,
+			history: true,
+			liveEditor: true,
+			revertToEditor: true
+		}, this.config.builderSupports );
+
+		// Automatically load the live editor as soon as it's ready
+		if( options.config.loadLiveEditor ) {
+			this.on( 'builder_live_editor_added', function(){
+				this.displayLiveEditor();
+			} );
 			}
-		}
 
 		// Now lets create all the dialog boxes that the main builder interface uses
 		this.dialogs = {
@@ -116,7 +125,6 @@ module.exports = Backbone.View.extend( {
 	attach: function ( options ) {
 
 		options = _.extend( {
-			type: undefined,
 			container: false,
 			dialog: false
 		}, options );
@@ -133,12 +141,28 @@ module.exports = Backbone.View.extend( {
 			this.trigger( 'attached_to_container', options.container );
 		}
 
-		// Store the builder type
-		if( ! _.isUndefined(options.type) ) {
-			this.builderType = options.type;
+		this.trigger( 'builder_attached' );
+
+		// Add support for components we have
+
+		if( this.supports( 'liveEditor' ) ) {
+			this.addLiveEditor();
+		}
+		if( this.supports( 'history' ) ) {
+			this.addHistoryBrowser();
 		}
 
-		this.trigger( 'builder_attached' );
+		// Hide toolbar buttons we don't support
+		var toolbar = this.$('.so-builder-toolbar');
+		if( ! this.supports( 'addWidget' ) ) {
+			toolbar.find('.so-widget-add' ).hide();
+		}
+		if( ! this.supports( 'addRow' ) ) {
+			toolbar.find('.so-row-add' ).hide();
+		}
+		if( ! this.supports( 'prebuilt' ) ) {
+			toolbar.find('.so-prebuilt-add' ).hide();
+		}
 
 		return this;
 	},
@@ -149,7 +173,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.builder}
 	 */
 	attachToEditor: function () {
-		if ( this.editorType !== 'tinymce' ) {
+		if ( this.config.editorType !== 'tinymce' ) {
 			return this;
 		}
 
@@ -192,24 +216,26 @@ module.exports = Backbone.View.extend( {
 		);
 
 		// Switch back to the standard editor
-		metabox.find( '.so-switch-to-standard' ).click( function ( e ) {
-			e.preventDefault();
+		if( this.supports( 'revertToEditor' ) ) {
+			metabox.find( '.so-switch-to-standard' ).click( function ( e ) {
+				e.preventDefault();
 
-			if ( ! confirm( panelsOptions.loc.confirm_stop_builder ) ) {
-				return;
-			}
+				if ( ! confirm( panelsOptions.loc.confirm_stop_builder ) ) {
+					return;
+				}
 
-			// User is switching to the standard visual editor
-			thisView.addHistoryEntry( 'back_to_editor' );
-			thisView.model.loadPanelsData( false );
+				// User is switching to the standard visual editor
+				thisView.addHistoryEntry( 'back_to_editor' );
+				thisView.model.loadPanelsData( false );
 
-			// Switch back to the standard editor
-			$( '#wp-content-wrap, #post-status-info' ).show();
-			metabox.hide();
+				// Switch back to the standard editor
+				$( '#wp-content-wrap, #post-status-info' ).show();
+				metabox.hide();
 
-			// Resize to trigger reflow of WordPress editor stuff
-			$( window ).resize();
-		} ).show();
+				// Resize to trigger reflow of WordPress editor stuff
+				$( window ).resize();
+			} ).show();
+		}
 
 		// Move the panels box into a tab of the content editor
 		metabox.insertAfter( '#wp-content-wrap' ).hide().addClass( 'attached-to-editor' );
@@ -287,8 +313,11 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the row sortables
 	 */
 	initSortable: function () {
+		if( ! this.supports( 'moveRow' ) ) {
+			return this;
+		}
+
 		// Create the sortable for the rows
-		var $el = this.$el;
 		var builderView = this;
 
 		this.rowsSortable = this.$( '.so-rows-container' ).sortable( {
@@ -305,6 +334,8 @@ module.exports = Backbone.View.extend( {
 				builderView.sortCollections();
 			}
 		} );
+
+		return this;
 	},
 
 	/**
@@ -515,15 +546,15 @@ module.exports = Backbone.View.extend( {
 	 *
 	 * @returns {panels.view.builder}
 	 */
-	addLiveEditor: function ( previewUrl ) {
-		if( _.isEmpty( previewUrl ) ) {
+	addLiveEditor: function ( ) {
+		if( _.isEmpty( this.config.liveEditorPreview ) ) {
 			return this;
 		}
 
 		// Create the live editor and set the builder to this.
 		this.liveEditor = new panels.view.liveEditor( {
 			builder: this,
-			previewUrl: previewUrl
+			previewUrl: this.config.liveEditorPreview
 		} );
 
 		// Display the live editor button in the toolbar
@@ -553,6 +584,10 @@ module.exports = Backbone.View.extend( {
 	 * @return {panels.view.builder}
 	 */
 	addHistoryBrowser: function () {
+		if( _.isEmpty( this.config.liveEditorPreview ) ) {
+			return this;
+		}
+
 		this.dialogs.history = new panels.dialog.history();
 		this.dialogs.history.builder = this;
 		this.dialogs.history.entries.builder = this.model;
@@ -580,6 +615,19 @@ module.exports = Backbone.View.extend( {
 		}
 	},
 
+	supports: function( thing ){
+
+		if( thing === 'rowAction' ) {
+			// Check if this supports any row action
+			return this.supports( 'addRow' ) || this.supports( 'editRow' ) || this.supports( 'deleteRow' );
+		} else if ( thing === 'widgetAction' ) {
+			// Check if this supports any widget action
+			return this.supports( 'addWidget' ) || this.supports( 'editWidget' ) || this.supports( 'deleteWidget' );
+		}
+
+		return _.isUndefined( this.config.builderSupports[ thing ] ) ? false : this.config.builderSupports[ thing ];
+	},
+
 	/**
 	 * Handle a change of the content
 	 */
@@ -596,7 +644,7 @@ module.exports = Backbone.View.extend( {
 					{
 						action: 'so_panels_builder_content',
 						panels_data: JSON.stringify( panelsData ),
-						post_id: this.postId
+						post_id: this.config.postId
 					},
 					function ( content ) {
 
@@ -628,8 +676,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	updateEditorContent: function ( content ) {
 		// Switch back to the standard editor
-		if ( this.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || _.isNull( tinyMCE.get( "content" ) ) ) {
-			var $editor = $( this.editorId );
+		if ( this.config.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || _.isNull( tinyMCE.get( "content" ) ) ) {
+			var $editor = $( this.config.editorId );
 			$editor.val( content ).trigger( 'change' ).trigger( 'keyup' );
 		} else {
 			var contentEd = tinyMCE.get( "content" );

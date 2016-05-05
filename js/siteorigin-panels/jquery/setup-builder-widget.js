@@ -9,7 +9,7 @@ module.exports = function ( config ) {
 		var widgetId = $$.closest( 'form' ).find( '.widget-id' ).val();
 
 		// Create a config for this specific widget
-		var thisConfig = $.extend(true, {}, config);;
+		var thisConfig = $.extend(true, {}, config);
 
 		// Exit if this isn't a real widget
 		if ( ! _.isUndefined( widgetId ) && widgetId.indexOf( '__i__' ) > - 1 ) {

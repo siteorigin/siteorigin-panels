@@ -84,9 +84,16 @@ module.exports = panels.view.dialog.extend( {
 			this.styles = new panels.view.styles();
 			this.styles.model = this.model;
 			this.styles.render( 'row', $( '#post_ID' ).val(), {
-				builderType: this.builder.builderType,
+				builderType: this.builder.config.builderType,
 				dialog: this
 			} );
+
+			if( ! this.builder.supports( 'addRow' ) ) {
+				this.$( '.so-buttons .so-duplicate' ).remove();
+			}
+			if( ! this.builder.supports( 'deleteRow' ) ) {
+				this.$( '.so-buttons .so-delete' ).remove();
+			}
 
 			var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
 			this.styles.attach( $rightSidebar );

@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .widget-edit': 'editHandler',
-		'click .title h4': 'editHandler',
+		'click .title h4': 'titleClickHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
 		'click .actions .widget-delete': 'deleteHandler'
 	},
@@ -41,6 +41,26 @@ module.exports = Backbone.View.extend( {
 		} ) );
 
 		this.$el.data( 'view', this );
+
+		// Remove any unsupported actions
+		if( ! this.cell.row.builder.supports( 'editWidget' ) ) {
+			this.$( '.actions .widget-edit' ).remove();
+			this.$el.addClass('so-widget-no-edit');
+		}
+		if( ! this.cell.row.builder.supports( 'addWidget' ) ) {
+			this.$( '.actions .widget-duplicate' ).remove();
+			this.$el.addClass('so-widget-no-duplicate');
+		}
+		if( ! this.cell.row.builder.supports( 'deleteWidget' ) ) {
+			this.$( '.actions .widget-delete' ).remove();
+			this.$el.addClass('so-widget-no-delete');
+		}
+		if( ! this.cell.row.builder.supports( 'moveWidget' ) ) {
+			this.$el.addClass('so-widget-no-move');
+		}
+		if( !$.trim( this.$('.actions').html() ).length ) {
+			this.$( '.actions' ).remove();
+		}
 
 		if ( _.size( this.model.get( 'values' ) ) === 0 || options.loadForm ) {
 			// If this widget doesn't have a value, create a form and save it
@@ -89,6 +109,13 @@ module.exports = Backbone.View.extend( {
 	editHandler: function () {
 		// Create a new dialog for editing this
 		this.getEditDialog().openDialog();
+		return this;
+	},
+
+	titleClickHandler: function(){
+		if( this.cell.row.builder.supports( 'editWidget' ) ) {
+			this.editHandler();
+		}
 	},
 
 	/**
@@ -109,6 +136,7 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		this.cell.row.builder.model.refreshPanelsData();
+		return this;
 	},
 
 	/**
@@ -118,6 +146,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	deleteHandler: function () {
 		this.model.trigger( 'visual_destroy' );
+		return this;
 	},
 
 	onModelChange: function () {
@@ -146,6 +175,8 @@ module.exports = Backbone.View.extend( {
 			thisView.cell.row.builder.model.refreshPanelsData();
 			thisView.remove();
 		} );
+
+		return this;
 	},
 
 	/**
@@ -157,64 +188,68 @@ module.exports = Backbone.View.extend( {
 	buildContextualMenu: function ( e, menu ) {
 		var thisView = this;
 
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.add_widget_below,
-				searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
-				defaultDisplay: panelsOptions.contextual.default_widgets
-			},
-			panelsOptions.widgets,
-			function ( c ) {
-				thisView.cell.row.builder.addHistoryEntry( 'widget_added' );
-
-				var widget = new panels.model.widget( {
-					class: c
-				} );
-				widget.cell = thisView.cell.model;
-
-				// Insert the new widget below
-				thisView.cell.model.widgets.add( widget, {
-					// Add this after the existing model
-					at: thisView.model.collection.indexOf( thisView.model ) + 1
-				} );
-
-				thisView.cell.row.builder.model.refreshPanelsData();
-			}
-		);
-
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.widget_actions,
-				search: false,
-			},
-			{
-				'edit': {
-					title: panelsOptions.loc.contextual.widget_edit
+		if( this.cell.row.builder.supports( 'addWidget' ) ) {
+			menu.addSection(
+				{
+					sectionTitle: panelsOptions.loc.contextual.add_widget_below,
+					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+					defaultDisplay: panelsOptions.contextual.default_widgets
 				},
-				'duplicate': {
-					title: panelsOptions.loc.contextual.widget_duplicate
-				},
-				'delete': {
-					title: panelsOptions.loc.contextual.widget_delete,
-					confirm: true
-				},
-			},
-			function ( c ) {
-				switch ( c ) {
-					case 'edit':
-						thisView.editHandler();
-						break;
-					case 'duplicate':
-						thisView.duplicateHandler();
-						break;
-					case 'delete':
-						thisView.visualDestroyModel();
-						break;
+				panelsOptions.widgets,
+				function ( c ) {
+					thisView.cell.row.builder.addHistoryEntry( 'widget_added' );
+
+					var widget = new panels.model.widget( {
+						class: c
+					} );
+					widget.cell = thisView.cell.model;
+
+					// Insert the new widget below
+					thisView.cell.model.widgets.add( widget, {
+						// Add this after the existing model
+						at: thisView.model.collection.indexOf( thisView.model ) + 1
+					} );
+
+					thisView.cell.row.builder.model.refreshPanelsData();
 				}
+			);
+		}
 
-				thisView.cell.row.builder.model.refreshPanelsData();
-			}
-		);
+		var actions = {};
+		if( this.cell.row.builder.supports( 'editWidget' ) ) {
+			actions.edit = { title: panelsOptions.loc.contextual.widget_edit };
+		}
+		if( this.cell.row.builder.supports( 'addWidget' ) ) {
+			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };
+		}
+		if( this.cell.row.builder.supports( 'deleteWidget' ) ) {
+			actions.delete = { title: panelsOptions.loc.contextual.widget_delete, confirm: true };
+		}
+
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				{
+					sectionTitle: panelsOptions.loc.contextual.widget_actions,
+					search: false,
+				},
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'edit':
+							thisView.editHandler();
+							break;
+						case 'duplicate':
+							thisView.duplicateHandler();
+							break;
+						case 'delete':
+							thisView.visualDestroyModel();
+							break;
+					}
+
+					thisView.cell.row.builder.model.refreshPanelsData();
+				}
+			);
+		}
 
 		// Lets also add the contextual menu for the entire row
 		this.cell.row.buildContextualMenu( e, menu );

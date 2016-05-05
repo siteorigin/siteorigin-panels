@@ -262,6 +262,10 @@
 
 						.so-widget {
 							cursor: move;
+							&.so-widget-no-move {
+								cursor: auto;
+							}
+
 							margin-bottom: 5px;
 
 							background: #f9f9fb;
@@ -316,6 +320,12 @@
 									margin-left: 12px;
 									margin-right: 5px;
 									font-style: italic;
+								}
+							}
+
+							&.so-widget-no-edit {
+								h4 {
+									cursor: auto;
 								}
 							}
 
@@ -376,7 +386,6 @@
 							.form{
 								display: none;
 							}
-
 						}
 
 						.so-widget-sortable-highlight{

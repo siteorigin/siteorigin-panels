@@ -5,7 +5,7 @@
  * @license GPL 3.0 http://www.gnu.org/licenses/gpl.html
  */
 
-/* global Backbone, _, jQuery, tinyMCE, panelsOptions, plupload, confirm, console */
+/* global Backbone, _, jQuery, tinyMCE, panelsOptions, plupload, confirm, console, require */
 
 /**
  * Convert template into something compatible with Underscore.js templates
@@ -72,31 +72,44 @@ jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' 
 // Set up Page Builder if we're on the main interface
 jQuery( function ( $ ) {
 
-	var container, field, form, editorType, editorId, postId, builderType, loadLiveEditor, liveEditorPreview;
+	var container,
+		field,
+		form,
+		builderConfig;
 
 	if ( $( '#siteorigin-panels-metabox' ).length && $( 'form#post' ).length ) {
 		// This is usually the case when we're in the post edit interface
 		container = $( '#siteorigin-panels-metabox' );
 		field = $( '#siteorigin-panels-metabox .siteorigin-panels-data-field' );
 		form = $( 'form#post' );
-		editorType = 'tinymce';
-		editorId = '#content';
-		postId = $( '#post_ID' ).val();
-		builderType = $( '#siteorigin-panels-metabox' ).data( 'builder-type' );
-		loadLiveEditor = $( '#siteorigin-panels-metabox' ).data('live-editor') == 1;
-		liveEditorPreview = container.data('preview-url');
+
+		builderConfig = {
+			editorType: 'tinymce',
+			postId: $( '#post_ID' ).val(),
+			editorId: '#content',
+			builderType: $( '#siteorigin-panels-metabox' ).data( 'builder-type' ),
+			builderSupports: $( '#siteorigin-panels-metabox' ).data( 'builder-supports' ),
+			loadLiveEditor: $( '#siteorigin-panels-metabox' ).data('live-editor') == 1,
+			liveEditorPreview: container.data('preview-url')
+		};
 	}
 	else if ( $( '.siteorigin-panels-builder-form' ).length ) {
 		// We're dealing with another interface like the custom home page interface
 		var $$ = $( '.siteorigin-panels-builder-form' );
+
 		container = $$.find( '.siteorigin-panels-builder-container' );
 		field = $$.find( 'input[name="panels_data"]' );
 		form = $$;
-		editorId = '#post_content';
-		liveEditorPreview = $( '#panels-home-page' ).data( 'preview-url' );
-		postId = $( '#panels-home-page' ).data( 'post-id' );
-		builderType = $$.data( 'type' );
-		loadLiveEditor = false;
+
+		builderConfig = {
+			editorType: 'standalone',
+			postId: $$.data( 'post-id' ),
+			editorId: '#post_content',
+			builderType: $$.data( 'type' ),
+			builderSupports: $$.data( 'builder-supports' ),
+			loadLiveEditor: false,
+			liveEditorPreview: $$.data( 'preview-url' )
+		};
 	}
 
 	if ( ! _.isUndefined( container ) ) {
@@ -105,15 +118,6 @@ jQuery( function ( $ ) {
 
 		// Create the main builder model
 		var builderModel = new panels.model.builder();
-
-		// Create the builder config
-		var builderConfig = {
-			editorType: editorType,
-			postId: postId,
-			editorId: editorId,
-			builderType: builderType,
-			loadLiveEditor: loadLiveEditor
-		};
 
 		// Now for the view to display the builder
 		var builderView = new panels.view.builder( {
@@ -125,16 +129,13 @@ jQuery( function ( $ ) {
 		builderView
 			.render()
 			.attach( {
-				container: container,
-				type: builderType
+				container: container
 			} )
 			.setDataField( field )
-			.attachToEditor()
-			.addLiveEditor( liveEditorPreview )
-			.addHistoryBrowser();
+			.attachToEditor();
 
 		// When the form is submitted, update the panels data
-		form.submit( function ( e ) {
+		form.submit( function () {
 			// Refresh the data
 			builderModel.refreshPanelsData();
 		} );

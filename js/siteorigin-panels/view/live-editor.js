@@ -79,10 +79,6 @@ module.exports = Backbone.View.extend( {
 		this.$el.appendTo( 'body' );
 	},
 
-	setPostId: function ( postId ) {
-		this.postId = postId;
-	},
-
 	/**
 	 * Display the live editor
 	 */
