@@ -96,13 +96,15 @@ module.exports = panels.view.dialog.extend( {
 		if ( currentIndex === 0 ) {
 			return false;
 		} else {
-			var widgetView = widgets.eq( currentIndex - 1 ).data( 'view' );
-			if ( _.isUndefined( widgetView ) ) {
-				return false;
-			}
-
-			return widgetView.getEditDialog();
+			do {
+				widgetView = widgets.eq( --currentIndex ).data( 'view' );
+				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
+					return widgetView.getEditDialog();
+				}
+			} while( ! _.isUndefined( widgetView ) && currentIndex > 0 );
 		}
+
+		return false;
 	},
 
 	/**
@@ -114,18 +116,21 @@ module.exports = panels.view.dialog.extend( {
 		if ( widgets.length <= 1 ) {
 			return false;
 		}
-		var currentIndex = widgets.index( this.widgetView.$el );
+
+		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
 
 		if ( currentIndex === widgets.length - 1 ) {
 			return false;
 		} else {
-			var widgetView = widgets.eq( currentIndex + 1 ).data( 'view' );
-			if ( _.isUndefined( widgetView ) ) {
-				return false;
-			}
-
-			return widgetView.getEditDialog();
+			do {
+				widgetView = widgets.eq( ++currentIndex ).data( 'view' );
+				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
+					return widgetView.getEditDialog();
+				}
+			} while( ! _.isUndefined( widgetView ) );
 		}
+
+		return false;
 	},
 
 	/**
