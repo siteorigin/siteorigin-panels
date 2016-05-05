@@ -2286,8 +2286,18 @@ module.exports = Backbone.Model.extend( {
 					newWidget.set( 'style', panels_info.style );
 				}
 
+				if ( ! _.isUndefined( panels_info.read_only ) ) {
+					newWidget.set( 'read_only', panels_info.read_only );
+				}
+				if ( ! _.isUndefined( panels_info.widget_id ) ) {
+					newWidget.set( 'widget_id', panels_info.widget_id );
+				}
+				else {
+					newWidget.set( 'widget_id', this.generateUUID() );
+				}
+
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, {noAnimate: true} );
+				cell.widgets.add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -2354,6 +2364,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	getPanelsData: function () {
 
+		var builder = this;
+
 		var data = {
 			'widgets': [],
 			'grids': [],
@@ -2367,15 +2379,23 @@ module.exports = Backbone.Model.extend( {
 
 				cell.widgets.each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
+					var panels_info = {
+						class: widget.get( 'class' ),
+						raw: widget.get( 'raw' ),
+						grid: ri,
+						cell: ci,
+						// Strictly this should be an index
+						id: widgetId ++,
+						widget_id: widget.get( 'widget_id' ),
+						style: widget.get( 'style' )
+					};
+
+					if( _.isEmpty( panels_info.widget_id ) ) {
+						panels_info.widget_id = builder.generateUUID();
+					}
+
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {
-						panels_info: {
-							class: widget.get( 'class' ),
-							raw: widget.get( 'raw' ),
-							grid: ri,
-							cell: ci,
-							id: widgetId ++,
-							style: widget.get( 'style' )
-						}
+						panels_info: panels_info
 					} );
 					data.widgets.push( values );
 				} );
@@ -2433,6 +2453,19 @@ module.exports = Backbone.Model.extend( {
 		return position === this.layoutPosition.BEFORE ||
 		       position === this.layoutPosition.AFTER ||
 		       position === this.layoutPosition.REPLACE;
+	},
+
+	generateUUID: function(){
+		var d = new Date().getTime();
+		if( window.performance && typeof window.performance.now === "function" ){
+			d += performance.now(); //use high-precision timer if available
+		}
+		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function(c) {
+			var r = (d + Math.random()*16)%16 | 0;
+			d = Math.floor(d/16);
+			return ( c == 'x' ? r : (r&0x3|0x8) ).toString(16);
+		} );
+		return uuid;
 	}
 
 } );
@@ -2658,7 +2691,10 @@ module.exports = Backbone.Model.extend( {
 		raw: false,
 
 		// Visual style fields
-		styles: {}
+		style: {},
+
+		read_only: false,
+		widget_id: '',
 	},
 
 	indexes: null,
@@ -3886,7 +3922,10 @@ module.exports = Backbone.View.extend( {
 		}
 
 		if (
-			( _.isEmpty( this.model.get( 'data' ) ) || _.isEmpty( this.model.get( 'data' ).widgets ) ) &&
+			(
+				_.isEmpty( this.model.get( 'data' ) ) ||
+				( _.isEmpty( this.model.get( 'data' ).widgets ) && _.isEmpty( this.model.get( 'data' ).grids ) )
+			) &&
 			editorContent !== ''
 		) {
 			// Confirm that the user wants to copy their content to Page Builder.
@@ -5865,7 +5904,7 @@ module.exports = Backbone.View.extend( {
 		this.$el.data( 'view', this );
 
 		// Remove any unsupported actions
-		if( ! this.cell.row.builder.supports( 'editWidget' ) ) {
+		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			this.$( '.actions .widget-edit' ).remove();
 			this.$el.addClass('so-widget-no-edit');
 		}
@@ -5882,6 +5921,10 @@ module.exports = Backbone.View.extend( {
 		}
 		if( !$.trim( this.$('.actions').html() ).length ) {
 			this.$( '.actions' ).remove();
+		}
+
+		if( this.model.get( 'read_only' ) ) {
+			this.$el.addClass('so-widget-read-only');
 		}
 
 		if ( _.size( this.model.get( 'values' ) ) === 0 || options.loadForm ) {
@@ -5935,9 +5978,11 @@ module.exports = Backbone.View.extend( {
 	},
 
 	titleClickHandler: function(){
-		if( this.cell.row.builder.supports( 'editWidget' ) ) {
-			this.editHandler();
+		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
+			return this;
 		}
+		this.editHandler();
+		return this;
 	},
 
 	/**

@@ -119,8 +119,18 @@ module.exports = Backbone.Model.extend( {
 					newWidget.set( 'style', panels_info.style );
 				}
 
+				if ( ! _.isUndefined( panels_info.read_only ) ) {
+					newWidget.set( 'read_only', panels_info.read_only );
+				}
+				if ( ! _.isUndefined( panels_info.widget_id ) ) {
+					newWidget.set( 'widget_id', panels_info.widget_id );
+				}
+				else {
+					newWidget.set( 'widget_id', this.generateUUID() );
+				}
+
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, {noAnimate: true} );
+				cell.widgets.add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -187,6 +197,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	getPanelsData: function () {
 
+		var builder = this;
+
 		var data = {
 			'widgets': [],
 			'grids': [],
@@ -200,15 +212,23 @@ module.exports = Backbone.Model.extend( {
 
 				cell.widgets.each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
+					var panels_info = {
+						class: widget.get( 'class' ),
+						raw: widget.get( 'raw' ),
+						grid: ri,
+						cell: ci,
+						// Strictly this should be an index
+						id: widgetId ++,
+						widget_id: widget.get( 'widget_id' ),
+						style: widget.get( 'style' )
+					};
+
+					if( _.isEmpty( panels_info.widget_id ) ) {
+						panels_info.widget_id = builder.generateUUID();
+					}
+
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {
-						panels_info: {
-							class: widget.get( 'class' ),
-							raw: widget.get( 'raw' ),
-							grid: ri,
-							cell: ci,
-							id: widgetId ++,
-							style: widget.get( 'style' )
-						}
+						panels_info: panels_info
 					} );
 					data.widgets.push( values );
 				} );
@@ -266,6 +286,19 @@ module.exports = Backbone.Model.extend( {
 		return position === this.layoutPosition.BEFORE ||
 		       position === this.layoutPosition.AFTER ||
 		       position === this.layoutPosition.REPLACE;
+	},
+
+	generateUUID: function(){
+		var d = new Date().getTime();
+		if( window.performance && typeof window.performance.now === "function" ){
+			d += performance.now(); //use high-precision timer if available
+		}
+		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function(c) {
+			var r = (d + Math.random()*16)%16 | 0;
+			d = Math.floor(d/16);
+			return ( c == 'x' ? r : (r&0x3|0x8) ).toString(16);
+		} );
+		return uuid;
 	}
 
 } );

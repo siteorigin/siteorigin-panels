@@ -43,7 +43,7 @@ module.exports = Backbone.View.extend( {
 		this.$el.data( 'view', this );
 
 		// Remove any unsupported actions
-		if( ! this.cell.row.builder.supports( 'editWidget' ) ) {
+		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			this.$( '.actions .widget-edit' ).remove();
 			this.$el.addClass('so-widget-no-edit');
 		}
@@ -60,6 +60,10 @@ module.exports = Backbone.View.extend( {
 		}
 		if( !$.trim( this.$('.actions').html() ).length ) {
 			this.$( '.actions' ).remove();
+		}
+
+		if( this.model.get( 'read_only' ) ) {
+			this.$el.addClass('so-widget-read-only');
 		}
 
 		if ( _.size( this.model.get( 'values' ) ) === 0 || options.loadForm ) {
@@ -113,9 +117,11 @@ module.exports = Backbone.View.extend( {
 	},
 
 	titleClickHandler: function(){
-		if( this.cell.row.builder.supports( 'editWidget' ) ) {
-			this.editHandler();
+		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
+			return this;
 		}
+		this.editHandler();
+		return this;
 	},
 
 	/**

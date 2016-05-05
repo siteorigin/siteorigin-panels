@@ -733,7 +733,10 @@ module.exports = Backbone.View.extend( {
 		}
 
 		if (
-			( _.isEmpty( this.model.get( 'data' ) ) || _.isEmpty( this.model.get( 'data' ).widgets ) ) &&
+			(
+				_.isEmpty( this.model.get( 'data' ) ) ||
+				( _.isEmpty( this.model.get( 'data' ).widgets ) && _.isEmpty( this.model.get( 'data' ).grids ) )
+			) &&
 			editorContent !== ''
 		) {
 			// Confirm that the user wants to copy their content to Page Builder.

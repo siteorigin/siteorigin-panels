@@ -19,7 +19,10 @@ module.exports = Backbone.Model.extend( {
 		raw: false,
 
 		// Visual style fields
-		styles: {}
+		style: {},
+
+		read_only: false,
+		widget_id: '',
 	},
 
 	indexes: null,
