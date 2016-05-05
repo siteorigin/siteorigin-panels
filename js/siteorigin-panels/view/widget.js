@@ -222,7 +222,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var actions = {};
-		if( this.cell.row.builder.supports( 'editWidget' ) ) {
+		if( this.cell.row.builder.supports( 'editWidget' ) && ! this.model.get( 'read_only' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.widget_edit };
 		}
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
