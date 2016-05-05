@@ -778,6 +778,12 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 				'float' => $collapse_order == 'left-top' ? 'left' : 'right'
 			) );
 		}
+		else {
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
+				// Float right for RTL
+				'float' => 'none'
+			) );
+		}
 
 		if ( $settings['responsive'] ) {
 
@@ -826,9 +832,6 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Let other plugins customize various aspects of the rows (grids)
 	foreach ( $panels_data['grids'] as $gi => $grid ) {
-		// Rows with only one cell don't need gutters
-		if($grid['cells'] <= 1) continue;
-
 		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
 
 		// Let other themes and plugins change the gutter.
