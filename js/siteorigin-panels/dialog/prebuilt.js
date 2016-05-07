@@ -158,7 +158,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// Handle exporting the file
 		c.find( '.so-export' ).submit( function ( e ) {
-			var $$ = jQuery( this );
+			var $$ = $( this );
 			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
 		} );
 
