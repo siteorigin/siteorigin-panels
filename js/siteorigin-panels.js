@@ -1585,7 +1585,7 @@ module.exports = panels.view.dialog.extend( {
 		var data = {
 			'action': 'so_panels_widget_form',
 			'widget': this.model.get( 'class' ),
-			'instance': JSON.stringify( this.model.get( 'values' ) ),
+			'instance': this.model.get( 'values' ),
 			'raw': this.model.get( 'raw' )
 		};
 
