@@ -126,7 +126,7 @@ module.exports = Backbone.Model.extend( {
 					newWidget.set( 'widget_id', panels_info.widget_id );
 				}
 				else {
-					newWidget.set( 'widget_id', this.generateUUID() );
+					newWidget.set( 'widget_id', builderModel.generateUUID() );
 				}
 
 				newWidget.cell = cell;
