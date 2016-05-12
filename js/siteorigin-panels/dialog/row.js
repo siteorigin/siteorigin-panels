@@ -517,7 +517,7 @@ module.exports = panels.view.dialog.extend( {
 		}, args );
 
 		// Set the cells
-		if( ! _.isUndefined( this.model ) ) {
+		if( ! _.isEmpty( this.model ) ) {
 			this.model.setCells( this.row.cells );
 		}
 
