@@ -96,6 +96,17 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.7 - May 11 2016 =
+* Replaced parallax with custom implementation.
+* Added more filters and actions.
+* Allow other plugins to enable/disable certain builder functionality.
+* Added unique IDs (UUID) to all widgets.
+* Added fallback previewer for Live Editor.
+* Prevent double filtering of $panels_data.
+* Developer support for read-only widgts.
+* Fixed issue that resulted in Wordfence blocking some Page Builder requests.
+* Small interface improvements.
+
 = 2.4.6 - April 13 2016 =
 * Fixed Javascript errors with layout builder widget.
 
