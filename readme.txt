@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.4.7 - May 11 2016 =
+= 2.4.7 - May 13 2016 =
 * Replaced parallax with custom implementation.
 * Added more filters and actions.
 * Allow other plugins to enable/disable certain builder functionality.
