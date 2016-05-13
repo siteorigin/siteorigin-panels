@@ -155,10 +155,13 @@ function siteorigin_panels_save_home_page(){
 		wp_update_post( array( 'ID' => $page_id, 'post_content' => $post_content ) );
 	}
 
+	$page = get_post( $page_id );
+
 	// Save the updated page data
 	$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 	$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 	$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+	$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
 	update_post_meta( $page_id, 'panels_data', $panels_data );
 
@@ -560,12 +563,13 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
 	if ( empty( $_POST['_sopanels_nonce'] ) || !wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ) return;
 	if ( !current_user_can( 'edit_post', $post_id ) ) return;
-	if ( !isset($_POST['panels_data']) ) return;
+	if ( !isset( $_POST['panels_data'] ) ) return;
 
 	if ( !wp_is_post_revision($post_id) ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 		if( !empty( $panels_data['widgets'] ) || !empty($panels_data['grids']) ) {
 			update_post_meta( $post_id, 'panels_data', $panels_data );
@@ -580,6 +584,7 @@ function siteorigin_panels_save_post( $post_id, $post ) {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
 		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 		// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
 		// https://core.trac.wordpress.org/ticket/20299
@@ -721,7 +726,10 @@ function siteorigin_panels_get_current_admin_panels_data( ){
  */
 function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	// Exit if we don't have panels data
-	if( empty($panels_data) ) $panels_data = get_post_meta( $post_id, 'panels_data', true );
+	if( empty($panels_data) ) {
+		$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
+	}
 	if ( empty( $panels_data ) || empty( $panels_data['grids'] ) ) return;
 
 	// Get some of the default settings
@@ -730,8 +738,6 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	$panels_mobile_width = $settings['mobile-width'];
 	$panels_margin_bottom = $settings['margin-bottom'];
 	$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
-
-	$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 
 	$css = new SiteOrigin_Panels_Css_Builder();
 
@@ -770,6 +776,12 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 			$css->add_cell_css($post_id, $grid_id, false, '', array(
 				// Float right for RTL
 				'float' => $collapse_order == 'left-top' ? 'left' : 'right'
+			) );
+		}
+		else {
+			$css->add_cell_css($post_id, $grid_id, false, '', array(
+				// Float right for RTL
+				'float' => 'none'
 			) );
 		}
 
@@ -820,9 +832,6 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Let other plugins customize various aspects of the rows (grids)
 	foreach ( $panels_data['grids'] as $gi => $grid ) {
-		// Rows with only one cell don't need gutters
-		if($grid['cells'] <= 1) continue;
-
 		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
 
 		// Let other themes and plugins change the gutter.
@@ -1109,6 +1118,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data, $post_id );
 
 	echo '</div>';
+
+	do_action( 'siteorigin_panels_after_render', $panels_data, $post_id );
 
 	$html = ob_get_clean();
 
@@ -1466,6 +1477,29 @@ function siteorigin_panels_live_edit_link_style(){
 	}
 }
 add_action( 'wp_enqueue_scripts', 'siteorigin_panels_live_edit_link_style' );
+
+function siteorigin_panels_live_editor_preview_url(){
+	global $post, $wp_post_types;
+
+	if(
+		empty( $post ) ||
+		empty( $wp_post_types ) ||
+		empty( $wp_post_types[ $post->post_type ] ) ||
+		!$wp_post_types[ $post->post_type ]->public
+	) {
+		$preview_url = add_query_arg(
+			'siteorigin_panels_live_editor',
+			'true',
+			admin_url( 'admin-ajax.php?action=so_panels_live_editor_preview' )
+		);
+		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
+	}
+	else {
+		$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) );
+	}
+
+	return $preview_url;
+}
 
 /**
  * Process panels data to make sure everything is properly formatted

@@ -3,10 +3,10 @@ var panels = window.panels, $ = jQuery;
 module.exports = Backbone.View.extend( {
 	template: _.template( $( '#siteorigin-panels-live-editor' ).html().panelsProcessTemplate() ),
 
-	postId: false,
 	previewScrollTop: 0,
 	loadTimes: [],
 	previewFrameId: 1,
+	previewUrl: null,
 	previewIframe: null,
 
 	events: {
@@ -16,7 +16,18 @@ module.exports = Backbone.View.extend( {
 	},
 
 	initialize: function ( options ) {
+		options = _.extend( {
+			builder: false,
+			previewUrl: false,
+		}, options );
+
+		if( _.isEmpty( options.previewUrl ) ) {
+			options.previewUrl = panelsOptions.ajaxurl + "&action=so_panels_live_editor_preview";
+		}
+
 		this.builder = options.builder;
+		this.previewUrl = options.previewUrl;
+
 		this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
 		this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
 	},
@@ -66,10 +77,6 @@ module.exports = Backbone.View.extend( {
 	 */
 	attach: function () {
 		this.$el.appendTo( 'body' );
-	},
-
-	setPostId: function ( postId ) {
-		this.postId = postId;
 	},
 
 	/**
@@ -163,7 +170,7 @@ module.exports = Backbone.View.extend( {
 		body.find( '.panel-grid .panel-grid-cell .so-panel' )
 			.filter( function () {
 				// Filter to only include non nested
-				return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+				return $( this ).parents( '.so-panel' ).length === 0;
 			} )
 			.not( over )
 			.addClass( 'so-panels-faded' );
@@ -234,8 +241,10 @@ module.exports = Backbone.View.extend( {
 
 
 		this.postToIframe(
-			{ live_editor_panels_data: JSON.stringify( data ) },
-			this.$el.data('preview-url'),
+			{
+				live_editor_panels_data: JSON.stringify( data )
+			},
+			this.previewUrl,
 			this.$('.so-preview')
 		);
 
@@ -328,7 +337,7 @@ module.exports = Backbone.View.extend( {
 				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
 					.filter( function () {
 						// Filter to only include non nested
-						return $( this ).parents( '.widget_siteorigin-panels-builder' ).length === 0;
+						return $( this ).parents( '.so-panel' ).length === 0;
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );

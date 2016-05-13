@@ -35,8 +35,10 @@ function siteorigin_panels_ajax_widget_form(){
 	$request = array_map('stripslashes_deep', $_REQUEST);
 
 	$widget = $request['widget'];
-
-	$instance = !empty($request['instance']) ? json_decode( $request['instance'] , true ) : array();
+	$instance = !empty( $request['instance'] ) ? $request['instance'] : array();
+	if( is_string( $instance ) ) {
+		$instance = json_decode( $instance, true );
+	}
 
 	$form = siteorigin_panels_render_form( $widget, $instance, $_REQUEST['raw'] == 'true' );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
@@ -254,3 +256,15 @@ function siteorigin_panels_ajax_directory_enable(){
 	wp_die();
 }
 add_action('wp_ajax_so_panels_directory_enable', 'siteorigin_panels_ajax_directory_enable');
+
+/**
+ * Preview in the live editor when there is no public view of the item
+ */
+function siteorigin_panels_live_editor_preview(){
+	if( empty( $_REQUEST['_panelsnonce'] ) || !wp_verify_nonce($_REQUEST['_panelsnonce'], 'live-editor-preview') ) wp_die();
+
+	include plugin_dir_path( __FILE__ ) . '../tpl/live-editor-preview.php';
+
+	exit();
+}
+add_action('wp_ajax_so_panels_live_editor_preview', 'siteorigin_panels_live_editor_preview');

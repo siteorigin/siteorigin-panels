@@ -5,7 +5,7 @@
  */
 function siteorigin_panels_default_styles_register_scripts(){
 	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
-	wp_register_script( 'siteorigin-panels-front-parallax', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/jquery.stellar' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+	wp_register_script( 'siteorigin-parallax', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/siteorigin-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
 	wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 		'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
 	) );
@@ -78,7 +78,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('Bottom Margin', 'siteorigin-panels'),
 			'type' => 'measurement',
 			'group' => 'layout',
-			'description' => __('Space below the row.', 'siteorigin-panels'),
+			'description' => sprintf( __('Space below the row. Default is %spx.', 'siteorigin-panels'), siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority' => 5,
 		);
 
@@ -86,7 +86,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'name' => __('Gutter', 'siteorigin-panels'),
 			'type' => 'measurement',
 			'group' => 'layout',
-			'description' => __('Amount of space between columns.', 'siteorigin-panels'),
+			'description' => sprintf( __('Amount of space between columns. Default is %spx.', 'siteorigin-panels'), siteorigin_panels_setting( 'margin-sides' ) ),
 			'priority' => 6,
 		);
 
@@ -293,12 +293,14 @@ class SiteOrigin_Panels_Default_Styling {
 			if( !empty($url) ) {
 
 				if( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
-					wp_enqueue_script('siteorigin-panels-front-parallax');
-					$attributes['data-stellar-background-ratio'] = '0.5';
-					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center; background-repeat: no-repeat;';
-					if( $args['background_display'] == 'parallax' ) {
-						$attributes['style'] .= 'background-size: cover;';
-					}
+					wp_enqueue_script('siteorigin-parallax');
+					$parallax_args = array(
+						'backgroundUrl' => $url[0],
+						'backgroundSize' => array( $url[1], $url[2] ),
+						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+					);
+					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
+					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';
 				}
 				else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
@@ -367,12 +369,14 @@ class SiteOrigin_Panels_Default_Styling {
 			if( !empty($url) ) {
 
 				if( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
-					wp_enqueue_script('siteorigin-panels-front-parallax');
-					$attributes['data-stellar-background-ratio'] = '0.5';
-					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center; background-repeat: no-repeat;';
-					if( $args['background_display'] == 'parallax' ) {
-						$attributes['style'] .= 'background-size: cover;';
-					}
+					wp_enqueue_script('siteorigin-parallax');
+					$parallax_args = array(
+						'backgroundUrl' => $url[0],
+						'backgroundSize' => array( $url[1], $url[2] ),
+						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+					);
+					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
+					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';
 				}
 				else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';

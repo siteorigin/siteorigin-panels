@@ -46,6 +46,10 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget sortable
 	 */
 	initSortable: function () {
+		if( ! this.row.builder.supports( 'moveWidget' ) ) {
+			return this;
+		}
+
 		var cellView = this;
 
 		// Go up the view hierarchy until we find the ID attribute
@@ -95,19 +99,27 @@ module.exports = Backbone.View.extend( {
 				return helper;
 			}
 		} );
+
+		return this;
 	},
 
 	/**
 	 * Refresh the widget sortable when a new widget is added
 	 */
 	refreshSortable: function () {
-		this.widgetSortable.sortable( 'refresh' );
+		if ( ! _.isNull( this.widgetSortable ) ) {
+			this.widgetSortable.sortable( 'refresh' );
+		}
 	},
 
 	/**
 	 * This will make the cell resizble
 	 */
 	initResizable: function () {
+		if( ! this.row.builder.supports( 'editRow' ) ) {
+			return this;
+		}
+
 		// var neighbor = this.$el.previous().data('view');
 		var handle = this.$( '.resize-handle' ).css( 'position', 'absolute' );
 		var container = this.row.$el;
@@ -202,6 +214,7 @@ module.exports = Backbone.View.extend( {
 			}
 		} );
 
+		return this;
 	},
 
 	/**

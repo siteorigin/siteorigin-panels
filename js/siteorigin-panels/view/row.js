@@ -56,6 +56,33 @@ module.exports = Backbone.View.extend( {
 			cellView.$el.appendTo( thisView.$( '.so-cells' ) );
 		} );
 
+		// Remove any unsupported actions
+		if( ! this.builder.supports( 'rowAction' ) ) {
+			this.$('.so-row-toolbar .so-dropdown-wrapper' ).remove();
+			this.$el.addClass('so-row-no-actions');
+		}
+		else {
+			if( ! this.builder.supports( 'editWidget' ) ) {
+				this.$('.so-row-toolbar .so-row-settings' ).parent().remove();
+				this.$el.addClass('so-row-no-edit');
+			}
+			if( ! this.builder.supports( 'addWidget' ) ) {
+				this.$('.so-row-toolbar .so-row-duplicate' ).parent().remove();
+				this.$el.addClass('so-row-no-duplicate');
+			}
+			if( ! this.builder.supports( 'deleteWidget' ) ) {
+				this.$('.so-row-toolbar .so-row-delete' ).parent().remove();
+				this.$el.addClass('so-row-no-delete');
+			}
+		}
+		if( ! this.builder.supports( 'moveRow' ) ) {
+			this.$('.so-row-toolbar .so-row-move' ).remove();
+			this.$el.addClass('so-row-no-move');
+		}
+		if( !$.trim( this.$('.so-row-toolbar').html() ).length ) {
+			this.$('.so-row-toolbar' ).remove();
+		}
+
 		// Resize the rows when ever the widget sortable moves
 		this.builder.on( 'widget_sortable_move', this.resize, this );
 		this.builder.on( 'builder_resize', this.resize, this );
@@ -178,6 +205,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.dialog.openDialog();
+
+		return this;
 	},
 
 	/**
@@ -185,6 +214,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	deleteHandler: function () {
 		this.model.destroy();
+		return this;
 	},
 
 	/**
@@ -233,68 +263,73 @@ module.exports = Backbone.View.extend( {
 			} );
 		}
 
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.add_row,
-				search: false
-			},
-			options,
-			function ( c ) {
-				thisView.builder.addHistoryEntry( 'row_added' );
+		if( this.builder.supports( 'addRow' ) ) {
+			menu.addSection(
+				{
+					sectionTitle: panelsOptions.loc.contextual.add_row,
+					search: false
+				},
+				options,
+				function ( c ) {
+					thisView.builder.addHistoryEntry( 'row_added' );
 
-				var columns = Number( c ) + 1;
-				var weights = [];
-				for ( var i = 0; i < columns; i ++ ) {
-					weights.push( 100 / columns );
+					var columns = Number( c ) + 1;
+					var weights = [];
+					for ( var i = 0; i < columns; i ++ ) {
+						weights.push( 100 / columns );
+					}
+
+					// Create the actual row
+					var newRow = new panels.model.row( {
+						collection: thisView.collection
+					} );
+
+					newRow.setCells( weights );
+					newRow.builder = thisView.builder;
+
+					thisView.builder.model.rows.add( newRow, {
+						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+					} );
+
+					thisView.builder.model.refreshPanelsData();
 				}
+			);
+		}
 
-				// Create the actual row
-				var newRow = new panels.model.row( {
-					collection: thisView.collection
-				} );
+		actions = {};
 
-				newRow.setCells( weights );
-				newRow.builder = thisView.builder;
+		if( this.builder.supports( 'editRow' ) ) {
+			actions.edit = { title: panelsOptions.loc.contextual.row_edit };
+		}
+		if( this.builder.supports( 'addRow' ) ) {
+			actions.duplicate = { title: panelsOptions.loc.contextual.row_duplicate };
+		}
+		if( this.builder.supports( 'deleteRow' ) ) {
+			actions.delete = { title: panelsOptions.loc.contextual.row_delete, confirm: true };
+		}
 
-				thisView.builder.model.rows.add( newRow, {
-					at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
-				} );
-
-				thisView.builder.model.refreshPanelsData();
-			}
-		);
-
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.row_actions,
-				search: false,
-			},
-			{
-				'edit': {
-					title: panelsOptions.loc.contextual.row_edit
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				{
+					sectionTitle: panelsOptions.loc.contextual.row_actions,
+					search: false,
 				},
-				'duplicate': {
-					title: panelsOptions.loc.contextual.row_duplicate
-				},
-				'delete': {
-					title: panelsOptions.loc.contextual.row_delete,
-					confirm: true
-				},
-			},
-			function ( c ) {
-				switch ( c ) {
-					case 'edit':
-						thisView.editSettingsHandler();
-						break;
-					case 'duplicate':
-						thisView.duplicateHandler();
-						break;
-					case 'delete':
-						thisView.visualDestroyModel();
-						break;
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'edit':
+							thisView.editSettingsHandler();
+							break;
+						case 'duplicate':
+							thisView.duplicateHandler();
+							break;
+						case 'delete':
+							thisView.visualDestroyModel();
+							break;
+					}
 				}
-			}
-		);
+			);
+		}
 	}
 
 } );

@@ -484,7 +484,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', get_the_permalink() ) ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
+			<form method="post" action="<?php echo siteorigin_panels_live_editor_preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
 				<input type="hidden" name="live_editor_panels_data" value="">
 			</form>
 			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid %}}" src=""></iframe>
@@ -505,7 +505,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-live-editor">
-	<div class="so-panels-live-editor" data-preview-url="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) ?>">
+	<div class="so-panels-live-editor">
 
 		<div class="live-editor-collapse">
 			<div class="collapse-icon"></div>

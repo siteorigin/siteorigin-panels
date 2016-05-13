@@ -51,11 +51,18 @@ module.exports = panels.view.dialog.extend( {
 			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
 		}
 
+		if( ! this.builder.supports( 'addWidget' ) ) {
+			this.$( '.so-buttons .so-duplicate' ).remove();
+		}
+		if( ! this.builder.supports( 'deleteWidget' ) ) {
+			this.$( '.so-buttons .so-delete' ).remove();
+		}
+
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();
 		this.styles.model = this.model;
 		this.styles.render( 'widget', $( '#post_ID' ).val(), {
-			builderType: this.builder.builderType,
+			builderType: this.builder.config.builderType,
 			dialog: this
 		} );
 
@@ -89,13 +96,15 @@ module.exports = panels.view.dialog.extend( {
 		if ( currentIndex === 0 ) {
 			return false;
 		} else {
-			var widgetView = widgets.eq( currentIndex - 1 ).data( 'view' );
-			if ( _.isUndefined( widgetView ) ) {
-				return false;
-			}
-
-			return widgetView.getEditDialog();
+			do {
+				widgetView = widgets.eq( --currentIndex ).data( 'view' );
+				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
+					return widgetView.getEditDialog();
+				}
+			} while( ! _.isUndefined( widgetView ) && currentIndex > 0 );
 		}
+
+		return false;
 	},
 
 	/**
@@ -107,18 +116,21 @@ module.exports = panels.view.dialog.extend( {
 		if ( widgets.length <= 1 ) {
 			return false;
 		}
-		var currentIndex = widgets.index( this.widgetView.$el );
+
+		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
 
 		if ( currentIndex === widgets.length - 1 ) {
 			return false;
 		} else {
-			var widgetView = widgets.eq( currentIndex + 1 ).data( 'view' );
-			if ( _.isUndefined( widgetView ) ) {
-				return false;
-			}
-
-			return widgetView.getEditDialog();
+			do {
+				widgetView = widgets.eq( ++currentIndex ).data( 'view' );
+				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
+					return widgetView.getEditDialog();
+				}
+			} while( ! _.isUndefined( widgetView ) );
 		}
+
+		return false;
 	},
 
 	/**
@@ -137,7 +149,7 @@ module.exports = panels.view.dialog.extend( {
 		var data = {
 			'action': 'so_panels_widget_form',
 			'widget': this.model.get( 'class' ),
-			'instance': JSON.stringify( this.model.get( 'values' ) ),
+			'instance': this.model.get( 'values' ),
 			'raw': this.model.get( 'raw' )
 		};
 
