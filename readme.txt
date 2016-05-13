@@ -103,7 +103,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Added unique IDs (UUID) to all widgets.
 * Added fallback previewer for Live Editor.
 * Prevent double filtering of $panels_data.
-* Developer support for read-only widgts.
+* Developer support for read-only widgets.
 * Fixed issue that resulted in Wordfence blocking some Page Builder requests.
 * Small interface improvements.
 
