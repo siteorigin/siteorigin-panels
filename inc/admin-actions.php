@@ -35,10 +35,7 @@ function siteorigin_panels_ajax_widget_form(){
 	$request = array_map('stripslashes_deep', $_REQUEST);
 
 	$widget = $request['widget'];
-	$instance = !empty( $request['instance'] ) ? $request['instance'] : array();
-	if( is_string( $instance ) ) {
-		$instance = json_decode( $instance, true );
-	}
+	$instance = !empty($request['instance']) ? $request['instance'] : array();
 
 	$form = siteorigin_panels_render_form( $widget, $instance, $_REQUEST['raw'] == 'true' );
 	$form = apply_filters('siteorigin_panels_ajax_widget_form', $form, $widget, $instance);
