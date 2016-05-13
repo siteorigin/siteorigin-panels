@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.0
-Tested up to: 4.5
+Tested up to: 4.5.2
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,17 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.4.7 - May 13 2016 =
+* Replaced parallax with custom implementation.
+* Added more filters and actions.
+* Allow other plugins to enable/disable certain builder functionality.
+* Added unique IDs (UUID) to all widgets.
+* Added fallback previewer for Live Editor.
+* Prevent double filtering of $panels_data.
+* Developer support for read-only widgts.
+* Fixed issue that resulted in Wordfence blocking some Page Builder requests.
+* Small interface improvements.
 
 = 2.4.6 - April 13 2016 =
 * Fixed Javascript errors with layout builder widget.
