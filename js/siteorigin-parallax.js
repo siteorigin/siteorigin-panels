@@ -60,6 +60,8 @@
 					limitMotion = options.limitMotion;
 				}
 
+				var effectiveWindowHeight = Math.max( wrapperSize[1], $( window ).outerHeight() );
+
 				// What percent is this through a screen cycle
 				// 0 is when the bottom of the wrapper is at the top of the screen
 				// 1 is when the top of the wrapper is at the bottom of the screen
@@ -68,11 +70,6 @@
 				var topPosition = 0;
 				var limitScale = 1;
 				var backgroundSize = options.backgroundSize;
-
-				var effectiveWindowHeight = $( window ).outerHeight();
-				if( wrapperSize[1] > effectiveWindowHeight ) {
-					effectiveWindowHeight = wrapperSize[1];
-				}
 
 				// Do the setup for every time something changes
 				if( options.backgroundSizing === 'scaled' ) {
