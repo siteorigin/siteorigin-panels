@@ -48,7 +48,7 @@
 
 				var limitMotion;
 				if( options.limitMotion === 'auto' ) {
-					var windowHeight = $(window ).outerHeight();
+					var windowHeight = $( window ).outerHeight();
 					if( windowHeight < 720 ) {
 						limitMotion = 0.55;
 					} else if( windowHeight > 1300 ) {
@@ -70,37 +70,41 @@
 
 				// Do the setup for every time something changes
 				if( options.backgroundSizing === 'scaled' ) {
-					$$.css( 'background-size', 'cover' );
-
 					// The amount of X scaling
 					var scaleX = wrapperSize[0] / options.backgroundSize[0];
 
-					// The amount of Y scaling
-					var scaleY = wrapperSize[1] / options.backgroundSize[1];
+					var finalY = wrapperSize[1] / limitMotion;
+					var scaleBG = scaleX;
 
-					if( scaleY < scaleX ) {
-						// Work out the top position
-						if( bounding.top > - wrapperSize[1] && bounding.bottom - $(window ).outerHeight() < wrapperSize[1] ) {
-							// This is the scaled background height
-							var backgroundHeight = options.backgroundSize[1] * scaleX;
+					if( finalY > options.backgroundSize[1] || options.backgroundSize[1] * scaleX < finalY ) {
+						// This image wouldn't be tall enough to give a decent parallax effect, so we'll scale it up
+						scaleBG = finalY / options.backgroundSize[1];
+					}
 
-							// Check if we need to limit the amount of motion in the background image
-							if( limitMotion && backgroundHeight > $( window ).outerHeight() * limitMotion ) {
-								// Work out how much to scale percent position based on how much motion we want.
-								limitScale = ( $( window ).outerHeight() * limitMotion ) / ( backgroundHeight );
-								// Percent is scaled so that the midpoint is still 0.5
-								percent = (percent * limitScale) + ( ( 1 - limitScale ) / 2 );
-							}
+					$$.css(
+						'background-size',
+						( options.backgroundSize[0] * scaleBG ) + 'px ' +
+						( options.backgroundSize[1] * scaleBG ) + 'px'
+					);
 
-							topPosition = - ( backgroundHeight - wrapperSize[1] ) * percent;
+					// Work out the top position
+					if( bounding.top > - wrapperSize[1] && bounding.bottom - $( window ).outerHeight() < wrapperSize[1] ) {
+						// This is the scaled background height
+						var backgroundHeight = options.backgroundSize[1] * scaleBG;
+
+						// Check if we need to limit the amount of motion in the background image
+						if( limitMotion && backgroundHeight > $( window ).outerHeight() * limitMotion ) {
+							// Work out how much to scale percent position based on how much motion we want.
+							limitScale = ( $( window ).outerHeight() * limitMotion ) / ( backgroundHeight );
+							// Percent is scaled so that the midpoint is still 0.5
+							percent = (percent * limitScale) + ( ( 1 - limitScale ) / 2 );
 						}
 
-						$$.css( 'background-position', '0px ' + topPosition + 'px' );
-
-					} else {
-						// There is no space for a vertical parallax
-						$$.css( 'background-position', '50% 50%' );
+						topPosition = - ( backgroundHeight - wrapperSize[1] ) * percent;
 					}
+
+					$$.css( 'background-position', '50% ' + topPosition + 'px' );
+
 				} else if( options.backgroundSizing === 'original' ) {
 					// See scaled version or explanation of this code.
 					if( limitMotion && options.backgroundSize[1] > $( window ).outerHeight() * limitMotion ) {
@@ -117,6 +121,7 @@
 				}
 			}
 			catch( err ) {
+				console.log( err.message );
 				$$.css( {
 					'background-size': options.backgroundSizing === 'scaled' ? 'cover' : 'auto',
 					'background-position': '50% 50%'
