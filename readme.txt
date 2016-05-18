@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.8 - May 13 2016 =
+* Reverted Wordfence fix from 2.4.7 - it raised other issues.
+
 = 2.4.7 - May 13 2016 =
 * Replaced parallax with custom implementation.
 * Added more filters and actions.
@@ -103,7 +106,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Added unique IDs (UUID) to all widgets.
 * Added fallback previewer for Live Editor.
 * Prevent double filtering of $panels_data.
-* Developer support for read-only widgts.
+* Developer support for read-only widgets.
 * Fixed issue that resulted in Wordfence blocking some Page Builder requests.
 * Small interface improvements.
 
