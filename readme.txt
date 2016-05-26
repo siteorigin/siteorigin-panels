@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.9 - May 26 2016 =
+* Improved parallax library to upscale images to ensure enough of a parallax.
+* Allow negative values in measurement fields.
+
 = 2.4.8 - May 13 2016 =
 * Reverted Wordfence fix from 2.4.7 - it raised other issues.
 
