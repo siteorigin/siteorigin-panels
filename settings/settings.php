@@ -108,6 +108,9 @@ class SiteOrigin_Panels_Settings {
 		$defaults['home-template'] = 'home-panels.php';
 		$defaults['affiliate-id'] = apply_filters( 'siteorigin_panels_affiliate_id', false );
 
+		// The general fields
+		$defaults['live-editor-quick-link'] = true;
+
 		// Widgets fields
 		$defaults['title-html'] = '<h3 class="widget-title">{{title}}</h3>';
 		$defaults['add-widget-class'] = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
@@ -216,6 +219,12 @@ class SiteOrigin_Panels_Settings {
 			'label' => __('Post Types', 'siteorigin-panels'),
 			'options' => $this->get_post_types(),
 			'description' => __('The post types to use Page Builder on.', 'siteorigin-panels'),
+		);
+
+		$fields['general']['fields']['live-editor-quick-link'] = array(
+			'type' => 'checkbox',
+			'label' => __('Live Editor Quick Link', 'siteorigin-panels'),
+			'description' => __('Display a Live Editor button in the admin bar.', 'siteorigin-panels'),
 		);
 
 		// The widgets fields

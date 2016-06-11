@@ -1453,7 +1453,12 @@ add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panel
 
 function siteorigin_panels_live_edit_link( $wp_admin_bar ){
 	// Add a Live Edit link if this is a Page Builder page that the user can edit
-	if( is_singular() && current_user_can( 'edit_post', get_the_ID() ) && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+	if(
+		siteorigin_panels_setting( 'live-editor-quick-link' ) &&
+		is_singular() &&
+		current_user_can( 'edit_post', get_the_ID() ) &&
+		get_post_meta( get_the_ID(), 'panels_data', true )
+	) {
 		$wp_admin_bar->add_node( array(
 			'id'    => 'so_live_editor',
 			'title' => __( 'Live Editor', 'siteorigin-panels' ),
