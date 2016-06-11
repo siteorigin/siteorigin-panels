@@ -109,16 +109,15 @@ class SiteOrigin_Panels_Settings {
 		$defaults['affiliate-id'] = apply_filters( 'siteorigin_panels_affiliate_id', false );
 
 		// The general fields
+		$defaults['post-types'] = array('page', 'post');
 		$defaults['live-editor-quick-link'] = true;
+		$defaults['parallax-motion'] = '';
 
 		// Widgets fields
 		$defaults['title-html'] = '<h3 class="widget-title">{{title}}</h3>';
 		$defaults['add-widget-class'] = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
 		$defaults['bundled-widgets'] = get_option( 'siteorigin_panels_is_using_bundled', false );
 		$defaults['recommended-widgets'] = true;
-
-		// Post types
-		$defaults['post-types'] = array('page', 'post');
 
 		// The layout fields
 		$defaults['responsive'] = true;
@@ -225,6 +224,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'checkbox',
 			'label' => __('Live Editor Quick Link', 'siteorigin-panels'),
 			'description' => __('Display a Live Editor button in the admin bar.', 'siteorigin-panels'),
+		);
+
+		$fields['general']['fields']['parallax-motion'] = array(
+			'type' => 'float',
+			'label' => __('Limit Parallax Motion', 'siteorigin-panels'),
+			'description' => __('How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels'),
 		);
 
 		// The widgets fields
@@ -350,6 +355,7 @@ class SiteOrigin_Panels_Settings {
 
 		switch ($field['type'] ) {
 			case 'text':
+			case 'float':
 				?><input name="<?php echo esc_attr($field_name) ?>" class="panels-setting-<?php echo esc_attr($field['type']) ?>" type="text" value="<?php echo esc_attr($value) ?>" /> <?php
 				break;
 
@@ -427,6 +433,18 @@ class SiteOrigin_Panels_Settings {
 					case 'number':
 						if( $post[$field_id] != '' ) {
 							$values[$field_id] = !empty($post[$field_id]) ? intval( $post[$field_id] ) : 0;
+						}
+						else {
+							$values[$field_id] = '';
+						}
+						break;
+
+					case 'float':
+						if( $post[$field_id] != '' ) {
+							$values[$field_id] = !empty($post[$field_id]) ? floatval( $post[$field_id] ) : 0;
+						}
+						else {
+							$values[$field_id] = '';
 						}
 						break;
 

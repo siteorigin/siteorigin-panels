@@ -58,7 +58,7 @@
 						limitMotion = (-0.00017 * ( windowHeight - 720 ) ) + 0.55;
 					}
 				} else {
-					limitMotion = options.limitMotion;
+					limitMotion = parseFloat( options.limitMotion );
 				}
 
 				// What percent is this through a screen cycle
