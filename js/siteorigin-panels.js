@@ -5903,7 +5903,8 @@ module.exports = Backbone.View.extend( {
 
 		this.setElement( this.template( {
 			title: this.model.getWidgetField( 'title' ),
-			description: this.model.getTitle()
+			description: this.model.getTitle(),
+            widget_css: this.model.attributes.style.class            
 		} ) );
 
 		this.$el.data( 'view', this );

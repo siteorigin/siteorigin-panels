@@ -109,7 +109,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-widget">
-	<div class="so-widget ui-draggable">
+	<div class="so-widget ui-draggable {{%= widget_css %}}">
 		<div class="so-widget-wrapper">
 			<div class="title">
 				<h4>{{%= title %}}</h4>
