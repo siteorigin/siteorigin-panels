@@ -645,7 +645,10 @@ function siteorigin_panels_process_raw_widgets($widgets) {
 		if( !empty($info['raw']) ) {
 			if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
 				$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
-				$widgets[$i] = $the_widget->update( $widgets[$i], $widgets[$i] );
+				$instance = $the_widget->update( $widgets[$i], $widgets[$i] );
+				$instance = apply_filters ( 'widget_update_callback', $instance, $widgets[$i], $widgets[$i], $the_widget );
+
+				$widgets[$i] = $instance;
 				unset($info['raw']);
 			}
 		}
