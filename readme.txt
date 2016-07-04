@@ -96,6 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.10 - 4 July 2016 =
+* Made Live Editor quick link optional from Page Builder settings page.
+* Added option to specify parallax motion.
+* Fixed settings help link.
+* Renamed Prebuilt to Layouts
+* Reverted sidebars emulator change.
+* Skip empty attributes in CSS generator class.
+
 = 2.4.9 - May 26 2016 =
 * Improved parallax library to upscale images to ensure enough of a parallax.
 * Allow negative values in measurement fields.

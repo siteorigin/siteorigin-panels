@@ -21,7 +21,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<a class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ) ?>">
 				<span class="so-panels-icon so-panels-icon-cubes"></span>
-				<span class="so-button-text"><?php esc_html_e('Prebuilt', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e('Layouts', 'siteorigin-panels') ?></span>
 			</a>
 
 			<?php if( !empty($post) ) : ?>
@@ -348,7 +348,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php _e('Prebuilt Layouts', 'siteorigin-panels') ?></h3>
+		<h3 class="title"><?php _e('Page Builder Layouts', 'siteorigin-panels') ?></h3>
 
 		<div class="left-sidebar">
 

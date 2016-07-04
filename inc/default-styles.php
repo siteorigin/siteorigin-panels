@@ -298,6 +298,7 @@ class SiteOrigin_Panels_Default_Styling {
 						'backgroundUrl' => $url[0],
 						'backgroundSize' => array( $url[1], $url[2] ),
 						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+						'limitMotion' => siteorigin_panels_setting( 'parallax-motion' ) ? floatval( siteorigin_panels_setting( 'parallax-motion' ) ) : 'auto',
 					);
 					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
 					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';

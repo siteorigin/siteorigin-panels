@@ -6,7 +6,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-		add_action( 'init', array( $this, 'register_widgets' ), 15 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ), 99 );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
