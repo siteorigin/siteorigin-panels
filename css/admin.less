@@ -1589,13 +1589,43 @@
 		/* All the field types */
 
 		.style-field-measurement {
-			input[type="text"] {
-				width: 60px;
+			.measurement-inputs {
+				overflow: auto;
+				margin: 0 -3px 4px -3px;
+			}
+
+			.measurement-wrapper {
+				box-sizing: border-box;
 				float: left;
+				width: 25%;
+				padding: 0 3px;
+
+				input[type="text"] {
+					border-width: 1px;
+					display: block;
+					max-width: 100%;
+
+					&.measurement-top {
+						box-shadow: inset 0 2px 1px rgba( 0, 115, 170, 0.35 );
+					}
+
+					&.measurement-right {
+						box-shadow: inset -3px 0 2px rgba( 0, 115, 170, 0.35 );
+					}
+
+					&.measurement-bottom {
+						box-shadow: inset 0 -2px 1px rgba( 0, 115, 170, 0.35 );
+					}
+
+					&.measurement-left {
+						box-shadow: inset 3px 0 2px rgba( 0, 115, 170, 0.35 );
+					}
+				}
 			}
 
 			select {
-				float: left;
+				width: 100%;
+				display: block;
 			}
 		}
 

@@ -1503,12 +1503,36 @@
 .so-panels-dialog .so-visual-styles .style-input-wrapper input {
   max-width: 100%;
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement input[type="text"] {
-  width: 60px;
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-inputs {
+  overflow: auto;
+  margin: 0 -3px 4px -3px;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper {
+  box-sizing: border-box;
   float: left;
+  width: 25%;
+  padding: 0 3px;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"] {
+  border-width: 1px;
+  display: block;
+  max-width: 100%;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-top {
+  box-shadow: inset 0 2px 1px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-right {
+  box-shadow: inset -3px 0 2px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-bottom {
+  box-shadow: inset 0 -2px 1px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-left {
+  box-shadow: inset 3px 0 2px rgba(0, 115, 170, 0.35);
 }
 .so-panels-dialog .so-visual-styles .style-field-measurement select {
-  float: left;
+  width: 100%;
+  display: block;
 }
 .so-panels-dialog .so-visual-styles .style-field-image .so-image-selector {
   display: inline-block;
