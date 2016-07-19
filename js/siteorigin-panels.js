@@ -5895,7 +5895,8 @@ module.exports = Backbone.View.extend( {
 					hidden.val( fullString );
 				}
 				else {
-					var valueList = [],
+					var target = $( e.target ),
+						valueList = [],
 						emptyIndex = [],
 						fullIndex = [];
 
@@ -5911,6 +5912,11 @@ module.exports = Backbone.View.extend( {
 						}
 					} );
 
+					if( emptyIndex.length === 3 && fullIndex[0] === text.index( target ) ) {
+						text.val( target.val() );
+						valueList = [ target.val(), target.val(), target.val(), target.val() ];
+					}
+
 					if( JSON.stringify( valueList ) === JSON.stringify( [ null, null, null, null ] ) ) {
 						hidden.val('');
 					}
@@ -5919,8 +5925,6 @@ module.exports = Backbone.View.extend( {
 							return ( k === null ? 0 : k ) + unit.val();
 						} ).join( ' ' ) );
 					}
-
-					console.log( hidden.val() );
 				}
 			};
 
