@@ -1083,7 +1083,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 		foreach ( $cells as $ci => $widgets ) {
 			// Themes can add their own styles to cells
-			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', array('panel-grid-cell'), $panels_data );
+			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', array('panel-grid-cell'), $panels_data, $gi, $ci );
 			$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 				'class' => implode( ' ', $cell_classes ),
 				'id' => 'pgc-' . $post_id . '-' . ( !empty($grid_id) ? $grid_id : $gi )  . '-' . $ci
