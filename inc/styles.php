@@ -150,26 +150,26 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 				?>
 				<div class="measurement-inputs">
 					<div class="measurement-wrapper">
-						<input type="text" class="measurement measurement-top" placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>" />
+						<input type="text" class="measurement-value measurement-top" placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>" />
 					</div>
 					<div class="measurement-wrapper">
-						<input type="text" class="measurement measurement-right" placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>" />
+						<input type="text" class="measurement-value measurement-right" placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>" />
 					</div>
 					<div class="measurement-wrapper">
-						<input type="text" class="measurement measurement-bottom" placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>" />
+						<input type="text" class="measurement-value measurement-bottom" placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>" />
 					</div>
 					<div class="measurement-wrapper">
-						<input type="text" class="measurement measurement-left" placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>" />
+						<input type="text" class="measurement-value measurement-left" placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>" />
 					</div>
 				</div>
 				<?php
 			}
 			else {
-				?><input type="text" class="measurement" /><?php
+				?><input type="text" class="measurement-value measurement-value-single" /><?php
 			}
 
 			?>
-			<select>
+			<select class="measurement-unit measurement-unit-<?php echo !empty( $field['multiple'] ) ? 'multiple' : 'single' ?>">
 				<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
 					<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
 				<?php endforeach?>

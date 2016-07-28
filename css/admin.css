@@ -1513,26 +1513,34 @@
   width: 25%;
   padding: 0 3px;
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"] {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value {
   border-width: 1px;
   display: block;
   max-width: 100%;
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-top {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-top {
   box-shadow: inset 0 2px 1px rgba(0, 115, 170, 0.35);
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-right {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-right {
   box-shadow: inset -3px 0 2px rgba(0, 115, 170, 0.35);
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-bottom {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-bottom {
   box-shadow: inset 0 -2px 1px rgba(0, 115, 170, 0.35);
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper input[type="text"].measurement-left {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-left {
   box-shadow: inset 3px 0 2px rgba(0, 115, 170, 0.35);
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement select {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-unit-multiple {
   width: 100%;
   display: block;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-unit-single {
+  float: right;
+  width: 25%;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-value-single {
+  float: left;
+  width: 72%;
 }
 .so-panels-dialog .so-visual-styles .style-field-image .so-image-selector {
   display: inline-block;
