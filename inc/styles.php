@@ -126,16 +126,7 @@ function siteorigin_panels_render_styles_fields( $section, $before = '', $after 
  */
 function siteorigin_panels_style_get_measurements_list() {
 	$measurements = array(
-		'px',
-		'%',
-		'in',
-		'cm',
-		'mm',
-		'em',
-		'ex',
-		'pt',
-		'pc',
-		'rem'
+		'px', '%', 'in', 'cm', 'mm', 'em', 'ex', 'pt', 'pc', 'rem'
 	);
 
 	// Allow themes and plugins to trim or enhance the list.
@@ -152,11 +143,33 @@ function siteorigin_panels_render_style_field( $field, $current, $field_id ){
 	$field_name = 'style['.$field_id.']';
 
 	echo '<div class="style-input-wrapper">';
-	switch($field['type']) {
+	switch( $field['type'] ) {
 		case 'measurement' :
+			
+			if( !empty( $field['multiple'] ) ) {
+				?>
+				<div class="measurement-inputs">
+					<div class="measurement-wrapper">
+						<input type="text" class="measurement-value measurement-top" placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>" />
+					</div>
+					<div class="measurement-wrapper">
+						<input type="text" class="measurement-value measurement-right" placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>" />
+					</div>
+					<div class="measurement-wrapper">
+						<input type="text" class="measurement-value measurement-bottom" placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>" />
+					</div>
+					<div class="measurement-wrapper">
+						<input type="text" class="measurement-value measurement-left" placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>" />
+					</div>
+				</div>
+				<?php
+			}
+			else {
+				?><input type="text" class="measurement-value measurement-value-single" /><?php
+			}
+
 			?>
-			<input type="text" />
-			<select>
+			<select class="measurement-unit measurement-unit-<?php echo !empty( $field['multiple'] ) ? 'multiple' : 'single' ?>">
 				<?php foreach ( siteorigin_panels_style_get_measurements_list() as $measurement ):?>
 					<option value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
 				<?php endforeach?>
