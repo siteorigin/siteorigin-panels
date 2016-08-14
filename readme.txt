@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.11 - 15 August 2016 =
+* Added esc_url to all add_query_arg calls.
+* Improved measurement style field to handle multiple values.
+
 = 2.4.10 - 4 July 2016 =
 * Made Live Editor quick link optional from Page Builder settings page.
 * Added option to specify parallax motion.
