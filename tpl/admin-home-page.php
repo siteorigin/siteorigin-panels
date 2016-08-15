@@ -5,13 +5,13 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 
 <div class="wrap" id="panels-home-page">
 	<form
-		action="<?php echo add_query_arg('page', 'so_panels_home_page') ?>"
+		action="<?php echo esc_url( add_query_arg('page', 'so_panels_home_page') ) ?>"
 		class="hide-if-no-js siteorigin-panels-builder-form"
 		method="post"
 		id="panels-home-page-form"
 		data-type="custom_home_page"
 		data-post-id="<?php echo get_the_ID() ?>"
-		data-preview-url="<?php echo add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) ?>"
+		data-preview-url="<?php echo esc_url( add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) ) ?>"
 		data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
 		>
 		<div id="icon-index" class="icon32"><br></div>

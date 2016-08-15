@@ -1503,12 +1503,44 @@
 .so-panels-dialog .so-visual-styles .style-input-wrapper input {
   max-width: 100%;
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement input[type="text"] {
-  width: 60px;
-  float: left;
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-inputs {
+  overflow: auto;
+  margin: 0 -3px 4px -3px;
 }
-.so-panels-dialog .so-visual-styles .style-field-measurement select {
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper {
+  box-sizing: border-box;
   float: left;
+  width: 25%;
+  padding: 0 3px;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value {
+  border-width: 1px;
+  display: block;
+  max-width: 100%;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-top {
+  box-shadow: inset 0 2px 1px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-right {
+  box-shadow: inset -3px 0 2px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-bottom {
+  box-shadow: inset 0 -2px 1px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-wrapper .measurement-value.measurement-left {
+  box-shadow: inset 3px 0 2px rgba(0, 115, 170, 0.35);
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-unit-multiple {
+  width: 100%;
+  display: block;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-unit-single {
+  float: right;
+  width: 25%;
+}
+.so-panels-dialog .so-visual-styles .style-field-measurement .measurement-value-single {
+  float: left;
+  width: 72%;
 }
 .so-panels-dialog .so-visual-styles .style-field-image .so-image-selector {
   display: inline-block;

@@ -5826,8 +5826,19 @@ module.exports = Backbone.View.extend( {
 			var unit = $$.find( 'select' );
 			var hidden = $$.find( 'input[type="hidden"]' );
 
-			// Load the value from the hidden field
-			if ( hidden.val() !== '' ) {
+			text.focus( function(){
+				$(this).select();
+			} );
+
+			/**
+			 * Load value into the visible input fields.
+			 * @param value
+             */
+			var loadValue = function( value ) {
+				if( value === '' ) {
+					return;
+				}
+
 				var re = /(?:([0-9\.,]+)(.*))+/;
 				var valueList = hidden.val().split( ' ' );
 				var valueListValue = [];
@@ -5838,26 +5849,88 @@ module.exports = Backbone.View.extend( {
 						unit.val( match[2] );
 					}
 				}
-				text.val( valueListValue.join( ' ' ) );
-			}
 
-			var setVal = function () {
-				var fullString = text
-					.val()
-					.split( ' ' )
-					.filter( function ( value ) {
-						return value !== '';
-					} )
-					.map( function ( value ) {
-						return value + unit.val();
-					} )
-					.join( ' ' );
-				hidden.val( fullString );
+				if( text.length === 1 ) {
+					// This is a single input text field
+					text.val( valueListValue.join( ' ' ) );
+				}
+				else {
+					// We're dealing with a multiple field
+					if( valueListValue.length === 1 ) {
+						valueListValue = [ valueListValue[0], valueListValue[0], valueListValue[0], valueListValue[0] ];
+					}
+					else if( valueListValue.length === 2 ) {
+						valueListValue = [ valueListValue[0], valueListValue[1], valueListValue[0], valueListValue[1] ];
+					}
+					else if( valueListValue.length === 3 ) {
+						valueListValue = [ valueListValue[0], valueListValue[1], valueListValue[2], valueListValue[1] ];
+					}
+
+					// Store this in the visible fields
+					text.each( function( i, el ) {
+						$( el ).val( valueListValue[i] );
+					} );
+				}
+			};
+			loadValue( hidden.val() );
+
+			/**
+			 * Set value of the hidden field based on inputs
+			 */
+			var setValue = function( e ){
+				var i;
+
+				if( text.length === 1 ) {
+					// We're dealing with a single measurement
+					var fullString = text
+						.val()
+						.split( ' ' )
+						.filter( function ( value ) {
+							return value !== '';
+						} )
+						.map( function ( value ) {
+							return value + unit.val();
+						} )
+						.join( ' ' );
+					hidden.val( fullString );
+				}
+				else {
+					var target = $( e.target ),
+						valueList = [],
+						emptyIndex = [],
+						fullIndex = [];
+
+					text.each( function( i, el ) {
+						var value = $( el ).val( ) !== '' ? parseFloat( $( el ).val( ) ) : null;
+						valueList.push( value );
+
+						if( value === null ) {
+							emptyIndex.push( i );
+						}
+						else {
+							fullIndex.push( i );
+						}
+					} );
+
+					if( emptyIndex.length === 3 && fullIndex[0] === text.index( target ) ) {
+						text.val( target.val() );
+						valueList = [ target.val(), target.val(), target.val(), target.val() ];
+					}
+
+					if( JSON.stringify( valueList ) === JSON.stringify( [ null, null, null, null ] ) ) {
+						hidden.val('');
+					}
+					else {
+						hidden.val( valueList.map( function( k ){
+							return ( k === null ? 0 : k ) + unit.val();
+						} ).join( ' ' ) );
+					}
+				}
 			};
 
 			// Set the value when ever anything changes
-			text.keyup( setVal ).change( setVal );
-			unit.change( setVal );
+			text.change( setValue );
+			unit.change( setValue );
 		} );
 	}
 
