@@ -90,7 +90,7 @@ function siteorigin_panels_ajax_get_prebuilt_layouts(){
 		if( !empty($search) ) $query['search'] = $search;
 		$query['page'] = $page;
 
-		$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . '/wp-admin/admin-ajax.php?action=query_layouts');
+		$url = add_query_arg( $query, SITEORIGIN_PANELS_LAYOUT_URL . 'wp-admin/admin-ajax.php?action=query_layouts');
 		$response = wp_remote_get( $url );
 
 		if( is_array($response) && $response['response']['code'] == 200 ) {
