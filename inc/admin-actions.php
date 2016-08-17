@@ -187,7 +187,7 @@ function siteorigin_panels_ajax_get_prebuilt_layout(){
 	}
 	if( $_REQUEST['type'] == 'directory' ) {
 		$response = wp_remote_get(
-			SITEORIGIN_PANELS_LAYOUT_URL . '/layout/' . urlencode($_REQUEST['lid']) . '/?action=download'
+			SITEORIGIN_PANELS_LAYOUT_URL . 'layout/' . urlencode($_REQUEST['lid']) . '/?action=download'
 		);
 
 		// var_dump($response['body']);
