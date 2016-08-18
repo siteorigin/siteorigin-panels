@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.13 - 18 August 2016 =
+* Fixed: layout directory imports in WordPress 4.6
+
 = 2.4.12 - 17 August 2016 =
 * Fixed layout directory requests for WordPress 4.6
 
