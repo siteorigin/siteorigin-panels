@@ -2842,6 +2842,24 @@ module.exports = Backbone.Model.extend( {
 			// This means that the widget has told us which field it wants us to use as a title
 			if ( widgetData.panels_title === false ) {
 				return panelsOptions.widgets[this.get( 'class' )].description;
+			} else {
+				// Get every value and iterate the keys
+		        var values = this.get( 'values' );
+
+		        for ( var k in values ) {
+		            if( typeof values[k] !== 'object' ) {
+		                if ( values.hasOwnProperty( k ) && k == widgetData.panels_title ) {
+		                    return values[k];
+		                }
+		            } else {
+		                // If we are into a section, check inside keys too
+		                for( var j in values[k] ) {
+		                    if( values[k].hasOwnProperty( j ) && j == widgetData.panels_title ) {
+		                        return values[k][j];
+		                    }
+		                }
+		            }
+		        }
 			}
 		}
 
