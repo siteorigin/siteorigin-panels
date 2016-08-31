@@ -56,7 +56,11 @@ function siteorigin_panels_init(){
 		include plugin_dir_path(__FILE__).'widgets/widgets.php';
 	}
 
-	if( ! is_admin() && siteorigin_panels_setting( 'sidebars-emulator' ) ) {
+	if(
+		! is_admin() &&
+		siteorigin_panels_setting( 'sidebars-emulator' ) &&
+		( ! get_option('permalink_structure') || get_option('rewrite_rules') )
+	) {
 		// Include the sidebars emulator
 		require_once plugin_dir_path(__FILE__) . 'inc/sidebars-emulator.php';
 	}
