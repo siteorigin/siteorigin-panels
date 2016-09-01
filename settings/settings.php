@@ -112,6 +112,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['post-types'] = array('page', 'post');
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['parallax-motion'] = '';
+		$defaults['sidebars-emulator'] = true;
 
 		// Widgets fields
 		$defaults['title-html'] = '<h3 class="widget-title">{{title}}</h3>';
@@ -230,6 +231,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'float',
 			'label' => __('Limit Parallax Motion', 'siteorigin-panels'),
 			'description' => __('How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels'),
+		);
+
+		$fields['general']['fields']['sidebars-emulator'] = array(
+			'type' => 'checkbox',
+			'label' => __('Sidebars Emulator', 'siteorigin-panels'),
+			'description' => __('Page Builder will create an emulated sidebar, that contains all widgets in the page.', 'siteorigin-panels'),
 		);
 
 		// The widgets fields
