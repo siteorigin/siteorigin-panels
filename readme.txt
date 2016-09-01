@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.14 - 18 August 2016 =
+* Fixes to sidebar emulator to prevent early rewrite rule building.
+* Added option to completely disable sidebar emulator.
+
 = 2.4.13 - 18 August 2016 =
 * Fixed: layout directory imports in WordPress 4.6
 
