@@ -48,9 +48,9 @@ register_activation_hook(__FILE__, 'siteorigin_panels_activate');
  */
 function siteorigin_panels_init(){
 	if(
-		!siteorigin_panels_setting('bundled-widgets') &&
-		!defined('SITEORIGIN_PANELS_LEGACY_WIDGETS_ACTIVE') &&
-		( !is_admin() || basename($_SERVER["SCRIPT_FILENAME"]) != 'plugins.php')
+		siteorigin_panels_setting('bundled-widgets') &&
+		! defined('SITEORIGIN_PANELS_LEGACY_WIDGETS_ACTIVE') &&
+		( ! is_admin() || basename( $_SERVER["SCRIPT_FILENAME"] ) != 'plugins.php' )
 	) {
 		// Include the bundled widgets if the Legacy Widgets plugin isn't active.
 		include plugin_dir_path(__FILE__).'widgets/widgets.php';
@@ -1067,7 +1067,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
 	foreach ( $grids as $gi => $cells ) {
-		
+
 		$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $panels_data['grids'][$gi] );
 		$grid_id = !empty($panels_data['grids'][$gi]['style']['id']) ? sanitize_html_class( $panels_data['grids'][$gi]['style']['id'] ) : false;
 
