@@ -50,7 +50,7 @@ function siteorigin_panels_init(){
 	if(
 		siteorigin_panels_setting('bundled-widgets') &&
 		! defined('SITEORIGIN_PANELS_LEGACY_WIDGETS_ACTIVE') &&
-		basename( $_SERVER["SCRIPT_FILENAME"] ) != 'plugins.php'
+		( ! is_admin() || basename( $_SERVER["SCRIPT_FILENAME"] ) != 'plugins.php' )
 	) {
 		// Include the bundled widgets if the Legacy Widgets plugin isn't active.
 		include plugin_dir_path(__FILE__).'widgets/widgets.php';
