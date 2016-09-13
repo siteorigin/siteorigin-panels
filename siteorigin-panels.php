@@ -939,6 +939,15 @@ function siteorigin_panels_filter_content( $content ) {
 }
 add_filter( 'the_content', 'siteorigin_panels_filter_content' );
 
+/**
+ * Flush the siteorigin content cache when a post is updated.
+ *
+ * @param  int $post_id
+ */
+function siteorigin_panels_flush_post_cache( $post_id ) {
+	wp_cache_delete( $post_id, 'siteorigin_panels' );
+}
+add_filter( 'clean_post_cache', 'siteorigin_panels_flush_post_cache' );
 
 /**
  * Render the panels
@@ -956,9 +965,19 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	$siteorigin_panels_current_post = $post_id;
 
 	// Try get the cached panel from in memory cache.
-	global $siteorigin_panels_cache;
-	if(!empty($siteorigin_panels_cache) && !empty($siteorigin_panels_cache[$post_id]))
-		return $siteorigin_panels_cache[$post_id];
+	$cache = wp_cache_get( $post_id, 'siteorigin_panels' );
+
+	if ( false !== $cache ) {
+		siteorigin_panels_enqueue_dependancies_from_cache( $cache );
+		return $cache['html'];
+	}
+
+	// capture all the enqueued styles and scripts
+	$backup_styles = $GLOBALS['wp_styles'];
+	$GLOBALS['wp_styles'] = new WP_Styles();
+
+	$backup_scripts = $GLOBALS['wp_scripts'];
+	$GLOBALS['wp_scripts'] = new WP_Scripts();
 
 	if( empty($panels_data) ) {
 		if( strpos($post_id, 'prebuilt:') === 0) {
@@ -1154,7 +1173,46 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	// Reset the current post
 	$siteorigin_panels_current_post = $old_current_post;
 
-	return apply_filters( 'siteorigin_panels_render', $html, $post_id, !empty($post) ? $post : null );
+	$html = apply_filters( 'siteorigin_panels_render', $html, $post_id, ! empty( $post ) ? $post : null );
+
+	$new_styles = array_diff( $GLOBALS['wp_styles']->queue, $backup_styles->queue );
+	$new_styles_registered = array_intersect_key( $GLOBALS['wp_styles']->registered, array_flip( $new_styles ) );
+
+	$new_scripts = array_diff( $GLOBALS['wp_scripts']->queue, $backup_scripts->queue );
+	$new_scripts_registered = array_intersect_key( $GLOBALS['wp_scripts']->registered, array_flip( $new_scripts ) );
+
+	$GLOBALS['wp_styles'] = $backup_styles;
+	$GLOBALS['wp_scripts'] = $backup_scripts;
+
+	$cache = array(
+		'html' => $html,
+		'styles' => array_map( 'get_object_vars', $new_styles_registered ),
+		'scripts' => array_map( 'get_object_vars', $new_scripts_registered ),
+	);
+
+	siteorigin_panels_enqueue_dependancies_from_cache( $cache );
+	wp_cache_set( $post_id, $cache, 'siteorigin_panels' );
+
+	return $html;
+}
+
+/**
+ * Enqueue the dependancies for the content scripts and styles.
+ *
+ * Because capturing the cache and ouputting it won't have any
+ * enqueued scripts and styles in the outputted HTML, we capture and
+ * re-enqueue the scripts and styles seperatly.
+ *
+ * @param  array $cache
+ */
+function siteorigin_panels_enqueue_dependancies_from_cache( $cache ) {
+	foreach ( $cache['styles'] as $style ) {
+		call_user_func_array( 'wp_enqueue_style', (array) $style );
+	}
+
+	foreach ( $cache['scripts'] as $script ) {
+		call_user_func_array( 'wp_enqueue_script', (array) $script );
+	}
 }
 
 /**
