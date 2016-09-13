@@ -135,6 +135,7 @@
 		// All the events where we'll need to change the parallax
 		$( window ).on( 'scroll', setupParallax );
 		$( window ).on( 'resize', setupParallax );
+		$( window ).on( 'live', setupParallax );
 		$( window ).on( 'panelsStretchRows', setupParallax );
 		$$.on( 'refreshParallax', setupParallax );
 	};
