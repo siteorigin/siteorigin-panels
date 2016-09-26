@@ -3,7 +3,7 @@
 Plugin Name: Page Builder by SiteOrigin
 Plugin URI: https://siteorigin.com/page-builder/
 Description: A drag and drop, responsive page builder that simplifies building your website.
-Version: dev
+Version: 2.4.15
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 License: GPL3
@@ -11,11 +11,11 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: http://siteorigin.com/page-builder/#donate
 */
 
-define('SITEORIGIN_PANELS_VERSION', 'dev');
+define('SITEORIGIN_PANELS_VERSION', '2.4.15');
 if ( ! defined('SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
-	define('SITEORIGIN_PANELS_JS_SUFFIX', '');
+	define('SITEORIGIN_PANELS_JS_SUFFIX', '.min');
 }
-define('SITEORIGIN_PANELS_VERSION_SUFFIX', '');
+define('SITEORIGIN_PANELS_VERSION_SUFFIX', '-24');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
 // All the basic settings
@@ -820,12 +820,15 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 				}
 			}
 		}
+		// Add the bottom margins
+		// Check for grid defined margin, and if not present, default to default
+		$cell_bottom_margin = ( !empty( $grid['style']['bottom_margin'] ) ? $grid['style']['bottom_margin'] : $panels_margin_bottom .'px' );
+
+		$css->add_cell_css($post_id, $grid_id, false, '.so-panel', array(
+			'margin-bottom' => apply_filters('siteorigin_panels_css_cell_margin_bottom', $cell_bottom_margin, $grid, $gi, $panels_data, $post_id)
+		));
 	}
 
-	// Add the bottom margins
-	$css->add_cell_css($post_id, false, false, '.so-panel', array(
-		'margin-bottom' => apply_filters('siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
-	));
 	$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
 		'margin-bottom' => apply_filters('siteorigin_panels_css_cell_last_margin_bottom', '0px', $grid, $gi, $panels_data, $post_id)
 	));
