@@ -39,7 +39,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<?php endif; ?>
 
 			<?php if( siteorigin_premium_display_teaser() ) : ?>
-				<a class="so-tool-button so-siteorigin-premium" title="<?php esc_attr_e( 'SiteOrigin Premium', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/downloads/premium/" target="_blank">
+				<a class="so-tool-button so-siteorigin-premium" title="<?php esc_attr_e( 'SiteOrigin Premium', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels" target="_blank">
 					<span class="so-panels-icon so-panels-icon-plus"></span>
 					<span class="so-button-text"><?php esc_html_e('Upgrade', 'siteorigin-panels') ?></span>
 				</a>
