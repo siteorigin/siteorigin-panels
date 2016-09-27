@@ -140,7 +140,7 @@
 		// Ensure that the parallax has run on inital load.
 		setTimeout( function () {
 			setupParallax();
-		}, 1000 );
+		}, 100 );
 	};
 
 }( jQuery ) );
