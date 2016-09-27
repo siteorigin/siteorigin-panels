@@ -1610,5 +1610,12 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 }
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
+function siteorigin_premium_display_teaser(){
+	return
+		siteorigin_panels_setting( 'display-teaser' ) &&
+		apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
+		! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+}
+
 // Include the live editor file if we're in live editor mode.
 if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';

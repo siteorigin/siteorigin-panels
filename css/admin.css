@@ -65,6 +65,13 @@
 .siteorigin-panels-builder .so-tool-button:hover span {
   color: #444444;
 }
+.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium {
+  margin-left: 10px;
+  background: #FFFFFF;
+}
+.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium:hover span {
+  color: #333;
+}
 .siteorigin-panels-builder .so-builder-toolbar {
   -ms-box-sizing: border-box;
   -moz-box-sizing: border-box;
