@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.16 - 27 September 2016 =
+* Added disableable upgrade notice.
+
 = 2.4.15 - 6 September 2016 =
 * Fixed legacy widgets check.
 
