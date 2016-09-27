@@ -137,6 +137,10 @@
 		$( window ).on( 'resize', setupParallax );
 		$( window ).on( 'panelsStretchRows', setupParallax );
 		$$.on( 'refreshParallax', setupParallax );
+		// Ensure that the parallax has run on inital load.
+		setTimeout( function () {
+			setupParallax();
+		}, 100 );
 	};
 
 }( jQuery ) );
