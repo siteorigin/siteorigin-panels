@@ -41,3 +41,14 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
 	SiteOrigin_Panels_Renderer::single()->the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id, $style_wrapper );
 }
+
+/**
+ * Get a setting with the given key.
+ *
+ * @param string $key
+ *
+ * @return array|bool|mixed|null
+ */
+function siteorigin_panels_setting($key = ''){
+	return SiteOrigin_Panels_Settings::single()->get($key);
+}

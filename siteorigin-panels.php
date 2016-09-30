@@ -24,7 +24,6 @@ require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
 
-require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/default-styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/widgets.php';
@@ -49,6 +48,7 @@ class SiteOrigin_Panels {
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 
+		SiteOrigin_Panels_Settings::single();
 		if( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
 		}
