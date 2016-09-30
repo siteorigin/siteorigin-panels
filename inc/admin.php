@@ -123,7 +123,7 @@ class SiteOrigin_Panels_Admin {
 
 		if ( !wp_is_post_revision($post_id) ) {
 			$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
-			$panels_data['widgets'] = siteorigin_panels_process_raw_widgets( $panels_data['widgets'] );
+			$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'] );
 			$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 			$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
