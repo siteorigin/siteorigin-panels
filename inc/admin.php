@@ -47,6 +47,9 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_import_layout', array( $this, 'action_import_layout' ) );
 		add_action( 'wp_ajax_so_panels_export_layout', array( $this, 'action_export_layout' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
+
+		// Initialize the additional admin classes.
+		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 	}
 
 	/**
@@ -728,6 +731,7 @@ class SiteOrigin_Panels_Admin {
 			apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
 			! defined( 'SITEORIGIN_PREMIUM_VERSION' );
 	}
+
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
