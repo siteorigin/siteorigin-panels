@@ -34,11 +34,12 @@ require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
 class SiteOrigin_Panels {
 
 	function __construct() {
+		register_activation_hook( __FILE__, array( 'SiteOrigin_Panels', 'activate' ) );
+
 		// Register the autoloader
 		spl_autoload_register ( array( $this, 'autoloader' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
@@ -47,19 +48,31 @@ class SiteOrigin_Panels {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
+
+		if( is_admin() ) {
+			SiteOrigin_Panels_Admin::single();
+		}
 	}
 
 	public static function single() {
 		static $single;
-		if( empty( $single ) ) {
-			$single = new self();
-		}
-
-		return $single;
+		return empty( $single ) ? $single = new self() : $single;
 	}
 
+	/**
+	 * Autoload Page Builder specific classses.
+	 *
+	 * @param $class
+	 */
 	public static function autoloader( $class ){
+		if( strpos( $class, 'SiteOrigin_Panels_' ) === 0 ) {
+			$filename = strtolower( str_replace( array( 'SiteOrigin_Panels_', '_' ), array( '', '-' ), $class ) );
+			$filename = plugin_dir_path( __FILE__ ) . 'inc/' . strtolower( $filename ) . '.php';
 
+			if( file_exists( $filename ) ) {
+				include $filename;
+			}
+		}
 	}
 
 	public function activate(){
@@ -357,7 +370,8 @@ class SiteOrigin_Panels {
 		return $panels_data;
 	}
 }
-register_activation_hook( __FILE__, array( 'SiteOrigin_Panels', 'activate' ) );
+
+SiteOrigin_Panels::single();
 
 
 // Include the live editor file if we're in live editor mode.

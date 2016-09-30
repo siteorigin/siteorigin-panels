@@ -17,9 +17,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 */
 	static function single(){
 		static $single = false;
-		if( empty($single) ) $single = new SiteOrigin_Panels_Sidebars_Emulator();
-
-		return $single;
+		return empty( $single ) ? $single = new self() : $single;
 	}
 
 	/**
