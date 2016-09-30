@@ -23,7 +23,6 @@ require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
 
-require_once plugin_dir_path(__FILE__) . 'inc/widgets.php';
 require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
 
 
