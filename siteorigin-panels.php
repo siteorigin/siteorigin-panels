@@ -51,6 +51,11 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Admin::single();
 		}
+
+		// Include the live editor file if we're in live editor mode.
+		if( !empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+			SiteOrigin_Panels_Live_Editor::single();
+		}
 	}
 
 	public static function single() {
@@ -100,7 +105,7 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels_Home::single();
 
 		// Check if we need to initialize the admin class.
-		if( is_admin() || is_preview() ) {
+		if( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
 		}
 	}
@@ -371,7 +376,3 @@ class SiteOrigin_Panels {
 }
 
 SiteOrigin_Panels::single();
-
-
-// Include the live editor file if we're in live editor mode.
-if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
