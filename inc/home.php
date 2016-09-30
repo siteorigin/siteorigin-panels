@@ -32,6 +32,9 @@ class SiteOrigin_Panels_Home {
 		);
 	}
 
+	/**
+	 * Render the home page interface.
+	 */
 	public function render_home(){
 		// We need a global post for some features in Page Builder (eg history)
 		global $post;
@@ -44,7 +47,7 @@ class SiteOrigin_Panels_Home {
 			$post = $home_page;
 		}
 
-		$panels_data = siteorigin_panels_get_current_admin_panels_data();
+		$panels_data = SiteOrigin_Panels_Admin::single()->get_current_admin_panels_data();
 		include plugin_dir_path(__FILE__) . '../tpl/admin-home-page.php';
 	}
 
