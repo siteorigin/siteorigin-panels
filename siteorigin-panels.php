@@ -23,7 +23,6 @@ require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
-require_once plugin_dir_path(__FILE__) . 'widgets/migration.php';
 
 require_once plugin_dir_path(__FILE__) . 'inc/css.php';
 require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
@@ -47,15 +46,6 @@ register_activation_hook(__FILE__, 'siteorigin_panels_activate');
  * Initialize the Page Builder.
  */
 function siteorigin_panels_init(){
-	if(
-		siteorigin_panels_setting('bundled-widgets') &&
-		! defined('SITEORIGIN_PANELS_LEGACY_WIDGETS_ACTIVE') &&
-		( ! is_admin() || basename( $_SERVER["SCRIPT_FILENAME"] ) != 'plugins.php' )
-	) {
-		// Include the bundled widgets if the Legacy Widgets plugin isn't active.
-		include plugin_dir_path(__FILE__).'widgets/widgets.php';
-	}
-
 	if(
 		! is_admin() &&
 		siteorigin_panels_setting( 'sidebars-emulator' ) &&
