@@ -23,6 +23,7 @@ module.exports = Backbone.Model.extend( {
 	 * Triggered when we destroy a cell
 	 */
 	onDestroy: function () {
+		// Destroy all the widgets
 		_.invoke( this.widgets.toArray(), 'destroy' );
 		this.widgets.reset();
 	},
