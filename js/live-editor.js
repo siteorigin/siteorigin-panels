@@ -55,18 +55,48 @@ module.exports = Backbone.View.extend( {
 	// The row view that this widget belongs to
 	row: null,
 
-	widget: {}
+	widgets: [],
+
+	initialize: function( options ){
+
+		this.setElement( options.$el );
+
+		// Create the rows, cells and widget views
+		var cellView = this;
+
+		cellView.$( '> .so-panel' ).each( function( i, el ){
+			var $$ = $(el);
+			var widgetView = new liveEditor.view.widget( {
+				model: cellView.model.widgets.at( i ),
+				$el: $$
+			} );
+			widgetView.cell = cellView;
+			cellView.widgets.push( widgetView );
+		} );
+	}
 } );
 
 },{}],4:[function(require,module,exports){
 var liveEditor = window.liveEditor, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-
-	rows: {},
+	rows: [],
 
 	initialize: function( options ){
-		console.log( options );
+		this.setElement( options.$el );
+
+		// Create the rows, cells and widget views
+		var layoutView = this;
+
+		layoutView.$( '> .panel-grid' ).each( function( i, el ){
+			var $$ = $(el);
+			var rowView = new liveEditor.view.row( {
+				model: layoutView.model.rows.at( i ),
+				$el: $$
+			} );
+			rowView.layout = layoutView;
+			layoutView.rows.push( rowView );
+		} );
 	},
 
 	attach: function( $el ){
@@ -79,10 +109,28 @@ module.exports = Backbone.View.extend( {
 var liveEditor = window.liveEditor, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	// The builder view that this widget belongs to
-	builder: null,
+	// The layout view that this widget belongs to
+	layout: null,
 
-	cells: {},
+	cells: [],
+
+	initialize: function( options ){
+
+		this.setElement( options.$el );
+
+		// Create the rows, cells and widget views
+		var rowView = this;
+
+		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
+			var $$ = $(el);
+			var cellView = new liveEditor.view.cell( {
+				model: rowView.model.cells.at( i ),
+				$el: $$
+			} );
+			cellView.row = rowView;
+			rowView.cells.push( cellView );
+		} );
+	}
 } );
 
 },{}],6:[function(require,module,exports){
@@ -92,8 +140,8 @@ module.exports = Backbone.View.extend( {
 	// The cell view that this widget belongs to
 	cell: null,
 
-	initialize: function(){
-
+	initialize: function( options ){
+		this.setElement( options.$el );
 	}
 } );
 
