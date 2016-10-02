@@ -70,7 +70,7 @@ module.exports = Backbone.Model.extend( {
 		}, options ) );
 
 		// This should be used by views to reposition everything.
-		this.trigger( 'move_to_cell', newCell, at );
+		this.trigger( 'move', newCell, at );
 
 		return this;
 	},
@@ -98,7 +98,7 @@ module.exports = Backbone.Model.extend( {
 			hasChanged = true;
 		}
 
-		this.set( 'values', values, {silent: true} );
+		this.set( 'values', values, { silent: true } );
 
 		if ( hasChanged ) {
 			// We'll trigger our own change events.

@@ -203,7 +203,12 @@ module.exports = Backbone.View.extend( {
 					cellView.row.builder.addHistoryEntry( 'cell_resized' );
 					cellView.model.set( 'weight', ncw );
 					previousCell.model.set( 'weight', pcw );
+
+					// Visually resize the row
 					cellView.row.resize();
+
+					// Reweight the cells of the row model.
+					cellView.row.model.reweightCells();
 				}
 
 				ui.helper.css( 'left', - handle.outerWidth() / 2 );

@@ -2706,7 +2706,7 @@ module.exports = Backbone.Model.extend( {
 		}, options ) );
 
 		// This should be used by views to reposition everything.
-		this.trigger( 'move_to_cell', newCell, at );
+		this.trigger( 'move', newCell, at );
 
 		return this;
 	},
@@ -2734,7 +2734,7 @@ module.exports = Backbone.Model.extend( {
 			hasChanged = true;
 		}
 
-		this.set( 'values', values, {silent: true} );
+		this.set( 'values', values, { silent: true } );
 
 		if ( hasChanged ) {
 			// We'll trigger our own change events.
@@ -4250,7 +4250,12 @@ module.exports = Backbone.View.extend( {
 					cellView.row.builder.addHistoryEntry( 'cell_resized' );
 					cellView.model.set( 'weight', ncw );
 					previousCell.model.set( 'weight', pcw );
+
+					// Visually resize the row
 					cellView.row.resize();
+
+					// Reweight the cells of the row model.
+					cellView.row.model.reweightCells();
 				}
 
 				ui.helper.css( 'left', - handle.outerWidth() / 2 );
