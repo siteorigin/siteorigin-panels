@@ -46,6 +46,10 @@ module.exports = function( postId, builder ){
 		$el: $( '#pl-' + postId )
 	} );
 
+	$( window ).unload( function() {
+
+	} );
+
 };
 
 },{}],3:[function(require,module,exports){
@@ -130,7 +134,21 @@ module.exports = Backbone.View.extend( {
 			cellView.row = rowView;
 			rowView.cells.push( cellView );
 		} );
-	}
+
+		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+	},
+
+	/**
+	 * Reweight the cells based on their new weights
+	 */
+	handleReweightCells: function(){
+		var rowView = this;
+		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
+			var $$ = $(this);
+			var cell = rowView.model.cells.at( i );
+			$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
+		} );
+	},
 } );
 
 },{}],6:[function(require,module,exports){
@@ -142,6 +160,16 @@ module.exports = Backbone.View.extend( {
 
 	initialize: function( options ){
 		this.setElement( options.$el );
+
+		this.listenTo( this.model, 'move_to_cell', this.reposition );
+		this.listenTo( this.model, 'change:values', this.changeValues );
+	},
+
+	reposition: function(){
+		// We need to move this view
+	},
+
+	changeValues: function(){
 	}
 } );
 

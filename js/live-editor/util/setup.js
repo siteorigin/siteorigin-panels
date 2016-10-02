@@ -13,4 +13,8 @@ module.exports = function( postId, builder ){
 		$el: $( '#pl-' + postId )
 	} );
 
+	$( window ).unload( function() {
+
+	} );
+
 };

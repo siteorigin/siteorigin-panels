@@ -22,5 +22,19 @@ module.exports = Backbone.View.extend( {
 			cellView.row = rowView;
 			rowView.cells.push( cellView );
 		} );
-	}
+
+		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+	},
+
+	/**
+	 * Reweight the cells based on their new weights
+	 */
+	handleReweightCells: function(){
+		var rowView = this;
+		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
+			var $$ = $(this);
+			var cell = rowView.model.cells.at( i );
+			$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
+		} );
+	},
 } );
