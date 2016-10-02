@@ -29,7 +29,7 @@ class SiteOrigin_Panels {
 		spl_autoload_register ( array( $this, 'autoloader' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
-
+		add_action( 'wp', array( $this, 'setup_renderer' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
 		// This is the main filter
@@ -100,6 +100,13 @@ class SiteOrigin_Panels {
 		// Check if we need to initialize the admin class.
 		if( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
+		}
+	}
+
+	function setup_renderer(){
+		if( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
+			// Setup the renderer
+			SiteOrigin_Panels_Renderer::single();
 		}
 	}
 

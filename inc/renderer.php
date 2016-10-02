@@ -4,6 +4,8 @@ class SiteOrigin_Panels_Renderer {
 
 	private $inline_css;
 
+	private $cache;
+
 	function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
 		$inline_css = null;
@@ -24,6 +26,12 @@ class SiteOrigin_Panels_Renderer {
 	 * @param $css
 	 */
 	public function add_inline_css( $post_id, $css ){
+
+		// We can't double add
+		if( isset( $this->inline_css[ $post_id ] ) && $this->inline_css[ $post_id ] === true ) {
+			return;
+		}
+
 		if( is_null( $this->inline_css ) ) {
 			$this->inline_css = array();
 			add_action( 'wp_head', array( $this, 'print_inline_css' ), 12);
@@ -211,9 +219,8 @@ class SiteOrigin_Panels_Renderer {
 		$siteorigin_panels_current_post = $post_id;
 
 		// Try get the cached panel from in memory cache.
-		global $siteorigin_panels_cache;
-		if(!empty($siteorigin_panels_cache) && !empty($siteorigin_panels_cache[$post_id]))
-			return $siteorigin_panels_cache[$post_id];
+		if( ! empty( $this->cache ) && ! empty( $this->cache[ $post_id ] ) )
+			return $this->cache[ $post_id ];
 
 		if( empty($panels_data) ) {
 			if( strpos($post_id, 'prebuilt:') === 0) {
@@ -311,12 +318,9 @@ class SiteOrigin_Panels_Renderer {
 		}
 		echo '>';
 
-		global $siteorigin_panels_inline_css;
-		if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = array();
-
-		if( $enqueue_css && !isset($siteorigin_panels_inline_css[$post_id]) ) {
-			wp_enqueue_style('siteorigin-panels-front');
-			$siteorigin_panels_inline_css[$post_id] = $this->generate_css($post_id, $panels_data);
+		if( $enqueue_css && ! isset( $this->inline_css[ $post_id ] ) ) {
+			wp_enqueue_style( 'siteorigin-panels-front', plugin_dir_url(__FILE__) . '../css/front.css', array( ), SITEORIGIN_PANELS_VERSION );
+			$this->add_inline_css( $post_id, $this->generate_css($post_id, $panels_data) );
 		}
 
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
@@ -560,10 +564,8 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	function enqueue_styles(){
 		// Register the style to support possible lazy loading
-		wp_register_style('siteorigin-panels-front', plugin_dir_url(__FILE__) . '../css/front.css', array(), SITEORIGIN_PANELS_VERSION );
-
 		if( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
-			wp_enqueue_style('siteorigin-panels-front');
+			wp_enqueue_style( 'siteorigin-panels-front', plugin_dir_url(__FILE__) . '../css/front.css', array( ), SITEORIGIN_PANELS_VERSION );
 			$this->add_inline_css( get_the_ID(), $this->generate_css( get_the_ID() ) );
 		}
 	}
