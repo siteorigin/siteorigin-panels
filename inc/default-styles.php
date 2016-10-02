@@ -3,28 +3,28 @@
 /**
  * Class for handling all the default styling.
  *
- * Class SiteOrigin_Panels_Default_Styling
+ * Class SiteOrigin_Panels_Default_Styles
  */
 class SiteOrigin_Panels_Default_Styles {
 
 	static function init() {
-		add_action('wp_enqueue_scripts', array( 'SiteOrigin_Panels_Default_Styling', 'register_scripts' ), 5);
+		add_action('wp_enqueue_scripts', array( 'SiteOrigin_Panels_Default_Styles', 'register_scripts' ), 5);
 
 		// Adding all the fields
-		add_filter('siteorigin_panels_row_style_fields', array('SiteOrigin_Panels_Default_Styling', 'row_style_fields' ) );
-		add_filter('siteorigin_panels_widget_style_fields', array('SiteOrigin_Panels_Default_Styling', 'widget_style_fields' ) );
+		add_filter('siteorigin_panels_row_style_fields', array('SiteOrigin_Panels_Default_Styles', 'row_style_fields' ) );
+		add_filter('siteorigin_panels_widget_style_fields', array('SiteOrigin_Panels_Default_Styles', 'widget_style_fields' ) );
 
 		// Filter the row style
-		add_filter('siteorigin_panels_row_style_attributes', array('SiteOrigin_Panels_Default_Styling', 'row_style_attributes' ), 10, 2);
-		add_filter('siteorigin_panels_cell_style_attributes', array('SiteOrigin_Panels_Default_Styling', 'cell_style_attributes' ), 10, 2);
-		add_filter('siteorigin_panels_widget_style_attributes', array('SiteOrigin_Panels_Default_Styling', 'widget_style_attributes' ), 10, 2);
+		add_filter('siteorigin_panels_row_style_attributes', array('SiteOrigin_Panels_Default_Styles', 'row_style_attributes' ), 10, 2);
+		add_filter('siteorigin_panels_cell_style_attributes', array('SiteOrigin_Panels_Default_Styles', 'cell_style_attributes' ), 10, 2);
+		add_filter('siteorigin_panels_widget_style_attributes', array('SiteOrigin_Panels_Default_Styles', 'widget_style_attributes' ), 10, 2);
 
 		// Main filter to add any custom CSS.
-		add_filter('siteorigin_panels_css_object', array('SiteOrigin_Panels_Default_Styling', 'filter_css_object' ), 10, 3);
+		add_filter('siteorigin_panels_css_object', array('SiteOrigin_Panels_Default_Styles', 'filter_css_object' ), 10, 3);
 
 		// Filtering specific attributes
-		add_filter('siteorigin_panels_css_row_margin_bottom', array('SiteOrigin_Panels_Default_Styling', 'filter_row_bottom_margin' ), 10, 2);
-		add_filter('siteorigin_panels_css_row_gutter', array('SiteOrigin_Panels_Default_Styling', 'filter_row_gutter' ), 10, 2);
+		add_filter('siteorigin_panels_css_row_margin_bottom', array('SiteOrigin_Panels_Default_Styles', 'filter_row_bottom_margin' ), 10, 2);
+		add_filter('siteorigin_panels_css_row_gutter', array('SiteOrigin_Panels_Default_Styles', 'filter_row_gutter' ), 10, 2);
 	}
 
 	static function register_scripts(){
