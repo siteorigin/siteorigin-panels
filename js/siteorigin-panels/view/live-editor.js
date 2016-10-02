@@ -27,9 +27,6 @@ module.exports = Backbone.View.extend( {
 
 		this.builder = options.builder;
 		this.previewUrl = options.previewUrl;
-
-		this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
-		this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
 	},
 
 	/**
@@ -198,22 +195,6 @@ module.exports = Backbone.View.extend( {
 		var contentWindow = this.$( '.so-preview iframe' )[0].contentWindow;
 	},
 
-	handleRefreshData: function ( newData, args ) {
-		if ( ! this.$el.is( ':visible' ) ) {
-			return this;
-		}
-
-		this.refreshPreview( newData );
-	},
-
-	handleLoadData: function () {
-		if ( ! this.$el.is( ':visible' ) ) {
-			return this;
-		}
-
-		this.refreshPreview( this.builder.model.getPanelsData() );
-	},
-
 	/**
 	 * Refresh the Live Editor preview.
 	 * @returns {exports}
@@ -332,37 +313,6 @@ module.exports = Backbone.View.extend( {
 					$iframeContents.scrollTop( thisView.previewScrollTop );
 					thisView.$( '.so-preview-overlay' ).hide();
 				}, 100 );
-
-				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
-				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
-					.filter( function () {
-						// Filter to only include non nested
-						return $( this ).parents( '.so-panel' ).length === 0;
-					} )
-					.each( function ( i, el ) {
-						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
-
-						widgetEdit.data( 'live-editor-preview-widget', $$ );
-
-						$$
-							.css( {
-								'cursor': 'pointer'
-							} )
-							.mouseenter( function () {
-								widgetEdit.parent().addClass( 'so-hovered' );
-								thisView.highlightElement( $$ );
-							} )
-							.mouseleave( function () {
-								widgetEdit.parent().removeClass( 'so-hovered' );
-								thisView.resetHighlights();
-							} )
-							.click( function ( e ) {
-								e.preventDefault();
-								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).click();
-							} );
-					} );
 
 				// Setup the Live Editor
 				var iframeWindow = $$.get(0).contentWindow;
