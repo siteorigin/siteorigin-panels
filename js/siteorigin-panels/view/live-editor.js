@@ -196,7 +196,6 @@ module.exports = Backbone.View.extend( {
 	 */
 	scrollToElement: function( over ) {
 		var contentWindow = this.$( '.so-preview iframe' )[0].contentWindow;
-		contentWindow.liveEditorScrollTo( over );
 	},
 
 	handleRefreshData: function ( newData, args ) {
@@ -319,6 +318,7 @@ module.exports = Backbone.View.extend( {
 
 				$$.data( 'iframeready', true );
 
+				// Store the load times to make the reload bar more accurate
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
 
@@ -363,6 +363,13 @@ module.exports = Backbone.View.extend( {
 								widgetEdit.find( '.title h4' ).click();
 							} );
 					} );
+
+				// Setup the Live Editor
+				var iframeWindow = $$.get(0).contentWindow;
+				iframeWindow.liveEditor.setup(
+					panelsOptions.post_id,
+					thisView.builder.model
+				);
 
 				// Prevent default clicks
 				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {

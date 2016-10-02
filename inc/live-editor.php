@@ -50,15 +50,10 @@ class SiteOrigin_Panels_Live_Editor {
 	function frontend_scripts(){
 		wp_enqueue_script(
 			'live-editor-front',
-			plugin_dir_url( __FILE__ ) . '../js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-			array( 'jquery' ),
-			SITEORIGIN_PANELS_VERSION
-		);
-
-		wp_enqueue_script(
-			'live-editor-scrollto',
-			plugin_dir_url( __FILE__ ) . '../js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-			array( 'jquery' ),
+			plugin_dir_url( __FILE__ ) . '../js/live-editor' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+			array(
+				'jquery', 'underscore', 'backbone'
+			),
 			SITEORIGIN_PANELS_VERSION
 		);
 

@@ -172,7 +172,16 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			// Media is required for row styles
 			wp_enqueue_media();
-			wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . '../js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
+			wp_enqueue_script(
+				'so-panels-admin',
+				plugin_dir_url(__FILE__) . '../js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+				array(
+					'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable',
+					'underscore', 'backbone', 'plupload', 'plupload-all'
+				),
+				SITEORIGIN_PANELS_VERSION,
+				true
+			);
 			add_action( 'admin_footer', array( $this, 'js_templates' ) );
 
 			$widgets = $this->get_widgets();
@@ -194,6 +203,7 @@ class SiteOrigin_Panels_Admin {
 				'row_layouts' => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled' => !empty( $directory_enabled ),
 				'copy_content' => siteorigin_panels_setting( 'copy-content' ),
+				'post_id' => get_the_ID(),
 
 				// Settings for the contextual menu
 				'contextual' => array(
