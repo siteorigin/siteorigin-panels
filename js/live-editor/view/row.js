@@ -4,11 +4,12 @@ module.exports = Backbone.View.extend( {
 	// The layout view that this widget belongs to
 	layout: null,
 
-	cells: [],
+	// cells: [],
 
 	initialize: function( options ){
-
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var rowView = this;
@@ -20,10 +21,18 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			cellView.row = rowView;
-			rowView.cells.push( cellView );
+			// rowView.cells.push( cellView );
 		} );
 
 		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+	},
+
+	/**
+	 * Get the container
+	 * @returns {*}
+	 */
+	getCellsContainer: function(){
+		return this.$( '> *' ).hasClass( 'panel-row-style' ) ? this.$( '> .panel-row-style' ) : this.$el;
 	},
 
 	/**
@@ -37,4 +46,12 @@ module.exports = Backbone.View.extend( {
 			$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
 		} );
 	},
+
+	/**
+	 * Get the row view at a specific index.
+	 * @param i
+	 */
+	cellAt: function( i ) {
+		return this.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).eq( i ).data( 'view' );
+	}
 } );

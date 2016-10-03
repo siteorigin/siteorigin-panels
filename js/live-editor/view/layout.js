@@ -1,10 +1,12 @@
 var liveEditor = window.liveEditor, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	rows: [],
+	// rows: [],
 
 	initialize: function( options ){
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var layoutView = this;
@@ -16,12 +18,23 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			rowView.layout = layoutView;
-			layoutView.rows.push( rowView );
+			// layoutView.rows.push( rowView );
 		} );
 	},
 
-	attach: function( $el ){
+	/**
+	 * Get the container
+	 * @returns {*}
+	 */
+	getRowsContainer: function(){
+		return $el;
+	},
 
+	/**
+	 * Get the row view at a specific index.
+	 * @param i
+	 */
+	rowAt: function( i ) {
+		return this.$( '> .panel-grid' ).eq( i ).data( 'view' );
 	}
-
 } );

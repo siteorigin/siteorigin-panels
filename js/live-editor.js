@@ -59,11 +59,12 @@ module.exports = Backbone.View.extend( {
 	// The row view that this widget belongs to
 	row: null,
 
-	widgets: [],
+	// widgets: [],
 
 	initialize: function( options ){
-
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var cellView = this;
@@ -75,8 +76,21 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			widgetView.cell = cellView;
-			cellView.widgets.push( widgetView );
+			// cellView.widgets.push( widgetView );
 		} );
+	},
+
+	getWidgetsContainer: function() {
+		return this.$el;
+	},
+
+	/**
+	 * Get the widget at a specific index
+	 * @param i
+	 * @returns {*}
+	 */
+	widgetAt: function( i ){
+		return this.$( '> .so-panel' ).eq( i ).data( 'view' );
 	}
 } );
 
@@ -84,10 +98,12 @@ module.exports = Backbone.View.extend( {
 var liveEditor = window.liveEditor, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	rows: [],
+	// rows: [],
 
 	initialize: function( options ){
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var layoutView = this;
@@ -99,14 +115,25 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			rowView.layout = layoutView;
-			layoutView.rows.push( rowView );
+			// layoutView.rows.push( rowView );
 		} );
 	},
 
-	attach: function( $el ){
+	/**
+	 * Get the container
+	 * @returns {*}
+	 */
+	getRowsContainer: function(){
+		return $el;
+	},
 
+	/**
+	 * Get the row view at a specific index.
+	 * @param i
+	 */
+	rowAt: function( i ) {
+		return this.$( '> .panel-grid' ).eq( i ).data( 'view' );
 	}
-
 } );
 
 },{}],5:[function(require,module,exports){
@@ -116,11 +143,12 @@ module.exports = Backbone.View.extend( {
 	// The layout view that this widget belongs to
 	layout: null,
 
-	cells: [],
+	// cells: [],
 
 	initialize: function( options ){
-
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var rowView = this;
@@ -132,10 +160,18 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			cellView.row = rowView;
-			rowView.cells.push( cellView );
+			// rowView.cells.push( cellView );
 		} );
 
 		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+	},
+
+	/**
+	 * Get the container
+	 * @returns {*}
+	 */
+	getCellsContainer: function(){
+		return this.$( '> *' ).hasClass( 'panel-row-style' ) ? this.$( '> .panel-row-style' ) : this.$el;
 	},
 
 	/**
@@ -149,6 +185,14 @@ module.exports = Backbone.View.extend( {
 			$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
 		} );
 	},
+
+	/**
+	 * Get the row view at a specific index.
+	 * @param i
+	 */
+	cellAt: function( i ) {
+		return this.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).eq( i ).data( 'view' );
+	}
 } );
 
 },{}],6:[function(require,module,exports){
@@ -160,16 +204,51 @@ module.exports = Backbone.View.extend( {
 
 	initialize: function( options ){
 		this.setElement( options.$el );
+		options.$el.data( 'view', this );
 
-		this.listenTo( this.model, 'move_to_cell', this.reposition );
+		this.listenTo( this.model, 'move', this.reposition );
 		this.listenTo( this.model, 'change:values', this.changeValues );
+		this.listenTo( this.model, 'change:style', this.changeStyle );
 	},
 
 	reposition: function(){
 		// We need to move this view
+
+		var rowIndex = this.model.cell.row.builder.rows.indexOf( this.model.cell.row ),
+			cellIndex = this.model.cell.row.cells.indexOf( this.model.cell ),
+			widgetIndex = this.model.cell.widgets.indexOf( this.model );
+
+		var rowView = this.cell.row.layout.rowAt( rowIndex ),
+			cellView = rowView.cellAt( cellIndex ),
+			widgetsContainer = cellView.getWidgetsContainer();
+
+		if( widgetsContainer.length ) {
+			this.$el.detach();
+
+			if( widgetIndex === 0 ) {
+				// This is the first element
+				widgetsContainer.prepend( this.$el );
+			}
+			else {
+				// This needs to go in place of another widget
+				var replaceWidget = cellView.widgetAt( widgetIndex - 1 );
+				if( replaceWidget.cid !== this.cid ) {
+					replaceWidget.$el.after( this.$el );
+				}
+
+			}
+		}
+	},
+
+	getWidgetContainer: function(){
+		return this.$('> .panel-widget-style').length ? this.$('> .panel-widget-style') : this.$el;
 	},
 
 	changeValues: function(){
+	},
+
+	changeStyle: function(){
+		console.log('change style');
 	}
 } );
 
