@@ -4,11 +4,12 @@ module.exports = Backbone.View.extend( {
 	// The row view that this widget belongs to
 	row: null,
 
-	widgets: [],
+	// widgets: [],
 
 	initialize: function( options ){
-
 		this.setElement( options.$el );
+
+		options.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var cellView = this;
@@ -20,7 +21,20 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			widgetView.cell = cellView;
-			cellView.widgets.push( widgetView );
+			// cellView.widgets.push( widgetView );
 		} );
+	},
+
+	getWidgetsContainer: function() {
+		return this.$el;
+	},
+
+	/**
+	 * Get the widget at a specific index
+	 * @param i
+	 * @returns {*}
+	 */
+	widgetAt: function( i ){
+		return this.$( '> .so-panel' ).eq( i ).data( 'view' );
 	}
 } );
