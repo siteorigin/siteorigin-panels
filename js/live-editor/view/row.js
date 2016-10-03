@@ -24,6 +24,7 @@ module.exports = Backbone.View.extend( {
 			// rowView.cells.push( cellView );
 		} );
 
+		this.listenTo( this.model, 'move', this.reposition );
 		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
 	},
 
@@ -33,6 +34,28 @@ module.exports = Backbone.View.extend( {
 	 */
 	getCellsContainer: function(){
 		return this.$( '> *' ).hasClass( 'panel-row-style' ) ? this.$( '> .panel-row-style' ) : this.$el;
+	},
+
+	reposition: function(){
+		var rowIndex = this.model.builder.rows.indexOf( this.model ),
+			rowContainer = this.layout.getRowsContainer();
+
+		if( rowContainer.length ) {
+			this.$el.detach();
+
+			if( rowIndex === 0 ) {
+				// This is the first element
+				rowContainer.prepend( this.$el );
+			}
+			else {
+				// This needs to go in place of another widget
+				var replaceRow = this.layout.rowAt( rowIndex - 1 );
+				if( replaceRow.cid !== this.cid ) {
+					replaceRow.$el.after( this.$el );
+				}
+
+			}
+		}
 	},
 
 	/**

@@ -342,7 +342,7 @@ module.exports = Backbone.View.extend( {
 					'at' : $$.index()
 				} );
 
-				row.trigger( 'move', $$.index() );
+				row.model.trigger( 'move', $$.index() );
 			}
 		} );
 
