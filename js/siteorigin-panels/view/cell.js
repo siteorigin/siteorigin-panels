@@ -212,9 +212,6 @@ module.exports = Backbone.View.extend( {
 				}
 
 				ui.helper.css( 'left', - handle.outerWidth() / 2 );
-
-				// Refresh the panels data
-				cellView.row.builder.model.refreshPanelsData();
 			}
 		} );
 
@@ -299,8 +296,6 @@ module.exports = Backbone.View.extend( {
 				// Add the widget to the cell model
 				widget.cell = thisView.model;
 				widget.cell.widgets.add( widget );
-
-				thisView.row.builder.model.refreshPanelsData();
 			}
 		);
 

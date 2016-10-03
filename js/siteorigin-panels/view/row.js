@@ -146,7 +146,6 @@ module.exports = Backbone.View.extend( {
 		var thisView = this;
 		this.$el.fadeOut( 'normal', function () {
 			thisView.model.destroy();
-			thisView.builder.model.refreshPanelsData();
 		} );
 	},
 
@@ -163,8 +162,6 @@ module.exports = Backbone.View.extend( {
 		this.builder.model.rows.add( duplicateRow, {
 			at: this.builder.model.rows.indexOf( this.model ) + 1
 		} );
-
-		this.builder.model.refreshPanelsData();
 	},
 
 	/**
@@ -290,8 +287,6 @@ module.exports = Backbone.View.extend( {
 					thisView.builder.model.rows.add( newRow, {
 						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
 					} );
-
-					thisView.builder.model.refreshPanelsData();
 				}
 			);
 		}

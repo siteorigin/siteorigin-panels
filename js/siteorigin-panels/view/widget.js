@@ -141,7 +141,6 @@ module.exports = Backbone.View.extend( {
 			at: this.model.collection.indexOf( this.model ) + 1
 		} );
 
-		this.cell.row.builder.model.refreshPanelsData();
 		return this;
 	},
 
@@ -178,7 +177,6 @@ module.exports = Backbone.View.extend( {
 		this.$el.fadeOut( 'fast', function () {
 			thisView.cell.row.resize();
 			thisView.model.destroy();
-			thisView.cell.row.builder.model.refreshPanelsData();
 			thisView.remove();
 		} );
 
@@ -215,8 +213,6 @@ module.exports = Backbone.View.extend( {
 						// Add this after the existing model
 						at: thisView.model.collection.indexOf( thisView.model ) + 1
 					} );
-
-					thisView.cell.row.builder.model.refreshPanelsData();
 				}
 			);
 		}
@@ -251,8 +247,6 @@ module.exports = Backbone.View.extend( {
 							thisView.visualDestroyModel();
 							break;
 					}
-
-					thisView.cell.row.builder.model.refreshPanelsData();
 				}
 			);
 		}

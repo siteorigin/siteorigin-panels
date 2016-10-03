@@ -264,7 +264,7 @@ module.exports = Backbone.View.extend( {
 				}
 			};
 
-			// Set the value when ever anything changes
+			// Set the value whenever anything changes
 			text.change( setValue );
 			unit.change( setValue );
 		} );

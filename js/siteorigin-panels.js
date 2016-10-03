@@ -1311,10 +1311,6 @@ module.exports = panels.view.dialog.extend( {
 
 			this.model.set( 'style', style );
 		}
-
-		if ( args.refresh ) {
-			this.builder.model.refreshPanelsData( args.refreshArgs );
-		}
 	},
 
 	/**
@@ -1342,8 +1338,6 @@ module.exports = panels.view.dialog.extend( {
 
 		this.closeDialog();
 
-		this.builder.model.refreshPanelsData();
-
 		return false;
 	},
 
@@ -1354,8 +1348,6 @@ module.exports = panels.view.dialog.extend( {
 		this.builder.addHistoryEntry( 'row_edited' );
 		this.updateModel();
 		this.closeDialog();
-
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	},
@@ -1609,10 +1601,6 @@ module.exports = panels.view.dialog.extend( {
 		}
 
 		this.savingWidget = false;
-
-		if ( args.refresh ) {
-			this.builder.model.refreshPanelsData( args.refreshArgs );
-		}
 	},
 
 	/**
@@ -1639,19 +1627,15 @@ module.exports = panels.view.dialog.extend( {
 	 * @returns {boolean}
 	 */
 	deleteHandler: function () {
-
 		this.model.trigger( 'visual_destroy' );
 		this.closeDialog( {silent: true} );
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	},
 
 	duplicateHandler: function () {
 		this.model.trigger( 'user_duplicate' );
-
 		this.closeDialog( {silent: true} );
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	}
@@ -1836,7 +1820,6 @@ module.exports = panels.view.dialog.extend( {
 		widget.cell.widgets.add( widget );
 
 		this.closeDialog();
-		this.builder.model.refreshPanelsData();
 	},
 
 	/**
@@ -4259,9 +4242,6 @@ module.exports = Backbone.View.extend( {
 				}
 
 				ui.helper.css( 'left', - handle.outerWidth() / 2 );
-
-				// Refresh the panels data
-				cellView.row.builder.model.refreshPanelsData();
 			}
 		} );
 
@@ -4346,8 +4326,6 @@ module.exports = Backbone.View.extend( {
 				// Add the widget to the cell model
 				widget.cell = thisView.model;
 				widget.cell.widgets.add( widget );
-
-				thisView.row.builder.model.refreshPanelsData();
 			}
 		);
 
@@ -5371,7 +5349,6 @@ module.exports = Backbone.View.extend( {
 		var thisView = this;
 		this.$el.fadeOut( 'normal', function () {
 			thisView.model.destroy();
-			thisView.builder.model.refreshPanelsData();
 		} );
 	},
 
@@ -5388,8 +5365,6 @@ module.exports = Backbone.View.extend( {
 		this.builder.model.rows.add( duplicateRow, {
 			at: this.builder.model.rows.indexOf( this.model ) + 1
 		} );
-
-		this.builder.model.refreshPanelsData();
 	},
 
 	/**
@@ -5515,8 +5490,6 @@ module.exports = Backbone.View.extend( {
 					thisView.builder.model.rows.add( newRow, {
 						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
 					} );
-
-					thisView.builder.model.refreshPanelsData();
 				}
 			);
 		}
@@ -5826,7 +5799,7 @@ module.exports = Backbone.View.extend( {
 				}
 			};
 
-			// Set the value when ever anything changes
+			// Set the value whenever anything changes
 			text.change( setValue );
 			unit.change( setValue );
 		} );
@@ -5978,7 +5951,6 @@ module.exports = Backbone.View.extend( {
 			at: this.model.collection.indexOf( this.model ) + 1
 		} );
 
-		this.cell.row.builder.model.refreshPanelsData();
 		return this;
 	},
 
@@ -6015,7 +5987,6 @@ module.exports = Backbone.View.extend( {
 		this.$el.fadeOut( 'fast', function () {
 			thisView.cell.row.resize();
 			thisView.model.destroy();
-			thisView.cell.row.builder.model.refreshPanelsData();
 			thisView.remove();
 		} );
 
@@ -6052,8 +6023,6 @@ module.exports = Backbone.View.extend( {
 						// Add this after the existing model
 						at: thisView.model.collection.indexOf( thisView.model ) + 1
 					} );
-
-					thisView.cell.row.builder.model.refreshPanelsData();
 				}
 			);
 		}
@@ -6088,8 +6057,6 @@ module.exports = Backbone.View.extend( {
 							thisView.visualDestroyModel();
 							break;
 					}
-
-					thisView.cell.row.builder.model.refreshPanelsData();
 				}
 			);
 		}

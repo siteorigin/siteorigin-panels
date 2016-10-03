@@ -216,10 +216,6 @@ module.exports = panels.view.dialog.extend( {
 		}
 
 		this.savingWidget = false;
-
-		if ( args.refresh ) {
-			this.builder.model.refreshPanelsData( args.refreshArgs );
-		}
 	},
 
 	/**
@@ -246,19 +242,15 @@ module.exports = panels.view.dialog.extend( {
 	 * @returns {boolean}
 	 */
 	deleteHandler: function () {
-
 		this.model.trigger( 'visual_destroy' );
 		this.closeDialog( {silent: true} );
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	},
 
 	duplicateHandler: function () {
 		this.model.trigger( 'user_duplicate' );
-
 		this.closeDialog( {silent: true} );
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	}

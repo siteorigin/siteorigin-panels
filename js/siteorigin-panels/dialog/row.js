@@ -534,10 +534,6 @@ module.exports = panels.view.dialog.extend( {
 
 			this.model.set( 'style', style );
 		}
-
-		if ( args.refresh ) {
-			this.builder.model.refreshPanelsData( args.refreshArgs );
-		}
 	},
 
 	/**
@@ -565,8 +561,6 @@ module.exports = panels.view.dialog.extend( {
 
 		this.closeDialog();
 
-		this.builder.model.refreshPanelsData();
-
 		return false;
 	},
 
@@ -577,8 +571,6 @@ module.exports = panels.view.dialog.extend( {
 		this.builder.addHistoryEntry( 'row_edited' );
 		this.updateModel();
 		this.closeDialog();
-
-		this.builder.model.refreshPanelsData();
 
 		return false;
 	},
