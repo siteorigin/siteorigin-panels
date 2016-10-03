@@ -27,7 +27,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {*}
 	 */
 	getRowsContainer: function(){
-		return $el;
+		return this.$el;
 	},
 
 	/**
