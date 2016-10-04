@@ -45,7 +45,7 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		if ( ! _.isUndefined( panelsOptions.widgets[this.model.get( 'class' )] ) ) {
+		if ( ! _.isUndefined( panelsOptions.widgets[ this.model.get( 'class' ) ] ) ) {
 			this.$( '.so-title .widget-name' ).html( panelsOptions.widgets[this.model.get( 'class' )].title );
 		} else {
 			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
@@ -184,7 +184,9 @@ module.exports = panels.view.dialog.extend( {
 	updateModel: function ( args ) {
 		args = _.extend( {
 			refresh: true,
-			refreshArgs: null
+			refreshArgs: {
+				silent: false
+			}
 		}, args );
 
 		// Get the values from the form and assign the new values to the model
@@ -200,7 +202,7 @@ module.exports = panels.view.dialog.extend( {
 				values = values[Object.keys( values )[0]];
 			}
 
-			this.model.setValues( values );
+			this.model.setValues( values, args.refreshArgs );
 			this.model.set( 'raw', true ); // We've saved from the widget form, so this is now raw
 		}
 
@@ -212,7 +214,8 @@ module.exports = panels.view.dialog.extend( {
 			}
 			catch ( e ) {
 			}
-			this.model.set( 'style', style );
+
+			this.model.setStyle( style, args.refreshArgs );
 		}
 
 		this.savingWidget = false;

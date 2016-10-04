@@ -92,7 +92,11 @@ module.exports = Backbone.Model.extend( {
 	/**
 	 * This is basically a wrapper for set that checks if we need to trigger a change
 	 */
-	setValues: function ( values ) {
+	setValues: function ( values, options ) {
+		options = _.extend( {
+			silent: false,
+		}, options );
+
 		var hasChanged = false;
 		if ( JSON.stringify( values ) !== JSON.stringify( this.get( 'values' ) ) ) {
 			hasChanged = true;
@@ -100,11 +104,35 @@ module.exports = Backbone.Model.extend( {
 
 		this.set( 'values', values, { silent: true } );
 
-		if ( hasChanged ) {
+		if ( hasChanged && ! options.silent ) {
 			// We'll trigger our own change events.
-			// NB: Must include the model being changed (i.e. `this`) as a workaround for a bug in Backbone 1.2.3
-			this.trigger( 'change', this );
+			this.trigger( 'change' );
 			this.trigger( 'change:values' );
+		}
+	},
+
+	/**
+	 * Set the widget styles.
+	 *
+	 * @param style
+	 * @param options
+	 */
+	setStyle: function( style, options ) {
+		options = _.extend( {
+			silent: false,
+		}, options );
+
+		var hasChanged = false;
+		if ( JSON.stringify( style ) !== JSON.stringify( this.get( 'style' ) ) ) {
+			hasChanged = true;
+		}
+
+		this.set( 'style', style, { silent: true } );
+
+		if ( hasChanged && ! options.silent ) {
+			// We'll trigger our own change events.
+			this.trigger( 'change' );
+			this.trigger( 'change:style' );
 		}
 	},
 
