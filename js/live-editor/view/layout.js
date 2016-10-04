@@ -3,6 +3,8 @@ var liveEditor = window.liveEditor, $ = jQuery;
 module.exports = Backbone.View.extend( {
 	// rows: [],
 
+	liveEditor: null,
+
 	initialize: function( options ){
 		this.setElement( options.$el );
 
@@ -18,8 +20,10 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			rowView.layout = layoutView;
-			// layoutView.rows.push( rowView );
 		} );
+
+		// Store the main Page Builder Live Editor manager
+		this.liveEditor = options.liveEditor;
 	},
 
 	/**

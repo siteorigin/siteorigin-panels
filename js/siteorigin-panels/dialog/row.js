@@ -513,7 +513,9 @@ module.exports = panels.view.dialog.extend( {
 	updateModel: function ( args ) {
 		args = _.extend( {
 			refresh: true,
-			refreshArgs: null
+			refreshArgs: {
+				silent: false
+			}
 		}, args );
 
 		// Set the cells
@@ -532,7 +534,7 @@ module.exports = panels.view.dialog.extend( {
 				console.log( 'Error retrieving styles - ' + err.message );
 			}
 
-			this.model.set( 'style', style );
+			this.model.setStyle( style, args.refreshArgs );
 		}
 	},
 

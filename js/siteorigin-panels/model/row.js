@@ -96,6 +96,31 @@ module.exports = Backbone.Model.extend( {
 	},
 
 	/**
+	 * Set the widget styles.
+	 *
+	 * @param style
+	 * @param options
+	 */
+	setStyle: function( style, options ) {
+		options = _.extend( {
+			silent: false,
+		}, options );
+
+		var hasChanged = false;
+		if ( JSON.stringify( style ) !== JSON.stringify( this.get( 'style' ) ) ) {
+			hasChanged = true;
+		}
+
+		this.set( 'style', style, { silent: true } );
+
+		if ( hasChanged && ! options.silent ) {
+			// We'll trigger our own change events.
+			this.trigger( 'change' );
+			this.trigger( 'change:style' );
+		}
+	},
+
+	/**
 	 * Triggered when the model is destroyed
 	 */
 	onDestroy: function () {

@@ -5,12 +5,13 @@ var liveEditor = window.liveEditor, $ = jQuery;
  *
  * @param builder
  */
-module.exports = function( postId, builder ){
+module.exports = function( postId, builder, mainLiveEditor ){
 
 	// Create the main layout view
 	var layout = new liveEditor.view.layout( {
 		model: builder,
-		$el: $( '#pl-' + postId )
+		$el: $( '#pl-' + postId ),
+		liveEditor : mainLiveEditor
 	} );
 
 	$( window ).unload( function() {

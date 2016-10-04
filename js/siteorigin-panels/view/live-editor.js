@@ -96,7 +96,7 @@ module.exports = Backbone.View.extend( {
 
 		// Refresh the preview display
 		this.$el.show();
-		this.refreshPreview( this.builder.model.getPanelsData() );
+		this.refreshPreview( );
 
 		this.originalContainer = this.builder.$el.parent();
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
@@ -116,7 +116,7 @@ module.exports = Backbone.View.extend( {
 
 				$( document ).one( 'heartbeat-tick.autosave', function(){
 					thisView.autoSaved = true;
-					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+					thisView.refreshPreview( );
 				} );
 				wp.autosave.server.triggerSave();
 			}
@@ -199,7 +199,10 @@ module.exports = Backbone.View.extend( {
 	 * Refresh the Live Editor preview.
 	 * @returns {exports}
 	 */
-	refreshPreview: function ( data ) {
+	refreshPreview: function ( ) {
+		// Get the current panels data
+		var data = this.builder.model.getPanelsData();
+
 		var loadTimePrediction = this.loadTimes.length ?
 		_.reduce( this.loadTimes, function ( memo, num ) {
 			return memo + num;
@@ -318,7 +321,8 @@ module.exports = Backbone.View.extend( {
 				var iframeWindow = $$.get(0).contentWindow;
 				iframeWindow.liveEditor.setup(
 					panelsOptions.post_id,
-					thisView.builder.model
+					thisView.builder.model,
+					thisView
 				);
 
 				// Prevent default clicks

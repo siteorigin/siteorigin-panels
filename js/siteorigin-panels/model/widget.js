@@ -29,7 +29,7 @@ module.exports = Backbone.Model.extend( {
 
 	initialize: function () {
 		var widgetClass = this.get( 'class' );
-		if ( _.isUndefined( panelsOptions.widgets[widgetClass] ) || ! panelsOptions.widgets[widgetClass].installed ) {
+		if ( _.isUndefined( panelsOptions.widgets[ widgetClass ] ) || ! panelsOptions.widgets[ widgetClass ].installed ) {
 			this.set( 'missing', true );
 		}
 	},

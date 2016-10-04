@@ -38,12 +38,13 @@ var liveEditor = window.liveEditor, $ = jQuery;
  *
  * @param builder
  */
-module.exports = function( postId, builder ){
+module.exports = function( postId, builder, mainLiveEditor ){
 
 	// Create the main layout view
 	var layout = new liveEditor.view.layout( {
 		model: builder,
-		$el: $( '#pl-' + postId )
+		$el: $( '#pl-' + postId ),
+		liveEditor : mainLiveEditor
 	} );
 
 	$( window ).unload( function() {
@@ -100,6 +101,8 @@ var liveEditor = window.liveEditor, $ = jQuery;
 module.exports = Backbone.View.extend( {
 	// rows: [],
 
+	liveEditor: null,
+
 	initialize: function( options ){
 		this.setElement( options.$el );
 
@@ -115,8 +118,10 @@ module.exports = Backbone.View.extend( {
 				$el: $$
 			} );
 			rowView.layout = layoutView;
-			// layoutView.rows.push( rowView );
 		} );
+
+		// Store the main Page Builder Live Editor manager
+		this.liveEditor = options.liveEditor;
 	},
 
 	/**
@@ -163,8 +168,9 @@ module.exports = Backbone.View.extend( {
 			// rowView.cells.push( cellView );
 		} );
 
-		this.listenTo( this.model, 'move', this.reposition );
+		this.listenTo( this.model, 'move', this.handleReposition );
 		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+		this.listenTo( this.model, 'change:style', this.handleChangeStyle );
 	},
 
 	/**
@@ -175,7 +181,7 @@ module.exports = Backbone.View.extend( {
 		return this.$( '> *' ).hasClass( 'panel-row-style' ) ? this.$( '> .panel-row-style' ) : this.$el;
 	},
 
-	reposition: function(){
+	handleReposition: function(){
 		var rowIndex = this.model.builder.rows.indexOf( this.model ),
 			rowContainer = this.layout.getRowsContainer();
 
@@ -209,6 +215,10 @@ module.exports = Backbone.View.extend( {
 		} );
 	},
 
+	handleChangeStyle: function(){
+		this.layout.liveEditor.refreshPreview();
+	},
+
 	/**
 	 * Get the row view at a specific index.
 	 * @param i
@@ -229,12 +239,13 @@ module.exports = Backbone.View.extend( {
 		this.setElement( options.$el );
 		options.$el.data( 'view', this );
 
-		this.listenTo( this.model, 'move', this.reposition );
-		this.listenTo( this.model, 'change:values', this.changeValues );
-		this.listenTo( this.model, 'change:style', this.changeStyle );
+		this.listenTo( this.model, 'move', this.handleReposition );
+		this.listenTo( this.model, 'change:values', this.handleChangeValues );
+		this.listenTo( this.model, 'change:style', this.handleChangeStyle );
+		this.listenTo( this.model, 'destroy', this.handleDestroy );
 	},
 
-	reposition: function(){
+	handleReposition: function(){
 		// We need to move this view
 
 		var rowIndex = this.model.cell.row.builder.rows.indexOf( this.model.cell.row ),
@@ -267,11 +278,16 @@ module.exports = Backbone.View.extend( {
 		return this.$('> .panel-widget-style').length ? this.$('> .panel-widget-style') : this.$el;
 	},
 
-	changeValues: function(){
+	handleChangeValues: function(){
+		this.cell.row.layout.liveEditor.refreshPreview();
 	},
 
-	changeStyle: function(){
-		console.log('change style');
+	handleChangeStyle: function(){
+		this.cell.row.layout.liveEditor.refreshPreview();
+	},
+
+	handleDestroy: function(){
+		this.$el.remove();
 	}
 } );
 
