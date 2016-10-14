@@ -1618,7 +1618,7 @@ function siteorigin_panels_display_premium_teaser(){
 }
 
 function siteorigin_panels_premium_url() {
-	$ref = apply_filters_ref_array( 'siteorigin_premium_affiliate_id', '' );
+	$ref = apply_filters( 'siteorigin_premium_affiliate_id', '' );
 	$url = 'https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels';
 
 	if( $ref ) {
