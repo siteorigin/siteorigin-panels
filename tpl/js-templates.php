@@ -74,6 +74,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				);
 				?>
 			</div>
+			<div class="so-tip-wrapper">
+				<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
+				<?php
+				$user = wp_get_current_user();
+				$user->user_email;
+				$signup_email = add_query_arg( array(
+					'email' => $user->user_email,
+					'name' => $user->first_name,
+				), 'https://siteorigin.com/wp-admin/admin-ajax.php?action=course_signup_form&course=300cd058f8' );
+				?>
+				<a href="<?php echo esc_url( $signup_email ) ?>">
+					<?php _e( '12 tips every Page Builder user should know.', 'siteorigin-panels' ) ?>
+				</a>
+			</div>
 		</div>
 
 	</div>
