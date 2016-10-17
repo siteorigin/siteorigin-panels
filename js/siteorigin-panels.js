@@ -3307,6 +3307,19 @@ module.exports = Backbone.View.extend( {
 
 		this.trigger( 'builder_rendered' );
 
+		this.$( '.so-tip-wrapper a' ).click( function( e ){
+			e.preventDefault();
+			var $$ = $(this).blur();
+			var newwindow = window.open(
+				$$.attr('href'),
+				'signup-window',
+				'height=450,width=650,toolbar=false'
+			);
+			if ( window.focus ) {
+				newwindow.focus();
+			}
+		} );
+
 		return this;
 	},
 

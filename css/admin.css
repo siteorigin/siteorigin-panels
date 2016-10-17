@@ -482,6 +482,10 @@
   color: #777;
   font-size: 0.8em;
 }
+.siteorigin-panels-builder .so-panels-welcome-message .so-tip-wrapper {
+  margin-top: 15px;
+  font-size: 0.95em;
+}
 .siteorigin-panels-builder.so-display-narrow .so-builder-toolbar {
   padding: 10px;
 }

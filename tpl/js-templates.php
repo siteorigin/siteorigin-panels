@@ -38,10 +38,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<?php endif; ?>
 
-			<?php if( siteorigin_premium_display_teaser() ) : ?>
-				<a class="so-tool-button so-siteorigin-premium" title="<?php esc_attr_e( 'SiteOrigin Premium', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels" target="_blank">
+			<?php if( siteorigin_panels_display_premium_teaser() ) : ?>
+				<a class="so-tool-button so-siteorigin-premium" title="<?php esc_attr_e( 'SiteOrigin Premium', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( siteorigin_panels_premium_url() ) ?>" target="_blank">
 					<span class="so-panels-icon so-panels-icon-plus"></span>
-					<span class="so-button-text"><?php esc_html_e('Upgrade', 'siteorigin-panels') ?></span>
+					<span class="so-button-text"><?php esc_html_e('Addons', 'siteorigin-panels') ?></span>
 				</a>
 			<?php endif; ?>
 
@@ -73,6 +73,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
 				);
 				?>
+			</div>
+			<div class="so-tip-wrapper">
+				<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
+				<?php
+				$user = wp_get_current_user();
+				$user->user_email;
+				$signup_email = add_query_arg( array(
+					'email' => $user->user_email,
+					'name' => $user->first_name,
+				), 'https://siteorigin.com/wp-admin/admin-ajax.php?action=course_signup_form&course=300cd058f8' );
+				?>
+				<a href="<?php echo esc_url( $signup_email ) ?>">
+					<?php _e( '12 tips every Page Builder user should know.', 'siteorigin-panels' ) ?>
+				</a>
 			</div>
 		</div>
 
