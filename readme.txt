@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.17 - 14 October 2016 =
+* Removed old Stellar JS library.
+* Added parallax setup after small timeout.
+* Added way to add affiliate ID.
+* Added tips signup link.
+
 = 2.4.16 - 27 September 2016 =
 * Added disableable upgrade notice.
 
