@@ -283,18 +283,6 @@ class SiteOrigin_Panels_Renderer {
 			}
 		}
 
-		// We need this to migrate from the old $panels_data that put widget meta into the "info" key instead of "panels_info"
-		if( !empty( $panels_data['widgets'] ) && is_array($panels_data['widgets']) ) {
-			foreach ( $panels_data['widgets'] as $i => $widget ) {
-				if( empty( $panels_data['widgets'][$i]['panels_info'] ) ) {
-					$panels_data['widgets'][$i]['panels_info'] = $panels_data['widgets'][$i]['info'];
-					unset($panels_data['widgets'][$i]['info']);
-				}
-
-				$panels_data['widgets'][$i]['panels_info']['widget_index'] = $i;
-			}
-		}
-
 		if( !empty( $panels_data['widgets'] ) && is_array($panels_data['widgets']) ){
 			foreach ( $panels_data['widgets'] as $widget ) {
 				// Put the widgets in the grids
