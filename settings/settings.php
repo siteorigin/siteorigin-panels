@@ -163,8 +163,8 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function admin_scripts($prefix){
 		if( $prefix != 'settings_page_siteorigin_panels' ) return;
-		wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
-		wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . '/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array(), SITEORIGIN_PANELS_VERSION );
+		wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . 'admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
+		wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url(__FILE__) . 'admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array(), SITEORIGIN_PANELS_VERSION );
 	}
 
 	/**
