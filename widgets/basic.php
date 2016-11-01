@@ -253,7 +253,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		global $siteorigin_panels_current_post;
 
 		if( !empty($siteorigin_panels_current_post) ){
-			if(!empty($query_args['post__not_in'])){
+			if( !empty( $query_args['post__not_in'] ) ){
+				if( !is_array( $query_args['post__not_in'] ) ){
+					$query_args['post__not_in'] = explode( ',', $query_args['post__not_in'] );
+					$query_args['post__not_in'] = array_map( 'intval', $query_args['post__not_in'] );
+				}
 				$query_args['post__not_in'][] = $siteorigin_panels_current_post;
 			}
 			else {
