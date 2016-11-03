@@ -132,12 +132,16 @@ class SiteOrigin_Panels_Renderer {
 					}
 				}
 			}
+			// Add bottom margin
+			// Check for grid defined margin, and if not present, use default
+			$cell_bottom_margin = ( !empty( $grid['style']['bottom_margin'] ) ? $grid['style']['bottom_margin'] : $panels_margin_bottom .'px' );
+
+			$css->add_cell_css( $post_id, $grid_id, false, '.so-panel', array(
+				'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $cell_bottom_margin, $grid, $gi, $panels_data, $post_id )
+			));
 		}
 
-		// Add the bottom margins
-		$css->add_cell_css($post_id, false, false, '.so-panel', array(
-			'margin-bottom' => apply_filters('siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
-		));
+		// Add the bottom margin for the last widget
 		$css->add_cell_css($post_id, false, false, '.so-panel:last-child', array(
 			'margin-bottom' => apply_filters('siteorigin_panels_css_cell_last_margin_bottom', '0px', $grid, $gi, $panels_data, $post_id)
 		));
