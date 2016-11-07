@@ -83,7 +83,7 @@ module.exports = panels.view.dialog.extend( {
 			// Now we need to attach the style window
 			this.styles = new panels.view.styles();
 			this.styles.model = this.model;
-			this.styles.render( 'row', $( '#post_ID' ).val(), {
+			this.styles.render( 'row', this.builder.config.postId, {
 				builderType: this.builder.config.builderType,
 				dialog: this
 			} );
