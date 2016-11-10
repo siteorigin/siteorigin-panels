@@ -147,6 +147,7 @@ class SiteOrigin_Panels_Default_Styles {
 				'tile' => __('Tiled Image', 'siteorigin-panels'),
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
+				'fixed' => __( 'Fixed', 'siteorigin-panels' ),
 				'parallax' => __('Parallax', 'siteorigin-panels'),
 				'parallax-original' => __('Parallax (Original Size)', 'siteorigin-panels'),
 			),
@@ -217,6 +218,7 @@ class SiteOrigin_Panels_Default_Styles {
 				'tile' => __('Tiled Image', 'siteorigin-panels'),
 				'cover' => __('Cover', 'siteorigin-panels'),
 				'center' => __('Centered, with original size', 'siteorigin-panels'),
+				'fixed' => __( 'Fixed', 'siteorigin-panels' ),
 				'parallax' => __('Parallax', 'siteorigin-panels'),
 				'parallax-original' => __('Parallax (Original Size)', 'siteorigin-panels'),
 			),
@@ -313,6 +315,9 @@ class SiteOrigin_Panels_Default_Styles {
 						case 'center':
 							$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
 							break;
+						case 'fixed':
+							$attributes['style'] .= 'background-attachment: fixed; background-size: cover;';
+							break;
 					}
 				}
 			}
@@ -389,6 +394,9 @@ class SiteOrigin_Panels_Default_Styles {
 							break;
 						case 'center':
 							$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
+							break;
+						case 'fixed':
+							$attributes['style'] .= 'background-attachment: fixed; background-size: cover;';
 							break;
 					}
 				}
