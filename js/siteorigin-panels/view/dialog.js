@@ -409,7 +409,7 @@ module.exports = Backbone.View.extend( {
 				else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
 					// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
 					var editor = null;
-					if ( typeof tinymce !== 'undefined' ) {
+					if ( typeof tinyMCE !== 'undefined' ) {
 						editor = tinyMCE.get( $$.attr( 'id' ) );
 					}
 
