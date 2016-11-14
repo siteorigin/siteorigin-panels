@@ -44,7 +44,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	getWidgetContainer: function(){
-		return this.$('> .panel-widget-style').length ? this.$('> .panel-widget-style') : this.$el;
+		return this.$('> .panel-widget-style').length ? this.$( '> .panel-widget-style' ) : this.$el;
 	},
 
 	handleChangeValues: function(){

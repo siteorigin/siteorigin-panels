@@ -45,15 +45,13 @@ class SiteOrigin_Panels_Live_Editor {
 
 
 	/**
-	 * Load the frontend scripts for the live editor
+	 * Enqueue the frontend scripts for the live editor
 	 */
 	function frontend_scripts(){
 		wp_enqueue_script(
 			'live-editor-front',
 			plugin_dir_url( __FILE__ ) . '../js/live-editor' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-			array(
-				'jquery', 'underscore', 'backbone'
-			),
+			array( 'jquery', 'underscore', 'backbone' ),
 			SITEORIGIN_PANELS_VERSION
 		);
 
