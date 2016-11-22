@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.19 - 22 November 2016 =
+* Added fixed background support.
+* Cycle addon and contribution link.
+* Small type and translation fixes.
+
 = 2.4.18 - 7 November 2016 =
 * Fixes for PHP 7 checker.
 * Properly provide post ID on custom home page.
