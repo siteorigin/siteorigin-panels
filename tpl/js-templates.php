@@ -38,12 +38,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<?php endif; ?>
 
-			<?php if( siteorigin_panels_display_premium_teaser() ) : ?>
-				<a class="so-tool-button so-siteorigin-premium" title="<?php esc_attr_e( 'SiteOrigin Premium', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( siteorigin_panels_premium_url() ) ?>" target="_blank">
-					<span class="so-panels-icon so-panels-icon-plus"></span>
-					<span class="so-button-text"><?php esc_html_e('Addons', 'siteorigin-panels') ?></span>
-				</a>
-			<?php endif; ?>
+			<?php siteorigin_panels_display_premium_teaser(); ?>
 
 			<a class="so-switch-to-standard"><?php _e('Revert to Editor', 'siteorigin-panels') ?></a>
 

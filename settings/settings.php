@@ -306,14 +306,14 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'number',
 			'unit' => 'px',
 			'label' => __('Tablet Width', 'siteorigin-panels'),
-			'description' => __('Device width, in pixels, to collapse into a tablet view .', 'siteorigin-panels'),
+			'description' => __('Device width, in pixels, to collapse into a tablet view.', 'siteorigin-panels'),
 		);
 
 		$fields['layout']['fields']['mobile-width'] = array(
 			'type' => 'number',
 			'unit' => 'px',
 			'label' => __('Mobile Width', 'siteorigin-panels'),
-			'description' => __('Device width, in pixels, to collapse into a mobile view .', 'siteorigin-panels'),
+			'description' => __('Device width, in pixels, to collapse into a mobile view.', 'siteorigin-panels'),
 		);
 
 		$fields['layout']['fields']['margin-bottom'] = array(

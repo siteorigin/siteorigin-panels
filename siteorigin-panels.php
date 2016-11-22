@@ -1610,11 +1610,31 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 }
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
+/**
+ * Display one of the premium or contribution teasers
+ */
 function siteorigin_panels_display_premium_teaser(){
-	return
+	if (
 		siteorigin_panels_setting( 'display-teaser' ) &&
 		apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
-		! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+		! defined( 'SITEORIGIN_PREMIUM_VERSION' )
+	) {
+
+		$links = array(
+			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Addons', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
+			array( __( 'Contribute to Page Builder', 'siteorigin-panels' ), __( 'Contribute', 'siteorigin-panels' ), 'http://siteorigin.com/downloads/contribution/' ),
+		);
+		$i = floor( time() / (30*60) ) % count( $links );
+
+		if( !empty( $links[ $i ] ) ) {
+			?>
+			<a class="so-tool-button so-siteorigin-premium" title="<?php echo esc_attr( $links[$i][0] ) ?>" href="<?php echo esc_url( $links[$i][2] ) ?>" target="_blank">
+				<span class="so-panels-icon so-panels-icon-plus"></span>
+				<span class="so-button-text"><?php echo esc_html( $links[$i][1] ) ?></span>
+			</a>
+			<?php
+		}
+	}
 }
 
 function siteorigin_panels_premium_url() {
