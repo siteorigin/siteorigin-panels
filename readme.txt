@@ -6,7 +6,7 @@ Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
-Donate link: http://siteorigin.com/page-builder/#donate
+Donate link: https://siteorigin.com/downloads/contribution/
 Contributors: gpriday, braam-genis
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
