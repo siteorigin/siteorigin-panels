@@ -1622,7 +1622,7 @@ function siteorigin_panels_display_premium_teaser(){
 
 		$links = array(
 			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Addons', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
-			array( __( 'Contribute to Page Builder', 'siteorigin-panels' ), __( 'Contribute', 'siteorigin-panels' ), 'siteorigin.com/downloads/contribution/' ),
+			array( __( 'Contribute to Page Builder', 'siteorigin-panels' ), __( 'Contribute', 'siteorigin-panels' ), 'http://siteorigin.com/downloads/contribution/' ),
 		);
 		$i = floor( time() / (30*60) ) % count( $links );
 
