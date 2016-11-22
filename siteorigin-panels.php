@@ -1621,8 +1621,8 @@ function siteorigin_panels_display_premium_teaser(){
 	) {
 
 		$links = array(
-			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Addons', 'siteorigin-panels' ), 'https://siteorigin.com/downloads/page-builder-premium/' ),
-			array( __( 'Contribute to Page Builder', 'siteorigin-panels' ), __( 'Contribute', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
+			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Addons', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
+			array( __( 'Contribute to Page Builder', 'siteorigin-panels' ), __( 'Contribute', 'siteorigin-panels' ), 'siteorigin.com/downloads/contribution/' ),
 		);
 		$i = floor( time() / (30*60) ) % count( $links );
 
