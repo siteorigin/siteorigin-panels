@@ -11,6 +11,10 @@ msgstr ""
 "Last-Translator: \n"
 "Language-Team: \n"
 
+#: siteorigin-panels.php:919
+msgid "Read More"
+msgstr "weiterlesen"
+
 #: inc/admin-actions.php:80
 msgid "No description"
 msgstr "Keine Beschreibung"
