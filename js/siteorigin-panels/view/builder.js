@@ -689,7 +689,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	updateEditorContent: function ( content ) {
 		// Switch back to the standard editor
-		if ( this.config.editorType !== 'tinyMCE' || typeof tinymce === 'undefined' || _.isNull( tinyMCE.get( "content" ) ) ) {
+		if ( this.config.editorType !== 'tinyMCE' || typeof tinyMCE === 'undefined' || _.isNull( tinyMCE.get( "content" ) ) ) {
 			var $editor = $( this.config.editorId );
 			$editor.val( content ).trigger( 'change' ).trigger( 'keyup' );
 		} else {
