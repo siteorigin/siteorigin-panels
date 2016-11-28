@@ -1086,7 +1086,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		if( !empty($row_style_wrapper) ) echo $row_style_wrapper;
 
 		// Themes can add a wrapper within the row itself
-		echo apply_filters( 'siteorigin_panels_inside_row_start', '', $panels_data['grids'][$gi], $grid_attributes );
+		echo apply_filters( 'siteorigin_panels_before_row_content', '', $panels_data['grids'][$gi], $grid_attributes );
 
 		$collapse_order = !empty( $panels_data['grids'][$gi]['style']['collapse_order'] ) ? $panels_data['grids'][$gi]['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
 
@@ -1129,7 +1129,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		}
 
 		// End inner row wrapping
-		echo apply_filters( 'siteorigin_panels_inside_row_end', '', $panels_data['grids'][$gi], $grid_attributes );
+		echo apply_filters( 'siteorigin_panels_after_row_content', '', $panels_data['grids'][$gi], $grid_attributes );
 		echo '</div>';
 
 		// Close the
