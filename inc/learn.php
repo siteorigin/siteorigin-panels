@@ -16,7 +16,7 @@ class SiteOrigin_Panels_Courses {
 			'button' => __( 'SEO', 'siteorigin-panels' ),
 			'title' => __( 'Page Builder SEO', 'siteorigin-panels' ),
 			'text' => __( 'Learn Page Builder SEO.', 'siteorigin-panels' ),
-			'id' => '300cd058f8'
+			'id' => '71ccd71c07'
 		);
 
 		$courses[ 'tips' ] = array(
