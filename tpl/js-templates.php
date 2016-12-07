@@ -79,12 +79,15 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				);
 				?>
 			</div>
-			<div class="so-tip-wrapper">
-				<strong><?php _e( 'Learn Page Builder: ', 'siteorigin-panels' ) ?></strong>
-				<a class="so-course-modal" title="<?php echo esc_attr( $course[ 'title' ] ) ?>" href="<?php echo esc_url( $course[ 'url' ] ) ?>">
-					<?php echo esc_html( $course[ 'text' ] ) ?>
-				</a>
-			</div>
+
+			<?php if( ! empty( $course ) ) : ?>
+				<div class="so-tip-wrapper">
+					<strong><?php _e( 'Learn Page Builder: ', 'siteorigin-panels' ) ?></strong>
+					<a class="so-course-modal" title="<?php echo esc_attr( $course[ 'title' ] ) ?>" href="<?php echo esc_url( $course[ 'url' ] ) ?>">
+						<?php echo esc_html( $course[ 'text' ] ) ?>
+					</a>
+				</div>
+			<?php endif; ?>
 		</div>
 
 	</div>
