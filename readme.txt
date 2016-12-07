@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.20 - 7 December 2016 =
+* Removed Premium and contribution links.
+* Added course links.
+
 = 2.4.19 - 22 November 2016 =
 * Added fixed background support.
 * Cycle addon and contribution link.
