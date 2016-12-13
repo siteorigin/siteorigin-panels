@@ -553,6 +553,11 @@ class SiteOrigin_Panels_Renderer {
 			'after_title' => $after_title,
 			'widget_id' => 'widget-' . $grid . '-' . $cell . '-' . $panel
 		);
+		
+		// Allow plugins / themes to filter widget title
+		if ( !empty( $instance['title'] ) && !empty( $the_widget ) && !empty( $the_widget->id_base ) ) {
+			$args['title'] = $instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $the_widget->id_base );
+		}
 
 		// Let other themes and plugins change the arguments that go to the widget class.
 		$args = apply_filters('siteorigin_panels_widget_args', $args);
