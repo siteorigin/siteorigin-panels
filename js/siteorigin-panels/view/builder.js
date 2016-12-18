@@ -113,7 +113,7 @@ module.exports = Backbone.View.extend( {
 
 		this.trigger( 'builder_rendered' );
 
-		this.$( 'a.so-course-modal' ).click( function( e ){
+		this.$( '.so-tip-wrapper a' ).click( function( e ){
 			e.preventDefault();
 			var $$ = $(this).blur();
 			var newwindow = window.open(
