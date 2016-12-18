@@ -38,7 +38,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<?php endif; ?>
 
-			<?php siteorigin_panels_display_premium_teaser(); ?>
+			<?php
+			$course = SiteOrigin_Panels_Courses::single()->get_course();
+			if( ! empty( $course ) ) {
+				?>
+				<a class="so-tool-button so-course-modal" title="<?php echo esc_attr( $course[ 'title' ] ) ?>" href="<?php echo esc_url( $course[ 'url' ] ) ?>" target="_blank">
+					<span class="so-panels-icon so-panels-icon-plus"></span>
+					<span class="so-button-text"><?php echo esc_html( $course[ 'button' ] ) ?></span>
+				</a>
+				<?php
+			}
+			?>
 
 			<a class="so-switch-to-standard"><?php _e('Revert to Editor', 'siteorigin-panels') ?></a>
 
@@ -69,20 +79,15 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				);
 				?>
 			</div>
-			<div class="so-tip-wrapper">
-				<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
-				<?php
-				$user = wp_get_current_user();
-				$user->user_email;
-				$signup_email = add_query_arg( array(
-					'email' => $user->user_email,
-					'name' => $user->first_name,
-				), 'https://siteorigin.com/wp-admin/admin-ajax.php?action=course_signup_form&course=300cd058f8' );
-				?>
-				<a href="<?php echo esc_url( $signup_email ) ?>">
-					<?php _e( '12 tips every Page Builder user should know.', 'siteorigin-panels' ) ?>
-				</a>
-			</div>
+
+			<?php if( ! empty( $course ) ) : ?>
+				<div class="so-tip-wrapper">
+					<strong><?php _e( 'Learn Page Builder: ', 'siteorigin-panels' ) ?></strong>
+					<a class="so-course-modal" title="<?php echo esc_attr( $course[ 'title' ] ) ?>" href="<?php echo esc_url( $course[ 'url' ] ) ?>">
+						<?php echo esc_html( $course[ 'text' ] ) ?>
+					</a>
+				</div>
+			<?php endif; ?>
 		</div>
 
 	</div>

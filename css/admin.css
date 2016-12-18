@@ -65,11 +65,11 @@
 .siteorigin-panels-builder .so-tool-button:hover span {
   color: #444444;
 }
-.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium {
+.siteorigin-panels-builder .so-tool-button.so-course-modal {
   margin-left: 10px;
   background: #FFFFFF;
 }
-.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium:hover span {
+.siteorigin-panels-builder .so-tool-button.so-course-modal:hover span {
   color: #333;
 }
 .siteorigin-panels-builder .so-builder-toolbar {
