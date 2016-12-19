@@ -1611,30 +1611,14 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
 
 /**
- * Display one of the premium or contribution teasers
+ * Should we display premium addon messages
+ *
+ * @return bool
  */
 function siteorigin_panels_display_premium_teaser(){
-	if (
-		siteorigin_panels_setting( 'display-teaser' ) &&
-		apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
-		! defined( 'SITEORIGIN_PREMIUM_VERSION' )
-	) {
-
-		$links = array(
-			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Get Addons', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
-			array( __( 'Page Builder Addons', 'siteorigin-panels' ), __( 'Premium Addons', 'siteorigin-panels' ), siteorigin_panels_premium_url() ),
-		);
-		$i = floor( time() / (30*60) ) % count( $links );
-
-		if( !empty( $links[ $i ] ) ) {
-			?>
-			<a class="so-tool-button so-siteorigin-premium" title="<?php echo esc_attr( $links[$i][0] ) ?>" href="<?php echo esc_url( $links[$i][2] ) ?>" target="_blank">
-				<span class="so-panels-icon so-panels-icon-plus"></span>
-				<span class="so-button-text"><?php echo esc_html( $links[$i][1] ) ?></span>
-			</a>
-			<?php
-		}
-	}
+	return siteorigin_panels_setting( 'display-teaser' ) &&
+	       apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
+	       ! defined( 'SITEORIGIN_PREMIUM_VERSION' );
 }
 
 function siteorigin_panels_premium_url() {
