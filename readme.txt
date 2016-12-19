@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.21 - 19 December 2016 =
+* Removed course toolbar links.
+* Added filter for post loop query.
+* Replace TinyMCE _.isUndefined() check with a typeof to prevent JS errors.
+
 = 2.4.20 - 7 December 2016 =
 * Removed Premium and contribution links.
 * Added course links.
