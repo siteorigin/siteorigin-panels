@@ -1473,8 +1473,13 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
  */
 function siteorigin_panels_plugin_action_links($links) {
 	unset( $links['edit'] );
-	$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __('Support Forum', 'siteorigin-panels') . '</a>';
+	$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __('Support', 'siteorigin-panels') . '</a>';
 	$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __('Newsletter', 'siteorigin-panels') . '</a>';
+
+	if( siteorigin_panels_display_premium_teaser() ) {
+		$links[] = '<a href="' . esc_url( siteorigin_panels_premium_url() ) . '" style="color: #3db634" target="_blank">' . __('Addons', 'siteorigin-panels') . '</a>';
+	}
+
 	return $links;
 }
 add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panels_plugin_action_links');
