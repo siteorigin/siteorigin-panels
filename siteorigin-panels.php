@@ -30,7 +30,6 @@ require_once plugin_dir_path(__FILE__) . 'inc/revisions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/default-styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/widgets.php';
-require_once plugin_dir_path(__FILE__) . 'inc/learn.php';
 require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
 require_once plugin_dir_path(__FILE__) . 'inc/admin-actions.php';
 
@@ -1474,8 +1473,13 @@ function siteorigin_panels_render_form($widget, $instance = array(), $raw = fals
  */
 function siteorigin_panels_plugin_action_links($links) {
 	unset( $links['edit'] );
-	$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __('Support Forum', 'siteorigin-panels') . '</a>';
+	$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __('Support', 'siteorigin-panels') . '</a>';
 	$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __('Newsletter', 'siteorigin-panels') . '</a>';
+
+	if( siteorigin_panels_display_premium_teaser() ) {
+		$links[] = '<a href="' . esc_url( siteorigin_panels_premium_url() ) . '" style="color: #3db634" target="_blank">' . __('Addons', 'siteorigin-panels') . '</a>';
+	}
+
 	return $links;
 }
 add_action('plugin_action_links_' . plugin_basename(__FILE__), 'siteorigin_panels_plugin_action_links');
@@ -1610,6 +1614,17 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 	return $panels_data;
 }
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_process_panels_data', 5 );
+
+/**
+ * Should we display premium addon messages
+ *
+ * @return bool
+ */
+function siteorigin_panels_display_premium_teaser(){
+	return siteorigin_panels_setting( 'display-teaser' ) &&
+	       apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
+	       ! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+}
 
 function siteorigin_panels_premium_url() {
 	$ref = apply_filters( 'siteorigin_premium_affiliate_id', '' );

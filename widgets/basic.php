@@ -271,7 +271,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 
 		// Create the query
-		query_posts($query_args);
+		query_posts( apply_filters( 'siteorigin_panels_postloop_query_args', $query_args ) );
 		echo $args['before_widget'];
 
 		// Filter the title
