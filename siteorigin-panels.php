@@ -44,7 +44,7 @@ class SiteOrigin_Panels {
 		}
 
 		// Include the live editor file if we're in live editor mode.
-		if( ! empty( $_GET[ 'siteorigin_panels_live_editor' ] ) ) {
+		if( self::is_live_editor() ) {
 			SiteOrigin_Panels_Live_Editor::single();
 		}
 
@@ -128,6 +128,19 @@ class SiteOrigin_Panels {
 		// Check if this is a panel
 		$is_panel =  ( siteorigin_panels_is_home() || ( is_singular() && get_post_meta(get_the_ID(), 'panels_data', false) ) );
 		return $is_panel && ( ! $can_edit || ( ( is_singular() && current_user_can( 'edit_post', get_the_ID() ) ) || ( siteorigin_panels_is_home() && current_user_can('edit_theme_options') ) ) );
+	}
+	
+	/**
+	 * Check if the user is currently using the live editor.
+	 *
+	 * @return bool
+	 */
+	public static function  is_live_editor(){
+		if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -235,6 +248,7 @@ class SiteOrigin_Panels {
 	function body_class( $classes ){
 		if( self::is_panel() ) $classes[] = 'siteorigin-panels';
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
+		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
 
 		return $classes;
 	}
