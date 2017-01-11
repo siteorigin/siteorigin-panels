@@ -47,3 +47,17 @@
   display: table;
   clear: both;
 }
+.panel-row-container {
+  margin: 0 auto;
+  width: 100%;
+  zoom: 1;
+}
+.panel-row-container:before {
+  content: '';
+  display: block;
+}
+.panel-row-container:after {
+  content: '';
+  display: table;
+  clear: both;
+}

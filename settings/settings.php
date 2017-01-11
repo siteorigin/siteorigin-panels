@@ -126,6 +126,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['tablet-layout'] = false;
 		$defaults['tablet-width'] = 1024;
 		$defaults['mobile-width'] = 780;
+		$defaults['row-container-width'] = 860;
 		$defaults['margin-bottom'] = 30;
 		$defaults['margin-bottom-last-row'] = false;
 		$defaults['margin-sides'] = 30;
@@ -314,6 +315,13 @@ class SiteOrigin_Panels_Settings {
 			'unit' => 'px',
 			'label' => __('Mobile Width', 'siteorigin-panels'),
 			'description' => __('Device width, in pixels, to collapse into a mobile view.', 'siteorigin-panels'),
+		);
+
+		$fields['layout']['fields']['row-container-width'] = array(
+			'type' => 'number',
+			'unit' => 'px',
+			'label' => __('Row Container Width', 'siteorigin-panels'),
+			'description' => __('Max-width of row containers.', 'siteorigin-panels'),
 		);
 
 		$fields['layout']['fields']['margin-bottom'] = array(

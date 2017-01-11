@@ -105,6 +105,7 @@ class SiteOrigin_Panels_Default_Styling {
 			'group' => 'layout',
 			'options' => array(
 				'' => __('Standard', 'siteorigin-panels'),
+				'contained' => __('Contained', 'siteorigin-panels'),
 				'full' => __('Full Width', 'siteorigin-panels'),
 				'full-stretched' => __('Full Width Stretched', 'siteorigin-panels'),
 			),
@@ -257,7 +258,12 @@ class SiteOrigin_Panels_Default_Styling {
 
 	static function row_style_attributes( $attributes, $args ) {
 		if( !empty( $args['row_stretch'] ) ) {
-			$attributes['class'][] = 'siteorigin-panels-stretch';
+			if( $args['row_stretch'] === 'contained' ) {
+				$attributes['class'][] = 'siteorigin-panels-contained';
+			} else {
+				$attributes['class'][] = 'siteorigin-panels-stretch';
+			}
+
 			$attributes['data-stretch-type'] = $args['row_stretch'];
 			wp_enqueue_script('siteorigin-panels-front-styles');
 		}
