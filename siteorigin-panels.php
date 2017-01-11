@@ -33,7 +33,7 @@ class SiteOrigin_Panels {
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
 		// This is the main filter
-		add_filter( 'the_content', array( $this, 'filter_content' ) );
+		add_filter( 'the_content', array( $this, 'filter_content' ), 9 );
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
