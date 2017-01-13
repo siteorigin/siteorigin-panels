@@ -177,7 +177,7 @@ class SiteOrigin_Panels_Admin {
 				plugin_dir_url(__FILE__) . '../js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
 				array(
 					'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable',
-					'underscore', 'backbone', 'plupload', 'plupload-all'
+					'underscore', 'backbone', 'plupload', 'plupload-all', 'wp-color-picker'
 				),
 				SITEORIGIN_PANELS_VERSION,
 				true
