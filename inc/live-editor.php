@@ -25,7 +25,14 @@ class SiteOrigin_Panels_Live_Editor {
 	 * @return array
 	 */
 	function post_metadata($value, $post_id, $meta_key){
-		if( $meta_key == 'panels_data' && current_user_can( 'edit_post', $post_id ) && !empty( $_POST['live_editor_panels_data'] ) ) {
+		global $post;
+		if(
+			$meta_key == 'panels_data' &&
+			current_user_can( 'edit_post', $post_id ) &&
+			! empty( $_POST['live_editor_panels_data'] ) &&
+			( empty( $_POST['live_editor_post_ID'] ) || empty( $post ) || $_POST['live_editor_post_ID'] == $post->ID )
+
+		) {
 			$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
 
 			if(
