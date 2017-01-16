@@ -242,7 +242,8 @@ module.exports = Backbone.View.extend( {
 
 		this.postToIframe(
 			{
-				live_editor_panels_data: JSON.stringify( data )
+				live_editor_panels_data: JSON.stringify( data ),
+				live_editor_post_ID: this.builder.config.postId
 			},
 			this.previewUrl,
 			this.$('.so-preview')

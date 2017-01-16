@@ -902,19 +902,18 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
  */
 function siteorigin_panels_filter_content( $content ) {
 	global $post;
-
 	if ( empty( $post ) ) return $content;
-	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
+	if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
 
 	// Check if this post has panels_data
 	$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-	if ( !empty( $panels_data ) ) {
+	if ( ! empty( $panels_data ) ) {
 		$panel_content = siteorigin_panels_render( $post->ID );
 
 		if ( !empty( $panel_content ) ) {
 			$content = $panel_content;
 
-			if( !is_singular() ) {
+			if( ! is_singular() ) {
 				// This is an archive page, so try strip out anything after the more text
 
 				if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
@@ -1638,4 +1637,4 @@ function siteorigin_panels_premium_url() {
 }
 
 // Include the live editor file if we're in live editor mode.
-if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( !empty( $_GET['siteorigin_panels_live_editor'] ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
