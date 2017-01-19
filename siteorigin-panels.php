@@ -136,11 +136,7 @@ class SiteOrigin_Panels {
 	 * @return bool
 	 */
 	public static function  is_live_editor(){
-		if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
-			return true;
-		} else {
-			return false;
-		}
+		return ! empty( $_GET['siteorigin_panels_live_editor'] )
 	}
 
 	/**
