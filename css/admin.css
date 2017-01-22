@@ -44,9 +44,9 @@
   background: -moz-linear-gradient(center bottom, #F0F0F0 0%, #F9F9F9 100%);
   background: -o-linear-gradient(#F9F9F9, #F0F0F0);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#F0F0F0', GradientType=0);
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF;
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF;
   outline: none;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
@@ -65,12 +65,17 @@
 .siteorigin-panels-builder .so-tool-button:hover span {
   color: #444444;
 }
-.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium {
-  margin-left: 10px;
-  background: #FFFFFF;
-}
-.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium:hover span {
-  color: #333;
+.siteorigin-panels-builder .so-tool-button.so-siteorigin-premium,
+.siteorigin-panels-builder .so-tool-button.so-learn {
+  background: #ebebeb;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ebebeb), color-stop(1, #f3f3f3));
+  background: -ms-linear-gradient(bottom, #ebebeb, #f3f3f3);
+  background: -moz-linear-gradient(center bottom, #ebebeb 0%, #f3f3f3 100%);
+  background: -o-linear-gradient(#f3f3f3, #ebebeb);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f3f3f3', endColorstr='#ebebeb', GradientType=0);
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05);
 }
 .siteorigin-panels-builder .so-builder-toolbar {
   -ms-box-sizing: border-box;
@@ -438,26 +443,32 @@
 .siteorigin-panels-builder .so-panels-icon.so-panels-icon-plus:before {
   content: "\f067";
 }
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-film:before {
+  content: "\f008";
+}
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-th-large:before {
+  content: "\f009";
+}
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-arrows:before {
+  content: "\f047";
+}
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-arrow-up:before {
+  content: "\f062";
+}
 .siteorigin-panels-builder .so-panels-icon.so-panels-icon-eye:before {
   content: "\f06e";
 }
-.siteorigin-panels-builder .so-panels-icon.so-panels-icon-arrows-v:before {
-  content: "\f07d";
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-hdd-o:before {
+  content: "\f0a0";
 }
 .siteorigin-panels-builder .so-panels-icon.so-panels-icon-wrench:before {
   content: "\f0ad";
 }
-.siteorigin-panels-builder .so-panels-icon.so-panels-icon-columns:before {
-  content: "\f0db";
-}
 .siteorigin-panels-builder .so-panels-icon.so-panels-icon-rotate-left:before {
   content: "\f0e2";
 }
-.siteorigin-panels-builder .so-panels-icon.so-panels-icon-puzzle-piece:before {
-  content: "\f12e";
-}
-.siteorigin-panels-builder .so-panels-icon.so-panels-icon-cubes:before {
-  content: "\f1b3";
+.siteorigin-panels-builder .so-panels-icon.so-panels-icon-undo:before {
+  content: "\f0e2";
 }
 .siteorigin-panels-builder .so-panels-welcome-message {
   text-align: center;
