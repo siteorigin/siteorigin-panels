@@ -72,8 +72,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					),
 					array(
 						"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-columns'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-cubes'></span> $1</a>",
+						"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-th-large'></span> $1</a>",
+						"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-hdd-o'></span> $1</a>",
 						"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
 					),
 					// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
