@@ -937,7 +937,7 @@ function siteorigin_panels_filter_content( $content ) {
 
 	return $content;
 }
-add_filter( 'the_content', 'siteorigin_panels_filter_content', 9 );
+add_filter( 'the_content', 'siteorigin_panels_filter_content' );
 
 
 /**
