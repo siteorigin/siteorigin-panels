@@ -1083,6 +1083,9 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			echo $name.'="'.esc_attr($value).'" ';
 		}
 		echo '>';
+		
+		// This allows other themes and plugins to add html before the row, inside div element
+		echo apply_filters( 'siteorigin_panels_before_row_inside_grid', '', $panels_data['grids'][$gi], $grid_attributes );
 
 		$style_attributes = array();
 		if( !empty( $panels_data['grids'][$gi]['style']['class'] ) ) {
