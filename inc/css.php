@@ -21,7 +21,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param array $attributes
 	 * @param int $resolution The pixel resolution that this applies to
 	 */
-	function add_css($selector, $attributes, $resolution = 1920) {
+	public function add_css($selector, $attributes, $resolution = 1920) {
 		$attribute_string = array();
 		foreach( $attributes as $k => $v ) {
 			if( empty( $v ) ) continue;
@@ -45,7 +45,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	function add_row_css($li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
+	public function add_row_css($li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
 		$selector = array();
 
 		if( $ri === false ) {
@@ -73,6 +73,8 @@ class SiteOrigin_Panels_Css_Builder {
 	}
 
 	/**
+	 * Add cell specific CSS
+	 *
 	 * @param int $li The layout ID. If false, then the CSS applies to all layouts.
 	 * @param int|bool $ri The row index. If false, then the CSS applies to all rows.
 	 * @param int|bool $ci The cell index. If false, then the CSS applies to all rows.
@@ -81,7 +83,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
+	public function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
 		$selector = array();
 
 		if( $ri === false && $ci === false ) {
@@ -111,9 +113,55 @@ class SiteOrigin_Panels_Css_Builder {
 	}
 
 	/**
+	 * Add widget specific CSS
+	 *
+	 * @param int $li The layout ID. If false, then the CSS applies to all layouts.
+	 * @param int|bool $ri The row index. If false, then the CSS applies to all rows.
+	 * @param int|bool $ci The cell index. If false, then the CSS applies to all rows.
+	 * @param int|bool $wi The widget index. If false, then CSS applies to all widgets.
+	 * @param string $sub_selector A sub selector if we need one.
+	 * @param array $attributes An array of attributes.
+	 * @param int $resolution The pixel resolution that this applies to
+	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
+	 */
+	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector, $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		$selector = array();
+
+		if( $ri === false && $ci === false && $wi === false ) {
+			// This applies to all widgets in the layout
+			$selector[] = '#pl-'.$li;
+			$selector[] = '.so-panel';
+		}
+		else if( $ri !== false && $ci === false && $wi === false ) {
+			// This applies to all widgets in a row
+			if( $specify_layout ) $selector[] = '#pl-'.$li;
+			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-'.$li.'-'.$ri;
+			$selector[] = '.so-panel';
+		}
+		else if( $ri !== false && $ci !== false && $wi === false ) {
+			if( $specify_layout ) $selector[] = '#pl-'.$li;
+			$selector[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
+			$selector[] = '.so-panel';
+		}
+		else {
+			// This applies to a specific widget
+			if( $specify_layout ) $selector[] = '#pl-'.$li;
+			$selector[] = '#panel-' . $li . '-' . $ri . '-' . $ci . '-' . $wi;
+		}
+
+		// Add in the sub selector
+		if( !empty($sub_selector) ) {
+			$selector[] = $sub_selector;
+		}
+
+		// Add this to the CSS array
+		$this->add_css( implode(' ', $selector), $attributes, $resolution );
+	}
+
+	/**
 	 * Gets the CSS for this particular layout.
 	 */
-	function get_css(){
+	public function get_css(){
 		// Build actual CSS from the array
 		$css_text = '';
 		krsort( $this->css );

@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.0
-Tested up to: 4.7
+Tested up to: 4.7.2
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,12 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.4.22 - 31 January 2016 =
+* Add WP Color Picker as a dependency for admin script
+* Include and check post ID in Live Editor. Fixes some issues with widgets using the_excerpt in Live Editor.
+* Added mobile padding settings
+* Made all learning links/buttons removable in Page Builder settings.
 
 = 2.4.21 - 19 December 2016 =
 * Removed course toolbar links.

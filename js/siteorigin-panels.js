@@ -3307,13 +3307,13 @@ module.exports = Backbone.View.extend( {
 
 		this.trigger( 'builder_rendered' );
 
-		this.$( '.so-tip-wrapper a' ).click( function( e ){
+		this.$( 'a.so-lesson-modal' ).click( function( e ){
 			e.preventDefault();
 			var $$ = $(this).blur();
 			var newwindow = window.open(
 				$$.attr('href'),
 				'signup-window',
-				'height=450,width=650,toolbar=false'
+				'height=600,width=650,toolbar=false'
 			);
 			if ( window.focus ) {
 				newwindow.focus();
@@ -5181,7 +5181,8 @@ module.exports = Backbone.View.extend( {
 
 		this.postToIframe(
 			{
-				live_editor_panels_data: JSON.stringify( data )
+				live_editor_panels_data: JSON.stringify( data ),
+				live_editor_post_ID: this.builder.config.postId
 			},
 			this.previewUrl,
 			this.$('.so-preview')

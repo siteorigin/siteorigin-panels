@@ -11,9 +11,6 @@
 	font-style: normal;
 }
 
-#panels{
-}
-
 /* This is for the metabox */
 
 #so-panels-panels {
@@ -59,7 +56,7 @@
 
 		border: 1px solid #C0C0C0;
 		.gradient(#F0F0F0, #F0F0F0, #F9F9F9);
-		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04)");
+		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF");
 		outline: none;
 		.rounded(2px);
 
@@ -79,15 +76,10 @@
 			}
 		}
 
-		&.so-siteorigin-premium {
-			margin-left: 10px;
-			background: #FFFFFF;
-
-			&:hover {
-				span {
-					color: #333;
-				}
-			}
+		&.so-siteorigin-premium,
+		&.so-learn {
+			.gradient(#ebebeb, #ebebeb, #f3f3f3);
+			.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05)");
 		}
 	}
 
@@ -474,27 +466,34 @@
 		&.so-panels-icon-plus:before {
 			content: "\f067";
 		}
+		&.so-panels-icon-film:before {
+			content: "\f008";
+		}
+		&.so-panels-icon-th-large:before {
+			content: "\f009";
+		}
+		&.so-panels-icon-arrows:before {
+			content: "\f047";
+		}
+		&.so-panels-icon-arrow-up:before {
+			content: "\f062";
+		}
 		&.so-panels-icon-eye:before {
 			content: "\f06e";
 		}
-		&.so-panels-icon-arrows-v:before {
-			content: "\f07d";
+		&.so-panels-icon-hdd-o:before {
+			content: "\f0a0";
 		}
 		&.so-panels-icon-wrench:before {
 			content: "\f0ad";
 		}
-		&.so-panels-icon-columns:before {
-			content: "\f0db";
-		}
 		&.so-panels-icon-rotate-left:before {
 			content: "\f0e2";
 		}
-		&.so-panels-icon-puzzle-piece:before {
-			content: "\f12e";
+		&.so-panels-icon-undo:before {
+			content: "\f0e2";
 		}
-		&.so-panels-icon-cubes:before {
-			content: "\f1b3";
-		}
+
 	}
 
 	.so-panels-welcome-message {

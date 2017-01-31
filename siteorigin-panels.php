@@ -32,6 +32,7 @@ require_once plugin_dir_path(__FILE__) . 'inc/default-styles.php';
 require_once plugin_dir_path(__FILE__) . 'inc/widgets.php';
 require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
 require_once plugin_dir_path(__FILE__) . 'inc/admin-actions.php';
+require_once plugin_dir_path(__FILE__) . 'inc/learn.php';
 
 if( defined('SITEORIGIN_PANELS_DEV') && SITEORIGIN_PANELS_DEV ) include plugin_dir_path(__FILE__).'inc/debug.php';
 
@@ -282,7 +283,7 @@ function siteorigin_panels_admin_enqueue_scripts( $prefix = '', $force = false )
 	if ( $force || siteorigin_panels_is_admin_page() ) {
 		// Media is required for row styles
 		wp_enqueue_media();
-		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all' ), SITEORIGIN_PANELS_VERSION, true );
+		wp_enqueue_script( 'so-panels-admin', plugin_dir_url(__FILE__) . 'js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery', 'jquery-ui-resizable', 'jquery-ui-sortable', 'jquery-ui-draggable', 'underscore', 'backbone', 'plupload', 'plupload-all', 'wp-color-picker'  ), SITEORIGIN_PANELS_VERSION, true );
 		add_action( 'admin_footer', 'siteorigin_panels_js_templates' );
 
 		$widgets = siteorigin_panels_get_widgets();
@@ -902,19 +903,18 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
  */
 function siteorigin_panels_filter_content( $content ) {
 	global $post;
-
 	if ( empty( $post ) ) return $content;
-	if ( !apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
+	if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) return $content;
 
 	// Check if this post has panels_data
 	$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-	if ( !empty( $panels_data ) ) {
+	if ( ! empty( $panels_data ) ) {
 		$panel_content = siteorigin_panels_render( $post->ID );
 
 		if ( !empty( $panel_content ) ) {
 			$content = $panel_content;
 
-			if( !is_singular() ) {
+			if( ! is_singular() ) {
 				// This is an archive page, so try strip out anything after the more text
 
 				if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
@@ -1638,4 +1638,4 @@ function siteorigin_panels_premium_url() {
 }
 
 // Include the live editor file if we're in live editor mode.
-if( !empty($_GET['siteorigin_panels_live_editor']) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
+if( !empty( $_GET['siteorigin_panels_live_editor'] ) ) require_once plugin_dir_path(__FILE__) . 'inc/live-editor.php';
