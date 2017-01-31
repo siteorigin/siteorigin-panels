@@ -453,12 +453,12 @@ class SiteOrigin_Panels_Default_Styling {
 			if( empty( $widget[ 'panels_info' ] ) ) continue;
 
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['id'], '.panel-widget-style', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'padding' ]
 				) );
 			}
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['id'], '.panel-widget-style', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ]
 				), $mobile_width );
 			}
