@@ -96,10 +96,13 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.23 - 31 January 2016 =
+* Fixed padding issue introduced by new mobile padding setting.
+
 = 2.4.22 - 31 January 2016 =
-* Add WP Color Picker as a dependency for admin script
+* Add WP Color Picker as a dependency for admin script.
 * Include and check post ID in Live Editor. Fixes some issues with widgets using the_excerpt in Live Editor.
-* Added mobile padding settings
+* Added mobile padding settings.
 * Made all learning links/buttons removable in Page Builder settings.
 
 = 2.4.21 - 19 December 2016 =

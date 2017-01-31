@@ -339,6 +339,11 @@ class SiteOrigin_Panels_Default_Styling {
 			}
 		}
 
+		// We need the style wrapper if there is padding or mobile padding
+		if( ! empty( $args[ 'padding' ] ) || ! empty( $args[ 'mobile_padding' ] ) ) {
+			$attributes['class'][] = 'panel-row-style';
+		}
+
 		if( !empty( $args['border_color'] ) ) {
 			$attributes['style'] .= 'border: 1px solid ' . $args['border_color']. ';';
 		}
@@ -416,6 +421,11 @@ class SiteOrigin_Panels_Default_Styling {
 			}
 		}
 
+		// We need the style wrapper if there is padding or mobile padding
+		if( ! empty( $args[ 'padding' ] ) || ! empty( $args[ 'mobile_padding' ] ) ) {
+			$attributes['class'][] = 'panel-widget-style';
+		}
+
 		if( !empty( $args['border_color'] ) ) {
 			$attributes['style'] .= 'border: 1px solid ' . $args['border_color']. ';';
 		}
@@ -443,12 +453,12 @@ class SiteOrigin_Panels_Default_Styling {
 			if( empty( $widget[ 'panels_info' ] ) ) continue;
 
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['id'], '', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'padding' ]
 				) );
 			}
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['id'], '', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ]
 				), $mobile_width );
 			}
@@ -456,15 +466,15 @@ class SiteOrigin_Panels_Default_Styling {
 
 		// Add in the row padding styling
 		foreach( $panels_data[ 'grids' ] as $i => $row ) {
-			if( empty( $widget[ 'style' ] ) ) continue;
+			if( empty( $row[ 'style' ] ) ) continue;
 
 			if( ! empty( $row['style']['padding'] ) ) {
-				$css->add_row_css( $post_id, $i, '', array(
+				$css->add_row_css( $post_id, $i, '.panel-row-style', array(
 					'padding' => $row['style']['padding']
 				) );
 			}
 			if( ! empty( $row['style'][ 'mobile_padding' ] ) ) {
-				$css->add_row_css( $post_id, $i, '', array(
+				$css->add_row_css( $post_id, $i, '.panel-row-style', array(
 					'padding' => $row['style'][ 'mobile_padding' ]
 				), $mobile_width );
 			}
