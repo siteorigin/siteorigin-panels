@@ -831,6 +831,11 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 		'margin-bottom' => apply_filters('siteorigin_panels_css_cell_last_margin_bottom', '0px', $grid, $gi, $panels_data, $post_id)
 	));
 
+	// add max-width for row containers
+	$css->add_row_css($post_id, false, '.panel-row-container', array(
+		'max-width' => $settings['row-container-width'] . 'px'
+	));
+
 	if( $settings['responsive'] ) {
 		// Add CSS to prevent overflow on mobile resolution.
 		$css->add_row_css($post_id, false, '', array(
@@ -1094,6 +1099,10 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 		$row_style_wrapper = siteorigin_panels_start_style_wrapper( 'row', $style_attributes, !empty($panels_data['grids'][$gi]['style']) ? $panels_data['grids'][$gi]['style'] : array() );
 		if( !empty($row_style_wrapper) ) echo $row_style_wrapper;
 
+		if( isset( $panels_data['grids'][$gi]['style']['row_stretch'] ) && $panels_data['grids'][$gi]['style']['row_stretch'] === 'contained' ) {
+			echo '<div class="panel-row-container">';
+		}
+
 		$collapse_order = !empty( $panels_data['grids'][$gi]['style']['collapse_order'] ) ? $panels_data['grids'][$gi]['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
 
 		if( $collapse_order == 'right-top' ) {
@@ -1132,6 +1141,10 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 
 			if( !empty($cell_style_wrapper) ) echo '</div>';
 			echo '</div>';
+		}
+
+		if( isset( $panels_data['grids'][$gi]['style']['row_stretch'] ) && $panels_data['grids'][$gi]['style']['row_stretch'] === 'contained' ) {
+			echo '</div>'; // /.panel-row-container
 		}
 
 		echo '</div>';
