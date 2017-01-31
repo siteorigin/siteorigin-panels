@@ -1100,6 +1100,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			$cells = array_reverse( $cells, true );
 		}
 
+		echo apply_filters( 'siteorigin_panels_before_cell_loop', '', $panels_data['grids'][$gi], $grid_attributes );
+
 		foreach ( $cells as $ci => $widgets ) {
 			$cell_classes = array('panel-grid-cell');
 			if( empty( $widgets ) ) {
@@ -1133,6 +1135,8 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			if( !empty($cell_style_wrapper) ) echo '</div>';
 			echo '</div>';
 		}
+
+		echo apply_filters( 'siteorigin_panels_after_cell_loop', '', $panels_data['grids'][$gi], $grid_attributes );
 
 		echo '</div>';
 
