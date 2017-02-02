@@ -758,7 +758,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 	foreach ( $panels_data['grids'] as $gi => $grid ) {
 
 		$cell_count = intval( $grid['cells'] );
-		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
+		$grid_id = intval( $gi );
 
 		// Add the cell sizing
 		for ( $i = 0; $i < $cell_count; $i++ ) {
@@ -855,7 +855,7 @@ function siteorigin_panels_generate_css($post_id, $panels_data = false){
 
 	// Let other plugins customize various aspects of the rows (grids)
 	foreach ( $panels_data['grids'] as $gi => $grid ) {
-		$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
+		$grid_id = intval( $gi );
 
 		// Let other themes and plugins change the gutter.
 		$gutter = apply_filters('siteorigin_panels_css_row_gutter', $settings['margin-sides'].'px', $grid, $gi, $panels_data);
@@ -1069,11 +1069,10 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	foreach ( $grids as $gi => $cells ) {
 
 		$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $panels_data['grids'][$gi] );
-		$grid_id = !empty($panels_data['grids'][$gi]['style']['id']) ? sanitize_html_class( $panels_data['grids'][$gi]['style']['id'] ) : false;
 
 		$grid_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
 			'class' => implode( ' ', $grid_classes ),
-			'id' => !empty($grid_id) ? $grid_id : 'pg-' . $post_id . '-' . $gi,
+			'id' => 'pg-' . $post_id . '-' . $gi,
 		), $panels_data['grids'][$gi] );
 
 		// This allows other themes and plugins to add html before the row
@@ -1112,7 +1111,7 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 			$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
 			$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 				'class' => implode( ' ', $cell_classes ),
-				'id' => 'pgc-' . $post_id . '-' . ( !empty($grid_id) ? $grid_id : $gi )  . '-' . $ci
+				'id' => 'pgc-' . $post_id . '-' . $gi  . '-' . $ci
 			), $panels_data );
 
 			echo '<div ';
@@ -1580,33 +1579,6 @@ function siteorigin_panels_process_panels_data( $panels_data ){
 				$grid['style'] = array(
 
 				);
-			}
-		}
-	}
-
-	// Process the IDs of the grids. Make sure that each is unique.
-
-	if( !empty($panels_data['grids']) && is_array($panels_data['grids']) ) {
-		$unique_grid_ids = array();
-		foreach( $panels_data['grids'] as &$grid ) {
-			// Make sure that the row ID is unique and non-numeric
-			if( !empty( $grid['style']['id'] ) ) {
-				if( is_numeric($grid['style']['id']) ) {
-					// Numeric IDs will cause problems, so we'll ignore them
-					$grid['style']['id'] = false;
-				}
-				else if( isset( $unique_grid_ids[ $grid['style']['id'] ] ) ) {
-					// This ID already exists, so add a suffix to make sure it's unique
-					$original_id = $grid['style']['id'];
-					$i = 1;
-					do {
-						$grid['style']['id'] = $original_id . '-' . (++$i);
-					} while( isset( $unique_grid_ids[ $grid['style']['id'] ] ) );
-				}
-
-				if( !empty( $grid['style']['id'] ) ) {
-					$unique_grid_ids[ $grid['style']['id'] ] = true;
-				}
 			}
 		}
 	}

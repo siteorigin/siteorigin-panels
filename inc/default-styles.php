@@ -348,6 +348,10 @@ class SiteOrigin_Panels_Default_Styling {
 			$attributes['style'] .= 'border: 1px solid ' . $args['border_color']. ';';
 		}
 
+		if( !empty( $args['id'] ) ) {
+			$attributes[ 'id' ] = sanitize_html_class( $args[ 'id' ] );
+		}
+
 		return $attributes;
 	}
 
