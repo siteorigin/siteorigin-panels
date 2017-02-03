@@ -96,10 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.4.23 - 31 January 2016 =
+= 2.4.24 - 3 February 2017 =
+* Add row ID to style wrapper instead of actual row.
+* Use more specific selectors for padding CSS.
+
+= 2.4.23 - 31 January 2017 =
 * Fixed padding issue introduced by new mobile padding setting.
 
-= 2.4.22 - 31 January 2016 =
+= 2.4.22 - 31 January 2017 =
 * Add WP Color Picker as a dependency for admin script.
 * Include and check post ID in Live Editor. Fixes some issues with widgets using the_excerpt in Live Editor.
 * Added mobile padding settings.
