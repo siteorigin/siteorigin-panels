@@ -1673,6 +1673,9 @@
 .wp-customizer .so-panels-dialog .so-right-sidebar {
   z-index: 500001;
 }
+.wp-customizer .so-panels-dialog .so-toolbar {
+  z-index: 500002;
+}
 .so-panels-live-editor > div {
   position: fixed;
   z-index: 99999;
