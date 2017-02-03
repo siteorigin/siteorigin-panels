@@ -4,7 +4,7 @@
 class SiteOrigin_Panels_Admin_Widgets_Bundle {
 
 	function __construct() {
-		if( isset( $_GET[  'siteorigin-pa-install' ] ) ) {
+		if ( isset( $_GET['siteorigin-pa-install'] ) ) {
 			add_action( 'admin_menu', array( $this, 'activation_page' ) );
 		}
 	}
@@ -14,17 +14,17 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
-	function activation_page(){
+	function activation_page() {
 		add_plugins_page(
-			__('Install Page Builder Plugin', 'siteorigin-panels'),
-			__('Install Page Builder Plugin', 'siteorigin-panels'),
+			__( 'Install Page Builder Plugin', 'siteorigin-panels' ),
+			__( 'Install Page Builder Plugin', 'siteorigin-panels' ),
 			'install_plugins',
 			'siteorigin_panels_plugin_activation',
 			array( $this, 'render_page' )
 		);
 	}
 
-	function render_page(){
+	function render_page() {
 		?>
 		<div class="wrap">
 			<?php
@@ -32,27 +32,26 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 			$plugin = array();
 
 			/** Checks for actions from hover links to process the installation */
-			if ( isset( $_GET[sanitize_key( 'plugin' )] ) && ( isset( $_GET[sanitize_key( 'siteorigin-pa-install' )] ) && 'install-plugin' == $_GET[sanitize_key( 'siteorigin-pa-install' )] ) && current_user_can('install_plugins') ) {
+			if ( isset( $_GET[ sanitize_key( 'plugin' ) ] ) && ( isset( $_GET[ sanitize_key( 'siteorigin-pa-install' ) ] ) && 'install-plugin' == $_GET[ sanitize_key( 'siteorigin-pa-install' ) ] ) && current_user_can( 'install_plugins' ) ) {
 				check_admin_referer( 'siteorigin-pa-install' );
 
-				$plugin['name']   = $_GET['plugin_name']; // Plugin name
-				$plugin['slug']   = $_GET['plugin']; // Plugin slug
+				$plugin['name'] = $_GET['plugin_name']; // Plugin name
+				$plugin['slug'] = $_GET['plugin']; // Plugin slug
 
-				if(!empty($_GET['plugin_source'])) {
+				if ( ! empty( $_GET['plugin_source'] ) ) {
 					$plugin['source'] = $_GET['plugin_source'];
-				}
-				else {
+				} else {
 					$plugin['source'] = false;
 				}
 
 				/** Pass all necessary information via URL if WP_Filesystem is needed */
-				$url = wp_nonce_url(
+				$url    = wp_nonce_url(
 					add_query_arg(
 						array(
-							'page'          => 'siteorigin_panels_plugin_activation',
-							'plugin'        => urlencode( $plugin['slug'] ),
-							'plugin_name'   => urlencode( $plugin['name'] ),
-							'plugin_source' => urlencode( $plugin['source'] ),
+							'page'                  => 'siteorigin_panels_plugin_activation',
+							'plugin'                => urlencode( $plugin['slug'] ),
+							'plugin_name'           => urlencode( $plugin['name'] ),
+							'plugin_source'         => urlencode( $plugin['source'] ),
 							'siteorigin-pa-install' => 'install-plugin',
 						),
 						admin_url( 'themes.php' )
@@ -62,8 +61,9 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 				$method = ''; // Leave blank so WP_Filesystem can populate it as necessary
 				$fields = array( sanitize_key( 'siteorigin-pa-install' ) ); // Extra fields to pass to WP_Filesystem
 
-				if ( false === ( $creds = request_filesystem_credentials( $url, $method, false, false, $fields ) ) )
+				if ( false === ( $creds = request_filesystem_credentials( $url, $method, false, false, $fields ) ) ) {
 					return true;
+				}
 
 				if ( ! WP_Filesystem( $creds ) ) {
 					request_filesystem_credentials( $url, $method, true, false, $fields ); // Setup WP_Filesystem
@@ -74,15 +74,19 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php'; // Need for upgrade classes
 
 				/** Prep variables for Plugin_Installer_Skin class */
-				$title = sprintf( __('Installing %s', 'siteorigin-panels'), $plugin['name'] );
-				$url   = add_query_arg( array( 'action' => 'install-plugin', 'plugin' => urlencode( $plugin['slug'] ) ), 'update.php' );
-				if ( isset( $_GET['from'] ) )
+				$title = sprintf( __( 'Installing %s', 'siteorigin-panels' ), $plugin['name'] );
+				$url   = add_query_arg( array(
+					'action' => 'install-plugin',
+					'plugin' => urlencode( $plugin['slug'] )
+				), 'update.php' );
+				if ( isset( $_GET['from'] ) ) {
 					$url .= add_query_arg( 'from', urlencode( stripslashes( $_GET['from'] ) ), $url );
+				}
 
 				$nonce = 'install-plugin_' . $plugin['slug'];
 
 				// Find the source of the plugin
-				$source = !empty( $plugin['source'] ) ? $plugin['source'] : 'http://downloads.wordpress.org/plugin/'.urlencode($plugin['slug']).'.zip';
+				$source = ! empty( $plugin['source'] ) ? $plugin['source'] : 'http://downloads.wordpress.org/plugin/' . urlencode( $plugin['slug'] ) . '.zip';
 
 				/** Create a new instance of Plugin_Upgrader */
 				$upgrader = new Plugin_Upgrader( $skin = new Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
@@ -98,35 +102,35 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 		<?php
 	}
 
-	static function install_url( $plugin, $plugin_name, $source = false ){
+	static function install_url( $plugin, $plugin_name, $source = false ) {
 		// This is to prevent the issue where this URL is called from outside the admin
-		if( !is_admin() || !function_exists('get_plugins') ) return false;
+		if ( ! is_admin() || ! function_exists( 'get_plugins' ) ) {
+			return false;
+		}
 
 		$plugins = get_plugins();
-		$plugins = array_keys($plugins);
+		$plugins = array_keys( $plugins );
 
 		$installed = false;
-		foreach($plugins as $plugin_path){
-			if(strpos($plugin_path, $plugin.'/') === 0) {
+		foreach ( $plugins as $plugin_path ) {
+			if ( strpos( $plugin_path, $plugin . '/' ) === 0 ) {
 				$installed = true;
 				break;
 			}
 		}
 
-		if($installed && !is_plugin_active($plugin)){
-			return wp_nonce_url( self_admin_url('plugins.php?action=activate&plugin='.$plugin_path), 'activate-plugin_'.$plugin_path);
-		}
-		elseif($installed && is_plugin_active($plugin)){
+		if ( $installed && ! is_plugin_active( $plugin ) ) {
+			return wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=' . $plugin_path ), 'activate-plugin_' . $plugin_path );
+		} elseif ( $installed && is_plugin_active( $plugin ) ) {
 			return '#';
-		}
-		else{
+		} else {
 			return wp_nonce_url(
 				add_query_arg(
 					array(
-						'page'          => 'siteorigin_panels_plugin_activation',
-						'plugin'        => $plugin,
-						'plugin_name'   => $plugin_name,
-						'plugin_source' => !empty($source) ? urlencode($source) : false,
+						'page'                  => 'siteorigin_panels_plugin_activation',
+						'plugin'                => $plugin,
+						'plugin_name'           => $plugin_name,
+						'plugin_source'         => ! empty( $source ) ? urlencode( $source ) : false,
 						'siteorigin-pa-install' => 'install-plugin',
 					),
 					admin_url( 'plugins.php' )

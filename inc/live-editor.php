@@ -3,12 +3,12 @@
 
 class SiteOrigin_Panels_Live_Editor {
 
-	function __construct(){
+	function __construct() {
 		add_action( 'get_post_metadata', array( $this, 'post_metadata' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 
 		// Don't display the admin bar when in live editor mode
-		add_filter('show_admin_bar', '__return_false');
+		add_filter( 'show_admin_bar', '__return_false' );
 	}
 
 	public static function single() {
@@ -25,13 +25,13 @@ class SiteOrigin_Panels_Live_Editor {
 	 *
 	 * @return array
 	 */
-	function post_metadata($value, $post_id, $meta_key){
-		if( $meta_key == 'panels_data' && current_user_can( 'edit_post', $post_id ) && !empty( $_POST['live_editor_panels_data'] ) ) {
+	function post_metadata( $value, $post_id, $meta_key ) {
+		if ( $meta_key == 'panels_data' && current_user_can( 'edit_post', $post_id ) && ! empty( $_POST['live_editor_panels_data'] ) ) {
 			$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
 
-			if(
-				!empty( $data['widgets'] ) && (
-					!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
+			if (
+				! empty( $data['widgets'] ) && (
+					! class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
 					method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
 				)
 			) {
@@ -48,7 +48,7 @@ class SiteOrigin_Panels_Live_Editor {
 	/**
 	 * Load the frontend scripts for the live editor
 	 */
-	function frontend_scripts(){
+	function frontend_scripts() {
 		wp_enqueue_script(
 			'live-editor-front',
 			plugin_dir_url( __FILE__ ) . '../js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',

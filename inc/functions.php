@@ -8,7 +8,7 @@
 /**
  * @return mixed|void Are we currently viewing the home page
  */
-function siteorigin_panels_is_home(){
+function siteorigin_panels_is_home() {
 	return SiteOrigin_Panels::is_home();
 }
 
@@ -16,14 +16,15 @@ function siteorigin_panels_is_home(){
  * Check if we're currently viewing a page builder page.
  *
  * @param bool $can_edit Also check if the user can edit this page
+ *
  * @return bool
  */
-function siteorigin_panels_is_panel($can_edit = false){
+function siteorigin_panels_is_panel( $can_edit = false ) {
 	return SiteOrigin_Panels::is_panel( $can_edit );
 }
 
 
-function siteorigin_panels_get_home_page_data(){
+function siteorigin_panels_get_home_page_data() {
 	return SiteOrigin_Panels::single()->get_home_page_data();
 }
 
@@ -34,7 +35,7 @@ function siteorigin_panels_get_home_page_data(){
  * @param bool $enqueue_css
  * @param bool $panels_data
  */
-function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panels_data = false ){
+function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panels_data = false ) {
 	SiteOrigin_Panels_Renderer::single()->render( $post_id, $enqueue_css, $panels_data );
 }
 
@@ -49,10 +50,10 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
  *
  * @return array|bool|mixed|null
  */
-function siteorigin_panels_setting($key = ''){
-	return SiteOrigin_Panels_Settings::single()->get($key);
+function siteorigin_panels_setting( $key = '' ) {
+	return SiteOrigin_Panels_Settings::single()->get( $key );
 }
 
-function siteorigin_panels_plugin_activation_install_url($plugin, $plugin_name, $source = false){
+function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name, $source = false ) {
 	return SiteOrigin_Panels_Admin_Widgets_Bundle::install_url( $plugin, $plugin_name, $source );
 }

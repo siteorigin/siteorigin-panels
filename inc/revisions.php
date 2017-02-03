@@ -5,7 +5,7 @@
  *
  * Handles Page Builder revisions.
  */
-class SiteOrigin_Panels_Revisions{
+class SiteOrigin_Panels_Revisions {
 
 	function __construct() {
 		add_action( 'save_post', array( $this, 'save_post' ), 11, 2 );
@@ -29,14 +29,14 @@ class SiteOrigin_Panels_Revisions{
 	 * @param $post_id
 	 * @param $post
 	 */
-	function save_post( $post_id, $post ){
+	function save_post( $post_id, $post ) {
 		$parent_id = wp_is_post_revision( $post_id );
 
 		if ( $parent_id ) {
 			// If the panels data meta exists, copy it into the revision.
 			$panels_data = get_post_meta( $parent_id, 'panels_data', true );
-			if ( !empty( $panels_data ) ) {
-				add_metadata('post', $post_id, 'panels_data', $panels_data);
+			if ( ! empty( $panels_data ) ) {
+				add_metadata( 'post', $post_id, 'panels_data', $panels_data );
 			}
 		}
 	}
@@ -48,26 +48,35 @@ class SiteOrigin_Panels_Revisions{
 	 * @param $revision_id
 	 */
 	function revisions_restore( $post_id, $revision_id ) {
-		$panels_data = get_metadata('post', $revision_id, 'panels_data', true);
-		if ( !empty( $panels_data ) ) update_post_meta( $post_id, 'panels_data', $panels_data );
-		else delete_post_meta( $post_id, 'panels_data' );
+		$panels_data = get_metadata( 'post', $revision_id, 'panels_data', true );
+		if ( ! empty( $panels_data ) ) {
+			update_post_meta( $post_id, 'panels_data', $panels_data );
+		} else {
+			delete_post_meta( $post_id, 'panels_data' );
+		}
 	}
 
 	/**
 	 * Add the Page Builder content revision field.
 	 *
 	 * @param $fields
+	 *
 	 * @return mixed
 	 */
 	function revisions_fields( $fields ) {
 		// Prevent the autosave message.
 		// TODO figure out how to include Page Builder data into the autosave.
-		if(!function_exists('get_current_screen')) return $fields;
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $fields;
+		}
 
 		$screen = get_current_screen();
-		if(!empty($screen) && $screen->base == 'post') return $fields;
+		if ( ! empty( $screen ) && $screen->base == 'post' ) {
+			return $fields;
+		}
 
-		$fields['panels_data_field'] = __('Page Builder Content', 'siteorigin-panels');
+		$fields['panels_data_field'] = __( 'Page Builder Content', 'siteorigin-panels' );
+
 		return $fields;
 	}
 
@@ -77,13 +86,17 @@ class SiteOrigin_Panels_Revisions{
 	 * @param $value
 	 * @param $field
 	 * @param $revision
+	 *
 	 * @return string
 	 */
 	function revisions_field( $value, $field, $revision ) {
-		$parent_id = wp_is_post_revision( $revision->ID );
+		$parent_id   = wp_is_post_revision( $revision->ID );
 		$panels_data = get_metadata( 'post', $revision->ID, 'panels_data', true );
 
-		if( empty( $panels_data ) ) return '';
-		return siteorigin_panels_render($parent_id, false, $panels_data);
+		if ( empty( $panels_data ) ) {
+			return '';
+		}
+
+		return siteorigin_panels_render( $parent_id, false, $panels_data );
 	}
 }
