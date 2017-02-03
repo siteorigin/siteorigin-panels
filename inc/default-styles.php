@@ -348,6 +348,10 @@ class SiteOrigin_Panels_Default_Styling {
 			$attributes['style'] .= 'border: 1px solid ' . $args['border_color']. ';';
 		}
 
+		if( !empty( $args['id'] ) ) {
+			$attributes[ 'id' ] = sanitize_html_class( $args[ 'id' ] );
+		}
+
 		return $attributes;
 	}
 
@@ -453,12 +457,12 @@ class SiteOrigin_Panels_Default_Styling {
 			if( empty( $widget[ 'panels_info' ] ) ) continue;
 
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '> .panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'padding' ]
 				) );
 			}
 			if( ! empty( $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '.panel-widget-style', array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], '> .panel-widget-style', array(
 					'padding' => $widget[ 'panels_info' ][ 'style' ][ 'mobile_padding' ]
 				), $mobile_width );
 			}
@@ -469,12 +473,12 @@ class SiteOrigin_Panels_Default_Styling {
 			if( empty( $row[ 'style' ] ) ) continue;
 
 			if( ! empty( $row['style']['padding'] ) ) {
-				$css->add_row_css( $post_id, $i, '.panel-row-style', array(
+				$css->add_row_css( $post_id, $i, '> .panel-row-style', array(
 					'padding' => $row['style']['padding']
 				) );
 			}
 			if( ! empty( $row['style'][ 'mobile_padding' ] ) ) {
-				$css->add_row_css( $post_id, $i, '.panel-row-style', array(
+				$css->add_row_css( $post_id, $i, '> .panel-row-style', array(
 					'padding' => $row['style'][ 'mobile_padding' ]
 				), $mobile_width );
 			}
