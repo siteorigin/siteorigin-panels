@@ -34,7 +34,6 @@ require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
 require_once plugin_dir_path(__FILE__) . 'inc/admin-actions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/learn.php';
 
-if( defined('SITEORIGIN_PANELS_DEV') && SITEORIGIN_PANELS_DEV ) include plugin_dir_path(__FILE__).'inc/debug.php';
 
 /**
  * Hook for activation of Page Builder.
