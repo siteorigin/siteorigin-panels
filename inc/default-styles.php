@@ -8,7 +8,7 @@
 class SiteOrigin_Panels_Default_Styling {
 
 	static function init() {
-		add_action('wp_enqueue_scripts', array( self, 'register_scripts' ), 5);
+		add_action('wp_enqueue_scripts', array( 'SiteOrigin_Panels_Default_Styling', 'register_scripts' ), 5);
 
 		// Adding all the fields
 		add_filter('siteorigin_panels_row_style_fields', array('SiteOrigin_Panels_Default_Styling', 'row_style_fields' ) );
