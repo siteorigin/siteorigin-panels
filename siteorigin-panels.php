@@ -22,9 +22,6 @@ require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
 
-require_once plugin_dir_path(__FILE__) . 'inc/widgets.php';
-require_once plugin_dir_path(__FILE__) . 'inc/plugin-activation.php';
-
 
 class SiteOrigin_Panels {
 
@@ -50,7 +47,7 @@ class SiteOrigin_Panels {
 		}
 
 		// Include the live editor file if we're in live editor mode.
-		if( !empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+		if( ! empty( $_GET[ 'siteorigin_panels_live_editor' ] ) ) {
 			SiteOrigin_Panels_Live_Editor::single();
 		}
 
