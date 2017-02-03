@@ -6,7 +6,8 @@ class SiteOrigin_Panels_Renderer {
 
 	function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
-		$inline_css = null;
+
+		$this->inline_css = null;
 	}
 
 	public static function single() {
@@ -61,7 +62,6 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $panels_data['grids'] as $gi => $grid ) {
 
 			$cell_count = intval( $grid['cells'] );
-			$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
 
 			// Add the cell sizing
 			for ( $i = 0; $i < $cell_count; $i++ ) {
@@ -72,7 +72,7 @@ class SiteOrigin_Panels_Renderer {
 					$width = apply_filters('siteorigin_panels_css_cell_width', $width, $grid, $gi, $cell, $ci - 1, $panels_data, $post_id);
 
 					// Add the width and ensure we have correct formatting for CSS.
-					$css->add_cell_css($post_id, $grid_id, $i, '', array(
+					$css->add_cell_css($post_id, intval( $gi ), $i, '', array(
 						'width' => str_replace(',', '.', $width)
 					));
 				}
@@ -81,7 +81,7 @@ class SiteOrigin_Panels_Renderer {
 			// Add the bottom margin to any grids that aren't the last
 			if($gi != count($panels_data['grids'])-1 || !empty($grid['style']['bottom_margin']) || !empty($panels_margin_bottom_last_row)){
 				// Filter the bottom margin for this row with the arguments
-				$css->add_row_css($post_id, $grid_id, '', array(
+				$css->add_row_css($post_id, intval( $gi ), '', array(
 					'margin-bottom' => apply_filters('siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom.'px', $grid, $gi, $panels_data, $post_id)
 				));
 			}
@@ -89,13 +89,13 @@ class SiteOrigin_Panels_Renderer {
 			$collapse_order = !empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( !is_rtl() ? 'left-top' : 'right-top' );
 
 			if ( $cell_count > 1 ) {
-				$css->add_cell_css($post_id, $grid_id, false, '', array(
+				$css->add_cell_css($post_id, intval( $gi ), false, '', array(
 					// Float right for RTL
 					'float' => $collapse_order == 'left-top' ? 'left' : 'right'
 				) );
 			}
 			else {
-				$css->add_cell_css($post_id, $grid_id, false, '', array(
+				$css->add_cell_css($post_id, intval( $gi ), false, '', array(
 					// Float right for RTL
 					'float' => 'none'
 				) );
@@ -105,20 +105,20 @@ class SiteOrigin_Panels_Renderer {
 
 				if( $settings['tablet-layout'] && $cell_count >= 3  && $panels_tablet_width > $panels_mobile_width ) {
 					// Tablet Responsive
-					$css->add_cell_css($post_id, $grid_id, false, '', array(
+					$css->add_cell_css($post_id, intval( $gi ), false, '', array(
 						'width' => '50%'
 					), $panels_tablet_width);
 				}
 
 				// Mobile Responsive
-				$css->add_cell_css($post_id, $grid_id, false, '', array(
+				$css->add_cell_css($post_id, intval( $gi ), false, '', array(
 					'float' => 'none',
 					'width' => 'auto'
 				), $panels_mobile_width);
 
 				for ( $i = 0; $i < $cell_count; $i++ ) {
 					if ( ( $collapse_order == 'left-top' && $i != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $i !== 0 ) ) {
-						$css->add_cell_css($post_id, $grid_id, $i, '', array(
+						$css->add_cell_css($post_id, intval( $gi ), $i, '', array(
 							'margin-bottom' => $panels_margin_bottom . 'px',
 						), $panels_mobile_width);
 					}
@@ -158,8 +158,6 @@ class SiteOrigin_Panels_Renderer {
 
 		// Let other plugins customize various aspects of the rows (grids)
 		foreach ( $panels_data['grids'] as $gi => $grid ) {
-			$grid_id = !empty( $grid['style']['id'] ) ? (string) sanitize_html_class( $grid['style']['id'] ) : intval( $gi );
-
 			// Let other themes and plugins change the gutter.
 			$gutter = apply_filters('siteorigin_panels_css_row_gutter', $settings['margin-sides'].'px', $grid, $gi, $panels_data);
 
@@ -168,11 +166,11 @@ class SiteOrigin_Panels_Renderer {
 				preg_match('/([0-9\.,]+)(.*)/', $gutter, $match);
 				if( !empty( $match[1] ) ) {
 					$margin_half = (floatval($match[1])/2) . $match[2];
-					$css->add_row_css($post_id, $grid_id, '', array(
+					$css->add_row_css($post_id, intval( $gi ), '', array(
 						'margin-left' => '-' . $margin_half,
 						'margin-right' => '-' . $margin_half,
 					) );
-					$css->add_cell_css($post_id, $grid_id, false, '', array(
+					$css->add_cell_css($post_id, intval( $gi ), false, '', array(
 						'padding-left' => $margin_half,
 						'padding-right' => $margin_half,
 					) );
@@ -311,12 +309,9 @@ class SiteOrigin_Panels_Renderer {
 		}
 		echo '>';
 
-		global $siteorigin_panels_inline_css;
-		if( empty($siteorigin_panels_inline_css) ) $siteorigin_panels_inline_css = array();
-
-		if( $enqueue_css && !isset($siteorigin_panels_inline_css[$post_id]) ) {
+		if( $enqueue_css && !isset( $this->inline_css[ $post_id ] ) ) {
 			wp_enqueue_style('siteorigin-panels-front');
-			$siteorigin_panels_inline_css[$post_id] = $this->generate_css($post_id, $panels_data);
+			$this->add_inline_css( $post_id,  $this->generate_css( $post_id, $panels_data ) );
 		}
 
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
@@ -324,11 +319,10 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $grids as $gi => $cells ) {
 
 			$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $panels_data['grids'][$gi] );
-			$grid_id = !empty($panels_data['grids'][$gi]['style']['id']) ? sanitize_html_class( $panels_data['grids'][$gi]['style']['id'] ) : false;
 
 			$grid_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
 				'class' => implode( ' ', $grid_classes ),
-				'id' => !empty($grid_id) ? $grid_id : 'pg-' . $post_id . '-' . $gi,
+				'id' => 'pg-' . $post_id . '-' . $gi,
 			), $panels_data['grids'][$gi] );
 
 			// This allows other themes and plugins to add html before the row
@@ -367,7 +361,7 @@ class SiteOrigin_Panels_Renderer {
 				$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
 				$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 					'class' => implode( ' ', $cell_classes ),
-					'id' => 'pgc-' . $post_id . '-' . ( !empty($grid_id) ? $grid_id : $gi )  . '-' . $ci
+					'id' => 'pgc-' . $post_id . '-' . $gi  . '-' . $ci
 				), $panels_data );
 
 				echo '<div ';
@@ -543,11 +537,12 @@ class SiteOrigin_Panels_Renderer {
 			$the_css = '';
 			foreach( $this->inline_css as $post_id => $css ) {
 				if( empty($css) ) continue;
-
 				$the_css .= '/* Layout ' . esc_attr($post_id) . ' */ ';
 				$the_css .= $css;
-				unset( $this->inline_css[ $post_id ] );
 			}
+
+			// Reset the inline CSS
+			$this->inline_css = null;
 
 			if( ! empty( $the_css ) ) {
 				?><style type="text/css" media="all" id="siteorigin-panels-grids-<?php echo esc_attr( current_filter() ) ?>"><?php echo $the_css ?></style><?php
