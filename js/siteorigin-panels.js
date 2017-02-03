@@ -18,22 +18,8 @@ module.exports = Backbone.Collection.extend( {
 		} );
 
 		return totalWeight;
-	},
-
-	visualSortComparator: function ( item ) {
-		if ( ! _.isNull( item.indexes ) ) {
-			return item.indexes.builder;
-		} else {
-			return null;
-		}
-	},
-
-	visualSort: function(){
-		var oldComparator = this.comparator;
-		this.comparator = this.visualSortComparator;
-		this.sort();
-		this.comparator = oldComparator;
 	}
+
 } );
 
 },{}],2:[function(require,module,exports){
@@ -126,22 +112,8 @@ module.exports = Backbone.Collection.extend( {
 
 			model.destroy();
 		} while ( true );
-	},
-
-	visualSortComparator: function ( item ) {
-		if ( ! _.isNull( item.indexes ) ) {
-			return item.indexes.builder;
-		} else {
-			return null;
-		}
-	},
-
-	visualSort: function(){
-		var oldComparator = this.comparator;
-		this.comparator = this.visualSortComparator;
-		this.sort();
-		this.comparator = oldComparator;
 	}
+
 } );
 
 },{}],4:[function(require,module,exports){
@@ -152,21 +124,6 @@ module.exports = Backbone.Collection.extend( {
 
 	initialize: function () {
 
-	},
-
-	visualSortComparator: function ( item ) {
-		if ( ! _.isNull( item.indexes ) ) {
-			return item.indexes.builder;
-		} else {
-			return null;
-		}
-	},
-
-	visualSort: function(){
-		var oldComparator = this.comparator;
-		this.comparator = this.visualSortComparator;
-		this.sort();
-		this.comparator = oldComparator;
 	}
 
 } );
@@ -2501,6 +2458,7 @@ module.exports = Backbone.Model.extend( {
 	 * Triggered when we destroy a cell
 	 */
 	onDestroy: function () {
+		// Destroy all the widgets
 		_.invoke( this.widgets.toArray(), 'destroy' );
 		this.widgets.reset();
 	},
@@ -2581,7 +2539,8 @@ module.exports = Backbone.Model.extend( {
 				cell.row = thisModel;
 				thisModel.cells.add( cell );
 			} );
-		} else {
+		}
+		else {
 
 			if ( cells.length > this.cells.length ) {
 				// We need to add cells
@@ -2602,7 +2561,7 @@ module.exports = Backbone.Model.extend( {
 				_.each( this.cells.slice( cells.length, this.cells.length ), function ( cell ) {
 					var widgetsToMove = cell.widgets.models.slice( 0 );
 					for ( var i = 0; i < widgetsToMove.length; i ++ ) {
-						widgetsToMove[i].moveToCell( newParentCell, {silent: false} );
+						widgetsToMove[i].moveToCell( newParentCell, { silent: false } );
 					}
 
 					// First move all the widgets to the new cell
@@ -2731,23 +2690,25 @@ module.exports = Backbone.Model.extend( {
 	 * Move this widget model to a new cell. Called by the views.
 	 *
 	 * @param panels.model.cell newCell
+	 * @param object options The options passed to the
 	 *
-	 * @return bool Indicating if the widget was moved into a different cell
+	 * @return boolean Indicating if the widget was moved into a different cell
 	 */
-	moveToCell: function ( newCell, options ) {
+	moveToCell: function ( newCell, options, at ) {
 		options = _.extend( {
-			silent: true
+			silent: true,
 		}, options );
-
-		if ( this.cell.cid === newCell.cid ) {
-			return false;
-		}
 
 		this.cell = newCell;
 		this.collection.remove( this, options );
-		newCell.widgets.add( this, options );
+		newCell.widgets.add( this, _.extend( {
+			at: at
+		}, options ) );
 
-		return true;
+		// This should be used by views to reposition everything.
+		this.trigger( 'move_to_cell', newCell, at );
+
+		return this;
 	},
 
 	/**
@@ -3231,6 +3192,7 @@ module.exports = Backbone.View.extend( {
 			builderSupports : {}
 		}, options.config);
 
+		// These are the actions that a user can perform in the builder
 		this.config.builderSupports = _.extend( {
 			addRow: true,
 			editRow: true,
@@ -3534,11 +3496,21 @@ module.exports = Backbone.View.extend( {
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,
-			stop: function ( e ) {
+			stop: function ( e, ui ) {
 				builderView.addHistoryEntry( 'row_moved' );
 
-				// Sort the rows collection after updating all the indexes.
-				builderView.sortCollections();
+				var $$ =  $( ui.item ),
+					row = $$.data( 'view' );
+
+				builderView.model.rows.remove( row.model, {
+					'silent' : true
+				} );
+				builderView.model.rows.add( row.model, {
+					'silent' : true,
+					'at' : $$.index()
+				} );
+
+				row.trigger( 'move', $$.index() );
 			}
 		} );
 
@@ -3579,7 +3551,6 @@ module.exports = Backbone.View.extend( {
 			this.model.loadPanelsData( data );
 			this.currentData = data;
 			this.toggleWelcomeDisplay();
-			this.sortCollections();
 		}
 
 		return this;
@@ -3700,52 +3671,6 @@ module.exports = Backbone.View.extend( {
 		}
 
 		return activeCell.data( 'view' ).model;
-	},
-
-	/**
-	 * Sort all widget and row collections based on their dom position
-	 */
-	sortCollections: function () {
-
-		// Give the widgets their indexes
-		this.$( '.so-widget' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-				cell: $$.index()
-			};
-		} );
-
-		// Give the cells their indexes
-		this.$( '.so-cells .cell' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-				row: $$.index()
-			};
-		} );
-
-		// Give the rows their indexes
-		this.$( '.so-row-container' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-			};
-		} );
-
-
-		// Sort the rows by their visual index
-		this.model.rows.visualSort();
-
-		// Sort the widget collections by their visual index
-		this.model.rows.each( function ( row ) {
-			row.cells.each( function ( cell ) {
-				cell.widgets.visualSort();
-			} );
-		} );
-
-		// Update the builder model to reflect the newly ordered data.
-		this.model.refreshPanelsData();
 	},
 
 	/**
@@ -3988,6 +3913,10 @@ module.exports = Backbone.View.extend( {
 		}
 	},
 
+	/**
+	 * Either add or remove the narrow class
+	 * @returns {exports}
+	 */
 	handleBuilderSizing: function () {
 		var width = this.$el.width();
 
@@ -4001,6 +3930,7 @@ module.exports = Backbone.View.extend( {
 			this.$el.removeClass( 'so-display-narrow' );
 		}
 
+		return this;
 	},
 
 	/**
@@ -4116,6 +4046,13 @@ module.exports = Backbone.View.extend( {
 				window.scrollTo( scrollPosition[0], scrollPosition[1] );
 			}
 		}
+	},
+
+	/**
+	 *
+	 */
+	syncWithModel: function(){
+
 	}
 
 } );
@@ -4191,14 +4128,13 @@ module.exports = Backbone.View.extend( {
 			stop: function ( e, ui ) {
 				cellView.row.builder.addHistoryEntry( 'widget_moved' );
 
-				var widget = $( ui.item ).data( 'view' );
-				var targetCell = $( ui.item ).closest( '.cell' ).data( 'view' );
+				var $$ =  $( ui.item ),
+					widget = $$.data( 'view' ),
+					targetCell = $$.closest( '.cell' ).data( 'view' );
 
 				// Move the model and the view to the new cell
-				widget.model.moveToCell( targetCell.model );
+				widget.model.moveToCell( targetCell.model, {}, $$.index() );
 				widget.cell = targetCell;
-
-				cellView.row.builder.sortCollections();
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()

@@ -38,7 +38,8 @@ module.exports = Backbone.Model.extend( {
 				cell.row = thisModel;
 				thisModel.cells.add( cell );
 			} );
-		} else {
+		}
+		else {
 
 			if ( cells.length > this.cells.length ) {
 				// We need to add cells
@@ -59,7 +60,7 @@ module.exports = Backbone.Model.extend( {
 				_.each( this.cells.slice( cells.length, this.cells.length ), function ( cell ) {
 					var widgetsToMove = cell.widgets.models.slice( 0 );
 					for ( var i = 0; i < widgetsToMove.length; i ++ ) {
-						widgetsToMove[i].moveToCell( newParentCell, {silent: false} );
+						widgetsToMove[i].moveToCell( newParentCell, { silent: false } );
 					}
 
 					// First move all the widgets to the new cell
