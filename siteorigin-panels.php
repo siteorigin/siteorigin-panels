@@ -18,8 +18,7 @@ if ( ! defined('SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 define('SITEORIGIN_PANELS_VERSION_SUFFIX', '');
 define('SITEORIGIN_PANELS_BASE_FILE', __FILE__);
 
-// All the basic settings
-require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
+require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
 
 // Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
@@ -48,8 +47,8 @@ class SiteOrigin_Panels {
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 
-		SiteOrigin_Panels_Settings::single();
 		if( is_admin() ) {
+			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Admin::single();
 		}
 	}
