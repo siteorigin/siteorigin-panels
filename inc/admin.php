@@ -138,7 +138,7 @@ class SiteOrigin_Panels_Admin {
 		else {
 			// When previewing, we don't need to wp_unslash the panels_data post variable.
 			$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
-			$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
+			$panels_data['widgets'] = $this->process_raw_widgets($panels_data['widgets']);
 			$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 			$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
@@ -452,7 +452,7 @@ class SiteOrigin_Panels_Admin {
 
 		// Save the updated page data
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
-		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
+		$panels_data['widgets'] = $this->process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
@@ -566,7 +566,7 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * @return array
 	 */
-	function siteorigin_panels_process_raw_widgets($widgets) {
+	function process_raw_widgets($widgets) {
 		if( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -750,9 +750,9 @@ class SiteOrigin_Panels_Admin {
 
 		// echo the content
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true);
-		$panels_data['widgets'] = siteorigin_panels_process_raw_widgets($panels_data['widgets']);
+		$panels_data['widgets'] = $this->process_raw_widgets($panels_data['widgets']);
 		$panels_data = siteorigin_panels_styles_sanitize_all( $panels_data );
-		echo siteorigin_panels_render( intval($_POST['post_id']), false, $panels_data );
+		echo SiteOrigin_Panels_Renderer::single()->render( intval($_POST['post_id']), false, $panels_data );
 
 		wp_die();
 	}

@@ -5,14 +5,7 @@ class SiteOrigin_Panels_Renderer {
 	private $inline_css;
 
 	function __construct() {
-		// Register the autoloader
-		spl_autoload_register ( array( $this, 'autoloader' ) );
-
-		add_action('plugins_loaded', array( $this, 'init' ) );
-		add_action('admin_menu', array( $this, 'admin_menu' ) );
-
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
-
 		$inline_css = null;
 	}
 
@@ -323,7 +316,7 @@ class SiteOrigin_Panels_Renderer {
 
 		if( $enqueue_css && !isset($siteorigin_panels_inline_css[$post_id]) ) {
 			wp_enqueue_style('siteorigin-panels-front');
-			$siteorigin_panels_inline_css[$post_id] = siteorigin_panels_generate_css($post_id, $panels_data);
+			$siteorigin_panels_inline_css[$post_id] = $this->generate_css($post_id, $panels_data);
 		}
 
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
@@ -571,7 +564,7 @@ class SiteOrigin_Panels_Renderer {
 
 		if( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
 			wp_enqueue_style('siteorigin-panels-front');
-			$this->add_inline_css( get_the_ID(), siteorigin_panels_generate_css( get_the_ID() ) );
+			$this->add_inline_css( get_the_ID(), $this->generate_css( get_the_ID() ) );
 		}
 	}
 }
