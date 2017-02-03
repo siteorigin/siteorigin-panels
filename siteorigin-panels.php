@@ -72,7 +72,7 @@ class SiteOrigin_Panels {
 		}
 	}
 
-	public function activate(){
+	public static function activate(){
 		add_option('siteorigin_panels_initial_version', SITEORIGIN_PANELS_VERSION, '', 'no');
 	}
 
