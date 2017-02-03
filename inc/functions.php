@@ -52,3 +52,7 @@ function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $p
 function siteorigin_panels_setting($key = ''){
 	return SiteOrigin_Panels_Settings::single()->get($key);
 }
+
+function siteorigin_panels_plugin_activation_install_url($plugin, $plugin_name, $source = false){
+	return SiteOrigin_Panels_Admin_Widgets_Bundle::install_url( $plugin, $plugin_name, $source );
+}
