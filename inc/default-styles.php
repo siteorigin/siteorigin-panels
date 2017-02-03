@@ -1,18 +1,6 @@
 <?php
 
 /**
- * Register the custom styles scripts
- */
-function siteorigin_panels_default_styles_register_scripts(){
-	wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
-	wp_register_script( 'siteorigin-parallax', plugin_dir_url(SITEORIGIN_PANELS_BASE_FILE) . 'js/siteorigin-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
-	wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
-		'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
-	) );
-}
-add_action('wp_enqueue_scripts', 'siteorigin_panels_default_styles_register_scripts', 5);
-
-/**
  * Class for handling all the default styling.
  *
  * Class SiteOrigin_Panels_Default_Styling
@@ -20,6 +8,8 @@ add_action('wp_enqueue_scripts', 'siteorigin_panels_default_styles_register_scri
 class SiteOrigin_Panels_Default_Styling {
 
 	static function init() {
+		add_action('wp_enqueue_scripts', array( self, 'register_scripts' ), 5);
+
 		// Adding all the fields
 		add_filter('siteorigin_panels_row_style_fields', array('SiteOrigin_Panels_Default_Styling', 'row_style_fields' ) );
 		add_filter('siteorigin_panels_widget_style_fields', array('SiteOrigin_Panels_Default_Styling', 'widget_style_fields' ) );
@@ -35,6 +25,14 @@ class SiteOrigin_Panels_Default_Styling {
 		// Filtering specific attributes
 		add_filter('siteorigin_panels_css_row_margin_bottom', array('SiteOrigin_Panels_Default_Styling', 'filter_row_bottom_margin' ), 10, 2);
 		add_filter('siteorigin_panels_css_row_gutter', array('SiteOrigin_Panels_Default_Styling', 'filter_row_gutter' ), 10, 2);
+	}
+
+	static function register_scripts(){
+		wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url( __FILE__ ) . '../js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+		wp_register_script( 'siteorigin-parallax', plugin_dir_url( __FILE__ ) . '../js/siteorigin-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array('jquery'), SITEORIGIN_PANELS_VERSION );
+		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
+			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting('full-width-container') )
+		) );
 	}
 
 	static function row_style_fields($fields) {
