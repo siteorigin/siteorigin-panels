@@ -37,6 +37,7 @@ module.exports = Backbone.View.extend( {
 			builderSupports : {}
 		}, options.config);
 
+		// These are the actions that a user can perform in the builder
 		this.config.builderSupports = _.extend( {
 			addRow: true,
 			editRow: true,
@@ -340,11 +341,21 @@ module.exports = Backbone.View.extend( {
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,
-			stop: function ( e ) {
+			stop: function ( e, ui ) {
 				builderView.addHistoryEntry( 'row_moved' );
 
-				// Sort the rows collection after updating all the indexes.
-				builderView.sortCollections();
+				var $$ =  $( ui.item ),
+					row = $$.data( 'view' );
+
+				builderView.model.rows.remove( row.model, {
+					'silent' : true
+				} );
+				builderView.model.rows.add( row.model, {
+					'silent' : true,
+					'at' : $$.index()
+				} );
+
+				row.trigger( 'move', $$.index() );
 			}
 		} );
 
@@ -385,7 +396,6 @@ module.exports = Backbone.View.extend( {
 			this.model.loadPanelsData( data );
 			this.currentData = data;
 			this.toggleWelcomeDisplay();
-			this.sortCollections();
 		}
 
 		return this;
@@ -506,52 +516,6 @@ module.exports = Backbone.View.extend( {
 		}
 
 		return activeCell.data( 'view' ).model;
-	},
-
-	/**
-	 * Sort all widget and row collections based on their dom position
-	 */
-	sortCollections: function () {
-
-		// Give the widgets their indexes
-		this.$( '.so-widget' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-				cell: $$.index()
-			};
-		} );
-
-		// Give the cells their indexes
-		this.$( '.so-cells .cell' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-				row: $$.index()
-			};
-		} );
-
-		// Give the rows their indexes
-		this.$( '.so-row-container' ).each( function ( i ) {
-			var $$ = $( this );
-			$$.data( 'view' ).model.indexes = {
-				builder: i,
-			};
-		} );
-
-
-		// Sort the rows by their visual index
-		this.model.rows.visualSort();
-
-		// Sort the widget collections by their visual index
-		this.model.rows.each( function ( row ) {
-			row.cells.each( function ( cell ) {
-				cell.widgets.visualSort();
-			} );
-		} );
-
-		// Update the builder model to reflect the newly ordered data.
-		this.model.refreshPanelsData();
 	},
 
 	/**
@@ -794,6 +758,10 @@ module.exports = Backbone.View.extend( {
 		}
 	},
 
+	/**
+	 * Either add or remove the narrow class
+	 * @returns {exports}
+	 */
 	handleBuilderSizing: function () {
 		var width = this.$el.width();
 
@@ -807,6 +775,7 @@ module.exports = Backbone.View.extend( {
 			this.$el.removeClass( 'so-display-narrow' );
 		}
 
+		return this;
 	},
 
 	/**
@@ -922,6 +891,13 @@ module.exports = Backbone.View.extend( {
 				window.scrollTo( scrollPosition[0], scrollPosition[1] );
 			}
 		}
+	},
+
+	/**
+	 *
+	 */
+	syncWithModel: function(){
+
 	}
 
 } );

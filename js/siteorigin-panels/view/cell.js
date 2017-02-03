@@ -68,14 +68,13 @@ module.exports = Backbone.View.extend( {
 			stop: function ( e, ui ) {
 				cellView.row.builder.addHistoryEntry( 'widget_moved' );
 
-				var widget = $( ui.item ).data( 'view' );
-				var targetCell = $( ui.item ).closest( '.cell' ).data( 'view' );
+				var $$ =  $( ui.item ),
+					widget = $$.data( 'view' ),
+					targetCell = $$.closest( '.cell' ).data( 'view' );
 
 				// Move the model and the view to the new cell
-				widget.model.moveToCell( targetCell.model );
+				widget.model.moveToCell( targetCell.model, {}, $$.index() );
 				widget.cell = targetCell;
-
-				cellView.row.builder.sortCollections();
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()

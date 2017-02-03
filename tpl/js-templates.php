@@ -38,7 +38,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<?php endif; ?>
 
-			<?php if( siteorigin_panels_display_premium_teaser() ) : ?>
+			<?php if( SiteOrigin_Panels_Admin::display_teaser() ) : ?>
 				<a class="so-tool-button so-siteorigin-premium" title="<?php echo esc_attr_e( 'SiteOrigin Premium Addons', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( siteorigin_panels_premium_url() ) ?>" target="_blank">
 					<span class="so-panels-icon so-panels-icon-arrow-up"></span>
 					<span class="so-button-text"><?php echo esc_html_e( 'Get Addons', 'siteorigin-panels' ) ?></span>
@@ -507,7 +507,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo siteorigin_panels_live_editor_preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
+			<form method="post" action="<?php echo SiteOrigin_Panels::preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
 				<input type="hidden" name="live_editor_panels_data" value="">
 			</form>
 			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid %}}" src=""></iframe>

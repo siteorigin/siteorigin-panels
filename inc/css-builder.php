@@ -21,18 +21,24 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param array $attributes
 	 * @param int $resolution The pixel resolution that this applies to
 	 */
-	public function add_css($selector, $attributes, $resolution = 1920) {
+	public function add_css( $selector, $attributes, $resolution = 1920 ) {
 		$attribute_string = array();
-		foreach( $attributes as $k => $v ) {
-			if( empty( $v ) ) continue;
-			$attribute_string[] = $k.':'.$v;
+		foreach ( $attributes as $k => $v ) {
+			if ( empty( $v ) ) {
+				continue;
+			}
+			$attribute_string[] = $k . ':' . $v;
 		}
-		$attribute_string = implode(';', $attribute_string);
+		$attribute_string = implode( ';', $attribute_string );
 
 		// Add everything we need to the CSS selector
-		if( empty( $this->css[$resolution] ) ) $this->css[$resolution] = array();
-		if( empty( $this->css[$resolution][$attribute_string] ) ) $this->css[$resolution][$attribute_string] = array();
-		$this->css[$resolution][$attribute_string][] = $selector;
+		if ( empty( $this->css[ $resolution ] ) ) {
+			$this->css[ $resolution ] = array();
+		}
+		if ( empty( $this->css[ $resolution ][ $attribute_string ] ) ) {
+			$this->css[ $resolution ][ $attribute_string ] = array();
+		}
+		$this->css[ $resolution ][ $attribute_string ][] = $selector;
 	}
 
 	/**
@@ -45,31 +51,33 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	public function add_row_css($li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
+	public function add_row_css( $li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
-		if( $ri === false ) {
+		if ( $ri === false ) {
 			// This applies to all rows
-			$selector[] = '#pl-'.$li;
+			$selector[] = '#pl-' . $li;
 			$selector[] = '.panel-grid';
-		}
-		else {
+		} else {
 			// This applies to a specific row
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			if( is_string($ri) ) {
-				$selector[] = '#' . $ri;
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
 			}
-			else {
-				$selector[] = '#pg-'.$li.'-'.$ri;
+			if ( is_string( $ri ) ) {
+				$selector[] = '#' . $ri;
+			} else {
+				$selector[] = '#pg-' . $li . '-' . $ri;
 			}
 
 		}
 
 		// Add in the sub selector
-		if( !empty($sub_selector) ) $selector[] = $sub_selector;
+		if ( ! empty( $sub_selector ) ) {
+			$selector[] = $sub_selector;
+		}
 
 		// Add this to the CSS array
-		$this->add_css( implode(' ', $selector), $attributes, $resolution );
+		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
 	}
 
 	/**
@@ -83,33 +91,35 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	public function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false) {
+	public function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
-		if( $ri === false && $ci === false ) {
+		if ( $ri === false && $ci === false ) {
 			// This applies to all cells in the layout
-			$selector[] = '#pl-'.$li;
+			$selector[] = '#pl-' . $li;
 			$selector[] = '.panel-grid-cell';
-		}
-		elseif( $ri !== false && $ci === false ) {
+		} elseif ( $ri !== false && $ci === false ) {
 			// This applies to all cells in a row
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-'.$li.'-'.$ri;
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
+			}
+			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-' . $li . '-' . $ri;
 			$selector[] = '.panel-grid-cell';
-		}
-		elseif( $ri !== false && $ci !== false ) {
+		} elseif ( $ri !== false && $ci !== false ) {
 			// This applies to a specific cell
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
+			}
 			$selector[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
 		}
 
 		// Add in the sub selector
-		if( !empty($sub_selector) ) {
+		if ( ! empty( $sub_selector ) ) {
 			$selector[] = $sub_selector;
 		}
 
 		// Add this to the CSS array
-		$this->add_css( implode(' ', $selector), $attributes, $resolution );
+		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
 	}
 
 	/**
@@ -127,46 +137,51 @@ class SiteOrigin_Panels_Css_Builder {
 	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector, $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
-		if( $ri === false && $ci === false && $wi === false ) {
+		if ( $ri === false && $ci === false && $wi === false ) {
 			// This applies to all widgets in the layout
-			$selector[] = '#pl-'.$li;
+			$selector[] = '#pl-' . $li;
 			$selector[] = '.so-panel';
-		}
-		else if( $ri !== false && $ci === false && $wi === false ) {
+		} else if ( $ri !== false && $ci === false && $wi === false ) {
 			// This applies to all widgets in a row
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
-			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-'.$li.'-'.$ri;
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
+			}
+			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-' . $li . '-' . $ri;
 			$selector[] = '.so-panel';
-		}
-		else if( $ri !== false && $ci !== false && $wi === false ) {
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
+		} else if ( $ri !== false && $ci !== false && $wi === false ) {
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
+			}
 			$selector[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
 			$selector[] = '.so-panel';
-		}
-		else {
+		} else {
 			// This applies to a specific widget
-			if( $specify_layout ) $selector[] = '#pl-'.$li;
+			if ( $specify_layout ) {
+				$selector[] = '#pl-' . $li;
+			}
 			$selector[] = '#panel-' . $li . '-' . $ri . '-' . $ci . '-' . $wi;
 		}
 
 		// Add in the sub selector
-		if( !empty($sub_selector) ) {
+		if ( ! empty( $sub_selector ) ) {
 			$selector[] = $sub_selector;
 		}
 
 		// Add this to the CSS array
-		$this->add_css( implode(' ', $selector), $attributes, $resolution );
+		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
 	}
 
 	/**
 	 * Gets the CSS for this particular layout.
 	 */
-	public function get_css(){
+	public function get_css() {
 		// Build actual CSS from the array
 		$css_text = '';
 		krsort( $this->css );
 		foreach ( $this->css as $res => $def ) {
-			if ( empty( $def ) ) continue;
+			if ( empty( $def ) ) {
+				continue;
+			}
 
 			if ( $res < 1920 ) {
 				$css_text .= '@media (max-width:' . $res . 'px)';
@@ -178,7 +193,9 @@ class SiteOrigin_Panels_Css_Builder {
 				$css_text .= implode( ' , ', $selector ) . ' { ' . $property . ' } ';
 			}
 
-			if ( $res < 1920 ) $css_text .= ' } ';
+			if ( $res < 1920 ) {
+				$css_text .= ' } ';
+			}
 		}
 
 		return $css_text;

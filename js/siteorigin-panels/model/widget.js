@@ -54,23 +54,25 @@ module.exports = Backbone.Model.extend( {
 	 * Move this widget model to a new cell. Called by the views.
 	 *
 	 * @param panels.model.cell newCell
+	 * @param object options The options passed to the
 	 *
-	 * @return bool Indicating if the widget was moved into a different cell
+	 * @return boolean Indicating if the widget was moved into a different cell
 	 */
-	moveToCell: function ( newCell, options ) {
+	moveToCell: function ( newCell, options, at ) {
 		options = _.extend( {
-			silent: true
+			silent: true,
 		}, options );
-
-		if ( this.cell.cid === newCell.cid ) {
-			return false;
-		}
 
 		this.cell = newCell;
 		this.collection.remove( this, options );
-		newCell.widgets.add( this, options );
+		newCell.widgets.add( this, _.extend( {
+			at: at
+		}, options ) );
 
-		return true;
+		// This should be used by views to reposition everything.
+		this.trigger( 'move_to_cell', newCell, at );
+
+		return this;
 	},
 
 	/**
