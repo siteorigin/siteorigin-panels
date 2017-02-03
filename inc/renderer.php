@@ -544,8 +544,22 @@ class SiteOrigin_Panels_Renderer {
 			// Reset the inline CSS
 			$this->inline_css = null;
 
+			switch( current_filter() ) {
+				case 'wp_head' :
+					$css_id = 'head';
+					break;
+
+				case 'wp_footer' :
+					$css_id = 'footer';
+					break;
+
+				default :
+					$css_id = sanitize_html_class( current_filter() );
+					break;
+			}
+
 			if( ! empty( $the_css ) ) {
-				?><style type="text/css" media="all" id="siteorigin-panels-grids-<?php echo esc_attr( current_filter() ) ?>"><?php echo $the_css ?></style><?php
+				?><style type="text/css" media="all" id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
 			}
 		}
 	}
