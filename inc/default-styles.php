@@ -5,7 +5,7 @@
  *
  * Class SiteOrigin_Panels_Default_Styling
  */
-class SiteOrigin_Panels_Default_Styling {
+class SiteOrigin_Panels_Default_Styles {
 
 	static function init() {
 		add_action('wp_enqueue_scripts', array( 'SiteOrigin_Panels_Default_Styling', 'register_scripts' ), 5);
@@ -501,5 +501,3 @@ class SiteOrigin_Panels_Default_Styling {
 	}
 
 }
-
-SiteOrigin_Panels_Default_Styling::init();

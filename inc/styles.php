@@ -408,4 +408,5 @@ class SiteOrigin_Panels_Styles {
 	}
 }
 
-require_once plugin_dir_path(__FILE__) . 'default-styles.php';
+// Initialise all the default styling
+SiteOrigin_Panels_Default_Styles::init();
