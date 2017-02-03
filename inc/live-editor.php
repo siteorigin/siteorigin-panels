@@ -1,35 +1,6 @@
 <?php
 
-<<<<<<< HEAD
-/**
- * Edit the page builder data when we're viewing the live editor version
- *
- * @param $value
- * @param $post_id
- * @param $meta_key
- *
- * @return array
- */
-function siteorigin_panels_live_editor($value, $post_id, $meta_key){
-	global $post;
 
-	if(
-		$meta_key == 'panels_data' &&
-		current_user_can( 'edit_post', $post_id ) &&
-		! empty( $_POST['live_editor_panels_data'] ) &&
-		( empty( $_POST['live_editor_post_ID'] ) || empty( $post ) || $_POST['live_editor_post_ID'] == $post->ID )
-
-	) {
-		$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
-
-		if(
-			!empty( $data['widgets'] ) && (
-				!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
-				method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
-			)
-		) {
-			$data['widgets'] = siteorigin_panels_process_raw_widgets( $data['widgets'] );
-=======
 class SiteOrigin_Panels_Live_Editor {
 
 	function __construct(){
@@ -68,7 +39,6 @@ class SiteOrigin_Panels_Live_Editor {
 			}
 
 			$value = array( $data );
->>>>>>> 4acf2f6... Live Editor refactor and fix
 		}
 
 		return $value;
