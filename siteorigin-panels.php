@@ -18,10 +18,7 @@ if ( ! defined('SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 define('SITEORIGIN_PANELS_VERSION_SUFFIX', '');
 
 require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
-
-// Include all the basic widgets
 require_once plugin_dir_path(__FILE__) . 'widgets/basic.php';
-
 
 class SiteOrigin_Panels {
 
