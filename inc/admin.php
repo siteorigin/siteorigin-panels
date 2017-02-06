@@ -395,7 +395,7 @@ class SiteOrigin_Panels_Admin {
 	 * Display the content for the help tab.
 	 */
 	function help_tab_content() {
-		include plugin_dir_path( __FILE__ ) . 'tpl/help.php';
+		include plugin_dir_path( __FILE__ ) . '../tpl/help.php';
 	}
 
 	/**
