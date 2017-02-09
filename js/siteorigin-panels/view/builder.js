@@ -187,7 +187,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.builder}
 	 */
 	attachToEditor: function () {
-		if ( this.config.editorType !== 'tinymce' ) {
+		if ( this.config.editorType !== 'tinyMCE' ) {
 			return this;
 		}
 
@@ -624,19 +624,6 @@ module.exports = Backbone.View.extend( {
 						post_id: this.config.postId
 					},
 					function ( content ) {
-
-						// Strip all the known layout divs
-						var t = $( '<div />' ).html( content );
-						t.find( 'div' ).each( function () {
-							var c = $( this ).contents();
-							$( this ).replaceWith( c );
-						} );
-
-						content = t.html()
-							.replace( /[\r\n]+/g, "\n" )
-							.replace( /\n\s+/g, "\n" )
-							.trim();
-
 						if( content !== '' ) {
 							this.updateEditorContent( content );
 						}

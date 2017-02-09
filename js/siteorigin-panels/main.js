@@ -84,7 +84,7 @@ jQuery( function ( $ ) {
 		form = $( 'form#post' );
 
 		builderConfig = {
-			editorType: 'tinymce',
+			editorType: 'tinyMCE',
 			postId: $( '#post_ID' ).val(),
 			editorId: '#content',
 			builderType: $( '#siteorigin-panels-metabox' ).data( 'builder-type' ),
