@@ -39,6 +39,17 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 	SiteOrigin_Panels_Renderer::single()->render( $post_id, $enqueue_css, $panels_data );
 }
 
+/**
+ * Legacy function to process raw widgets.
+ *
+ * @param $widgets
+ *
+ * @return array
+ */
+function siteorigin_panels_process_raw_widgets( $widgets ) {
+	return SiteOrigin_Panels_Admin::single()->process_raw_widgets( $widgets );
+}
+
 function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
 	SiteOrigin_Panels_Renderer::single()->the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id, $style_wrapper );
 }

@@ -31,7 +31,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
 
 		echo $args['before_widget'];
-		echo siteorigin_panels_render( 'w'.$instance['builder_id'], true, $instance['panels_data'] );
+		echo SiteOrigin_Panels_Renderer::single()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'] );
 		echo $args['after_widget'];
 	}
 
