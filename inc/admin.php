@@ -767,11 +767,25 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * @return bool
 	 */
-	static function display_teaser() {
+	public static function display_teaser() {
 		return
 			siteorigin_panels_setting( 'display-teaser' ) &&
 			apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
 			! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function premium_url(){
+		$ref = apply_filters( 'siteorigin_premium_affiliate_id', '' );
+		$url = 'https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels';
+
+		if( $ref ) {
+			$url = add_query_arg( 'ref', urlencode( $ref ), $url );
+		}
+
+		return $url;
 	}
 
 
