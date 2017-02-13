@@ -34,9 +34,11 @@ function siteorigin_panels_get_home_page_data() {
  * @param bool $post_id
  * @param bool $enqueue_css
  * @param bool $panels_data
+ *
+ * @return string The HTML content.
  */
 function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panels_data = false ) {
-	SiteOrigin_Panels_Renderer::single()->render( $post_id, $enqueue_css, $panels_data );
+	return SiteOrigin_Panels_Renderer::single()->render( $post_id, $enqueue_css, $panels_data );
 }
 
 /**
