@@ -89,9 +89,10 @@ class SiteOrigin_Panels_Renderer {
 			if ( $settings['responsive'] ) {
 
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
-					// TODO figure out how to do tablet responsiveness
+					// Tablet responsiveness
 					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-						'width' => '50%'
+						'width' => '50%',
+						'flex-wrap' => 'wrap',
 					), $panels_tablet_width );
 				}
 
