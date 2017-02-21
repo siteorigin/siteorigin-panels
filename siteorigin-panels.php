@@ -334,7 +334,7 @@ class SiteOrigin_Panels {
 				// Filter the widgets to add indexes
 				if ( $widget['panels_info']['grid'] != $last_gi ) {
 					$last_gi = $widget['panels_info']['grid'];
-					$last_ci = 0;
+					$last_ci = $widget['panels_info']['cell'];
 					$last_wi = 0;
 				} elseif ( $widget['panels_info']['cell'] != $last_ci ) {
 					$last_ci = $widget['panels_info']['cell'];

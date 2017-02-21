@@ -249,25 +249,6 @@ class SiteOrigin_Panels_Renderer {
 			return '';
 		}
 
-		// Filter the widgets to add indexes
-		if ( ! empty( $panels_data['widgets'] ) ) {
-			$last_gi = 0;
-			$last_ci = 0;
-			$last_wi = 0;
-			foreach ( $panels_data['widgets'] as $wid => &$widget_info ) {
-
-				if ( $widget_info['panels_info']['grid'] != $last_gi ) {
-					$last_gi = $widget_info['panels_info']['grid'];
-					$last_ci = 0;
-					$last_wi = 0;
-				} elseif ( $widget_info['panels_info']['cell'] != $last_ci ) {
-					$last_ci = $widget_info['panels_info']['cell'];
-					$last_wi = 0;
-				}
-				$widget_info['panels_info']['cell_index'] = $last_wi ++;
-			}
-		}
-
 		// Create the skeleton of the grids
 		$grids = array();
 		if ( ! empty( $panels_data['grids'] ) && ! empty( $panels_data['grids'] ) ) {
