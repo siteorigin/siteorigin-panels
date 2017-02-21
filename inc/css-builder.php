@@ -27,7 +27,7 @@ class SiteOrigin_Panels_Css_Builder {
 			if ( empty( $v ) ) {
 				continue;
 			}
-			$attribute_string[] = $k . ':' . $v;
+			$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v );
 		}
 		$attribute_string = implode( ';', $attribute_string );
 
