@@ -1,21 +1,6 @@
 .panel-grid {
-  zoom: 1;
-}
-.panel-grid:before {
-  content: '';
-  display: block;
-}
-.panel-grid:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-.panel-grid-cell {
-  -ms-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  min-height: 1em;
+  display: flex;
+  flex-wrap: nowrap;
 }
 .panel-grid-cell .so-panel {
   zoom: 1;

@@ -67,17 +67,16 @@ class SiteOrigin_Panels_Renderer {
 				$cell = $panels_data['grid_cells'][ $ci ++ ];
 
 				if ( $cell_count > 1 ) {
-					$width = round( $cell['weight'] * 100, 3 ) . '%';
-					$width = apply_filters( 'siteorigin_panels_css_cell_width', $width, $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
+					$width = apply_filters( 'siteorigin_panels_css_cell_flex_grow', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
 
 					// Add the width and ensure we have correct formatting for CSS.
 					$css->add_cell_css( $post_id, intval( $gi ), $i, '', array(
-						'width' => str_replace( ',', '.', $width )
+						'flex-grow' => $width
 					) );
 				}
 			}
 
-			// Add the bottom margin to any grids that aren't the last
+			// Add the bottom margin to any rows that aren't the last
 			if ( $gi != count( $panels_data['grids'] ) - 1 || ! empty( $grid['style']['bottom_margin'] ) || ! empty( $panels_margin_bottom_last_row ) ) {
 				// Filter the bottom margin for this row with the arguments
 				$css->add_row_css( $post_id, intval( $gi ), '', array(
@@ -102,16 +101,19 @@ class SiteOrigin_Panels_Renderer {
 			if ( $settings['responsive'] ) {
 
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
-					// Tablet Responsive
-					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-						'width' => '50%'
-					), $panels_tablet_width );
+					// TODO figure out how to do tablet responsiveness
+//					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
+//						'flex-grow' => '50%'
+//					), $panels_tablet_width );
 				}
 
 				// Mobile Responsive
+				$css->add_row_css( $post_id, intval( $gi ), '', array(
+					'flex-direction' => 'column',
+				), $panels_mobile_width );
+
 				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					'float' => 'none',
-					'width' => 'auto'
+					'flex-grow' => 1,
 				), $panels_mobile_width );
 
 				for ( $i = 0; $i < $cell_count; $i ++ ) {
@@ -589,7 +591,7 @@ class SiteOrigin_Panels_Renderer {
 		// Register the style to support possible lazy loading
 		wp_register_style( 'siteorigin-panels-front', plugin_dir_url( __FILE__ ) . '../css/front.css', array(), SITEORIGIN_PANELS_VERSION );
 
-		if ( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
+		if ( is_singular() && get_post_meta( get_the_ID(), 'siteorigin_panels_data', true ) != '' ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
 			$this->add_inline_css( get_the_ID(), $this->generate_css( get_the_ID() ) );
 		}
