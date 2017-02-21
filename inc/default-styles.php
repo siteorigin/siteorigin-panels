@@ -159,9 +159,10 @@ class SiteOrigin_Panels_Default_Styles {
 			'type'     => 'select',
 			'group'    => 'layout',
 			'options'  => array(
-				'top'               => __( 'Top', 'siteorigin-panels' ),
-				'center'           => __( 'Center', 'siteorigin-panels' ),
-				'bottom' => __( 'Bottom', 'siteorigin-panels' ),
+				'flex-start' => __( 'Top', 'siteorigin-panels' ),
+				'center'     => __( 'Center', 'siteorigin-panels' ),
+				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
+				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
 			),
 			'priority' => 16,
 		);
@@ -523,27 +524,11 @@ class SiteOrigin_Panels_Default_Styles {
 				), $mobile_width );
 			}
 
+			// Add in flexbox alignment
 			if( ! empty( $row['style'][ 'cell_alignment' ] ) ) {
-
-				$align_items = '';
-
-				switch( $row['style'][ 'cell_alignment' ] ) {
-					case 'top' :
-						$align_items = 'flex-start';
-						break;
-					case 'center' :
-						$align_items = 'center';
-						break;
-					case 'bottom' :
-						$align_items = 'flex-end';
-						break;
-				}
-
-				if( ! empty( $align_items ) ) {
-					$css->add_row_css( $post_id, $i, '', array(
-						'align-items' => $align_items
-					) );
-				}
+				$css->add_row_css( $post_id, $i, '', array(
+					'align-items' => $row['style'][ 'cell_alignment' ]
+				) );
 			}
 		}
 
