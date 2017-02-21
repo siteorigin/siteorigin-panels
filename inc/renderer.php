@@ -67,11 +67,11 @@ class SiteOrigin_Panels_Renderer {
 				$cell = $panels_data['grid_cells'][ $ci ++ ];
 
 				if ( $cell_count > 1 ) {
-					$width = apply_filters( 'siteorigin_panels_css_cell_flex_grow', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
+					$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
 
 					// Add the width and ensure we have correct formatting for CSS.
 					$css->add_cell_css( $post_id, intval( $gi ), $i, '', array(
-						'flex-grow' => $width
+						'width' => round( floatval( $weight ) * 100, 4 ) . '%'
 					) );
 				}
 			}
@@ -102,18 +102,18 @@ class SiteOrigin_Panels_Renderer {
 
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
 					// TODO figure out how to do tablet responsiveness
-//					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-//						'flex-grow' => '50%'
-//					), $panels_tablet_width );
+					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
+						'width' => '50%'
+					), $panels_tablet_width );
 				}
 
 				// Mobile Responsive
 				$css->add_row_css( $post_id, intval( $gi ), '', array(
-					'flex-direction' => 'column',
+					'flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 				), $panels_mobile_width );
 
 				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					'flex-grow' => 1,
+					'width' => 'auto',
 				), $panels_mobile_width );
 
 				for ( $i = 0; $i < $cell_count; $i ++ ) {
