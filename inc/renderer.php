@@ -86,18 +86,6 @@ class SiteOrigin_Panels_Renderer {
 
 			$collapse_order = ! empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
-			if ( $cell_count > 1 ) {
-				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					// Float right for RTL
-					'float' => $collapse_order == 'left-top' ? 'left' : 'right'
-				) );
-			} else {
-				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					// Float right for RTL
-					'float' => 'none'
-				) );
-			}
-
 			if ( $settings['responsive'] ) {
 
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
@@ -109,6 +97,7 @@ class SiteOrigin_Panels_Renderer {
 
 				// Mobile Responsive
 				$css->add_row_css( $post_id, intval( $gi ), '', array(
+					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 				), $panels_mobile_width );
 

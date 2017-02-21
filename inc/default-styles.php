@@ -527,7 +527,8 @@ class SiteOrigin_Panels_Default_Styles {
 			// Add in flexbox alignment
 			if( ! empty( $row['style'][ 'cell_alignment' ] ) ) {
 				$css->add_row_css( $post_id, $i, '', array(
-					'align-items' => $row['style'][ 'cell_alignment' ]
+					'-webkit-align-items' => $row['style'][ 'cell_alignment' ],
+					'align-items' => $row['style'][ 'cell_alignment' ],
 				) );
 			}
 		}

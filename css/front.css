@@ -1,4 +1,6 @@
 .panel-grid {
+  display: -webkit-flex;
+  -webkit-flex-wrap: wrap;
   display: flex;
   flex-wrap: nowrap;
 }
