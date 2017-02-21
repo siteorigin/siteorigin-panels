@@ -3,3 +3,4 @@ lang/siteorigin-panels.mo
 *.min.js
 node_modules/
 dist/
+/tmp
