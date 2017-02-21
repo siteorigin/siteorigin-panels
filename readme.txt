@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.4.25 - 21 February 2017 =
+* Fixed how widget wrapper IDs are generated.
+
 = 2.4.24 - 3 February 2017 =
 * Add row ID to style wrapper instead of actual row.
 * Use more specific selectors for padding CSS.
