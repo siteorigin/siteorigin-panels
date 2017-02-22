@@ -154,6 +154,19 @@ class SiteOrigin_Panels_Default_Styles {
 			'priority' => 15,
 		);
 
+		$fields['cell_alignment'] = array(
+			'name'     => __( 'Cell Vertical Alignment', 'siteorigin-panels' ),
+			'type'     => 'select',
+			'group'    => 'layout',
+			'options'  => array(
+				'flex-start' => __( 'Top', 'siteorigin-panels' ),
+				'center'     => __( 'Center', 'siteorigin-panels' ),
+				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
+				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
+			),
+			'priority' => 16,
+		);
+
 		// How lets add the design fields
 
 		$fields['background'] = array(
@@ -494,7 +507,7 @@ class SiteOrigin_Panels_Default_Styles {
 			}
 		}
 
-		// Add in the row padding styling
+		// Add in the row  styling
 		foreach ( $panels_data['grids'] as $i => $row ) {
 			if ( empty( $row['style'] ) ) {
 				continue;
@@ -509,6 +522,14 @@ class SiteOrigin_Panels_Default_Styles {
 				$css->add_row_css( $post_id, $i, '> .panel-row-style', array(
 					'padding' => $row['style']['mobile_padding']
 				), $mobile_width );
+			}
+
+			// Add in flexbox alignment
+			if( ! empty( $row['style'][ 'cell_alignment' ] ) ) {
+				$css->add_row_css( $post_id, $i, '', array(
+					'-webkit-align-items' => $row['style'][ 'cell_alignment' ],
+					'align-items' => $row['style'][ 'cell_alignment' ],
+				) );
 			}
 		}
 

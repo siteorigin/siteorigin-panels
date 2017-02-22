@@ -67,17 +67,16 @@ class SiteOrigin_Panels_Renderer {
 				$cell = $panels_data['grid_cells'][ $ci ++ ];
 
 				if ( $cell_count > 1 ) {
-					$width = round( $cell['weight'] * 100, 3 ) . '%';
-					$width = apply_filters( 'siteorigin_panels_css_cell_width', $width, $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
+					$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
 
 					// Add the width and ensure we have correct formatting for CSS.
 					$css->add_cell_css( $post_id, intval( $gi ), $i, '', array(
-						'width' => str_replace( ',', '.', $width )
+						'width' => round( floatval( $weight ) * 100, 4 ) . '%'
 					) );
 				}
 			}
 
-			// Add the bottom margin to any grids that aren't the last
+			// Add the bottom margin to any rows that aren't the last
 			if ( $gi != count( $panels_data['grids'] ) - 1 || ! empty( $grid['style']['bottom_margin'] ) || ! empty( $panels_margin_bottom_last_row ) ) {
 				// Filter the bottom margin for this row with the arguments
 				$css->add_row_css( $post_id, intval( $gi ), '', array(
@@ -87,31 +86,24 @@ class SiteOrigin_Panels_Renderer {
 
 			$collapse_order = ! empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
-			if ( $cell_count > 1 ) {
-				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					// Float right for RTL
-					'float' => $collapse_order == 'left-top' ? 'left' : 'right'
-				) );
-			} else {
-				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					// Float right for RTL
-					'float' => 'none'
-				) );
-			}
-
 			if ( $settings['responsive'] ) {
 
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
-					// Tablet Responsive
+					// Tablet responsiveness
 					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-						'width' => '50%'
+						'width' => '50%',
+						'flex-wrap' => 'wrap',
 					), $panels_tablet_width );
 				}
 
 				// Mobile Responsive
+				$css->add_row_css( $post_id, intval( $gi ), '', array(
+					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					'flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+				), $panels_mobile_width );
+
 				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-					'float' => 'none',
-					'width' => 'auto'
+					'width' => 'auto',
 				), $panels_mobile_width );
 
 				for ( $i = 0; $i < $cell_count; $i ++ ) {
@@ -589,7 +581,7 @@ class SiteOrigin_Panels_Renderer {
 		// Register the style to support possible lazy loading
 		wp_register_style( 'siteorigin-panels-front', plugin_dir_url( __FILE__ ) . '../css/front.css', array(), SITEORIGIN_PANELS_VERSION );
 
-		if ( is_singular() && get_post_meta( get_the_ID(), true ) != '' ) {
+		if ( is_singular() && get_post_meta( get_the_ID(), 'siteorigin_panels_data', true ) != '' ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
 			$this->add_inline_css( get_the_ID(), $this->generate_css( get_the_ID() ) );
 		}

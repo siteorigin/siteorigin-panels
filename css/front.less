@@ -1,12 +1,13 @@
 @import "mixins";
 
 .panel-grid {
-    zoom: 1;
-	.clearfix();
+	display: -webkit-flex;
+	-webkit-flex-wrap: wrap;
+	display: flex;
+	flex-wrap: nowrap;
 }
+
 .panel-grid-cell {
-	.box-sizing(border-box);
-    min-height: 1em;
 
 	.so-panel {
 		.clearfix();

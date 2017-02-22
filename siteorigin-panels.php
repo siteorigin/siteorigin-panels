@@ -48,6 +48,7 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Live_Editor::single();
 		}
 
+		SiteOrigin_Panels_Renderer::single();
 		SiteOrigin_Panels_Styles::single();
 	}
 
