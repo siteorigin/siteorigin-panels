@@ -52,6 +52,7 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels_Styles::single();
 	}
 
+
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
@@ -88,8 +89,8 @@ class SiteOrigin_Panels {
 			siteorigin_panels_setting( 'sidebars-emulator' ) &&
 			( ! get_option( 'permalink_structure' ) || get_option( 'rewrite_rules' ) )
 		) {
-			// Include the sidebars emulator
-			require_once plugin_dir_path( __FILE__ ) . 'inc/sidebars-emulator.php';
+			// Initialize the sidebars emulator
+			SiteOrigin_Panels_Sidebars_Emulator::single();
 		}
 
 		// Initialize the language
