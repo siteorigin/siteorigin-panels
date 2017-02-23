@@ -112,6 +112,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['home-template']     = 'home-panels.php';
 		$defaults['affiliate-id']      = apply_filters( 'siteorigin_panels_affiliate_id', false );
 		$defaults['display-teaser']    = true;
+		$defaults['display-learn']    = true;
 
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
@@ -257,6 +258,12 @@ class SiteOrigin_Panels_Settings {
 				'<a href="siteorigin.com/downloads/premium/" target="_blank">',
 				'</a>'
 			)
+		);
+
+		$fields['general']['fields']['display-learn'] = array(
+			'type' => 'checkbox',
+			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
+			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
 		);
 
 		// The widgets fields
