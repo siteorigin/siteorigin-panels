@@ -1,40 +1,41 @@
-module.exports = Backbone.Model.extend( {
-	layoutPosition: {
-		BEFORE: 'before',
-		AFTER: 'after',
-		REPLACE: 'replace',
-	},
+module.exports = Backbone.Model.extend({
+    layoutPosition: {
+        BEFORE: 'before',
+        AFTER: 'after',
+        REPLACE: 'replace',
+    },
 
-	rows: {},
+    rows: {},
 
-	defaults: {
-		'data': {
-			'widgets': [],
-			'grids': [],
-			'grid_cells': []
-		}
-	},
+    defaults: {
+        'data': {
+            'widgets': [],
+            'grids': [],
+            'grid_cells': []
+        }
+    },
 
-	initialize: function () {
-		// These are the main rows in the interface
-		this.rows = new panels.collection.rows();
-	},
+    initialize: function () {
+        // These are the main rows in the interface
+        this.rows = new panels.collection.rows();
+    },
 
-	/**
-	 * Add a new row to this builder.
-	 *
-	 * @param weights
-	 */
-	addRow: function ( weights, options ) {
-		options = _.extend( {
-			noAnimate: false
-		}, options );
-		// Create the actual row
-		var row = new panels.model.row( {
-			collection: this.rows
-		} );
-
-		row.setCells( weights );
+    /**
+     * Add a new row to this builder.
+     *
+     * @param weights
+     */
+    addRow: function (weights, options) {
+        options = _.extend({
+            noAnimate: false
+        }, options);
+        // Create the actual row
+        var row = new panels.model.row({
+            collection: this.rows
+        });
+        row.set('cells', new panels.collection.cells(weights.map(function (weight) {
+            return {weight: weight};
+        })));
 		row.builder = this;
 
 		this.rows.add( row, options );
@@ -108,7 +109,7 @@ module.exports = Backbone.Model.extend( {
 				}
 
 				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
-				var cell = row.cells.at( parseInt( panels_info.cell ) );
+				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
 					class: panels_info.class,
@@ -208,7 +209,7 @@ module.exports = Backbone.Model.extend( {
 
 		this.rows.each( function ( row, ri ) {
 
-			row.cells.each( function ( cell, ci ) {
+			row.get('cells').each( function ( cell, ci ) {
 
 				cell.widgets.each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
@@ -242,7 +243,7 @@ module.exports = Backbone.Model.extend( {
 			} );
 
 			data.grids.push( {
-				cells: row.cells.length,
+				cells: row.get('cells').length,
 				style: row.get( 'style' )
 			} );
 

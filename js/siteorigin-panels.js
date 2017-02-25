@@ -18,7 +18,7 @@ module.exports = Backbone.Collection.extend( {
 		} );
 
 		return totalWeight;
-	}
+	},
 
 } );
 
@@ -804,15 +804,15 @@ module.exports = panels.view.dialog.extend( {
 	 * The current settings, not yet saved to the model
 	 */
 	row: {
-		// This is just the cell weights, cell content is not edited by this dialog
-		cells: [],
+		// This will be a clone of cells collection.
+		cells: null,
 		// The style settings of the row
 		style: {}
 	},
 
 	initializeDialog: function () {
 		this.on( 'open_dialog', function () {
-			if ( ! _.isUndefined( this.model ) && ! _.isEmpty( this.model.cells ) ) {
+			if ( ! _.isUndefined( this.model ) && ! _.isEmpty( this.model.get('cells') ) ) {
 				this.setRowModel( this.model );
 			} else {
 				this.setRowModel( null );
@@ -823,7 +823,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// This is the default row layout
 		this.row = {
-			cells: [0.5, 0.5],
+			cells: 	new panels.collection.cells([{weight:0.5}, {weight:0.5}]),
 			style: {}
 		};
 
@@ -890,10 +890,9 @@ module.exports = panels.view.dialog.extend( {
 
 		if ( ! _.isUndefined( this.model ) ) {
 			// Set the initial value of the
-			this.$( 'input.so-row-field' ).val( this.model.cells.length );
+			this.$( 'input.so-row-field' ).val( this.model.get('cells').length );
 		}
 
-		var thisView = this;
 		this.$( 'input.so-row-field' ).keyup( function () {
 			$( this ).trigger( 'change' );
 		} );
@@ -915,14 +914,12 @@ module.exports = panels.view.dialog.extend( {
 
 		// Set the rows to be a copy of the model
 		this.row = {
-			cells: this.model.cells.map( function ( cell ) {
-				return cell.get( 'weight' );
-			} ),
+			cells: this.model.get('cells').clone(),
 			style: {}
 		};
 
 		// Set the initial value of the cell field.
-		this.$( 'input.so-row-field' ).val( this.model.cells.length );
+		this.$( 'input.so-row-field' ).val( this.model.get('cells').length );
 
 		return this;
 	},
@@ -939,8 +936,8 @@ module.exports = panels.view.dialog.extend( {
 		var timeout;
 
 		// Represent the cells
-		_.each( this.row.cells, function ( cell, i ) {
-			var newCell = $( this.cellPreviewTemplate( {weight: cell} ) );
+		this.row.cells.each( function ( cellModel, i ) {
+			var newCell = $( this.cellPreviewTemplate( { weight: cellModel.get('weight') } ) );
 			rowPreview.append( newCell );
 
 			var prevCell = newCell.prev();
@@ -951,8 +948,10 @@ module.exports = panels.view.dialog.extend( {
 				handle
 					.appendTo( newCell )
 					.dblclick( function () {
-						var t = thisDialog.row.cells[i] + thisDialog.row.cells[i - 1];
-						thisDialog.row.cells[i] = thisDialog.row.cells[i - 1] = t / 2;
+                        var prevCellModel = thisDialog.row.cells.at(i - 1);
+						var t = cellModel.get('weight') + prevCellModel.get('weight');
+                        cellModel.set('weight', t / 2);
+                        prevCellModel.set('weight', t / 2);
 						thisDialog.scaleRowWidths();
 					} );
 
@@ -992,12 +991,14 @@ module.exports = panels.view.dialog.extend( {
 					},
 					drag: function ( e, ui ) {
 						// Calculate the new cell and previous cell widths as a percent
-						var ncw = thisDialog.row.cells[i] - (
+                        var cellWeight = thisDialog.row.cells.at(i).get('weight');
+                        var prevCellWeight = thisDialog.row.cells.at(i - 1).get('weight');
+						var ncw = cellWeight - (
 							(
 							ui.position.left + 6
 							) / rowPreview.width()
 							);
-						var pcw = thisDialog.row.cells[i - 1] + (
+						var pcw = prevCellWeight + (
 							(
 							ui.position.left + 6
 							) / rowPreview.width()
@@ -1025,9 +1026,11 @@ module.exports = panels.view.dialog.extend( {
 						var percent = offset / rowPreview.width();
 
 						// Ignore this if any of the cells are below 2% in width.
-						if ( thisDialog.row.cells[i] - percent > 0.02 && thisDialog.row.cells[i - 1] + percent > 0.02 ) {
-							thisDialog.row.cells[i] -= percent;
-							thisDialog.row.cells[i - 1] += percent;
+                        var cellModel = thisDialog.row.cells.at(i);
+                        var prevCellModel = thisDialog.row.cells.at(i - 1);
+						if ( cellModel.get('weight') - percent > 0.02 && prevCellModel.get('weight') + percent > 0.02 ) {
+							cellModel.set('weight', cellModel.get('weight') - percent);
+							prevCellModel.set('weight', prevCellModel.get('weight') + percent);
 						}
 
 						thisDialog.scaleRowWidths();
@@ -1035,6 +1038,10 @@ module.exports = panels.view.dialog.extend( {
 					}
 				} );
 			}
+
+            newCell.click(function () {
+                console.log('load cell styles');
+            }.bind(this));
 
 			// Make this row weight click editable
 			newCell.find( '.preview-cell-weight' ).click( function ( ci ) {
@@ -1078,13 +1085,13 @@ module.exports = panels.view.dialog.extend( {
 						.blur( function () {
 							rowPreview.find( '.preview-cell-weight-input' ).each( function ( i, el ) {
 								if ( isNaN( parseFloat( $( el ).val() ) ) ) {
-									$( el ).val( Math.floor( thisDialog.row.cells[i] * 1000 ) / 10 );
+									$( el ).val( Math.floor( thisDialog.row.cells.at(i).get('weight') * 1000 ) / 10 );
 								}
 							} );
 
 							timeout = setTimeout( function () {
 								// If there are no weight inputs, then skip this
-								if ( rowPreview.find( '.preview-cell-weight-input' ).legnth === 0 ) {
+								if ( rowPreview.find( '.preview-cell-weight-input' ).length === 0 ) {
 									return false;
 								}
 
@@ -1145,8 +1152,9 @@ module.exports = panels.view.dialog.extend( {
 
 								// Now lets animate the cells into their new widths
 								rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
-									$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-									$( el ).find( '.preview-cell-weight-input' ).val( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+                                    var cellWeight = thisDialog.row.cells.at(i).get('weight');
+									$( el ).animate( {'width': Math.round( cellWeight * 1000 ) / 10 + "%"}, 250 );
+									$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
 								} );
 
 								// So the draggable handle is not hidden.
@@ -1178,9 +1186,10 @@ module.exports = panels.view.dialog.extend( {
 	scaleRowWidths: function () {
 		var thisDialog = this;
 		this.$( '.row-preview .preview-cell' ).each( function ( i, el ) {
+            var cell = thisDialog.row.cells.at(i);
 			$( el )
-				.css( 'width', thisDialog.row.cells[i] * 100 + "%" )
-				.find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+				.css( 'width', cell.get('weight') * 100 + "%" )
+				.find( '.preview-cell-weight' ).html( Math.round( cell.get('weight') * 1000 ) / 10 );
 		} );
 	},
 
@@ -1243,7 +1252,18 @@ module.exports = panels.view.dialog.extend( {
 				cells = cells.reverse();
 			}
 
-			this.row.cells = cells;
+			// Discard deleted cells.
+            this.row.cells = new panels.collection.cells(this.row.cells.first(cells.length));
+
+            _.each(cells, function (cellWeight, index) {
+                var cell = this.row.cells.at(index);
+                if (!cell) {
+                    cell = new panels.model.cell({weight:cellWeight, row:this.model});
+                    this.row.cells.add(cell);
+				} else {
+                	cell.set('weight', cellWeight);
+				}
+            }.bind(this));
 
 			if ( cellCountChanged ) {
 				this.regenerateRowPreview();
@@ -1252,8 +1272,9 @@ module.exports = panels.view.dialog.extend( {
 
 				// Now lets animate the cells into their new widths
 				this.$( '.preview-cell' ).each( function ( i, el ) {
-					$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-					$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+                    var cellWeight = thisDialog.row.cells.at(i).get('weight');
+					$( el ).animate( {'width': Math.round( cellWeight * 1000 ) / 10 + "%"}, 250 );
+					$( el ).find( '.preview-cell-weight' ).html( Math.round( cellWeight * 1000 ) / 10 );
 				} );
 
 				// So the draggable handle is not hidden.
@@ -1323,7 +1344,6 @@ module.exports = panels.view.dialog.extend( {
 	insertHandler: function () {
 		this.builder.addHistoryEntry( 'row_added' );
 
-		this.model = new panels.model.row();
 		this.updateModel();
 
 		var activeCell = this.builder.getActiveCell( {
@@ -2127,43 +2147,44 @@ jQuery( function ( $ ) {
 } );
 
 },{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/menu":18,"./view/builder":19,"./view/cell":20,"./view/dialog":21,"./view/live-editor":22,"./view/row":23,"./view/styles":24,"./view/widget":25}],13:[function(require,module,exports){
-module.exports = Backbone.Model.extend( {
-	layoutPosition: {
-		BEFORE: 'before',
-		AFTER: 'after',
-		REPLACE: 'replace',
-	},
+module.exports = Backbone.Model.extend({
+    layoutPosition: {
+        BEFORE: 'before',
+        AFTER: 'after',
+        REPLACE: 'replace',
+    },
 
-	rows: {},
+    rows: {},
 
-	defaults: {
-		'data': {
-			'widgets': [],
-			'grids': [],
-			'grid_cells': []
-		}
-	},
+    defaults: {
+        'data': {
+            'widgets': [],
+            'grids': [],
+            'grid_cells': []
+        }
+    },
 
-	initialize: function () {
-		// These are the main rows in the interface
-		this.rows = new panels.collection.rows();
-	},
+    initialize: function () {
+        // These are the main rows in the interface
+        this.rows = new panels.collection.rows();
+    },
 
-	/**
-	 * Add a new row to this builder.
-	 *
-	 * @param weights
-	 */
-	addRow: function ( weights, options ) {
-		options = _.extend( {
-			noAnimate: false
-		}, options );
-		// Create the actual row
-		var row = new panels.model.row( {
-			collection: this.rows
-		} );
-
-		row.setCells( weights );
+    /**
+     * Add a new row to this builder.
+     *
+     * @param weights
+     */
+    addRow: function (weights, options) {
+        options = _.extend({
+            noAnimate: false
+        }, options);
+        // Create the actual row
+        var row = new panels.model.row({
+            collection: this.rows
+        });
+        row.set('cells', new panels.collection.cells(weights.map(function (weight) {
+            return {weight: weight};
+        })));
 		row.builder = this;
 
 		this.rows.add( row, options );
@@ -2237,7 +2258,7 @@ module.exports = Backbone.Model.extend( {
 				}
 
 				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
-				var cell = row.cells.at( parseInt( panels_info.cell ) );
+				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
 					class: panels_info.class,
@@ -2337,7 +2358,7 @@ module.exports = Backbone.Model.extend( {
 
 		this.rows.each( function ( row, ri ) {
 
-			row.cells.each( function ( cell, ci ) {
+			row.get('cells').each( function ( cell, ci ) {
 
 				cell.widgets.each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
@@ -2371,7 +2392,7 @@ module.exports = Backbone.Model.extend( {
 			} );
 
 			data.grids.push( {
-				cells: row.cells.length,
+				cells: row.get('cells').length,
 				style: row.get( 'style' )
 			} );
 
@@ -2473,7 +2494,7 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneWidgets: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', row.cells, {silent: true} );
+		clone.set( 'collection', row.get('cells'), {silent: true} );
 		clone.row = row;
 
 		if ( cloneOptions.cloneWidgets ) {
@@ -2516,7 +2537,7 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
-		this.cells = new panels.collection.cells();
+		this.set('cells', new panels.collection.cells());
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -2527,38 +2548,39 @@ module.exports = Backbone.Model.extend( {
 	 */
 	setCells: function ( cells ) {
 		var thisModel = this;
+        var currentCells = this.get('cells');
 
-		if ( _.isEmpty( this.cells ) ) {
+		if ( _.isEmpty( currentCells ) ) {
 			// We're adding the initial cells
 			_.each( cells, function ( cellWeight ) {
 				// Add the new cell to the row
 				var cell = new panels.model.cell( {
 					weight: cellWeight,
-					collection: thisModel.cells
+					collection: currentCells,
 				} );
 				cell.row = thisModel;
-				thisModel.cells.add( cell );
+				currentCells.add( cell );
 			} );
 		}
 		else {
 
-			if ( cells.length > this.cells.length ) {
+			if ( cells.length > currentCells.length ) {
 				// We need to add cells
-				for ( var i = this.cells.length; i < cells.length; i ++ ) {
+				for ( var i = currentCells.length; i < cells.length; i ++ ) {
 					var cell = new panels.model.cell( {
 						weight: cells[cells.length + i],
-						collection: thisModel.cells
+						collection: currentCells
 					} );
 					cell.row = this;
-					thisModel.cells.add( cell );
+                    currentCells.add( cell );
 				}
 
 			}
-			else if ( cells.length < this.cells.length ) {
-				var newParentCell = this.cells.at( cells.length - 1 );
+			else if ( cells.length < currentCells.length ) {
+				var newParentCell = currentCells.at( cells.length - 1 );
 
 				// We need to remove cells
-				_.each( this.cells.slice( cells.length, this.cells.length ), function ( cell ) {
+				_.each( currentCells.slice( cells.length, currentCells.length ), function ( cell ) {
 					var widgetsToMove = cell.widgets.models.slice( 0 );
 					for ( var i = 0; i < widgetsToMove.length; i ++ ) {
 						widgetsToMove[i].moveToCell( newParentCell, { silent: false } );
@@ -2570,7 +2592,7 @@ module.exports = Backbone.Model.extend( {
 			}
 
 			// Now we need to change the weights of all the cells
-			this.cells.each( function ( cell, i ) {
+			currentCells.each( function ( cell, i ) {
 				cell.set( 'weight', cells[i] );
 			} );
 		}
@@ -2584,11 +2606,12 @@ module.exports = Backbone.Model.extend( {
 	 */
 	reweightCells: function () {
 		var totalWeight = 0;
-		this.cells.each( function ( cell ) {
+        var cells = this.get('cells');
+		cells.each( function ( cell ) {
 			totalWeight += cell.get( 'weight' );
 		} );
 
-		this.cells.each( function ( cell ) {
+		cells.each( function ( cell ) {
 			cell.set( 'weight', cell.get( 'weight' ) / totalWeight );
 		} );
 
@@ -2601,8 +2624,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	onDestroy: function () {
 		// Also destroy all the cells
-		_.invoke( this.cells.toArray(), 'destroy' );
-		this.cells.reset();
+		_.invoke( this.get('cells').toArray(), 'destroy' );
+		this.get('cells').reset();
 	},
 
 	/**
@@ -2624,8 +2647,8 @@ module.exports = Backbone.Model.extend( {
 
 		if ( cloneOptions.cloneCells ) {
 			// Clone all the rows
-			this.cells.each( function ( cell ) {
-				clone.cells.add( cell.clone( clone, cloneOptions ), {silent: true} );
+			this.get('cells').each( function ( cell ) {
+				clone.get('cells').add( cell.clone( clone, cloneOptions ), {silent: true} );
 			} );
 		}
 
@@ -3618,8 +3641,10 @@ module.exports = Backbone.View.extend( {
 	 * @returns {boolean}
 	 */
 	displayAddRowDialog: function () {
+        var row = new panels.model.row();
+        row.set('cells', new panels.collection.cells([{weight:0.5}, {weight:0.5}]));
 		this.dialogs.row.openDialog();
-		this.dialogs.row.setRowModel(); // Set this to an empty row model
+		this.dialogs.row.setRowModel(row);
 	},
 
 	/**
@@ -4067,7 +4092,7 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		var templateArgs = {
 			weight: this.model.get( 'weight' ),
-			totalWeight: this.row.model.cells.totalWeight()
+			totalWeight: this.row.model.get('cells').totalWeight()
 		};
 
 		this.setElement( this.template( templateArgs ) );
@@ -5281,20 +5306,21 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 
-		this.model.cells.on( 'add', this.handleCellAdd, this );
-		this.model.cells.on( 'remove', this.handleCellRemove, this );
+        var rowCells = this.model.get('cells');
+		rowCells.on( 'add', this.handleCellAdd, this );
+		rowCells.on( 'remove', this.handleCellRemove, this );
 		this.model.on( 'reweight_cells', this.resize, this );
 
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		var thisView = this;
-		this.model.cells.each( function ( cell ) {
+		rowCells.each( function ( cell ) {
 			thisView.listenTo( cell.widgets, 'add', thisView.resize );
 		} );
 
 		// When ever a new cell is added, listen to it for new widgets
-		this.model.cells.on( 'add', function ( cell ) {
+		rowCells.on( 'add', function ( cell ) {
 			thisView.listenTo( cell.widgets, 'add', thisView.resize );
 		}, this );
 
@@ -5311,7 +5337,7 @@ module.exports = Backbone.View.extend( {
 
 		// Create views for the cells in this row
 		var thisView = this;
-		this.model.cells.each( function ( cell ) {
+		this.model.get('cells').each( function ( cell ) {
 			var cellView = new panels.view.cell( {
 				model: cell
 			} );

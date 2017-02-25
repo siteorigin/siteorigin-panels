@@ -15,7 +15,7 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
-		this.cells = new panels.collection.cells();
+		this.set('cells', new panels.collection.cells());
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -26,38 +26,39 @@ module.exports = Backbone.Model.extend( {
 	 */
 	setCells: function ( cells ) {
 		var thisModel = this;
+        var currentCells = this.get('cells');
 
-		if ( _.isEmpty( this.cells ) ) {
+		if ( _.isEmpty( currentCells ) ) {
 			// We're adding the initial cells
 			_.each( cells, function ( cellWeight ) {
 				// Add the new cell to the row
 				var cell = new panels.model.cell( {
 					weight: cellWeight,
-					collection: thisModel.cells
+					collection: currentCells,
 				} );
 				cell.row = thisModel;
-				thisModel.cells.add( cell );
+				currentCells.add( cell );
 			} );
 		}
 		else {
 
-			if ( cells.length > this.cells.length ) {
+			if ( cells.length > currentCells.length ) {
 				// We need to add cells
-				for ( var i = this.cells.length; i < cells.length; i ++ ) {
+				for ( var i = currentCells.length; i < cells.length; i ++ ) {
 					var cell = new panels.model.cell( {
 						weight: cells[cells.length + i],
-						collection: thisModel.cells
+						collection: currentCells
 					} );
 					cell.row = this;
-					thisModel.cells.add( cell );
+                    currentCells.add( cell );
 				}
 
 			}
-			else if ( cells.length < this.cells.length ) {
-				var newParentCell = this.cells.at( cells.length - 1 );
+			else if ( cells.length < currentCells.length ) {
+				var newParentCell = currentCells.at( cells.length - 1 );
 
 				// We need to remove cells
-				_.each( this.cells.slice( cells.length, this.cells.length ), function ( cell ) {
+				_.each( currentCells.slice( cells.length, currentCells.length ), function ( cell ) {
 					var widgetsToMove = cell.widgets.models.slice( 0 );
 					for ( var i = 0; i < widgetsToMove.length; i ++ ) {
 						widgetsToMove[i].moveToCell( newParentCell, { silent: false } );
@@ -69,7 +70,7 @@ module.exports = Backbone.Model.extend( {
 			}
 
 			// Now we need to change the weights of all the cells
-			this.cells.each( function ( cell, i ) {
+			currentCells.each( function ( cell, i ) {
 				cell.set( 'weight', cells[i] );
 			} );
 		}
@@ -83,11 +84,12 @@ module.exports = Backbone.Model.extend( {
 	 */
 	reweightCells: function () {
 		var totalWeight = 0;
-		this.cells.each( function ( cell ) {
+        var cells = this.get('cells');
+		cells.each( function ( cell ) {
 			totalWeight += cell.get( 'weight' );
 		} );
 
-		this.cells.each( function ( cell ) {
+		cells.each( function ( cell ) {
 			cell.set( 'weight', cell.get( 'weight' ) / totalWeight );
 		} );
 
@@ -100,8 +102,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	onDestroy: function () {
 		// Also destroy all the cells
-		_.invoke( this.cells.toArray(), 'destroy' );
-		this.cells.reset();
+		_.invoke( this.get('cells').toArray(), 'destroy' );
+		this.get('cells').reset();
 	},
 
 	/**
@@ -123,8 +125,8 @@ module.exports = Backbone.Model.extend( {
 
 		if ( cloneOptions.cloneCells ) {
 			// Clone all the rows
-			this.cells.each( function ( cell ) {
-				clone.cells.add( cell.clone( clone, cloneOptions ), {silent: true} );
+			this.get('cells').each( function ( cell ) {
+				clone.get('cells').add( cell.clone( clone, cloneOptions ), {silent: true} );
 			} );
 		}
 

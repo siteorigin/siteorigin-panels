@@ -17,20 +17,21 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 
-		this.model.cells.on( 'add', this.handleCellAdd, this );
-		this.model.cells.on( 'remove', this.handleCellRemove, this );
+        var rowCells = this.model.get('cells');
+		rowCells.on( 'add', this.handleCellAdd, this );
+		rowCells.on( 'remove', this.handleCellRemove, this );
 		this.model.on( 'reweight_cells', this.resize, this );
 
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		var thisView = this;
-		this.model.cells.each( function ( cell ) {
+		rowCells.each( function ( cell ) {
 			thisView.listenTo( cell.widgets, 'add', thisView.resize );
 		} );
 
 		// When ever a new cell is added, listen to it for new widgets
-		this.model.cells.on( 'add', function ( cell ) {
+		rowCells.on( 'add', function ( cell ) {
 			thisView.listenTo( cell.widgets, 'add', thisView.resize );
 		}, this );
 
@@ -47,7 +48,7 @@ module.exports = Backbone.View.extend( {
 
 		// Create views for the cells in this row
 		var thisView = this;
-		this.model.cells.each( function ( cell ) {
+		this.model.get('cells').each( function ( cell ) {
 			var cellView = new panels.view.cell( {
 				model: cell
 			} );

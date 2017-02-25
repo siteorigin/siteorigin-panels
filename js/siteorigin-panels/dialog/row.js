@@ -27,15 +27,15 @@ module.exports = panels.view.dialog.extend( {
 	 * The current settings, not yet saved to the model
 	 */
 	row: {
-		// This is just the cell weights, cell content is not edited by this dialog
-		cells: [],
+		// This will be a clone of cells collection.
+		cells: null,
 		// The style settings of the row
 		style: {}
 	},
 
 	initializeDialog: function () {
 		this.on( 'open_dialog', function () {
-			if ( ! _.isUndefined( this.model ) && ! _.isEmpty( this.model.cells ) ) {
+			if ( ! _.isUndefined( this.model ) && ! _.isEmpty( this.model.get('cells') ) ) {
 				this.setRowModel( this.model );
 			} else {
 				this.setRowModel( null );
@@ -46,7 +46,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// This is the default row layout
 		this.row = {
-			cells: [0.5, 0.5],
+			cells: 	new panels.collection.cells([{weight:0.5}, {weight:0.5}]),
 			style: {}
 		};
 
@@ -113,10 +113,9 @@ module.exports = panels.view.dialog.extend( {
 
 		if ( ! _.isUndefined( this.model ) ) {
 			// Set the initial value of the
-			this.$( 'input.so-row-field' ).val( this.model.cells.length );
+			this.$( 'input.so-row-field' ).val( this.model.get('cells').length );
 		}
 
-		var thisView = this;
 		this.$( 'input.so-row-field' ).keyup( function () {
 			$( this ).trigger( 'change' );
 		} );
@@ -138,14 +137,12 @@ module.exports = panels.view.dialog.extend( {
 
 		// Set the rows to be a copy of the model
 		this.row = {
-			cells: this.model.cells.map( function ( cell ) {
-				return cell.get( 'weight' );
-			} ),
+			cells: this.model.get('cells').clone(),
 			style: {}
 		};
 
 		// Set the initial value of the cell field.
-		this.$( 'input.so-row-field' ).val( this.model.cells.length );
+		this.$( 'input.so-row-field' ).val( this.model.get('cells').length );
 
 		return this;
 	},
@@ -162,8 +159,8 @@ module.exports = panels.view.dialog.extend( {
 		var timeout;
 
 		// Represent the cells
-		_.each( this.row.cells, function ( cell, i ) {
-			var newCell = $( this.cellPreviewTemplate( {weight: cell} ) );
+		this.row.cells.each( function ( cellModel, i ) {
+			var newCell = $( this.cellPreviewTemplate( { weight: cellModel.get('weight') } ) );
 			rowPreview.append( newCell );
 
 			var prevCell = newCell.prev();
@@ -174,8 +171,10 @@ module.exports = panels.view.dialog.extend( {
 				handle
 					.appendTo( newCell )
 					.dblclick( function () {
-						var t = thisDialog.row.cells[i] + thisDialog.row.cells[i - 1];
-						thisDialog.row.cells[i] = thisDialog.row.cells[i - 1] = t / 2;
+                        var prevCellModel = thisDialog.row.cells.at(i - 1);
+						var t = cellModel.get('weight') + prevCellModel.get('weight');
+                        cellModel.set('weight', t / 2);
+                        prevCellModel.set('weight', t / 2);
 						thisDialog.scaleRowWidths();
 					} );
 
@@ -215,12 +214,14 @@ module.exports = panels.view.dialog.extend( {
 					},
 					drag: function ( e, ui ) {
 						// Calculate the new cell and previous cell widths as a percent
-						var ncw = thisDialog.row.cells[i] - (
+                        var cellWeight = thisDialog.row.cells.at(i).get('weight');
+                        var prevCellWeight = thisDialog.row.cells.at(i - 1).get('weight');
+						var ncw = cellWeight - (
 							(
 							ui.position.left + 6
 							) / rowPreview.width()
 							);
-						var pcw = thisDialog.row.cells[i - 1] + (
+						var pcw = prevCellWeight + (
 							(
 							ui.position.left + 6
 							) / rowPreview.width()
@@ -248,9 +249,11 @@ module.exports = panels.view.dialog.extend( {
 						var percent = offset / rowPreview.width();
 
 						// Ignore this if any of the cells are below 2% in width.
-						if ( thisDialog.row.cells[i] - percent > 0.02 && thisDialog.row.cells[i - 1] + percent > 0.02 ) {
-							thisDialog.row.cells[i] -= percent;
-							thisDialog.row.cells[i - 1] += percent;
+                        var cellModel = thisDialog.row.cells.at(i);
+                        var prevCellModel = thisDialog.row.cells.at(i - 1);
+						if ( cellModel.get('weight') - percent > 0.02 && prevCellModel.get('weight') + percent > 0.02 ) {
+							cellModel.set('weight', cellModel.get('weight') - percent);
+							prevCellModel.set('weight', prevCellModel.get('weight') + percent);
 						}
 
 						thisDialog.scaleRowWidths();
@@ -258,6 +261,10 @@ module.exports = panels.view.dialog.extend( {
 					}
 				} );
 			}
+
+            newCell.click(function () {
+                console.log('load cell styles');
+            }.bind(this));
 
 			// Make this row weight click editable
 			newCell.find( '.preview-cell-weight' ).click( function ( ci ) {
@@ -301,13 +308,13 @@ module.exports = panels.view.dialog.extend( {
 						.blur( function () {
 							rowPreview.find( '.preview-cell-weight-input' ).each( function ( i, el ) {
 								if ( isNaN( parseFloat( $( el ).val() ) ) ) {
-									$( el ).val( Math.floor( thisDialog.row.cells[i] * 1000 ) / 10 );
+									$( el ).val( Math.floor( thisDialog.row.cells.at(i).get('weight') * 1000 ) / 10 );
 								}
 							} );
 
 							timeout = setTimeout( function () {
 								// If there are no weight inputs, then skip this
-								if ( rowPreview.find( '.preview-cell-weight-input' ).legnth === 0 ) {
+								if ( rowPreview.find( '.preview-cell-weight-input' ).length === 0 ) {
 									return false;
 								}
 
@@ -368,8 +375,9 @@ module.exports = panels.view.dialog.extend( {
 
 								// Now lets animate the cells into their new widths
 								rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
-									$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-									$( el ).find( '.preview-cell-weight-input' ).val( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+                                    var cellWeight = thisDialog.row.cells.at(i).get('weight');
+									$( el ).animate( {'width': Math.round( cellWeight * 1000 ) / 10 + "%"}, 250 );
+									$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
 								} );
 
 								// So the draggable handle is not hidden.
@@ -401,9 +409,10 @@ module.exports = panels.view.dialog.extend( {
 	scaleRowWidths: function () {
 		var thisDialog = this;
 		this.$( '.row-preview .preview-cell' ).each( function ( i, el ) {
+            var cell = thisDialog.row.cells.at(i);
 			$( el )
-				.css( 'width', thisDialog.row.cells[i] * 100 + "%" )
-				.find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+				.css( 'width', cell.get('weight') * 100 + "%" )
+				.find( '.preview-cell-weight' ).html( Math.round( cell.get('weight') * 1000 ) / 10 );
 		} );
 	},
 
@@ -466,7 +475,18 @@ module.exports = panels.view.dialog.extend( {
 				cells = cells.reverse();
 			}
 
-			this.row.cells = cells;
+			// Discard deleted cells.
+            this.row.cells = new panels.collection.cells(this.row.cells.first(cells.length));
+
+            _.each(cells, function (cellWeight, index) {
+                var cell = this.row.cells.at(index);
+                if (!cell) {
+                    cell = new panels.model.cell({weight:cellWeight, row:this.model});
+                    this.row.cells.add(cell);
+				} else {
+                	cell.set('weight', cellWeight);
+				}
+            }.bind(this));
 
 			if ( cellCountChanged ) {
 				this.regenerateRowPreview();
@@ -475,8 +495,9 @@ module.exports = panels.view.dialog.extend( {
 
 				// Now lets animate the cells into their new widths
 				this.$( '.preview-cell' ).each( function ( i, el ) {
-					$( el ).animate( {'width': Math.round( thisDialog.row.cells[i] * 1000 ) / 10 + "%"}, 250 );
-					$( el ).find( '.preview-cell-weight' ).html( Math.round( thisDialog.row.cells[i] * 1000 ) / 10 );
+                    var cellWeight = thisDialog.row.cells.at(i).get('weight');
+					$( el ).animate( {'width': Math.round( cellWeight * 1000 ) / 10 + "%"}, 250 );
+					$( el ).find( '.preview-cell-weight' ).html( Math.round( cellWeight * 1000 ) / 10 );
 				} );
 
 				// So the draggable handle is not hidden.
@@ -546,7 +567,6 @@ module.exports = panels.view.dialog.extend( {
 	insertHandler: function () {
 		this.builder.addHistoryEntry( 'row_added' );
 
-		this.model = new panels.model.row();
 		this.updateModel();
 
 		var activeCell = this.builder.getActiveCell( {

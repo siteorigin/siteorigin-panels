@@ -38,7 +38,7 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneWidgets: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', row.cells, {silent: true} );
+		clone.set( 'collection', row.get('cells'), {silent: true} );
 		clone.row = row;
 
 		if ( cloneOptions.cloneWidgets ) {

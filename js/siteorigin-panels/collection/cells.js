@@ -17,6 +17,6 @@ module.exports = Backbone.Collection.extend( {
 		} );
 
 		return totalWeight;
-	}
+	},
 
 } );

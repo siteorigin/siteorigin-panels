@@ -463,8 +463,10 @@ module.exports = Backbone.View.extend( {
 	 * @returns {boolean}
 	 */
 	displayAddRowDialog: function () {
+        var row = new panels.model.row();
+        row.set('cells', new panels.collection.cells([{weight:0.5}, {weight:0.5}]));
 		this.dialogs.row.openDialog();
-		this.dialogs.row.setRowModel(); // Set this to an empty row model
+		this.dialogs.row.setRowModel(row);
 	},
 
 	/**
