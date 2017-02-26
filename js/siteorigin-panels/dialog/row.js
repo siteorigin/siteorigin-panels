@@ -540,6 +540,7 @@ module.exports = panels.view.dialog.extend( {
 		// Set the cells
 		if( ! _.isEmpty( this.model ) ) {
 			this.model.setCells( this.row.cells );
+			// this.model.get('cells').set(this.row.cells.slice());
 		}
 
 		// Update the styles if they've loaded

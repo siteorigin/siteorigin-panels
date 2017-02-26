@@ -1317,6 +1317,7 @@ module.exports = panels.view.dialog.extend( {
 		// Set the cells
 		if( ! _.isEmpty( this.model ) ) {
 			this.model.setCells( this.row.cells );
+			// this.model.get('cells').set(this.row.cells.slice());
 		}
 
 		// Update the styles if they've loaded
@@ -2544,58 +2545,42 @@ module.exports = Backbone.Model.extend( {
 	/**
 	 * Add cells to the model row
 	 *
-	 * @param cells an array of cells, where each object in the array has a weight value
+	 * @param newCells the updated collection of cell models
 	 */
-	setCells: function ( cells ) {
-		var thisModel = this;
+	setCells: function ( newCells ) {
         var currentCells = this.get('cells');
+        var cellsToRemove = [];
 
-		if ( _.isEmpty( currentCells ) ) {
-			// We're adding the initial cells
-			_.each( cells, function ( cellWeight ) {
-				// Add the new cell to the row
-				var cell = new panels.model.cell( {
-					weight: cellWeight,
-					collection: currentCells,
-				} );
-				cell.row = thisModel;
-				currentCells.add( cell );
-			} );
-		}
-		else {
+        currentCells.each(function (cell, i) {
+            var newCell = newCells.at(i);
+            if(newCell) {
+            	cell.set('weight', newCell.get('weight'));
+                // cell.set('styles', newCell.get('styles'));
+            } else {
+				var newParentCell = currentCells.at( newCells.length - 1 );
 
-			if ( cells.length > currentCells.length ) {
-				// We need to add cells
-				for ( var i = currentCells.length; i < cells.length; i ++ ) {
-					var cell = new panels.model.cell( {
-						weight: cells[cells.length + i],
-						collection: currentCells
-					} );
-					cell.row = this;
-                    currentCells.add( cell );
+				// First move all the widgets to the new cell
+				var widgetsToMove = cell.widgets.models.slice();
+				for ( var j = 0; j < widgetsToMove.length; j++ ) {
+					widgetsToMove[j].moveToCell( newParentCell, { silent: false } );
 				}
 
+                cellsToRemove.push(cell);
 			}
-			else if ( cells.length < currentCells.length ) {
-				var newParentCell = currentCells.at( cells.length - 1 );
+        });
 
-				// We need to remove cells
-				_.each( currentCells.slice( cells.length, currentCells.length ), function ( cell ) {
-					var widgetsToMove = cell.widgets.models.slice( 0 );
-					for ( var i = 0; i < widgetsToMove.length; i ++ ) {
-						widgetsToMove[i].moveToCell( newParentCell, { silent: false } );
-					}
+        _.each(cellsToRemove, function(cell) {
+            currentCells.remove(cell);
+        });
 
-					// First move all the widgets to the new cell
-					cell.destroy();
-				} );
-			}
-
-			// Now we need to change the weights of all the cells
-			currentCells.each( function ( cell, i ) {
-				cell.set( 'weight', cells[i] );
-			} );
-		}
+        if( newCells.length > currentCells.length) {
+            _.each(newCells.slice(currentCells.length, newCells.length), function (newCell) {
+        		// TODO: make sure row and collection is set correctly when cell is created then we can just add new cells
+                newCell.set({collection: currentCells});
+                newCell.row = this;
+                currentCells.add(newCell);
+            }.bind(this));
+        }
 
 		// Rescale the cells when we add or remove
 		this.reweightCells();
