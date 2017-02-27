@@ -25,7 +25,7 @@ module.exports = Backbone.Model.extend( {
 	 * @param newCells the updated collection of cell models
 	 */
 	setCells: function ( newCells ) {
-        var currentCells = this.get('cells');
+        var currentCells = this.get('cells') || new panels.collection.cells();
         var cellsToRemove = [];
 
         currentCells.each(function (cell, i) {

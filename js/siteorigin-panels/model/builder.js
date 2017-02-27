@@ -23,9 +23,9 @@ module.exports = Backbone.Model.extend({
     /**
      * Add a new row to this builder.
      *
-     * @param weights
+     * @param cells
      */
-    addRow: function (weights, options) {
+    addRow: function (cells, options) {
         options = _.extend({
             noAnimate: false
         }, options);
@@ -33,9 +33,7 @@ module.exports = Backbone.Model.extend({
         var row = new panels.model.row({
             collection: this.rows
         });
-        var cells = new panels.collection.cells(weights.map(function (weight) {
-            return {weight: weight};
-        }));
+        var cells = new panels.collection.cells(cells);
         cells.each(function (cell) {
             cell.row = row;
         });
@@ -83,7 +81,7 @@ module.exports = Backbone.Model.extend({
 					rows[gi] = [];
 				}
 
-				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+				rows[gi].push( data.grid_cells[ci] );
 			}
 
 			var builderModel = this;
@@ -241,7 +239,9 @@ module.exports = Backbone.Model.extend({
 				// Add the cell info
 				data.grid_cells.push( {
 					grid: ri,
-					weight: cell.get( 'weight' )
+					index: ci,
+					weight: cell.get( 'weight' ),
+					style: cell.get( 'style' ),
 				} );
 
 			} );

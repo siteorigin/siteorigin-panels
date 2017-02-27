@@ -1040,7 +1040,33 @@ module.exports = panels.view.dialog.extend( {
 			}
 
             newCell.click(function () {
-                console.log('load cell styles');
+            	if(this.cellStyles) {
+            		// Update changes before showing the next cell's styles.
+                    this.cellStyles.model.set('style', this.getFormValues( '.so-sidebar .so-visual-styles.so-cell-styles' ).style);
+                    this.cellStyles.remove();
+                }
+                this.cellStyles = new panels.view.styles();
+                this.cellStyles.model = cellModel;
+                this.cellStyles.render( 'cell', this.builder.config.postId, {
+                    builderType: this.builder.config.builderType,
+                    dialog: this
+                } );
+
+                var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
+                this.cellStyles.attach( $rightSidebar );
+
+                // Handle the loading class
+                this.cellStyles.on( 'styles_loaded', function ( hasStyles ) {
+                    // If we have styles remove the loading spinner, else remove the whole empty sidebar.
+                    if ( hasStyles ) {
+                        $rightSidebar.removeClass( 'so-panels-loading' );
+                    } else {
+                        $rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
+                        $rightSidebar.remove();
+                    }
+                }, this );
+                $rightSidebar.addClass( 'so-panels-loading' );
+
             }.bind(this));
 
 			// Make this row weight click editable
@@ -1317,7 +1343,6 @@ module.exports = panels.view.dialog.extend( {
 		// Set the cells
 		if( ! _.isEmpty( this.model ) ) {
 			this.model.setCells( this.row.cells );
-			// this.model.get('cells').set(this.row.cells.slice());
 		}
 
 		// Update the styles if they've loaded
@@ -1325,7 +1350,7 @@ module.exports = panels.view.dialog.extend( {
 			// This is an edit dialog, so there are styles
 			var style = {};
 			try {
-				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
+				style = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch ( err ) {
 				console.log( 'Error retrieving styles - ' + err.message );
@@ -2173,9 +2198,9 @@ module.exports = Backbone.Model.extend({
     /**
      * Add a new row to this builder.
      *
-     * @param weights
+     * @param cells
      */
-    addRow: function (weights, options) {
+    addRow: function (cells, options) {
         options = _.extend({
             noAnimate: false
         }, options);
@@ -2183,9 +2208,7 @@ module.exports = Backbone.Model.extend({
         var row = new panels.model.row({
             collection: this.rows
         });
-        var cells = new panels.collection.cells(weights.map(function (weight) {
-            return {weight: weight};
-        }));
+        var cells = new panels.collection.cells(cells);
         cells.each(function (cell) {
             cell.row = row;
         });
@@ -2233,7 +2256,7 @@ module.exports = Backbone.Model.extend({
 					rows[gi] = [];
 				}
 
-				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+				rows[gi].push( data.grid_cells[ci] );
 			}
 
 			var builderModel = this;
@@ -2391,7 +2414,9 @@ module.exports = Backbone.Model.extend({
 				// Add the cell info
 				data.grid_cells.push( {
 					grid: ri,
-					weight: cell.get( 'weight' )
+					index: ci,
+					weight: cell.get( 'weight' ),
+					style: cell.get( 'style' ),
 				} );
 
 			} );
@@ -2552,7 +2577,7 @@ module.exports = Backbone.Model.extend( {
 	 * @param newCells the updated collection of cell models
 	 */
 	setCells: function ( newCells ) {
-        var currentCells = this.get('cells');
+        var currentCells = this.get('cells') || new panels.collection.cells();
         var cellsToRemove = [];
 
         currentCells.each(function (cell, i) {
@@ -5645,7 +5670,7 @@ module.exports = Backbone.View.extend( {
 			dialog: null
 		}, args );
 
-		this.$el.addClass( 'so-visual-styles' );
+		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
 
 		// Load the form
 		var thisView = this;

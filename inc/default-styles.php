@@ -15,6 +15,12 @@ class SiteOrigin_Panels_Default_Styles {
 			'SiteOrigin_Panels_Default_Styles',
 			'row_style_fields'
 		) );
+
+		add_filter( 'siteorigin_panels_cell_style_fields', array(
+			'SiteOrigin_Panels_Default_Styles',
+			'cell_style_fields'
+		) );
+
 		add_filter( 'siteorigin_panels_widget_style_fields', array(
 			'SiteOrigin_Panels_Default_Styles',
 			'widget_style_fields'
@@ -78,6 +84,7 @@ class SiteOrigin_Panels_Default_Styles {
 			'priority'    => 5,
 		);
 
+		//Should we remove this? Or move it's existing value to new Cell Styles?
 		$fields['cell_class'] = array(
 			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
 			'type'        => 'text',
@@ -207,6 +214,102 @@ class SiteOrigin_Panels_Default_Styles {
 			'group'       => 'design',
 			'description' => __( 'Border color of the row.', 'siteorigin-panels' ),
 			'priority'    => 10,
+		);
+
+		return $fields;
+	}
+
+	static function cell_style_fields( $fields ) {
+		$fields['class'] = array(
+			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
+			'type'        => 'text',
+			'group'       => 'attributes',
+			'description' => __( 'A CSS class', 'siteorigin-panels' ),
+			'priority'    => 5,
+		);
+
+		$fields['widget_css'] = array(
+			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
+			'type'        => 'code',
+			'group'       => 'attributes',
+			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
+			'priority'    => 10,
+		);
+
+		$fields['padding'] = array(
+			'name'        => __( 'Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => __( 'Padding around the entire cell.', 'siteorigin-panels' ),
+			'priority'    => 7,
+			'multiple'    => true
+		);
+
+		$fields['mobile_padding'] = array(
+			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
+			'priority'    => 8,
+			'multiple'    => true
+		);
+
+		// How lets add the design fields
+
+		$fields['background'] = array(
+			'name'        => __( 'Background Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Background color of the cell.', 'siteorigin-panels' ),
+			'priority'    => 5,
+		);
+
+		$fields['background_image_attachment'] = array(
+			'name'        => __( 'Background Image', 'siteorigin-panels' ),
+			'type'        => 'image',
+			'group'       => 'design',
+			'description' => __( 'Background image of the cell.', 'siteorigin-panels' ),
+			'priority'    => 6,
+		);
+
+		$fields['background_display'] = array(
+			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
+			'type'        => 'select',
+			'group'       => 'design',
+			'options'     => array(
+				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
+				'cover'             => __( 'Cover', 'siteorigin-panels' ),
+				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
+				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
+				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
+				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
+			),
+			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
+			'priority'    => 7,
+		);
+
+		$fields['border_color'] = array(
+			'name'        => __( 'Border Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Border color of the cell.', 'siteorigin-panels' ),
+			'priority'    => 10,
+		);
+
+		$fields['font_color'] = array(
+			'name'        => __( 'Font Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of text inside this cell.', 'siteorigin-panels' ),
+			'priority'    => 15,
+		);
+
+		$fields['link_color'] = array(
+			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
+			'priority'    => 16,
 		);
 
 		return $fields;

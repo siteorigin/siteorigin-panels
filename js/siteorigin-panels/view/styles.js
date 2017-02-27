@@ -25,7 +25,7 @@ module.exports = Backbone.View.extend( {
 			dialog: null
 		}, args );
 
-		this.$el.addClass( 'so-visual-styles' );
+		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
 
 		// Load the form
 		var thisView = this;

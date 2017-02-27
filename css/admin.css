@@ -1641,6 +1641,9 @@
   font-style: italic;
   clear: both;
 }
+.so-panels-dialog .so-visual-styles.so-cell-styles {
+  margin-top: 15px;
+}
 .so-panels-dialog .so-content .siteorigin-panels-builder .so-builder-toolbar {
   border: 1px solid #dedede;
 }

@@ -263,7 +263,33 @@ module.exports = panels.view.dialog.extend( {
 			}
 
             newCell.click(function () {
-                console.log('load cell styles');
+            	if(this.cellStyles) {
+            		// Update changes before showing the next cell's styles.
+                    this.cellStyles.model.set('style', this.getFormValues( '.so-sidebar .so-visual-styles.so-cell-styles' ).style);
+                    this.cellStyles.remove();
+                }
+                this.cellStyles = new panels.view.styles();
+                this.cellStyles.model = cellModel;
+                this.cellStyles.render( 'cell', this.builder.config.postId, {
+                    builderType: this.builder.config.builderType,
+                    dialog: this
+                } );
+
+                var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
+                this.cellStyles.attach( $rightSidebar );
+
+                // Handle the loading class
+                this.cellStyles.on( 'styles_loaded', function ( hasStyles ) {
+                    // If we have styles remove the loading spinner, else remove the whole empty sidebar.
+                    if ( hasStyles ) {
+                        $rightSidebar.removeClass( 'so-panels-loading' );
+                    } else {
+                        $rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
+                        $rightSidebar.remove();
+                    }
+                }, this );
+                $rightSidebar.addClass( 'so-panels-loading' );
+
             }.bind(this));
 
 			// Make this row weight click editable
@@ -540,7 +566,6 @@ module.exports = panels.view.dialog.extend( {
 		// Set the cells
 		if( ! _.isEmpty( this.model ) ) {
 			this.model.setCells( this.row.cells );
-			// this.model.get('cells').set(this.row.cells.slice());
 		}
 
 		// Update the styles if they've loaded
@@ -548,7 +573,7 @@ module.exports = panels.view.dialog.extend( {
 			// This is an edit dialog, so there are styles
 			var style = {};
 			try {
-				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
+				style = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch ( err ) {
 				console.log( 'Error retrieving styles - ' + err.message );
