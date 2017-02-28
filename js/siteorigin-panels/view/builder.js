@@ -469,8 +469,8 @@ module.exports = Backbone.View.extend( {
             cell.row = row;
         });
         row.set('cells', cells);
-		this.dialogs.row.openDialog();
 		this.dialogs.row.setRowModel(row);
+		this.dialogs.row.openDialog();
 	},
 
 	/**
