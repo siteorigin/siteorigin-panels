@@ -1040,11 +1040,21 @@ module.exports = panels.view.dialog.extend( {
 			}
 
             newCell.click(function () {
-            	if(this.cellStyles) {
-            		// Update changes before showing the next cell's styles.
-                    this.cellStyles.model.set('style', this.getFormValues( '.so-sidebar .so-visual-styles.so-cell-styles' ).style);
+                if ( ! _.isUndefined( this.cellStyles ) ) {
+					if ( this.cellStyles.stylesLoaded ) {
+                        var style = {};
+                        try {
+                            style = this.getFormValues('.so-sidebar .so-visual-styles.so-cell-styles').style;
+                        }
+                        catch (err) {
+                            console.log('Error retrieving cell styles - ' + err.message);
+                        }
+
+                        this.cellStyles.model.set('style', style);
+                    }
                     this.cellStyles.remove();
                 }
+
                 this.cellStyles = new panels.view.styles();
                 this.cellStyles.model = cellModel;
                 this.cellStyles.render( 'cell', this.builder.config.postId, {
@@ -1345,7 +1355,7 @@ module.exports = panels.view.dialog.extend( {
 			this.model.setCells( this.row.cells );
 		}
 
-		// Update the styles if they've loaded
+		// Update the row styles if they've loaded
 		if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
 			// This is an edit dialog, so there are styles
 			var style = {};
@@ -1353,11 +1363,25 @@ module.exports = panels.view.dialog.extend( {
 				style = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch ( err ) {
-				console.log( 'Error retrieving styles - ' + err.message );
+				console.log( 'Error retrieving row styles - ' + err.message );
 			}
 
 			this.model.set( 'style', style );
 		}
+
+        // Update the cell styles if any are showing.
+        if ( ! _.isUndefined( this.cellStyles ) && this.cellStyles.stylesLoaded ) {
+
+            var style = {};
+            try {
+                style = this.getFormValues( '.so-sidebar .so-visual-styles.so-cell-styles' ).style;
+            }
+            catch ( err ) {
+                console.log( 'Error retrieving cell styles - ' + err.message );
+            }
+
+            this.cellStyles.model.set( 'style', style );
+        }
 
 		if ( args.refresh ) {
 			this.builder.model.refreshPanelsData( args.refreshArgs );
