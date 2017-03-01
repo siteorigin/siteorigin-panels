@@ -307,12 +307,6 @@ class SiteOrigin_Panels_Renderer {
 			// This allows other themes and plugins to add html before the row
 			echo apply_filters( 'siteorigin_panels_before_row', '', $panels_data['grids'][ $gi ], $grid_attributes );
 
-			echo '<div ';
-			foreach ( $grid_attributes as $name => $value ) {
-				echo $name . '="' . esc_attr( $value ) . '" ';
-			}
-			echo '>';
-
 			$style_attributes = array();
 			if ( ! empty( $panels_data['grids'][ $gi ]['style']['class'] ) ) {
 				$style_attributes['class'] = array( 'panel-row-style-' . $panels_data['grids'][ $gi ]['style']['class'] );
@@ -323,6 +317,12 @@ class SiteOrigin_Panels_Renderer {
 			if ( ! empty( $row_style_wrapper ) ) {
 				echo $row_style_wrapper;
 			}
+
+			echo '<div ';
+			foreach ( $grid_attributes as $name => $value ) {
+				echo $name . '="' . esc_attr( $value ) . '" ';
+			}
+			echo '>';
 
 			$collapse_order = ! empty( $panels_data['grids'][ $gi ]['style']['collapse_order'] ) ? $panels_data['grids'][ $gi ]['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
@@ -368,12 +368,12 @@ class SiteOrigin_Panels_Renderer {
 				echo '</div>';
 			}
 
-			echo '</div>';
-
 			// Close the
 			if ( ! empty( $row_style_wrapper ) ) {
 				echo '</div>';
 			}
+
+			echo '</div>';
 
 			// This allows other themes and plugins to add html after the row
 			echo apply_filters( 'siteorigin_panels_after_row', '', $panels_data['grids'][ $gi ], $grid_attributes );
