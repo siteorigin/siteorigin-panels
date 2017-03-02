@@ -202,7 +202,7 @@ class SiteOrigin_Panels {
 	function filter_content( $content ) {
 		global $post;
 
-		if ( empty( $post ) ) {
+		if ( empty( $post ) && ! in_the_loop() ) {
 			return $content;
 		}
 		if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) {
