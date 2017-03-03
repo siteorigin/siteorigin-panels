@@ -37,7 +37,8 @@ class SiteOrigin_Panels_Styles {
 				break;
 
 			case 'cell':
-				$this->render_styles_fields( 'cell', '<h3>' . __( 'Cell Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
+				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
+				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
                 break;
 
 			case 'widget':

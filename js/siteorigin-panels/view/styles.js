@@ -27,6 +27,14 @@ module.exports = Backbone.View.extend( {
 
 		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
 
+        var postArgs = {
+            builderType: args.builderType
+        };
+
+        if ( stylesType === 'cell') {
+            postArgs.index = this.model.get('index');
+        }
+
 		// Load the form
 		$.post(
 			panelsOptions.ajaxurl,
@@ -34,9 +42,7 @@ module.exports = Backbone.View.extend( {
 				action: 'so_panels_style_form',
 				type: stylesType,
 				style: this.model.get( 'style' ),
-				args: JSON.stringify( {
-					builderType: args.builderType
-				} ),
+				args: JSON.stringify( postArgs ),
 				postId: postId
 			},
 			function ( response ) {
