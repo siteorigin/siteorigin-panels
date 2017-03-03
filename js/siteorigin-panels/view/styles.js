@@ -28,7 +28,6 @@ module.exports = Backbone.View.extend( {
 		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
 
 		// Load the form
-		var thisView = this;
 		$.post(
 			panelsOptions.ajaxurl,
 			{
@@ -41,14 +40,14 @@ module.exports = Backbone.View.extend( {
 				postId: postId
 			},
 			function ( response ) {
-				thisView.$el.html( response );
-				thisView.setupFields();
-				thisView.stylesLoaded = true;
-				thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+				this.$el.html( response );
+				this.setupFields();
+				this.stylesLoaded = true;
+				this.trigger( 'styles_loaded', ! _.isEmpty( response ) );
 				if ( ! _.isNull( args.dialog ) ) {
 					args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
 				}
-			}
+			}.bind(this)
 		);
 
 		return this;

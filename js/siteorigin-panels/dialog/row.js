@@ -33,6 +33,8 @@ module.exports = panels.view.dialog.extend( {
 		style: {}
 	},
 
+    cellStylesCache: [],
+
 	initializeDialog: function () {
 		this.on( 'open_dialog', function () {
 			if ( ! _.isUndefined( this.model ) && ! _.isEmpty( this.model.get('cells') ) ) {
@@ -143,6 +145,8 @@ module.exports = panels.view.dialog.extend( {
 
 		// Set the initial value of the cell field.
 		this.$( 'input.so-row-field' ).val( this.model.get('cells').length );
+
+        this.clearCellStylesCache();
 
 		return this;
 	},
@@ -262,7 +266,12 @@ module.exports = panels.view.dialog.extend( {
 				} );
 			}
 
-            newCell.click(function () {
+            newCell.click(function ( event ) {
+
+                var cell = $(event.target);
+                cell.closest( '.row-preview' ).find( '.preview-cell .preview-cell-in' ).removeClass( 'cell-selected' );
+                cell.addClass( 'cell-selected' );
+
                 if ( ! _.isUndefined( this.cellStyles ) ) {
 					if ( this.cellStyles.stylesLoaded ) {
                         var style = {};
@@ -275,30 +284,21 @@ module.exports = panels.view.dialog.extend( {
 
                         this.cellStyles.model.set('style', style);
                     }
-                    this.cellStyles.remove();
+                    this.cellStyles.detach();
                 }
 
-                this.cellStyles = new panels.view.styles();
-                this.cellStyles.model = cellModel;
-                this.cellStyles.render( 'cell', this.builder.config.postId, {
-                    builderType: this.builder.config.builderType,
-                    dialog: this
-                } );
+                this.cellStyles = this.getCellStyles(cellModel);
 
                 var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
                 this.cellStyles.attach( $rightSidebar );
 
-                // Handle the loading class
-                this.cellStyles.on( 'styles_loaded', function ( hasStyles ) {
-                    // If we have styles remove the loading spinner, else remove the whole empty sidebar.
-                    if ( hasStyles ) {
+                if ( ! this.cellStyles.stylesLoaded ) {
+                    // Handle the loading class
+                    this.cellStyles.on( 'styles_loaded', function ( hasStyles ) {
                         $rightSidebar.removeClass( 'so-panels-loading' );
-                    } else {
-                        $rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
-                        $rightSidebar.remove();
-                    }
-                }, this );
-                $rightSidebar.addClass( 'so-panels-loading' );
+                    }, this );
+                    $rightSidebar.addClass( 'so-panels-loading' );
+                }
 
             }.bind(this));
 
@@ -438,6 +438,30 @@ module.exports = panels.view.dialog.extend( {
 
 		this.trigger( 'form_loaded', this );
 	},
+
+    getCellStyles: function( cellModel ) {
+        var cellIndex = cellModel.get('index');
+        var cellStyles = this.cellStylesCache[cellIndex];
+        if ( ! cellStyles ) {
+            cellStyles = new panels.view.styles();
+            cellStyles.model = cellModel;
+            cellStyles.render( 'cell', this.builder.config.postId, {
+                builderType: this.builder.config.builderType,
+                dialog: this
+            } );
+            this.cellStylesCache[cellIndex] = cellStyles;
+        }
+
+        return cellStyles;
+    },
+
+    clearCellStylesCache: function() {
+	    // Call remove() on all cell styles to remove data, event listeners etc.
+        this.cellStylesCache.forEach(function(cellStyles) {
+            cellStyles.remove();
+        });
+        this.cellStylesCache = [];
+    },
 
 	/**
 	 * Visually scale the row widths based on the cell weights

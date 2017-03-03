@@ -1150,12 +1150,19 @@
 					display: inline-block;
 					position: relative;
 					padding: 0 6px;
+					cursor: pointer;
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;
 						min-height: @preview_height;
 						background: #e4eff4;
 						position: relative;
+
+						&.cell-selected {
+							background: #cae7f4 url("images/cell-selected.png") repeat;
+							border-color: #9abcc7;
+							box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+						}
 
 						.preview-cell-weight,
 						.preview-cell-weight-input {

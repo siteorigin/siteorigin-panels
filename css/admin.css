@@ -1125,12 +1125,18 @@
   display: inline-block;
   position: relative;
   padding: 0 6px;
+  cursor: pointer;
 }
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell .preview-cell-in {
   border: 1px solid #bcccd2;
   min-height: 360px;
   background: #e4eff4;
   position: relative;
+}
+.so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell .preview-cell-in.cell-selected {
+  background: #cae7f4 url("images/cell-selected.png") repeat;
+  border-color: #9abcc7;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell .preview-cell-in .preview-cell-weight,
 .so-panels-dialog.so-panels-dialog-row-edit .so-content .row-preview .preview-cell .preview-cell-in .preview-cell-weight-input {
