@@ -32,7 +32,6 @@ module.exports = Backbone.Model.extend( {
             var newCell = newCells.at(i);
             if(newCell) {
             	cell.set('weight', newCell.get('weight'));
-                // cell.set('styles', newCell.get('styles'));
             } else {
 				var newParentCell = currentCells.at( newCells.length - 1 );
 

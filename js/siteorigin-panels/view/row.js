@@ -277,7 +277,7 @@ module.exports = Backbone.View.extend( {
 					var columns = Number( c ) + 1;
 					var weights = [];
 					for ( var i = 0; i < columns; i ++ ) {
-						weights.push( 100 / columns );
+						weights.push( {weight: 100 / columns } );
 					}
 
 					// Create the actual row
@@ -285,7 +285,11 @@ module.exports = Backbone.View.extend( {
 						collection: thisView.collection
 					} );
 
-					newRow.setCells( weights );
+                    var cells = new panels.collection.cells(weights);
+                    cells.each(function (cell) {
+                        cell.row = newRow;
+                    });
+                    newRow.setCells(cells);
 					newRow.builder = thisView.builder;
 
 					thisView.builder.model.rows.add( newRow, {
