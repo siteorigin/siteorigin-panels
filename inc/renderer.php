@@ -595,8 +595,8 @@ class SiteOrigin_Panels_Renderer {
 
 			if ( ! empty( $the_css ) ) {
 				?>
-                <style type="text/css" media="all"
-                       id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
+				<style type="text/css" media="all"
+				       id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
 			}
 		}
 	}
