@@ -937,6 +937,13 @@ module.exports = panels.view.dialog.extend({
 		var thisDialog = this;
 		var rowPreview = this.$('.row-preview');
 
+		var selectedIndex = -1;
+		rowPreview.find('.preview-cell .preview-cell-in').each(function(index, el) {
+			if($(el).is('.cell-selected')) {
+				selectedIndex = index;
+			}
+		});
+
 		rowPreview.empty();
 
 		var timeout;
@@ -945,6 +952,10 @@ module.exports = panels.view.dialog.extend({
 		this.row.cells.each(function (cellModel, i) {
 			var newCell = $(this.cellPreviewTemplate({weight: cellModel.get('weight')}));
 			rowPreview.append(newCell);
+
+			if(i == selectedIndex) {
+				newCell.find('.preview-cell-in').addClass('cell-selected');
+			}
 
 			var prevCell = newCell.prev();
 			var handle;
