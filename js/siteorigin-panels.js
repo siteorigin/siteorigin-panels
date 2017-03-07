@@ -1047,6 +1047,10 @@ module.exports = panels.view.dialog.extend({
 
 			newCell.click(function (event) {
 
+				if($(event.target).is('.preview-cell-weight')) {
+					return;
+				}
+
 				var cell = $(event.target);
 				cell.closest('.row-preview').find('.preview-cell .preview-cell-in').removeClass('cell-selected');
 				cell.addClass('cell-selected');
@@ -1184,7 +1188,9 @@ module.exports = panels.view.dialog.extend({
 
 								// Set the new cell weights and regenerate the preview.
 								if (Math.min.apply(Math, rowWeights) > 0.01) {
-									thisDialog.row.cells = rowWeights;
+									thisDialog.row.cells.each(function (cell, i) {
+										cell.set('weight', rowWeights[i]);
+									});
 								}
 
 								// Now lets animate the cells into their new widths
