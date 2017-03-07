@@ -11,6 +11,7 @@ class SiteOrigin_Panels_Styles {
 
 	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -39,7 +40,7 @@ class SiteOrigin_Panels_Styles {
 			case 'cell':
 				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
 				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
-                break;
+				break;
 
 			case 'widget':
 				$this->render_styles_fields( 'widget', '<h3>' . __( 'Widget Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
@@ -117,32 +118,32 @@ class SiteOrigin_Panels_Styles {
 			}
 
 			?>
-			<div class="style-section-wrapper">
-				<div class="style-section-head">
-					<h4><?php echo esc_html( $group['name'] ) ?></h4>
-				</div>
-				<div class="style-section-fields" style="display: none">
+            <div class="style-section-wrapper">
+                <div class="style-section-head">
+                    <h4><?php echo esc_html( $group['name'] ) ?></h4>
+                </div>
+                <div class="style-section-fields" style="display: none">
 					<?php
 					foreach ( $fields as $field_id => $field ) {
 						$default = isset( $field['default'] ) ? $field['default'] : false;
 
 						if ( $field['group'] == $group_id ) {
 							?>
-							<div class="style-field-wrapper">
-								<label><?php echo $field['name'] ?></label>
-								<div
-									class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
+                            <div class="style-field-wrapper">
+                                <label><?php echo $field['name'] ?></label>
+                                <div
+                                        class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
 									<?php $this->render_style_field( $field, isset( $current[ $field_id ] ) ? $current[ $field_id ] : $default, $field_id ) ?>
-								</div>
-							</div>
+                                </div>
+                            </div>
 							<?php
 
 						}
 
 					}
 					?>
-				</div>
-			</div>
+                </div>
+            </div>
 			<?php
 		}
 
@@ -164,46 +165,46 @@ class SiteOrigin_Panels_Styles {
 
 				if ( ! empty( $field['multiple'] ) ) {
 					?>
-					<div class="measurement-inputs">
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-top"
-							       placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-right"
-							       placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-bottom"
-							       placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-left"
-							       placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>"/>
-						</div>
-					</div>
+                    <div class="measurement-inputs">
+                        <div class="measurement-wrapper">
+                            <input type="text" class="measurement-value measurement-top"
+                                   placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>"/>
+                        </div>
+                        <div class="measurement-wrapper">
+                            <input type="text" class="measurement-value measurement-right"
+                                   placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>"/>
+                        </div>
+                        <div class="measurement-wrapper">
+                            <input type="text" class="measurement-value measurement-bottom"
+                                   placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>"/>
+                        </div>
+                        <div class="measurement-wrapper">
+                            <input type="text" class="measurement-value measurement-left"
+                                   placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>"/>
+                        </div>
+                    </div>
 					<?php
 				} else {
 					?><input type="text" class="measurement-value measurement-value-single"/><?php
 				}
 
 				?>
-				<select
-					class="measurement-unit measurement-unit-<?php echo ! empty( $field['multiple'] ) ? 'multiple' : 'single' ?>">
+                <select
+                        class="measurement-unit measurement-unit-<?php echo ! empty( $field['multiple'] ) ? 'multiple' : 'single' ?>">
 					<?php foreach ( $this->measurements_list() as $measurement ): ?>
-						<option
-							value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
+                        <option
+                                value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
 					<?php endforeach ?>
-				</select>
-				<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-				       value="<?php echo esc_attr( $current ) ?>"/>
+                </select>
+                <input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
+                       value="<?php echo esc_attr( $current ) ?>"/>
 				<?php
 				break;
 
 			case 'color' :
 				?>
-				<input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				       value="<?php echo esc_attr( $current ) ?>" class="so-wp-color-field"/>
+                <input type="text" name="<?php echo esc_attr( $field_name ) ?>"
+                       value="<?php echo esc_attr( $current ) ?>" class="so-wp-color-field"/>
 				<?php
 				break;
 
@@ -214,53 +215,53 @@ class SiteOrigin_Panels_Styles {
 				}
 
 				?>
-				<div class="so-image-selector">
-					<div class="current-image" <?php if ( ! empty( $image ) ) {
+                <div class="so-image-selector">
+                    <div class="current-image" <?php if ( ! empty( $image ) ) {
 						echo 'style="background-image: url(' . esc_url( $image[0] ) . ');"';
 					} ?>>
-					</div>
+                    </div>
 
-					<div class="select-image">
+                    <div class="select-image">
 						<?php _e( 'Select Image', 'siteorigin-panels' ) ?>
-					</div>
-					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-					       value="<?php echo intval( $current ) ?>"/>
-				</div>
-				<a href="#" class="remove-image"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+                    </div>
+                    <input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
+                           value="<?php echo intval( $current ) ?>"/>
+                </div>
+                <a href="#" class="remove-image"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				<?php
 				break;
 
 			case 'url' :
 			case 'text' :
 				?><input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
+                         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
 				break;
 
 			case 'checkbox' :
 				$current = (bool) $current;
 				?>
-				<label class="so-checkbox-label">
-					<input type="checkbox" name="<?php echo esc_attr( $field_name ) ?>" <?php checked( $current ) ?> />
+                <label class="so-checkbox-label">
+                    <input type="checkbox" name="<?php echo esc_attr( $field_name ) ?>" <?php checked( $current ) ?> />
 					<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ) ?>
-				</label>
+                </label>
 				<?php
 				break;
 
 			case 'select' :
 				?>
-				<select name="<?php echo esc_attr( $field_name ) ?>">
+                <select name="<?php echo esc_attr( $field_name ) ?>">
 					<?php foreach ( $field['options'] as $k => $v ) : ?>
-						<option
-							value="<?php echo esc_attr( $k ) ?>" <?php selected( $current, $k ) ?>><?php echo esc_html( $v ) ?></option>
+                        <option
+                                value="<?php echo esc_attr( $k ) ?>" <?php selected( $current, $k ) ?>><?php echo esc_html( $v ) ?></option>
 					<?php endforeach; ?>
-				</select>
+                </select>
 				<?php
 				break;
 
 			case 'textarea' :
 			case 'code' :
 				?><textarea type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				            class="widefat <?php if ( $field['type'] == 'code' ) {
+                            class="widefat <?php if ( $field['type'] == 'code' ) {
 					            echo 'so-field-code';
 				            } ?>" rows="4"><?php echo esc_textarea( $current ) ?></textarea><?php
 				break;

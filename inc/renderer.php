@@ -12,6 +12,7 @@ class SiteOrigin_Panels_Renderer {
 
 	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -66,12 +67,12 @@ class SiteOrigin_Panels_Renderer {
 			for ( $i = 0; $i < $cell_count; $i ++ ) {
 				$cell = $panels_data['grid_cells'][ $ci ++ ];
 
-                $weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
+				$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $grid, $gi, $cell, $ci - 1, $panels_data, $post_id );
 
-                // Add the width and ensure we have correct formatting for CSS.
-                $css->add_cell_css( $post_id, intval( $gi ), $i, '', array(
-                    'width' => round( floatval( $weight ) * 100, 4 ) . '%'
-                ) );
+				// Add the width and ensure we have correct formatting for CSS.
+				$css->add_cell_css( $post_id, intval( $gi ), $i, '', array(
+					'width' => round( floatval( $weight ) * 100, 4 ) . '%'
+				) );
 			}
 
 			// Add the bottom margin to any rows that aren't the last
@@ -89,7 +90,7 @@ class SiteOrigin_Panels_Renderer {
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
 					// Tablet responsiveness
 					$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
-						'width' => '50%',
+						'width'     => '50%',
 						'flex-wrap' => 'wrap',
 					), $panels_tablet_width );
 				}
@@ -97,7 +98,7 @@ class SiteOrigin_Panels_Renderer {
 				// Mobile Responsive
 				$css->add_row_css( $post_id, intval( $gi ), '', array(
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-					'flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 				), $panels_mobile_width );
 
 				$css->add_cell_css( $post_id, intval( $gi ), false, '', array(
@@ -246,8 +247,8 @@ class SiteOrigin_Panels_Renderer {
 		if ( ! empty( $panels_data['grids'] ) && ! empty( $panels_data['grids'] ) ) {
 			foreach ( $panels_data['grids'] as $gi => $grid ) {
 				$grid_cells_by_grid[ $gi ] = array();
-				$gi           = intval( $gi );
-				$grids[ $gi ] = array();
+				$gi                        = intval( $gi );
+				$grids[ $gi ]              = array();
 				for ( $i = 0; $i < $grid['cells']; $i ++ ) {
 					$grids[ $gi ][ $i ] = array();
 				}
@@ -256,9 +257,9 @@ class SiteOrigin_Panels_Renderer {
 
 		foreach ( $panels_data['grid_cells'] as $g_cell ) {
 			if ( empty( $g_cell['index'] ) ) {
-				$grid_cells_by_grid[$g_cell['grid']][] = $g_cell;
+				$grid_cells_by_grid[ $g_cell['grid'] ][] = $g_cell;
 			} else {
-				$grid_cells_by_grid[$g_cell['grid']][$g_cell['index']] = $g_cell;
+				$grid_cells_by_grid[ $g_cell['grid'] ][ $g_cell['index'] ] = $g_cell;
 			}
 		}
 
@@ -343,7 +344,7 @@ class SiteOrigin_Panels_Renderer {
 
 			foreach ( $cells as $ci => $widgets ) {
 
-				$grid_cell = $grid_cells_by_grid[$gi][$ci];
+				$grid_cell = $grid_cells_by_grid[ $gi ][ $ci ];
 
 				$cell_classes = array( 'panel-grid-cell' );
 
@@ -354,7 +355,7 @@ class SiteOrigin_Panels_Renderer {
 					$cell_classes[] = 'panel-grid-cell-mobile-last';
 				}
 				// Themes can add their own styles to cells
-				$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
+				$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
 
 				$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 					'class' => implode( ' ', $cell_classes ),
@@ -367,17 +368,17 @@ class SiteOrigin_Panels_Renderer {
 				}
 				echo '>';
 
-				if( empty( $grid_cell['style']['class'] ) && ! empty( $grid['style']['cell_class'] ) )  {
+				if ( empty( $grid_cell['style']['class'] ) && ! empty( $grid['style']['cell_class'] ) ) {
 					$grid_cell['style']['class'] = $grid['style']['cell_class'];
-                }
+				}
 
 				$cell_style_attributes = array();
 				if ( ! empty( $grid_cell['style']['class'] ) ) {
 					$cell_style_attributes['class'] = array( 'panel-cell-style-' . $grid_cell['style']['class'] );
 				}
 
-				$cell_style_args = ! empty( $grid_cell['style'] ) ? $grid_cell['style'] : array();
-				$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_attributes,  $cell_style_args );
+				$cell_style_args    = ! empty( $grid_cell['style'] ) ? $grid_cell['style'] : array();
+				$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_attributes, $cell_style_args );
 				if ( ! empty( $cell_style_wrapper ) ) {
 					echo $cell_style_wrapper;
 				}
@@ -594,8 +595,8 @@ class SiteOrigin_Panels_Renderer {
 
 			if ( ! empty( $the_css ) ) {
 				?>
-				<style type="text/css" media="all"
-				       id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
+                <style type="text/css" media="all"
+                       id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
 			}
 		}
 	}
