@@ -15,7 +15,7 @@ module.exports = panels.view.dialog.extend({
 
 		// Changing the row
 		'change .row-set-form > *': 'setCellsFromForm',
-		'click .row-set-form button.set-row': 'setCellsFromForm'
+		'click .row-set-form button.set-row': 'setCellsFromForm',
 	},
 
 	dialogClass: 'so-panels-dialog-row-edit',
@@ -65,6 +65,8 @@ module.exports = panels.view.dialog.extend({
 				});
 			}
 		});
+
+		this.on('close_dialog', this.closeHandler);
 	},
 
 	/**
@@ -293,8 +295,7 @@ module.exports = panels.view.dialog.extend({
 				this.cellStyles.attach($rightSidebar);
 
 				if (!this.cellStyles.stylesLoaded) {
-					// Handle the loading class
-					this.cellStyles.on('styles_loaded', function (hasStyles) {
+					this.cellStyles.on('styles_loaded', function () {
 						$rightSidebar.removeClass('so-panels-loading');
 					}, this);
 					$rightSidebar.addClass('so-panels-loading');
@@ -703,6 +704,13 @@ module.exports = panels.view.dialog.extend({
 		this.closeDialog({silent: true});
 
 		return false;
-	}
+	},
+
+	closeHandler: function() {
+		this.clearCellStylesCache();
+		if( ! _.isUndefined(this.cellStyles) ) {
+			this.cellStyles = undefined;
+		}
+	},
 
 });
