@@ -161,7 +161,7 @@ module.exports = panels.view.dialog.extend({
 		var rowPreview = this.$('.row-preview');
 
 		// If no selected cell, select the first cell.
-		var selectedIndex = Math.max(this.getSelectedCellIndex(), 0);
+		var selectedIndex = this.getSelectedCellIndex();
 
 		rowPreview.empty();
 
@@ -455,31 +455,36 @@ module.exports = panels.view.dialog.extend({
 			}
 			this.cellStyles.detach();
 		}
+
 		this.cellStyles = this.getSelectedCellStyles();
 
-		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
-		this.cellStyles.attach($rightSidebar);
+		if ( this.cellStyles ) {
+			var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
+			this.cellStyles.attach( $rightSidebar );
 
-		if (!this.cellStyles.stylesLoaded) {
-			this.cellStyles.on('styles_loaded', function () {
-				$rightSidebar.removeClass('so-panels-loading');
-			}, this);
-			$rightSidebar.addClass('so-panels-loading');
+			if ( !this.cellStyles.stylesLoaded ) {
+				this.cellStyles.on( 'styles_loaded', function () {
+					$rightSidebar.removeClass( 'so-panels-loading' );
+				}, this );
+				$rightSidebar.addClass( 'so-panels-loading' );
+			}
 		}
 	},
 
 	getSelectedCellStyles: function () {
 		var cellIndex = this.getSelectedCellIndex();
-		var cellStyles = this.cellStylesCache[cellIndex];
-		if (!cellStyles) {
-			cellStyles = new panels.view.styles();
-			cellStyles.model = this.row.cells.at( cellIndex );
-			cellStyles.render('cell', this.builder.config.postId, {
-				builderType: this.builder.config.builderType,
-				dialog: this,
-				index: cellIndex,
-			});
-			this.cellStylesCache[cellIndex] = cellStyles;
+		if ( cellIndex > -1 ) {
+			var cellStyles = this.cellStylesCache[cellIndex];
+			if ( !cellStyles ) {
+				cellStyles = new panels.view.styles();
+				cellStyles.model = this.row.cells.at( cellIndex );
+				cellStyles.render( 'cell', this.builder.config.postId, {
+					builderType: this.builder.config.builderType,
+					dialog: this,
+					index: cellIndex,
+				} );
+				this.cellStylesCache[cellIndex] = cellStyles;
+			}
 		}
 
 		return cellStyles;
