@@ -11,6 +11,7 @@ class SiteOrigin_Panels_Styles {
 
 	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -19,7 +20,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	function action_style_form() {
 		$type = $_REQUEST['type'];
-		if ( ! in_array( $type, array( 'row', 'widget' ) ) ) {
+		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
 			exit();
 		}
 		if ( empty( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
@@ -36,8 +37,14 @@ class SiteOrigin_Panels_Styles {
 				$this->render_styles_fields( 'row', '<h3>' . __( 'Row Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
 				break;
 
+			case 'cell':
+				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
+				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
+				break;
+
 			case 'widget':
 				$this->render_styles_fields( 'widget', '<h3>' . __( 'Widget Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
+				break;
 		}
 
 		wp_die();

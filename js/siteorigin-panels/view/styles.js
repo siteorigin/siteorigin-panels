@@ -25,30 +25,35 @@ module.exports = Backbone.View.extend( {
 			dialog: null
 		}, args );
 
-		this.$el.addClass( 'so-visual-styles' );
+		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
+
+        var postArgs = {
+            builderType: args.builderType
+        };
+
+        if ( stylesType === 'cell') {
+            postArgs.index = args.index;
+        }
 
 		// Load the form
-		var thisView = this;
 		$.post(
 			panelsOptions.ajaxurl,
 			{
 				action: 'so_panels_style_form',
 				type: stylesType,
 				style: this.model.get( 'style' ),
-				args: JSON.stringify( {
-					builderType: args.builderType
-				} ),
+				args: JSON.stringify( postArgs ),
 				postId: postId
 			},
 			function ( response ) {
-				thisView.$el.html( response );
-				thisView.setupFields();
-				thisView.stylesLoaded = true;
-				thisView.trigger( 'styles_loaded', ! _.isEmpty( response ) );
+				this.$el.html( response );
+				this.setupFields();
+				this.stylesLoaded = true;
+				this.trigger( 'styles_loaded', ! _.isEmpty( response ) );
 				if ( ! _.isNull( args.dialog ) ) {
 					args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
 				}
-			}
+			}.bind(this)
 		);
 
 		return this;

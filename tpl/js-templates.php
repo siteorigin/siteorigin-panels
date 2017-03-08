@@ -284,9 +284,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% } %}}
 		</h3>
 
-		{{% if( dialogType == 'edit' ) { %}}
-			<div class="right-sidebar"></div>
-		{{% } %}}
+		<div class="right-sidebar"></div>
 
 		<div class="content">
 
