@@ -32,7 +32,7 @@ module.exports = Backbone.View.extend( {
         };
 
         if ( stylesType === 'cell') {
-            postArgs.index = this.model.get('index');
+            postArgs.index = args.index;
         }
 
 		// Load the form

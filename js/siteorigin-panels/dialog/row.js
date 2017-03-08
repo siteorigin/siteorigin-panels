@@ -304,7 +304,7 @@ module.exports = panels.view.dialog.extend({
 					this.cellStyles.detach();
 				}
 
-				this.cellStyles = this.getCellStyles(cellModel);
+				this.cellStyles = this.getCellStyles(cellModel, i);
 
 				var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
 				this.cellStyles.attach($rightSidebar);
@@ -457,15 +457,15 @@ module.exports = panels.view.dialog.extend({
 		this.trigger('form_loaded', this);
 	},
 
-	getCellStyles: function (cellModel) {
-		var cellIndex = cellModel.get('index');
+	getCellStyles: function (cellModel, cellIndex) {
 		var cellStyles = this.cellStylesCache[cellIndex];
 		if (!cellStyles) {
 			cellStyles = new panels.view.styles();
 			cellStyles.model = cellModel;
 			cellStyles.render('cell', this.builder.config.postId, {
 				builderType: this.builder.config.builderType,
-				dialog: this
+				dialog: this,
+				index: cellIndex,
 			});
 			this.cellStylesCache[cellIndex] = cellStyles;
 		}
