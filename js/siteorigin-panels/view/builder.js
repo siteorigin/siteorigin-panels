@@ -640,7 +640,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	updateEditorContent: function ( content ) {
 		// Switch back to the standard editor
-		if ( this.config.editorType !== 'tinymce' || _.isUndefined( tinyMCE ) || _.isNull( tinyMCE.get( "content" ) ) ) {
+		if ( this.config.editorType !== 'tinyMCE' || typeof tinyMCE === 'undefined' || _.isNull( tinyMCE.get( "content" ) ) ) {
 			var $editor = $( this.config.editorId );
 			$editor.val( content ).trigger( 'change' ).trigger( 'keyup' );
 		} else {
@@ -687,7 +687,7 @@ module.exports = Backbone.View.extend( {
 		var editorContent = '';
 		var editor;
 
-		if ( ! _.isUndefined( tinyMCE ) ) {
+		if ( typeof tinyMCE !== 'undefined' ) {
 			editor = tinyMCE.get( 'content' );
 		}
 		if ( editor && _.isFunction( editor.getContent ) ) {
