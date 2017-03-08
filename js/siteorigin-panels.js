@@ -857,40 +857,38 @@ module.exports = panels.view.dialog.extend({
 	/**
 	 * Render the new row dialog
 	 */
-	render: function (dialogType) {
+	render: function () {
 		this.renderDialog(this.parseDialogContent($('#siteorigin-panels-dialog-row').html(), {dialogType: this.dialogType}));
 
-		if (this.dialogType === 'edit') {
-			// Now we need to attach the style window
-			this.styles = new panels.view.styles();
-			this.styles.model = this.model;
-			this.styles.render('row', this.builder.config.postId, {
-				builderType: this.builder.config.builderType,
-				dialog: this
-			});
+		// Now we need to attach the style window
+		this.styles = new panels.view.styles();
+		this.styles.model = this.model;
+		this.styles.render('row', this.builder.config.postId, {
+			builderType: this.builder.config.builderType,
+			dialog: this
+		});
 
-			if (!this.builder.supports('addRow')) {
-				this.$('.so-buttons .so-duplicate').remove();
-			}
-			if (!this.builder.supports('deleteRow')) {
-				this.$('.so-buttons .so-delete').remove();
-			}
-
-			var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
-			this.styles.attach($rightSidebar);
-
-			// Handle the loading class
-			this.styles.on('styles_loaded', function (hasStyles) {
-				// If we have styles remove the loading spinner, else remove the whole empty sidebar.
-				if (hasStyles) {
-					$rightSidebar.removeClass('so-panels-loading');
-				} else {
-					$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
-					$rightSidebar.remove();
-				}
-			}, this);
-			$rightSidebar.addClass('so-panels-loading');
+		if (!this.builder.supports('addRow')) {
+			this.$('.so-buttons .so-duplicate').remove();
 		}
+		if (!this.builder.supports('deleteRow')) {
+			this.$('.so-buttons .so-delete').remove();
+		}
+
+		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
+		this.styles.attach($rightSidebar);
+
+		// Handle the loading class
+		this.styles.on('styles_loaded', function (hasStyles) {
+			// If we have styles remove the loading spinner, else remove the whole empty sidebar.
+			if (hasStyles) {
+				$rightSidebar.removeClass('so-panels-loading');
+			} else {
+				$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
+				$rightSidebar.remove();
+			}
+		}, this);
+		$rightSidebar.addClass('so-panels-loading');
 
 		if (!_.isUndefined(this.model)) {
 			// Set the initial value of the
