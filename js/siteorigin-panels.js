@@ -937,12 +937,8 @@ module.exports = panels.view.dialog.extend({
 		var thisDialog = this;
 		var rowPreview = this.$('.row-preview');
 
-		var selectedIndex = -1;
-		rowPreview.find('.preview-cell .preview-cell-in').each(function(index, el) {
-			if($(el).is('.cell-selected')) {
-				selectedIndex = index;
-			}
-		});
+		// If no selected cell, select the first cell.
+		var selectedIndex = Math.max(this.getSelectedCellIndex(), 0);
 
 		rowPreview.empty();
 
@@ -1058,7 +1054,7 @@ module.exports = panels.view.dialog.extend({
 
 			newCell.click(function (event) {
 
-				if($(event.target).is('.preview-cell-weight')) {
+				if ( ! ( $(event.target).is('.preview-cell') || $(event.target).is('.preview-cell-in') ) ) {
 					return;
 				}
 
@@ -1066,32 +1062,7 @@ module.exports = panels.view.dialog.extend({
 				cell.closest('.row-preview').find('.preview-cell .preview-cell-in').removeClass('cell-selected');
 				cell.addClass('cell-selected');
 
-				if (!_.isUndefined(this.cellStyles)) {
-					if (this.cellStyles.stylesLoaded) {
-						var style = {};
-						try {
-							style = this.getFormValues('.so-sidebar .so-visual-styles.so-cell-styles').style;
-						}
-						catch (err) {
-							console.log('Error retrieving cell styles - ' + err.message);
-						}
-
-						this.cellStyles.model.set('style', style);
-					}
-					this.cellStyles.detach();
-				}
-
-				this.cellStyles = this.getCellStyles(cellModel, i);
-
-				var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
-				this.cellStyles.attach($rightSidebar);
-
-				if (!this.cellStyles.stylesLoaded) {
-					this.cellStyles.on('styles_loaded', function () {
-						$rightSidebar.removeClass('so-panels-loading');
-					}, this);
-					$rightSidebar.addClass('so-panels-loading');
-				}
+				this.openSelectedCellStyles();
 
 			}.bind(this));
 
@@ -1231,14 +1202,55 @@ module.exports = panels.view.dialog.extend({
 
 		}, this);
 
+		this.openSelectedCellStyles();
+
 		this.trigger('form_loaded', this);
 	},
 
-	getCellStyles: function (cellModel, cellIndex) {
+	getSelectedCellIndex: function() {
+		var selectedIndex = -1;
+		this.$('.preview-cell .preview-cell-in').each(function(index, el) {
+			if($(el).is('.cell-selected')) {
+				selectedIndex = index;
+			}
+		});
+		return selectedIndex;
+	},
+
+	openSelectedCellStyles: function() {
+		if (!_.isUndefined(this.cellStyles)) {
+			if (this.cellStyles.stylesLoaded) {
+				var style = {};
+				try {
+					style = this.getFormValues('.so-sidebar .so-visual-styles.so-cell-styles').style;
+				}
+				catch (err) {
+					console.log('Error retrieving cell styles - ' + err.message);
+				}
+
+				this.cellStyles.model.set('style', style);
+			}
+			this.cellStyles.detach();
+		}
+		this.cellStyles = this.getSelectedCellStyles();
+
+		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
+		this.cellStyles.attach($rightSidebar);
+
+		if (!this.cellStyles.stylesLoaded) {
+			this.cellStyles.on('styles_loaded', function () {
+				$rightSidebar.removeClass('so-panels-loading');
+			}, this);
+			$rightSidebar.addClass('so-panels-loading');
+		}
+	},
+
+	getSelectedCellStyles: function () {
+		var cellIndex = this.getSelectedCellIndex();
 		var cellStyles = this.cellStylesCache[cellIndex];
 		if (!cellStyles) {
 			cellStyles = new panels.view.styles();
-			cellStyles.model = cellModel;
+			cellStyles.model = this.row.cells.at( cellIndex );
 			cellStyles.render('cell', this.builder.config.postId, {
 				builderType: this.builder.config.builderType,
 				dialog: this,
