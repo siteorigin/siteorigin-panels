@@ -320,7 +320,7 @@ class SiteOrigin_Panels_Renderer {
 			echo apply_filters( 'siteorigin_panels_before_row', '', $grid, $grid_attributes );
 
 			// Themes can add their own attributes to the style wrapper
-			$row_style_wrapper = $this->start_style_wrapper( 'row', array(), ! empty( $grid['style'] ) ? $grid['style'] : array() );
+			$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $grid['style'] ) ? $grid['style'] : array(), $post_id . '-' . $gi );
 			if ( ! empty( $row_style_wrapper ) ) {
 				echo $row_style_wrapper;
 			}
@@ -369,13 +369,17 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				$cell_style_args    = ! empty( $grid_cell['style'] ) ? $grid_cell['style'] : array();
-				$cell_style_wrapper = $this->start_style_wrapper( 'cell', array(), $cell_style_args );
+				$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_args, $post_id . '-' . $gi . '-' . $ci );
 				if ( ! empty( $cell_style_wrapper ) ) {
 					echo $cell_style_wrapper;
 				}
 
 				foreach ( $widgets as $wi => $widget_info ) {
-					$widget_style_wrapper = $this->start_style_wrapper( 'widget', array(), ! empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
+					$widget_style_wrapper = $this->start_style_wrapper(
+						'widget',
+						! empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array(),
+						$post_id . '-' . $gi . '-' . $ci . '-' . $wi
+					);
 					$this->the_widget(
 						$widget_info['panels_info'],
 						$widget_info,
@@ -425,13 +429,13 @@ class SiteOrigin_Panels_Renderer {
 	/**
 	 * Echo the style wrapper and return if there was a wrapper
 	 *
-	 * @param $name
-	 * @param $style_attributes HTML attributes added to the style wrapper
-	 * @param array $style_args
+	 * @param $name The name of the style wrapper
+	 * @param array $style_args The style wrapper args. Used as an argument for siteorigin_panels_{$name}_style_attributes
+	 * @param string|bool $for An identifier of what this style wrapper is for
 	 *
 	 * @return bool Is there a style wrapper
 	 */
-	function start_style_wrapper( $name, $style_attributes, $style_args = array() ) {
+	private function start_style_wrapper( $name, $style_args = array(), $for = false ) {
 
 		$style_wrapper = '';
 
@@ -442,7 +446,7 @@ class SiteOrigin_Panels_Renderer {
 			$style_attributes['style'] = '';
 		}
 
-		$style_attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $style_attributes, $style_args );
+		$style_attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', array(), $style_args );
 
 		if ( empty( $style_attributes['class'] ) ) {
 			unset( $style_attributes['class'] );
@@ -456,6 +460,9 @@ class SiteOrigin_Panels_Renderer {
 				$style_attributes['class'] = array();
 			}
 			$style_attributes['class'][] = 'panel-' . $name . '-style';
+			if( ! empty( $for ) ) {
+				$style_attributes['class'][] = 'panel-' . $name . '-style-for-' . sanitize_html_class( $for );
+			}
 			$style_attributes['class']   = array_unique( $style_attributes['class'] );
 
 			// Filter and sanitize the classes
