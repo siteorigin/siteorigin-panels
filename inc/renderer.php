@@ -362,6 +362,8 @@ class SiteOrigin_Panels_Renderer {
 					'id'    => 'pgc-' . $post_id . '-' . $gi . '-' . $ci
 				), $panels_data );
 
+				echo apply_filters( 'siteorigin_panels_before_cell', '', $grid_cell, $cell_attributes );
+
 				echo '<div ';
 				foreach ( $cell_attributes as $name => $value ) {
 					echo $name . '="' . esc_attr( $value ) . '" ';
@@ -393,6 +395,8 @@ class SiteOrigin_Panels_Renderer {
 					echo '</div>';
 				}
 				echo '</div>';
+
+				echo apply_filters( 'siteorigin_panels_after_cell', '', $grid_cell, $cell_attributes );
 			}
 
 			// Close the
