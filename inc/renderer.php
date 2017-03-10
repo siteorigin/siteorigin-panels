@@ -193,6 +193,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @return string
 	 */
 	function render( $post_id = false, $enqueue_css = true, $panels_data = false ) {
+
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 		}
@@ -208,30 +209,9 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		if ( empty( $panels_data ) ) {
-			if ( strpos( $post_id, 'prebuilt:' ) === 0 ) {
-				list( $null, $prebuilt_id ) = explode( ':', $post_id, 2 );
-				$layouts     = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
-				$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : array();
-			} else if ( $post_id == 'home' ) {
-				$page_id = get_option( 'page_on_front' );
-				if ( empty( $page_id ) ) {
-					$page_id = get_option( 'siteorigin_panels_home_page_id' );
-				}
-
-				$panels_data = ! empty( $page_id ) ? get_post_meta( $page_id, 'panels_data', true ) : null;
-
-				if ( is_null( $panels_data ) ) {
-					// Load the default layout
-					$layouts     = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
-					$prebuilt_id = siteorigin_panels_setting( 'home-page-default' ) ? siteorigin_panels_setting( 'home-page-default' ) : 'home';
-
-					$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : current( $layouts );
-				}
-			} else {
-				if ( post_password_required( $post_id ) ) {
-					return false;
-				}
-				$panels_data = get_post_meta( $post_id, 'panels_data', true );
+			$panels_data = $this->get_panels_data_for_post( $post_id );
+			if ( $panels_data === false ) {
+				return false;
 			}
 		}
 
@@ -240,47 +220,14 @@ class SiteOrigin_Panels_Renderer {
 			return '';
 		}
 
-		$grid_cells_by_grid = array();
 
-		// Create the skeleton of the grids
-		$grids = array();
-		if ( ! empty( $panels_data['grids'] ) && ! empty( $panels_data['grids'] ) ) {
-			foreach ( $panels_data['grids'] as $gi => $grid ) {
-				$grid_cells_by_grid[ $gi ] = array();
-				$gi                        = intval( $gi );
-				$grids[ $gi ]              = array();
-				for ( $i = 0; $i < $grid['cells']; $i ++ ) {
-					$grids[ $gi ][ $i ] = array();
-				}
-			}
-		}
+		$grids = $this->get_grids_skeleton( $panels_data['grids'] );
 
-		foreach ( $panels_data['grid_cells'] as $g_cell ) {
-			if ( empty( $g_cell['index'] ) ) {
-				$grid_cells_by_grid[ $g_cell['grid'] ][] = $g_cell;
-			} else {
-				$grid_cells_by_grid[ $g_cell['grid'] ][ $g_cell['index'] ] = $g_cell;
-			}
-		}
+		$panels_data['widgets'] = $this->migrate_widgets_data( $panels_data['widgets'] );
 
-		// We need this to migrate from the old $panels_data that put widget meta into the "info" key instead of "panels_info"
-		if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
-			foreach ( $panels_data['widgets'] as $i => $widget ) {
-				if ( empty( $panels_data['widgets'][ $i ]['panels_info'] ) ) {
-					$panels_data['widgets'][ $i ]['panels_info'] = $panels_data['widgets'][ $i ]['info'];
-					unset( $panels_data['widgets'][ $i ]['info'] );
-				}
+		$grids = $this->populate_grids_widgets( $grids, $panels_data['widgets'] );
 
-				$panels_data['widgets'][ $i ]['panels_info']['widget_index'] = $i;
-			}
-		}
-
-		if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
-			foreach ( $panels_data['widgets'] as $widget ) {
-				// Put the widgets in the grids
-				$grids[ intval( $widget['panels_info']['grid'] ) ][ intval( $widget['panels_info']['cell'] ) ][] = $widget;
-			}
-		}
+		$grid_cells_by_grid = $this->get_grid_cells_by_grid( $panels_data['grid_cells'] );
 
 		ob_start();
 
@@ -621,5 +568,97 @@ class SiteOrigin_Panels_Renderer {
 			wp_enqueue_style( 'siteorigin-panels-front' );
 			$this->add_inline_css( get_the_ID(), $this->generate_css( get_the_ID() ) );
 		}
+	}
+
+	private function get_panels_data_for_post( $post_id ) {
+		$panels_data = array();
+		if ( strpos( $post_id, 'prebuilt:' ) === 0 ) {
+			list( $null, $prebuilt_id ) = explode( ':', $post_id, 2 );
+			$layouts     = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
+			$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : array();
+		} else if ( $post_id == 'home' ) {
+			$page_id = get_option( 'page_on_front' );
+			if ( empty( $page_id ) ) {
+				$page_id = get_option( 'siteorigin_panels_home_page_id' );
+			}
+
+			$panels_data = ! empty( $page_id ) ? get_post_meta( $page_id, 'panels_data', true ) : null;
+
+			if ( is_null( $panels_data ) ) {
+				// Load the default layout
+				$layouts     = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
+				$prebuilt_id = siteorigin_panels_setting( 'home-page-default' ) ? siteorigin_panels_setting( 'home-page-default' ) : 'home';
+
+				$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : current( $layouts );
+			}
+		} else {
+			if ( post_password_required( $post_id ) ) {
+				return false;
+			}
+			$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		}
+
+		return $panels_data;
+	}
+
+	private function get_grids_skeleton( $panels_grids ) {
+		// Create the skeleton of the grids
+		$grids = array();
+		if ( ! empty( $panels_grids ) && ! empty( $panels_grids ) ) {
+			foreach ( $panels_grids as $gi => $grid ) {
+				$gi                        = intval( $gi );
+				$grids[ $gi ]              = array();
+				for ( $i = 0; $i < $grid['cells']; $i ++ ) {
+					$grids[ $gi ][ $i ] = array();
+				}
+			}
+		}
+
+		return $grids;
+	}
+
+	private function migrate_widgets_data( $panels_widgets ) {
+
+		// We need this to migrate from the old $panels_data that put widget meta into the "info" key instead of "panels_info"
+		if ( ! empty( $panels_widgets ) && is_array( $panels_widgets ) ) {
+			foreach ( $panels_widgets as $i => $widget ) {
+				if ( empty( $panels_widgets[ $i ]['panels_info'] ) ) {
+					$panels_widgets[ $i ]['panels_info'] = $panels_widgets[ $i ]['info'];
+					unset( $panels_widgets[ $i ]['info'] );
+				}
+
+				$panels_widgets[ $i ]['panels_info']['widget_index'] = $i;
+			}
+		}
+
+		return $panels_widgets;
+	}
+
+	private function populate_grids_widgets( $grids, $widgets ) {
+
+		if ( ! empty( $widgets ) && is_array( $widgets ) ) {
+			foreach ( $widgets as $widget ) {
+				// Put the widgets in the grids
+				$grids[ intval( $widget['panels_info']['grid'] ) ][ intval( $widget['panels_info']['cell'] ) ][] = $widget;
+			}
+		}
+
+		return $grids;
+	}
+
+	private function get_grid_cells_by_grid( $panels_grid_cells ) {
+		$grid_cells_by_grid = array();
+		foreach ( $panels_grid_cells as $g_cell ) {
+			if ( empty( $grid_cells_by_grid[ $g_cell['grid'] ] ) ) {
+				$grid_cells_by_grid[ $g_cell['grid'] ] = array();
+			}
+			if ( empty( $g_cell['index'] ) ) {
+				$grid_cells_by_grid[ $g_cell['grid'] ][] = $g_cell;
+			} else {
+				$grid_cells_by_grid[ $g_cell['grid'] ][ $g_cell['index'] ] = $g_cell;
+			}
+		}
+
+		return $grid_cells_by_grid;
 	}
 }
