@@ -285,13 +285,14 @@ class SiteOrigin_Panels_Renderer {
 		ob_start();
 
 		// Add the panel layout wrapper
-		$panel_layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array(), $post_id, $panels_data );
-		$panel_layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
-			'class' => implode( ' ', $panel_layout_classes ),
+		$layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array(), $post_id, $panels_data );
+		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
+			'class' => implode( ' ', $layout_classes ),
 			'id'    => 'pl-' . $post_id
 		), $post_id, $panels_data );
+
 		echo '<div';
-		foreach ( $panel_layout_attributes as $name => $value ) {
+		foreach ( $layout_attributes as $name => $value ) {
 			if ( $value ) {
 				echo ' ' . $name . '="' . esc_attr( $value ) . '"';
 			}
@@ -309,23 +310,17 @@ class SiteOrigin_Panels_Renderer {
 
 			$grid = $panels_data['grids'][ $gi ];
 
-			$grid_classes = apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $grid );
-
+			$grid_classes = implode( ' ', apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $grid ) );
 			$grid_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
-				'class' => implode( ' ', $grid_classes ),
+				'class' => $grid_classes,
 				'id'    => 'pg-' . $post_id . '-' . $gi,
 			), $grid );
 
 			// This allows other themes and plugins to add html before the row
 			echo apply_filters( 'siteorigin_panels_before_row', '', $grid, $grid_attributes );
 
-			$row_style_attributes = array();
-			if ( ! empty( $grid['style']['class'] ) ) {
-				$row_style_attributes['class'] = array( 'panel-row-style-' . $grid['style']['class'] );
-			}
-
 			// Themes can add their own attributes to the style wrapper
-			$row_style_wrapper = $this->start_style_wrapper( 'row', $row_style_attributes, ! empty( $grid['style'] ) ? $grid['style'] : array() );
+			$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $grid['style'] ) ? $grid['style'] : array(), $post_id . '-' . $gi );
 			if ( ! empty( $row_style_wrapper ) ) {
 				echo $row_style_wrapper;
 			}
@@ -356,7 +351,6 @@ class SiteOrigin_Panels_Renderer {
 				}
 				// Themes can add their own styles to cells
 				$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
-
 				$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 					'class' => implode( ' ', $cell_classes ),
 					'id'    => 'pgc-' . $post_id . '-' . $gi . '-' . $ci
@@ -374,21 +368,29 @@ class SiteOrigin_Panels_Renderer {
 					$grid_cell['style']['class'] = $grid['style']['cell_class'];
 				}
 
-				$cell_style_attributes = array();
-				if ( ! empty( $grid_cell['style']['class'] ) ) {
-					$cell_style_attributes['class'] = array( 'panel-cell-style-' . $grid_cell['style']['class'] );
-				}
-
 				$cell_style_args    = ! empty( $grid_cell['style'] ) ? $grid_cell['style'] : array();
-				$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_attributes, $cell_style_args );
+				$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_args, $post_id . '-' . $gi . '-' . $ci );
 				if ( ! empty( $cell_style_wrapper ) ) {
 					echo $cell_style_wrapper;
 				}
 
-				foreach ( $widgets as $pi => $widget_info ) {
-					// TODO this wrapper should go in the before/after widget arguments
-					$widget_style_wrapper = $this->start_style_wrapper( 'widget', array(), ! empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array() );
-					$this->the_widget( $widget_info['panels_info'], $widget_info, $gi, $ci, $pi, $pi == 0, $pi == count( $widgets ) - 1, $post_id, $widget_style_wrapper );
+				foreach ( $widgets as $wi => $widget_info ) {
+					$widget_style_wrapper = $this->start_style_wrapper(
+						'widget',
+						! empty( $widget_info['panels_info']['style'] ) ? $widget_info['panels_info']['style'] : array(),
+						$post_id . '-' . $gi . '-' . $ci . '-' . $wi
+					);
+					$this->the_widget(
+						$widget_info['panels_info'],
+						$widget_info,
+						$gi,
+						$ci,
+						$wi,
+						$wi == 0,
+						$wi == count( $widgets ) - 1,
+						$post_id,
+						$widget_style_wrapper
+					);
 				}
 
 				if ( ! empty( $cell_style_wrapper ) ) {
@@ -399,12 +401,12 @@ class SiteOrigin_Panels_Renderer {
 				echo apply_filters( 'siteorigin_panels_after_cell', '', $grid_cell, $cell_attributes );
 			}
 
+			echo '</div>';
+
 			// Close the
 			if ( ! empty( $row_style_wrapper ) ) {
 				echo '</div>';
 			}
-
-			echo '</div>';
 
 			// This allows other themes and plugins to add html after the row
 			echo apply_filters( 'siteorigin_panels_after_row', '', $grid, $grid_attributes );
@@ -427,13 +429,13 @@ class SiteOrigin_Panels_Renderer {
 	/**
 	 * Echo the style wrapper and return if there was a wrapper
 	 *
-	 * @param $name
-	 * @param $style_attributes
-	 * @param array $style_args
+	 * @param $name The name of the style wrapper
+	 * @param array $style_args The style wrapper args. Used as an argument for siteorigin_panels_{$name}_style_attributes
+	 * @param string|bool $for An identifier of what this style wrapper is for
 	 *
 	 * @return bool Is there a style wrapper
 	 */
-	function start_style_wrapper( $name, $style_attributes, $style_args = array() ) {
+	private function start_style_wrapper( $name, $style_args = array(), $for = false ) {
 
 		$style_wrapper = '';
 
@@ -444,7 +446,7 @@ class SiteOrigin_Panels_Renderer {
 			$style_attributes['style'] = '';
 		}
 
-		$style_attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $style_attributes, $style_args );
+		$style_attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', array(), $style_args );
 
 		if ( empty( $style_attributes['class'] ) ) {
 			unset( $style_attributes['class'] );
@@ -458,6 +460,9 @@ class SiteOrigin_Panels_Renderer {
 				$style_attributes['class'] = array();
 			}
 			$style_attributes['class'][] = 'panel-' . $name . '-style';
+			if( ! empty( $for ) ) {
+				$style_attributes['class'][] = 'panel-' . $name . '-style-for-' . sanitize_html_class( $for );
+			}
 			$style_attributes['class']   = array_unique( $style_attributes['class'] );
 
 			// Filter and sanitize the classes
@@ -485,15 +490,15 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @param array $widget_info The widget info.
 	 * @param array $instance The widget instance
-	 * @param int $grid The grid number.
-	 * @param int $cell The cell number.
-	 * @param int $panel the panel number.
+	 * @param int $grid_index The grid index.
+	 * @param int $cell_index The cell index.
+	 * @param int $widget_index The index of this widget.
 	 * @param bool $is_first Is this the first widget in the cell.
 	 * @param bool $is_last Is this the last widget in the cell.
 	 * @param bool $post_id
 	 * @param string $style_wrapper The start of the style wrapper
 	 */
-	function the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
+	function the_widget( $widget_info, $instance, $grid_index, $cell_index, $widget_index, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
 
 		global $wp_widget_factory;
 
@@ -524,7 +529,7 @@ class SiteOrigin_Panels_Renderer {
 		if ( $is_last ) {
 			$classes[] = 'panel-last-child';
 		}
-		$id = 'panel-' . $post_id . '-' . $grid . '-' . $cell . '-' . $panel;
+		$id = 'panel-' . $post_id . '-' . $grid_index . '-' . $cell_index . '-' . $widget_index;
 
 		// Filter and sanitize the classes
 		$classes = apply_filters( 'siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info );
@@ -546,7 +551,7 @@ class SiteOrigin_Panels_Renderer {
 			'after_widget'  => '</div>',
 			'before_title'  => $before_title,
 			'after_title'   => $after_title,
-			'widget_id'     => 'widget-' . $grid . '-' . $cell . '-' . $panel
+			'widget_id'     => 'widget-' . $grid_index . '-' . $cell_index . '-' . $widget_index
 		);
 
 		// Let other themes and plugins change the arguments that go to the widget class.

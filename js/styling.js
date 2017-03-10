@@ -12,21 +12,23 @@ jQuery( function ( $ ) {
 
 		$( '.siteorigin-panels-stretch.panel-row-style' ).each( function () {
 			var $$ = $( this );
+
+			// Reset all the styles associated with row stretching
 			$$.css( {
-				'margin-left': 0,
-				'margin-right': 0,
-				'padding-left': 0,
-				'padding-right': 0
+				'margin-left': '',
+				'margin-right': '',
+				'padding-left': '',
+				'padding-right': ''
 			} );
 
-			var leftSpace = $$.offset().left - fullContainer.offset().left;
-			var rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
+			var leftSpace = $$.offset().left - fullContainer.offset().left,
+				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
 			$$.css( {
 				'margin-left': - leftSpace,
 				'margin-right': - rightSpace,
-				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : 0,
-				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : 0
+				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : '',
+				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : ''
 			} );
 
 			var cells = $$.find( '> .panel-grid-cell' );

@@ -54,7 +54,12 @@ class SiteOrigin_Panels_Css_Builder {
 	public function add_row_css( $li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
-		if ( $ri === false ) {
+		// Special case of `> .panel-row-style` sub_selector
+		if( $sub_selector == '> .panel-row-style' ) {
+			$sub_selector = false;
+			$selector[] = '#pl-' . $li;
+			$selector[] = '.panel-row-style-for-' . $li . '-' . $ri;
+		} else if ( $ri === false ) {
 			// This applies to all rows
 			$selector[] = '#pl-' . $li;
 			$selector[] = '.panel-grid';
