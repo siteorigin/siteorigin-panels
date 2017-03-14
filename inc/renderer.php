@@ -220,8 +220,6 @@ class SiteOrigin_Panels_Renderer {
 			return '';
 		}
 
-		$panels_data['widgets'] = $this->migrate_widgets_data( $panels_data['widgets'] );
-
 		$panels_layout_data = $this->get_panels_layout_data( $panels_data );
 
 		ob_start();
@@ -296,10 +294,10 @@ class SiteOrigin_Panels_Renderer {
 				$style_attributes['class'] = array();
 			}
 			$style_attributes['class'][] = 'panel-' . $name . '-style';
-			if( ! empty( $for ) ) {
+			if ( ! empty( $for ) ) {
 				$style_attributes['class'][] = 'panel-' . $name . '-style-for-' . sanitize_html_class( $for );
 			}
-			$style_attributes['class']   = array_unique( $style_attributes['class'] );
+			$style_attributes['class'] = array_unique( $style_attributes['class'] );
 
 			// Filter and sanitize the classes
 			$style_attributes['class'] = apply_filters( 'siteorigin_panels_' . $name . '_style_classes', $style_attributes['class'], $style_attributes, $style_args );
@@ -459,6 +457,13 @@ class SiteOrigin_Panels_Renderer {
 		}
 	}
 
+	/**
+	 * Retrieve panels data for a post or a prebuilt layout or the home page layout.
+	 *
+	 * @param string $post_id
+	 *
+	 * @return array
+	 */
 	private function get_panels_data_for_post( $post_id ) {
 		if ( strpos( $post_id, 'prebuilt:' ) === 0 ) {
 			list( $null, $prebuilt_id ) = explode( ':', $post_id, 2 );
@@ -489,29 +494,19 @@ class SiteOrigin_Panels_Renderer {
 		return $panels_data;
 	}
 
-	private function migrate_widgets_data( $panels_widgets ) {
-
-		// We need this to migrate from the old $panels_data that put widget meta into the "info" key instead of "panels_info"
-		if ( ! empty( $panels_widgets ) && is_array( $panels_widgets ) ) {
-			foreach ( $panels_widgets as $i => $widget ) {
-				if ( empty( $panels_widgets[ $i ]['panels_info'] ) ) {
-					$panels_widgets[ $i ]['panels_info'] = $panels_widgets[ $i ]['info'];
-					unset( $panels_widgets[ $i ]['info'] );
-				}
-
-				$panels_widgets[ $i ]['panels_info']['widget_index'] = $i;
-			}
-		}
-
-		return $panels_widgets;
-	}
-
+	/**
+	 * Transform flat panels data into a hierarchical structure.
+	 *
+	 * @param array $panels_data Flat panels data containing `grids`, `grid_cells`, and `widgets`.
+	 *
+	 * @return array Hierarchical structure of rows => cells => widgets.
+	 */
 	private function get_panels_layout_data( $panels_data ) {
 		$panels_layout_data = array();
 
 		foreach ( $panels_data['grids'] as $gi => $grid ) {
-			$row = array( 'row' => $grid, 'cells' => array() );
-			$ci = 0;
+			$row        = array( 'row' => $grid, 'cells' => array() );
+			$ci         = 0;
 			$cell_count = intval( $grid['cells'] );
 			for ( $i = 0; $i < $cell_count; $i ++ ) {
 				$row['cells'][] = array( 'cell' => $panels_data['grid_cells'][ $ci ++ ], 'widgets' => array() );
@@ -519,15 +514,23 @@ class SiteOrigin_Panels_Renderer {
 			$panels_layout_data[] = $row;
 		}
 
-		foreach ( $panels_data['widgets'] as $widget ) {
-			$row_index = intval( $widget['panels_info']['grid'] );
-			$cell_index = intval( $widget['panels_info']['cell'] );
+		foreach ( $panels_data['widgets'] as $i => $widget ) {
+			$widget['panels_info']['widget_index']                                 = $i;
+			$row_index                                                             = intval( $widget['panels_info']['grid'] );
+			$cell_index                                                            = intval( $widget['panels_info']['cell'] );
 			$panels_layout_data[ $row_index ]['cells'][ $cell_index ]['widgets'][] = $widget;
 		}
 
 		return $panels_layout_data;
 	}
 
+	/**
+	 * Outputs the given HTML tag with the given attributes.
+	 *
+	 * @param string $tag The HTML element to render.
+	 * @param array $attributes The attributes for the HTML element.
+	 *
+	 */
 	private function render_element( $tag, $attributes ) {
 
 		echo '<' . $tag;
@@ -540,10 +543,23 @@ class SiteOrigin_Panels_Renderer {
 
 	}
 
+	/**
+	 * Render everything for the given row, including:
+	 *  - filters before and after row,
+	 *  - row style wrapper,
+	 *  - row element wrapper with attributes,
+	 *  - child cells
+	 *
+	 * @param string $post_id The ID of the post containing this layout.
+	 * @param int $ri The index of this row.
+	 * @param array $row The model containing this row's data and child cells.
+	 * @param array $panels_data The flat data structure containing all rows, cells, and widgets in this layout.
+	 *
+	 */
 	private function render_row( $post_id, $ri, $row, $panels_data ) {
 
-		$row_data = $row['row'];
-		$row_classes = implode( ' ', apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $row_data ) );
+		$row_data       = $row['row'];
+		$row_classes    = implode( ' ', apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $row_data ) );
 		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
 			'class' => $row_classes,
 			'id'    => 'pg-' . $post_id . '-' . $ri,
@@ -584,6 +600,22 @@ class SiteOrigin_Panels_Renderer {
 
 	}
 
+	/**
+	 *
+	 * Render everything for the given cell, including:
+	 *  - filters before and after cell,
+	 *  - cell element wrapper with attributes,
+	 *  - style wrapper,
+	 *  - child widgets
+	 *
+	 * @param string $post_id The ID of the post containing this layout.
+	 * @param int $ri The index of this cell's parent row.
+	 * @param int $ci The index of this cell.
+	 * @param array $cell The model containing this cell's data and child widgets.
+	 * @param array $cells The array of cells containing this cell.
+	 * @param array $panels_data The flat data structure containing all rows, cells, and widgets in this layout.
+	 *
+	 */
 	private function render_cell( $post_id, $ri, $ci, $cell, $cells, $panels_data ) {
 
 		$cell_classes = array( 'panel-grid-cell' );
@@ -592,12 +624,12 @@ class SiteOrigin_Panels_Renderer {
 			$cell_classes[] = 'panel-grid-cell-empty';
 		}
 
-		if ( $ci == count( $cells ) - 2 && count( $cells[ $ci + 1 ] ) == 0 ) {
+		if ( $ci == count( $cells ) - 2 && count( $cells[ $ci + 1 ]['widgets'] ) == 0 ) {
 			$cell_classes[] = 'panel-grid-cell-mobile-last';
 		}
 
 		// Themes can add their own styles to cells
-		$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
+		$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
 		$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 			'class' => implode( ' ', $cell_classes ),
 			'id'    => 'pgc-' . $post_id . '-' . $ri . '-' . $ci
@@ -632,6 +664,18 @@ class SiteOrigin_Panels_Renderer {
 		echo apply_filters( 'siteorigin_panels_after_cell', '', $cell_data, $cell_attributes );
 	}
 
+	/**
+	 *
+	 * Gets the style wrapper for this widget and passes it through to `the_widget` along with other required parameters.
+	 *
+	 * @param string $post_id The ID of the post containing this layout.
+	 * @param int $ri The index of this widget's ancestor row.
+	 * @param int $ci The index of this widget's parent cell.
+	 * @param int $wi The index of this widget.
+	 * @param array $widget The model containing this widget's data.
+	 * @param bool $is_last Whether this is the last widget in the parent cell.
+	 *
+	 */
 	private function render_widget( $post_id, $ri, $ci, $wi, $widget, $is_last ) {
 
 		$widget_style_wrapper = $this->start_style_wrapper(
