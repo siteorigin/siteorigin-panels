@@ -3753,6 +3753,8 @@ module.exports = Backbone.View.extend( {
 				} );
 
 				row.trigger( 'move', $$.index() );
+
+				builderView.model.refreshPanelsData();
 			}
 		} );
 
@@ -4360,6 +4362,8 @@ module.exports = Backbone.View.extend( {
 				// Move the model and the view to the new cell
 				widget.model.moveToCell( targetCell.model, {}, $$.index() );
 				widget.cell = targetCell;
+
+				widget.model.cell.row.builder.refreshPanelsData();
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()

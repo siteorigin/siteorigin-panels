@@ -357,6 +357,8 @@ module.exports = Backbone.View.extend( {
 				} );
 
 				row.trigger( 'move', $$.index() );
+
+				builderView.model.refreshPanelsData();
 			}
 		} );
 
