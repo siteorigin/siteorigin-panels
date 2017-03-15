@@ -180,6 +180,42 @@
 						}
 					}
 
+					ul li.so-row-colors-container {
+
+						padding-left: 7px;
+
+						& input[type=radio].so-row-color {
+
+							display: none;
+
+							& + label {
+								display: inline-block;
+								cursor: pointer;
+								position: relative;
+								font-size: 13px;
+
+								width: 16px;
+								height: 16px;
+							}
+
+							& + label:before {
+								content: "";
+								display: inline-block;
+
+								width: 16px;
+								height: 16px;
+							}
+
+							&:checked + label:before {
+								content: "\2714";
+								color: rgba(0, 0, 0, 0.3);
+								font-size: 20px;
+								text-align: center;
+								line-height: 18px;
+							}
+						}
+					}
+
 				}
 
 				&:hover .so-dropdown-links-wrapper {

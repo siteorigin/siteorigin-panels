@@ -5400,7 +5400,8 @@ module.exports = Backbone.View.extend( {
 	events: {
 		'click .so-row-settings': 'editSettingsHandler',
 		'click .so-row-duplicate': 'duplicateHandler',
-		'click .so-row-delete': 'confirmedDeleteHandler'
+		'click .so-row-delete': 'confirmedDeleteHandler',
+		'change .so-row-color': 'rowColorChangeHandler',
 	},
 
 	builder: null,
@@ -5437,7 +5438,8 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.row}
 	 */
 	render: function () {
-		this.setElement( this.template() );
+		var rowIndex = this.model.collection.indexOf( this.model );
+		this.setElement( this.template( { index: rowIndex } ) );
 		this.$el.data( 'view', this );
 
 		// Create views for the cells in this row
@@ -5609,6 +5611,14 @@ module.exports = Backbone.View.extend( {
 	 */
 	deleteHandler: function () {
 		this.model.destroy();
+		return this;
+	},
+
+	/**
+	 * Change the row background color.
+	 */
+	rowColorChangeHandler: function ( event ) {
+		console.log( 'change color: ' + $( event.target ).val() );
 		return this;
 	},
 

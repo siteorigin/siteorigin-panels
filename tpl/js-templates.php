@@ -110,6 +110,29 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
+						<li class="so-row-colors-container">
+							<?php
+							$row_custom_colors = array(
+								'rgba(116,93,95,0.5)',
+								'rgba(116,93,120,0.5)',
+								'rgba(99,109,120,0.5)',
+								'rgba(90,119,120,0.5)',
+								'rgba(90,119,95,0.5)',
+							);
+
+							foreach ( $row_custom_colors as $i => $custom_color ) {
+								?>
+								<input type="radio"
+								       id="<?php echo 'so-color-' . $i; ?>-{{%= index %}}"
+								       name="so-row-color-{{%= index %}}"
+								       class="so-row-color"
+								       value="<?php echo $custom_color; ?>"/>
+								<label for="<?php echo 'so-color-' . $i; ?>-{{%= index %}}"
+								       style="background-color: <?php echo $custom_color; ?>;color: <?php echo $custom_color; ?>"></label>
+								<?php
+							}
+							?>
+						</li>
 						<div class="so-pointer"></div>
 					</ul>
 				</div>
