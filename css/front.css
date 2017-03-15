@@ -4,6 +4,9 @@
   display: flex;
   flex-wrap: nowrap;
 }
+.panel-grid-cell .panel-cell-style {
+  height: 100%;
+}
 .panel-grid-cell .so-panel {
   zoom: 1;
 }
