@@ -267,6 +267,7 @@ module.exports = Backbone.View.extend( {
 	handleCellClick: function ( e ) {
 		var cells = this.$el.closest( '.so-rows-container' ).find( '.so-cells .cell' ).removeClass( 'cell-selected' );
 		$( e.target ).parent().addClass( 'cell-selected' );
+		this.row.builder.activeCell = this;
 	},
 
 	/**
