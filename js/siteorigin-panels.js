@@ -4566,9 +4566,9 @@ module.exports = Backbone.View.extend( {
 	 * Insert a widget from the clipboard
 	 */
 	pasteHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
-		var clipboardObject = localStorage['panels_clipboard'];
+		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'widget-model' ) {
@@ -4617,12 +4617,14 @@ module.exports = Backbone.View.extend( {
 
 		var actions = {};
 
-		if( this.row.builder.supports( 'addWidget' ) ) {
-			var clipboardObject = localStorage['panels_clipboard'];
-			if (clipboardObject !== undefined) {
-				clipboardObject = JSON.parse(clipboardObject);
-				if (clipboardObject.thingType === 'widget-model') {
-					actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+			if (this.row.builder.supports('addWidget')) {
+				var clipboardObject = localStorage['panels_clipboard_' + panelsOptions.user];
+				if (clipboardObject !== undefined) {
+					clipboardObject = JSON.parse(clipboardObject);
+					if (clipboardObject.thingType === 'widget-model') {
+						actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+					}
 				}
 			}
 		}
@@ -5738,22 +5740,22 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a localStorage
 	 */
 	copyHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'row-model';
 
 		// Store this in the cookie
-		localStorage['panels_clipboard'] = JSON.stringify( serial );
+		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
 	},
 
 	/**
 	 * Create a new row and insert it
 	 */
 	pasteHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
-		var clipboardObject = localStorage['panels_clipboard'];
+		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'row-model' ) {
@@ -5906,10 +5908,10 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		if ( typeof(Storage) !== "undefined" ) {
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
 			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
 			if ( this.builder.supports( 'addRow' ) ) {
-				var clipboardObject = localStorage['panels_clipboard'];
+				var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 				if( clipboardObject !== undefined ) {
 					clipboardObject = JSON.parse( clipboardObject );
 					if( clipboardObject.thingType === 'row-model' ) {
@@ -6391,13 +6393,13 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a cookie based clipboard
 	 */
 	copyHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'widget-model';
 
 		// Store this in the cookie
-		localStorage['panels_clipboard'] = JSON.stringify( serial );
+		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
 	},
 
 	/**
@@ -6482,7 +6484,9 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		actions.copy = { title: panelsOptions.loc.contextual.widget_copy };
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+			actions.copy = {title: panelsOptions.loc.contextual.widget_copy};
+		}
 
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };

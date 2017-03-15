@@ -149,13 +149,13 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a cookie based clipboard
 	 */
 	copyHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'widget-model';
 
 		// Store this in the cookie
-		localStorage['panels_clipboard'] = JSON.stringify( serial );
+		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
 	},
 
 	/**
@@ -240,7 +240,9 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		actions.copy = { title: panelsOptions.loc.contextual.widget_copy };
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+			actions.copy = {title: panelsOptions.loc.contextual.widget_copy};
+		}
 
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };

@@ -273,9 +273,9 @@ module.exports = Backbone.View.extend( {
 	 * Insert a widget from the clipboard
 	 */
 	pasteHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
-		var clipboardObject = localStorage['panels_clipboard'];
+		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'widget-model' ) {
@@ -324,12 +324,14 @@ module.exports = Backbone.View.extend( {
 
 		var actions = {};
 
-		if( this.row.builder.supports( 'addWidget' ) ) {
-			var clipboardObject = localStorage['panels_clipboard'];
-			if (clipboardObject !== undefined) {
-				clipboardObject = JSON.parse(clipboardObject);
-				if (clipboardObject.thingType === 'widget-model') {
-					actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+			if (this.row.builder.supports('addWidget')) {
+				var clipboardObject = localStorage['panels_clipboard_' + panelsOptions.user];
+				if (clipboardObject !== undefined) {
+					clipboardObject = JSON.parse(clipboardObject);
+					if (clipboardObject.thingType === 'widget-model') {
+						actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+					}
 				}
 			}
 		}

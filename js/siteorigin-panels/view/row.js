@@ -172,22 +172,22 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a localStorage
 	 */
 	copyHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'row-model';
 
 		// Store this in the cookie
-		localStorage['panels_clipboard'] = JSON.stringify( serial );
+		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
 	},
 
 	/**
 	 * Create a new row and insert it
 	 */
 	pasteHandler: function(){
-		if (typeof(Storage) === "undefined") return;
+		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
 
-		var clipboardObject = localStorage['panels_clipboard'];
+		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'row-model' ) {
@@ -340,10 +340,10 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		if ( typeof(Storage) !== "undefined" ) {
+		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
 			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
 			if ( this.builder.supports( 'addRow' ) ) {
-				var clipboardObject = localStorage['panels_clipboard'];
+				var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
 				if( clipboardObject !== undefined ) {
 					clipboardObject = JSON.parse( clipboardObject );
 					if( clipboardObject.thingType === 'row-model' ) {
