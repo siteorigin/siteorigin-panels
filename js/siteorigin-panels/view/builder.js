@@ -458,8 +458,6 @@ module.exports = Backbone.View.extend( {
 
 	/**
 	 * Display the dialog to add a new row.
-	 *
-	 * @returns {boolean}
 	 */
 	displayAddRowDialog: function () {
         var row = new panels.model.row();
@@ -468,6 +466,8 @@ module.exports = Backbone.View.extend( {
             cell.row = row;
         });
         row.set('cells', cells);
+		row.builder = this.model;
+
 		this.dialogs.row.setRowModel(row);
 		this.dialogs.row.openDialog();
 	},
