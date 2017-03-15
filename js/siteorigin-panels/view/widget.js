@@ -149,31 +149,13 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a cookie based clipboard
 	 */
 	copyHandler: function(){
+		if (typeof(Storage) === "undefined") return;
+
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'widget-model';
 
 		// Store this in the cookie
-		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
-	},
-
-	/**
-	 * Paste a widget underneath the current widget
-	 */
-	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				// Create the model
-				this.cell.row.builder.addHistoryEntry( 'widget_pasted' );
-
-				var pastedWidget = panels.serial.unserialize( clipboardObject, 'widget-model', this.cell.model );
-				this.cell.model.get('widgets').add( pastedWidget, {
-					// Add this after the existing model
-					at: this.model.collection.indexOf( this.model ) + 1
-				} );
-			}
-		}
+		localStorage['panels_clipboard'] = JSON.stringify( serial );
 	},
 
 	/**
@@ -225,6 +207,7 @@ module.exports = Backbone.View.extend( {
 	buildContextualMenu: function ( e, menu ) {
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			menu.addSection(
+				'add-widget-below',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_widget_below,
 					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
@@ -258,13 +241,6 @@ module.exports = Backbone.View.extend( {
 
 		// Copy and paste functions
 		actions.copy = { title: panelsOptions.loc.contextual.widget_copy };
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.widget_paste };
-			}
-		}
 
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };
@@ -276,6 +252,7 @@ module.exports = Backbone.View.extend( {
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'widget-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.widget_actions,
 					search: false,
@@ -288,9 +265,6 @@ module.exports = Backbone.View.extend( {
 							break;
 						case 'copy':
 							this.copyHandler();
-							break;
-						case 'paste':
-							this.pasteHandler();
 							break;
 						case 'duplicate':
 							this.duplicateHandler();
@@ -306,7 +280,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Lets also add the contextual menu for the entire row
-		this.cell.row.buildContextualMenu( e, menu );
+		this.cell.buildContextualMenu( e, menu );
 	}
 
 } );

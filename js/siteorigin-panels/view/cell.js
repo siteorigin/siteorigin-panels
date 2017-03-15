@@ -273,7 +273,9 @@ module.exports = Backbone.View.extend( {
 	 * Insert a widget from the clipboard
 	 */
 	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if (typeof(Storage) === "undefined") return;
+
+		var clipboardObject = localStorage['panels_clipboard'];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'widget-model' ) {
@@ -294,39 +296,47 @@ module.exports = Backbone.View.extend( {
 	 */
 	buildContextualMenu: function ( e, menu ) {
 		var thisView = this;
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
-				searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
-				defaultDisplay: panelsOptions.contextual.default_widgets
-			},
-			panelsOptions.widgets,
-			function ( c ) {
-				thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				var widget = new panels.model.widget( {
-					class: c
-				} );
+		if( ! menu.hasSection( 'add-widget-below' ) ) {
+			menu.addSection(
+				'add-widget-cell',
+				{
+					sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+					defaultDisplay: panelsOptions.contextual.default_widgets
+				},
+				panelsOptions.widgets,
+				function ( c ) {
+					thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				// Add the widget to the cell model
-				widget.cell = thisView.model;
-				widget.cell.get('widgets').add( widget );
+					var widget = new panels.model.widget( {
+						class: c
+					} );
 
-				thisView.row.builder.model.refreshPanelsData();
-			}
-		);
+					// Add the widget to the cell model
+					widget.cell = thisView.model;
+					widget.cell.get('widgets').add( widget );
+
+					thisView.row.builder.model.refreshPanelsData();
+				}
+			);
+		}
 
 		var actions = {};
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.cell_paste_widget };
+
+		if( this.row.builder.supports( 'addWidget' ) ) {
+			var clipboardObject = localStorage['panels_clipboard'];
+			if (clipboardObject !== undefined) {
+				clipboardObject = JSON.parse(clipboardObject);
+				if (clipboardObject.thingType === 'widget-model') {
+					actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+				}
 			}
 		}
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'cell-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.cell_actions,
 					search: false,
@@ -344,6 +354,7 @@ module.exports = Backbone.View.extend( {
 			);
 		}
 
+		// Add the contextual menu for the parent row
 		this.row.buildContextualMenu( e, menu );
 	}
 } );

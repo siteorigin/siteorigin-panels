@@ -169,21 +169,25 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Copy the row to a cookie based clipboard
+	 * Copy the row to a localStorage
 	 */
 	copyHandler: function(){
+		if (typeof(Storage) === "undefined") return;
+
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'row-model';
 
 		// Store this in the cookie
-		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
+		localStorage['panels_clipboard'] = JSON.stringify( serial );
 	},
 
 	/**
 	 * Create a new row and insert it
 	 */
 	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if (typeof(Storage) === "undefined") return;
+
+		var clipboardObject = localStorage['panels_clipboard'];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'row-model' ) {
@@ -284,8 +288,6 @@ module.exports = Backbone.View.extend( {
 	 * @param menu
 	 */
 	buildContextualMenu: function ( e, menu ) {
-		var thisView = this;
-
 		var options = [];
 		for ( var i = 1; i < 5; i ++ ) {
 			options.push( {
@@ -295,6 +297,7 @@ module.exports = Backbone.View.extend( {
 
 		if( this.builder.supports( 'addRow' ) ) {
 			menu.addSection(
+				'add-row',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_row,
 					search: false
@@ -319,10 +322,10 @@ module.exports = Backbone.View.extend( {
                         cell.row = newRow;
                     });
                     newRow.setCells(cells);
-					newRow.builder = thisView.builder;
+					newRow.builder = this.builder.model;
 
-					this.builder.model.rows.add( newRow, {
-						at: this.builder.model.rows.indexOf( this.model ) + 1
+					this.builder.model.get('rows').add( newRow, {
+						at: this.builder.model.get('rows').indexOf( this.model ) + 1
 					} );
 
 					this.builder.model.refreshPanelsData();
@@ -337,12 +340,16 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		actions.copy = { title: panelsOptions.loc.contextual.row_copy };
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'row-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+		if ( typeof(Storage) !== "undefined" ) {
+			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
+			if ( this.builder.supports( 'addRow' ) ) {
+				var clipboardObject = localStorage['panels_clipboard'];
+				if( clipboardObject !== undefined ) {
+					clipboardObject = JSON.parse( clipboardObject );
+					if( clipboardObject.thingType === 'row-model' ) {
+						actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+					}
+				}
 			}
 		}
 
@@ -356,6 +363,7 @@ module.exports = Backbone.View.extend( {
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'row-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.row_actions,
 					search: false,

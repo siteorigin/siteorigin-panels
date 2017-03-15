@@ -2165,7 +2165,6 @@ panels.dialog.history = require( './dialog/history' );
 // The utils
 panels.utils = {};
 panels.utils.menu = require( './utils/menu' );
-panels.Cookies = require( 'js-cookie' );
 panels.serial = require( './utils/backbone-serialize' );
 
 
@@ -2263,7 +2262,7 @@ jQuery( function ( $ ) {
 	}
 } );
 
-},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/backbone-serialize":18,"./utils/menu":19,"./view/builder":20,"./view/cell":21,"./view/dialog":22,"./view/live-editor":23,"./view/row":24,"./view/styles":25,"./view/widget":26,"js-cookie":27}],13:[function(require,module,exports){
+},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/backbone-serialize":18,"./utils/menu":19,"./view/builder":20,"./view/cell":21,"./view/dialog":22,"./view/live-editor":23,"./view/row":24,"./view/styles":25,"./view/widget":26}],13:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     layoutPosition: {
         BEFORE: 'before',
@@ -3220,7 +3219,7 @@ module.exports = Backbone.View.extend( {
 	 * @param items
 	 * @param callback
 	 */
-	addSection: function ( settings, items, callback ) {
+	addSection: function ( id, settings, items, callback ) {
 		var thisView = this;
 		settings = _.extend( {
 			display: 5,
@@ -3239,7 +3238,7 @@ module.exports = Backbone.View.extend( {
 		var section = $( this.sectionTemplate( {
 			settings: settings,
 			items: items
-		} ) );
+		} ) ).attr( 'id', 'panels-menu-section-' + id );
 		this.$el.append( section );
 
 		section.find( '.so-item:not(.so-confirm)' ).click( function () {
@@ -3271,6 +3270,16 @@ module.exports = Backbone.View.extend( {
 		section.data( 'settings', settings ).find( '.so-search-wrapper input' ).trigger( 'keyup' );
 
 		this.active = true;
+	},
+
+	/**
+	 * Check if a section exists in the current menu.
+	 *
+	 * @param id
+	 * @returns {boolean}
+	 */
+	hasSection: function( id ){
+		return this.$el.find( '#panels-menu-section-' + id  ).length > 0;
 	},
 
 	/**
@@ -4557,7 +4566,9 @@ module.exports = Backbone.View.extend( {
 	 * Insert a widget from the clipboard
 	 */
 	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if (typeof(Storage) === "undefined") return;
+
+		var clipboardObject = localStorage['panels_clipboard'];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'widget-model' ) {
@@ -4578,39 +4589,47 @@ module.exports = Backbone.View.extend( {
 	 */
 	buildContextualMenu: function ( e, menu ) {
 		var thisView = this;
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
-				searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
-				defaultDisplay: panelsOptions.contextual.default_widgets
-			},
-			panelsOptions.widgets,
-			function ( c ) {
-				thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				var widget = new panels.model.widget( {
-					class: c
-				} );
+		if( ! menu.hasSection( 'add-widget-below' ) ) {
+			menu.addSection(
+				'add-widget-cell',
+				{
+					sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+					defaultDisplay: panelsOptions.contextual.default_widgets
+				},
+				panelsOptions.widgets,
+				function ( c ) {
+					thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				// Add the widget to the cell model
-				widget.cell = thisView.model;
-				widget.cell.get('widgets').add( widget );
+					var widget = new panels.model.widget( {
+						class: c
+					} );
 
-				thisView.row.builder.model.refreshPanelsData();
-			}
-		);
+					// Add the widget to the cell model
+					widget.cell = thisView.model;
+					widget.cell.get('widgets').add( widget );
+
+					thisView.row.builder.model.refreshPanelsData();
+				}
+			);
+		}
 
 		var actions = {};
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.cell_paste_widget };
+
+		if( this.row.builder.supports( 'addWidget' ) ) {
+			var clipboardObject = localStorage['panels_clipboard'];
+			if (clipboardObject !== undefined) {
+				clipboardObject = JSON.parse(clipboardObject);
+				if (clipboardObject.thingType === 'widget-model') {
+					actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+				}
 			}
 		}
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'cell-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.cell_actions,
 					search: false,
@@ -4628,6 +4647,7 @@ module.exports = Backbone.View.extend( {
 			);
 		}
 
+		// Add the contextual menu for the parent row
 		this.row.buildContextualMenu( e, menu );
 	}
 } );
@@ -5715,21 +5735,25 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Copy the row to a cookie based clipboard
+	 * Copy the row to a localStorage
 	 */
 	copyHandler: function(){
+		if (typeof(Storage) === "undefined") return;
+
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'row-model';
 
 		// Store this in the cookie
-		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
+		localStorage['panels_clipboard'] = JSON.stringify( serial );
 	},
 
 	/**
 	 * Create a new row and insert it
 	 */
 	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if (typeof(Storage) === "undefined") return;
+
+		var clipboardObject = localStorage['panels_clipboard'];
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType === 'row-model' ) {
@@ -5830,8 +5854,6 @@ module.exports = Backbone.View.extend( {
 	 * @param menu
 	 */
 	buildContextualMenu: function ( e, menu ) {
-		var thisView = this;
-
 		var options = [];
 		for ( var i = 1; i < 5; i ++ ) {
 			options.push( {
@@ -5841,6 +5863,7 @@ module.exports = Backbone.View.extend( {
 
 		if( this.builder.supports( 'addRow' ) ) {
 			menu.addSection(
+				'add-row',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_row,
 					search: false
@@ -5865,10 +5888,10 @@ module.exports = Backbone.View.extend( {
                         cell.row = newRow;
                     });
                     newRow.setCells(cells);
-					newRow.builder = thisView.builder;
+					newRow.builder = this.builder.model;
 
-					this.builder.model.rows.add( newRow, {
-						at: this.builder.model.rows.indexOf( this.model ) + 1
+					this.builder.model.get('rows').add( newRow, {
+						at: this.builder.model.get('rows').indexOf( this.model ) + 1
 					} );
 
 					this.builder.model.refreshPanelsData();
@@ -5883,12 +5906,16 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		actions.copy = { title: panelsOptions.loc.contextual.row_copy };
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'row-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+		if ( typeof(Storage) !== "undefined" ) {
+			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
+			if ( this.builder.supports( 'addRow' ) ) {
+				var clipboardObject = localStorage['panels_clipboard'];
+				if( clipboardObject !== undefined ) {
+					clipboardObject = JSON.parse( clipboardObject );
+					if( clipboardObject.thingType === 'row-model' ) {
+						actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+					}
+				}
 			}
 		}
 
@@ -5902,6 +5929,7 @@ module.exports = Backbone.View.extend( {
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'row-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.row_actions,
 					search: false,
@@ -6363,31 +6391,13 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a cookie based clipboard
 	 */
 	copyHandler: function(){
+		if (typeof(Storage) === "undefined") return;
+
 		var serial = panels.serial.serialize( this.model );
 		serial.thingType = 'widget-model';
 
 		// Store this in the cookie
-		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
-	},
-
-	/**
-	 * Paste a widget underneath the current widget
-	 */
-	pasteHandler: function(){
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				// Create the model
-				this.cell.row.builder.addHistoryEntry( 'widget_pasted' );
-
-				var pastedWidget = panels.serial.unserialize( clipboardObject, 'widget-model', this.cell.model );
-				this.cell.model.get('widgets').add( pastedWidget, {
-					// Add this after the existing model
-					at: this.model.collection.indexOf( this.model ) + 1
-				} );
-			}
-		}
+		localStorage['panels_clipboard'] = JSON.stringify( serial );
 	},
 
 	/**
@@ -6439,6 +6449,7 @@ module.exports = Backbone.View.extend( {
 	buildContextualMenu: function ( e, menu ) {
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			menu.addSection(
+				'add-widget-below',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_widget_below,
 					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
@@ -6472,13 +6483,6 @@ module.exports = Backbone.View.extend( {
 
 		// Copy and paste functions
 		actions.copy = { title: panelsOptions.loc.contextual.widget_copy };
-		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				actions.paste = { title: panelsOptions.loc.contextual.widget_paste };
-			}
-		}
 
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };
@@ -6490,6 +6494,7 @@ module.exports = Backbone.View.extend( {
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'widget-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.widget_actions,
 					search: false,
@@ -6502,9 +6507,6 @@ module.exports = Backbone.View.extend( {
 							break;
 						case 'copy':
 							this.copyHandler();
-							break;
-						case 'paste':
-							this.pasteHandler();
 							break;
 						case 'duplicate':
 							this.duplicateHandler();
@@ -6520,167 +6522,9 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Lets also add the contextual menu for the entire row
-		this.cell.row.buildContextualMenu( e, menu );
+		this.cell.buildContextualMenu( e, menu );
 	}
 
 } );
-
-},{}],27:[function(require,module,exports){
-/*!
- * JavaScript Cookie v2.1.3
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-;(function (factory) {
-	var registeredInModuleLoader = false;
-	if (typeof define === 'function' && define.amd) {
-		define(factory);
-		registeredInModuleLoader = true;
-	}
-	if (typeof exports === 'object') {
-		module.exports = factory();
-		registeredInModuleLoader = true;
-	}
-	if (!registeredInModuleLoader) {
-		var OldCookies = window.Cookies;
-		var api = window.Cookies = factory();
-		api.noConflict = function () {
-			window.Cookies = OldCookies;
-			return api;
-		};
-	}
-}(function () {
-	function extend () {
-		var i = 0;
-		var result = {};
-		for (; i < arguments.length; i++) {
-			var attributes = arguments[ i ];
-			for (var key in attributes) {
-				result[key] = attributes[key];
-			}
-		}
-		return result;
-	}
-
-	function init (converter) {
-		function api (key, value, attributes) {
-			var result;
-			if (typeof document === 'undefined') {
-				return;
-			}
-
-			// Write
-
-			if (arguments.length > 1) {
-				attributes = extend({
-					path: '/'
-				}, api.defaults, attributes);
-
-				if (typeof attributes.expires === 'number') {
-					var expires = new Date();
-					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
-					attributes.expires = expires;
-				}
-
-				try {
-					result = JSON.stringify(value);
-					if (/^[\{\[]/.test(result)) {
-						value = result;
-					}
-				} catch (e) {}
-
-				if (!converter.write) {
-					value = encodeURIComponent(String(value))
-						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-				} else {
-					value = converter.write(value, key);
-				}
-
-				key = encodeURIComponent(String(key));
-				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-				key = key.replace(/[\(\)]/g, escape);
-
-				return (document.cookie = [
-					key, '=', value,
-					attributes.expires ? '; expires=' + attributes.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-					attributes.path ? '; path=' + attributes.path : '',
-					attributes.domain ? '; domain=' + attributes.domain : '',
-					attributes.secure ? '; secure' : ''
-				].join(''));
-			}
-
-			// Read
-
-			if (!key) {
-				result = {};
-			}
-
-			// To prevent the for loop in the first place assign an empty array
-			// in case there are no cookies at all. Also prevents odd result when
-			// calling "get()"
-			var cookies = document.cookie ? document.cookie.split('; ') : [];
-			var rdecode = /(%[0-9A-Z]{2})+/g;
-			var i = 0;
-
-			for (; i < cookies.length; i++) {
-				var parts = cookies[i].split('=');
-				var cookie = parts.slice(1).join('=');
-
-				if (cookie.charAt(0) === '"') {
-					cookie = cookie.slice(1, -1);
-				}
-
-				try {
-					var name = parts[0].replace(rdecode, decodeURIComponent);
-					cookie = converter.read ?
-						converter.read(cookie, name) : converter(cookie, name) ||
-						cookie.replace(rdecode, decodeURIComponent);
-
-					if (this.json) {
-						try {
-							cookie = JSON.parse(cookie);
-						} catch (e) {}
-					}
-
-					if (key === name) {
-						result = cookie;
-						break;
-					}
-
-					if (!key) {
-						result[name] = cookie;
-					}
-				} catch (e) {}
-			}
-
-			return result;
-		}
-
-		api.set = api;
-		api.get = function (key) {
-			return api.call(api, key);
-		};
-		api.getJSON = function () {
-			return api.apply({
-				json: true
-			}, [].slice.call(arguments));
-		};
-		api.defaults = {};
-
-		api.remove = function (key, attributes) {
-			api(key, '', extend(attributes, {
-				expires: -1
-			}));
-		};
-
-		api.withConverter = init;
-
-		return api;
-	}
-
-	return init(function () {});
-}));
 
 },{}]},{},[12]);
