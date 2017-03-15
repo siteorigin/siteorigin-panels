@@ -3411,6 +3411,8 @@ module.exports = Backbone.View.extend( {
 	liveEditor: undefined,
 	menu: false,
 
+	activeCell: null,
+
 	events: {
 		'click .so-tool-button.so-widget-add': 'displayAddWidgetDialog',
 		'click .so-tool-button.so-row-add': 'displayAddRowDialog',
@@ -3895,28 +3897,18 @@ module.exports = Backbone.View.extend( {
 			defaultPosition: 'first'
 		}, options );
 
-		if ( this.$( '.so-cells .cell' ).length === 0 ) {
-
+		if( ! this.model.get('rows').length ) {
+			// There aren't any rows yet
 			if ( options.createCell ) {
 				// Create a row with a single cell
 				this.model.addRow( [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}
-
 		}
 
-		var activeCell = this.$( '.so-cells .cell.cell-selected' );
-
-		if ( activeCell.length === 0 ) {
-			if ( options.defaultPosition === 'last' ) {
-				activeCell = this.$( '.so-cells .cell' ).first();
-			} else {
-				activeCell = this.$( '.so-cells .cell' ).last();
-			}
-		}
-
-		return activeCell.data( 'view' ).model;
+		var activeCell = this.activeCell;
+		return _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ? this.model.get('rows').last().get('cells').first() : activeCell.model;
 	},
 
 	/**
@@ -4560,6 +4552,7 @@ module.exports = Backbone.View.extend( {
 	handleCellClick: function ( e ) {
 		var cells = this.$el.closest( '.so-rows-container' ).find( '.so-cells .cell' ).removeClass( 'cell-selected' );
 		$( e.target ).parent().addClass( 'cell-selected' );
+		this.row.builder.activeCell = this;
 	},
 
 	/**
