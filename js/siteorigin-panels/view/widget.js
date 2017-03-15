@@ -136,7 +136,7 @@ module.exports = Backbone.View.extend( {
 		// Create the new widget and connect it to the widget collection for the current row
 		var newWidget = this.model.clone( this.model.cell );
 
-		this.cell.model.widgets.add( newWidget, {
+		this.cell.model.get('widgets').add( newWidget, {
 			// Add this after the existing model
 			at: this.model.collection.indexOf( this.model ) + 1
 		} );
@@ -211,7 +211,7 @@ module.exports = Backbone.View.extend( {
 					widget.cell = thisView.cell.model;
 
 					// Insert the new widget below
-					thisView.cell.model.widgets.add( widget, {
+					thisView.cell.model.get('widgets').add( widget, {
 						// Add this after the existing model
 						at: thisView.model.collection.indexOf( thisView.model ) + 1
 					} );

@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 	widgetSortable: null,
 
 	initialize: function () {
-		this.model.widgets.on( 'add', this.onAddWidget, this );
+		this.model.get('widgets').on( 'add', this.onAddWidget, this );
 	},
 
 	/**
@@ -28,7 +28,7 @@ module.exports = Backbone.View.extend( {
 
 		// Now lets render any widgets that are currently in the row
 		var thisView = this;
-		this.model.widgets.each( function ( widget ) {
+		this.model.get('widgets').each( function ( widget ) {
 			var widgetView = new panels.view.widget( {model: widget} );
 			widgetView.cell = thisView;
 			widgetView.render();
@@ -293,7 +293,7 @@ module.exports = Backbone.View.extend( {
 
 				// Add the widget to the cell model
 				widget.cell = thisView.model;
-				widget.cell.widgets.add( widget );
+				widget.cell.get('widgets').add( widget );
 
 				thisView.row.builder.model.refreshPanelsData();
 			}

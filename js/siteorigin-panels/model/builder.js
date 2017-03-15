@@ -133,7 +133,7 @@ module.exports = Backbone.Model.extend({
 				}
 
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, { noAnimate: true } );
+				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -213,7 +213,7 @@ module.exports = Backbone.Model.extend({
 
 			row.get('cells').each( function ( cell, ci ) {
 
-				cell.widgets.each( function ( widget, wi ) {
+				cell.get('widgets').each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
 					var panels_info = {
 						class: widget.get( 'class' ),

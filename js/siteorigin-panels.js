@@ -1967,7 +1967,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// Add the widget to the cell model
 		widget.cell = this.builder.getActiveCell();
-		widget.cell.widgets.add( widget );
+		widget.cell.get('widgets').add( widget );
 
 		this.closeDialog();
 		this.builder.model.refreshPanelsData();
@@ -2396,7 +2396,7 @@ module.exports = Backbone.Model.extend({
 				}
 
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, { noAnimate: true } );
+				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -2476,7 +2476,7 @@ module.exports = Backbone.Model.extend({
 
 			row.get('cells').each( function ( cell, ci ) {
 
-				cell.widgets.each( function ( widget, wi ) {
+				cell.get('widgets').each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
 					var panels_info = {
 						class: widget.get( 'class' ),
@@ -2589,7 +2589,7 @@ module.exports = Backbone.Model.extend( {
 	 * Set up the cell model
 	 */
 	initialize: function () {
-		this.widgets = new panels.collection.widgets();
+		this.set( 'widgets', new panels.collection.widgets() );
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -2598,8 +2598,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	onDestroy: function () {
 		// Destroy all the widgets
-		_.invoke( this.widgets.toArray(), 'destroy' );
-		this.widgets.reset();
+		_.invoke( this.get('widgets').toArray(), 'destroy' );
+		this.get('widgets').reset();
 	},
 
 	/**
@@ -2617,8 +2617,8 @@ module.exports = Backbone.Model.extend( {
 
 		if ( cloneOptions.cloneWidgets ) {
 			// Now we're going add all the widgets that belong to this, to the clone
-			this.widgets.each( function ( widget ) {
-				clone.widgets.add( widget.clone( clone, cloneOptions ), {silent: true} );
+			this.get('widgets').each( function ( widget ) {
+				clone.get('widgets').add( widget.clone( clone, cloneOptions ), {silent: true} );
 			} );
 		}
 
@@ -2676,7 +2676,7 @@ module.exports = Backbone.Model.extend( {
 				var newParentCell = currentCells.at( newCells.length - 1 );
 
 				// First move all the widgets to the new cell
-				var widgetsToMove = cell.widgets.models.slice();
+				var widgetsToMove = cell.get('widgets').models.slice();
 				for ( var j = 0; j < widgetsToMove.length; j++ ) {
 					widgetsToMove[j].moveToCell( newParentCell, { silent: false } );
 				}
@@ -2825,7 +2825,7 @@ module.exports = Backbone.Model.extend( {
 
 		this.cell = newCell;
 		this.collection.remove( this, options );
-		newCell.widgets.add( this, _.extend( {
+		newCell.get('widgets').add( this, _.extend( {
 			at: at
 		}, options ) );
 
@@ -2905,7 +2905,7 @@ module.exports = Backbone.Model.extend( {
 		}
 
 		clone.set( 'values', cloneValues, {silent: true} );
-		clone.set( 'collection', cell.widgets, {silent: true} );
+		clone.set( 'collection', cell.get('widgets'), {silent: true} );
 		clone.cell = cell;
 
 		// This is used to force a form reload later on
@@ -4188,7 +4188,7 @@ module.exports = Backbone.View.extend( {
 	widgetSortable: null,
 
 	initialize: function () {
-		this.model.widgets.on( 'add', this.onAddWidget, this );
+		this.model.get('widgets').on( 'add', this.onAddWidget, this );
 	},
 
 	/**
@@ -4205,7 +4205,7 @@ module.exports = Backbone.View.extend( {
 
 		// Now lets render any widgets that are currently in the row
 		var thisView = this;
-		this.model.widgets.each( function ( widget ) {
+		this.model.get('widgets').each( function ( widget ) {
 			var widgetView = new panels.view.widget( {model: widget} );
 			widgetView.cell = thisView;
 			widgetView.render();
@@ -4470,7 +4470,7 @@ module.exports = Backbone.View.extend( {
 
 				// Add the widget to the cell model
 				widget.cell = thisView.model;
-				widget.cell.widgets.add( widget );
+				widget.cell.get('widgets').add( widget );
 
 				thisView.row.builder.model.refreshPanelsData();
 			}
@@ -5421,12 +5421,12 @@ module.exports = Backbone.View.extend( {
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		} );
 
 		// When ever a new cell is added, listen to it for new widgets
 		rowCells.on( 'add', function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
 	},
@@ -6152,7 +6152,7 @@ module.exports = Backbone.View.extend( {
 		// Create the new widget and connect it to the widget collection for the current row
 		var newWidget = this.model.clone( this.model.cell );
 
-		this.cell.model.widgets.add( newWidget, {
+		this.cell.model.get('widgets').add( newWidget, {
 			// Add this after the existing model
 			at: this.model.collection.indexOf( this.model ) + 1
 		} );
@@ -6227,7 +6227,7 @@ module.exports = Backbone.View.extend( {
 					widget.cell = thisView.cell.model;
 
 					// Insert the new widget below
-					thisView.cell.model.widgets.add( widget, {
+					thisView.cell.model.get('widgets').add( widget, {
 						// Add this after the existing model
 						at: thisView.model.collection.indexOf( thisView.model ) + 1
 					} );

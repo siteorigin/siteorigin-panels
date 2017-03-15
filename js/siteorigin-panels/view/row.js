@@ -27,12 +27,12 @@ module.exports = Backbone.View.extend( {
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		} );
 
 		// When ever a new cell is added, listen to it for new widgets
 		rowCells.on( 'add', function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
 	},

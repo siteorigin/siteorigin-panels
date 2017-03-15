@@ -36,7 +36,7 @@ module.exports = Backbone.Model.extend( {
 				var newParentCell = currentCells.at( newCells.length - 1 );
 
 				// First move all the widgets to the new cell
-				var widgetsToMove = cell.widgets.models.slice();
+				var widgetsToMove = cell.get('widgets').models.slice();
 				for ( var j = 0; j < widgetsToMove.length; j++ ) {
 					widgetsToMove[j].moveToCell( newParentCell, { silent: false } );
 				}
