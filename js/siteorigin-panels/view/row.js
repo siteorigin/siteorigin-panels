@@ -338,7 +338,6 @@ module.exports = Backbone.View.extend( {
 
 		// Copy and paste functions
 		actions.copy = { title: panelsOptions.loc.contextual.row_copy };
-
 		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );

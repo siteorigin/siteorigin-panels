@@ -146,6 +146,37 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Copy the row to a cookie based clipboard
+	 */
+	copyHandler: function(){
+		var serial = panels.serial.serialize( this.model );
+		serial.thingType = 'widget-model';
+
+		// Store this in the cookie
+		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
+	},
+
+	/**
+	 * Paste a widget underneath the current widget
+	 */
+	pasteHandler: function(){
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'widget-model' ) {
+				// Create the model
+				this.cell.row.builder.addHistoryEntry( 'widget_pasted' );
+
+				var pastedWidget = panels.serial.unserialize( clipboardObject, 'widget-model', this.cell.model );
+				this.cell.model.get('widgets').add( pastedWidget, {
+					// Add this after the existing model
+					at: this.model.collection.indexOf( this.model ) + 1
+				} );
+			}
+		}
+	},
+
+	/**
 	 * Handle clicking on delete.
 	 *
 	 * @returns {boolean}
@@ -192,8 +223,6 @@ module.exports = Backbone.View.extend( {
 	 * @param menu
 	 */
 	buildContextualMenu: function ( e, menu ) {
-		var thisView = this;
-
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			menu.addSection(
 				{
@@ -203,31 +232,44 @@ module.exports = Backbone.View.extend( {
 				},
 				panelsOptions.widgets,
 				function ( c ) {
-					thisView.cell.row.builder.addHistoryEntry( 'widget_added' );
+					this.cell.row.builder.addHistoryEntry( 'widget_added' );
 
 					var widget = new panels.model.widget( {
 						class: c
 					} );
-					widget.cell = thisView.cell.model;
+					widget.cell = this.cell.model;
 
 					// Insert the new widget below
-					thisView.cell.model.get('widgets').add( widget, {
+					this.cell.model.get('widgets').add( widget, {
 						// Add this after the existing model
-						at: thisView.model.collection.indexOf( thisView.model ) + 1
+						at: this.model.collection.indexOf( this.model ) + 1
 					} );
 
-					thisView.cell.row.builder.model.refreshPanelsData();
-				}
+					this.cell.row.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 
 		var actions = {};
+
 		if( this.cell.row.builder.supports( 'editWidget' ) && ! this.model.get( 'read_only' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.widget_edit };
 		}
+
+		// Copy and paste functions
+		actions.copy = { title: panelsOptions.loc.contextual.widget_copy };
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'widget-model' ) {
+				actions.paste = { title: panelsOptions.loc.contextual.widget_paste };
+			}
+		}
+
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };
 		}
+
 		if( this.cell.row.builder.supports( 'deleteWidget' ) ) {
 			actions.delete = { title: panelsOptions.loc.contextual.widget_delete, confirm: true };
 		}
@@ -242,18 +284,24 @@ module.exports = Backbone.View.extend( {
 				function ( c ) {
 					switch ( c ) {
 						case 'edit':
-							thisView.editHandler();
+							this.editHandler();
+							break;
+						case 'copy':
+							this.copyHandler();
+							break;
+						case 'paste':
+							this.pasteHandler();
 							break;
 						case 'duplicate':
-							thisView.duplicateHandler();
+							this.duplicateHandler();
 							break;
 						case 'delete':
-							thisView.visualDestroyModel();
+							this.visualDestroyModel();
 							break;
 					}
 
-					thisView.cell.row.builder.model.refreshPanelsData();
-				}
+					this.cell.row.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 

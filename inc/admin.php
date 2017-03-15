@@ -314,10 +314,15 @@ class SiteOrigin_Panels_Admin {
 						'add_row' => __( 'Add Row', 'siteorigin-panels' ),
 						'column'  => __( 'Column', 'siteorigin-panels' ),
 
+						'cell_actions'        => __( 'Cell Actions', 'siteorigin-panels' ),
+						'cell_paste_widget'   => __( 'Paste Widget', 'siteorigin-panels' ),
+
 						'widget_actions'   => __( 'Widget Actions', 'siteorigin-panels' ),
 						'widget_edit'      => __( 'Edit Widget', 'siteorigin-panels' ),
 						'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
 						'widget_delete'    => __( 'Delete Widget', 'siteorigin-panels' ),
+						'widget_copy'      => __( 'Copy Widget', 'siteorigin-panels' ),
+						'widget_paste'     => __( 'Paste Widget Below', 'siteorigin-panels' ),
 
 						'row_actions'   => __( 'Row Actions', 'siteorigin-panels' ),
 						'row_edit'      => __( 'Edit Row', 'siteorigin-panels' ),

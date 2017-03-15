@@ -270,6 +270,23 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Insert a widget from the clipboard
+	 */
+	pasteHandler: function(){
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'widget-model' ) {
+				// Create the model
+				this.row.builder.addHistoryEntry( 'widget_pasted' );
+
+				var pastedWidget = panels.serial.unserialize( clipboardObject, 'widget-model', this.model );
+				this.model.get('widgets').add( pastedWidget );
+			}
+		}
+	},
+
+	/**
 	 * Build up the contextual menu for a cell
 	 *
 	 * @param e
@@ -298,6 +315,34 @@ module.exports = Backbone.View.extend( {
 				thisView.row.builder.model.refreshPanelsData();
 			}
 		);
+
+		var actions = {};
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'widget-model' ) {
+				actions.paste = { title: panelsOptions.loc.contextual.cell_paste_widget };
+			}
+		}
+
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				{
+					sectionTitle: panelsOptions.loc.contextual.cell_actions,
+					search: false,
+				},
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'paste':
+							this.pasteHandler();
+							break;
+					}
+
+					this.row.builder.model.refreshPanelsData();
+				}.bind( this )
+			);
+		}
 
 		this.row.buildContextualMenu( e, menu );
 	}
