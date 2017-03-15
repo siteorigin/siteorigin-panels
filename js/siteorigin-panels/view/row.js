@@ -161,8 +161,8 @@ module.exports = Backbone.View.extend( {
 
 		var duplicateRow = this.model.clone( this.builder.model );
 
-		this.builder.model.rows.add( duplicateRow, {
-			at: this.builder.model.rows.indexOf( this.model ) + 1
+		this.builder.model.get('rows').add( duplicateRow, {
+			at: this.builder.model.get('rows').indexOf( this.model ) + 1
 		} );
 
 		this.builder.model.refreshPanelsData();
@@ -292,8 +292,8 @@ module.exports = Backbone.View.extend( {
                     newRow.setCells(cells);
 					newRow.builder = thisView.builder;
 
-					thisView.builder.model.rows.add( newRow, {
-						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+					thisView.builder.model.get('rows').add( newRow, {
+						at: thisView.builder.model.get('rows').indexOf( thisView.model ) + 1
 					} );
 
 					thisView.builder.model.refreshPanelsData();

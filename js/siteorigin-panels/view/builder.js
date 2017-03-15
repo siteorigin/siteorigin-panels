@@ -75,7 +75,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogs.row.setRowDialogType( 'create' );
 
 		// This handles a new row being added to the collection - we'll display it in the interface
-		this.model.rows.on( 'add', this.onAddRow, this );
+		this.model.get('rows').on( 'add', this.onAddRow, this );
 
 		// Reflow the entire builder when ever the
 		$( window ).resize( function ( e ) {
@@ -347,10 +347,10 @@ module.exports = Backbone.View.extend( {
 				var $$ =  $( ui.item ),
 					row = $$.data( 'view' );
 
-				builderView.model.rows.remove( row.model, {
+				builderView.model.get('rows').remove( row.model, {
 					'silent' : true
 				} );
-				builderView.model.rows.add( row.model, {
+				builderView.model.get('rows').add( row.model, {
 					'silent' : true,
 					'at' : $$.index()
 				} );
@@ -792,7 +792,7 @@ module.exports = Backbone.View.extend( {
 	 * This shows or hides the welcome display depending on whether there are any rows in the collection.
 	 */
 	toggleWelcomeDisplay: function () {
-		if ( ! this.model.rows.isEmpty() ) {
+		if ( ! this.model.get('rows').isEmpty() ) {
 			this.$( '.so-panels-welcome-message' ).hide();
 		} else {
 			this.$( '.so-panels-welcome-message' ).show();

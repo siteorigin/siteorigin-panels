@@ -103,7 +103,7 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneCells: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', builder.rows, {silent: true} );
+		clone.set( 'collection', builder.get('rows'), {silent: true} );
 		clone.builder = builder;
 
 		if ( cloneOptions.cloneCells ) {

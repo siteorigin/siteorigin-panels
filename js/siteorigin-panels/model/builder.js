@@ -17,7 +17,7 @@ module.exports = Backbone.Model.extend({
 
     initialize: function () {
         // These are the main rows in the interface
-        this.rows = new panels.collection.rows();
+		this.set( 'rows', new panels.collection.rows() );
     },
 
     /**
@@ -31,7 +31,7 @@ module.exports = Backbone.Model.extend({
         }, options);
         // Create the actual row
         var row = new panels.model.row({
-            collection: this.rows
+            collection: this.get('rows')
         });
         var cells = new panels.collection.cells(cells);
         cells.each(function (cell) {
@@ -40,7 +40,7 @@ module.exports = Backbone.Model.extend({
         row.set('cells', cells);
 		row.builder = this;
 
-		this.rows.add( row, options );
+		this.get('rows').add( row, options );
 
 		return row;
 	},
@@ -110,7 +110,7 @@ module.exports = Backbone.Model.extend({
 					delete widgetData.info;
 				}
 
-				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
+				var row = builderModel.get('rows').at( parseInt( panels_info.grid ) );
 				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
@@ -209,7 +209,7 @@ module.exports = Backbone.Model.extend({
 		};
 		var widgetId = 0;
 
-		this.rows.each( function ( row, ri ) {
+		this.get('rows').each( function ( row, ri ) {
 
 			row.get('cells').each( function ( cell, ci ) {
 
@@ -281,8 +281,8 @@ module.exports = Backbone.Model.extend({
 	 * Empty all the rows and the cells/widgets they contain.
 	 */
 	emptyRows: function () {
-		_.invoke( this.rows.toArray(), 'destroy' );
-		this.rows.reset();
+		_.invoke( this.get('rows').toArray(), 'destroy' );
+		this.get('rows').reset();
 
 		return this;
 	},

@@ -1460,12 +1460,12 @@ module.exports = panels.view.dialog.extend({
 
 		var options = {};
 		if (activeCell !== null) {
-			options.at = this.builder.model.rows.indexOf(activeCell.row) + 1;
+			options.at = this.builder.model.get('rows').indexOf(activeCell.row) + 1;
 		}
 
 		// Set up the model and add it to the builder
-		this.model.collection = this.builder.model.rows;
-		this.builder.model.rows.add(this.model, options);
+		this.model.collection = this.builder.model.get('rows');
+		this.builder.model.get('rows').add(this.model, options);
 
 		this.closeDialog();
 
@@ -1506,8 +1506,8 @@ module.exports = panels.view.dialog.extend({
 
 		var duplicateRow = this.model.clone(this.builder.model);
 
-		this.builder.model.rows.add(duplicateRow, {
-			at: this.builder.model.rows.indexOf(this.model) + 1
+		this.builder.model.get('rows').add(duplicateRow, {
+			at: this.builder.get('rows').indexOf(this.model) + 1
 		});
 
 		this.closeDialog({silent: true});
@@ -2280,7 +2280,7 @@ module.exports = Backbone.Model.extend({
 
     initialize: function () {
         // These are the main rows in the interface
-        this.rows = new panels.collection.rows();
+		this.set( 'rows', new panels.collection.rows() );
     },
 
     /**
@@ -2294,7 +2294,7 @@ module.exports = Backbone.Model.extend({
         }, options);
         // Create the actual row
         var row = new panels.model.row({
-            collection: this.rows
+            collection: this.get('rows')
         });
         var cells = new panels.collection.cells(cells);
         cells.each(function (cell) {
@@ -2303,7 +2303,7 @@ module.exports = Backbone.Model.extend({
         row.set('cells', cells);
 		row.builder = this;
 
-		this.rows.add( row, options );
+		this.get('rows').add( row, options );
 
 		return row;
 	},
@@ -2373,7 +2373,7 @@ module.exports = Backbone.Model.extend({
 					delete widgetData.info;
 				}
 
-				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
+				var row = builderModel.get('rows').at( parseInt( panels_info.grid ) );
 				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
@@ -2472,7 +2472,7 @@ module.exports = Backbone.Model.extend({
 		};
 		var widgetId = 0;
 
-		this.rows.each( function ( row, ri ) {
+		this.get('rows').each( function ( row, ri ) {
 
 			row.get('cells').each( function ( cell, ci ) {
 
@@ -2544,8 +2544,8 @@ module.exports = Backbone.Model.extend({
 	 * Empty all the rows and the cells/widgets they contain.
 	 */
 	emptyRows: function () {
-		_.invoke( this.rows.toArray(), 'destroy' );
-		this.rows.reset();
+		_.invoke( this.get('rows').toArray(), 'destroy' );
+		this.get('rows').reset();
 
 		return this;
 	},
@@ -2743,7 +2743,7 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneCells: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', builder.rows, {silent: true} );
+		clone.set( 'collection', builder.get('rows'), {silent: true} );
 		clone.builder = builder;
 
 		if ( cloneOptions.cloneCells ) {
@@ -3354,7 +3354,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogs.row.setRowDialogType( 'create' );
 
 		// This handles a new row being added to the collection - we'll display it in the interface
-		this.model.rows.on( 'add', this.onAddRow, this );
+		this.model.get('rows').on( 'add', this.onAddRow, this );
 
 		// Reflow the entire builder when ever the
 		$( window ).resize( function ( e ) {
@@ -3626,10 +3626,10 @@ module.exports = Backbone.View.extend( {
 				var $$ =  $( ui.item ),
 					row = $$.data( 'view' );
 
-				builderView.model.rows.remove( row.model, {
+				builderView.model.get('rows').remove( row.model, {
 					'silent' : true
 				} );
-				builderView.model.rows.add( row.model, {
+				builderView.model.get('rows').add( row.model, {
 					'silent' : true,
 					'at' : $$.index()
 				} );
@@ -4071,7 +4071,7 @@ module.exports = Backbone.View.extend( {
 	 * This shows or hides the welcome display depending on whether there are any rows in the collection.
 	 */
 	toggleWelcomeDisplay: function () {
-		if ( ! this.model.rows.isEmpty() ) {
+		if ( ! this.model.get('rows').isEmpty() ) {
 			this.$( '.so-panels-welcome-message' ).hide();
 		} else {
 			this.$( '.so-panels-welcome-message' ).show();
@@ -5555,8 +5555,8 @@ module.exports = Backbone.View.extend( {
 
 		var duplicateRow = this.model.clone( this.builder.model );
 
-		this.builder.model.rows.add( duplicateRow, {
-			at: this.builder.model.rows.indexOf( this.model ) + 1
+		this.builder.model.get('rows').add( duplicateRow, {
+			at: this.builder.model.get('rows').indexOf( this.model ) + 1
 		} );
 
 		this.builder.model.refreshPanelsData();
@@ -5686,8 +5686,8 @@ module.exports = Backbone.View.extend( {
                     newRow.setCells(cells);
 					newRow.builder = thisView.builder;
 
-					thisView.builder.model.rows.add( newRow, {
-						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+					thisView.builder.model.get('rows').add( newRow, {
+						at: thisView.builder.model.get('rows').indexOf( thisView.model ) + 1
 					} );
 
 					thisView.builder.model.refreshPanelsData();
