@@ -1,0 +1,9 @@
+{
+  "name": "siteorigin-panels",
+  "version": "0.0.1",
+  "repository": "https://github.com/siteorigin/siteorigin-panels",
+  "license": "GPL-2.0+",
+  "dependencies": {
+    "js-cookie": "^2.1.3"
+  }
+}

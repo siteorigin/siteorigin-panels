@@ -96,7 +96,6 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
-
 		return this;
 	},
 

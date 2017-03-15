@@ -2165,6 +2165,9 @@ panels.dialog.history = require( './dialog/history' );
 // The utils
 panels.utils = {};
 panels.utils.menu = require( './utils/menu' );
+panels.Cookies = require( 'js-cookie' );
+panels.serial = require( './utils/backbone-serialize' );
+
 
 // jQuery Plugins
 jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' );
@@ -2260,7 +2263,7 @@ jQuery( function ( $ ) {
 	}
 } );
 
-},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/menu":18,"./view/builder":19,"./view/cell":20,"./view/dialog":21,"./view/live-editor":22,"./view/row":23,"./view/styles":24,"./view/widget":25}],13:[function(require,module,exports){
+},{"./collection/cells":1,"./collection/history-entries":2,"./collection/rows":3,"./collection/widgets":4,"./dialog/builder":5,"./dialog/history":6,"./dialog/prebuilt":7,"./dialog/row":8,"./dialog/widget":9,"./dialog/widgets":10,"./jquery/setup-builder-widget":11,"./model/builder":13,"./model/cell":14,"./model/history-entry":15,"./model/row":16,"./model/widget":17,"./utils/backbone-serialize":18,"./utils/menu":19,"./view/builder":20,"./view/cell":21,"./view/dialog":22,"./view/live-editor":23,"./view/row":24,"./view/styles":25,"./view/widget":26,"js-cookie":27}],13:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     layoutPosition: {
         BEFORE: 'before',
@@ -2580,7 +2583,8 @@ module.exports = Backbone.Model.extend( {
 	row: null,
 
 	defaults: {
-		weight: 0
+		weight: 0,
+		style: {}
 	},
 
 	indexes: null,
@@ -2966,6 +2970,110 @@ module.exports = Backbone.Model.extend( {
 } );
 
 },{}],18:[function(require,module,exports){
+/*
+This is a modified version of https://github.com/underdogio/backbone-serialize/
+*/
+
+/* global Backbone, module, panels */
+
+module.exports = {
+	serialize: function( thing ){
+		var val;
+
+		if( thing instanceof Backbone.Model ) {
+			var retObj = {};
+			for ( var key in thing.attributes ) {
+				if (thing.attributes.hasOwnProperty( key ) ) {
+					// Skip these to avoid recursion
+					if( key === 'builder' || key === 'collection' ) { continue; }
+
+					// If the value is a Model or a Collection, then serialize them as well
+					val = thing.attributes[key];
+					if ( val instanceof Backbone.Model || val instanceof Backbone.Collection ) {
+						retObj[key] = this.serialize( val );
+					} else {
+						// Otherwise, save the original value
+						retObj[key] = val;
+					}
+				}
+			}
+			return retObj;
+		}
+		else if( thing instanceof Backbone.Collection ) {
+			// Walk over all of our models
+			var retArr = [];
+
+			for ( var i = 0; i < thing.models.length; i++ ) {
+				// If the model is serializable, then serialize it
+				val = thing.models[i];
+
+				if ( val instanceof Backbone.Model || val instanceof Backbone.Collection ) {
+					retArr.push( this.serialize( val ) );
+				} else {
+					// Otherwise (it is an object), return it in its current form
+					retArr.push( val );
+				}
+			}
+
+			// Return the serialized models
+			return retArr;
+		}
+	},
+
+	unserialize: function( thing, thingType, parent ) {
+		var retObj;
+
+		switch( thingType ) {
+			case 'row-model' :
+				retObj = new panels.model.row();
+				retObj.builder = parent;
+				retObj.set( 'style', thing.style );
+				retObj.setCells( this.unserialize( thing.cells, 'cell-collection', retObj ) );
+				break;
+
+			case 'cell-model' :
+				retObj = new panels.model.cell();
+				retObj.row = parent;
+				retObj.set( 'weight', thing.weight );
+				retObj.set( 'style', thing.style );
+				retObj.set( 'widgets', this.unserialize( thing.widgets, 'widget-collection', retObj ) );
+				break;
+
+			case 'widget-model' :
+				retObj = new panels.model.widget();
+				retObj.cell = parent;
+				for ( var key in thing ) {
+					if ( thing.hasOwnProperty( key ) ) {
+						retObj.set( key, thing[key] );
+					}
+				}
+				retObj.set( 'widget_id', parent.row.builder.generateUUID() );
+				break;
+
+			case 'cell-collection':
+				retObj = new panels.collection.cells();
+				for( var i = 0; i < thing.length; i++ ) {
+					retObj.push( this.unserialize( thing[i], 'cell-model', parent ) );
+				}
+				break;
+
+			case 'widget-collection':
+				retObj = new panels.collection.widgets();
+				for( var i = 0; i < thing.length; i++ ) {
+					retObj.push( this.unserialize( thing[i], 'widget-model', parent ) );
+				}
+				break;
+
+			default:
+				console.log( 'Unknown Thing - ' + thingType );
+				break;
+		}
+
+		return retObj;
+	}
+};
+
+},{}],19:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -3276,7 +3384,7 @@ module.exports = Backbone.View.extend( {
 
 } );
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -3375,7 +3483,6 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
-
 		return this;
 	},
 
@@ -4174,7 +4281,7 @@ module.exports = Backbone.View.extend( {
 
 } );
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -4480,7 +4587,7 @@ module.exports = Backbone.View.extend( {
 	}
 } );
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -4989,7 +5096,7 @@ module.exports = Backbone.View.extend( {
 	}
 } );
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -5391,7 +5498,7 @@ module.exports = Backbone.View.extend( {
 	}
 } );
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -5563,6 +5670,35 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Copy the row to a cookie based clipboard
+	 */
+	copyHandler: function(){
+		var serial = panels.serial.serialize( this.model );
+		serial.thingType = 'row-model';
+
+		// Store this in the cookie
+		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
+	},
+
+	/**
+	 * Create a new row and insert it
+	 */
+	pasteHandler: function(){
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'row-model' ) {
+				// Create the model
+				this.builder.addHistoryEntry( 'row_pasted' );
+				var pastedRow = panels.serial.unserialize( clipboardObject, 'row-model', this.builder.model );
+				this.builder.model.get('rows').add( pastedRow, {
+					at: this.builder.model.get('rows').indexOf( this.model ) + 1
+				} );
+			}
+		}
+	},
+
+	/**
 	 * Handles deleting the row with a confirmation.
 	 */
 	confirmedDeleteHandler: function ( e ) {
@@ -5666,7 +5802,7 @@ module.exports = Backbone.View.extend( {
 				},
 				options,
 				function ( c ) {
-					thisView.builder.addHistoryEntry( 'row_added' );
+					this.builder.addHistoryEntry( 'row_added' );
 
 					var columns = Number( c ) + 1;
 					var weights = [];
@@ -5676,7 +5812,7 @@ module.exports = Backbone.View.extend( {
 
 					// Create the actual row
 					var newRow = new panels.model.row( {
-						collection: thisView.collection
+						collection: this.collection
 					} );
 
                     var cells = new panels.collection.cells(weights);
@@ -5686,12 +5822,12 @@ module.exports = Backbone.View.extend( {
                     newRow.setCells(cells);
 					newRow.builder = thisView.builder;
 
-					thisView.builder.model.get('rows').add( newRow, {
-						at: thisView.builder.model.get('rows').indexOf( thisView.model ) + 1
+					this.builder.model.rows.add( newRow, {
+						at: this.builder.model.rows.indexOf( this.model ) + 1
 					} );
 
-					thisView.builder.model.refreshPanelsData();
-				}
+					this.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 
@@ -5700,9 +5836,22 @@ module.exports = Backbone.View.extend( {
 		if( this.builder.supports( 'editRow' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.row_edit };
 		}
+
+		// Copy and paste functions
+		actions.copy = { title: panelsOptions.loc.contextual.row_copy };
+
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'row-model' ) {
+				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+			}
+		}
+
 		if( this.builder.supports( 'addRow' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.row_duplicate };
 		}
+
 		if( this.builder.supports( 'deleteRow' ) ) {
 			actions.delete = { title: panelsOptions.loc.contextual.row_delete, confirm: true };
 		}
@@ -5717,23 +5866,28 @@ module.exports = Backbone.View.extend( {
 				function ( c ) {
 					switch ( c ) {
 						case 'edit':
-							thisView.editSettingsHandler();
+							this.editSettingsHandler();
+							break;
+						case 'copy':
+							this.copyHandler();
+							break;
+						case 'paste':
+							this.pasteHandler();
 							break;
 						case 'duplicate':
-							thisView.duplicateHandler();
+							this.duplicateHandler();
 							break;
 						case 'delete':
-							thisView.visualDestroyModel();
+							this.visualDestroyModel();
 							break;
 					}
-				}
+				}.bind( this )
 			);
 		}
-	}
-
+	},
 } );
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -6013,7 +6167,7 @@ module.exports = Backbone.View.extend( {
 
 } );
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
@@ -6278,5 +6432,163 @@ module.exports = Backbone.View.extend( {
 	}
 
 } );
+
+},{}],27:[function(require,module,exports){
+/*!
+ * JavaScript Cookie v2.1.3
+ * https://github.com/js-cookie/js-cookie
+ *
+ * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
+ * Released under the MIT license
+ */
+;(function (factory) {
+	var registeredInModuleLoader = false;
+	if (typeof define === 'function' && define.amd) {
+		define(factory);
+		registeredInModuleLoader = true;
+	}
+	if (typeof exports === 'object') {
+		module.exports = factory();
+		registeredInModuleLoader = true;
+	}
+	if (!registeredInModuleLoader) {
+		var OldCookies = window.Cookies;
+		var api = window.Cookies = factory();
+		api.noConflict = function () {
+			window.Cookies = OldCookies;
+			return api;
+		};
+	}
+}(function () {
+	function extend () {
+		var i = 0;
+		var result = {};
+		for (; i < arguments.length; i++) {
+			var attributes = arguments[ i ];
+			for (var key in attributes) {
+				result[key] = attributes[key];
+			}
+		}
+		return result;
+	}
+
+	function init (converter) {
+		function api (key, value, attributes) {
+			var result;
+			if (typeof document === 'undefined') {
+				return;
+			}
+
+			// Write
+
+			if (arguments.length > 1) {
+				attributes = extend({
+					path: '/'
+				}, api.defaults, attributes);
+
+				if (typeof attributes.expires === 'number') {
+					var expires = new Date();
+					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
+					attributes.expires = expires;
+				}
+
+				try {
+					result = JSON.stringify(value);
+					if (/^[\{\[]/.test(result)) {
+						value = result;
+					}
+				} catch (e) {}
+
+				if (!converter.write) {
+					value = encodeURIComponent(String(value))
+						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+				} else {
+					value = converter.write(value, key);
+				}
+
+				key = encodeURIComponent(String(key));
+				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+				key = key.replace(/[\(\)]/g, escape);
+
+				return (document.cookie = [
+					key, '=', value,
+					attributes.expires ? '; expires=' + attributes.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+					attributes.path ? '; path=' + attributes.path : '',
+					attributes.domain ? '; domain=' + attributes.domain : '',
+					attributes.secure ? '; secure' : ''
+				].join(''));
+			}
+
+			// Read
+
+			if (!key) {
+				result = {};
+			}
+
+			// To prevent the for loop in the first place assign an empty array
+			// in case there are no cookies at all. Also prevents odd result when
+			// calling "get()"
+			var cookies = document.cookie ? document.cookie.split('; ') : [];
+			var rdecode = /(%[0-9A-Z]{2})+/g;
+			var i = 0;
+
+			for (; i < cookies.length; i++) {
+				var parts = cookies[i].split('=');
+				var cookie = parts.slice(1).join('=');
+
+				if (cookie.charAt(0) === '"') {
+					cookie = cookie.slice(1, -1);
+				}
+
+				try {
+					var name = parts[0].replace(rdecode, decodeURIComponent);
+					cookie = converter.read ?
+						converter.read(cookie, name) : converter(cookie, name) ||
+						cookie.replace(rdecode, decodeURIComponent);
+
+					if (this.json) {
+						try {
+							cookie = JSON.parse(cookie);
+						} catch (e) {}
+					}
+
+					if (key === name) {
+						result = cookie;
+						break;
+					}
+
+					if (!key) {
+						result[name] = cookie;
+					}
+				} catch (e) {}
+			}
+
+			return result;
+		}
+
+		api.set = api;
+		api.get = function (key) {
+			return api.call(api, key);
+		};
+		api.getJSON = function () {
+			return api.apply({
+				json: true
+			}, [].slice.call(arguments));
+		};
+		api.defaults = {};
+
+		api.remove = function (key, attributes) {
+			api(key, '', extend(attributes, {
+				expires: -1
+			}));
+		};
+
+		api.withConverter = init;
+
+		return api;
+	}
+
+	return init(function () {});
+}));
 
 },{}]},{},[12]);

@@ -284,6 +284,8 @@ class SiteOrigin_Panels_Admin {
 						'row_moved'         => __( 'Row moved', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is duplicated
 						'row_duplicated'    => __( 'Row duplicated', 'siteorigin-panels' ),
+						// TRANSLATORS: Message displayed in the history when a row is pasted
+						'row_pasted'        => __( 'Row pasted', 'siteorigin-panels' ),
 
 						// Cells
 						'cell_resized'      => __( 'Cell resized', 'siteorigin-panels' ),
@@ -321,6 +323,8 @@ class SiteOrigin_Panels_Admin {
 						'row_edit'      => __( 'Edit Row', 'siteorigin-panels' ),
 						'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
 						'row_delete'    => __( 'Delete Row', 'siteorigin-panels' ),
+						'row_copy'      => __( 'Copy Row', 'siteorigin-panels' ),
+						'row_paste'     => __( 'Paste Row', 'siteorigin-panels' ),
 					),
 					'draft'                => __( 'Draft', 'siteorigin-panels' ),
 				),

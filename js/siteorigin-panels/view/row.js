@@ -169,6 +169,35 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Copy the row to a cookie based clipboard
+	 */
+	copyHandler: function(){
+		var serial = panels.serial.serialize( this.model );
+		serial.thingType = 'row-model';
+
+		// Store this in the cookie
+		panels.Cookies.set( 'panels_clipboard', JSON.stringify( serial ) );
+	},
+
+	/**
+	 * Create a new row and insert it
+	 */
+	pasteHandler: function(){
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'row-model' ) {
+				// Create the model
+				this.builder.addHistoryEntry( 'row_pasted' );
+				var pastedRow = panels.serial.unserialize( clipboardObject, 'row-model', this.builder.model );
+				this.builder.model.get('rows').add( pastedRow, {
+					at: this.builder.model.get('rows').indexOf( this.model ) + 1
+				} );
+			}
+		}
+	},
+
+	/**
 	 * Handles deleting the row with a confirmation.
 	 */
 	confirmedDeleteHandler: function ( e ) {
@@ -272,7 +301,7 @@ module.exports = Backbone.View.extend( {
 				},
 				options,
 				function ( c ) {
-					thisView.builder.addHistoryEntry( 'row_added' );
+					this.builder.addHistoryEntry( 'row_added' );
 
 					var columns = Number( c ) + 1;
 					var weights = [];
@@ -282,7 +311,7 @@ module.exports = Backbone.View.extend( {
 
 					// Create the actual row
 					var newRow = new panels.model.row( {
-						collection: thisView.collection
+						collection: this.collection
 					} );
 
                     var cells = new panels.collection.cells(weights);
@@ -292,12 +321,12 @@ module.exports = Backbone.View.extend( {
                     newRow.setCells(cells);
 					newRow.builder = thisView.builder;
 
-					thisView.builder.model.get('rows').add( newRow, {
-						at: thisView.builder.model.get('rows').indexOf( thisView.model ) + 1
+					this.builder.model.rows.add( newRow, {
+						at: this.builder.model.rows.indexOf( this.model ) + 1
 					} );
 
-					thisView.builder.model.refreshPanelsData();
-				}
+					this.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 
@@ -306,9 +335,22 @@ module.exports = Backbone.View.extend( {
 		if( this.builder.supports( 'editRow' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.row_edit };
 		}
+
+		// Copy and paste functions
+		actions.copy = { title: panelsOptions.loc.contextual.row_copy };
+
+		var clipboardObject = panels.Cookies.get( 'panels_clipboard' );
+		if( clipboardObject !== undefined ) {
+			clipboardObject = JSON.parse( clipboardObject );
+			if( clipboardObject.thingType === 'row-model' ) {
+				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+			}
+		}
+
 		if( this.builder.supports( 'addRow' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.row_duplicate };
 		}
+
 		if( this.builder.supports( 'deleteRow' ) ) {
 			actions.delete = { title: panelsOptions.loc.contextual.row_delete, confirm: true };
 		}
@@ -323,18 +365,23 @@ module.exports = Backbone.View.extend( {
 				function ( c ) {
 					switch ( c ) {
 						case 'edit':
-							thisView.editSettingsHandler();
+							this.editSettingsHandler();
+							break;
+						case 'copy':
+							this.copyHandler();
+							break;
+						case 'paste':
+							this.pasteHandler();
 							break;
 						case 'duplicate':
-							thisView.duplicateHandler();
+							this.duplicateHandler();
 							break;
 						case 'delete':
-							thisView.visualDestroyModel();
+							this.visualDestroyModel();
 							break;
 					}
-				}
+				}.bind( this )
 			);
 		}
-	}
-
+	},
 } );

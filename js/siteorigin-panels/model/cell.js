@@ -6,7 +6,8 @@ module.exports = Backbone.Model.extend( {
 	row: null,
 
 	defaults: {
-		weight: 0
+		weight: 0,
+		style: {}
 	},
 
 	indexes: null,
