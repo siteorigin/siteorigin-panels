@@ -184,7 +184,9 @@
   background: #a00;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-toolbar .so-dropdown-wrapper .so-dropdown-links-wrapper ul li.so-row-colors-container {
-  padding-left: 7px;
+  display: flex;
+  justify-content: space-around;
+  padding: 5px;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-toolbar .so-dropdown-wrapper .so-dropdown-links-wrapper ul li.so-row-colors-container input[type=radio].so-row-color {
   display: none;
@@ -206,9 +208,9 @@
 .siteorigin-panels-builder .so-rows-container .so-row-toolbar .so-dropdown-wrapper .so-dropdown-links-wrapper ul li.so-row-colors-container input[type=radio].so-row-color:checked + label:before {
   content: "\2714";
   color: rgba(0, 0, 0, 0.3);
-  font-size: 20px;
+  font-size: 16px;
   text-align: center;
-  line-height: 18px;
+  line-height: 16px;
 }
 .siteorigin-panels-builder .so-rows-container .so-row-toolbar .so-dropdown-wrapper:hover .so-dropdown-links-wrapper {
   display: block;

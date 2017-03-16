@@ -113,11 +113,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li class="so-row-colors-container">
 							<?php
 							$row_custom_colors = array(
-								'rgba(116,93,95,0.5)',
-								'rgba(116,93,120,0.5)',
-								'rgba(99,109,120,0.5)',
-								'rgba(90,119,120,0.5)',
-								'rgba(90,119,95,0.5)',
+								'#FCB3B1',
+								'#F5BC87',
+								'#E0DB8B',
+								'#A7DE95',
+								'#A2CAF5',
 							);
 
 							foreach ( $row_custom_colors as $i => $custom_color ) {
