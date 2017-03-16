@@ -17,7 +17,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 
-        var rowCells = this.model.get('cells');
+		var rowCells = this.model.get('cells');
 		rowCells.on( 'add', this.handleCellAdd, this );
 		rowCells.on( 'remove', this.handleCellRemove, this );
 		this.model.on( 'reweight_cells', this.resize, this );
@@ -317,11 +317,11 @@ module.exports = Backbone.View.extend( {
 						collection: this.collection
 					} );
 
-                    var cells = new panels.collection.cells(weights);
-                    cells.each(function (cell) {
-                        cell.row = newRow;
-                    });
-                    newRow.setCells(cells);
+					var cells = new panels.collection.cells(weights);
+					cells.each(function (cell) {
+						cell.row = newRow;
+					});
+					newRow.setCells(cells);
 					newRow.builder = this.builder.model;
 
 					this.builder.model.get('rows').add( newRow, {

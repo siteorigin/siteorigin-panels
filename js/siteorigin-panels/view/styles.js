@@ -27,13 +27,13 @@ module.exports = Backbone.View.extend( {
 
 		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
 
-        var postArgs = {
-            builderType: args.builderType
-        };
+		var postArgs = {
+			builderType: args.builderType
+		};
 
-        if ( stylesType === 'cell') {
-            postArgs.index = args.index;
-        }
+		if ( stylesType === 'cell') {
+			postArgs.index = args.index;
+		}
 
 		// Load the form
 		$.post(
@@ -174,7 +174,7 @@ module.exports = Backbone.View.extend( {
 			/**
 			 * Load value into the visible input fields.
 			 * @param value
-             */
+			 */
 			var loadValue = function( value ) {
 				if( value === '' ) {
 					return;

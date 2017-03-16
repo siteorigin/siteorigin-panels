@@ -1,43 +1,43 @@
 module.exports = Backbone.Model.extend({
-    layoutPosition: {
-        BEFORE: 'before',
-        AFTER: 'after',
-        REPLACE: 'replace',
-    },
+	layoutPosition: {
+		BEFORE: 'before',
+		AFTER: 'after',
+		REPLACE: 'replace',
+	},
 
-    rows: {},
+	rows: {},
 
-    defaults: {
-        'data': {
-            'widgets': [],
-            'grids': [],
-            'grid_cells': []
-        }
-    },
+	defaults: {
+		'data': {
+			'widgets': [],
+			'grids': [],
+			'grid_cells': []
+		}
+	},
 
-    initialize: function () {
-        // These are the main rows in the interface
+	initialize: function () {
+		// These are the main rows in the interface
 		this.set( 'rows', new panels.collection.rows() );
-    },
+	},
 
-    /**
-     * Add a new row to this builder.
-     *
-     * @param cells
-     */
-    addRow: function (cells, options) {
-        options = _.extend({
-            noAnimate: false
-        }, options);
-        // Create the actual row
-        var row = new panels.model.row({
-            collection: this.get('rows')
-        });
-        var cells = new panels.collection.cells(cells);
-        cells.each(function (cell) {
-            cell.row = row;
-        });
-        row.set('cells', cells);
+	/**
+	 * Add a new row to this builder.
+	 *
+	 * @param cells
+	 */
+	addRow: function (cells, options) {
+		options = _.extend({
+			noAnimate: false
+		}, options);
+		// Create the actual row
+		var row = new panels.model.row({
+			collection: this.get('rows')
+		});
+		var cells = new panels.collection.cells(cells);
+		cells.each(function (cell) {
+			cell.row = row;
+		});
+		row.set('cells', cells);
 		row.builder = this;
 
 		this.get('rows').add( row, options );
@@ -50,7 +50,7 @@ module.exports = Backbone.Model.extend({
 	 *
 	 * @param data Object the layout and widgets data to load.
 	 * @param position string Where to place the new layout. Allowed options are 'before', 'after'. Anything else will
-	 *                          cause the new layout to replace the old one.
+	 *						  cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
 		try {
@@ -151,7 +151,7 @@ module.exports = Backbone.Model.extend({
 	concatPanelsData: function ( panelsDataA, panelsDataB ) {
 
 		if ( _.isUndefined( panelsDataB ) || _.isUndefined( panelsDataB.grids ) || _.isEmpty( panelsDataB.grids ) ||
-		     _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
+			 _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
 			return panelsDataA;
 		}
 
@@ -289,8 +289,8 @@ module.exports = Backbone.Model.extend({
 
 	isValidLayoutPosition: function ( position ) {
 		return position === this.layoutPosition.BEFORE ||
-		       position === this.layoutPosition.AFTER ||
-		       position === this.layoutPosition.REPLACE;
+			   position === this.layoutPosition.AFTER ||
+			   position === this.layoutPosition.REPLACE;
 	},
 
 	generateUUID: function(){

@@ -202,12 +202,12 @@ module.exports = Backbone.View.extend( {
 			this.$( '.so-dropdown-links-wrapper' ).not( '.hidden' ).each( function ( index, el ) {
 				var $dropdownList = $( el );
 				var $trgt = $( e.target );
-				if ( $trgt.length === 0 || ! (
-				     (
-				     $trgt.is( '.so-needs-confirm' ) && ! $trgt.is( '.so-confirmed' )
-				     ) || $trgt.is( '.so-dropdown-button' )
+				if ( $trgt.length === 0 || !(
+						(
+							$trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')
+						) || $trgt.is('.so-dropdown-button')
 					) ) {
-					$dropdownList.addClass( 'hidden' );
+					$dropdownList.addClass('hidden');
 				}
 			} );
 		}.bind( this ) );

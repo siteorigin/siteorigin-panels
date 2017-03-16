@@ -258,10 +258,10 @@ module.exports = Backbone.View.extend( {
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets
 		var data = this.model.get( 'data' );
 		if ( (
-			     ! _.isEmpty( data.widgets )
-		     ) || (
-			     ! _.isEmpty( data.grids )
-		     ) ) {
+				 ! _.isEmpty( data.widgets )
+			 ) || (
+				 ! _.isEmpty( data.grids )
+			 ) ) {
 			$( '#content-panels.switch-panels' ).click();
 		}
 
@@ -464,12 +464,12 @@ module.exports = Backbone.View.extend( {
 	 * Display the dialog to add a new row.
 	 */
 	displayAddRowDialog: function () {
-        var row = new panels.model.row();
-        var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
-        cells.each(function (cell) {
-            cell.row = row;
-        });
-        row.set('cells', cells);
+		var row = new panels.model.row();
+		var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
+		cells.each(function (cell) {
+			cell.row = row;
+		});
+		row.set('cells', cells);
 		row.builder = this.model;
 
 		this.dialogs.row.setRowModel(row);

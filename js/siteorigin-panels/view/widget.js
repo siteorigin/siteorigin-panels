@@ -21,8 +21,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 		// The 2 user actions on the model that this view will handle.
-		this.model.on( 'user_edit', this.editHandler, this );                 // When a user wants to edit the widget model
-		this.model.on( 'user_duplicate', this.duplicateHandler, this );       // When a user wants to duplicate the widget model
+		this.model.on( 'user_edit', this.editHandler, this );				 // When a user wants to edit the widget model
+		this.model.on( 'user_duplicate', this.duplicateHandler, this );	   // When a user wants to duplicate the widget model
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 

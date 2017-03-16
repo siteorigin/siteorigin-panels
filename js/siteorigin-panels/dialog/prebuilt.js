@@ -248,8 +248,8 @@ module.exports = panels.view.dialog.extend( {
 				c.find( '.so-screenshot' ).each( function () {
 					var $$ = $( this ), $a = $$.find( '.so-screenshot-wrapper' );
 					$a.css( 'height', (
-					                  $a.width() / 4 * 3
-					                  ) + 'px' ).addClass( 'so-loading' );
+									  $a.width() / 4 * 3
+									  ) + 'px' ).addClass( 'so-loading' );
 
 					if ( $$.data( 'src' ) !== '' ) {
 						// Set the initial height
@@ -327,8 +327,8 @@ module.exports = panels.view.dialog.extend( {
 
 	canAddLayout: function () {
 		return (
-		       this.selectedLayoutItem || this.uploadedLayout
-		       ) && ! this.addingLayout;
+			   this.selectedLayoutItem || this.uploadedLayout
+			   ) && ! this.addingLayout;
 	},
 
 	/**
