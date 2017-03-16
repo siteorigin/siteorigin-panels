@@ -678,7 +678,6 @@ module.exports = panels.view.dialog.extend({
 
 		var activeCell = this.builder.getActiveCell({
 			createCell: false,
-			defaultPosition: 'last'
 		});
 
 		var options = {};

@@ -500,7 +500,6 @@ module.exports = Backbone.View.extend( {
 	getActiveCell: function ( options ) {
 		options = _.extend( {
 			createCell: true,
-			defaultPosition: 'first'
 		}, options );
 
 		if( ! this.model.get('rows').length ) {
