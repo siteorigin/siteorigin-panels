@@ -513,7 +513,12 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var activeCell = this.activeCell;
-		return _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ? this.model.get('rows').last().get('cells').first() : activeCell.model;
+
+		if( _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ) {
+			return this.model.get('rows').last().get('cells').first();
+		} else {
+			return activeCell.model;
+		}
 	},
 
 	/**
