@@ -129,7 +129,7 @@ module.exports = Backbone.Model.extend({
 					newWidget.set( 'widget_id', panels_info.widget_id );
 				}
 				else {
-					newWidget.set( 'widget_id', builderModel.generateUUID() );
+					newWidget.set( 'widget_id', panels.helpers.generateUUID() );
 				}
 
 				newWidget.cell = cell;
@@ -227,7 +227,7 @@ module.exports = Backbone.Model.extend({
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
-						panels_info.widget_id = builder.generateUUID();
+						panels_info.widget_id = panels.helpers.generateUUID();
 					}
 
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {
@@ -292,18 +292,4 @@ module.exports = Backbone.Model.extend({
 			   position === this.layoutPosition.AFTER ||
 			   position === this.layoutPosition.REPLACE;
 	},
-
-	generateUUID: function(){
-		var d = new Date().getTime();
-		if( window.performance && typeof window.performance.now === "function" ){
-			d += performance.now(); //use high-precision timer if available
-		}
-		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function(c) {
-			var r = (d + Math.random()*16)%16 | 0;
-			d = Math.floor(d/16);
-			return ( c == 'x' ? r : (r&0x3|0x8) ).toString(16);
-		} );
-		return uuid;
-	}
-
 } );

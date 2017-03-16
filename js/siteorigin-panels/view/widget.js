@@ -149,13 +149,7 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a cookie based clipboard
 	 */
 	copyHandler: function(){
-		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
-
-		var serial = panels.serial.serialize( this.model );
-		serial.thingType = 'widget-model';
-
-		// Store this in the cookie
-		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
+		panels.helpers.clipboard.setModel( this.model );
 	},
 
 	/**

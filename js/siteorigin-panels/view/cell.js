@@ -276,18 +276,11 @@ module.exports = Backbone.View.extend( {
 	 * Insert a widget from the clipboard
 	 */
 	pasteHandler: function(){
-		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
-
-		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'widget-model' ) {
-				// Create the model
-				this.row.builder.addHistoryEntry( 'widget_pasted' );
-
-				var pastedWidget = panels.serial.unserialize( clipboardObject, 'widget-model', this.model );
-				this.model.get('widgets').add( pastedWidget );
-			}
+		var pastedModel = panels.helpers.clipboard.getModel( 'widget-model' );
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.widget ) {
+			this.row.builder.addHistoryEntry( 'widget_pasted' );
+			pastedModel.cell = this.model;
+			this.model.get('widgets').add( pastedModel );
 		}
 	},
 
@@ -326,17 +319,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var actions = {};
-
-		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
-			if (this.row.builder.supports('addWidget')) {
-				var clipboardObject = localStorage['panels_clipboard_' + panelsOptions.user];
-				if (clipboardObject !== undefined) {
-					clipboardObject = JSON.parse(clipboardObject);
-					if (clipboardObject.thingType === 'widget-model') {
-						actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
-					}
-				}
-			}
+		if ( this.row.builder.supports('addWidget') && panels.helpers.clipboard.isModel( 'widget-model' ) ) {
+			actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
 		}
 
 		if( ! _.isEmpty( actions ) ) {

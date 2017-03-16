@@ -172,32 +172,21 @@ module.exports = Backbone.View.extend( {
 	 * Copy the row to a localStorage
 	 */
 	copyHandler: function(){
-		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
-
-		var serial = panels.serial.serialize( this.model );
-		serial.thingType = 'row-model';
-
-		// Store this in the cookie
-		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
+		panels.helpers.clipboard.setModel( this.model );
 	},
 
 	/**
 	 * Create a new row and insert it
 	 */
 	pasteHandler: function(){
-		if ( typeof(Storage) === "undefined" || ! panelsOptions.user ) return;
+		var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
 
-		var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
-		if( clipboardObject !== undefined ) {
-			clipboardObject = JSON.parse( clipboardObject );
-			if( clipboardObject.thingType === 'row-model' ) {
-				// Create the model
-				this.builder.addHistoryEntry( 'row_pasted' );
-				var pastedRow = panels.serial.unserialize( clipboardObject, 'row-model', this.builder.model );
-				this.builder.model.get('rows').add( pastedRow, {
-					at: this.builder.model.get('rows').indexOf( this.model ) + 1
-				} );
-			}
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
+			this.builder.addHistoryEntry( 'row_pasted' );
+			pastedModel.builder = this.builder.model;
+			this.builder.model.get('rows').add( pastedModel, {
+				at: this.builder.model.get('rows').indexOf( this.model ) + 1
+			} );
 		}
 	},
 
@@ -342,14 +331,8 @@ module.exports = Backbone.View.extend( {
 		// Copy and paste functions
 		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
 			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
-			if ( this.builder.supports( 'addRow' ) ) {
-				var clipboardObject = localStorage[ 'panels_clipboard_' + panelsOptions.user ];
-				if( clipboardObject !== undefined ) {
-					clipboardObject = JSON.parse( clipboardObject );
-					if( clipboardObject.thingType === 'row-model' ) {
-						actions.paste = { title: panelsOptions.loc.contextual.row_paste };
-					}
-				}
+			if ( this.builder.supports( 'addRow' ) && panels.helpers.clipboard.isModel( 'row-model' ) ) {
+				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
 			}
 		}
 
