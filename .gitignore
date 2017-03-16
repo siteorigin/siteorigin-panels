@@ -4,3 +4,6 @@ lang/siteorigin-panels.mo
 node_modules/
 dist/
 /tmp
+/js/siteorigin-panels.js
+/css/*.css
+/settings/admin-settings.css
