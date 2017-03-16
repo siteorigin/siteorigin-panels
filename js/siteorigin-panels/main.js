@@ -64,6 +64,12 @@ panels.dialog.history = require( './dialog/history' );
 // The utils
 panels.utils = {};
 panels.utils.menu = require( './utils/menu' );
+panels.serial = require( './utils/backbone-serialize' );
+
+// Helpers
+panels.helpers = {};
+panels.helpers.clipboard = require( './helpers/clipboard' );
+panels.helpers.generateUUID = require( './helpers/generate-uuid' );
 
 // jQuery Plugins
 jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' );

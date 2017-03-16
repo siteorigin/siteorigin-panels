@@ -678,17 +678,16 @@ module.exports = panels.view.dialog.extend({
 
 		var activeCell = this.builder.getActiveCell({
 			createCell: false,
-			defaultPosition: 'last'
 		});
 
 		var options = {};
 		if (activeCell !== null) {
-			options.at = this.builder.model.rows.indexOf(activeCell.row) + 1;
+			options.at = this.builder.model.get('rows').indexOf(activeCell.row) + 1;
 		}
 
 		// Set up the model and add it to the builder
-		this.model.collection = this.builder.model.rows;
-		this.builder.model.rows.add(this.model, options);
+		this.model.collection = this.builder.model.get('rows');
+		this.builder.model.get('rows').add(this.model, options);
 
 		this.closeDialog();
 
@@ -729,8 +728,8 @@ module.exports = panels.view.dialog.extend({
 
 		var duplicateRow = this.model.clone(this.builder.model);
 
-		this.builder.model.rows.add(duplicateRow, {
-			at: this.builder.model.rows.indexOf(this.model) + 1
+		this.builder.model.get('rows').add(duplicateRow, {
+			at: this.builder.get('rows').indexOf(this.model) + 1
 		});
 
 		this.closeDialog({silent: true});

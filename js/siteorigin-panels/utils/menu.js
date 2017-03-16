@@ -144,7 +144,7 @@ module.exports = Backbone.View.extend( {
 	 * @param items
 	 * @param callback
 	 */
-	addSection: function ( settings, items, callback ) {
+	addSection: function ( id, settings, items, callback ) {
 		var thisView = this;
 		settings = _.extend( {
 			display: 5,
@@ -163,7 +163,7 @@ module.exports = Backbone.View.extend( {
 		var section = $( this.sectionTemplate( {
 			settings: settings,
 			items: items
-		} ) );
+		} ) ).attr( 'id', 'panels-menu-section-' + id );
 		this.$el.append( section );
 
 		section.find( '.so-item:not(.so-confirm)' ).click( function () {
@@ -195,6 +195,16 @@ module.exports = Backbone.View.extend( {
 		section.data( 'settings', settings ).find( '.so-search-wrapper input' ).trigger( 'keyup' );
 
 		this.active = true;
+	},
+
+	/**
+	 * Check if a section exists in the current menu.
+	 *
+	 * @param id
+	 * @returns {boolean}
+	 */
+	hasSection: function( id ){
+		return this.$el.find( '#panels-menu-section-' + id  ).length > 0;
 	},
 
 	/**

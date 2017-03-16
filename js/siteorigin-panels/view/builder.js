@@ -15,6 +15,8 @@ module.exports = Backbone.View.extend( {
 	liveEditor: undefined,
 	menu: false,
 
+	activeCell: null,
+
 	events: {
 		'click .so-tool-button.so-widget-add': 'displayAddWidgetDialog',
 		'click .so-tool-button.so-row-add': 'displayAddRowDialog',
@@ -75,7 +77,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogs.row.setRowDialogType( 'create' );
 
 		// This handles a new row being added to the collection - we'll display it in the interface
-		this.model.rows.on( 'add', this.onAddRow, this );
+		this.model.get('rows').on( 'add', this.onAddRow, this );
 
 		// Reflow the entire builder when ever the
 		$( window ).resize( function ( e ) {
@@ -96,7 +98,6 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
-
 		return this;
 	},
 
@@ -257,10 +258,10 @@ module.exports = Backbone.View.extend( {
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets
 		var data = this.model.get( 'data' );
 		if ( (
-			     ! _.isEmpty( data.widgets )
-		     ) || (
-			     ! _.isEmpty( data.grids )
-		     ) ) {
+				 ! _.isEmpty( data.widgets )
+			 ) || (
+				 ! _.isEmpty( data.grids )
+			 ) ) {
 			$( '#content-panels.switch-panels' ).click();
 		}
 
@@ -347,15 +348,17 @@ module.exports = Backbone.View.extend( {
 				var $$ =  $( ui.item ),
 					row = $$.data( 'view' );
 
-				builderView.model.rows.remove( row.model, {
+				builderView.model.get('rows').remove( row.model, {
 					'silent' : true
 				} );
-				builderView.model.rows.add( row.model, {
+				builderView.model.get('rows').add( row.model, {
 					'silent' : true,
 					'at' : $$.index()
 				} );
 
 				row.trigger( 'move', $$.index() );
+
+				builderView.model.refreshPanelsData();
 			}
 		} );
 
@@ -459,16 +462,16 @@ module.exports = Backbone.View.extend( {
 
 	/**
 	 * Display the dialog to add a new row.
-	 *
-	 * @returns {boolean}
 	 */
 	displayAddRowDialog: function () {
-        var row = new panels.model.row();
-        var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
-        cells.each(function (cell) {
-            cell.row = row;
-        });
-        row.set('cells', cells);
+		var row = new panels.model.row();
+		var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
+		cells.each(function (cell) {
+			cell.row = row;
+		});
+		row.set('cells', cells);
+		row.builder = this.model;
+
 		this.dialogs.row.setRowModel(row);
 		this.dialogs.row.openDialog();
 	},
@@ -497,31 +500,25 @@ module.exports = Backbone.View.extend( {
 	getActiveCell: function ( options ) {
 		options = _.extend( {
 			createCell: true,
-			defaultPosition: 'first'
 		}, options );
 
-		if ( this.$( '.so-cells .cell' ).length === 0 ) {
-
+		if( ! this.model.get('rows').length ) {
+			// There aren't any rows yet
 			if ( options.createCell ) {
 				// Create a row with a single cell
 				this.model.addRow( [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}
-
 		}
 
-		var activeCell = this.$( '.so-cells .cell.cell-selected' );
+		var activeCell = this.activeCell;
 
-		if ( activeCell.length === 0 ) {
-			if ( options.defaultPosition === 'last' ) {
-				activeCell = this.$( '.so-cells .cell' ).first();
-			} else {
-				activeCell = this.$( '.so-cells .cell' ).last();
-			}
+		if( _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ) {
+			return this.model.get('rows').last().get('cells').first();
+		} else {
+			return activeCell.model;
 		}
-
-		return activeCell.data( 'view' ).model;
 	},
 
 	/**
@@ -792,7 +789,7 @@ module.exports = Backbone.View.extend( {
 	 * This shows or hides the welcome display depending on whether there are any rows in the collection.
 	 */
 	toggleWelcomeDisplay: function () {
-		if ( ! this.model.rows.isEmpty() ) {
+		if ( ! this.model.get('rows').isEmpty() ) {
 			this.$( '.so-panels-welcome-message' ).hide();
 		} else {
 			this.$( '.so-panels-welcome-message' ).show();

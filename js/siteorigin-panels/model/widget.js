@@ -65,7 +65,7 @@ module.exports = Backbone.Model.extend( {
 
 		this.cell = newCell;
 		this.collection.remove( this, options );
-		newCell.widgets.add( this, _.extend( {
+		newCell.get('widgets').add( this, _.extend( {
 			at: at
 		}, options ) );
 
@@ -145,7 +145,7 @@ module.exports = Backbone.Model.extend( {
 		}
 
 		clone.set( 'values', cloneValues, {silent: true} );
-		clone.set( 'collection', cell.widgets, {silent: true} );
+		clone.set( 'collection', cell.get('widgets'), {silent: true} );
 		clone.cell = cell;
 
 		// This is used to force a form reload later on

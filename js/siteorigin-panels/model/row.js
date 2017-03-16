@@ -25,38 +25,38 @@ module.exports = Backbone.Model.extend( {
 	 * @param newCells the updated collection of cell models
 	 */
 	setCells: function ( newCells ) {
-        var currentCells = this.get('cells') || new panels.collection.cells();
-        var cellsToRemove = [];
+		var currentCells = this.get('cells') || new panels.collection.cells();
+		var cellsToRemove = [];
 
-        currentCells.each(function (cell, i) {
-            var newCell = newCells.at(i);
-            if(newCell) {
-            	cell.set('weight', newCell.get('weight'));
-            } else {
+		currentCells.each(function (cell, i) {
+			var newCell = newCells.at(i);
+			if(newCell) {
+				cell.set('weight', newCell.get('weight'));
+			} else {
 				var newParentCell = currentCells.at( newCells.length - 1 );
 
 				// First move all the widgets to the new cell
-				var widgetsToMove = cell.widgets.models.slice();
+				var widgetsToMove = cell.get('widgets').models.slice();
 				for ( var j = 0; j < widgetsToMove.length; j++ ) {
 					widgetsToMove[j].moveToCell( newParentCell, { silent: false } );
 				}
 
-                cellsToRemove.push(cell);
+				cellsToRemove.push(cell);
 			}
-        });
+		});
 
-        _.each(cellsToRemove, function(cell) {
-            currentCells.remove(cell);
-        });
+		_.each(cellsToRemove, function(cell) {
+			currentCells.remove(cell);
+		});
 
-        if( newCells.length > currentCells.length) {
-            _.each(newCells.slice(currentCells.length, newCells.length), function (newCell) {
-        		// TODO: make sure row and collection is set correctly when cell is created then we can just add new cells
-                newCell.set({collection: currentCells});
-                newCell.row = this;
-                currentCells.add(newCell);
-            }.bind(this));
-        }
+		if( newCells.length > currentCells.length) {
+			_.each(newCells.slice(currentCells.length, newCells.length), function (newCell) {
+				// TODO: make sure row and collection is set correctly when cell is created then we can just add new cells
+				newCell.set({collection: currentCells});
+				newCell.row = this;
+				currentCells.add(newCell);
+			}.bind(this));
+		}
 
 		// Rescale the cells when we add or remove
 		this.reweightCells();
@@ -67,7 +67,7 @@ module.exports = Backbone.Model.extend( {
 	 */
 	reweightCells: function () {
 		var totalWeight = 0;
-        var cells = this.get('cells');
+		var cells = this.get('cells');
 		cells.each( function ( cell ) {
 			totalWeight += cell.get( 'weight' );
 		} );
@@ -103,7 +103,7 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneCells: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', builder.rows, {silent: true} );
+		clone.set( 'collection', builder.get('rows'), {silent: true} );
 		clone.builder = builder;
 
 		if ( cloneOptions.cloneCells ) {

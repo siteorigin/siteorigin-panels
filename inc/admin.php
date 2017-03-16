@@ -202,7 +202,9 @@ class SiteOrigin_Panels_Admin {
 
 			$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
 
+			$user = wp_get_current_user();
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
+				'user'                      => ! empty( $user ) ? $user->ID : 0,
 				'ajaxurl'                   => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ),
 				'widgets'                   => $widgets,
 				'widget_dialog_tabs'        => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
@@ -284,6 +286,8 @@ class SiteOrigin_Panels_Admin {
 						'row_moved'         => __( 'Row moved', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is duplicated
 						'row_duplicated'    => __( 'Row duplicated', 'siteorigin-panels' ),
+						// TRANSLATORS: Message displayed in the history when a row is pasted
+						'row_pasted'        => __( 'Row pasted', 'siteorigin-panels' ),
 
 						// Cells
 						'cell_resized'      => __( 'Cell resized', 'siteorigin-panels' ),
@@ -312,15 +316,22 @@ class SiteOrigin_Panels_Admin {
 						'add_row' => __( 'Add Row', 'siteorigin-panels' ),
 						'column'  => __( 'Column', 'siteorigin-panels' ),
 
+						'cell_actions'        => __( 'Cell Actions', 'siteorigin-panels' ),
+						'cell_paste_widget'   => __( 'Paste Widget', 'siteorigin-panels' ),
+
 						'widget_actions'   => __( 'Widget Actions', 'siteorigin-panels' ),
 						'widget_edit'      => __( 'Edit Widget', 'siteorigin-panels' ),
 						'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
 						'widget_delete'    => __( 'Delete Widget', 'siteorigin-panels' ),
+						'widget_copy'      => __( 'Copy Widget', 'siteorigin-panels' ),
+						'widget_paste'     => __( 'Paste Widget Below', 'siteorigin-panels' ),
 
 						'row_actions'   => __( 'Row Actions', 'siteorigin-panels' ),
 						'row_edit'      => __( 'Edit Row', 'siteorigin-panels' ),
 						'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
 						'row_delete'    => __( 'Delete Row', 'siteorigin-panels' ),
+						'row_copy'      => __( 'Copy Row', 'siteorigin-panels' ),
+						'row_paste'     => __( 'Paste Row', 'siteorigin-panels' ),
 					),
 					'draft'                => __( 'Draft', 'siteorigin-panels' ),
 				),
