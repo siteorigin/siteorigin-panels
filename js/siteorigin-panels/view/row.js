@@ -187,6 +187,7 @@ module.exports = Backbone.View.extend( {
 			this.builder.model.get('rows').add( pastedModel, {
 				at: this.builder.model.get('rows').indexOf( this.model ) + 1
 			} );
+			this.builder.model.refreshPanelsData();
 		}
 	},
 

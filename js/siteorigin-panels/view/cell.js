@@ -281,6 +281,7 @@ module.exports = Backbone.View.extend( {
 			this.row.builder.addHistoryEntry( 'widget_pasted' );
 			pastedModel.cell = this.model;
 			this.model.get('widgets').add( pastedModel );
+			this.row.builder.model.refreshPanelsData();
 		}
 	},
 
