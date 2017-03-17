@@ -15,7 +15,7 @@ module.exports = {
 			return false;
 		}
 
-		var serial = panels.serial.serialize( model );
+		var serial = panels.helpers.serialize.serialize( model );
 		if( model instanceof  panels.model.row ) {
 			serial.thingType = 'row-model';
 		} else if( model instanceof  panels.model.widget ) {
@@ -56,7 +56,7 @@ module.exports = {
 		if( clipboardObject !== undefined ) {
 			clipboardObject = JSON.parse( clipboardObject );
 			if( clipboardObject.thingType && clipboardObject.thingType === expected ) {
-				return panels.serial.unserialize( clipboardObject, clipboardObject.thingType, null );
+				return panels.helpers.serialize.unserialize( clipboardObject, clipboardObject.thingType, null );
 			}
 		}
 
