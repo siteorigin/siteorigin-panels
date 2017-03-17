@@ -267,9 +267,17 @@ module.exports = Backbone.View.extend( {
 	 * @returns {boolean}
 	 */
 	handleCellClick: function ( e ) {
-		var cells = this.$el.closest( '.so-rows-container' ).find( '.so-cells .cell' ).removeClass( 'cell-selected' );
-		$( e.target ).parent().addClass( 'cell-selected' );
-		this.row.builder.activeCell = this;
+		// Remove all existing selected cell indication for this builder
+		this.row.builder.$el.find( '.so-cells .cell' ).removeClass( 'cell-selected' );
+
+		if( this.row.builder.activeCell === this && ! this.model.get('widgets').length ) {
+			// This is a click on an empty cell
+			this.row.builder.activeCell = null;
+		}
+		else {
+			this.$el.addClass( 'cell-selected' );
+			this.row.builder.activeCell = this;
+		}
 	},
 
 	/**
