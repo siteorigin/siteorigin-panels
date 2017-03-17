@@ -2,7 +2,7 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend({
 
-	cellPreviewTemplate: _.template($('#siteorigin-panels-dialog-row-cell-preview').html().panelsProcessTemplate()),
+	cellPreviewTemplate: _.template( panels.helpers.utils.processTemplate( $('#siteorigin-panels-dialog-row-cell-preview').html() ) ),
 
 	events: {
 		'click .so-close': 'closeDialog',

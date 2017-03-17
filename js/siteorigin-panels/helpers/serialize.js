@@ -75,7 +75,7 @@ module.exports = {
 						retObj.set( key, thing[key] );
 					}
 				}
-				retObj.set( 'widget_id', panels.helpers.generateUUID() );
+				retObj.set( 'widget_id', panels.helpers.utils.generateUUID() );
 				break;
 
 			case 'cell-collection':

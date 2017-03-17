@@ -1,8 +1,8 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	wrapperTemplate: _.template( $( '#siteorigin-panels-context-menu' ).html().panelsProcessTemplate() ),
-	sectionTemplate: _.template( $( '#siteorigin-panels-context-menu-section' ).html().panelsProcessTemplate() ),
+	wrapperTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-context-menu' ).html() ) ),
+	sectionTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-context-menu-section' ).html() ) ),
 
 	contexts: [],
 	active: false,

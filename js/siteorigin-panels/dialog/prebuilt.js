@@ -2,7 +2,7 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-	directoryTemplate: _.template( $( '#siteorigin-panels-directory-items' ).html().panelsProcessTemplate() ),
+	directoryTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-directory-items' ).html() ) ),
 
 	builder: null,
 	dialogClass: 'so-panels-dialog-prebuilt-layouts',

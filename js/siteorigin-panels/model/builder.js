@@ -129,7 +129,7 @@ module.exports = Backbone.Model.extend({
 					newWidget.set( 'widget_id', panels_info.widget_id );
 				}
 				else {
-					newWidget.set( 'widget_id', panels.helpers.generateUUID() );
+					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
 				}
 
 				newWidget.cell = cell;
@@ -227,7 +227,7 @@ module.exports = Backbone.Model.extend({
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
-						panels_info.widget_id = panels.helpers.generateUUID();
+						panels_info.widget_id = panels.helpers.utils.generateUUID();
 					}
 
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {

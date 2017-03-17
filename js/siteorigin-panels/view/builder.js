@@ -5,7 +5,7 @@ module.exports = Backbone.View.extend( {
 	// Config options
 	config: {},
 
-	template: _.template( $( '#siteorigin-panels-builder' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder' ).html() ) ),
 	dialogs: {},
 	rowsSortable: null,
 	dataField: false,
@@ -495,6 +495,22 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Handle pasting a row into the builder.
+	 */
+	pasteRowHandler: function(){
+		var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
+
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
+			this.addHistoryEntry( 'row_pasted' );
+			pastedModel.builder = this.model;
+			this.model.get('rows').add( pastedModel, {
+				at: this.model.get('rows').indexOf( this.model ) + 1
+			} );
+			this.model.refreshPanelsData();
+		}
+	},
+
+	/**
 	 * Get the model for the currently selected cell
 	 */
 	getActiveCell: function ( options ) {
@@ -880,16 +896,7 @@ module.exports = Backbone.View.extend( {
 							break;
 
 						case 'paste_row':
-							var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
-
-							if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
-								this.addHistoryEntry( 'row_pasted' );
-								pastedModel.builder = this.model;
-								this.model.get('rows').add( pastedModel, {
-									at: this.model.get('rows').indexOf( this.model ) + 1
-								} );
-								this.model.refreshPanelsData();
-							}
+							this.pasteRowHandler();
 							break;
 					}
 				}.bind( this )

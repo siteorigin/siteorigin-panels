@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	template: _.template( $( '#siteorigin-panels-builder-widget' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder-widget' ).html() ) ),
 
 	// The cell view that this widget belongs to
 	cell: null,
@@ -234,7 +234,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Copy and paste functions
-		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
 			actions.copy = {title: panelsOptions.loc.contextual.widget_copy};
 		}
 
@@ -269,8 +269,6 @@ module.exports = Backbone.View.extend( {
 							this.visualDestroyModel();
 							break;
 					}
-
-					this.cell.row.builder.model.refreshPanelsData();
 				}.bind( this )
 			);
 		}

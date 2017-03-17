@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	template: _.template( $( '#siteorigin-panels-builder-row' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder-row' ).html() ) ),
 
 	events: {
 		'click .so-row-settings': 'editSettingsHandler',
@@ -323,14 +323,14 @@ module.exports = Backbone.View.extend( {
 			);
 		}
 
-		actions = {};
+		var actions = {};
 
 		if( this.builder.supports( 'editRow' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.row_edit };
 		}
 
 		// Copy and paste functions
-		if ( typeof(Storage) !== "undefined" && panelsOptions.user ) {
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
 			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
 			if ( this.builder.supports( 'addRow' ) && panels.helpers.clipboard.isModel( 'row-model' ) ) {
 				actions.paste = { title: panelsOptions.loc.contextual.row_paste };

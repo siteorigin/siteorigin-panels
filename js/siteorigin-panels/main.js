@@ -7,25 +7,17 @@
 
 /* global Backbone, _, jQuery, tinyMCE, panelsOptions, plupload, confirm, console, require */
 
-/**
- * Convert template into something compatible with Underscore.js templates
- *
- * @param s
- * @return {*}
- */
-String.prototype.panelsProcessTemplate = function () {
-	var s = this;
-	s = s.replace( /{{%/g, '<%' );
-	s = s.replace( /%}}/g, '%>' );
-	s = s.trim();
-	return s;
-};
-
 var panels = {};
 
 // Store everything globally
 window.panels = panels;
 window.siteoriginPanels = panels;
+
+// Helpers
+panels.helpers = {};
+panels.helpers.clipboard = require( './helpers/clipboard' );
+panels.helpers.utils = require( './helpers/utils' );
+panels.helpers.serialize = require( './helpers/serialize' );
 
 // The models
 panels.model = {};
@@ -64,12 +56,6 @@ panels.dialog.history = require( './dialog/history' );
 // The utils
 panels.utils = {};
 panels.utils.menu = require( './utils/menu' );
-
-// Helpers
-panels.helpers = {};
-panels.helpers.clipboard = require( './helpers/clipboard' );
-panels.helpers.generateUUID = require( './helpers/generate-uuid' );
-panels.helpers.serialize = require( './helpers/serialize' );
 
 // jQuery Plugins
 jQuery.fn.soPanelsSetupBuilderWidget = require( './jquery/setup-builder-widget' );
