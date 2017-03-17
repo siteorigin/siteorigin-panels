@@ -796,6 +796,11 @@ module.exports = Backbone.View.extend( {
 		}
 	},
 
+	/**
+	 * Activate the contextual menu
+	 * @param e
+	 * @param menu
+	 */
 	activateContextMenu: function ( e, menu ) {
 		var builder = this;
 
@@ -824,6 +829,7 @@ module.exports = Backbone.View.extend( {
 		) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
+				.add( builder.$( '.so-panels-welcome-message' ) )
 				.add( builder.$( '.so-rows-container > .so-row-container' ) )
 				.add( builder.$( '.so-cells > .cell' ) )
 				.add( builder.$( '.cell-wrapper > .so-widget' ) )
@@ -836,6 +842,58 @@ module.exports = Backbone.View.extend( {
 				// We'll pass this to the current active view so it can popular the contextual menu
 				activeView.buildContextualMenu( e, menu );
 			}
+			else if( over.last().hasClass( 'so-panels-welcome-message' ) ) {
+				// The user opened the contextual menu on the welcome message
+				this.buildContextualMenu( e, menu );
+			}
+		}
+	},
+
+	/**
+	 * Build the contextual menu for the main builder - before any content has been added.
+	 */
+	buildContextualMenu: function( e, menu ){
+		var actions = {};
+
+		if( this.supports( 'addRow' ) ) {
+			actions.add_row = { title: panelsOptions.loc.contextual.add_row };
+		}
+
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
+			if( panels.helpers.clipboard.isModel( 'row-model' ) && this.supports( 'addRow' ) ) {
+				actions.paste_row = { title: panelsOptions.loc.contextual.row_paste };
+			}
+		}
+
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				'builder-actions',
+				{
+					sectionTitle: panelsOptions.loc.contextual.row_actions,
+					search: false,
+				},
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'add_row':
+							this.displayAddRowDialog();
+							break;
+
+						case 'paste_row':
+							var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
+
+							if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
+								this.addHistoryEntry( 'row_pasted' );
+								pastedModel.builder = this.model;
+								this.model.get('rows').add( pastedModel, {
+									at: this.model.get('rows').indexOf( this.model ) + 1
+								} );
+								this.model.refreshPanelsData();
+							}
+							break;
+					}
+				}.bind( this )
+			);
 		}
 	},
 
@@ -882,12 +940,4 @@ module.exports = Backbone.View.extend( {
 			}
 		}
 	},
-
-	/**
-	 *
-	 */
-	syncWithModel: function(){
-
-	}
-
 } );
