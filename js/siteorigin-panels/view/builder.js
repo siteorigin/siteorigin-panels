@@ -504,7 +504,7 @@ module.exports = Backbone.View.extend( {
 
 			if ( options.createCell ) {
 				// Create a row with a single cell
-				this.model.addRow( [{ weight: 1 }], { noAnimate: true } );
+				this.model.addRow( {}, [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}

@@ -92,6 +92,8 @@ module.exports = Backbone.View.extend( {
 
 		this.resize();
 
+		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
+
 		return this;
 	},
 
@@ -225,6 +227,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	rowColorChangeHandler: function ( event ) {
 		console.log( 'change color: ' + $( event.target ).val() );
+		this.model.set( 'color', $( event.target ).val() );
+		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
 		return this;
 	},
 

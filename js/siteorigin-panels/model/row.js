@@ -15,7 +15,9 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
-		this.set('cells', new panels.collection.cells());
+		if ( _.isEmpty(this.get('cells') ) ) {
+			this.set('cells', new panels.collection.cells());
+		}
 		this.on( 'destroy', this.onDestroy, this );
 	},
 

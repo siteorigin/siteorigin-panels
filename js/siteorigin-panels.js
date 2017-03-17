@@ -2286,21 +2286,27 @@ module.exports = Backbone.Model.extend({
     /**
      * Add a new row to this builder.
      *
+     * @param attrs
      * @param cells
+     * @param options
      */
-    addRow: function (cells, options) {
+    addRow: function (attrs, cells, options) {
         options = _.extend({
             noAnimate: false
         }, options);
+
+	    var cellCollection = new panels.collection.cells(cells);
+	    cellCollection.each(function (cell) {
+		    cell.row = row;
+	    });
+
+	    attrs = _.extend({
+		    collection: this.rows,
+		    cells: cellCollection,
+	    }, attrs);
+
         // Create the actual row
-        var row = new panels.model.row({
-            collection: this.rows
-        });
-        var cells = new panels.collection.cells(cells);
-        cells.each(function (cell) {
-            cell.row = row;
-        });
-        row.set('cells', cells);
+        var row = new panels.model.row(attrs);
 		row.builder = this;
 
 		this.rows.add( row, options );
@@ -2349,12 +2355,17 @@ module.exports = Backbone.Model.extend({
 
 			var builderModel = this;
 			_.each( rows, function ( row, i ) {
-				// This will create and add the row model and its cells
-				var newRow = builderModel.addRow( row, {noAnimate: true} );
+				var rowAttrs = {};
 
 				if ( ! _.isUndefined( data.grids[i].style ) ) {
-					newRow.set( 'style', data.grids[i].style );
+					rowAttrs.style = data.grids[i].style;
 				}
+
+				if ( ! _.isUndefined( data.grids[i].color ) ) {
+					rowAttrs.color = data.grids[i].color;
+				}
+				// This will create and add the row model and its cells
+				builderModel.addRow(rowAttrs, row, {noAnimate: true} );
 			} );
 
 
@@ -2511,7 +2522,8 @@ module.exports = Backbone.Model.extend({
 
 			data.grids.push( {
 				cells: row.get('cells').length,
-				style: row.get( 'style' )
+				style: row.get( 'style' ),
+				color: row.get( 'color' )
 			} );
 
 		} );
@@ -2655,7 +2667,9 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
-		this.set('cells', new panels.collection.cells());
+		if ( _.isEmpty(this.get('cells') ) ) {
+			this.set('cells', new panels.collection.cells());
+		}
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -3783,7 +3797,7 @@ module.exports = Backbone.View.extend( {
 
 			if ( options.createCell ) {
 				// Create a row with a single cell
-				this.model.addRow( [{ weight: 1 }], { noAnimate: true } );
+				this.model.addRow( {}, [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}
@@ -5486,6 +5500,8 @@ module.exports = Backbone.View.extend( {
 
 		this.resize();
 
+		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
+
 		return this;
 	},
 
@@ -5619,6 +5635,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	rowColorChangeHandler: function ( event ) {
 		console.log( 'change color: ' + $( event.target ).val() );
+		this.model.set( 'color', $( event.target ).val() );
+		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
 		return this;
 	},
 
