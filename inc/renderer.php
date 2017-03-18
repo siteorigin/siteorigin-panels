@@ -241,9 +241,7 @@ class SiteOrigin_Panels_Renderer {
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
 		foreach ( $panels_layout_data as $ri => $row ) {
-
 			$this->render_row( $post_id, $ri, $row, $panels_data );
-
 		}
 
 		echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data, $post_id );
@@ -256,7 +254,6 @@ class SiteOrigin_Panels_Renderer {
 
 		// Reset the current post
 		$siteorigin_panels_current_post = $old_current_post;
-
 		return apply_filters( 'siteorigin_panels_render', $html, $post_id, ! empty( $post ) ? $post : null );
 	}
 
@@ -502,26 +499,31 @@ class SiteOrigin_Panels_Renderer {
 	 * @return array Hierarchical structure of rows => cells => widgets.
 	 */
 	private function get_panels_layout_data( $panels_data ) {
-		$panels_layout_data = array();
+		$layout_data = array();
 
-		foreach ( $panels_data['grids'] as $gi => $grid ) {
-			$row        = array( 'row' => $grid, 'cells' => array() );
-			$ci         = 0;
-			$cell_count = intval( $grid['cells'] );
-			for ( $i = 0; $i < $cell_count; $i ++ ) {
-				$row['cells'][] = array( 'cell' => $panels_data['grid_cells'][ $ci ++ ], 'widgets' => array() );
-			}
-			$panels_layout_data[] = $row;
+		foreach ( $panels_data[ 'grids' ] as $grid ) {
+			$layout_data[] = array(
+				'style' => ! empty( $grid[ 'style' ] ) ? $grid[ 'style' ] : array(),
+				'cells' => array()
+			);
 		}
 
-		foreach ( $panels_data['widgets'] as $i => $widget ) {
-			$widget['panels_info']['widget_index']                                 = $i;
-			$row_index                                                             = intval( $widget['panels_info']['grid'] );
-			$cell_index                                                            = intval( $widget['panels_info']['cell'] );
-			$panels_layout_data[ $row_index ]['cells'][ $cell_index ]['widgets'][] = $widget;
+		foreach( $panels_data[ 'grid_cells' ] as $cell ) {
+			$layout_data[ $cell[ 'grid' ] ][ 'cells' ][] = array(
+				'widgets' => array(),
+				'style' => ! empty( $cell[ 'style' ] ) ? $cell[ 'style' ] : array(),
+				'weight' => floatval( $cell['weight'] ),
+			);
 		}
 
-		return $panels_layout_data;
+		foreach( $panels_data[ 'widgets' ] as $i => $widget ) {
+			$widget['panels_info']['widget_index'] = $i;
+			$row_index = intval( $widget['panels_info']['grid'] );
+			$cell_index = intval( $widget['panels_info']['cell'] );
+			$layout_data[ $row_index ]['cells'][ $cell_index ]['widgets'][] = $widget;
+		}
+
+		return $layout_data;
 	}
 
 	/**
@@ -557,26 +559,24 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 */
 	private function render_row( $post_id, $ri, $row, $panels_data ) {
-
-		$row_data       = $row['row'];
-		$row_classes    = implode( ' ', apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $row_data ) );
+		$row_classes    = implode( ' ', apply_filters( 'siteorigin_panels_row_classes', array( 'panel-grid' ), $row ) );
 		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
 			'class' => $row_classes,
 			'id'    => 'pg-' . $post_id . '-' . $ri,
-		), $row_data );
+		), $row );
 
 		// This allows other themes and plugins to add html before the row
-		echo apply_filters( 'siteorigin_panels_before_row', '', $row_data, $row_attributes );
+		echo apply_filters( 'siteorigin_panels_before_row', '', $row, $row_attributes );
 
 		// Themes can add their own attributes to the style wrapper
-		$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $row_data['style'] ) ? $row_data['style'] : array(), $post_id . '-' . $ri );
+		$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $row['style'] ) ? $row['style'] : array(), $post_id . '-' . $ri );
 		if ( ! empty( $row_style_wrapper ) ) {
 			echo $row_style_wrapper;
 		}
 
 		$this->render_element( 'div', $row_attributes );
 
-		$collapse_order = ! empty( $row_data['style']['collapse_order'] ) ? $row_data['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
+		$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
 		$cells = $row['cells'];
 		if ( $collapse_order == 'right-top' ) {
@@ -584,7 +584,6 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		foreach ( $cells as $ci => $cell ) {
-
 			$this->render_cell( $post_id, $ri, $ci, $cell, $cells, $panels_data );
 		}
 
@@ -596,7 +595,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// This allows other themes and plugins to add html after the row
-		echo apply_filters( 'siteorigin_panels_after_row', '', $row_data, $row_attributes );
+		echo apply_filters( 'siteorigin_panels_after_row', '', $row, $row_attributes );
 
 	}
 
@@ -629,24 +628,22 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Themes can add their own styles to cells
-		$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data );
+		$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $cell );
 		$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
 			'class' => implode( ' ', $cell_classes ),
 			'id'    => 'pgc-' . $post_id . '-' . $ri . '-' . $ci
-		), $panels_data );
+		), $cell );
 
-		$cell_data = $cell['cell'];
-
-		echo apply_filters( 'siteorigin_panels_before_cell', '', $cell_data, $cell_attributes );
+		echo apply_filters( 'siteorigin_panels_before_cell', '', $cell, $cell_attributes );
 
 		$this->render_element( 'div', $cell_attributes );
 
-		if ( empty( $cell_data['style']['class'] ) && ! empty( $grid['style']['cell_class'] ) ) {
-			$cell_data['style']['class'] = $grid['style']['cell_class'];
+		if ( empty( $cell['style']['class'] ) && ! empty( $grid['style']['cell_class'] ) ) {
+			$cell['style']['class'] = $grid['style']['cell_class'];
 		}
 
-		$cell_style_args    = ! empty( $cell_data['style'] ) ? $cell_data['style'] : array();
-		$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style_args, $post_id . '-' . $ri . '-' . $ci );
+		$cell_style    = ! empty( $cell['style'] ) ? $cell['style'] : array();
+		$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style, $post_id . '-' . $ri . '-' . $ci );
 		if ( ! empty( $cell_style_wrapper ) ) {
 			echo $cell_style_wrapper;
 		}
@@ -661,7 +658,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 		echo '</div>';
 
-		echo apply_filters( 'siteorigin_panels_after_cell', '', $cell_data, $cell_attributes );
+		echo apply_filters( 'siteorigin_panels_after_cell', '', $cell, $cell_attributes );
 	}
 
 	/**
