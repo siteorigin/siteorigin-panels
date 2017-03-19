@@ -531,8 +531,8 @@ module.exports = panels.view.dialog.extend({
 				f.cells = 1;
 				this.$('.row-set-form input[name="cells"]').val(f.cells);
 			}
-			else if (f.cells > 10) {
-				f.cells = 10;
+			else if (f.cells > 12) {
+				f.cells = 12;
 				this.$('.row-set-form input[name="cells"]').val(f.cells);
 			}
 
