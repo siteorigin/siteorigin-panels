@@ -353,7 +353,7 @@ class SiteOrigin_Panels_Styles {
 			switch ( $field['type'] ) {
 				case 'color' :
 					$color = $styles[ $k ];
-					if ( preg_match( '|^#([A-Fa-f0-9]{3}){1,2}$|', $color ) ) {
+					if ( preg_match( '|^#([A-Fa-f0-9]{3,8})$|', $color ) ) {
 						$return[ $k ] = $color;
 					} else {
 						$return[ $k ] = '';
