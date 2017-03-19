@@ -45,11 +45,13 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
  * Legacy function to process raw widgets.
  *
  * @param $widgets
+ * @param $old_widgets
+ * @param $escape_classes
  *
  * @return array
  */
-function siteorigin_panels_process_raw_widgets( $widgets ) {
-	return SiteOrigin_Panels_Admin::single()->process_raw_widgets( $widgets );
+function siteorigin_panels_process_raw_widgets( $widgets, $old_widgets = false, $escape_classes = false ) {
+	return SiteOrigin_Panels_Admin::single()->process_raw_widgets( $widgets, $old_widgets, $escape_classes );
 }
 
 function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {

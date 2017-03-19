@@ -163,8 +163,12 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( ! wp_is_post_revision( $post_id ) ) {
+			$old_panels_data        = get_post_meta( $post_id, 'panels_data', true );
 			$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
-			$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'] );
+			$panels_data['widgets'] = $this->process_raw_widgets(
+				$panels_data['widgets'],
+				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
+			);
 			$panels_data            = SiteOrigin_Panels_Styles::single()->sanitize_all( $panels_data );
 			$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
@@ -519,8 +523,12 @@ class SiteOrigin_Panels_Admin {
 		$page = get_post( $page_id );
 
 		// Save the updated page data
+		$old_panels_data        = get_post_meta( $page_id, 'panels_data', true );
 		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
-		$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'] );
+		$panels_data['widgets'] = $this->process_raw_widgets(
+			$panels_data['widgets'],
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
+		);
 		$panels_data            = SiteOrigin_Panels_Styles::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
@@ -641,32 +649,54 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * @return array
 	 */
-	function process_raw_widgets( $widgets, $escape_classes = true ) {
+	function process_raw_widgets( $widgets, $old_widgets = false, $escape_classes = true ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
 
 		global $wp_widget_factory;
 
-		for ( $i = 0; $i < count( $widgets ); $i ++ ) {
-			if ( ! is_array( $widgets[ $i ] ) ) {
+		$old_widgets_by_id = array();
+		foreach( $old_widgets as $widget ) {
+			if( ! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) ) {
+				$old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] = $widget;
+				unset( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ][ 'panels_info' ] );
+			}
+		}
+
+
+
+		foreach( $widgets as $i => & $widget ) {
+			if ( ! is_array( $widget ) ) {
 				continue;
 			}
 
-			if ( is_array( $widgets[ $i ] ) ) {
-				$info = (array) ( is_array( $widgets[ $i ]['panels_info'] ) ? $widgets[ $i ]['panels_info'] : $widgets[ $i ]['info'] );
+			if ( is_array( $widget ) ) {
+				$info = (array) ( is_array( $widget['panels_info'] ) ? $widget['panels_info'] : $widget['info'] );
 			} else {
 				$info = array();
 			}
-			unset( $widgets[ $i ]['info'] );
+			unset( $widget['info'] );
 
 			if ( ! empty( $info['raw'] ) ) {
 				if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
-					$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
-					$instance   = $the_widget->update( $widgets[ $i ], $widgets[ $i ] );
-					$instance   = apply_filters( 'widget_update_callback', $instance, $widgets[ $i ], $widgets[ $i ], $the_widget );
 
-					$widgets[ $i ] = $instance;
+					if(
+						! empty( $old_widgets_by_id ) &&
+						! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) &&
+						! empty( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] )
+					){
+						$old_widget = $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ];
+					}
+					else {
+						$old_widget = $widget;
+					}
+
+					$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
+					$instance   = $the_widget->update( $widget, $old_widget );
+					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
+
+					$widget = $instance;
 					unset( $info['raw'] );
 				}
 			}
@@ -675,7 +705,7 @@ class SiteOrigin_Panels_Admin {
 				// Escaping for namespaced widgets
 				$info['class'] = preg_replace( '/\\\\([^\\\\])/', '\\\\\\\\$1', $info['class'] );
 			}
-			$widgets[ $i ]['panels_info'] = $info;
+			$widget['panels_info'] = $info;
 		}
 
 		return $widgets;
@@ -846,8 +876,12 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		// echo the content
+		$old_panels_data        = get_post_meta( $_POST['post_id'], 'panels_data', true );
 		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
-		$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'] );
+		$panels_data['widgets'] = $this->process_raw_widgets(
+			$panels_data['widgets'],
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
+		);
 		$panels_data            = SiteOrigin_Panels_Styles::single()->sanitize_all( $panels_data );
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
 

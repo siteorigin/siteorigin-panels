@@ -53,7 +53,7 @@ class SiteOrigin_Panels_Live_Editor {
 					method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
 				)
 			) {
-				$data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $data['widgets'], false );
+				$data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $data['widgets'], false, false );
 			}
 
 			$value = array( $data );
