@@ -4,6 +4,7 @@
 class SiteOrigin_Panels_Live_Editor {
 
 	function __construct() {
+		add_action( 'template_redirect', array( $this, 'xss_headers' ) );
 		add_action( 'get_post_metadata', array( $this, 'post_metadata' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 
@@ -14,6 +15,18 @@ class SiteOrigin_Panels_Live_Editor {
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
+	}
+
+	public function xss_headers(){
+		global $post;
+		if(
+			! empty( $_POST['live_editor_panels_data'] ) &&
+			! empty( $post->ID ) &&
+			current_user_can( 'edit_post', $post->ID )
+		) {
+			// Disable XSS protection when in the Live Editor
+			header( 'X-XSS-Protection: 0' );
+		}
 	}
 
 	/**
