@@ -16,6 +16,8 @@ class SiteOrigin_Panels_Admin {
 			'plugin_action_links'
 		) );
 
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
+
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_init', array( $this, 'save_home_page' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
@@ -30,6 +32,7 @@ class SiteOrigin_Panels_Admin {
 			'enqueue_admin_scripts'
 		) );
 		add_action( 'admin_print_scripts-widgets.php', array( $this, 'enqueue_admin_scripts' ) );
+		add_action( 'admin_print_scripts-edit.php', array( $this, 'footer_column_css' ) );
 
 		// Enqueue the admin styles
 		add_action( 'admin_print_styles-post-new.php', array( $this, 'enqueue_admin_styles' ) );
@@ -65,6 +68,23 @@ class SiteOrigin_Panels_Admin {
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
+	}
+
+	/**
+	 * Do some general admin initialization
+	 */
+	public function admin_init(){
+		if( siteorigin_panels_setting( 'admin-widget-count' ) ) {
+
+			// Add the custom columns
+			$post_types = siteorigin_panels_setting( 'post-types' );
+			if( ! empty( $post_types ) ) {
+				foreach( $post_types as $post_type ) {
+					add_filter( 'manage_' . $post_type . 's_columns' , array( $this, 'add_custom_column' ) );
+					add_action( 'manage_' . $post_type . 's_custom_column' , array( $this, 'display_custom_column' ), 10, 2 );
+				}
+			}
+		}
 	}
 
 	/**
@@ -1076,4 +1096,57 @@ class SiteOrigin_Panels_Admin {
 
 		exit();
 	}
+
+	/**
+	 * Add a column that indicates if a column is powered by Page Builder
+	 *
+	 * @param $columns
+	 *
+	 * @return array
+	 */
+	function add_custom_column( $columns ){
+		$index = array_search( 'comments', array_keys( $columns ) );
+
+		if( empty( $index ) ) {
+			$columns = array_merge(
+				$columns,
+				array( 'panels' => __( 'Page Builder', 'siteorigin-panels' ) )
+			);
+		}
+		else {
+			$columns = array_slice($columns, 0, $index, true) +
+			           array( 'panels' => __( 'Page Builder', 'siteorigin-panels' ) ) +
+			           array_slice( $columns, $index, count( $columns ) - 1, true) ;
+		}
+
+		return $columns;
+	}
+
+	function display_custom_column( $column, $post_id ){
+		if( $column != 'panels' ) return;
+
+		$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		if( ! empty( $panels_data['widgets'] ) ) {
+			printf( __( '%s Widgets', 'siteorigin-panels' ), count( $panels_data['widgets'] ) );
+		}
+		else {
+			echo '—';
+		}
+	}
+
+	public function footer_column_css(){
+		if( siteorigin_panels_setting( 'admin-widget-count' ) ) {
+			$screen = get_current_screen();
+			$post_types = siteorigin_panels_setting( 'post-types' );
+
+			if(
+				$screen->base == 'edit' &&
+				is_array( $post_types ) &&
+				in_array( $screen->post_type, $post_types )
+			){
+				?><style type="text/css">.column-panels{ width: 10% }</style><?php
+			}
+		}
+	}
+
 }
