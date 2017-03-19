@@ -538,6 +538,9 @@ class SiteOrigin_Panels_Settings {
 			}
 		}
 
+		// Don't let mobile width go below 320
+		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
+
 		// Save the values to the database
 		update_option( 'siteorigin_panels_settings', $values );
 		$this->settings       = wp_parse_args( $values, $this->settings );
