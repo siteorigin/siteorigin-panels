@@ -652,7 +652,8 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			if( $escape_classes ) {
-				$info['class'] = addslashes( $info['class'] );
+				// Escaping for namespaced widgets
+				$info['class'] = preg_replace( '/\\\\([^\\\\])/', '\\\\\\\\$1', $info['class'] );
 			}
 			$widgets[ $i ]['panels_info'] = $info;
 		}
