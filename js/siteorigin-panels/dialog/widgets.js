@@ -96,8 +96,16 @@ module.exports = panels.view.dialog.extend( {
 	 * Handle changes to the search value
 	 */
 	searchHandler: function ( e ) {
-		this.filter.search = $( e.target ).val();
-		this.filterWidgets( this.filter );
+		if( e.which === 13 ) {
+			var visibleWidgets = this.$( '.widget-type-list .widget-type:visible' );
+			if( visibleWidgets.length === 1 ) {
+				visibleWidgets.click();
+			}
+		}
+		else {
+			this.filter.search = $( e.target ).val().trim();
+			this.filterWidgets( this.filter );
+		}
 	},
 
 	/**
