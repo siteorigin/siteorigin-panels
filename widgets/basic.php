@@ -28,6 +28,12 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 		if(empty($instance['panels_data']['widgets'])) return;
 
+		if( ! empty( $instance['panels_data']['widgets'] ) ) {
+			foreach( $instance['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
+			}
+		}
+
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
 
 		echo $args['before_widget'];
@@ -44,7 +50,10 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		if ( ! empty( $new['panels_data'] ) && ! empty( $new['panels_data']['widgets'] ) ) {
-			$new['panels_data']['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $new['panels_data']['widgets'] );
+			$new['panels_data']['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $new['panels_data']['widgets'], false );
+			foreach( $new['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '\\', '&#92;', $widget['panels_info']['class'] );
+			}
 		}
 
 		return $new;
@@ -55,6 +64,12 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 			'panels_data' => '',
 			'builder_id' => uniqid(),
 		) );
+
+		if( ! empty( $instance['panels_data']['widgets'] ) ) {
+			foreach( $instance['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
+			}
+		}
 
 		if( ! is_string( $instance['panels_data'] ) ) {
 			$instance['panels_data'] = json_encode( $instance['panels_data'] );
