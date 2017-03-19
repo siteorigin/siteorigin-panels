@@ -59,11 +59,12 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		return $new;
 	}
 
-	function form($instance){
+	function form( $instance ){
 		$instance = wp_parse_args($instance, array(
 			'panels_data' => '',
 			'builder_id' => uniqid(),
 		) );
+		$form_id = uniqid();
 
 		if( ! empty( $instance['panels_data']['widgets'] ) ) {
 			foreach( $instance['panels_data']['widgets'] as & $widget ) {
@@ -76,7 +77,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		?>
-		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>" data-builder-id="<?php echo esc_attr( $instance['builder_id'] ) ?>" data-type="layout_widget">
+		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>" data-builder-id="<?php echo esc_attr( $form_id ) ?>" data-type="layout_widget">
 			<p>
 				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></button>
 			</p>
@@ -94,7 +95,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		</div>
 		<script type="text/javascript">
 			if( typeof jQuery.fn.soPanelsSetupBuilderWidget != 'undefined' && !jQuery('body').hasClass('wp-customizer') ) {
-				jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>").soPanelsSetupBuilderWidget();
+				jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>").soPanelsSetupBuilderWidget();
 			}
 		</script>
 		<?php
