@@ -137,13 +137,6 @@ class SiteOrigin_Panels {
 		return ! empty( $_GET['siteorigin_panels_live_editor'] );
 	}
 
-	/**
-	 * @todo Check if this is used anywhere. It doesn't seem to be.
-	 */
-	public static function is_preview() {
-
-	}
-
 	public static function preview_url() {
 		global $post, $wp_post_types;
 

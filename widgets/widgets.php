@@ -114,7 +114,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 	function update($new, $old) {
 
 		// We wont clear cache if this is a preview
-		if(!siteorigin_panels_is_preview()){
+		if( !is_preview() ){
 			// Remove the old CSS file
 			if(!empty($old['origin_style'])) {
 				list($style, $preset) = explode(':', $old['origin_style']);
