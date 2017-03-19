@@ -908,6 +908,7 @@ class SiteOrigin_Panels_Admin {
 			$query['page'] = $page;
 
 			$url      = add_query_arg( $query, self::LAYOUT_URL . 'wp-admin/admin-ajax.php?action=query_layouts' );
+			$url      = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
 			$response = wp_remote_get( $url );
 
 			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
