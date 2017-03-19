@@ -2,7 +2,7 @@
 /**
  * Some color classes to help the widgets class
  *
- * @license GPL 2.0
+ * @license GPL 3.0
  * @author Greg Priday
  */
 
