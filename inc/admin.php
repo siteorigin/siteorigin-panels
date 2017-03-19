@@ -616,11 +616,12 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * Process raw widgets that have come from the Page Builder front end.
 	 *
-	 * @param $widgets
+	 * @param array $widgets An array of widgets from panels_data.
+	 * @param bool $escape_classes Should the class names be escaped. Set to false if not saving in post_meta.
 	 *
 	 * @return array
 	 */
-	function process_raw_widgets( $widgets ) {
+	function process_raw_widgets( $widgets, $escape_classes = true ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -650,7 +651,9 @@ class SiteOrigin_Panels_Admin {
 				}
 			}
 
-			$info['class']                = addslashes( $info['class'] );
+			if( $escape_classes ) {
+				$info['class'] = addslashes( $info['class'] );
+			}
 			$widgets[ $i ]['panels_info'] = $info;
 		}
 
