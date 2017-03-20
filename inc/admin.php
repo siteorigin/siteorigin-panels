@@ -980,9 +980,12 @@ class SiteOrigin_Panels_Admin {
 			}
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
 			// Check that the user can view the given page types
-			$post_type = str_replace( 'clone_', '', $type );
+			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
+			if( empty( $post_type ) ) {
+				return;
+			}
 
-			$return['title'] = sprintf( __( 'Clone %s', 'siteorigin-panels' ), esc_html( ucfirst( $post_type ) ) );
+			$return['title'] = sprintf( __( 'Clone %s', 'siteorigin-panels' ), esc_html( $post_type->labels->singular_name ) );
 
 			global $wpdb;
 			$user_can_read_private = ( $post_type == 'post' && current_user_can( 'read_private_posts' ) || ( $post_type == 'page' && current_user_can( 'read_private_pages' ) ) );
@@ -990,16 +993,16 @@ class SiteOrigin_Panels_Admin {
 
 			// Select only the posts with the given post type that also have panels_data
 			$results     = $wpdb->get_results( "
-			SELECT SQL_CALC_FOUND_ROWS DISTINCT ID, post_title, meta.meta_value
-			FROM {$wpdb->posts} AS posts
-			JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			WHERE
-				posts.post_type = '" . esc_sql( $post_type ) . "'
-				AND meta.meta_key = 'panels_data'
-				" . ( ! empty( $search ) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
-				AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
-			ORDER BY post_date DESC
-			LIMIT 16 OFFSET " . intval( ( $page - 1 ) * 16 ) );
+				SELECT SQL_CALC_FOUND_ROWS DISTINCT ID, post_title, meta.meta_value
+				FROM {$wpdb->posts} AS posts
+				JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+				WHERE
+					posts.post_type = '" . esc_sql( $post_type->name ) . "'
+					AND meta.meta_key = 'panels_data'
+					" . ( ! empty( $search ) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
+					AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
+				ORDER BY post_date DESC
+				LIMIT 16 OFFSET " . intval( ( $page - 1 ) * 16 ) );
 			$total_posts = $wpdb->get_var( "SELECT FOUND_ROWS();" );
 
 			foreach ( $results as $result ) {
