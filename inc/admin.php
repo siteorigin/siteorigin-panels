@@ -368,7 +368,7 @@ class SiteOrigin_Panels_Admin {
 					'error_message'       => __( 'Error uploading or importing file.', 'siteorigin-panels' ),
 				),
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
-				'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . 'css/images/prebuilt-default.png',
+				'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . '../css/images/prebuilt-default.png',
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 			) );
 
