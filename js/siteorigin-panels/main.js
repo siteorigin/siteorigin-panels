@@ -81,6 +81,7 @@ jQuery( function ( $ ) {
 			editorId: '#content',
 			builderType: $( '#siteorigin-panels-metabox' ).data( 'builder-type' ),
 			builderSupports: $( '#siteorigin-panels-metabox' ).data( 'builder-supports' ),
+			loadOnAttach: panelsOptions.loadOnAttach && $( '#auto_draft' ).val() == 1,
 			loadLiveEditor: $( '#siteorigin-panels-metabox' ).data('live-editor') == 1,
 			liveEditorPreview: container.data('preview-url')
 		};

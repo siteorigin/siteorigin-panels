@@ -112,7 +112,8 @@ class SiteOrigin_Panels_Settings {
 		$defaults['home-template']     = 'home-panels.php';
 		$defaults['affiliate-id']      = apply_filters( 'siteorigin_panels_affiliate_id', false );
 		$defaults['display-teaser']    = true;
-		$defaults['display-learn']    = true;
+		$defaults['display-learn']     = true;
+		$defaults['load-on-attach']    = false;
 
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
@@ -271,6 +272,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'checkbox',
 			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
 			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
+		);
+
+		$fields['general']['fields']['load-on-attach'] = array(
+			'type' => 'checkbox',
+			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),
+			'description' => __( 'New posts/pages that you create will start with the Page Builder loaded.', 'siteorigin-panels' )
 		);
 
 		// The widgets fields

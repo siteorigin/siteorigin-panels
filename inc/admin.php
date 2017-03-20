@@ -369,6 +369,7 @@ class SiteOrigin_Panels_Admin {
 				),
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
 				'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . 'css/images/prebuilt-default.png',
+				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 			) );
 
 			if ( $screen->base != 'widgets' ) {

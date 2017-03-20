@@ -98,6 +98,13 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
+
+		if( this.config.loadOnAttach ) {
+			this.on( 'builder_attached_to_editor', function(){
+				$( '#content-panels' ).click();
+			}, this );
+		}
+
 		return this;
 	},
 
