@@ -180,7 +180,7 @@ module.exports = Backbone.View.extend( {
 					return;
 				}
 
-				var re = /(?:([0-9\.,]+)(.*))+/;
+				var re = /(?:([0-9\.,\-]+)(.*))+/;
 				var valueList = hidden.val().split( ' ' );
 				var valueListValue = [];
 				for ( var i in valueList ) {
