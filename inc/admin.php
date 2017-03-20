@@ -664,8 +664,6 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-
-
 		foreach( $widgets as $i => & $widget ) {
 			if ( ! is_array( $widget ) ) {
 				continue;

@@ -55,11 +55,7 @@ class SiteOrigin_Panels_Css_Builder {
 		$selector = array();
 
 		// Special case of `> .panel-row-style` sub_selector
-		if( $sub_selector == '> .panel-row-style' ) {
-			$sub_selector = false;
-			$selector[] = '#pl-' . $li;
-			$selector[] = '.panel-row-style-for-' . $li . '-' . $ri;
-		} else if ( $ri === false ) {
+		if ( $ri === false ) {
 			// This applies to all rows
 			$selector[] = '#pl-' . $li;
 			$selector[] = '.panel-grid';
