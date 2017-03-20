@@ -93,11 +93,13 @@ class SiteOrigin_Panels_Renderer {
 					), $panels_tablet_width );
 				}
 
-				// Mobile Responsive
-				$css->add_row_css( $post_id, $ri, ! empty( $row[ 'has_style_wrapper' ] ) ? ' > .panel-row-style' : '', array(
-					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-				), $panels_mobile_width );
+				if( ! isset( $row[ 'style' ][ 'mobile_collapse' ] ) || $row[ 'style' ][ 'mobile_collapse' ] ) {
+					// Mobile Responsive
+					$css->add_row_css( $post_id, $ri, ! empty( $row[ 'has_style_wrapper' ] ) ? ' > .panel-row-style' : '', array(
+						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+						'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					), $panels_mobile_width );
+				}
 
 				$css->add_cell_css( $post_id, $ri, false, '', array(
 					'width' => '100%',
