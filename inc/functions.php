@@ -72,12 +72,3 @@ function siteorigin_panels_setting( $key = '' ) {
 function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name, $source = false ) {
 	return SiteOrigin_Panels_Admin_Widgets_Bundle::install_url( $plugin, $plugin_name, $source );
 }
-
-/**
- * Checks if we're currently doing a database render.
- *
- * @return bool
- */
-function siteorigin_panels_is_database_render(){
-	return SiteOrigin_Panels_Admin::single()->is_database_render();
-}

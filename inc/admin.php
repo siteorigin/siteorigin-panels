@@ -9,13 +9,6 @@ class SiteOrigin_Panels_Admin {
 
 	const LAYOUT_URL = 'http://layouts.siteorigin.com/';
 
-	/**
-	 * Store if we're currently rendering for post_content.
-	 *
-	 * @var bool
-	 */
-	private $database_render;
-
 	function __construct() {
 
 		add_action( 'plugin_action_links_siteorigin-panels/siteorigin-panels.php', array(
@@ -67,8 +60,6 @@ class SiteOrigin_Panels_Admin {
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
-
-		$this->database_render = false;
 	}
 
 	/**
@@ -868,15 +859,6 @@ class SiteOrigin_Panels_Admin {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Is the current rendering happening for post_content in the database.
-	 *
-	 * @return bool
-	 */
-	public function is_database_render(){
-		return $this->database_render;
-	}
-
-	/**
 	 * Get builder content based on the submitted panels_data.
 	 */
 	function action_builder_content() {
@@ -900,9 +882,8 @@ class SiteOrigin_Panels_Admin {
 		);
 		$panels_data            = SiteOrigin_Panels_Styles::single()->sanitize_all( $panels_data );
 
-		$this->database_render = true;
+		define( 'SITEORIGIN_PANELS_DATABASE_RENDER', true );
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
-		$this->database_render = false;
 
 		wp_die();
 	}
