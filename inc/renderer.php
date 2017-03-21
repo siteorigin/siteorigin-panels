@@ -261,47 +261,49 @@ class SiteOrigin_Panels_Renderer {
 	 * Echo the style wrapper and return if there was a wrapper
 	 *
 	 * @param string $name The name of the style wrapper
-	 * @param array $style_args The style wrapper args. Used as an argument for siteorigin_panels_{$name}_style_attributes
+	 * @param array $style The style wrapper args. Used as an argument for siteorigin_panels_{$name}_style_attributes
 	 * @param string|bool $for An identifier of what this style wrapper is for
 	 *
 	 * @return bool Is there a style wrapper
 	 */
-	private function start_style_wrapper( $name, $style_args = array(), $for = false ) {
+	private function start_style_wrapper( $name, $style = array(), $for = false ) {
+		$attributes = array();
+
+		if ( empty( $attributes['class'] ) ) {
+			$attributes['class'] = array();
+		}
+		if ( empty( $attributes['style'] ) ) {
+			$attributes['style'] = '';
+		}
+
+		$attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
+
+		if ( empty( $attributes['class'] ) ) {
+			unset( $attributes['class'] );
+		}
+		if ( empty( $attributes['style'] ) ) {
+			unset( $attributes['style'] );
+		}
 
 		$style_wrapper = '';
-
-		if ( empty( $style_attributes['class'] ) ) {
-			$style_attributes['class'] = array();
-		}
-		if ( empty( $style_attributes['style'] ) ) {
-			$style_attributes['style'] = '';
-		}
-
-		$style_attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $style_attributes, $style_args );
-
-		if ( empty( $style_attributes['class'] ) ) {
-			unset( $style_attributes['class'] );
-		}
-		if ( empty( $style_attributes['style'] ) ) {
-			unset( $style_attributes['style'] );
-		}
-
-		if ( ! empty( $style_attributes ) ) {
-			if ( empty( $style_attributes['class'] ) ) {
-				$style_attributes['class'] = array();
+		if ( ! empty( $attributes ) ) {
+			if ( empty( $attributes['class'] ) ) {
+				$attributes['class'] = array();
 			}
-			$style_attributes['class'][] = 'panel-' . $name . '-style';
+			$attributes['class'][] = 'panel-' . $name . '-style';
 			if ( ! empty( $for ) ) {
-				$style_attributes['class'][] = 'panel-' . $name . '-style-for-' . sanitize_html_class( $for );
+				$attributes['class'][] = 'panel-' . $name . '-style-for-' . sanitize_html_class( $for );
 			}
-			$style_attributes['class'] = array_unique( $style_attributes['class'] );
+			$attributes['class'] = array_unique( $attributes['class'] );
 
 			// Filter and sanitize the classes
-			$style_attributes['class'] = apply_filters( 'siteorigin_panels_' . $name . '_style_classes', $style_attributes['class'], $style_attributes, $style_args );
-			$style_attributes['class'] = array_map( 'sanitize_html_class', $style_attributes['class'] );
+			$attributes['class'] = apply_filters( 'siteorigin_panels_' . $name . '_style_classes', $attributes['class'], $attributes, $style );
+			$attributes['class'] = array_map( 'sanitize_html_class', $attributes['class'] );
 
 			$style_wrapper = '<div ';
-			foreach ( $style_attributes as $name => $value ) {
+			foreach ( $attributes as $name => $value ) {
+				if( substr( $name, 0, 1 ) === '_' ) continue;
+
 				if ( is_array( $value ) ) {
 					$style_wrapper .= $name . '="' . esc_attr( implode( " ", array_unique( $value ) ) ) . '" ';
 				} else {
