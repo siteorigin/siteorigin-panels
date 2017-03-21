@@ -667,10 +667,12 @@ class SiteOrigin_Panels_Admin {
 		global $wp_widget_factory;
 
 		$old_widgets_by_id = array();
-		foreach( $old_widgets as $widget ) {
-			if( ! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) ) {
-				$old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] = $widget;
-				unset( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ][ 'panels_info' ] );
+		if( ! empty( $old_widgets ) ) {
+			foreach( $old_widgets as $widget ) {
+				if( ! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) ) {
+					$old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] = $widget;
+					unset( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ][ 'panels_info' ] );
+				}
 			}
 		}
 

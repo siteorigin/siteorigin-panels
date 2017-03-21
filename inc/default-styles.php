@@ -247,7 +247,7 @@ class SiteOrigin_Panels_Default_Styles {
 	 */
 	static function cell_style_fields( $fields ) {
 		// Add the general fields
-		$fields = wp_parse_args( $fields, self::get_general_style_attributes( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
 
 		$fields['vertical_alignment'] = array(
 			'name'     => __( 'Vertical Alignment', 'siteorigin-panels' ),
@@ -290,7 +290,7 @@ class SiteOrigin_Panels_Default_Styles {
 	static function widget_style_fields( $fields ) {
 
 		// Add the general fields
-		$fields = wp_parse_args( $fields, self::get_general_style_attributes( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
 
 		// How lets add the design fields
 
@@ -374,9 +374,14 @@ class SiteOrigin_Panels_Default_Styles {
 	 */
 	static function general_style_css( $css, $style ){
 
-		$css_key = array_intersect( array( 'row_css', 'cell_css', 'widget_css' ), array_keys( $style ) );
+		// Find which key the CSS is stored in
+		foreach( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
+			if( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
+				break;
+			}
+		}
 
-		if ( ! empty( $style[ $css_key ] ) ) {
+		if ( ! empty( $css_key ) && ! empty( $style[ $css_key ] ) ) {
 			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ $css_key ], $matches );
 
 			if ( ! empty( $matches[0] ) ) {
