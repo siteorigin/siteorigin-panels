@@ -276,8 +276,12 @@ class SiteOrigin_Panels_Renderer {
 			$attributes['style'] = '';
 		}
 
+		// Get everything related to the style wrapper
 		$attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
+		$standard_css = apply_filters( 'siteorigin_panels_' . $name . '_style_css', array(), $style );
+		$mobile_css = apply_filters( 'siteorigin_panels_' . $name . '_style_mobile_css', array(), $style );
 
+		// Remove anything we didn't actually use
 		if ( empty( $attributes['class'] ) ) {
 			unset( $attributes['class'] );
 		}
@@ -286,7 +290,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		$style_wrapper = '';
-		if ( ! empty( $attributes ) ) {
+		if ( ! empty( $attributes ) || ! empty( $standard_css ) || ! empty( $mobile_css ) ) {
 			if ( empty( $attributes['class'] ) ) {
 				$attributes['class'] = array();
 			}

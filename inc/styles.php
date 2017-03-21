@@ -11,7 +11,6 @@ class SiteOrigin_Panels_Styles {
 
 	public static function single() {
 		static $single;
-
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -409,18 +408,16 @@ class SiteOrigin_Panels_Styles {
 			return $panels_data;
 		}
 
-		for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
-			if ( ! is_array( $panels_data['grids'][ $i ] ) ) {
-				continue;
-			}
-			if ( empty( $panels_data['grids'][ $i ] ) || empty( $panels_data['grids'][ $i ]['style'] ) ) {
+		foreach( $panels_data['grids'] as & $grid ) {
+			if ( ! is_array( $grid ) || empty( $grid ) || empty( $grid['style'] ) ) {
 				continue;
 			}
 
-			if ( is_string( $panels_data['grids'][ $i ]['style'] ) ) {
-				$panels_data['grids'][ $i ]['style'] = array( 'class' => $panels_data['grids'][ $i ]['style'] );
+			if ( is_string( $grid['style'] ) ) {
+				$grid['style'] = array(
+					$grid['style']
+				);
 			}
-
 		}
 
 		return $panels_data;
@@ -463,4 +460,4 @@ class SiteOrigin_Panels_Styles {
 }
 
 // Initialise all the default styling
-SiteOrigin_Panels_Default_Styles::init();
+SiteOrigin_Panels_Default_Styles::single();
