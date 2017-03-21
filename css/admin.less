@@ -312,30 +312,39 @@
 								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
 							}
 
-							.so-widget-wrapper{
+							.so-widget-wrapper {
 								padding: 7px 9px;
 								overflow: hidden;
 								position: relative;
 							}
 
-							h4{
-								display: block;
+							.title {
 								cursor: pointer;
-								margin: 0 15px 3px 0;
-								font-weight: 600;
-								line-height: 1.25em;
-								color: #474747;
-								text-shadow: 0 1px 0 #FFF;
-								white-space: nowrap;
 
-								span {
-									font-weight: normal;
+								h4, .so-widget-edit-title {
 									display: inline-block;
-									color: #999;
+									cursor: text;
+									margin: 0 15px 3px 0;
+									font-weight: 600;
+									line-height: 1.25em;
+									color: #474747;
 									text-shadow: 0 1px 0 #FFF;
-									margin-left: 12px;
-									margin-right: 5px;
-									font-style: italic;
+									white-space: nowrap;
+
+									span {
+										font-weight: normal;
+										display: inline-block;
+										color: #999;
+										text-shadow: 0 1px 0 #FFF;
+										margin-left: 12px;
+										margin-right: 5px;
+										font-style: italic;
+									}
+								}
+
+								.so-widget-edit-title {
+									display: none;
+									font-size: 1em;
 								}
 							}
 

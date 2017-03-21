@@ -143,6 +143,10 @@ module.exports = Backbone.Model.extend({
 					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
 				}
 
+				if ( ! _.isUndefined( panels_info.title ) ) {
+					newWidget.set( 'title', panels_info.title );
+				}
+
 				newWidget.cell = cell;
 				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
@@ -234,7 +238,8 @@ module.exports = Backbone.Model.extend({
 						// Strictly this should be an index
 						id: widgetId ++,
 						widget_id: widget.get( 'widget_id' ),
-						style: widget.get( 'style' )
+						style: widget.get( 'style' ),
+						title: widget.get('title'),
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {

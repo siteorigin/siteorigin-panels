@@ -156,11 +156,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-widget-wrapper">
 			<div class="title">
 				<h4>{{%= title %}}</h4>
-					<span class="actions">
-						<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
-						<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
-						<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
-					</span>
+				<input type="text" value="{{%= title %}}" class="so-widget-edit-title">
+				<span class="actions">
+					<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
+					<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+					<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
+				</span>
 			</div>
 			<small class="description">{{%= description %}}</small>
 		</div>

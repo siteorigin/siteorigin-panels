@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .widget-edit': 'editHandler',
-		'click .title h4': 'titleClickHandler',
+		'click .title': 'titleClickHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
 		'click .actions .widget-delete': 'deleteHandler'
 	},
@@ -20,7 +20,6 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget
 	 */
 	initialize: function () {
-		// The 2 user actions on the model that this view will handle.
 		this.model.on( 'user_edit', this.editHandler, this );				 // When a user wants to edit the widget model
 		this.model.on( 'user_duplicate', this.duplicateHandler, this );	   // When a user wants to duplicate the widget model
 		this.model.on( 'destroy', this.onModelDestroy, this );
@@ -113,14 +112,31 @@ module.exports = Backbone.View.extend( {
 	editHandler: function () {
 		// Create a new dialog for editing this
 		this.getEditDialog().openDialog();
-		return this;
 	},
 
-	titleClickHandler: function(){
-		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
+	titleClickHandler: function( event ){
+		if ( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			return this;
 		}
-		this.editHandler();
+		var titleElt = this.$( 'h4' );
+		var titleInput = this.$( '.so-widget-edit-title' );
+		var descElt = this.$( '.description' );
+		if ( $( event.target ).is( 'h4' ) || $( event.target ).is( '.so-widget-edit-title' ) ) {
+			titleElt.hide();
+			descElt.css( 'visibility', 'hidden' );
+			titleInput.show();
+			titleInput.focus();
+			titleInput.blur( function ( event ) {
+				titleElt.show();
+				descElt.css( 'visibility', 'visible' );
+				titleInput.hide();
+				titleElt.text( titleInput.val() );
+				this.model.set( 'title', titleInput.val() );
+			}.bind( this ) );
+
+		} else if ( $( event.target ).is( '.title' ) ){
+			this.editHandler();
+		}
 		return this;
 	},
 
