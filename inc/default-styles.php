@@ -65,24 +65,111 @@ class SiteOrigin_Panels_Default_Styles {
 		) );
 	}
 
-	static function row_style_fields( $fields ) {
-		// Add the attribute fields
+	/**
+	 * These are general styles that apply to all elements
+	 *
+	 * @param $id
+	 * @param $label
+	 *
+	 * @return array
+	 */
+	static function get_general_style_fields( $id, $label ) {
+		$fields = array();
+
+		// All the attribute fields
 
 		$fields['id'] = array(
-			'name'        => __( 'Row ID', 'siteorigin-panels' ),
+			'name'        => sprintf( __( '%s ID', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
 			'group'       => 'attributes',
-			'description' => __( 'A custom ID used for this row.', 'siteorigin-panels' ),
+			'description' => sprintf( __( 'A custom ID used for this %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 4,
 		);
 
 		$fields['class'] = array(
-			'name'        => __( 'Row Class', 'siteorigin-panels' ),
+			'name'        => sprintf( __( '%s Class', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
 			'group'       => 'attributes',
 			'description' => __( 'A CSS class', 'siteorigin-panels' ),
 			'priority'    => 5,
 		);
+
+		$fields[  $id. '_css' ] = array(
+			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
+			'type'        => 'code',
+			'group'       => 'attributes',
+			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
+			'priority'    => 10,
+		);
+
+		// The layout fields
+
+		$fields['padding'] = array(
+			'name'        => __( 'Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => sprintf( __( 'Padding around the entire %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 7,
+			'multiple'    => true
+		);
+
+		$fields['mobile_padding'] = array(
+			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
+			'priority'    => 8,
+			'multiple'    => true
+		);
+
+		// The general design fields
+
+		$fields['background'] = array(
+			'name'        => __( 'Background Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Background color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 5,
+		);
+
+		$fields['background_image_attachment'] = array(
+			'name'        => __( 'Background Image', 'siteorigin-panels' ),
+			'type'        => 'image',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Background image of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 6,
+		);
+
+		$fields['background_display'] = array(
+			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
+			'type'        => 'select',
+			'group'       => 'design',
+			'options'     => array(
+				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
+				'cover'             => __( 'Cover', 'siteorigin-panels' ),
+				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
+				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
+				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
+				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
+			),
+			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
+			'priority'    => 7,
+		);
+
+		$fields['border_color'] = array(
+			'name'        => __( 'Border Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Border color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 10,
+		);
+
+		return $fields;
+	}
+
+	static function row_style_fields( $fields ) {
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'row', __( 'Row', 'siteorigin-panels' ) ) );
 
 		//Should we remove this? Or move it's existing value to new Cell Styles?
 		$fields['cell_class'] = array(
@@ -91,14 +178,6 @@ class SiteOrigin_Panels_Default_Styles {
 			'group'       => 'attributes',
 			'description' => __( 'Class added to all cells in this row.', 'siteorigin-panels' ),
 			'priority'    => 6,
-		);
-
-		$fields['row_css'] = array(
-			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
-			'type'        => 'code',
-			'group'       => 'attributes',
-			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
-			'priority'    => 10,
 		);
 
 		// Add the layout fields
@@ -117,24 +196,6 @@ class SiteOrigin_Panels_Default_Styles {
 			'group'       => 'layout',
 			'description' => sprintf( __( 'Amount of space between columns. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
 			'priority'    => 6,
-		);
-
-		$fields['padding'] = array(
-			'name'        => __( 'Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding around the entire row.', 'siteorigin-panels' ),
-			'priority'    => 7,
-			'multiple'    => true
-		);
-
-		$fields['mobile_padding'] = array(
-			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
-			'priority'    => 8,
-			'multiple'    => true
 		);
 
 		$fields['row_stretch'] = array(
@@ -182,85 +243,13 @@ class SiteOrigin_Panels_Default_Styles {
 			'priority' => 17,
 		);
 
-		// How lets add the design fields
-
-		$fields['background'] = array(
-			'name'        => __( 'Background Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Background color of the row.', 'siteorigin-panels' ),
-			'priority'    => 5,
-		);
-
-		$fields['background_image_attachment'] = array(
-			'name'        => __( 'Background Image', 'siteorigin-panels' ),
-			'type'        => 'image',
-			'group'       => 'design',
-			'description' => __( 'Background image of the row.', 'siteorigin-panels' ),
-			'priority'    => 6,
-		);
-
-		$fields['background_display'] = array(
-			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
-			'type'        => 'select',
-			'group'       => 'design',
-			'options'     => array(
-				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
-				'cover'             => __( 'Cover', 'siteorigin-panels' ),
-				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
-				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
-				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
-				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
-			),
-			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
-			'priority'    => 7,
-		);
-
-		$fields['border_color'] = array(
-			'name'        => __( 'Border Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Border color of the row.', 'siteorigin-panels' ),
-			'priority'    => 10,
-		);
-
 		return $fields;
 	}
 
 	static function cell_style_fields( $fields ) {
-		$fields['class'] = array(
-			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
-			'type'        => 'text',
-			'group'       => 'attributes',
-			'description' => __( 'A CSS class', 'siteorigin-panels' ),
-			'priority'    => 5,
-		);
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_attributes( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
 
-		$fields['cell_css'] = array(
-			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
-			'type'        => 'code',
-			'group'       => 'attributes',
-			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
-			'priority'    => 10,
-		);
-
-		$fields['padding'] = array(
-			'name'        => __( 'Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding around the entire cell.', 'siteorigin-panels' ),
-			'priority'    => 7,
-			'multiple'    => true
-		);
-
-		$fields['mobile_padding'] = array(
-			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
-			'priority'    => 8,
-			'multiple'    => true
-		);
 
 		$fields['vertical_alignment'] = array(
 			'name'     => __( 'Vertical Alignment', 'siteorigin-panels' ),
@@ -274,48 +263,6 @@ class SiteOrigin_Panels_Default_Styles {
 				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
 			),
 			'priority' => 16,
-		);
-
-		// How lets add the design fields
-
-		$fields['background'] = array(
-			'name'        => __( 'Background Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Background color of the cell.', 'siteorigin-panels' ),
-			'priority'    => 5,
-		);
-
-		$fields['background_image_attachment'] = array(
-			'name'        => __( 'Background Image', 'siteorigin-panels' ),
-			'type'        => 'image',
-			'group'       => 'design',
-			'description' => __( 'Background image of the cell.', 'siteorigin-panels' ),
-			'priority'    => 6,
-		);
-
-		$fields['background_display'] = array(
-			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
-			'type'        => 'select',
-			'group'       => 'design',
-			'options'     => array(
-				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
-				'cover'             => __( 'Cover', 'siteorigin-panels' ),
-				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
-				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
-				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
-				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
-			),
-			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
-			'priority'    => 7,
-		);
-
-		$fields['border_color'] = array(
-			'name'        => __( 'Border Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Border color of the cell.', 'siteorigin-panels' ),
-			'priority'    => 10,
 		);
 
 		$fields['font_color'] = array(
@@ -338,81 +285,11 @@ class SiteOrigin_Panels_Default_Styles {
 	}
 
 	static function widget_style_fields( $fields ) {
-		$fields['class'] = array(
-			'name'        => __( 'Widget Class', 'siteorigin-panels' ),
-			'type'        => 'text',
-			'group'       => 'attributes',
-			'description' => __( 'A CSS class', 'siteorigin-panels' ),
-			'priority'    => 5,
-		);
 
-		$fields['widget_css'] = array(
-			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
-			'type'        => 'code',
-			'group'       => 'attributes',
-			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
-			'priority'    => 10,
-		);
-
-		$fields['padding'] = array(
-			'name'        => __( 'Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding around the entire widget.', 'siteorigin-panels' ),
-			'priority'    => 7,
-			'multiple'    => true
-		);
-
-		$fields['mobile_padding'] = array(
-			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
-			'type'        => 'measurement',
-			'group'       => 'layout',
-			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
-			'priority'    => 8,
-			'multiple'    => true
-		);
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_attributes( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
 
 		// How lets add the design fields
-
-		$fields['background'] = array(
-			'name'        => __( 'Background Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Background color of the widget.', 'siteorigin-panels' ),
-			'priority'    => 5,
-		);
-
-		$fields['background_image_attachment'] = array(
-			'name'        => __( 'Background Image', 'siteorigin-panels' ),
-			'type'        => 'image',
-			'group'       => 'design',
-			'description' => __( 'Background image of the widget.', 'siteorigin-panels' ),
-			'priority'    => 6,
-		);
-
-		$fields['background_display'] = array(
-			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
-			'type'        => 'select',
-			'group'       => 'design',
-			'options'     => array(
-				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
-				'cover'             => __( 'Cover', 'siteorigin-panels' ),
-				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
-				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
-				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
-				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
-			),
-			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
-			'priority'    => 7,
-		);
-
-		$fields['border_color'] = array(
-			'name'        => __( 'Border Color', 'siteorigin-panels' ),
-			'type'        => 'color',
-			'group'       => 'design',
-			'description' => __( 'Border color of the widget.', 'siteorigin-panels' ),
-			'priority'    => 10,
-		);
 
 		$fields['font_color'] = array(
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
@@ -433,97 +310,119 @@ class SiteOrigin_Panels_Default_Styles {
 		return $fields;
 	}
 
-	static function row_style_attributes( $attributes, $args ) {
-		if ( ! empty( $args['row_stretch'] ) ) {
+	static function row_style_attributes( $attributes, $style ) {
+		if ( ! empty( $style['row_stretch'] ) ) {
 			$attributes['class'][]           = 'siteorigin-panels-stretch';
-			$attributes['data-stretch-type'] = $args['row_stretch'];
+			$attributes['data-stretch-type'] = $style['row_stretch'];
 			wp_enqueue_script( 'siteorigin-panels-front-styles' );
 		}
 
-		if ( ! empty( $args['class'] ) ) {
-			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $args['class'] ) );
+		if ( ! empty( $style['class'] ) ) {
+			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $style['class'] ) );
 		}
 
-		if ( ! empty( $args['row_css'] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $args['row_css'], $matches );
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			if ( ! empty( $matches[0] ) ) {
-				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
-					$attributes['style'] .= $matches[1][ $i ] . ':' . $matches[2][ $i ] . ';';
-				}
-			}
-		}
-
-		if ( ! empty( $args['background'] ) ) {
-			$attributes['style'] .= 'background-color:' . $args['background'] . ';';
-		}
-
-		if ( ! empty( $args['background_display'] ) && ! empty( $args['background_image_attachment'] ) ) {
-
-			if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
+			if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
 				wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			}
 
-			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
-			if ( ! empty( $url ) ) {
-
-				if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
-					wp_enqueue_script( 'siteorigin-parallax' );
-					$parallax_args                          = array(
-						'backgroundUrl'    => $url[0],
-						'backgroundSize'   => array( $url[1], $url[2] ),
-						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
-						'limitMotion'      => siteorigin_panels_setting( 'parallax-motion' ) ? floatval( siteorigin_panels_setting( 'parallax-motion' ) ) : 'auto',
-					);
-					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
-					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';
-				} else {
-					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
-					switch ( $args['background_display'] ) {
-						case 'tile':
-							$attributes['style'] .= 'background-repeat: repeat;';
-							break;
-						case 'cover':
-							$attributes['style'] .= 'background-size: cover;';
-							break;
-						case 'center':
-							$attributes['style'] .= 'background-position: center center; background-repeat: no-repeat;';
-							break;
-						case 'fixed':
-							$attributes['style'] .= 'background-attachment: fixed; background-size: cover;';
-							break;
-					}
-				}
+			if (
+				! empty( $url ) &&
+				( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' )
+			) {
+				wp_enqueue_script( 'siteorigin-parallax' );
+				$parallax_args                          = array(
+					'backgroundUrl'    => $url[0],
+					'backgroundSize'   => array( $url[1], $url[2] ),
+					'backgroundSizing' => $style['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+					'limitMotion'      => siteorigin_panels_setting( 'parallax-motion' ) ? floatval( siteorigin_panels_setting( 'parallax-motion' ) ) : 'auto',
+				);
+				$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
 			}
 		}
 
-		// We need the style wrapper if there is padding or mobile padding
-		if ( ! empty( $args['padding'] ) || ! empty( $args['mobile_padding'] ) ) {
-			$attributes['class'][] = 'panel-row-style';
-		}
-
-		if ( ! empty( $args['border_color'] ) ) {
-			$attributes['style'] .= 'border: 1px solid ' . $args['border_color'] . ';';
-		}
-
-		if ( ! empty( $args['id'] ) ) {
-			$attributes['id'] = sanitize_html_class( $args['id'] );
+		if ( ! empty( $style['id'] ) ) {
+			$attributes['id'] = sanitize_html_class( $style['id'] );
 		}
 
 		return $attributes;
 	}
 
-	static function cell_style_attributes( $attributes, $args ) {
-		if ( ! empty( $args['class'] ) ) {
+	/**
+	 * Get CSS for a row style wrapper
+	 *
+	 * @param $style
+	 *
+	 * @return array
+	 */
+	static function get_row_style_css( $style ){
+		$return = array();
+
+		if ( ! empty( $style['row_css'] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style['row_css'], $matches );
+
+			if ( ! empty( $matches[0] ) ) {
+				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
+					$return[ $matches[1][ $i ] ] = $matches[2][ $i ];
+				}
+			}
+		}
+
+		if ( ! empty( $style['background'] ) ) {
+			$return[ 'background-color' ] = $style['background'];
+		}
+
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
+
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+
+			if ( ! empty( $url ) ) {
+				$return[ 'background-image' ] = 'url(' . $url[0] . ')';
+
+				switch ( $style['background_display'] ) {
+					case 'parallax':
+					case 'parallax-original':
+						$return[ 'background-position' ] = 'center center';
+						$return[ 'background-repeat' ] = 'no-repeat';
+						break;
+					case 'tile':
+						$return[ 'background-repeat' ] = 'repeat';
+						break;
+					case 'cover':
+						$return[ 'background-size' ] = 'cover';
+						break;
+					case 'center':
+						$return[ 'background-position' ] = 'center center';
+						$return[ 'background-repeat' ] = 'no-repeat';
+						break;
+					case 'fixed':
+						$return[ 'background-attachment' ] = 'fixed';
+						$return[ 'background-size' ] = 'cover';
+						break;
+				}
+			}
+		}
+
+		if ( ! empty( $style['border_color'] ) ) {
+			$return[ 'border' ] = '1px solid ' . $style['border_color'];
+		}
+
+		return $return;
+	}
+
+	static function cell_style_attributes( $attributes, $style ) {
+		if ( ! empty( $style['class'] ) ) {
 			if ( empty( $attributes['class'] ) ) {
 				$attributes['class'] = array();
 			}
-			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $args['class'] ) );
+			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $style['class'] ) );
 		}
 
-		if ( ! empty( $args['cell_css'] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $args['cell_css'], $matches );
+		if ( ! empty( $style['cell_css'] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style['cell_css'], $matches );
 
 			if ( ! empty( $matches[0] ) ) {
 				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
@@ -532,32 +431,32 @@ class SiteOrigin_Panels_Default_Styles {
 			}
 		}
 
-		if ( ! empty( $args['background'] ) ) {
-			$attributes['style'] .= 'background-color:' . $args['background'] . ';';
+		if ( ! empty( $style['background'] ) ) {
+			$attributes['style'] .= 'background-color:' . $style['background'] . ';';
 		}
 
-		if ( ! empty( $args['background_display'] ) && ! empty( $args['background_image_attachment'] ) ) {
-			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
-			if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
+			if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
 				wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			}
 
 			if ( ! empty( $url ) ) {
 
-				if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
+				if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
 					wp_enqueue_script( 'siteorigin-parallax' );
 					$parallax_args                          = array(
 						'backgroundUrl'    => $url[0],
 						'backgroundSize'   => array( $url[1], $url[2] ),
-						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+						'backgroundSizing' => $style['background_display'] == 'parallax-original' ? 'original' : 'scaled',
 					);
 					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
 					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';
 				} else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
 
-					switch ( $args['background_display'] ) {
+					switch ( $style['background_display'] ) {
 						case 'tile':
 							$attributes['style'] .= 'background-repeat: repeat;';
 							break;
@@ -577,31 +476,31 @@ class SiteOrigin_Panels_Default_Styles {
 		}
 
 		// We need the style wrapper if there is padding or mobile padding
-		if ( ! empty( $args['padding'] ) || ! empty( $args['mobile_padding'] ) ) {
+		if ( ! empty( $style['padding'] ) || ! empty( $style['mobile_padding'] ) ) {
 			$attributes['class'][] = 'panel-cell-style';
 		}
 
-		if ( ! empty( $args['border_color'] ) ) {
-			$attributes['style'] .= 'border: 1px solid ' . $args['border_color'] . ';';
+		if ( ! empty( $style['border_color'] ) ) {
+			$attributes['style'] .= 'border: 1px solid ' . $style['border_color'] . ';';
 		}
 
-		if ( ! empty( $args['font_color'] ) ) {
-			$attributes['style'] .= 'color: ' . $args['font_color'] . ';';
+		if ( ! empty( $style['font_color'] ) ) {
+			$attributes['style'] .= 'color: ' . $style['font_color'] . ';';
 		}
 
 		return $attributes;
 	}
 
-	static function widget_style_attributes( $attributes, $args ) {
-		if ( ! empty( $args['class'] ) ) {
+	static function widget_style_attributes( $attributes, $style ) {
+		if ( ! empty( $style['class'] ) ) {
 			if ( empty( $attributes['class'] ) ) {
 				$attributes['class'] = array();
 			}
-			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $args['class'] ) );
+			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $style['class'] ) );
 		}
 
-		if ( ! empty( $args['widget_css'] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $args['widget_css'], $matches );
+		if ( ! empty( $style['widget_css'] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style['widget_css'], $matches );
 
 			if ( ! empty( $matches[0] ) ) {
 				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
@@ -610,32 +509,32 @@ class SiteOrigin_Panels_Default_Styles {
 			}
 		}
 
-		if ( ! empty( $args['background'] ) ) {
-			$attributes['style'] .= 'background-color:' . $args['background'] . ';';
+		if ( ! empty( $style['background'] ) ) {
+			$attributes['style'] .= 'background-color:' . $style['background'] . ';';
 		}
 
-		if ( ! empty( $args['background_display'] ) && ! empty( $args['background_image_attachment'] ) ) {
-			$url = wp_get_attachment_image_src( $args['background_image_attachment'], 'full' );
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
-			if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
+			if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
 				wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			}
 
 			if ( ! empty( $url ) ) {
 
-				if ( $args['background_display'] == 'parallax' || $args['background_display'] == 'parallax-original' ) {
+				if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
 					wp_enqueue_script( 'siteorigin-parallax' );
 					$parallax_args                          = array(
 						'backgroundUrl'    => $url[0],
 						'backgroundSize'   => array( $url[1], $url[2] ),
-						'backgroundSizing' => $args['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+						'backgroundSizing' => $style['background_display'] == 'parallax-original' ? 'original' : 'scaled',
 					);
 					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
 					$attributes['style'] .= 'background-image: url(' . $url[0] . '); background-position: center center; background-repeat: no-repeat;';
 				} else {
 					$attributes['style'] .= 'background-image: url(' . $url[0] . ');';
 
-					switch ( $args['background_display'] ) {
+					switch ( $style['background_display'] ) {
 						case 'tile':
 							$attributes['style'] .= 'background-repeat: repeat;';
 							break;
@@ -655,16 +554,16 @@ class SiteOrigin_Panels_Default_Styles {
 		}
 
 		// We need the style wrapper if there is padding or mobile padding
-		if ( ! empty( $args['padding'] ) || ! empty( $args['mobile_padding'] ) ) {
+		if ( ! empty( $style['padding'] ) || ! empty( $style['mobile_padding'] ) ) {
 			$attributes['class'][] = 'panel-widget-style';
 		}
 
-		if ( ! empty( $args['border_color'] ) ) {
-			$attributes['style'] .= 'border: 1px solid ' . $args['border_color'] . ';';
+		if ( ! empty( $style['border_color'] ) ) {
+			$attributes['style'] .= 'border: 1px solid ' . $style['border_color'] . ';';
 		}
 
-		if ( ! empty( $args['font_color'] ) ) {
-			$attributes['style'] .= 'color: ' . $args['font_color'] . ';';
+		if ( ! empty( $style['font_color'] ) ) {
+			$attributes['style'] .= 'color: ' . $style['font_color'] . ';';
 		}
 
 		return $attributes;
