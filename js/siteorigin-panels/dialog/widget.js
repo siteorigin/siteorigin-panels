@@ -3,7 +3,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
 	builder: null,
-	sidebarWidgetTemplate: _.template( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html().panelsProcessTemplate() ),
+	sidebarWidgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html() ) ),
 	dialogClass: 'so-panels-dialog-edit-widget',
 	widgetView: false,
 	savingWidget: false,

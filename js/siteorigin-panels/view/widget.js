@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	template: _.template( $( '#siteorigin-panels-builder-widget' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder-widget' ).html() ) ),
 
 	// The cell view that this widget belongs to
 	cell: null,
@@ -21,8 +21,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 		// The 2 user actions on the model that this view will handle.
-		this.model.on( 'user_edit', this.editHandler, this );                 // When a user wants to edit the widget model
-		this.model.on( 'user_duplicate', this.duplicateHandler, this );       // When a user wants to duplicate the widget model
+		this.model.on( 'user_edit', this.editHandler, this );				 // When a user wants to edit the widget model
+		this.model.on( 'user_duplicate', this.duplicateHandler, this );	   // When a user wants to duplicate the widget model
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
@@ -136,13 +136,20 @@ module.exports = Backbone.View.extend( {
 		// Create the new widget and connect it to the widget collection for the current row
 		var newWidget = this.model.clone( this.model.cell );
 
-		this.cell.model.widgets.add( newWidget, {
+		this.cell.model.get('widgets').add( newWidget, {
 			// Add this after the existing model
 			at: this.model.collection.indexOf( this.model ) + 1
 		} );
 
 		this.cell.row.builder.model.refreshPanelsData();
 		return this;
+	},
+
+	/**
+	 * Copy the row to a cookie based clipboard
+	 */
+	copyHandler: function(){
+		panels.helpers.clipboard.setModel( this.model );
 	},
 
 	/**
@@ -192,10 +199,9 @@ module.exports = Backbone.View.extend( {
 	 * @param menu
 	 */
 	buildContextualMenu: function ( e, menu ) {
-		var thisView = this;
-
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			menu.addSection(
+				'add-widget-below',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_widget_below,
 					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
@@ -203,37 +209,46 @@ module.exports = Backbone.View.extend( {
 				},
 				panelsOptions.widgets,
 				function ( c ) {
-					thisView.cell.row.builder.addHistoryEntry( 'widget_added' );
+					this.cell.row.builder.addHistoryEntry( 'widget_added' );
 
 					var widget = new panels.model.widget( {
 						class: c
 					} );
-					widget.cell = thisView.cell.model;
+					widget.cell = this.cell.model;
 
 					// Insert the new widget below
-					thisView.cell.model.widgets.add( widget, {
+					this.cell.model.get('widgets').add( widget, {
 						// Add this after the existing model
-						at: thisView.model.collection.indexOf( thisView.model ) + 1
+						at: this.model.collection.indexOf( this.model ) + 1
 					} );
 
-					thisView.cell.row.builder.model.refreshPanelsData();
-				}
+					this.cell.row.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 
 		var actions = {};
+
 		if( this.cell.row.builder.supports( 'editWidget' ) && ! this.model.get( 'read_only' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.widget_edit };
 		}
+
+		// Copy and paste functions
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
+			actions.copy = {title: panelsOptions.loc.contextual.widget_copy};
+		}
+
 		if( this.cell.row.builder.supports( 'addWidget' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.widget_duplicate };
 		}
+
 		if( this.cell.row.builder.supports( 'deleteWidget' ) ) {
 			actions.delete = { title: panelsOptions.loc.contextual.widget_delete, confirm: true };
 		}
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'widget-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.widget_actions,
 					search: false,
@@ -242,23 +257,24 @@ module.exports = Backbone.View.extend( {
 				function ( c ) {
 					switch ( c ) {
 						case 'edit':
-							thisView.editHandler();
+							this.editHandler();
+							break;
+						case 'copy':
+							this.copyHandler();
 							break;
 						case 'duplicate':
-							thisView.duplicateHandler();
+							this.duplicateHandler();
 							break;
 						case 'delete':
-							thisView.visualDestroyModel();
+							this.visualDestroyModel();
 							break;
 					}
-
-					thisView.cell.row.builder.model.refreshPanelsData();
-				}
+				}.bind( this )
 			);
 		}
 
 		// Lets also add the contextual menu for the entire row
-		this.cell.row.buildContextualMenu( e, menu );
+		this.cell.buildContextualMenu( e, menu );
 	}
 
 } );

@@ -5,7 +5,7 @@ module.exports = Backbone.View.extend( {
 	// Config options
 	config: {},
 
-	template: _.template( $( '#siteorigin-panels-builder' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder' ).html() ) ),
 	dialogs: {},
 	rowsSortable: null,
 	dataField: false,
@@ -14,6 +14,8 @@ module.exports = Backbone.View.extend( {
 	attachedToEditor: false,
 	liveEditor: undefined,
 	menu: false,
+
+	activeCell: null,
 
 	events: {
 		'click .so-tool-button.so-widget-add': 'displayAddWidgetDialog',
@@ -75,7 +77,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogs.row.setRowDialogType( 'create' );
 
 		// This handles a new row being added to the collection - we'll display it in the interface
-		this.model.rows.on( 'add', this.onAddRow, this );
+		this.model.get('rows').on( 'add', this.onAddRow, this );
 
 		// Reflow the entire builder when ever the
 		$( window ).resize( function ( e ) {
@@ -96,6 +98,12 @@ module.exports = Backbone.View.extend( {
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
+
+		if( this.config.loadOnAttach ) {
+			this.on( 'builder_attached_to_editor', function(){
+				$( '#content-panels' ).click();
+			}, this );
+		}
 
 		return this;
 	},
@@ -257,10 +265,10 @@ module.exports = Backbone.View.extend( {
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets
 		var data = this.model.get( 'data' );
 		if ( (
-			     ! _.isEmpty( data.widgets )
-		     ) || (
-			     ! _.isEmpty( data.grids )
-		     ) ) {
+				 ! _.isEmpty( data.widgets )
+			 ) || (
+				 ! _.isEmpty( data.grids )
+			 ) ) {
 			$( '#content-panels.switch-panels' ).click();
 		}
 
@@ -347,15 +355,17 @@ module.exports = Backbone.View.extend( {
 				var $$ =  $( ui.item ),
 					row = $$.data( 'view' );
 
-				builderView.model.rows.remove( row.model, {
+				builderView.model.get('rows').remove( row.model, {
 					'silent' : true
 				} );
-				builderView.model.rows.add( row.model, {
+				builderView.model.get('rows').add( row.model, {
 					'silent' : true,
 					'at' : $$.index()
 				} );
 
 				row.trigger( 'move', $$.index() );
+
+				builderView.model.refreshPanelsData();
 			}
 		} );
 
@@ -459,16 +469,16 @@ module.exports = Backbone.View.extend( {
 
 	/**
 	 * Display the dialog to add a new row.
-	 *
-	 * @returns {boolean}
 	 */
 	displayAddRowDialog: function () {
-        var row = new panels.model.row();
-        var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
-        cells.each(function (cell) {
-            cell.row = row;
-        });
-        row.set('cells', cells);
+		var row = new panels.model.row();
+		var cells = new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]);
+		cells.each(function (cell) {
+			cell.row = row;
+		});
+		row.set('cells', cells);
+		row.builder = this.model;
+
 		this.dialogs.row.setRowModel(row);
 		this.dialogs.row.openDialog();
 	},
@@ -492,36 +502,46 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Handle pasting a row into the builder.
+	 */
+	pasteRowHandler: function(){
+		var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
+
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
+			this.addHistoryEntry( 'row_pasted' );
+			pastedModel.builder = this.model;
+			this.model.get('rows').add( pastedModel, {
+				at: this.model.get('rows').indexOf( this.model ) + 1
+			} );
+			this.model.refreshPanelsData();
+		}
+	},
+
+	/**
 	 * Get the model for the currently selected cell
 	 */
 	getActiveCell: function ( options ) {
 		options = _.extend( {
 			createCell: true,
-			defaultPosition: 'first'
 		}, options );
 
-		if ( this.$( '.so-cells .cell' ).length === 0 ) {
-
+		if( ! this.model.get('rows').length ) {
+			// There aren't any rows yet
 			if ( options.createCell ) {
 				// Create a row with a single cell
 				this.model.addRow( {}, [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}
-
 		}
 
-		var activeCell = this.$( '.so-cells .cell.cell-selected' );
+		var activeCell = this.activeCell;
 
-		if ( activeCell.length === 0 ) {
-			if ( options.defaultPosition === 'last' ) {
-				activeCell = this.$( '.so-cells .cell' ).first();
-			} else {
-				activeCell = this.$( '.so-cells .cell' ).last();
-			}
+		if( _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ) {
+			return this.model.get('rows').last().get('cells').first();
+		} else {
+			return activeCell.model;
 		}
-
-		return activeCell.data( 'view' ).model;
 	},
 
 	/**
@@ -792,13 +812,18 @@ module.exports = Backbone.View.extend( {
 	 * This shows or hides the welcome display depending on whether there are any rows in the collection.
 	 */
 	toggleWelcomeDisplay: function () {
-		if ( ! this.model.rows.isEmpty() ) {
+		if ( ! this.model.get('rows').isEmpty() ) {
 			this.$( '.so-panels-welcome-message' ).hide();
 		} else {
 			this.$( '.so-panels-welcome-message' ).show();
 		}
 	},
 
+	/**
+	 * Activate the contextual menu
+	 * @param e
+	 * @param menu
+	 */
 	activateContextMenu: function ( e, menu ) {
 		var builder = this;
 
@@ -827,6 +852,7 @@ module.exports = Backbone.View.extend( {
 		) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
+				.add( builder.$( '.so-panels-welcome-message' ) )
 				.add( builder.$( '.so-rows-container > .so-row-container' ) )
 				.add( builder.$( '.so-cells > .cell' ) )
 				.add( builder.$( '.cell-wrapper > .so-widget' ) )
@@ -839,6 +865,49 @@ module.exports = Backbone.View.extend( {
 				// We'll pass this to the current active view so it can popular the contextual menu
 				activeView.buildContextualMenu( e, menu );
 			}
+			else if( over.last().hasClass( 'so-panels-welcome-message' ) ) {
+				// The user opened the contextual menu on the welcome message
+				this.buildContextualMenu( e, menu );
+			}
+		}
+	},
+
+	/**
+	 * Build the contextual menu for the main builder - before any content has been added.
+	 */
+	buildContextualMenu: function( e, menu ){
+		var actions = {};
+
+		if( this.supports( 'addRow' ) ) {
+			actions.add_row = { title: panelsOptions.loc.contextual.add_row };
+		}
+
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
+			if( panels.helpers.clipboard.isModel( 'row-model' ) && this.supports( 'addRow' ) ) {
+				actions.paste_row = { title: panelsOptions.loc.contextual.row_paste };
+			}
+		}
+
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				'builder-actions',
+				{
+					sectionTitle: panelsOptions.loc.contextual.row_actions,
+					search: false,
+				},
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'add_row':
+							this.displayAddRowDialog();
+							break;
+
+						case 'paste_row':
+							this.pasteRowHandler();
+							break;
+					}
+				}.bind( this )
+			);
 		}
 	},
 
@@ -885,12 +954,4 @@ module.exports = Backbone.View.extend( {
 			}
 		}
 	},
-
-	/**
-	 *
-	 */
-	syncWithModel: function(){
-
-	}
-
 } );

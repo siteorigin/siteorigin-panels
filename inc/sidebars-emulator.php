@@ -13,7 +13,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	/**
 	 * Get the single instance.
 	 *
-	 * @return SiteOrigin_Panels_Widgets
+	 * @return SiteOrigin_Panels_Sidebars_Emulator
 	 */
 	static function single() {
 		static $single;
@@ -86,6 +86,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		}
 		$widgets                             = $panels_data['widgets'];
 		$this->all_posts_widgets[ $post_id ] = array();
+
 		foreach ( $widgets as $widget_instance ) {
 			if ( empty( $widget_instance['panels_info']['class'] ) ) {
 				continue;

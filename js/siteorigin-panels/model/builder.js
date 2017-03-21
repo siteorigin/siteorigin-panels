@@ -1,52 +1,52 @@
 module.exports = Backbone.Model.extend({
-    layoutPosition: {
-        BEFORE: 'before',
-        AFTER: 'after',
-        REPLACE: 'replace',
-    },
+	layoutPosition: {
+		BEFORE: 'before',
+		AFTER: 'after',
+		REPLACE: 'replace',
+	},
 
-    rows: {},
+	rows: {},
 
-    defaults: {
-        'data': {
-            'widgets': [],
-            'grids': [],
-            'grid_cells': []
-        }
-    },
+	defaults: {
+		'data': {
+			'widgets': [],
+			'grids': [],
+			'grid_cells': []
+		}
+	},
 
-    initialize: function () {
-        // These are the main rows in the interface
-        this.rows = new panels.collection.rows();
-    },
+	initialize: function () {
+		// These are the main rows in the interface
+		this.set( 'rows', new panels.collection.rows() );
+	},
 
-    /**
-     * Add a new row to this builder.
-     *
-     * @param attrs
-     * @param cells
-     * @param options
-     */
-    addRow: function (attrs, cells, options) {
-        options = _.extend({
-            noAnimate: false
-        }, options);
+	/**
+	 * Add a new row to this builder.
+	 *
+	 * @param attrs
+	 * @param cells
+	 * @param options
+	 */
+	addRow: function (cells, options) {
+		options = _.extend({
+			noAnimate: false
+		}, options);
 
-	    var cellCollection = new panels.collection.cells(cells);
-	    cellCollection.each(function (cell) {
-		    cell.row = row;
-	    });
+		var cellCollection = new panels.collection.cells(cells);
+		cellCollection.each(function (cell) {
+			cell.row = row;
+		});
 
-	    attrs = _.extend({
-		    collection: this.rows,
-		    cells: cellCollection,
-	    }, attrs);
+		attrs = _.extend({
+			collection: this.get('rows'),
+			cells: cellCollection,
+		}, attrs);
 
-        // Create the actual row
-        var row = new panels.model.row(attrs);
+		// Create the actual row
+		var row = new panels.model.row(attrs);
 		row.builder = this;
 
-		this.rows.add( row, options );
+		this.get('rows').add( row, options );
 
 		return row;
 	},
@@ -56,7 +56,7 @@ module.exports = Backbone.Model.extend({
 	 *
 	 * @param data Object the layout and widgets data to load.
 	 * @param position string Where to place the new layout. Allowed options are 'before', 'after'. Anything else will
-	 *                          cause the new layout to replace the old one.
+	 *						  cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
 		try {
@@ -121,7 +121,7 @@ module.exports = Backbone.Model.extend({
 					delete widgetData.info;
 				}
 
-				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
+				var row = builderModel.get('rows').at( parseInt( panels_info.grid ) );
 				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
@@ -140,11 +140,11 @@ module.exports = Backbone.Model.extend({
 					newWidget.set( 'widget_id', panels_info.widget_id );
 				}
 				else {
-					newWidget.set( 'widget_id', builderModel.generateUUID() );
+					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
 				}
 
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, { noAnimate: true } );
+				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -162,7 +162,7 @@ module.exports = Backbone.Model.extend({
 	concatPanelsData: function ( panelsDataA, panelsDataB ) {
 
 		if ( _.isUndefined( panelsDataB ) || _.isUndefined( panelsDataB.grids ) || _.isEmpty( panelsDataB.grids ) ||
-		     _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
+			 _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
 			return panelsDataA;
 		}
 
@@ -220,11 +220,11 @@ module.exports = Backbone.Model.extend({
 		};
 		var widgetId = 0;
 
-		this.rows.each( function ( row, ri ) {
+		this.get('rows').each( function ( row, ri ) {
 
 			row.get('cells').each( function ( cell, ci ) {
 
-				cell.widgets.each( function ( widget, wi ) {
+				cell.get('widgets').each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
 					var panels_info = {
 						class: widget.get( 'class' ),
@@ -238,7 +238,7 @@ module.exports = Backbone.Model.extend({
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
-						panels_info.widget_id = builder.generateUUID();
+						panels_info.widget_id = panels.helpers.utils.generateUUID();
 					}
 
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {
@@ -293,29 +293,15 @@ module.exports = Backbone.Model.extend({
 	 * Empty all the rows and the cells/widgets they contain.
 	 */
 	emptyRows: function () {
-		_.invoke( this.rows.toArray(), 'destroy' );
-		this.rows.reset();
+		_.invoke( this.get('rows').toArray(), 'destroy' );
+		this.get('rows').reset();
 
 		return this;
 	},
 
 	isValidLayoutPosition: function ( position ) {
 		return position === this.layoutPosition.BEFORE ||
-		       position === this.layoutPosition.AFTER ||
-		       position === this.layoutPosition.REPLACE;
+			   position === this.layoutPosition.AFTER ||
+			   position === this.layoutPosition.REPLACE;
 	},
-
-	generateUUID: function(){
-		var d = new Date().getTime();
-		if( window.performance && typeof window.performance.now === "function" ){
-			d += performance.now(); //use high-precision timer if available
-		}
-		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function(c) {
-			var r = (d + Math.random()*16)%16 | 0;
-			d = Math.floor(d/16);
-			return ( c == 'x' ? r : (r&0x3|0x8) ).toString(16);
-		} );
-		return uuid;
-	}
-
 } );

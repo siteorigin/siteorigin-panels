@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	template: _.template( $( '#siteorigin-panels-builder-row' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder-row' ).html() ) ),
 
 	events: {
 		'click .so-row-settings': 'editSettingsHandler',
@@ -18,7 +18,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	initialize: function () {
 
-        var rowCells = this.model.get('cells');
+		var rowCells = this.model.get('cells');
 		rowCells.on( 'add', this.handleCellAdd, this );
 		rowCells.on( 'remove', this.handleCellRemove, this );
 		this.model.on( 'reweight_cells', this.resize, this );
@@ -28,12 +28,12 @@ module.exports = Backbone.View.extend( {
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		} );
 
 		// When ever a new cell is added, listen to it for new widgets
 		rowCells.on( 'add', function ( cell ) {
-			thisView.listenTo( cell.widgets, 'add', thisView.resize );
+			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
 	},
@@ -165,11 +165,34 @@ module.exports = Backbone.View.extend( {
 
 		var duplicateRow = this.model.clone( this.builder.model );
 
-		this.builder.model.rows.add( duplicateRow, {
-			at: this.builder.model.rows.indexOf( this.model ) + 1
+		this.builder.model.get('rows').add( duplicateRow, {
+			at: this.builder.model.get('rows').indexOf( this.model ) + 1
 		} );
 
 		this.builder.model.refreshPanelsData();
+	},
+
+	/**
+	 * Copy the row to a localStorage
+	 */
+	copyHandler: function(){
+		panels.helpers.clipboard.setModel( this.model );
+	},
+
+	/**
+	 * Create a new row and insert it
+	 */
+	pasteHandler: function(){
+		var pastedModel = panels.helpers.clipboard.getModel( 'row-model' );
+
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.row ) {
+			this.builder.addHistoryEntry( 'row_pasted' );
+			pastedModel.builder = this.builder.model;
+			this.builder.model.get('rows').add( pastedModel, {
+				at: this.builder.model.get('rows').indexOf( this.model ) + 1
+			} );
+			this.builder.model.refreshPanelsData();
+		}
 	},
 
 	/**
@@ -273,8 +296,6 @@ module.exports = Backbone.View.extend( {
 	 * @param menu
 	 */
 	buildContextualMenu: function ( e, menu ) {
-		var thisView = this;
-
 		var options = [];
 		for ( var i = 1; i < 5; i ++ ) {
 			options.push( {
@@ -284,13 +305,14 @@ module.exports = Backbone.View.extend( {
 
 		if( this.builder.supports( 'addRow' ) ) {
 			menu.addSection(
+				'add-row',
 				{
 					sectionTitle: panelsOptions.loc.contextual.add_row,
 					search: false
 				},
 				options,
 				function ( c ) {
-					thisView.builder.addHistoryEntry( 'row_added' );
+					this.builder.addHistoryEntry( 'row_added' );
 
 					var columns = Number( c ) + 1;
 					var weights = [];
@@ -300,39 +322,50 @@ module.exports = Backbone.View.extend( {
 
 					// Create the actual row
 					var newRow = new panels.model.row( {
-						collection: thisView.collection
+						collection: this.collection
 					} );
 
-                    var cells = new panels.collection.cells(weights);
-                    cells.each(function (cell) {
-                        cell.row = newRow;
-                    });
-                    newRow.setCells(cells);
-					newRow.builder = thisView.builder;
+					var cells = new panels.collection.cells(weights);
+					cells.each(function (cell) {
+						cell.row = newRow;
+					});
+					newRow.setCells(cells);
+					newRow.builder = this.builder.model;
 
-					thisView.builder.model.rows.add( newRow, {
-						at: thisView.builder.model.rows.indexOf( thisView.model ) + 1
+					this.builder.model.get('rows').add( newRow, {
+						at: this.builder.model.get('rows').indexOf( this.model ) + 1
 					} );
 
-					thisView.builder.model.refreshPanelsData();
-				}
+					this.builder.model.refreshPanelsData();
+				}.bind( this )
 			);
 		}
 
-		actions = {};
+		var actions = {};
 
 		if( this.builder.supports( 'editRow' ) ) {
 			actions.edit = { title: panelsOptions.loc.contextual.row_edit };
 		}
+
+		// Copy and paste functions
+		if ( panels.helpers.clipboard.canCopyPaste() ) {
+			actions.copy = { title: panelsOptions.loc.contextual.row_copy };
+			if ( this.builder.supports( 'addRow' ) && panels.helpers.clipboard.isModel( 'row-model' ) ) {
+				actions.paste = { title: panelsOptions.loc.contextual.row_paste };
+			}
+		}
+
 		if( this.builder.supports( 'addRow' ) ) {
 			actions.duplicate = { title: panelsOptions.loc.contextual.row_duplicate };
 		}
+
 		if( this.builder.supports( 'deleteRow' ) ) {
 			actions.delete = { title: panelsOptions.loc.contextual.row_delete, confirm: true };
 		}
 
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
+				'row-actions',
 				{
 					sectionTitle: panelsOptions.loc.contextual.row_actions,
 					search: false,
@@ -341,18 +374,23 @@ module.exports = Backbone.View.extend( {
 				function ( c ) {
 					switch ( c ) {
 						case 'edit':
-							thisView.editSettingsHandler();
+							this.editSettingsHandler();
+							break;
+						case 'copy':
+							this.copyHandler();
+							break;
+						case 'paste':
+							this.pasteHandler();
 							break;
 						case 'duplicate':
-							thisView.duplicateHandler();
+							this.duplicateHandler();
 							break;
 						case 'delete':
-							thisView.visualDestroyModel();
+							this.visualDestroyModel();
 							break;
 					}
-				}
+				}.bind( this )
 			);
 		}
-	}
-
+	},
 } );

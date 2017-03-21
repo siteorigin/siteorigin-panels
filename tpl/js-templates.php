@@ -309,7 +309,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<div class="row-set-form">
 				<?php
-				$cells_field = '<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />';
+				$cells_field = apply_filters('siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />');
 				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
 					'Even' => 1,
 					'Golden' => 0.61803398,
@@ -399,8 +399,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php endif; ?>
 
-				<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
+				<?php if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) : ?>
+					<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
+				<?php endif; ?>
+
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
+
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
 				foreach($post_types as $post_type) {

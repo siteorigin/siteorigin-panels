@@ -2,7 +2,7 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-	historyEntryTemplate: _.template( $( '#siteorigin-panels-dialog-history-entry' ).html().panelsProcessTemplate() ),
+	historyEntryTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-history-entry' ).html() ) ),
 
 	entries: {},
 	currentEntry: null,

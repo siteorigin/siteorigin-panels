@@ -149,6 +149,14 @@ class SiteOrigin_Panels_Default_Styles {
 			'priority' => 10,
 		);
 
+		$fields['mobile_collapse'] = array(
+			'name'     => __( 'Collapse On Mobile', 'siteorigin-panels' ),
+			'type'     => 'checkbox',
+			'group'    => 'layout',
+			'default'  => true,
+			'priority' => 15,
+		);
+
 		$fields['collapse_order'] = array(
 			'name'     => __( 'Collapse Order', 'siteorigin-panels' ),
 			'type'     => 'select',
@@ -158,7 +166,7 @@ class SiteOrigin_Panels_Default_Styles {
 				'left-top'  => __( 'Left on Top', 'siteorigin-panels' ),
 				'right-top' => __( 'Right on Top', 'siteorigin-panels' ),
 			),
-			'priority' => 15,
+			'priority' => 16,
 		);
 
 		$fields['cell_alignment'] = array(
@@ -171,7 +179,7 @@ class SiteOrigin_Panels_Default_Styles {
 				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
 				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
 			),
-			'priority' => 16,
+			'priority' => 17,
 		);
 
 		// How lets add the design fields

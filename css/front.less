@@ -1,10 +1,14 @@
 @import "mixins";
 
 .panel-grid {
-	display: -webkit-flex;
-	-webkit-flex-wrap: wrap;
-	display: flex;
-	flex-wrap: nowrap;
+
+	&.panel-no-style,
+	&.panel-has-style > .panel-row-style{
+		display: -webkit-flex;
+		-webkit-flex-wrap: wrap;
+		display: flex;
+		flex-wrap: nowrap;
+	}
 }
 
 .panel-grid-cell {

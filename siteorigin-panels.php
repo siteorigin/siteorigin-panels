@@ -50,6 +50,10 @@ class SiteOrigin_Panels {
 
 		SiteOrigin_Panels_Renderer::single();
 		SiteOrigin_Panels_Styles::single();
+
+		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';
+		}
 	}
 
 
@@ -135,13 +139,6 @@ class SiteOrigin_Panels {
 	 */
 	static function is_live_editor(){
 		return ! empty( $_GET['siteorigin_panels_live_editor'] );
-	}
-
-	/**
-	 * @todo Check if this is used anywhere. It doesn't seem to be.
-	 */
-	public static function is_preview() {
-
 	}
 
 	public static function preview_url() {

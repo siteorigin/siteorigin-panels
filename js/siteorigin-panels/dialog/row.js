@@ -2,7 +2,7 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend({
 
-	cellPreviewTemplate: _.template($('#siteorigin-panels-dialog-row-cell-preview').html().panelsProcessTemplate()),
+	cellPreviewTemplate: _.template( panels.helpers.utils.processTemplate( $('#siteorigin-panels-dialog-row-cell-preview').html() ) ),
 
 	events: {
 		'click .so-close': 'closeDialog',
@@ -531,8 +531,8 @@ module.exports = panels.view.dialog.extend({
 				f.cells = 1;
 				this.$('.row-set-form input[name="cells"]').val(f.cells);
 			}
-			else if (f.cells > 10) {
-				f.cells = 10;
+			else if (f.cells > 12) {
+				f.cells = 12;
 				this.$('.row-set-form input[name="cells"]').val(f.cells);
 			}
 
@@ -678,17 +678,16 @@ module.exports = panels.view.dialog.extend({
 
 		var activeCell = this.builder.getActiveCell({
 			createCell: false,
-			defaultPosition: 'last'
 		});
 
 		var options = {};
 		if (activeCell !== null) {
-			options.at = this.builder.model.rows.indexOf(activeCell.row) + 1;
+			options.at = this.builder.model.get('rows').indexOf(activeCell.row) + 1;
 		}
 
 		// Set up the model and add it to the builder
-		this.model.collection = this.builder.model.rows;
-		this.builder.model.rows.add(this.model, options);
+		this.model.collection = this.builder.model.get('rows');
+		this.builder.model.get('rows').add(this.model, options);
 
 		this.closeDialog();
 
@@ -729,8 +728,8 @@ module.exports = panels.view.dialog.extend({
 
 		var duplicateRow = this.model.clone(this.builder.model);
 
-		this.builder.model.rows.add(duplicateRow, {
-			at: this.builder.model.rows.indexOf(this.model) + 1
+		this.builder.model.get('rows').add(duplicateRow, {
+			at: this.builder.get('rows').indexOf(this.model) + 1
 		});
 
 		this.closeDialog({silent: true});

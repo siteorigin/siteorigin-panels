@@ -3,7 +3,7 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
 	builder: null,
-	widgetTemplate: _.template( $( '#siteorigin-panels-dialog-widgets-widget' ).html().panelsProcessTemplate() ),
+	widgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widgets-widget' ).html() ) ),
 	filter: {},
 
 	dialogClass: 'so-panels-dialog-add-widget',
@@ -96,8 +96,16 @@ module.exports = panels.view.dialog.extend( {
 	 * Handle changes to the search value
 	 */
 	searchHandler: function ( e ) {
-		this.filter.search = $( e.target ).val();
-		this.filterWidgets( this.filter );
+		if( e.which === 13 ) {
+			var visibleWidgets = this.$( '.widget-type-list .widget-type:visible' );
+			if( visibleWidgets.length === 1 ) {
+				visibleWidgets.click();
+			}
+		}
+		else {
+			this.filter.search = $( e.target ).val().trim();
+			this.filterWidgets( this.filter );
+		}
 	},
 
 	/**
@@ -172,7 +180,7 @@ module.exports = panels.view.dialog.extend( {
 
 		// Add the widget to the cell model
 		widget.cell = this.builder.getActiveCell();
-		widget.cell.widgets.add( widget );
+		widget.cell.get('widgets').add( widget );
 
 		this.closeDialog();
 		this.builder.model.refreshPanelsData();

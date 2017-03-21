@@ -7,25 +7,17 @@
 
 /* global Backbone, _, jQuery, tinyMCE, panelsOptions, plupload, confirm, console, require */
 
-/**
- * Convert template into something compatible with Underscore.js templates
- *
- * @param s
- * @return {*}
- */
-String.prototype.panelsProcessTemplate = function () {
-	var s = this;
-	s = s.replace( /{{%/g, '<%' );
-	s = s.replace( /%}}/g, '%>' );
-	s = s.trim();
-	return s;
-};
-
 var panels = {};
 
 // Store everything globally
 window.panels = panels;
 window.siteoriginPanels = panels;
+
+// Helpers
+panels.helpers = {};
+panels.helpers.clipboard = require( './helpers/clipboard' );
+panels.helpers.utils = require( './helpers/utils' );
+panels.helpers.serialize = require( './helpers/serialize' );
 
 // The models
 panels.model = {};
@@ -89,6 +81,7 @@ jQuery( function ( $ ) {
 			editorId: '#content',
 			builderType: $( '#siteorigin-panels-metabox' ).data( 'builder-type' ),
 			builderSupports: $( '#siteorigin-panels-metabox' ).data( 'builder-supports' ),
+			loadOnAttach: panelsOptions.loadOnAttach && $( '#auto_draft' ).val() == 1,
 			loadLiveEditor: $( '#siteorigin-panels-metabox' ).data('live-editor') == 1,
 			liveEditorPreview: container.data('preview-url')
 		};

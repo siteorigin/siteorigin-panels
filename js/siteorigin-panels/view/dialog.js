@@ -1,8 +1,8 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	dialogTemplate: _.template( $( '#siteorigin-panels-dialog' ).html().panelsProcessTemplate() ),
-	dialogTabTemplate: _.template( $( '#siteorigin-panels-dialog-tab' ).html().panelsProcessTemplate() ),
+	dialogTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog' ).html() ) ),
+	dialogTabTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-tab' ).html() ) ),
 
 	tabbed: false,
 	rendered: false,
@@ -90,7 +90,7 @@ module.exports = Backbone.View.extend( {
 
 
 		var c = $( (
-			_.template( html.panelsProcessTemplate() )
+			_.template( panels.helpers.utils.processTemplate( html ) )
 		)( args ) );
 		var r = {
 			title: c.find( '.title' ).html(),
@@ -202,12 +202,12 @@ module.exports = Backbone.View.extend( {
 			this.$( '.so-dropdown-links-wrapper' ).not( '.hidden' ).each( function ( index, el ) {
 				var $dropdownList = $( el );
 				var $trgt = $( e.target );
-				if ( $trgt.length === 0 || ! (
-				     (
-				     $trgt.is( '.so-needs-confirm' ) && ! $trgt.is( '.so-confirmed' )
-				     ) || $trgt.is( '.so-dropdown-button' )
+				if ( $trgt.length === 0 || !(
+						(
+							$trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')
+						) || $trgt.is('.so-dropdown-button')
 					) ) {
-					$dropdownList.addClass( 'hidden' );
+					$dropdownList.addClass('hidden');
 				}
 			} );
 		}.bind( this ) );

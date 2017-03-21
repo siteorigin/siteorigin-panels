@@ -112,11 +112,13 @@ class SiteOrigin_Panels_Settings {
 		$defaults['home-template']     = 'home-panels.php';
 		$defaults['affiliate-id']      = apply_filters( 'siteorigin_panels_affiliate_id', false );
 		$defaults['display-teaser']    = true;
-		$defaults['display-learn']    = true;
+		$defaults['display-learn']     = true;
+		$defaults['load-on-attach']    = false;
 
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
+		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
 		$defaults['sidebars-emulator']      = true;
 
@@ -238,6 +240,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Display a Live Editor button in the admin bar.', 'siteorigin-panels' ),
 		);
 
+		$fields['general']['fields']['admin-widget-count'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
+			'description' => __( "Display a widget count in the admin lists of posts/pages where you're using Page Builder.", 'siteorigin-panels' ),
+		);
+
 		$fields['general']['fields']['parallax-motion'] = array(
 			'type'        => 'float',
 			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
@@ -264,6 +272,12 @@ class SiteOrigin_Panels_Settings {
 			'type' => 'checkbox',
 			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
 			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
+		);
+
+		$fields['general']['fields']['load-on-attach'] = array(
+			'type' => 'checkbox',
+			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),
+			'description' => __( 'New posts/pages that you create will start with the Page Builder loaded.', 'siteorigin-panels' )
 		);
 
 		// The widgets fields
@@ -537,6 +551,9 @@ class SiteOrigin_Panels_Settings {
 
 			}
 		}
+
+		// Don't let mobile width go below 320
+		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
 
 		// Save the values to the database
 		update_option( 'siteorigin_panels_settings', $values );
