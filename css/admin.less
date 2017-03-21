@@ -199,7 +199,7 @@
 
 							&.so-row-color-selected:before {
 								content: "\2714";
-								color: rgba(0, 0, 0, 0.3);
+								color: rgba(0, 0, 0, 0.2);
 								font-size: 16px;
 								line-height: 16px;
 							}
@@ -269,6 +269,8 @@
 						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
 						height: 100%;
 						min-height: 70px;
+
+						.transition(0.25s, background, ease-in-out);
 					}
 
 					&.cell-selected .cell-wrapper{
