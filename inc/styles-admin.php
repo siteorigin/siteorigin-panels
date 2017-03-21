@@ -460,4 +460,4 @@ class SiteOrigin_Panels_Styles_Admin {
 }
 
 // Initialise all the default styling
-SiteOrigin_Panels_Default_Styles::single();
+SiteOrigin_Panels_Styles::single();

@@ -5,7 +5,7 @@
  *
  * Class SiteOrigin_Panels_Default_Styles
  */
-class SiteOrigin_Panels_Default_Styles {
+class SiteOrigin_Panels_Styles {
 
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
