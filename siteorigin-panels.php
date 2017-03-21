@@ -49,7 +49,7 @@ class SiteOrigin_Panels {
 		}
 
 		SiteOrigin_Panels_Renderer::single();
-		SiteOrigin_Panels_Styles::single();
+		SiteOrigin_Panels_Styles_Admin::single();
 
 		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';

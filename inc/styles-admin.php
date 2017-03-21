@@ -1,6 +1,6 @@
 <?php
 
-class SiteOrigin_Panels_Styles {
+class SiteOrigin_Panels_Styles_Admin {
 
 	function __construct() {
 		add_action( 'wp_ajax_so_panels_style_form', array( $this, 'action_style_form' ) );
