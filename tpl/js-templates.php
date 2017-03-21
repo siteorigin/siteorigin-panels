@@ -122,13 +122,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 							foreach ( $row_custom_colors as $i => $custom_color ) {
 								?>
-								<input type="radio"
-								       id="<?php echo 'so-color-' . $i; ?>-{{%= index %}}"
-								       name="so-row-color-{{%= index %}}"
-								       class="so-row-color"
-								       value="<?php echo $custom_color; ?>"/>
-								<label for="<?php echo 'so-color-' . $i; ?>-{{%= index %}}"
-								       style="background-color: <?php echo $custom_color; ?>;color: <?php echo $custom_color; ?>"></label>
+								<div data-color="<?php echo $custom_color; ?>"
+								        class="so-row-color{{% if( color == '<?php echo $custom_color; ?>' ) print(' so-row-color-selected'); %}}"
+								        style="background-color: <?php echo $custom_color; ?>;color: <?php echo $custom_color; ?>"></div>
 								<?php
 							}
 							?>

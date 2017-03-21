@@ -7,7 +7,7 @@ module.exports = Backbone.View.extend( {
 		'click .so-row-settings': 'editSettingsHandler',
 		'click .so-row-duplicate': 'duplicateHandler',
 		'click .so-row-delete': 'confirmedDeleteHandler',
-		'change .so-row-color': 'rowColorChangeHandler',
+		'click .so-row-color': 'rowColorChangeHandler',
 	},
 
 	builder: null,
@@ -44,8 +44,8 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.row}
 	 */
 	render: function () {
-		var rowIndex = this.model.collection.indexOf( this.model );
-		this.setElement( this.template( { index: rowIndex } ) );
+		var rowColor = this.model.get( 'color' );
+		this.setElement( this.template( { color: rowColor } ) );
 		this.$el.data( 'view', this );
 
 		// Create views for the cells in this row
@@ -92,7 +92,7 @@ module.exports = Backbone.View.extend( {
 
 		this.resize();
 
-		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
+		this.$( '.cell-wrapper' ).css( 'background-color', rowColor );
 
 		return this;
 	},
@@ -226,10 +226,14 @@ module.exports = Backbone.View.extend( {
 	 * Change the row background color.
 	 */
 	rowColorChangeHandler: function ( event ) {
-		console.log( 'change color: ' + $( event.target ).val() );
-		this.model.set( 'color', $( event.target ).val() );
-		this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
-		return this;
+		var selectedColor = $( event.target );
+		if ( this.model.get( 'color' ) !== selectedColor.data( 'color' ) ) {
+			this.model.set( 'color', selectedColor.data( 'color' ) );
+			this.$( '.so-row-color' ).removeClass( 'so-row-color-selected' );
+			selectedColor.addClass( 'so-row-color-selected' );
+
+			this.$( '.cell-wrapper' ).css( 'background-color', this.model.get( 'color' ) );
+		}
 	},
 
 	/**

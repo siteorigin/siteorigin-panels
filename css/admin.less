@@ -186,33 +186,21 @@
 
 						padding: 5px;
 
-						& input[type=radio].so-row-color {
+						& div.so-row-color {
 
-							display: none;
+							display: inline-block;
+							cursor: pointer;
+							position: relative;
+							border: none;
+							text-align: center;
 
-							& + label {
-								display: inline-block;
-								cursor: pointer;
-								position: relative;
-								font-size: 13px;
+							width: 16px;
+							height: 16px;
 
-								width: 16px;
-								height: 16px;
-							}
-
-							& + label:before {
-								content: "";
-								display: inline-block;
-
-								width: 16px;
-								height: 16px;
-							}
-
-							&:checked + label:before {
+							&.so-row-color-selected:before {
 								content: "\2714";
 								color: rgba(0, 0, 0, 0.3);
 								font-size: 16px;
-								text-align: center;
 								line-height: 16px;
 							}
 						}
