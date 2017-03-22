@@ -46,7 +46,6 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'load-appearance_page_so_panels_home_page', array( $this, 'add_help_tab' ), 12 );
 
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'js_templates' ) );
-		add_filter( 'get_post_metadata', array( $this, 'view_post_preview' ), 10, 3 );
 
 		// Register all the admin actions
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
@@ -162,37 +161,22 @@ class SiteOrigin_Panels_Admin {
 			return;
 		}
 
-		if ( ! wp_is_post_revision( $post_id ) ) {
-			$old_panels_data        = get_post_meta( $post_id, 'panels_data', true );
-			$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
-			$panels_data['widgets'] = $this->process_raw_widgets(
-				$panels_data['widgets'],
-				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
-			);
-			$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-			$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+		$old_panels_data        = get_post_meta( $post_id, 'panels_data', true );
+		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 
-			if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
-				update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
-			} else {
-				// There are no widgets or rows, so delete the panels data
-				delete_post_meta( $post_id, 'panels_data' );
-			}
+		$panels_data['widgets'] = $this->process_raw_widgets(
+			$panels_data['widgets'],
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
+		);
+		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+
+		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
+			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 		} else {
-			// When previewing, we don't need to wp_unslash the panels_data post variable.
-			$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
-			$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'] );
-			$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-			$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
-
-			// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
-			// https://core.trac.wordpress.org/ticket/20299
-			if ( ! empty( $panels_data['widgets'] ) ) {
-				update_post_meta( $post_id, '_panels_data_preview', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
-			} else {
-				delete_post_meta( $post_id, '_panels_data_preview' );
+			// There are no widgets or rows, so delete the panels data
+			delete_post_meta( $post_id, 'panels_data' );
 			}
-		}
 	}
 
 	/**
@@ -533,7 +517,7 @@ class SiteOrigin_Panels_Admin {
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
-		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
+		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
 		$template      = get_post_meta( $page_id, '_wp_page_template', true );
 		$home_template = siteorigin_panels_setting( 'home-template' );
@@ -717,23 +701,6 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function js_templates() {
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
-	}
-
-	/**
-	 * @param $value
-	 * @param $post_id
-	 * @param $meta_key
-	 *
-	 * @return mixed
-	 */
-	function view_post_preview( $value, $post_id, $meta_key ) {
-		if ( $meta_key == 'panels_data' && is_preview() && current_user_can( 'edit_post', $post_id ) ) {
-			$panels_preview = get_post_meta( $post_id, '_panels_data_preview' );
-
-			return ! empty( $panels_preview ) ? $panels_preview : $value;
-		}
-
-		return $value;
 	}
 
 	/**
@@ -1197,7 +1164,6 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public static function double_slash_string( $value ){
 		return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
-		return $value;
 	}
 
 }

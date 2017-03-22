@@ -40,6 +40,7 @@ class SiteOrigin_Panels {
 
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Settings::single();
+			SiteOrigin_Panels_Revisions::single();
 			SiteOrigin_Panels_Admin::single();
 		}
 
