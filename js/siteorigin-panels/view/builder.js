@@ -729,21 +729,14 @@ module.exports = Backbone.View.extend( {
 			) &&
 			editorContent !== ''
 		) {
-			// Confirm that the user wants to copy their content to Page Builder.
-			if ( ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
+			var widgetClass = panelsOptions.text_widget;
+			// There is a small chance a theme will have removed this, so check
+			if ( _.isEmpty( widgetClass ) ) {
 				return;
 			}
 
-			var widgetClass = '';
-			// There is a small chance a theme will have removed this, so check
-			if ( ! _.isUndefined( panelsOptions.widgets.SiteOrigin_Widget_Editor_Widget ) ) {
-				widgetClass = 'SiteOrigin_Widget_Editor_Widget';
-			}
-			else if ( ! _.isUndefined( panelsOptions.widgets.WP_Widget_Text ) ) {
-				widgetClass = 'WP_Widget_Text';
-			}
-
-			if ( widgetClass === '' ) {
+			// Confirm that the user wants to copy their content to Page Builder.
+			if ( ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
 				return;
 			}
 

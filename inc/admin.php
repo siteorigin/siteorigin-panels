@@ -207,14 +207,20 @@ class SiteOrigin_Panels_Admin {
 			add_action( 'admin_footer', array( $this, 'js_templates' ) );
 
 			$widgets = $this->get_widgets();
-
 			$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
+
+			// This is the widget we'll use for default text
+			if( ! empty( $widgets[ 'SiteOrigin_Widget_Editor_Widget' ] ) ) $text_widget = 'SiteOrigin_Widget_Editor_Widget';
+			else if( ! empty( $widgets[ 'WP_Widget_Text' ] ) ) $text_widget = 'WP_Widget_Text';
+			else $text_widget = false;
+			$text_widget = apply_filters( 'siteorigin_panels_text_widget_class', $text_widget );
 
 			$user = wp_get_current_user();
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
 				'ajaxurl'                   => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ),
 				'widgets'                   => $widgets,
+				'text_widget'               => $text_widget,
 				'widget_dialog_tabs'        => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
 					0 => array(
 						'title'  => __( 'All Widgets', 'siteorigin-panels' ),
