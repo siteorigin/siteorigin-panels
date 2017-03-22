@@ -27,7 +27,15 @@ class SiteOrigin_Panels_Css_Builder {
 			if ( empty( $v ) ) {
 				continue;
 			}
-			$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v );
+
+			if( is_array( $v ) ) {
+				for( $i = 0; $i < count( $v ); $i++ ) {
+					$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v[ $i ] );
+				}
+			}
+			else {
+				$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v );
+			}
 		}
 		$attribute_string = implode( ';', $attribute_string );
 
