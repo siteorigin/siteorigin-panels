@@ -306,6 +306,8 @@ class SiteOrigin_Panels_Renderer {
 
 			$style_wrapper = '<div ';
 			foreach ( $attributes as $name => $value ) {
+				// Attributes start with _ are used for internal communication between filters, so are not added to the HTML
+				// We don't make use of this in our styling, so its left as a mechanism for other plugins.
 				if( substr( $name, 0, 1 ) === '_' ) continue;
 
 				if ( is_array( $value ) ) {

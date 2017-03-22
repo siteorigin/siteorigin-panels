@@ -163,7 +163,6 @@ class SiteOrigin_Panels_Styles {
 		// Add the general fields
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'row', __( 'Row', 'siteorigin-panels' ) ) );
 
-		//Should we remove this? Or move it's existing value to new Cell Styles?
 		$fields['cell_class'] = array(
 			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
 			'type'        => 'text',
