@@ -50,7 +50,7 @@ class SiteOrigin_Panels_Revisions {
 	function revisions_restore( $post_id, $revision_id ) {
 		$panels_data = get_metadata( 'post', $revision_id, 'panels_data', true );
 		if ( ! empty( $panels_data ) ) {
-			update_post_meta( $post_id, 'panels_data', $panels_data );
+			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
 		} else {
 			delete_post_meta( $post_id, 'panels_data' );
 		}

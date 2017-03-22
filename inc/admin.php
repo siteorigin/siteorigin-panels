@@ -173,7 +173,7 @@ class SiteOrigin_Panels_Admin {
 			$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 			if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
-				update_post_meta( $post_id, 'panels_data', $panels_data );
+				update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
 			} else {
 				// There are no widgets or rows, so delete the panels data
 				delete_post_meta( $post_id, 'panels_data' );
@@ -188,7 +188,7 @@ class SiteOrigin_Panels_Admin {
 			// Because of issue #20299, we are going to save the preview into a different variable so we don't overwrite the actual data.
 			// https://core.trac.wordpress.org/ticket/20299
 			if ( ! empty( $panels_data['widgets'] ) ) {
-				update_post_meta( $post_id, '_panels_data_preview', $panels_data );
+				update_post_meta( $post_id, '_panels_data_preview', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
 			} else {
 				delete_post_meta( $post_id, '_panels_data_preview' );
 			}
@@ -533,7 +533,7 @@ class SiteOrigin_Panels_Admin {
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
-		update_post_meta( $page_id, 'panels_data', $panels_data );
+		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( $this, 'double_slash_string' ) ) );
 
 		$template      = get_post_meta( $page_id, '_wp_page_template', true );
 		$home_template = siteorigin_panels_setting( 'home-template' );
@@ -1186,6 +1186,18 @@ class SiteOrigin_Panels_Admin {
 				?><style type="text/css">.column-panels{ width: 10% }</style><?php
 			}
 		}
+	}
+
+	/**
+	 * Add double slashes to strings
+	 *
+	 * @param $value
+	 *
+	 * @return string
+	 */
+	public static function double_slash_string( $value ){
+		return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
+		return $value;
 	}
 
 }
