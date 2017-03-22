@@ -1,466 +1,602 @@
 <?php
 
+/**
+ * Class for handling all the default styling.
+ *
+ * Class SiteOrigin_Panels_Default_Styles
+ */
 class SiteOrigin_Panels_Styles {
 
-	function __construct() {
-		add_action( 'wp_ajax_so_panels_style_form', array( $this, 'action_style_form' ) );
+	public function __construct() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
 
-		add_filter( 'siteorigin_panels_data', array( $this, 'convert_data' ) );
-		add_filter( 'siteorigin_panels_prebuilt_layout', array( $this, 'convert_data' ) );
+		// Adding all the fields
+		add_filter( 'siteorigin_panels_row_style_fields', array( $this, 'row_style_fields' ) );
+		add_filter( 'siteorigin_panels_cell_style_fields', array( $this, 'cell_style_fields' ) );
+		add_filter( 'siteorigin_panels_widget_style_fields', array( $this, 'widget_style_fields' ) );
+
+		// Style wrapper attributes
+		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
+		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'row_style_attributes' ), 10, 2 );
+		add_filter( 'siteorigin_panels_cell_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
+		add_filter( 'siteorigin_panels_widget_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
+
+		// Style wrapper CSS
+		add_filter( 'siteorigin_panels_row_style_css', array( $this, 'general_style_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'general_style_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_widget_style_css', array( $this, 'general_style_css' ), 10, 2 );
+
+		add_filter( 'siteorigin_panels_row_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_cell_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_widget_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
+
+		// Main filter to add any custom CSS.
+		add_filter( 'siteorigin_panels_css_object', array( $this, 'filter_css_object' ), 10, 3 );
+
+		// Filtering specific attributes
+		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
+		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
 	}
 
 	public static function single() {
 		static $single;
-
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
-	/**
-	 * Admin action for handling fetching the style fields
-	 */
-	function action_style_form() {
-		$type = $_REQUEST['type'];
-		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
-			exit();
-		}
-		if ( empty( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
-			exit();
-		}
-
-		$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
-		$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
-
-		$args = ! empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true ) : array();
-
-		switch ( $type ) {
-			case 'row':
-				$this->render_styles_fields( 'row', '<h3>' . __( 'Row Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
-				break;
-
-			case 'cell':
-				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
-				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
-				break;
-
-			case 'widget':
-				$this->render_styles_fields( 'widget', '<h3>' . __( 'Widget Styles', 'siteorigin-panels' ) . '</h3>', '', $current, $post_id, $args );
-				break;
-		}
-
-		wp_die();
+	static function register_scripts() {
+		wp_register_script( 'siteorigin-panels-front-styles', plugin_dir_url( __FILE__ ) . '../js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery' ), SITEORIGIN_PANELS_VERSION );
+		wp_register_script( 'siteorigin-parallax', plugin_dir_url( __FILE__ ) . '../js/siteorigin-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array( 'jquery' ), SITEORIGIN_PANELS_VERSION );
+		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
+			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) )
+		) );
 	}
 
 	/**
-	 * Render all the style fields
+	 * These are general styles that apply to all elements
 	 *
-	 * @param $section
-	 * @param string $before
-	 * @param string $after
-	 * @param array $current
-	 * @param int $post_id
-	 * @param array $args Arguments passed by the builder
-	 *
-	 * @return bool
-	 */
-	function render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0, $args = array() ) {
-		$fields = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', array(), $post_id, $args );
-		if ( empty( $fields ) ) {
-			return false;
-		}
-
-		$groups = array(
-			'attributes' => array(
-				'name'     => __( 'Attributes', 'siteorigin-panels' ),
-				'priority' => 5
-			),
-			'layout'     => array(
-				'name'     => __( 'Layout', 'siteorigin-panels' ),
-				'priority' => 10
-			),
-			'design'     => array(
-				'name'     => __( 'Design', 'siteorigin-panels' ),
-				'priority' => 15
-			),
-		);
-
-		// Check if we need a default group
-		foreach ( $fields as $field_id => $field ) {
-			if ( empty( $field['group'] ) || $field['group'] == 'theme' ) {
-				if ( empty( $groups['theme'] ) ) {
-					$groups['theme'] = array(
-						'name'     => __( 'Theme', 'siteorigin-panels' ),
-						'priority' => 10
-					);
-				}
-				$fields[ $field_id ]['group'] = 'theme';
-			}
-		}
-		$groups = apply_filters( 'siteorigin_panels_' . $section . '_style_groups', $groups, $post_id, $args );
-
-		// Sort the style fields and groups by priority
-		uasort( $fields, array( self, 'sort_fields' ) );
-		uasort( $groups, array( self, 'sort_fields' ) );
-
-		echo $before;
-
-		$group_counts = array();
-		foreach ( $fields as $field_id => $field ) {
-			if ( empty( $group_counts[ $field['group'] ] ) ) {
-				$group_counts[ $field['group'] ] = 0;
-			}
-			$group_counts[ $field['group'] ] ++;
-		}
-
-		foreach ( $groups as $group_id => $group ) {
-
-			if ( empty( $group_counts[ $group_id ] ) ) {
-				continue;
-			}
-
-			?>
-			<div class="style-section-wrapper">
-				<div class="style-section-head">
-					<h4><?php echo esc_html( $group['name'] ) ?></h4>
-				</div>
-				<div class="style-section-fields" style="display: none">
-					<?php
-					foreach ( $fields as $field_id => $field ) {
-						$default = isset( $field['default'] ) ? $field['default'] : false;
-
-						if ( $field['group'] == $group_id ) {
-							?>
-							<div class="style-field-wrapper">
-								<label><?php echo $field['name'] ?></label>
-								<div
-									class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
-									<?php $this->render_style_field( $field, isset( $current[ $field_id ] ) ? $current[ $field_id ] : $default, $field_id ) ?>
-								</div>
-							</div>
-							<?php
-
-						}
-
-					}
-					?>
-				</div>
-			</div>
-			<?php
-		}
-
-		echo $after;
-	}
-
-	/**
-	 * Generate the style field
-	 *
-	 * @param $field
-	 * @param $current
-	 */
-	function render_style_field( $field, $current, $field_id ) {
-		$field_name = 'style[' . $field_id . ']';
-
-		echo '<div class="style-input-wrapper">';
-		switch ( $field['type'] ) {
-			case 'measurement' :
-
-				if ( ! empty( $field['multiple'] ) ) {
-					?>
-					<div class="measurement-inputs">
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-top"
-							       placeholder="<?php _e( 'Top', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-right"
-							       placeholder="<?php _e( 'Right', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-bottom"
-							       placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ) ?>"/>
-						</div>
-						<div class="measurement-wrapper">
-							<input type="text" class="measurement-value measurement-left"
-							       placeholder="<?php _e( 'Left', 'siteorigin-panels' ) ?>"/>
-						</div>
-					</div>
-					<?php
-				} else {
-					?><input type="text" class="measurement-value measurement-value-single"/><?php
-				}
-
-				?>
-				<select
-					class="measurement-unit measurement-unit-<?php echo ! empty( $field['multiple'] ) ? 'multiple' : 'single' ?>">
-					<?php foreach ( $this->measurements_list() as $measurement ): ?>
-						<option
-							value="<?php echo esc_html( $measurement ) ?>"><?php echo esc_html( $measurement ) ?></option>
-					<?php endforeach ?>
-				</select>
-				<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-				       value="<?php echo esc_attr( $current ) ?>"/>
-				<?php
-				break;
-
-			case 'color' :
-				?>
-				<input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				       value="<?php echo esc_attr( $current ) ?>" class="so-wp-color-field"/>
-				<?php
-				break;
-
-			case 'image' :
-				$image = false;
-				if ( ! empty( $current ) ) {
-					$image = wp_get_attachment_image_src( $current, 'thumbnail' );
-				}
-
-				?>
-				<div class="so-image-selector">
-					<div class="current-image" <?php if ( ! empty( $image ) ) {
-						echo 'style="background-image: url(' . esc_url( $image[0] ) . ');"';
-					} ?>>
-					</div>
-
-					<div class="select-image">
-						<?php _e( 'Select Image', 'siteorigin-panels' ) ?>
-					</div>
-					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-					       value="<?php echo intval( $current ) ?>"/>
-				</div>
-				<a href="#" class="remove-image"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
-				<?php
-				break;
-
-			case 'url' :
-			case 'text' :
-				?><input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
-				break;
-
-			case 'checkbox' :
-				$current = (bool) $current;
-				?>
-				<label class="so-checkbox-label">
-					<input type="checkbox" name="<?php echo esc_attr( $field_name ) ?>" <?php checked( $current ) ?> />
-					<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ) ?>
-				</label>
-				<?php
-				break;
-
-			case 'select' :
-				?>
-				<select name="<?php echo esc_attr( $field_name ) ?>">
-					<?php foreach ( $field['options'] as $k => $v ) : ?>
-						<option
-							value="<?php echo esc_attr( $k ) ?>" <?php selected( $current, $k ) ?>><?php echo esc_html( $v ) ?></option>
-					<?php endforeach; ?>
-				</select>
-				<?php
-				break;
-
-			case 'textarea' :
-			case 'code' :
-				?><textarea type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				            class="widefat <?php if ( $field['type'] == 'code' ) {
-					            echo 'so-field-code';
-				            } ?>" rows="4"><?php echo esc_textarea( $current ) ?></textarea><?php
-				break;
-		}
-
-		echo '</div>';
-
-		if ( ! empty( $field['description'] ) ) {
-			?><p class="so-description"><?php echo wp_kses_post( $field['description'] ) ?></p><?php
-		}
-	}
-
-	/**
-	 * Sanitize the style fields in panels_data
-	 *
-	 * @param $panels_data
-	 *
-	 * @return mixed
-	 */
-	function sanitize_all( $panels_data ) {
-		if ( ! empty( $panels_data['widgets'] ) ) {
-			// Sanitize the widgets
-			for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {
-				if ( empty( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
-					continue;
-				}
-				$panels_data['widgets'][ $i ]['panels_info']['style'] = $this->sanitize_style_fields( 'widget', $panels_data['widgets'][ $i ]['panels_info']['style'] );
-			}
-		}
-
-		if ( ! empty( $panels_data['grids'] ) ) {
-			// The rows
-			for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
-				if ( empty( $panels_data['grids'][ $i ]['style'] ) ) {
-					continue;
-				}
-				$panels_data['grids'][ $i ]['style'] = $this->sanitize_style_fields( 'row', $panels_data['grids'][ $i ]['style'] );
-			}
-		}
-
-		if ( ! empty( $panels_data['grid_cells'] ) ) {
-			// And finally, the cells
-			for ( $i = 0; $i < count( $panels_data['grid_cells'] ); $i ++ ) {
-				if ( empty( $panels_data['grid_cells'][ $i ]['style'] ) ) {
-					continue;
-				}
-				$panels_data['grid_cells'][ $i ]['style'] = $this->sanitize_style_fields( 'cell', $panels_data['grid_cells'][ $i ]['style'] );
-			}
-		}
-
-		return $panels_data;
-	}
-
-	/**
-	 * Sanitize style fields.
-	 *
-	 * @param $section
-	 * @param $styles
-	 *
-	 * @return Sanitized styles
-	 */
-	function sanitize_style_fields( $section, $styles ) {
-		// Use the filter to get the fields for this section.
-		if ( empty( $fields_cache[ $section ] ) ) {
-			// This filter doesn't pass in the arguments $post_id and $args
-			// Plugins looking to extend fields, should always add their fields if these are empty
-			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', array(), false, false );
-		}
-		$fields = $fields_cache[ $section ];
-
-		$return = array();
-		foreach ( $fields as $k => $field ) {
-			// Skip this if no field type is set
-			if ( empty( $field['type'] ) ) {
-				continue;
-			}
-
-			// Handle the special case of a checkbox
-			if ( $field['type'] == 'checkbox' ) {
-				$return[ $k ] = ! empty( $styles[ $k ] ) ? true : '';
-				continue;
-			}
-
-			// Ignore this if we don't even have a value for the style
-			if ( ! isset( $styles[ $k ] ) || $styles[ $k ] == '' ) {
-				continue;
-			}
-
-			switch ( $field['type'] ) {
-				case 'color' :
-					$color = $styles[ $k ];
-					if ( preg_match( '|^#([A-Fa-f0-9]{3,8})$|', $color ) ) {
-						$return[ $k ] = $color;
-					} else {
-						$return[ $k ] = '';
-					}
-					break;
-				case 'image' :
-					$return[ $k ] = ! empty( $styles[ $k ] ) ? intval( $styles[ $k ] ) : false;
-					break;
-				case 'url' :
-					$return[ $k ] = esc_url_raw( $styles[ $k ] );
-					break;
-				case 'measurement' :
-					$measurements = array_map( 'preg_quote', $this->measurements_list() );
-					if ( ! empty( $field['multiple'] ) ) {
-						if ( preg_match_all( '/(?:(-?[0-9\.,]+).*?(' . implode( '|', $measurements ) . ')+)/', $styles[ $k ], $match ) ) {
-							$return[ $k ] = $styles[ $k ];
-						} else {
-							$return[ $k ] = '';
-						}
-					} else {
-						if ( preg_match( '/([-?0-9\.,]+).*?(' . implode( '|', $measurements ) . ')/', $styles[ $k ], $match ) ) {
-							$return[ $k ] = $match[1] . $match[2];
-						} else {
-							$return[ $k ] = '';
-						}
-					}
-					break;
-				case 'select' :
-					if ( ! empty( $styles[ $k ] ) && in_array( $styles[ $k ], array_keys( $field['options'] ) ) ) {
-						$return[ $k ] = $styles[ $k ];
-					}
-					break;
-				default:
-					// Just pass the value through.
-					$return[ $k ] = $styles[ $k ];
-					break;
-
-			}
-		}
-
-		return $return;
-	}
-
-	/**
-	 * Convert the single string attribute of the grid style into an array.
-	 *
-	 * @param $panels_data
-	 *
-	 * @return mixed
-	 */
-	function convert_data( $panels_data ) {
-		if ( empty( $panels_data ) || empty( $panels_data['grids'] ) || ! is_array( $panels_data['grids'] ) ) {
-			return $panels_data;
-		}
-
-		for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
-			if ( ! is_array( $panels_data['grids'][ $i ] ) ) {
-				continue;
-			}
-			if ( empty( $panels_data['grids'][ $i ] ) || empty( $panels_data['grids'][ $i ]['style'] ) ) {
-				continue;
-			}
-
-			if ( is_string( $panels_data['grids'][ $i ]['style'] ) ) {
-				$panels_data['grids'][ $i ]['style'] = array( 'class' => $panels_data['grids'][ $i ]['style'] );
-			}
-
-		}
-
-		return $panels_data;
-	}
-
-	/**
-	 * Get list of supported mesurements
+	 * @param $label
 	 *
 	 * @return array
 	 */
-	function measurements_list() {
-		$measurements = array(
-			'px',
-			'%',
-			'in',
-			'cm',
-			'mm',
-			'em',
-			'ex',
-			'pt',
-			'pc',
-			'rem'
+	static function get_general_style_fields( $id, $label ) {
+		$fields = array();
+
+		// All the attribute fields
+
+		$fields['id'] = array(
+			'name'        => sprintf( __( '%s ID', 'siteorigin-panels' ), $label ),
+			'type'        => 'text',
+			'group'       => 'attributes',
+			'description' => sprintf( __( 'A custom ID used for this %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 4,
 		);
 
-		// Allow themes and plugins to trim or enhance the list.
-		return apply_filters( 'siteorigin_panels_style_get_measurements_list', $measurements );
+		$fields['class'] = array(
+			'name'        => sprintf( __( '%s Class', 'siteorigin-panels' ), $label ),
+			'type'        => 'text',
+			'group'       => 'attributes',
+			'description' => __( 'A CSS class', 'siteorigin-panels' ),
+			'priority'    => 5,
+		);
+
+		$fields[ $id . '_css' ] = array(
+			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
+			'type'        => 'code',
+			'group'       => 'attributes',
+			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
+			'priority'    => 10,
+		);
+
+		// The layout fields
+
+		$fields['padding'] = array(
+			'name'        => __( 'Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => sprintf( __( 'Padding around the entire %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 7,
+			'multiple'    => true
+		);
+
+		$fields['mobile_padding'] = array(
+			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
+			'priority'    => 8,
+			'multiple'    => true
+		);
+
+		// The general design fields
+
+		$fields['background'] = array(
+			'name'        => __( 'Background Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Background color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 5,
+		);
+
+		$fields['background_image_attachment'] = array(
+			'name'        => __( 'Background Image', 'siteorigin-panels' ),
+			'type'        => 'image',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Background image of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 6,
+		);
+
+		$fields['background_display'] = array(
+			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
+			'type'        => 'select',
+			'group'       => 'design',
+			'options'     => array(
+				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
+				'cover'             => __( 'Cover', 'siteorigin-panels' ),
+				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
+				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
+				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
+				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
+			),
+			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
+			'priority'    => 7,
+		);
+
+		$fields['border_color'] = array(
+			'name'        => __( 'Border Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => sprintf( __( 'Border color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+			'priority'    => 10,
+		);
+
+		return $fields;
 	}
 
 	/**
-	 * User sort function to sort by the priority key value.
+	 * All the row styling fields
 	 *
-	 * @param $a
-	 * @param $b
+	 * @param $fields
 	 *
-	 * @return int
+	 * @return array
 	 */
-	static function sort_fields( $a, $b ) {
-		return ( ( isset( $a['priority'] ) ? $a['priority'] : 10 ) > ( isset( $b['priority'] ) ? $b['priority'] : 10 ) ) ? 1 : - 1;
-	}
-}
+	static function row_style_fields( $fields ) {
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'row', __( 'Row', 'siteorigin-panels' ) ) );
 
-// Initialise all the default styling
-SiteOrigin_Panels_Default_Styles::init();
+		$fields['cell_class'] = array(
+			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
+			'type'        => 'text',
+			'group'       => 'attributes',
+			'description' => __( 'Class added to all cells in this row.', 'siteorigin-panels' ),
+			'priority'    => 6,
+		);
+
+		// Add the layout fields
+
+		$fields['bottom_margin'] = array(
+			'name'        => __( 'Bottom Margin', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => sprintf( __( 'Space below the row. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
+			'priority'    => 5,
+		);
+
+		$fields['gutter'] = array(
+			'name'        => __( 'Gutter', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => sprintf( __( 'Amount of space between columns. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
+			'priority'    => 6,
+		);
+
+		$fields['row_stretch'] = array(
+			'name'     => __( 'Row Layout', 'siteorigin-panels' ),
+			'type'     => 'select',
+			'group'    => 'layout',
+			'options'  => array(
+				''               => __( 'Standard', 'siteorigin-panels' ),
+				'full'           => __( 'Full Width', 'siteorigin-panels' ),
+				'full-stretched' => __( 'Full Width Stretched', 'siteorigin-panels' ),
+			),
+			'priority' => 10,
+		);
+
+		$fields['mobile_collapse'] = array(
+			'name'     => __( 'Collapse On Mobile', 'siteorigin-panels' ),
+			'type'     => 'checkbox',
+			'group'    => 'layout',
+			'default'  => true,
+			'priority' => 15,
+		);
+
+		$fields['collapse_order'] = array(
+			'name'     => __( 'Collapse Order', 'siteorigin-panels' ),
+			'type'     => 'select',
+			'group'    => 'layout',
+			'options'  => array(
+				''          => __( 'Default', 'siteorigin-panels' ),
+				'left-top'  => __( 'Left on Top', 'siteorigin-panels' ),
+				'right-top' => __( 'Right on Top', 'siteorigin-panels' ),
+			),
+			'priority' => 16,
+		);
+
+		$fields['cell_alignment'] = array(
+			'name'     => __( 'Cell Vertical Alignment', 'siteorigin-panels' ),
+			'type'     => 'select',
+			'group'    => 'layout',
+			'options'  => array(
+				'flex-start' => __( 'Top', 'siteorigin-panels' ),
+				'center'     => __( 'Center', 'siteorigin-panels' ),
+				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
+				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
+			),
+			'priority' => 17,
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * All the cell styling fields
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	static function cell_style_fields( $fields ) {
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
+
+		$fields['vertical_alignment'] = array(
+			'name'     => __( 'Vertical Alignment', 'siteorigin-panels' ),
+			'type'     => 'select',
+			'group'    => 'layout',
+			'options'  => array(
+				'auto'       => __( 'Use row setting', 'siteorigin-panels' ),
+				'flex-start' => __( 'Top', 'siteorigin-panels' ),
+				'center'     => __( 'Center', 'siteorigin-panels' ),
+				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
+				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
+			),
+			'priority' => 16,
+		);
+
+		$fields['font_color'] = array(
+			'name'        => __( 'Font Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of text inside this cell.', 'siteorigin-panels' ),
+			'priority'    => 15,
+		);
+
+		$fields['link_color'] = array(
+			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
+			'priority'    => 16,
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	static function widget_style_fields( $fields ) {
+
+		// Add the general fields
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
+
+		// How lets add the design fields
+
+		$fields['font_color'] = array(
+			'name'        => __( 'Font Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of text inside this widget.', 'siteorigin-panels' ),
+			'priority'    => 15,
+		);
+
+		$fields['link_color'] = array(
+			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of links inside this widget.', 'siteorigin-panels' ),
+			'priority'    => 16,
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * Style attributes that apply to rows, cells and widgets
+	 *
+	 * @param $attributes
+	 * @param $style
+	 *
+	 * @return array $attributes
+	 */
+	static function general_style_attributes( $attributes, $style ){
+		if ( ! empty( $style['class'] ) ) {
+			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $style['class'] ) );
+		}
+
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
+
+			if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
+				wp_enqueue_script( 'siteorigin-panels-front-styles' );
+			}
+
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+
+			if (
+				! empty( $url ) &&
+				( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' )
+			) {
+				wp_enqueue_script( 'siteorigin-parallax' );
+				$parallax_args                          = array(
+					'backgroundUrl'    => $url[0],
+					'backgroundSize'   => array( $url[1], $url[2] ),
+					'backgroundSizing' => $style['background_display'] == 'parallax-original' ? 'original' : 'scaled',
+					'limitMotion'      => siteorigin_panels_setting( 'parallax-motion' ) ? floatval( siteorigin_panels_setting( 'parallax-motion' ) ) : 'auto',
+				);
+				$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
+			}
+		}
+
+		if ( ! empty( $style['id'] ) ) {
+			$attributes['id'] = sanitize_html_class( $style['id'] );
+		}
+
+		return $attributes;
+	}
+
+	static function row_style_attributes( $attributes, $style ) {
+		if ( ! empty( $style['row_stretch'] ) ) {
+			$attributes['class'][]           = 'siteorigin-panels-stretch';
+			$attributes['data-stretch-type'] = $style['row_stretch'];
+			wp_enqueue_script( 'siteorigin-panels-front-styles' );
+		}
+	}
+
+	/**
+	 * Get the CSS styles that apply to all rows, cells and widgets
+	 *
+	 * @param $css
+	 * @param $style
+	 *
+	 * @return mixed
+	 */
+	static function general_style_css( $css, $style ){
+
+		// Find which key the CSS is stored in
+		foreach( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
+			if( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
+				break;
+			}
+		}
+
+		if ( ! empty( $css_key ) && ! empty( $style[ $css_key ] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ $css_key ], $matches );
+
+			if ( ! empty( $matches[0] ) ) {
+				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
+					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
+				}
+			}
+		}
+
+		if ( ! empty( $style['background'] ) ) {
+			$css[ 'background-color' ] = $style['background'];
+		}
+
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
+
+			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+
+			if ( ! empty( $url ) ) {
+				$css[ 'background-image' ] = 'url(' . $url[0] . ')';
+
+				switch ( $style['background_display'] ) {
+					case 'parallax':
+					case 'parallax-original':
+						$css[ 'background-position' ] = 'center center';
+						$css[ 'background-repeat' ] = 'no-repeat';
+						break;
+					case 'tile':
+						$css[ 'background-repeat' ] = 'repeat';
+						break;
+					case 'cover':
+						$css[ 'background-size' ] = 'cover';
+						break;
+					case 'center':
+						$css[ 'background-position' ] = 'center center';
+						$css[ 'background-repeat' ] = 'no-repeat';
+						break;
+					case 'fixed':
+						$css[ 'background-attachment' ] = 'fixed';
+						$css[ 'background-size' ] = 'cover';
+						break;
+				}
+			}
+		}
+
+		if ( ! empty( $style[ 'border_color' ] ) ) {
+			$css[ 'border' ] = '1px solid ' . $style['border_color'];
+		}
+
+		if ( ! empty( $style[ 'font_color' ] ) ) {
+			$css[ 'color' ] = $style['font_color'];
+		}
+
+		if( ! empty( $style[ 'padding' ] ) ) {
+			$css['padding'] = $style[ 'padding' ];
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Get the mobile styling for rows, cells and widgets
+	 *
+	 * @param $css
+	 * @param $style
+	 *
+	 * @return mixed
+	 */
+	static function general_style_mobile_css( $css, $style ){
+		if( ! empty( $style['mobile_padding'] ) ) {
+			$css['padding'] = $style[ 'mobile_padding' ];
+		}
+
+		return $css;
+	}
+
+	/**
+	 * @param SiteOrigin_Panels_Css_Builder $css
+	 * @param $panels_data
+	 * @param $post_id
+	 *
+	 * @return mixed
+	 */
+	static function filter_css_object( $css, $panels_data, $post_id ) {
+		$mobile_width = siteorigin_panels_setting( 'mobile-width' );
+
+		// Add in the row  styling
+		foreach ( $panels_data['grids'] as $i => $row ) {
+			if ( empty( $row['style'] ) ) {
+				continue;
+			}
+
+			$standard_css = apply_filters( 'siteorigin_panels_row_style_css', array(), $row['style'] );
+			$mobile_css = apply_filters( 'siteorigin_panels_row_style_mobile_css', array(), $row['style'] );
+
+			if ( ! empty( $standard_css ) ) {
+				$css->add_row_css(
+					$post_id,
+					$i,
+					'> .panel-row-style',
+					$standard_css
+				);
+			}
+			if ( ! empty( $mobile_css ) ) {
+				$css->add_row_css(
+					$post_id,
+					$i,
+					'> .panel-row-style',
+					$mobile_css,
+					$mobile_width
+				);
+			}
+
+			// Add in flexbox alignment to the main row element
+			if ( ! empty( $row['style']['cell_alignment'] ) ) {
+				$css->add_row_css(
+					$post_id,
+					$i,
+					'',
+					array(
+						'-webkit-align-items' => $row['style']['cell_alignment'],
+						'align-items'         => $row['style']['cell_alignment'],
+					)
+				);
+			}
+		}
+
+		foreach ( $panels_data['grid_cells'] as $i => $cell ) {
+			if ( empty( $cell['style'] ) ) {
+				continue;
+			}
+
+			$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
+			$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
+
+			if ( ! empty( $standard_css ) ) {
+				$css->add_cell_css(
+					$post_id,
+					$cell['grid'],
+					$cell['index'],
+					'> .panel-cell-style',
+					$standard_css
+				);
+			}
+			if ( ! empty( $mobile_css ) ) {
+				$css->add_cell_css(
+					$post_id,
+					$cell['grid'],
+					$cell['index'],
+					'> .panel-cell-style',
+					$mobile_css,
+					$mobile_width
+				);
+			}
+			if ( ! empty( $style['vertical_alignment'] ) ) {
+				$css->add_cell_css(
+					$post_id,
+					$cell['grid'],
+					$cell['index'],
+					'',
+					array(
+						'align-self' => $style['vertical_alignment']
+					)
+				);
+			}
+		}
+
+		// Add in the widget padding styling
+		foreach ( $panels_data['widgets'] as $i => $widget ) {
+			if ( empty( $widget['panels_info'] ) ) {
+				continue;
+			}
+
+			$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
+			$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
+
+			if( ! empty( $standard_css ) ) {
+				$css->add_widget_css(
+					$post_id,
+					$widget['panels_info']['grid'],
+					$widget['panels_info']['cell'],
+					$widget['panels_info']['cell_index'],
+					'> .panel-widget-style',
+					$standard_css
+				);
+			}
+
+			if( ! empty( $mobile_css ) ) {
+				$css->add_widget_css(
+					$post_id,
+					$widget['panels_info']['grid'],
+					$widget['panels_info']['cell'],
+					$widget['panels_info']['cell_index'],
+					'> .panel-widget-style',
+					$mobile_css,
+					$mobile_width
+				);
+			}
+		}
+
+		return $css;
+	}
+
+	static function filter_row_bottom_margin( $margin, $grid ) {
+		if ( ! empty( $grid['style']['bottom_margin'] ) ) {
+			$margin = $grid['style']['bottom_margin'];
+		}
+
+		return $margin;
+	}
+
+	static function filter_row_gutter( $gutter, $grid ) {
+		if ( ! empty( $grid['style']['gutter'] ) ) {
+			$gutter = $grid['style']['gutter'];
+		}
+
+		return $gutter;
+	}
+
+}
