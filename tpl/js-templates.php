@@ -152,7 +152,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-widget-wrapper">
 			<div class="title">
 				<h4>{{%= title %}}</h4>
-				<input type="text" value="{{%= title %}}" class="so-widget-edit-title">
 				<span class="actions">
 					<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
 					<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
@@ -170,7 +169,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-overlay"></div>
 
 		<div class="so-title-bar">
-			<h3 class="so-title">{{%= title %}}</h3>
+			<h3 class="so-title{{% if ( editableTitle ) print(' so-title-editable')%}}">{{%= title %}}</h3>
+			{{% if ( editableTitle ) { %}}
+			<input type="text" class="so-edit-title">
+			{{% } %}}
 			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-close"><span class="so-dialog-icon"></span></a>

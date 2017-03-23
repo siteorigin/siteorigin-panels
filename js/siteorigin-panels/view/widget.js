@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .widget-edit': 'editHandler',
-		'click .title': 'titleClickHandler',
+		'click .title h4': 'titleClickHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
 		'click .actions .widget-delete': 'deleteHandler'
 	},
@@ -26,6 +26,8 @@ module.exports = Backbone.View.extend( {
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		this.model.on( 'change:values', this.onModelChange, this );
+
+		this.model.on( 'change:title', this.onTitleChange, this );
 	},
 
 	/**
@@ -118,25 +120,7 @@ module.exports = Backbone.View.extend( {
 		if ( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			return this;
 		}
-		var titleElt = this.$( 'h4' );
-		var titleInput = this.$( '.so-widget-edit-title' );
-		var descElt = this.$( '.description' );
-		if ( $( event.target ).is( 'h4' ) || $( event.target ).is( '.so-widget-edit-title' ) ) {
-			titleElt.hide();
-			descElt.css( 'visibility', 'hidden' );
-			titleInput.show();
-			titleInput.focus();
-			titleInput.blur( function ( event ) {
-				titleElt.show();
-				descElt.css( 'visibility', 'visible' );
-				titleInput.hide();
-				titleElt.text( titleInput.val() );
-				this.model.set( 'title', titleInput.val() );
-			}.bind( this ) );
-
-		} else if ( $( event.target ).is( '.title' ) ){
-			this.editHandler();
-		}
+		this.editHandler();
 		return this;
 	},
 
@@ -181,6 +165,10 @@ module.exports = Backbone.View.extend( {
 	onModelChange: function () {
 		// Update the description when ever the model changes
 		this.$( '.description' ).html( this.model.getTitle() );
+	},
+
+	onTitleChange: function( model, title) {
+		this.$( '.title > h4' ).text( title );
 	},
 
 	/**

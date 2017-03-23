@@ -11,11 +11,13 @@ module.exports = Backbone.View.extend( {
 	dialogClass: '',
 	parentDialog: false,
 	dialogOpen: false,
+	editableTitle: false,
 
 	events: {
 		'click .so-close': 'closeDialog',
 		'click .so-nav.so-previous': 'navToPrevious',
-		'click .so-nav.so-next': 'navToNext'
+		'click .so-nav.so-next': 'navToNext',
+		'click .so-title': 'editTitle',
 	},
 
 	initialize: function () {
@@ -117,6 +119,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.dialog}
 	 */
 	renderDialog: function ( attributes ) {
+		attributes = _.extend( { editableTitle: this.editableTitle }, attributes );
 		this.$el.html( this.dialogTemplate( attributes ) ).hide();
 		this.$el.data( 'view', this );
 		this.$el.addClass( 'so-panels-dialog-wrapper' );
@@ -132,6 +135,9 @@ module.exports = Backbone.View.extend( {
 			} );
 			this.$( '.so-title-bar' ).prepend( dialogParent );
 		}
+
+		// Added here because .so-edit-title is only available after the template has been rendered.
+		this.$( '.so-edit-title' ).blur( this.saveTitle.bind( this ) );
 
 		return this;
 	},
@@ -341,6 +347,34 @@ module.exports = Backbone.View.extend( {
 		var next = this.getNextDialog();
 		if ( next !== null && next !== false ) {
 			next.openDialog();
+		}
+	},
+
+	/**
+	 * Start editing the title.
+	 */
+	editTitle: function( event ) {
+		if ( this.editableTitle ) {
+			var titleElt = this.$( '.so-title' );
+			var titleInput = this.$( '.so-edit-title' );
+			titleElt.hide();
+			titleInput.show();
+			titleInput.focus();
+		}
+	},
+
+	/**
+	 * Finish editing the title
+	 */
+	saveTitle: function() {
+		var titleElt = this.$( '.so-title' );
+		var titleInput = this.$( '.so-edit-title' );
+		titleElt.show();
+		titleInput.hide();
+		if ( titleElt.text() !== titleInput.val() ) {
+			console.log( 'edited title' );
+			titleElt.text( titleInput.val() );
+			this.trigger( 'edit_title', titleInput.val() );
 		}
 	},
 

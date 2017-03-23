@@ -348,33 +348,24 @@
 								position: relative;
 							}
 
-							.title {
+							h4{
+								display: block;
 								cursor: pointer;
+								margin: 0 15px 3px 0;
+								font-weight: 600;
+								line-height: 1.25em;
+								color: #474747;
+								text-shadow: 0 1px 0 #FFF;
+								white-space: nowrap;
 
-								h4, .so-widget-edit-title {
+								span {
+									font-weight: normal;
 									display: inline-block;
-									cursor: text;
-									margin: 0 15px 3px 0;
-									font-weight: 600;
-									line-height: 1.25em;
-									color: #474747;
+									color: #999;
 									text-shadow: 0 1px 0 #FFF;
-									white-space: nowrap;
-
-									span {
-										font-weight: normal;
-										display: inline-block;
-										color: #999;
-										text-shadow: 0 1px 0 #FFF;
-										margin-left: 12px;
-										margin-right: 5px;
-										font-style: italic;
-									}
-								}
-
-								.so-widget-edit-title {
-									display: none;
-									font-size: 1em;
+									margin-left: 12px;
+									margin-right: 5px;
+									font-style: italic;
 								}
 							}
 
@@ -725,6 +716,25 @@
 		h3.so-title {
 			margin: 0 !important;
 			padding: 0 !important;
+
+			&.so-title-editable {
+				cursor: pointer;
+
+				&:hover {
+					background-color: #F2F2F2;
+				}
+			}
+		}
+
+		input[type=text].so-edit-title {
+			display: none;
+			color: #23282d;
+			font-size: 1.3em;
+			font-weight: 600;
+			border: none;
+			box-shadow: none;
+			margin-top: -4px;
+			margin-left: -5px;
 		}
 
 		h3.so-parent-link {
