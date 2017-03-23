@@ -728,9 +728,9 @@ module.exports = panels.view.dialog.extend({
 
 		var duplicateRow = this.model.clone(this.builder.model);
 
-		this.builder.model.get('rows').add(duplicateRow, {
-			at: this.builder.get('rows').indexOf(this.model) + 1
-		});
+		this.builder.model.get('rows').add( duplicateRow, {
+			at: this.builder.model.get('rows').indexOf(this.model) + 1
+		} );
 
 		this.closeDialog({silent: true});
 
