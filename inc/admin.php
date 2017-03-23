@@ -1025,17 +1025,35 @@ class SiteOrigin_Panels_Admin {
 
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
-			if ( empty( $layouts[ $_REQUEST['lid'] ] ) ) {
+			$lid = ! empty( $_REQUEST['lid'] ) ? $_REQUEST['lid'] : false;
+
+			if ( empty( $lid ) || empty( $layouts[ $lid ] ) ) {
 				// Display an error message
 				wp_die();
 			}
 
 			$layout = $layouts[ $_REQUEST['lid'] ];
-			if ( isset( $layout['name'] ) ) {
-				unset( $layout['name'] );
+
+			// Fix the format of this layout
+			if( !empty( $layout[ 'filename' ] ) ) {
+				$filename = $layout[ 'filename' ];
+				// Only accept filenames that end with .json
+				if( substr( $filename, -5, 5 ) === '.json' && file_exists( $filename ) ) {
+					$panels_data = json_decode( file_get_contents( $filename ), true );
+					$layout[ 'widgets' ] = ! empty( $panels_data[ 'widgets' ] ) ? $panels_data[ 'widgets' ] : array();
+					$layout[ 'grids' ] = ! empty( $panels_data[ 'grids' ] ) ? $panels_data[ 'grids' ] : array();
+					$layout[ 'grid_cells' ] = ! empty( $panels_data[ 'grid_cells' ] ) ? $panels_data[ 'grid_cells' ] : array();
+				}
 			}
 
-			$layout = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout );
+			// A theme or plugin could use this to change the data in the layout
+			$layout = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $lid );
+
+			// Remove all the layout specific attributes
+			if ( isset( $layout['name'] ) ) unset( $layout['name'] );
+			if ( isset( $layout['screenshot'] ) ) unset( $layout['screenshot'] );
+			if ( isset( $layout['filename'] ) ) unset( $layout['filename'] );
+
 			$layout = apply_filters( 'siteorigin_panels_data', $layout );
 
 			echo json_encode( $layout );
@@ -1046,7 +1064,6 @@ class SiteOrigin_Panels_Admin {
 				self::LAYOUT_URL . 'layout/' . urlencode( $_REQUEST['lid'] ) . '/?action=download'
 			);
 
-			// var_dump($response['body']);
 			if ( $response['response']['code'] == 200 ) {
 				// For now, we'll just pretend to load this
 				echo $response['body'];
