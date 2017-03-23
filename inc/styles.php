@@ -402,6 +402,7 @@ class SiteOrigin_Panels_Styles {
 						$css[ 'background-repeat' ] = 'repeat';
 						break;
 					case 'cover':
+						$css[ 'background-position' ] = 'center center';
 						$css[ 'background-size' ] = 'cover';
 						break;
 					case 'center':
@@ -410,6 +411,7 @@ class SiteOrigin_Panels_Styles {
 						break;
 					case 'fixed':
 						$css[ 'background-attachment' ] = 'fixed';
+						$css[ 'background-position' ] = 'center center';
 						$css[ 'background-size' ] = 'cover';
 						break;
 				}
