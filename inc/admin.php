@@ -181,9 +181,9 @@ class SiteOrigin_Panels_Admin {
 				do_action( 'siteorigin_panels_setup_database_render', $post_id );
 				SiteOrigin_Panels_Post_Content::single();
 
-				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
+				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data, $layout_data );
 				$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
-				$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, false, $panels_data );
+				$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data, $layout_data );
 				$post_css = preg_replace( '/\s+/', ' ', $post_css );
 
 				$post_content .=  "\n\n" . '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">' . $post_css . '</style>';

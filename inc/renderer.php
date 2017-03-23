@@ -34,12 +34,12 @@ class SiteOrigin_Panels_Renderer {
 	 * Generate the CSS for the page layout.
 	 *
 	 * @param $post_id
-	 * @param $layout_data
 	 * @param $panels_data
+	 * @param $layout_data
 	 *
 	 * @return string
 	 */
-	public function generate_css( $post_id, $layout_data = false, $panels_data ) {
+	public function generate_css( $post_id, $panels_data, $layout_data) {
 		// Exit if we don't have panels data
 		if ( empty( $layout_data ) && empty( $panels_data ) ) {
 			return;
@@ -75,8 +75,8 @@ class SiteOrigin_Panels_Renderer {
 
 			if(
 				$ri != count( $layout_data ) - 1 ||
-			    ! empty( $row[ 'style' ][ 'bottom_margin' ] ) ||
-			    ! empty( $panels_margin_bottom_last_row )
+				! empty( $row[ 'style' ][ 'bottom_margin' ] ) ||
+				! empty( $panels_margin_bottom_last_row )
 			) {
 				// Filter the bottom margin for this row with the arguments
 				$css->add_row_css( $post_id, $ri, '', array(
@@ -192,10 +192,11 @@ class SiteOrigin_Panels_Renderer {
 	 * @param int|string|bool $post_id The Post ID or 'home'.
 	 * @param bool $enqueue_css Should we also enqueue the layout CSS.
 	 * @param array|bool $panels_data Existing panels data. By default load from settings or post meta.
+	 * @param array $layout_data Reformatted panels_data that includes data about the render.
 	 *
 	 * @return string
 	 */
-	function render( $post_id = false, $enqueue_css = true, $panels_data = false ) {
+	function render( $post_id = false, $enqueue_css = true, $panels_data = false, & $layout_data = array() ) {
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
@@ -223,7 +224,7 @@ class SiteOrigin_Panels_Renderer {
 			return '';
 		}
 
-		$panels_layout_data = $this->get_panels_layout_data( $panels_data );
+		$layout_data = $this->get_panels_layout_data( $panels_data );
 
 		ob_start();
 
@@ -238,7 +239,7 @@ class SiteOrigin_Panels_Renderer {
 
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
-		foreach ( $panels_layout_data as $ri => & $row ) {
+		foreach ( $layout_data as $ri => & $row ) {
 			$this->render_row( $post_id, $ri, $row );
 		}
 
@@ -252,7 +253,7 @@ class SiteOrigin_Panels_Renderer {
 
 		if ( $enqueue_css && ! isset( $this->inline_css[ $post_id ] ) ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
-			$this->add_inline_css( $post_id, $this->generate_css( $post_id, $panels_layout_data, $panels_data ) );
+			$this->add_inline_css( $post_id, $this->generate_css( $post_id, $panels_data, $layout_data ) );
 		}
 
 		// Reset the current post

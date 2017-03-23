@@ -37,10 +37,10 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
 
 		echo $args['before_widget'];
-		echo SiteOrigin_Panels_Renderer::single()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'] );
+		echo SiteOrigin_Panels_Renderer::single()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'], $layout_data );
 		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) {
 			$widget_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
-			$widget_css .= SiteOrigin_Panels_Renderer::single()->generate_css( 'w'.$instance['builder_id'], false, $instance['panels_data'] );
+			$widget_css .= SiteOrigin_Panels_Renderer::single()->generate_css( 'w'.$instance['builder_id'], $instance['panels_data'], $layout_data );
 			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
 			echo "\n\n" .
 			     '<style type="text/css" class="panels-style" data-panels-style-for-post="' . esc_attr( 'w'.$instance['builder_id'] ) . '">' .
