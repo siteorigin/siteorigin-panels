@@ -148,16 +148,15 @@ class SiteOrigin_Panels_Admin {
 	 * @action save_post
 	 */
 	function save_post( $post_id, $post ) {
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-		if ( empty( $_POST['_sopanels_nonce'] ) || ! wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ) {
-			return;
-		}
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-		if ( ! isset( $_POST['panels_data'] ) ) {
+		// Check that everything is valid with this save.
+		if(
+			isset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ||
+			( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ||
+			empty( $_POST['_sopanels_nonce'] ) ||
+			! wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ||
+			! current_user_can( 'edit_post', $post_id ) ||
+			! isset( $_POST['panels_data'] )
+		) {
 			return;
 		}
 
@@ -176,7 +175,26 @@ class SiteOrigin_Panels_Admin {
 		} else {
 			// There are no widgets or rows, so delete the panels data
 			delete_post_meta( $post_id, 'panels_data' );
-			}
+		}
+
+		if( siteorigin_panels_setting( 'copy-content' ) ) {
+			// Save a copy of all this content into the posts's post_content
+			$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
+
+			// This gives other plugins the chance to
+			do_action( 'siteorigin_panels_setup_database_render', $post_id );
+			$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
+			$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
+			$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, false, $panels_data );
+			$post_css = preg_replace( '/\s+/', ' ', $post_css );
+
+			$post_content .=  "\n\n" . '<style type="text/css">' . $post_css . '</style>';
+			$post->post_content = $post_content;
+
+			// Update the post_content for this post
+			wp_update_post( $post );
+			unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
+		}
 	}
 
 	/**
@@ -858,13 +876,10 @@ class SiteOrigin_Panels_Admin {
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
-		$post_content = SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
-		$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
-		$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( intval( $_POST['post_id'] ), false, $panels_data );
-		$post_css = preg_replace( '/\s+/', ' ', $post_css );
 
-		echo '<style type="text/css">' . $post_css . '</style>';
-		echo $post_content;
+		do_action( 'siteorigin_panels_setup_database_render' );
+		$post_content = SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
 
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
 

@@ -418,7 +418,12 @@ class SiteOrigin_Panels_Renderer {
 			$args['after_widget']  = '</div>' . $args['after_widget'];
 		}
 
-		if ( ! empty( $the_widget ) && is_a( $the_widget, 'WP_Widget' ) ) {
+		// This gives other plugins the chance to take over rendering of widgets
+		$widget_html = apply_filters( 'siteorigin_panels_the_widget_html', '', $the_widget, $args, $instance );
+
+		if( ! empty( $widget_html ) ) {
+			echo $widget_html;
+		} else if ( ! empty( $the_widget ) && is_a( $the_widget, 'WP_Widget' ) ) {
 			$the_widget->widget( $args, $instance );
 		} else {
 			// This gives themes a chance to display some sort of placeholder for missing widgets
