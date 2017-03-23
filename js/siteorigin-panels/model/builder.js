@@ -298,6 +298,7 @@ module.exports = Backbone.Model.extend({
 	 * @param html
 	 */
 	getPanelsDataFromHtml: function( html, editorClass ){
+		var thisModel = this;
 		var $html = jQuery( '<div id="wrapper">' + html + '</div>' );
 
 		if( $html.find('.panel-layout .panel-grid').length ) {
@@ -312,9 +313,9 @@ module.exports = Backbone.Model.extend({
 			// console.log( panelsOptions.siteoriginWidgetRegex );
 			var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
 
-			$html.find('.panel-layout .panel-grid').each( function( ri, el ){
+			$html.find('> .panel-layout > .panel-grid').each( function( ri, el ){
 				var $row = jQuery( el ),
-					$cells = $row.find( '.panel-grid-cell' );
+					$cells = $row.find( '> .panel-grid-cell, > .panel-row-style > .panel-grid-cell' );
 
 				panels_data.grids.push( {
 					cells: $cells.length,
@@ -323,7 +324,7 @@ module.exports = Backbone.Model.extend({
 
 				$cells.each( function( ci, el ){
 					var $cell = jQuery( el ),
-						$widgets = $cell.find( '.so-panel' );
+						$widgets = $cell.find( '> .so-panel, > .panel-cell-style > .so-panel' );
 
 					panels_data.grid_cells.push( {
 						grid: ri,
@@ -367,22 +368,44 @@ module.exports = Backbone.Model.extend({
 									}
 								} );
 							}
+
+							// Continue
+							return true;
 						}
-						else {
-							// This is a standard editor class widget
-							panels_data.widgets.push( {
-								filter: "1",
-								text: widgetContent,
-								title: "",
-								type: "visual",
-								panels_info: {
-									class: editorClass,
-									raw: false,
-									grid: ri,
-									cell: ci
-								}
-							} );
+						else if( widgetContent.indexOf( 'panel-layout' ) !== -1 ) {
+							// Check if this is a layout widget
+							var $widgetContent = jQuery( '<div>' + widgetContent + '</div>' );
+							if( $widgetContent.find('.panel-layout .panel-grid').length ) {
+								// This is a standard editor class widget
+								panels_data.widgets.push( {
+									panels_data: thisModel.getPanelsDataFromHtml( widgetContent, editorClass ),
+									panels_info: {
+										class: 'SiteOrigin_Panels_Widgets_Layout',
+										raw: false,
+										grid: ri,
+										cell: ci
+									}
+								} );
+
+								// continue
+								return true;
+							}
 						}
+
+						// This is a standard editor class widget
+						panels_data.widgets.push( {
+							filter: "1",
+							text: widgetContent,
+							title: "",
+							type: "visual",
+							panels_info: {
+								class: editorClass,
+								raw: false,
+								grid: ri,
+								cell: ci
+							}
+						} );
+						return true;
 					} );
 				} );
 			} );
