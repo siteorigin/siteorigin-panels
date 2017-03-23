@@ -387,6 +387,34 @@ module.exports = Backbone.Model.extend({
 				} );
 			} );
 
+			// Remove all the Page Builder content
+			$html.find('.panel-layout').remove();
+			$html.find('style[data-panels-style-for-post]').remove();
+
+			// If there's anything left, add it to an editor widget at the end of panels_data
+			if( $html.html().trim().length ) {
+				panels_data.grids.push( {
+					cells: 1,
+					style: {},
+				} );
+				panels_data.grid_cells.push( {
+					grid: panels_data.grids.length - 1,
+					weight: 1,
+				} );
+				panels_data.widgets.push( {
+					filter: "1",
+					text: $html.html().trim(),
+					title: "",
+					type: "visual",
+					panels_info: {
+						class: editorClass,
+						raw: false,
+						grid: panels_data.grids.length - 1,
+						cell: 0
+					}
+				} );
+			}
+
 			return panels_data;
 		}
 		else {
