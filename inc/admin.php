@@ -857,8 +857,16 @@ class SiteOrigin_Panels_Admin {
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
-		define( 'SITEORIGIN_PANELS_DATABASE_RENDER', true );
-		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
+		$post_content = SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
+		$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( intval( $_POST['post_id'] ), false, $panels_data );
+		$post_css = preg_replace( '/\s+/', ' ', $post_css );
+
+		echo '<style type="text/css">' . $post_css . '</style>';
+		echo $post_content;
+
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
 
 		wp_die();
 	}

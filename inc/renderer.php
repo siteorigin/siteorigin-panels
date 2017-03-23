@@ -39,10 +39,13 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return string
 	 */
-	private function generate_css( $post_id, $layout_data, $panels_data ) {
+	public function generate_css( $post_id, $layout_data = false, $panels_data ) {
 		// Exit if we don't have panels data
-		if ( empty( $layout_data ) ) {
+		if ( empty( $layout_data ) && empty( $panels_data ) ) {
 			return;
+		}
+		if( empty( $layout_data ) ) {
+			$layout_data = $this->get_panels_layout_data( $panels_data );
 		}
 
 		// Get some of the default settings
@@ -514,7 +517,7 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return array Hierarchical structure of rows => cells => widgets.
 	 */
-	private function get_panels_layout_data( $panels_data ) {
+	public function get_panels_layout_data( $panels_data ) {
 		$layout_data = array();
 
 		foreach ( $panels_data[ 'grids' ] as $grid ) {
