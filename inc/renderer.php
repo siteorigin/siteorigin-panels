@@ -385,8 +385,21 @@ class SiteOrigin_Panels_Renderer {
 			$after_title  = '</h3>';
 		}
 
+		// Attributes of the widget wrapper
+		$attributes = apply_filters( 'siteorigin_panels_widget_attributes', array(
+			'class' => implode( ' ', $classes ),
+			'id' => $id,
+			'data-index' => $widget_info['widget_index'],
+		) );
+
+		$before_widget = '<div ';
+		foreach( $attributes as $k => $v ) {
+			$before_widget .= esc_attr( $k ) . '="' . esc_attr( $v ) . '"';
+		}
+		$before_widget .= '>';
+
 		$args = array(
-			'before_widget' => '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" id="' . $id . '" data-index="' . $widget_info['widget_index'] . '">',
+			'before_widget' => $before_widget,
 			'after_widget'  => '</div>',
 			'before_title'  => $before_title,
 			'after_title'   => $after_title,
