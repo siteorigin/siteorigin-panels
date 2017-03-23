@@ -373,23 +373,6 @@ class SiteOrigin_Panels_Styles {
 	 */
 	static function general_style_css( $css, $style ){
 
-		// Find which key the CSS is stored in
-		foreach( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
-			if( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
-				break;
-			}
-		}
-
-		if ( ! empty( $css_key ) && ! empty( $style[ $css_key ] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ $css_key ], $matches );
-
-			if ( ! empty( $matches[0] ) ) {
-				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
-					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
-				}
-			}
-		}
-
 		if ( ! empty( $style['background'] ) ) {
 			$css[ 'background-color' ] = $style['background'];
 		}
@@ -435,6 +418,22 @@ class SiteOrigin_Panels_Styles {
 
 		if( ! empty( $style[ 'padding' ] ) ) {
 			$css['padding'] = $style[ 'padding' ];
+		}
+
+		// Find which key the CSS is stored in
+		foreach( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
+			if( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
+				break;
+			}
+		}
+		if ( ! empty( $css_key ) && ! empty( $style[ $css_key ] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ $css_key ], $matches );
+
+			if ( ! empty( $matches[0] ) ) {
+				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
+					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
+				}
+			}
 		}
 
 		return $css;
