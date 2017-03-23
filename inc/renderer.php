@@ -228,10 +228,10 @@ class SiteOrigin_Panels_Renderer {
 		ob_start();
 
 		// Add the panel layout wrapper
-		$layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array(), $post_id, $panels_data );
+		$layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array( 'panel-layout' ), $post_id, $panels_data );
 		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
+			'id'    => 'pl-' . $post_id,
 			'class' => implode( ' ', $layout_classes ),
-			'id'    => 'pl-' . $post_id
 		), $post_id, $panels_data );
 
 		$this->render_element( 'div', $layout_attributes );
@@ -390,10 +390,10 @@ class SiteOrigin_Panels_Renderer {
 
 		// Attributes of the widget wrapper
 		$attributes = apply_filters( 'siteorigin_panels_widget_attributes', array(
-			'class' => implode( ' ', $classes ),
 			'id' => $id,
+			'class' => implode( ' ', $classes ),
 			'data-index' => $widget_info['widget_index'],
-		) );
+		), $widget_info );
 
 		$before_widget = '<div ';
 		foreach( $attributes as $k => $v ) {
@@ -587,11 +587,10 @@ class SiteOrigin_Panels_Renderer {
 		$row_classes   = array( 'panel-grid' );
 		$row_classes[] = ! empty( $row_style_wrapper ) ? 'panel-has-style' : 'panel-no-style';
 		$row_classes   = apply_filters( 'siteorigin_panels_row_classes', $row_classes, $row );
-		$row_classes   = implode( ' ', $row_classes );
 
 		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
-			'class' => $row_classes,
 			'id'    => 'pg-' . $post_id . '-' . $ri,
+			'class' => implode( ' ', $row_classes ),
 		), $row );
 
 		// This allows other themes and plugins to add html before the row
@@ -650,10 +649,10 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Themes can add their own styles to cells
-		$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $cell );
-		$cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', array(
+		$cell_classes    = apply_filters( 'siteorigin_panels_cell_classes', $cell_classes, $cell );
+		$cell_attributes = apply_filters( 'siteorigin_panels_cell_attributes', array(
+			'id'    => 'pgc-' . $post_id . '-' . $ri . '-' . $ci,
 			'class' => implode( ' ', $cell_classes ),
-			'id'    => 'pgc-' . $post_id . '-' . $ri . '-' . $ci
 		), $cell );
 
 		echo apply_filters( 'siteorigin_panels_before_cell', '', $cell, $cell_attributes );

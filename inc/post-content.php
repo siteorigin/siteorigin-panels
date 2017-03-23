@@ -10,11 +10,10 @@ class SiteOrigin_Panels_Post_Content {
 
 	public function __construct() {
 		// $this->clear_filters();
-		$this->setup_filters();
 
 		add_filter( 'siteorigin_panels_row_attributes', array( $this, 'row_attributes' ), 99, 2 );
 		add_filter( 'siteorigin_panels_cell_attributes', array( $this, 'cell_attributes' ), 99, 2 );
-		add_filter( 'siteorigin_panels_widget_attributes', array( $this, 'widget_attributes' ), 99, 4 );
+		add_filter( 'siteorigin_panels_widget_attributes', array( $this, 'widget_attributes' ), 99, 2 );
 	}
 
 	public static function single() {
@@ -65,11 +64,13 @@ class SiteOrigin_Panels_Post_Content {
 	 * @return mixed
 	 */
 	public function row_attributes( $attributes, $row ){
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
+		if( empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
 
-		if( ! empty( $attributes['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $attributes['style'] );
+		if( ! empty( $row['style'] ) ) {
+			$attributes[ 'data-style' ] = json_encode( $row['style'] );
 		}
+
+		return $attributes;
 	}
 
 	/**
@@ -79,11 +80,15 @@ class SiteOrigin_Panels_Post_Content {
 	 * @return mixed
 	 */
 	public function cell_attributes( $attributes, $cell ){
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
+		if( empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
 
-		if( ! empty( $attributes['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $attributes['style'] );
+		if( ! empty( $cell['style'] ) ) {
+			$attributes[ 'data-style' ] = json_encode( $cell['style'] );
 		}
+
+		$attributes[ 'data-weight' ] = $cell['weight'];
+
+		return $attributes;
 	}
 
 	/**
@@ -93,11 +98,13 @@ class SiteOrigin_Panels_Post_Content {
 	 * @return mixed
 	 */
 	public function widget_attributes( $attributes, $widget ){
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
+		if( empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) return $attributes;
 
-		if( ! empty( $attributes['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $attributes['style'] );
+		if( ! empty( $widget['style'] ) ) {
+			$attributes[ 'data-style' ] = json_encode( $widget['style'] );
 		}
+
+		return $attributes;
 	}
 
 }

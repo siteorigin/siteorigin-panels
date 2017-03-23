@@ -172,28 +172,31 @@ class SiteOrigin_Panels_Admin {
 
 		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
 			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
+
+			if( siteorigin_panels_setting( 'copy-content' ) ) {
+				// Save a copy of all this content into the posts's post_content
+				$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
+
+				// This gives other plugins the chance to
+				do_action( 'siteorigin_panels_setup_database_render', $post_id );
+				SiteOrigin_Panels_Post_Content::single();
+
+				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
+				$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
+				$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, false, $panels_data );
+				$post_css = preg_replace( '/\s+/', ' ', $post_css );
+
+				$post_content .=  "\n\n" . '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">' . $post_css . '</style>';
+				$post->post_content = $post_content;
+
+				// Update the post_content for this post
+				wp_update_post( $post );
+				unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
+			}
+
 		} else {
 			// There are no widgets or rows, so delete the panels data
 			delete_post_meta( $post_id, 'panels_data' );
-		}
-
-		if( siteorigin_panels_setting( 'copy-content' ) ) {
-			// Save a copy of all this content into the posts's post_content
-			$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
-
-			// This gives other plugins the chance to
-			do_action( 'siteorigin_panels_setup_database_render', $post_id );
-			$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
-			$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
-			$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, false, $panels_data );
-			$post_css = preg_replace( '/\s+/', ' ', $post_css );
-
-			$post_content .=  "\n\n" . '<style type="text/css">' . $post_css . '</style>';
-			$post->post_content = $post_content;
-
-			// Update the post_content for this post
-			wp_update_post( $post );
-			unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
 		}
 	}
 
@@ -378,6 +381,7 @@ class SiteOrigin_Panels_Admin {
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
 				'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . '../css/images/prebuilt-default.png',
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
+				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 			) );
 
 			if ( $screen->base != 'widgets' ) {

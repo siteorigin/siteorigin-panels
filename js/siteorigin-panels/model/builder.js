@@ -292,4 +292,123 @@ module.exports = Backbone.Model.extend({
 			   position === this.layoutPosition.AFTER ||
 			   position === this.layoutPosition.REPLACE;
 	},
+
+	/**
+	 * Convert HTML into Panels Data
+	 * @param html
+	 */
+	getPanelsDataFromHtml: function( html, editorClass ){
+		var $html = jQuery( '<div id="wrapper">' + html + '</div>' );
+
+		if( $html.find('.panel-layout .panel-grid').length ) {
+			// This looks like Page Builder html, lets try parse it
+			var panels_data = {
+				grids: [],
+				grid_cells: [],
+				widgets: [],
+			};
+
+			// The Regex object that'll match SiteOrigin widgets
+			// console.log( panelsOptions.siteoriginWidgetRegex );
+			var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
+
+			$html.find('.panel-layout .panel-grid').each( function( ri, el ){
+				var $row = jQuery( el ),
+					$cells = $row.find( '.panel-grid-cell' );
+
+				panels_data.grids.push( {
+					cells: $cells.length,
+					style: $row.data( 'style' ),
+				} );
+
+				$cells.each( function( ci, el ){
+					var $cell = jQuery( el ),
+						$widgets = $cell.find( '.so-panel' );
+
+					panels_data.grid_cells.push( {
+						grid: ri,
+						weight: ! _.isUndefined( $cell.data( 'weight' ) ) ? parseFloat( $cell.data( 'weight' ) ) : 1,
+					} );
+
+					$widgets.each( function( wi, el ){
+						var $widget = jQuery(el),
+							widgetContent = $widget.find('.panel-widget-style').length ? $widget.find('.panel-widget-style').html() : $widget.html();
+
+						widgetContent = widgetContent.trim();
+
+						// Check if this is a SiteOrigin Widget
+						var match = re.exec( widgetContent );
+						if( ! _.isNull( match ) && widgetContent.replace( re, '' ).trim() === '' ) {
+							try {
+								var classMatch = /class="(.*?)"/.exec( match[3] );
+								var meta = JSON.parse( match[5] );
+
+								var newWidget = meta.instance;
+								newWidget.panels_info = {
+									class: classMatch[1],
+									raw: false,
+									grid: ri,
+									cell: ci
+								};
+								panels_data.widgets.push( newWidget );
+							}
+							catch ( err ) {
+								// This is a standard editor class widget
+								panels_data.widgets.push( {
+									filter: "1",
+									text: widgetContent,
+									title: "",
+									type: "visual",
+									panels_info: {
+										class: editorClass,
+										raw: false,
+										grid: ri,
+										cell: ci
+									}
+								} );
+							}
+						}
+						else {
+							// This is a standard editor class widget
+							panels_data.widgets.push( {
+								filter: "1",
+								text: widgetContent,
+								title: "",
+								type: "visual",
+								panels_info: {
+									class: editorClass,
+									raw: false,
+									grid: ri,
+									cell: ci
+								}
+							} );
+						}
+					} );
+				} );
+			} );
+
+			return panels_data;
+		}
+		else {
+			// This is probably just old school post content
+			return {
+				grid_cells: [ { grid: 0, weight: 1 } ],
+				grids: [ { cells: 1 } ],
+				widgets: [
+					{
+						filter: "1",
+						text: html,
+						title: "",
+						type: "visual",
+						panels_info: {
+							class: editorClass,
+							raw: false,
+							grid: 0,
+							cell: 0
+						}
+					}
+				]
+			};
+		}
+	}
 } );
