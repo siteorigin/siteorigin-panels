@@ -97,7 +97,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-row">
-	<div class="so-row-container ui-draggable">
+	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorIndex %}}">
 
 		<div class="so-row-toolbar">
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
@@ -110,22 +110,18 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
-						<li class="so-row-colors-container" style="color: #A7DE95;">
+						<li class="so-row-colors-container">
 							<?php
-							$row_custom_colors = array(
-								array( 'background' => '#FCB3B1', 'border' => '#FA9A98', 'handle' => '#FACBCA' ),
-								array( 'background' => '#F5BC87', 'border' => '#F5AE71', 'handle' => '#FFD1A8' ),
-								array( 'background' => '#E0DB8B', 'border' => '#DED776', 'handle' => '#F7F3B5' ),
-								array( 'background' => '#A7DE95', 'border' => '#98DE81', 'handle' => '#C4EBB7' ),
-								array( 'background' => '#A2CAF5', 'border' => '#8CBEF5', 'handle' => '#BCD8F5' ),
-							);
+							// See css/admin.less variable @row_colors. This should match the number of colors defined there.
+							$row_color_count = 4;
 
-							foreach ( $row_custom_colors as $i => $custom_color ) {
+							for ($i = 1; $i <= $row_color_count; $i++) {
+								$classes = array( 'so-row-color', 'so-row-color-' . $i );
+
 								?>
-								<div data-colors="<?php echo esc_attr( json_encode( $custom_color ) ); ?>"
-								     data-index="<?php echo esc_attr( $i ); ?>"
-							         class="so-row-color{{% if( color == '<?php echo esc_attr( $custom_color['background'] ); ?>' ) print(' so-row-color-selected'); %}}"
-							         style="background-color: <?php echo esc_attr( $custom_color['background'] ); ?>;"></div>
+								<div data-color-index="<?php echo esc_attr( $i ); ?>"
+							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorIndex == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
+							         ></div>
 								<?php
 							}
 							?>

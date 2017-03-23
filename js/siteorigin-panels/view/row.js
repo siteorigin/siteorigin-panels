@@ -44,8 +44,8 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.row}
 	 */
 	render: function () {
-		var rowColors = this.model.get( 'colors' ) || { background: '' };
-		this.setElement( this.template( { color: rowColors.background } ) );
+		var rowColorIndex = this.model.has( 'colorIndex' ) ? this.model.get( 'colorIndex' ) : 1;
+		this.setElement( this.template( { rowColorIndex: rowColorIndex } ) );
 		this.$el.data( 'view', this );
 
 		// Create views for the cells in this row
@@ -91,8 +91,6 @@ module.exports = Backbone.View.extend( {
 		this.builder.on( 'builder_resize', this.resize, this );
 
 		this.resize();
-
-		this.updateRowColors( rowColors );
 
 		return this;
 	},
@@ -251,28 +249,12 @@ module.exports = Backbone.View.extend( {
 	rowColorChangeHandler: function ( event ) {
 		this.$( '.so-row-color' ).removeClass( 'so-row-color-selected' );
 		var clickedColorElem = $( event.target );
-		var newColors = clickedColorElem.data( 'colors' );
-		if ( this.model.has('colors') && this.model.get( 'colors' ).background === newColors.background ) {
-			newColors = {};
-		} else {
-			clickedColorElem.addClass( 'so-row-color-selected' );
-		}
-		this.model.set( 'colors', newColors );
-		this.updateRowColors( newColors );
-	},
-
-	/**
-	 *
-	 * Update row color elements.
-	 *
-	 */
-	updateRowColors: function( rowColors ) {
-		var colors = _.extend( { background: '', border: '', handle: '' }, rowColors );
-
-		this.$( '.cell-wrapper' ).css( 'background-color', colors.background );
-		this.$( '.cell-wrapper' ).css( 'border-color', colors.border );
-		this.$( '.resize-handle' ).css( 'background-color', colors.handle );
-
+		var newColorIndex = clickedColorElem.data( 'colorIndex' );
+		var oldColorIndex = this.model.has( 'colorIndex' ) ? this.model.get( 'colorIndex' ) : 1;
+		clickedColorElem.addClass( 'so-row-color-selected' );
+		this.$el.removeClass( 'so-row-color-' + oldColorIndex );
+		this.$el.addClass( 'so-row-color-' + newColorIndex );
+		this.model.set( 'colorIndex', newColorIndex );
 	},
 
 	/**
