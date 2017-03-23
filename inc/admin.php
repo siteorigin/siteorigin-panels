@@ -662,7 +662,7 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * @return array
 	 */
-	function process_raw_widgets( $widgets, $old_widgets = false, $escape_classes = true ) {
+	function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = true ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
