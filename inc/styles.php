@@ -87,6 +87,14 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 10,
 		);
 
+		$fields[ 'mobile_css' ] = array(
+			'name'        => __( 'Mobile CSS Styles', 'siteorigin-panels' ),
+			'type'        => 'code',
+			'group'       => 'attributes',
+			'description' => __( 'CSS applied when in mobile view.', 'siteorigin-panels' ),
+			'priority'    => 11,
+		);
+
 		// The layout fields
 
 		$fields['padding'] = array(
@@ -450,6 +458,16 @@ class SiteOrigin_Panels_Styles {
 	static function general_style_mobile_css( $css, $style ){
 		if( ! empty( $style['mobile_padding'] ) ) {
 			$css['padding'] = $style[ 'mobile_padding' ];
+		}
+
+		if ( ! empty( $style[ 'mobile_css' ] ) ) {
+			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ 'mobile_css' ], $matches );
+
+			if ( ! empty( $matches[0] ) ) {
+				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
+					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
+				}
+			}
 		}
 
 		return $css;
