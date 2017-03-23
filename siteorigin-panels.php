@@ -358,6 +358,10 @@ class SiteOrigin_Panels {
 
 		return $panels_data;
 	}
+
+	public static function front_css_url(){
+		return plugin_dir_url( __FILE__ ) . 'css/front.css';
+	}
 }
 
 SiteOrigin_Panels::single();

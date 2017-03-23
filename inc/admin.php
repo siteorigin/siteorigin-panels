@@ -182,7 +182,8 @@ class SiteOrigin_Panels_Admin {
 				SiteOrigin_Panels_Post_Content::single();
 
 				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data, $layout_data );
-				$post_css = file_get_contents( plugin_dir_path( __FILE__ ) . '../css/front.css' );
+
+				$post_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
 				$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data, $layout_data );
 				$post_css = preg_replace( '/\s+/', ' ', $post_css );
 
