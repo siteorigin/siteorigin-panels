@@ -881,7 +881,7 @@ class SiteOrigin_Panels_Admin {
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
 
-		do_action( 'siteorigin_panels_setup_database_render' );
+		do_action( 'siteorigin_panels_setup_database_render', $_POST['post_id'] );
 		$post_content = SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
 
