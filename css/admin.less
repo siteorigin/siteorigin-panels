@@ -145,16 +145,17 @@
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
+		// See tpl/js-templates.php variable @$row_color_count. It should match the number of colors defined here.
 		@row_colors: #E4EFF4, #EAE3F3, #F6EFDF, #DCF8F2;
 
 		.row-colors( @i: 1 ) when ( @i <= length( @row_colors ) ) {
 			@row_color: extract( @row_colors, @i );
 			@row_color_dark: darken( @row_color, 11% );
 			@row_color_light: lighten( @row_color, 5% );
-			.so-row-toolbar .so-dropdown-wrapper .so-dropdown-links-wrapper ul li.so-row-colors-container .so-row-color-@{i} {
+			.so-row-color-@{i} {
 				&.so-row-color {
 					background-color: @row_color;
-					border-color: @row_color_dark;
+					border: 1px solid @row_color_dark;
 				}
 			}
 			.so-row-container.so-row-color-@{i} .so-cells .cell {
@@ -214,21 +215,24 @@
 						padding: 5px;
 
 						& div.so-row-color {
+							@row_color_checkbox_size: 14px;
 
 							display: inline-block;
 							cursor: pointer;
 							position: relative;
-							border: 1px solid;
 							text-align: center;
 
-							width: 16px;
-							height: 16px;
+							width: @row_color_checkbox_size;
+							height: @row_color_checkbox_size;
 
 							&.so-row-color-selected:before {
 								content: "\2714";
 								color: rgba(0, 0, 0, 0.2);
-								font-size: 16px;
-								line-height: 16px;
+								position: absolute;
+								top: 0;
+								left: 1px;
+								font-size: @row_color_checkbox_size;
+								line-height: @row_color_checkbox_size;
 							}
 						}
 					}
