@@ -306,7 +306,7 @@ module.exports = Backbone.View.extend( {
 		this.refreshDialogNav();
 
 		// Stop scrolling for the main body
-		this.builder.lockPageScroll();
+		panels.helpers.pageScroll.lock();
 
 		// Start listen for keyboard keypresses.
 		$( window ).on( 'keyup', this.keyboardListen );
@@ -338,7 +338,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogOpen = false;
 
 		this.$el.hide();
-		this.builder.unlockPageScroll();
+		panels.helpers.pageScroll.unlock();
 
 		// Stop listen for keyboard keypresses.
 		$( window ).off( 'keyup', this.keyboardListen );
