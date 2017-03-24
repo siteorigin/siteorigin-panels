@@ -1,7 +1,4 @@
 module.exports = Backbone.Model.extend( {
-	/* A collection of the cells in this row */
-	cells: {},
-
 	/* The builder model */
 	builder: null,
 
@@ -17,6 +14,12 @@ module.exports = Backbone.Model.extend( {
 	initialize: function () {
 		if ( _.isEmpty(this.get('cells') ) ) {
 			this.set('cells', new panels.collection.cells());
+		}
+		else {
+			// Make sure that the cells have this row set as their parent
+			this.get('cells').each( function( cell ){
+				cell.row = this;
+			}.bind( this ) );
 		}
 		this.on( 'destroy', this.onDestroy, this );
 	},
