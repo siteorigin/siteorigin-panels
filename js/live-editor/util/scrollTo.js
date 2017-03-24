@@ -1,22 +1,8 @@
-var iframe = window.frameElement;
-
-if ( iframe ) {
-	iframe.contentDocument = document;
-	var windowParent = window.parent;
-	
-	if( typeof windowParent !== 'undefined' && typeof windowParent.jQuery !== 'undefined' ) {
-		windowParent.jQuery( iframe ).trigger( "iframeloading" );
-		jQuery( function () {
-			windowParent.jQuery( iframe ).trigger( "iframeready" );
-		} );
-	}
-}
-
 /**
  * Scroll this window over a specific element. Called by the main live editor.
  * @param el
  */
-function liveEditorScrollTo( el ){
+module.exports = function( el ){
 	var $ = jQuery,
 		$el = $( el ),
 		rect = $el[0].getBoundingClientRect();

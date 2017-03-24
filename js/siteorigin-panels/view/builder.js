@@ -60,7 +60,7 @@ module.exports = Backbone.View.extend( {
 			this.on( 'builder_live_editor_added', function(){
 				this.displayLiveEditor();
 			} );
-			}
+		}
 
 		// Now lets create all the dialog boxes that the main builder interface uses
 		this.dialogs = {
