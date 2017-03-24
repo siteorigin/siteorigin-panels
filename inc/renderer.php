@@ -66,7 +66,7 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'width' => round( floatval( $weight ) * 100, 4 ) . '%'
+					'flex' => round( $weight * 1000 )
 				) );
 			}
 
@@ -88,8 +88,9 @@ class SiteOrigin_Panels_Renderer {
 				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
 					// Tablet responsiveness
 					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'width'     => '50%',
+						'flex'      => '1',
 						'flex-wrap' => 'wrap',
+						'margin-right' => 0,
 					), $panels_tablet_width );
 				}
 
@@ -98,6 +99,10 @@ class SiteOrigin_Panels_Renderer {
 					$css->add_row_css( $post_id, $ri, ! empty( $row[ 'has_style_wrapper' ] ) ? ' > .panel-row-style' : '', array(
 						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 						'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					), $panels_mobile_width );
+
+					$css->add_cell_css( $post_id, $ri, false, '', array(
+						'margin-right' => 0,
 					), $panels_mobile_width );
 				}
 
@@ -116,20 +121,14 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Add the bottom margins
-		$css->add_cell_css( $post_id, false, false, '.so-panel', array(
+		$css->add_widget_css( $post_id, false, false, false, '', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom . 'px', false, false, $panels_data, $post_id )
 		) );
-		$css->add_cell_css( $post_id, false, false, '.so-panel:last-child', array(
+		$css->add_widget_css( $post_id, false, false, false, ':last-child', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id )
 		) );
 
 		if ( $settings['responsive'] ) {
-			// Add CSS to prevent overflow on mobile resolution.
-			$css->add_row_css( $post_id, false, '', array(
-				'margin-left'  => 0,
-				'margin-right' => 0,
-			), $panels_mobile_width );
-
 			$css->add_cell_css( $post_id, false, false, '', array(
 				'padding' => 0,
 			), $panels_mobile_width );
@@ -154,16 +153,14 @@ class SiteOrigin_Panels_Renderer {
 				// We actually need to find half the gutter.
 				preg_match( '/([0-9\.,]+)(.*)/', $gutter, $match );
 				if ( ! empty( $match[1] ) ) {
-					$margin_half = ( floatval( $match[1] ) / 2 ) . $match[2];
-					$css->add_row_css( $post_id, $ri, '', array(
-						'margin-left'  => '-' . $margin_half,
-						'margin-right' => '-' . $margin_half,
-					) );
+					$margin = floatval( $match[1] ) . $match[2];
 					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'padding-left'  => $margin_half,
-						'padding-right' => $margin_half,
+						'margin-right' => $margin,
 					) );
 
+					$css->add_cell_css( $post_id, $ri, false, ':last-child', array(
+						'margin-right' => 0,
+					) );
 				}
 			}
 		}
