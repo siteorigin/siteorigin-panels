@@ -415,7 +415,7 @@ module.exports = Backbone.Model.extend({
 			$html.find('style[data-panels-style-for-post]').remove();
 
 			// If there's anything left, add it to an editor widget at the end of panels_data
-			if( $html.html().trim().length ) {
+			if( $html.html().replace(/^\s+|\s+$/gm,'').length ) {
 				panels_data.grids.push( {
 					cells: 1,
 					style: {},
@@ -426,7 +426,7 @@ module.exports = Backbone.Model.extend({
 				} );
 				panels_data.widgets.push( {
 					filter: "1",
-					text: $html.html().trim(),
+					text: $html.html().replace(/^\s+|\s+$/gm,''),
 					title: "",
 					type: "visual",
 					panels_info: {
