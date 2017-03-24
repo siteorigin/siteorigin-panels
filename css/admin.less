@@ -145,28 +145,40 @@
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
-		// See tpl/js-templates.php variable @$row_color_count. It should match the number of colors defined here.
-		@row_colors: #E4EFF4, #EAE3F3, #F6EFDF, #DCF8F2;
+		// See tpl/js-templates.php variable $row_color_count. It should match the number of colors defined here.
+		@row_colors: #CDE2EC, #F2C2BE, #D5CCDF, #CAE7CD, #E2DCB1;
 
 		.row-colors( @i: 1 ) when ( @i <= length( @row_colors ) ) {
 			@row_color: extract( @row_colors, @i );
-			@row_color_dark: darken( @row_color, 11% );
-			@row_color_light: lighten( @row_color, 5% );
+
+			// The color selectors
 			.so-row-color-@{i} {
 				&.so-row-color {
 					background-color: @row_color;
-					border: 1px solid @row_color_dark;
+					border: 1px solid darken( @row_color, 11% );
+
+					&.so-row-color-selected:before {
+						background: darken( @row_color, 10% );
+					}
 				}
 			}
+
+			// The actual container
 			.so-row-container.so-row-color-@{i} .so-cells .cell {
 				.cell-wrapper {
 					background-color: @row_color;
-					.so-widget {
-						border-color: @row_color_dark;
-					}
 				}
+
+				&.cell-selected .cell-wrapper {
+					background-color: darken( @row_color, 5% );
+				}
+
 				.resize-handle {
-					background-color: @row_color_light;
+					background-color: lighten( @row_color, 7% );
+
+					&:hover {
+						background-color: lighten( @row_color, 4% );
+					}
 				}
 			}
 
@@ -214,7 +226,7 @@
 
 						padding: 5px;
 
-						& div.so-row-color {
+						.so-row-color {
 							@row_color_checkbox_size: 14px;
 
 							display: inline-block;
@@ -226,13 +238,13 @@
 							height: @row_color_checkbox_size;
 
 							&.so-row-color-selected:before {
-								content: "\2714";
-								color: rgba(0, 0, 0, 0.2);
+								content: "";
+								display: block;
 								position: absolute;
-								top: 0;
-								left: 1px;
-								font-size: @row_color_checkbox_size;
-								line-height: @row_color_checkbox_size;
+								top: 2px;
+								bottom: 2px;
+								left: 2px;
+								right: 2px;
 							}
 						}
 					}
@@ -296,7 +308,7 @@
 					.cell-wrapper{
 						background: #e4eff4;
 						//border: 1px solid #bcccd2;
-						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
+						padding: 6px 6px 0px 6px; /* 6px bottom to remove bottom margin from panels */
 						height: 100%;
 						min-height: 70px;
 
@@ -304,9 +316,7 @@
 					}
 
 					&.cell-selected .cell-wrapper{
-						background: #cae7f4 url("images/cell-selected.png") repeat;
-						//border-color: #9abcc7;
-						box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
 					}
 
 					@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
@@ -323,6 +333,7 @@
 
 						.so-widget {
 							cursor: move;
+
 							&.so-widget-no-move {
 								cursor: auto;
 							}
@@ -331,13 +342,14 @@
 
 							background: #f9f9fb;
 
-							border: 1px solid #9bafb5;
+							border: 1px solid rgba( 0,0,0,0.175 );
 							max-height: 49px;
+
+							.box-shadow(~"0 1px 1px rgba(0,0,0,0.05)");
 							.box-sizing(border-box);
-							.box-shadow(~"0 1px 2px rgba(0,0,0,0.075)");
 
 							&:hover {
-								border: 1px solid #93a7ad;
+								border: 1px solid rgba( 0,0,0,0.225 );
 								background: #fff;
 								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
 							}
@@ -462,13 +474,13 @@
 						}
 
 						.so-widget-sortable-highlight{
-							border: 1px solid;
+							border: 1px solid rgba( 0,0,0,0.075 );
+							background: rgba( 0,0,0,0.025 );
+
 							.box-sizing(border-box);
 
 							height: 49px;
 
-							background: #ddebef;
-							border-color: #bcccd2;
 							margin-bottom: 5px;
 
 							position: relative;
@@ -489,10 +501,6 @@
 						height: 100%;
 
 						.transition(0.25s, background, ease-in-out);
-
-						&:hover{
-							background: #bfe4f3;
-						}
 					}
 
 					&:first-child {
@@ -714,8 +722,9 @@
 		border-bottom: 1px solid @border_color;
 
 		h3.so-title {
-			margin: 0 !important;
-			padding: 0 !important;
+			margin: -2px 0 0 -3px !important;
+			padding: 4px 5px !important;
+			display: inline-block;
 
 			&.so-title-editable {
 				cursor: pointer;
@@ -727,14 +736,17 @@
 		}
 
 		input[type=text].so-edit-title {
+			margin-top: -3px;
+			margin-left: -3px;
+
 			display: none;
 			color: #23282d;
 			font-size: 1.3em;
 			font-weight: 600;
 			border: none;
 			box-shadow: none;
-			margin-top: -4px;
-			margin-left: -5px;
+			background-color: #F0F0F0;
+			padding: 4px 5px;
 		}
 
 		h3.so-parent-link {
@@ -1287,7 +1299,8 @@
 
 						.transition(0.15s, background, ease-in-out);
 
-						&:hover, &.ui-draggable-dragging {
+						&:hover,
+						&.ui-draggable-dragging {
 							background: #b7e0f1;
 						}
 					}
@@ -1966,9 +1979,16 @@
 		width: @live_editor_width;
 		overflow-y: auto;
 
-		background: #F2F2F2;
+		background: #f7f7f7;
 
 		border-right: 1px solid #D0D0D0;
+
+		// Style the builder differently in the live editor sidebar to make better use of space
+		.siteorigin-panels-builder {
+			.so-rows-container {
+				padding: 10px 10px 0 10px !important;
+			}
+		}
 	}
 
 	.so-preview {

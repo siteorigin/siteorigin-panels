@@ -76,7 +76,7 @@ module.exports = Backbone.View.extend( {
 				widget.model.moveToCell( targetCell.model, {}, $$.index() );
 				widget.cell = targetCell;
 
-				widget.model.cell.row.builder.refreshPanelsData();
+				widget.cell.row.builder.model.refreshPanelsData();
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()

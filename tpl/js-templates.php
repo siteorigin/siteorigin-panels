@@ -113,9 +113,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li class="so-row-colors-container">
 							<?php
 							// See css/admin.less variable @row_colors. This should match the number of colors defined there.
-							$row_color_count = 4;
+							$row_color_count = 5;
 
-							for ($i = 1; $i <= $row_color_count; $i++) {
+							for ( $i = 1; $i <= $row_color_count; $i++ ) {
 								$classes = array( 'so-row-color', 'so-row-color-' . $i );
 
 								?>
