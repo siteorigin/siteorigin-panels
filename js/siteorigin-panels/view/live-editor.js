@@ -6,7 +6,6 @@ module.exports = Backbone.View.extend( {
 	previewScrollTop: 0,
 	loadTimes: [],
 	previewFrameId: 1,
-
 	previewUrl: null,
 	previewIframe: null,
 
@@ -97,9 +96,8 @@ module.exports = Backbone.View.extend( {
 
 		// Refresh the preview display
 		this.$el.show();
-		this.refreshPreview( this.builder.model.getPanelsData() );
+		this.refreshPreview( );
 
-		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
 		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
@@ -118,7 +116,7 @@ module.exports = Backbone.View.extend( {
 
 				$( document ).one( 'heartbeat-tick.autosave', function(){
 					thisView.autoSaved = true;
-					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+					thisView.refreshPreview( );
 				} );
 				wp.autosave.server.triggerSave();
 			}
@@ -201,7 +199,10 @@ module.exports = Backbone.View.extend( {
 	 * Refresh the Live Editor preview.
 	 * @returns {exports}
 	 */
-	refreshPreview: function ( data ) {
+	refreshPreview: function ( ) {
+		// Get the current panels data
+		var data = this.builder.model.getPanelsData();
+
 		var loadTimePrediction = this.loadTimes.length ?
 		_.reduce( this.loadTimes, function ( memo, num ) {
 			return memo + num;
@@ -287,10 +288,6 @@ module.exports = Backbone.View.extend( {
 		return this.previewIframe;
 	},
 
-	/**
-	 * Do all the basic setup for the preview Iframe element
-	 * @param iframe
-	 */
 	setupPreviewFrame: function( iframe ){
 		var thisView = this;
 		iframe
@@ -325,10 +322,11 @@ module.exports = Backbone.View.extend( {
 				var iframeWindow = $$.get(0).contentWindow;
 				iframeWindow.liveEditor.setup(
 					panelsOptions.post_id,
-					thisView.builder.model
+					thisView.builder.model,
+					thisView
 				);
 
-				// Prevent default clicks inside the preview iframe
+				// Prevent default clicks
 				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
 					e.preventDefault();
 				} );
@@ -336,7 +334,7 @@ module.exports = Backbone.View.extend( {
 			} )
 			.on( 'load', function(){
 				var $$ = $( this );
-				if( ! $$.data( 'iframeready' ) ) {
+				if( ! $$.data( 'iframeready' )  ) {
 					$$.trigger('iframeready');
 				}
 			} );
@@ -350,10 +348,6 @@ module.exports = Backbone.View.extend( {
 		return this.$( 'form.live-editor-form' ).attr( 'action' ) !== '';
 	},
 
-	/**
-	 * Toggle the size of the preview iframe to simulate mobile devices.
-	 * @param e
-	 */
 	mobileToggle: function( e ){
 		var button = $( e.currentTarget );
 		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');

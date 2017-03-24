@@ -8,12 +8,13 @@ module.exports = Backbone.View.extend( {
 		this.setElement( options.$el );
 		options.$el.data( 'view', this );
 
-		this.listenTo( this.model, 'move', this.reposition );
-		this.listenTo( this.model, 'change:values', this.changeValues );
-		this.listenTo( this.model, 'change:style', this.changeStyle );
+		this.listenTo( this.model, 'move', this.handleReposition );
+		this.listenTo( this.model, 'change:values', this.handleChangeValues );
+		this.listenTo( this.model, 'change:style', this.handleChangeStyle );
+		this.listenTo( this.model, 'destroy', this.handleDestroy );
 	},
 
-	reposition: function(){
+	handleReposition: function(){
 		// We need to move this view
 
 		var rowIndex = this.model.cell.row.builder.rows.indexOf( this.model.cell.row ),
@@ -43,13 +44,18 @@ module.exports = Backbone.View.extend( {
 	},
 
 	getWidgetContainer: function(){
-		return this.$('> .panel-widget-style').length ? this.$('> .panel-widget-style') : this.$el;
+		return this.$('> .panel-widget-style').length ? this.$( '> .panel-widget-style' ) : this.$el;
 	},
 
-	changeValues: function(){
+	handleChangeValues: function(){
+		this.cell.row.layout.liveEditor.refreshPreview();
 	},
 
-	changeStyle: function(){
-		console.log('change style');
+	handleChangeStyle: function(){
+		this.cell.row.layout.liveEditor.refreshPreview();
+	},
+
+	handleDestroy: function(){
+		this.$el.remove();
 	}
 } );

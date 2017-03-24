@@ -24,8 +24,13 @@ module.exports = Backbone.View.extend( {
 			// rowView.cells.push( cellView );
 		} );
 
-		this.listenTo( this.model, 'move', this.reposition );
+		this.listenTo( this.model, 'move', this.handleReposition );
 		this.listenTo( this.model, 'reweight_cells', this.handleReweightCells );
+		this.listenTo( this.model, 'change:style', this.handleChangeStyle );
+
+		// For adding and removing cells
+		this.listenTo( this.model.cells, 'add', this.handleCellAddRemove );
+		this.listenTo( this.model.cells, 'remove', this.handleCellAddRemove );
 	},
 
 	/**
@@ -36,7 +41,7 @@ module.exports = Backbone.View.extend( {
 		return this.$( '> *' ).hasClass( 'panel-row-style' ) ? this.$( '> .panel-row-style' ) : this.$el;
 	},
 
-	reposition: function(){
+	handleReposition: function(){
 		var rowIndex = this.model.builder.rows.indexOf( this.model ),
 			rowContainer = this.layout.getRowsContainer();
 
@@ -66,8 +71,21 @@ module.exports = Backbone.View.extend( {
 		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
 			var $$ = $(this);
 			var cell = rowView.model.cells.at( i );
-			$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
+			if( cell !== undefined ) {
+				$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
+			}
 		} );
+	},
+
+	handleChangeStyle: function(){
+		this.layout.liveEditor.refreshPreview();
+	},
+
+	handleCellAddRemove: function(){
+		var thisView = this;
+		setTimeout( function(){
+			thisView.layout.liveEditor.refreshPreview();
+		}, 50 );
 	},
 
 	/**
