@@ -170,7 +170,7 @@
 				}
 
 				&.cell-selected .cell-wrapper {
-					background-color: darken( @row_color, 5% );
+					background-color: darken( @row_color, 7% );
 				}
 
 				.resize-handle {
@@ -307,8 +307,7 @@
 
 					.cell-wrapper{
 						background: #e4eff4;
-						//border: 1px solid #bcccd2;
-						padding: 6px 6px 0px 6px; /* 6px bottom to remove bottom margin from panels */
+						padding: 7px 7px 0px 7px;
 						height: 100%;
 						min-height: 70px;
 
@@ -338,24 +337,24 @@
 								cursor: auto;
 							}
 
-							margin-bottom: 5px;
+							margin-bottom: 7px;
 
 							background: #f9f9fb;
 
-							border: 1px solid rgba( 0,0,0,0.175 );
+							border: 1px solid rgba( 255, 255, 255, 0.75 );
 							max-height: 49px;
 
-							.box-shadow(~"0 1px 1px rgba(0,0,0,0.05)");
+							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
 							.box-sizing(border-box);
 
 							&:hover {
-								border: 1px solid rgba( 0,0,0,0.225 );
+								border: 1px solid rgba( 255, 255, 255, 0.55 );
 								background: #fff;
-								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
+								.box-shadow(~"0 0 2px rgba(0,0,0,0.1)");
 							}
 
 							.so-widget-wrapper {
-								padding: 7px 9px;
+								padding: 7px 8px;
 								overflow: hidden;
 								position: relative;
 							}
@@ -481,7 +480,7 @@
 
 							height: 49px;
 
-							margin-bottom: 5px;
+							margin-bottom: 7px;
 
 							position: relative;
 
@@ -632,6 +631,7 @@
 
 	opacity: 0.9;
 	pointer-events: none;
+	border: 1px solid rgba( 0,0,0,0.35 ) !important;
 
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
@@ -722,13 +722,12 @@
 		border-bottom: 1px solid @border_color;
 
 		h3.so-title {
-			margin: -3px 0 0 -3px;
+			.box-sizing( border-box );
+			margin: -3px 150px 0 -3px;
 			padding: 5px 6px;
-			display: inline-block;
+			display: block;
 
 			&.so-title-editable {
-				cursor: pointer;
-
 				&:hover,
 				&:focus {
 					outline: none;
@@ -736,7 +735,8 @@
 				}
 
 				&:focus {
-					margin: -4px 0 0 -4px;
+					margin-top: -4px;
+					margin-left: -4px;
 					border: 1px solid #E4E4E4;
 				}
 			}

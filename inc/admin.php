@@ -372,6 +372,7 @@ class SiteOrigin_Panels_Admin {
 						'row_paste'     => __( 'Paste Row', 'siteorigin-panels' ),
 					),
 					'draft'                => __( 'Draft', 'siteorigin-panels' ),
+					'untitled'             => __( 'Untitled', 'siteorigin-panels' ),
 				),
 				'plupload'                  => array(
 					'max_file_size'       => wp_max_upload_size() . 'b',

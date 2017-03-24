@@ -169,7 +169,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-overlay"></div>
 
 		<div class="so-title-bar">
-			<h3 class="so-title{{% if ( editableTitle ) print(' so-title-editable')%}}" {{% if ( editableTitle ) print('contenteditable="true"')%}}>{{%= title %}}</h3>
+			<h3 class="so-title{{% if ( editableTitle ) print(' so-title-editable')%}}" {{% if ( editableTitle ) print('contenteditable="true" spellcheck="false"')%}}>{{%= title %}}</h3>
 			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-close"><span class="so-dialog-icon"></span></a>
