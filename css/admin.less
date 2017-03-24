@@ -722,15 +722,22 @@
 		border-bottom: 1px solid @border_color;
 
 		h3.so-title {
-			margin: -2px 0 0 -3px !important;
-			padding: 4px 5px !important;
+			margin: -3px 0 0 -3px;
+			padding: 5px 6px;
 			display: inline-block;
 
 			&.so-title-editable {
 				cursor: pointer;
 
-				&:hover {
-					background-color: #F2F2F2;
+				&:hover,
+				&:focus {
+					outline: none;
+					background-color: #F0F0F0;
+				}
+
+				&:focus {
+					margin: -4px 0 0 -4px;
+					border: 1px solid #E4E4E4;
 				}
 			}
 		}

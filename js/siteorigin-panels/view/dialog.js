@@ -17,7 +17,6 @@ module.exports = Backbone.View.extend( {
 		'click .so-close': 'closeDialog',
 		'click .so-nav.so-previous': 'navToPrevious',
 		'click .so-nav.so-next': 'navToNext',
-		'click .so-title': 'editTitle',
 	},
 
 	initialize: function () {
@@ -137,7 +136,10 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Added here because .so-edit-title is only available after the template has been rendered.
-		this.$( '.so-edit-title' ).blur( this.saveTitle.bind( this ) );
+		this.$( '.so-title-editable' ).keyup( this.saveTitle.bind( this ) ).blur( this.saveTitle.bind( this ) );
+		this.$( '.so-title-editable' ).click( function(){
+			document.execCommand('selectAll',this,null);
+		} );
 
 		return this;
 	},
@@ -351,30 +353,17 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Start editing the title.
-	 */
-	editTitle: function( event ) {
-		if ( this.editableTitle ) {
-			var titleElt = this.$( '.so-title' );
-			var titleInput = this.$( '.so-edit-title' );
-			titleElt.hide();
-			titleInput.show();
-			titleInput.focus();
-		}
-	},
-
-	/**
 	 * Finish editing the title
 	 */
-	saveTitle: function() {
-		var titleElt = this.$( '.so-title' );
-		var titleInput = this.$( '.so-edit-title' );
-		titleElt.show();
-		titleInput.hide();
-		if ( titleElt.text() !== titleInput.val() ) {
-			console.log( 'edited title' );
-			titleElt.text( titleInput.val() );
-			this.trigger( 'edit_title', titleInput.val() );
+	saveTitle: function( event ) {
+		if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
+			var titleElt = this.$( '.so-title' );
+			titleElt.text( titleElt.text().replace(/^\s+|\s+$/gm,'') );
+
+			this.trigger( 'edit_title', titleElt.text() );
+			if( event.type !== 'blur' ) {
+				titleElt.blur();
+			}
 		}
 	},
 
