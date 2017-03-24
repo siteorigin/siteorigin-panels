@@ -6,6 +6,7 @@ module.exports = Backbone.View.extend( {
 	previewScrollTop: 0,
 	loadTimes: [],
 	previewFrameId: 1,
+
 	previewUrl: null,
 	previewIframe: null,
 
@@ -91,7 +92,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Disable page scrolling
-		this.builder.lockPageScroll();
+		panels.helpers.pageScroll.lock();
 
 		if ( this.$el.is( ':visible' ) ) {
 			return this;
@@ -101,6 +102,7 @@ module.exports = Backbone.View.extend( {
 		this.$el.show();
 		this.refreshPreview( this.builder.model.getPanelsData() );
 
+		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
 		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
@@ -135,7 +137,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.$el.hide();
-		this.builder.unlockPageScroll();
+		panels.helpers.pageScroll.unlock();
 
 		// Move the builder back to its original container
 		this.builder.$el.appendTo( this.originalContainer );
@@ -305,6 +307,10 @@ module.exports = Backbone.View.extend( {
 		return this.previewIframe;
 	},
 
+	/**
+	 * Do all the basic setup for the preview Iframe element
+	 * @param iframe
+	 */
 	setupPreviewFrame: function( iframe ){
 		var thisView = this;
 		iframe
@@ -365,7 +371,7 @@ module.exports = Backbone.View.extend( {
 							} );
 					} );
 
-				// Prevent default clicks
+				// Prevent default clicks inside the preview iframe
 				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
 					e.preventDefault();
 				} );
@@ -373,7 +379,7 @@ module.exports = Backbone.View.extend( {
 			} )
 			.on( 'load', function(){
 				var $$ = $( this );
-				if( ! $$.data( 'iframeready' )  ) {
+				if( ! $$.data( 'iframeready' ) ) {
 					$$.trigger('iframeready');
 				}
 			} );
@@ -387,6 +393,10 @@ module.exports = Backbone.View.extend( {
 		return this.$( 'form.live-editor-form' ).attr( 'action' ) !== '';
 	},
 
+	/**
+	 * Toggle the size of the preview iframe to simulate mobile devices.
+	 * @param e
+	 */
 	mobileToggle: function( e ){
 		var button = $( e.currentTarget );
 		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');
