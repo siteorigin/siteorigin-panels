@@ -6,19 +6,24 @@
  *
  * Class SiteOrigin_Panels_Post_Content
  */
-class SiteOrigin_Panels_Post_Content {
+class SiteOrigin_Panels_Post_Content_Filters {
 
 	public function __construct() {
-		// $this->clear_filters();
 
-		add_filter( 'siteorigin_panels_row_attributes', array( $this, 'row_attributes' ), 99, 2 );
-		add_filter( 'siteorigin_panels_cell_attributes', array( $this, 'cell_attributes' ), 99, 2 );
-		add_filter( 'siteorigin_panels_widget_attributes', array( $this, 'widget_attributes' ), 99, 2 );
 	}
 
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
+	}
+
+	/**
+	 * Add filters that include data-* attributes on Page Builder divs
+	 */
+	public function setup_filters(){
+		add_filter( 'siteorigin_panels_row_attributes', array( $this, 'row_attributes' ), 99, 2 );
+		add_filter( 'siteorigin_panels_cell_attributes', array( $this, 'cell_attributes' ), 99, 2 );
+		add_filter( 'siteorigin_panels_widget_attributes', array( $this, 'widget_attributes' ), 99, 2 );
 	}
 
 	/**

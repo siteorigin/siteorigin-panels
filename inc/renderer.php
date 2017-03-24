@@ -41,10 +41,10 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	public function generate_css( $post_id, $panels_data, $layout_data) {
 		// Exit if we don't have panels data
-		if ( empty( $layout_data ) && empty( $panels_data ) ) {
-			return;
-		}
-		if( empty( $layout_data ) ) {
+		if ( empty( $layout_data ) ) {
+			if ( empty( $panels_data ) ) {
+				return '';
+			}
 			$layout_data = $this->get_panels_layout_data( $panels_data );
 		}
 

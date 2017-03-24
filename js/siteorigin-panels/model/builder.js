@@ -310,7 +310,6 @@ module.exports = Backbone.Model.extend({
 			};
 
 			// The Regex object that'll match SiteOrigin widgets
-			// console.log( panelsOptions.siteoriginWidgetRegex );
 			var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
 
 			$html.find('> .panel-layout > .panel-grid').each( function( ri, el ){

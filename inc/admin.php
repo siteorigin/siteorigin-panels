@@ -179,7 +179,9 @@ class SiteOrigin_Panels_Admin {
 
 				// This gives other plugins the chance to
 				do_action( 'siteorigin_panels_setup_database_render', $post_id );
-				SiteOrigin_Panels_Post_Content::single();
+				$filters = SiteOrigin_Panels_Post_Content_Filters::single();
+				$filters->clear_filters();
+				$filters->setup_filters();
 
 				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data, $layout_data );
 
@@ -883,8 +885,10 @@ class SiteOrigin_Panels_Admin {
 		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
 
 		do_action( 'siteorigin_panels_setup_database_render', $_POST['post_id'] );
-		SiteOrigin_Panels_Post_Content::single();
-		$post_content = SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		$filters = SiteOrigin_Panels_Post_Content_Filters::single();
+		$filters->clear_filters();
+		$filters->setup_filters();
+
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
 
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
