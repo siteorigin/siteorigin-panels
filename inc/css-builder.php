@@ -24,7 +24,7 @@ class SiteOrigin_Panels_Css_Builder {
 	public function add_css( $selector, $attributes, $resolution = 1920 ) {
 		$attribute_string = array();
 		foreach ( $attributes as $k => $v ) {
-			if ( empty( $v ) ) {
+			if ( ! strlen( (string) $v ) ) {
 				continue;
 			}
 
@@ -82,7 +82,12 @@ class SiteOrigin_Panels_Css_Builder {
 
 		// Add in the sub selector
 		if ( ! empty( $sub_selector ) ) {
-			$selector[] = $sub_selector;
+			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
+				$selector[ count( $selector )-1 ] .= $sub_selector;
+			}
+			else {
+				$selector[] = $sub_selector;
+			}
 		}
 
 		// Add this to the CSS array
@@ -124,7 +129,12 @@ class SiteOrigin_Panels_Css_Builder {
 
 		// Add in the sub selector
 		if ( ! empty( $sub_selector ) ) {
-			$selector[] = $sub_selector;
+			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
+				$selector[ count( $selector )-1 ] .= $sub_selector;
+			}
+			else {
+				$selector[] = $sub_selector;
+			}
 		}
 
 		// Add this to the CSS array
@@ -173,7 +183,12 @@ class SiteOrigin_Panels_Css_Builder {
 
 		// Add in the sub selector
 		if ( ! empty( $sub_selector ) ) {
-			$selector[] = $sub_selector;
+			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
+				$selector[ count( $selector )-1 ] .= $sub_selector;
+			}
+			else {
+				$selector[] = $sub_selector;
+			}
 		}
 
 		// Add this to the CSS array
