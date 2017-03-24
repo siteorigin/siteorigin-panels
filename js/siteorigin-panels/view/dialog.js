@@ -135,24 +135,9 @@ module.exports = Backbone.View.extend( {
 			this.$( '.so-title-bar' ).prepend( dialogParent );
 		}
 
-		// Added here because .so-edit-title is only available after the template has been rendered.
-		var saveTitle = function( event ) {
-			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
-				var titleElt = this.$( '.so-title' );
-				titleElt.text( titleElt.text().replace(/^\s+|\s+$/gm,'') );
-
-				this.trigger( 'edit_title', titleElt.text() );
-				if( event.type !== 'blur' ) {
-					titleElt.blur();
-				}
-			}
-		}.bind( this );
-
-		var $editElt = this.$( '.so-title-editable' );
-		$editElt.keyup( saveTitle ).blur( saveTitle );
-		$editElt.focus( function() {
-			panels.helpers.utils.selectElementContents( this );
-		} );
+		if( this.$( '.so-title-bar .so-title-editable' ).length ) {
+			this.initEditableTitle();
+		}
 
 		return this;
 	},
@@ -232,6 +217,40 @@ module.exports = Backbone.View.extend( {
 				}
 			} );
 		}.bind( this ) );
+	},
+
+	/**
+	 * Initialize the editable dialog title
+	 */
+	initEditableTitle: function(){
+		// Added here because .so-edit-title is only available after the template has been rendered.
+		var $editElt = this.$( '.so-title-bar .so-title-editable' );
+		var saveTitle = function( event ) {
+			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
+				var value = $editElt.text().replace(/^\s+|\s+$/gm,'');
+				if( value === '' ) {
+					if( ! _.isEmpty( $editElt.data( 'original-value' ) ) ) {
+						value = $editElt.data( 'original-value' );
+					}
+					else {
+						value = panelsOptions.loc.untitled;
+					}
+				}
+
+				$editElt.text( value );
+				this.trigger( 'edit_title', value );
+
+				if( event.type !== 'blur' ) {
+					$editElt.blur();
+				}
+			}
+		}.bind( this );
+
+		$editElt.keyup( saveTitle ).blur( saveTitle );
+		$editElt.focus( function() {
+			$editElt.data( 'original-value', $editElt.text() );
+			panels.helpers.utils.selectElementContents( this );
+		} );
 	},
 
 	/**
