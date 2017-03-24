@@ -136,9 +136,22 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Added here because .so-edit-title is only available after the template has been rendered.
-		this.$( '.so-title-editable' ).keyup( this.saveTitle.bind( this ) ).blur( this.saveTitle.bind( this ) );
-		this.$( '.so-title-editable' ).click( function(){
-			document.execCommand('selectAll',this,null);
+		var saveTitle = function( event ) {
+			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
+				var titleElt = this.$( '.so-title' );
+				titleElt.text( titleElt.text().replace(/^\s+|\s+$/gm,'') );
+
+				this.trigger( 'edit_title', titleElt.text() );
+				if( event.type !== 'blur' ) {
+					titleElt.blur();
+				}
+			}
+		}.bind( this );
+
+		var $editElt = this.$( '.so-title-editable' );
+		$editElt.keyup( saveTitle ).blur( saveTitle );
+		$editElt.focus( function() {
+			panels.helpers.utils.selectElementContents( this );
 		} );
 
 		return this;
@@ -349,21 +362,6 @@ module.exports = Backbone.View.extend( {
 		var next = this.getNextDialog();
 		if ( next !== null && next !== false ) {
 			next.openDialog();
-		}
-	},
-
-	/**
-	 * Finish editing the title
-	 */
-	saveTitle: function( event ) {
-		if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
-			var titleElt = this.$( '.so-title' );
-			titleElt.text( titleElt.text().replace(/^\s+|\s+$/gm,'') );
-
-			this.trigger( 'edit_title', titleElt.text() );
-			if( event.type !== 'blur' ) {
-				titleElt.blur();
-			}
 		}
 	},
 

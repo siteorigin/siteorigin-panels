@@ -18,6 +18,15 @@ module.exports = {
 		s = s.replace( /%}}/g, '%>' );
 		s = s.trim();
 		return s;
-	}
+	},
+
+	// From this SO post: http://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
+	selectElementContents: function( element ) {
+		var range = document.createRange();
+		range.selectNodeContents( element );
+		var sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange( range );
+	},
 
 }

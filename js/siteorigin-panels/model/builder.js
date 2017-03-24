@@ -98,8 +98,8 @@ module.exports = Backbone.Model.extend({
 					rowAttrs.style = data.grids[i].style;
 				}
 
-				if ( ! _.isUndefined( data.grids[i].colors) ) {
-					rowAttrs.colors = data.grids[i].colors;
+				if ( ! _.isUndefined( data.grids[i].colorIndex) ) {
+					rowAttrs.colorIndex = data.grids[i].colorIndex;
 				}
 				// This will create and add the row model and its cells
 				builderModel.addRow(rowAttrs, row, {noAnimate: true} );
@@ -265,7 +265,7 @@ module.exports = Backbone.Model.extend({
 			data.grids.push( {
 				cells: row.get('cells').length,
 				style: row.get( 'style' ),
-				colors: row.get( 'colors' )
+				colorIndex: row.get( 'colorIndex' )
 			} );
 
 		} );

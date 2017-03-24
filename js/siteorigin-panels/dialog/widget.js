@@ -13,7 +13,6 @@ module.exports = panels.view.dialog.extend( {
 		'click .so-close': 'saveHandler',
 		'click .so-nav.so-previous': 'navToPrevious',
 		'click .so-nav.so-next': 'navToNext',
-		'click .so-title': 'editTitle',
 
 		// Action handlers
 		'click .so-toolbar .so-delete': 'deleteHandler',
