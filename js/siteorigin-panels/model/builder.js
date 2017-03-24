@@ -328,6 +328,25 @@ module.exports = Backbone.Model.extend({
 
 			// The Regex object that'll match SiteOrigin widgets
 			var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
+			var decodeEntities = (function() {
+				// this prevents any overhead from creating the object each time
+				var element = document.createElement('div');
+
+				function decodeHTMLEntities (str) {
+					if(str && typeof str === 'string') {
+						// strip script/html tags
+						str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+						str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+						element.innerHTML = str;
+						str = element.textContent;
+						element.textContent = '';
+					}
+
+					return str;
+				}
+
+				return decodeHTMLEntities;
+			})();
 
 			$html.find('> .panel-layout > .panel-grid').each( function( ri, el ){
 				var $row = jQuery( el ),
@@ -358,7 +377,7 @@ module.exports = Backbone.Model.extend({
 						if( ! _.isNull( match ) && widgetContent.replace( re, '' ).trim() === '' ) {
 							try {
 								var classMatch = /class="(.*?)"/.exec( match[3] );
-								var meta = JSON.parse( match[5] );
+								var meta = JSON.parse( decodeEntities( match[5] ) );
 
 								var newWidget = meta.instance;
 								newWidget.panels_info = {
