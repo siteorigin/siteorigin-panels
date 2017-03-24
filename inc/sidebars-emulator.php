@@ -108,7 +108,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 		$widget_option_names = array();
 		$widgets = $panels_data['widgets'];
-		foreach ( $widgets as $widget_instance ) {
+		foreach ( $widgets as $i => $widget_instance ) {
 			if ( empty( $widget_instance['panels_info']['class'] ) ) {
 				continue;
 			}
@@ -118,7 +118,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				$widget_option_names = array_merge( $widget_option_names, $this->get_widget_option_names( $post_id, $widget_instance[ 'panels_data' ], ++$start ) );
 			}
 
-			$id_val  = $post_id . strval( ( 10000 * $start ) + intval( $widget_instance['panels_info']['id'] ) );
+			$id_val  = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
 			$widget_class = $widget_instance['panels_info']['class'];
 			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
 				$widget                = $wp_widget_factory->widgets[ $widget_class ];
