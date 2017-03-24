@@ -33,9 +33,6 @@ module.exports = Backbone.Model.extend({
 		}, options);
 
 		var cellCollection = new panels.collection.cells(cells);
-		cellCollection.each(function (cell) {
-			cell.row = row;
-		});
 
 		attrs = _.extend({
 			collection: this.get('rows'),
