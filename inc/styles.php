@@ -572,8 +572,8 @@ class SiteOrigin_Panels_Styles {
 				continue;
 			}
 
-			$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
-			$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
+			$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), ! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array() );
+			$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), ! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array() );
 
 			if( ! empty( $standard_css ) ) {
 				$css->add_widget_css(
