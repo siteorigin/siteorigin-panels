@@ -145,6 +145,34 @@
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
+		// See tpl/js-templates.php variable @$row_color_count. It should match the number of colors defined here.
+		@row_colors: #E4EFF4, #EAE3F3, #F6EFDF, #DCF8F2;
+
+		.row-colors( @i: 1 ) when ( @i <= length( @row_colors ) ) {
+			@row_color: extract( @row_colors, @i );
+			@row_color_dark: darken( @row_color, 11% );
+			@row_color_light: lighten( @row_color, 5% );
+			.so-row-color-@{i} {
+				&.so-row-color {
+					background-color: @row_color;
+					border: 1px solid @row_color_dark;
+				}
+			}
+			.so-row-container.so-row-color-@{i} .so-cells .cell {
+				.cell-wrapper {
+					background-color: @row_color;
+					.so-widget {
+						border-color: @row_color_dark;
+					}
+				}
+				.resize-handle {
+					background-color: @row_color_light;
+				}
+			}
+
+			.row-colors( ( @i + 1 ) );
+		} .row-colors();
+
 		.so-row-toolbar {
 			.clearfix();
 
@@ -180,6 +208,35 @@
 						}
 					}
 
+					ul li.so-row-colors-container {
+						display: flex;
+						justify-content: space-around;
+
+						padding: 5px;
+
+						& div.so-row-color {
+							@row_color_checkbox_size: 14px;
+
+							display: inline-block;
+							cursor: pointer;
+							position: relative;
+							text-align: center;
+
+							width: @row_color_checkbox_size;
+							height: @row_color_checkbox_size;
+
+							&.so-row-color-selected:before {
+								content: "\2714";
+								color: rgba(0, 0, 0, 0.2);
+								position: absolute;
+								top: 0;
+								left: 1px;
+								font-size: @row_color_checkbox_size;
+								line-height: @row_color_checkbox_size;
+							}
+						}
+					}
+
 				}
 
 				&:hover .so-dropdown-links-wrapper {
@@ -209,7 +266,6 @@
 					width: 10px;
 					left: -11px;
 					cursor: col-resize;
-					background: rgba(0,150,211, 0);
 					background: rgba(0,150,211, 0.25);
 
 					-webkit-transition: background 0.25s ease-in-out;
@@ -239,15 +295,17 @@
 
 					.cell-wrapper{
 						background: #e4eff4;
-						border: 1px solid #bcccd2;
+						//border: 1px solid #bcccd2;
 						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
 						height: 100%;
 						min-height: 70px;
+
+						.transition(0.25s, background, ease-in-out);
 					}
 
 					&.cell-selected .cell-wrapper{
 						background: #cae7f4 url("images/cell-selected.png") repeat;
-						border-color: #9abcc7;
+						//border-color: #9abcc7;
 						box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 					}
 
@@ -284,7 +342,7 @@
 								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
 							}
 
-							.so-widget-wrapper{
+							.so-widget-wrapper {
 								padding: 7px 9px;
 								overflow: hidden;
 								position: relative;
@@ -427,7 +485,7 @@
 						width: 10px;
 						left: -5px;
 						cursor: col-resize;
-						background: #e5f4fa;
+						background: #f6fafb;
 						height: 100%;
 
 						.transition(0.25s, background, ease-in-out);
@@ -658,6 +716,25 @@
 		h3.so-title {
 			margin: 0 !important;
 			padding: 0 !important;
+
+			&.so-title-editable {
+				cursor: pointer;
+
+				&:hover {
+					background-color: #F2F2F2;
+				}
+			}
+		}
+
+		input[type=text].so-edit-title {
+			display: none;
+			color: #23282d;
+			font-size: 1.3em;
+			font-weight: 600;
+			border: none;
+			box-shadow: none;
+			margin-top: -4px;
+			margin-left: -5px;
 		}
 
 		h3.so-parent-link {

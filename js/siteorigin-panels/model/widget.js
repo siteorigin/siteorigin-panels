@@ -45,6 +45,8 @@ module.exports = Backbone.Model.extend( {
 			} else {
 				return '';
 			}
+		} else if ( this.has( 'title' ) ) {
+			return this.get( 'title' );
 		} else {
 			return panelsOptions.widgets[this.get( 'class' )][field];
 		}

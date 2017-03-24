@@ -15,7 +15,9 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
-		this.set('cells', new panels.collection.cells());
+		if ( _.isEmpty(this.get('cells') ) ) {
+			this.set('cells', new panels.collection.cells());
+		}
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -96,22 +98,21 @@ module.exports = Backbone.Model.extend( {
 	 *
 	 * @return {panels.model.row} The cloned row.
 	 */
-	clone: function ( builder, cloneOptions ) {
+	clone: function ( builder ) {
 		if ( _.isUndefined( builder ) ) {
 			builder = this.builder;
 		}
-		cloneOptions = _.extend( {cloneCells: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
 		clone.set( 'collection', builder.get('rows'), {silent: true} );
 		clone.builder = builder;
 
-		if ( cloneOptions.cloneCells ) {
-			// Clone all the rows
-			this.get('cells').each( function ( cell ) {
-				clone.get('cells').add( cell.clone( clone, cloneOptions ), {silent: true} );
-			} );
-		}
+		var cellClones = new panels.collection.cells();
+		this.get('cells').each( function ( cell ) {
+			cellClones.add( cell.clone( clone ), {silent: true} );
+		} );
+
+		clone.set( 'cells', cellClones );
 
 		return clone;
 	}

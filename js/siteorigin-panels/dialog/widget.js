@@ -7,11 +7,13 @@ module.exports = panels.view.dialog.extend( {
 	dialogClass: 'so-panels-dialog-edit-widget',
 	widgetView: false,
 	savingWidget: false,
+	editableTitle: true,
 
 	events: {
 		'click .so-close': 'saveHandler',
 		'click .so-nav.so-previous': 'navToPrevious',
 		'click .so-nav.so-next': 'navToNext',
+		'click .so-title': 'editTitle',
 
 		// Action handlers
 		'click .so-toolbar .so-delete': 'deleteHandler',
@@ -35,6 +37,10 @@ module.exports = panels.view.dialog.extend( {
 				} );
 			}
 		} );
+
+		this.on( 'edit_title', function ( title ) {
+			this.model.set( 'title', title );
+		}.bind( this ) );
 	},
 
 	/**
@@ -45,11 +51,9 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		if ( ! _.isUndefined( panelsOptions.widgets[this.model.get( 'class' )] ) ) {
-			this.$( '.so-title .widget-name' ).html( panelsOptions.widgets[this.model.get( 'class' )].title );
-		} else {
-			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
-		}
+		var title = this.model.getWidgetField( 'title' );
+		this.$( '.so-title .widget-name' ).html( title );
+		this.$( '.so-edit-title' ).val( title );
 
 		if( ! this.builder.supports( 'addWidget' ) ) {
 			this.$( '.so-buttons .so-duplicate' ).remove();

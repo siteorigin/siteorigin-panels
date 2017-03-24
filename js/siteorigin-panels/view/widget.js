@@ -20,13 +20,14 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget
 	 */
 	initialize: function () {
-		// The 2 user actions on the model that this view will handle.
 		this.model.on( 'user_edit', this.editHandler, this );				 // When a user wants to edit the widget model
 		this.model.on( 'user_duplicate', this.duplicateHandler, this );	   // When a user wants to duplicate the widget model
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		this.model.on( 'change:values', this.onModelChange, this );
+
+		this.model.on( 'change:title', this.onTitleChange, this );
 	},
 
 	/**
@@ -113,11 +114,10 @@ module.exports = Backbone.View.extend( {
 	editHandler: function () {
 		// Create a new dialog for editing this
 		this.getEditDialog().openDialog();
-		return this;
 	},
 
-	titleClickHandler: function(){
-		if( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
+	titleClickHandler: function( event ){
+		if ( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			return this;
 		}
 		this.editHandler();
@@ -165,6 +165,10 @@ module.exports = Backbone.View.extend( {
 	onModelChange: function () {
 		// Update the description when ever the model changes
 		this.$( '.description' ).html( this.model.getTitle() );
+	},
+
+	onTitleChange: function( model, title) {
+		this.$( '.title > h4' ).text( title );
 	},
 
 	/**

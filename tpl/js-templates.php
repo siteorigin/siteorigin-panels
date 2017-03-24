@@ -97,7 +97,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-row">
-	<div class="so-row-container ui-draggable">
+	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorIndex %}}">
 
 		<div class="so-row-toolbar">
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
@@ -110,6 +110,22 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
+						<li class="so-row-colors-container">
+							<?php
+							// See css/admin.less variable @row_colors. This should match the number of colors defined there.
+							$row_color_count = 4;
+
+							for ($i = 1; $i <= $row_color_count; $i++) {
+								$classes = array( 'so-row-color', 'so-row-color-' . $i );
+
+								?>
+								<div data-color-index="<?php echo esc_attr( $i ); ?>"
+							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorIndex == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
+							         ></div>
+								<?php
+							}
+							?>
+						</li>
 						<div class="so-pointer"></div>
 					</ul>
 				</div>
@@ -136,11 +152,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-widget-wrapper">
 			<div class="title">
 				<h4>{{%= title %}}</h4>
-					<span class="actions">
-						<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
-						<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
-						<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
-					</span>
+				<span class="actions">
+					<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
+					<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+					<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
+				</span>
 			</div>
 			<small class="description">{{%= description %}}</small>
 		</div>
@@ -153,7 +169,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-overlay"></div>
 
 		<div class="so-title-bar">
-			<h3 class="so-title">{{%= title %}}</h3>
+			<h3 class="so-title{{% if ( editableTitle ) print(' so-title-editable')%}}">{{%= title %}}</h3>
+			{{% if ( editableTitle ) { %}}
+			<input type="text" class="so-edit-title">
+			{{% } %}}
 			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-close"><span class="so-dialog-icon"></span></a>

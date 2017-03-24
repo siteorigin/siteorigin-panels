@@ -23,21 +23,27 @@ module.exports = Backbone.Model.extend({
 	/**
 	 * Add a new row to this builder.
 	 *
+	 * @param attrs
 	 * @param cells
+	 * @param options
 	 */
-	addRow: function (cells, options) {
+	addRow: function (attrs, cells, options) {
 		options = _.extend({
 			noAnimate: false
 		}, options);
-		// Create the actual row
-		var row = new panels.model.row({
-			collection: this.get('rows')
-		});
-		var cells = new panels.collection.cells(cells);
-		cells.each(function (cell) {
+
+		var cellCollection = new panels.collection.cells(cells);
+		cellCollection.each(function (cell) {
 			cell.row = row;
 		});
-		row.set('cells', cells);
+
+		attrs = _.extend({
+			collection: this.get('rows'),
+			cells: cellCollection,
+		}, attrs);
+
+		// Create the actual row
+		var row = new panels.model.row(attrs);
 		row.builder = this;
 
 		this.get('rows').add( row, options );
@@ -86,12 +92,17 @@ module.exports = Backbone.Model.extend({
 
 			var builderModel = this;
 			_.each( rows, function ( row, i ) {
-				// This will create and add the row model and its cells
-				var newRow = builderModel.addRow( row, {noAnimate: true} );
+				var rowAttrs = {};
 
 				if ( ! _.isUndefined( data.grids[i].style ) ) {
-					newRow.set( 'style', data.grids[i].style );
+					rowAttrs.style = data.grids[i].style;
 				}
+
+				if ( ! _.isUndefined( data.grids[i].colors) ) {
+					rowAttrs.colors = data.grids[i].colors;
+				}
+				// This will create and add the row model and its cells
+				builderModel.addRow(rowAttrs, row, {noAnimate: true} );
 			} );
 
 
@@ -130,6 +141,10 @@ module.exports = Backbone.Model.extend({
 				}
 				else {
 					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
+				}
+
+				if ( ! _.isUndefined( panels_info.title ) ) {
+					newWidget.set( 'title', panels_info.title );
 				}
 
 				newWidget.cell = cell;
@@ -223,7 +238,8 @@ module.exports = Backbone.Model.extend({
 						// Strictly this should be an index
 						id: widgetId ++,
 						widget_id: widget.get( 'widget_id' ),
-						style: widget.get( 'style' )
+						style: widget.get( 'style' ),
+						title: widget.get('title'),
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
@@ -248,7 +264,8 @@ module.exports = Backbone.Model.extend({
 
 			data.grids.push( {
 				cells: row.get('cells').length,
-				style: row.get( 'style' )
+				style: row.get( 'style' ),
+				colors: row.get( 'colors' )
 			} );
 
 		} );

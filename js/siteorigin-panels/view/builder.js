@@ -529,7 +529,7 @@ module.exports = Backbone.View.extend( {
 			// There aren't any rows yet
 			if ( options.createCell ) {
 				// Create a row with a single cell
-				this.model.addRow( [{ weight: 1 }], { noAnimate: true } );
+				this.model.addRow( {}, [{ weight: 1 }], { noAnimate: true } );
 			} else {
 				return null;
 			}
