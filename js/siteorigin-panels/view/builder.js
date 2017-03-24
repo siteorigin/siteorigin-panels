@@ -729,9 +729,9 @@ module.exports = Backbone.View.extend( {
 			) &&
 			editorContent !== ''
 		) {
-			var widgetClass = panelsOptions.text_widget;
+			var editorClass = panelsOptions.text_widget;
 			// There is a small chance a theme will have removed this, so check
-			if ( _.isEmpty( widgetClass ) ) {
+			if ( _.isEmpty( editorClass ) ) {
 				return;
 			}
 
@@ -741,24 +741,7 @@ module.exports = Backbone.View.extend( {
 			}
 
 			// Create the existing page content in a single widget
-			this.model.loadPanelsData( {
-				grid_cells: [{grid: 0, weight: 1}],
-				grids: [{cells: 1}],
-				widgets: [
-					{
-						filter: "1",
-						text: editorContent,
-						title: "",
-						type: "visual",
-						panels_info: {
-							class: widgetClass,
-							raw: false,
-							grid: 0,
-							cell: 0
-						}
-					}
-				]
-			} );
+			this.model.loadPanelsData( this.model.getPanelsDataFromHtml( editorContent, editorClass ) );
 			this.model.trigger( 'change' );
 			this.model.trigger( 'change:data' );
 		}
