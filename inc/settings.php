@@ -140,6 +140,8 @@ class SiteOrigin_Panels_Settings {
 
 		// Content fields
 		$defaults['copy-content'] = true;
+		$defaults['cache-html'] = false;
+		$defaults['cache-css'] = true;
 
 		return $defaults;
 	}
@@ -385,6 +387,18 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Copy Content', 'siteorigin-panels' ),
 			'description' => __( 'Copy content from Page Builder to post content.', 'siteorigin-panels' ),
+		);
+
+		$fields['content']['fields']['cache-css'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Cache Generated CSS', 'siteorigin-panels' ),
+			'description' => __( "Store generated CSS so it doesn't need to generated on every page load." , 'siteorigin - panels' ),
+		);
+
+		$fields['content']['fields']['cache-html'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Cache Generated HTML', 'siteorigin-panels' ),
+			'description' => __( "Store generated HTML for increased speed. This can cause problems with some widgets though." , 'siteorigin - panels' ),
 		);
 
 		return $fields;

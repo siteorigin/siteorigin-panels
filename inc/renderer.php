@@ -420,7 +420,9 @@ class SiteOrigin_Panels_Renderer {
 		$widget_html = apply_filters( 'siteorigin_panels_the_widget_html', '', $the_widget, $args, $instance );
 
 		if( ! empty( $widget_html ) ) {
+			echo $args['before_widget'];
 			echo $widget_html;
+			echo $args['after_widget'];
 		} else if ( ! empty( $the_widget ) && is_a( $the_widget, 'WP_Widget' ) ) {
 			$the_widget->widget( $args, $instance );
 		} else {

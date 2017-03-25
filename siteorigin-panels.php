@@ -28,17 +28,26 @@ class SiteOrigin_Panels {
 		// Register the autoloader
 		spl_autoload_register( array( $this, 'autoloader' ) );
 
+		add_action( 'plugins_loaded', array( $this, 'version_check' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
-
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
-		// This is the main filter
-		add_filter( 'the_content', array( $this, 'filter_content' ) );
-		add_filter( 'body_class', array( $this, 'body_class' ) );
+		if( siteorigin_panels_setting( 'cache-html' ) ) {
+			// We can use the cached content
+			add_filter( 'the_content', array( $this, 'cached_post_content' ), 5 );
+			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
+			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
+		}
+		else {
+			// We need to generate fresh post content
+			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
+		}
 
+		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 
 		if ( is_admin() ) {
+			// Setup all the admin classes
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
 			SiteOrigin_Panels_Admin::single();
@@ -55,6 +64,9 @@ class SiteOrigin_Panels {
 		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';
 		}
+
+		SiteOrigin_Panels_Widget_Shortcode::init();
+		SiteOrigin_Panels_Cache::single();
 	}
 
 
@@ -197,12 +209,12 @@ class SiteOrigin_Panels {
 	 *
 	 * @filter the_content
 	 */
-	function filter_content( $content ) {
+	function generate_post_content( $content ) {
 		global $post;
-
 		if ( empty( $post ) && ! in_the_loop() ) {
 			return $content;
 		}
+
 		if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) {
 			return $content;
 		}
@@ -210,7 +222,7 @@ class SiteOrigin_Panels {
 		// Check if this post has panels_data
 		$panels_data = get_post_meta( $post->ID, 'panels_data', true );
 		if ( ! empty( $panels_data ) ) {
-			$panel_content = SiteOrigin_Panels_Renderer::single()->render( $post->ID );
+			$panel_content = SiteOrigin_Panels_Renderer::single()->render( $post->ID, ! siteorigin_panels_setting( 'cache-css' ) );
 
 			if ( ! empty( $panel_content ) ) {
 				$content = $panel_content;
@@ -236,6 +248,39 @@ class SiteOrigin_Panels {
 		}
 
 		return $content;
+	}
+
+	public function cached_post_content( $content ){
+		global $post;
+		if (
+			( empty( $post ) && ! in_the_loop() ) ||
+			! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ||
+			! get_post_meta( $post->ID, 'panels_data', true )
+		) {
+			return $content;
+		}
+
+		$cache = SiteOrigin_Panels_Cache::single();
+		$stored = $cache->get( $post->ID, true );
+		return $stored[ 'html' ];
+
+		return $content;
+	}
+
+	public function cached_post_css(){
+		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+			$cache = SiteOrigin_Panels_Cache::single();
+			$stored = $cache->get( get_the_ID(), true );
+
+			?>
+			<style type="text/css"><?php echo $stored[ 'css' ] ?></style>
+			<?php
+		}
+	}
+
+	public function cached_post_enqueue(){
+		wp_enqueue_style( 'siteorigin-panels-front' );
+		wp_enqueue_script( 'siteorigin-panels-front-styles' );
 	}
 
 	/**
@@ -361,6 +406,17 @@ class SiteOrigin_Panels {
 
 	public static function front_css_url(){
 		return plugin_dir_url( __FILE__ ) . 'css/front.css';
+	}
+
+	/**
+	 * Trigger a siteorigin_panels_version_changed action if the version has changed
+	 */
+	public function version_check(){
+		$active_version = get_option( 'siteorigin_panels_active_version', false );
+		if( empty( $active_version ) || $active_version !== SITEORIGIN_PANELS_VERSION ) {
+			do_action( 'siteorigin_panels_version_changed' );
+			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
+		}
 	}
 }
 
