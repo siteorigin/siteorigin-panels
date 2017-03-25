@@ -38,7 +38,7 @@ module.exports = panels.view.dialog.extend( {
 		} );
 
 		this.on( 'edit_title', function ( title ) {
-			this.model.set( 'title', title );
+			this.model.set( 'label', title );
 		}.bind( this ) );
 	},
 

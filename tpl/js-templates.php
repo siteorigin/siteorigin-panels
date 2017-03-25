@@ -97,7 +97,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-row">
-	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorIndex %}}">
+	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorLabel %}}">
 
 		<div class="so-row-toolbar">
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
@@ -119,8 +119,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								$classes = array( 'so-row-color', 'so-row-color-' . $i );
 
 								?>
-								<div data-color-index="<?php echo esc_attr( $i ); ?>"
-							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorIndex == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
+								<div data-color-label="<?php echo esc_attr( $i ); ?>"
+							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorLabel == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
 							         ></div>
 								<?php
 							}

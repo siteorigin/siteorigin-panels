@@ -44,8 +44,8 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.row}
 	 */
 	render: function () {
-		var rowColorIndex = this.model.has( 'colorIndex' ) ? this.model.get( 'colorIndex' ) : 1;
-		this.setElement( this.template( { rowColorIndex: rowColorIndex } ) );
+		var rowColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : 1;
+		this.setElement( this.template( { rowColorLabel: rowColorLabel } ) );
 		this.$el.data( 'view', this );
 
 		// Create views for the cells in this row
@@ -249,12 +249,12 @@ module.exports = Backbone.View.extend( {
 	rowColorChangeHandler: function ( event ) {
 		this.$( '.so-row-color' ).removeClass( 'so-row-color-selected' );
 		var clickedColorElem = $( event.target );
-		var newColorIndex = clickedColorElem.data( 'colorIndex' );
-		var oldColorIndex = this.model.has( 'colorIndex' ) ? this.model.get( 'colorIndex' ) : 1;
+		var newColorLabel = clickedColorElem.data( 'color-label' );
+		var oldColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : 1;
 		clickedColorElem.addClass( 'so-row-color-selected' );
-		this.$el.removeClass( 'so-row-color-' + oldColorIndex );
-		this.$el.addClass( 'so-row-color-' + newColorIndex );
-		this.model.set( 'colorIndex', newColorIndex );
+		this.$el.removeClass( 'so-row-color-' + oldColorLabel );
+		this.$el.addClass( 'so-row-color-' + newColorLabel );
+		this.model.set( 'color_label', newColorLabel );
 	},
 
 	/**

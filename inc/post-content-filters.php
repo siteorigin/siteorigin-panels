@@ -74,6 +74,9 @@ class SiteOrigin_Panels_Post_Content_Filters {
 		if( ! empty( $row['style'] ) ) {
 			$attributes[ 'data-style' ] = json_encode( $row['style'] );
 		}
+		if( ! empty( $row['color_label'] ) ) {
+			$attributes[ 'data-color-label' ] = intval( $row['color_label'] );
+		}
 
 		return $attributes;
 	}
