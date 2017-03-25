@@ -369,6 +369,8 @@ class SiteOrigin_Panels_Styles {
 			$attributes['data-stretch-type'] = $style['row_stretch'];
 			wp_enqueue_script( 'siteorigin-panels-front-styles' );
 		}
+
+		return $attributes;
 	}
 
 	/**
