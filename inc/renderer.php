@@ -84,7 +84,7 @@ class SiteOrigin_Panels_Renderer {
 				) );
 			}
 
-			$collapse_order = ! empty( $grid['style']['collapse_order'] ) ? $grid['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
+			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
 			if ( $settings['responsive'] ) {
 
