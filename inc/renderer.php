@@ -561,7 +561,7 @@ class SiteOrigin_Panels_Renderer {
 		echo '<' . $tag;
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
-				echo ' ' . $name . '="' . esc_attr( $value ) . '"';
+				echo ' ' . $name . '="' . esc_attr( $value ) . '" ';
 			}
 		}
 		echo '>';
