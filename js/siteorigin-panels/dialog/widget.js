@@ -7,7 +7,7 @@ module.exports = panels.view.dialog.extend( {
 	dialogClass: 'so-panels-dialog-edit-widget',
 	widgetView: false,
 	savingWidget: false,
-	editableTitle: true,
+	editableLabel: true,
 
 	events: {
 		'click .so-close': 'saveHandler',
@@ -37,8 +37,8 @@ module.exports = panels.view.dialog.extend( {
 			}
 		} );
 
-		this.on( 'edit_title', function ( title ) {
-			this.model.set( 'label', title );
+		this.on( 'edit_label', function ( text ) {
+			this.model.set( 'label', text );
 		}.bind( this ) );
 	},
 

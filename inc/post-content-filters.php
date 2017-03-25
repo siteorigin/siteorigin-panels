@@ -111,6 +111,9 @@ class SiteOrigin_Panels_Post_Content_Filters {
 		if( ! empty( $widget['style'] ) ) {
 			$attributes[ 'data-style' ] = json_encode( $widget['style'] );
 		}
+		if( ! empty( $widget['label'] ) ) {
+			$attributes[ 'data-label' ] = $widget['label'];
+		}
 
 		return $attributes;
 	}

@@ -140,8 +140,8 @@ module.exports = Backbone.Model.extend({
 					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
 				}
 
-				if ( ! _.isUndefined( panels_info.title ) ) {
-					newWidget.set( 'title', panels_info.title );
+				if ( ! _.isUndefined( panels_info.label ) ) {
+					newWidget.set( 'label', panels_info.label );
 				}
 
 				newWidget.cell = cell;
@@ -236,7 +236,7 @@ module.exports = Backbone.Model.extend({
 						id: widgetId ++,
 						widget_id: widget.get( 'widget_id' ),
 						style: widget.get( 'style' ),
-						title: widget.get('title'),
+						label: widget.get( 'label' ),
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
@@ -352,6 +352,7 @@ module.exports = Backbone.Model.extend({
 				panels_data.grids.push( {
 					cells: $cells.length,
 					style: $row.data( 'style' ),
+					color_label: $row.data( 'color-label' )
 				} );
 
 				$cells.each( function( ci, el ){
@@ -365,7 +366,13 @@ module.exports = Backbone.Model.extend({
 
 					$widgets.each( function( wi, el ){
 						var $widget = jQuery(el),
-							widgetContent = $widget.find('.panel-widget-style').length ? $widget.find('.panel-widget-style').html() : $widget.html();
+							widgetContent = $widget.find('.panel-widget-style').length ? $widget.find('.panel-widget-style').html() : $widget.html(),
+							panels_info = {
+								grid: ri,
+								cell: ci,
+								raw: false,
+								label: $widget.data( 'label' )
+							};
 
 						widgetContent = widgetContent.trim();
 
@@ -377,27 +384,22 @@ module.exports = Backbone.Model.extend({
 								var meta = JSON.parse( decodeEntities( match[5] ) );
 
 								var newWidget = meta.instance;
-								newWidget.panels_info = {
-									class: classMatch[1],
-									raw: false,
-									grid: ri,
-									cell: ci
-								};
+
+								panels_info.class = classMatch[1];
+								panels_info.raw = false;
+
+								newWidget.panels_info = panels_info;
 								panels_data.widgets.push( newWidget );
 							}
 							catch ( err ) {
 								// This is a standard editor class widget
+								panels_info.class = editorClass;
 								panels_data.widgets.push( {
 									filter: "1",
 									text: widgetContent,
 									title: "",
 									type: "visual",
-									panels_info: {
-										class: editorClass,
-										raw: false,
-										grid: ri,
-										cell: ci
-									}
+									panels_info: panels_info
 								} );
 							}
 
@@ -409,14 +411,10 @@ module.exports = Backbone.Model.extend({
 							var $widgetContent = jQuery( '<div>' + widgetContent + '</div>' );
 							if( $widgetContent.find('.panel-layout .panel-grid').length ) {
 								// This is a standard editor class widget
+								panels_info.class = 'SiteOrigin_Panels_Widgets_Layout';
 								panels_data.widgets.push( {
 									panels_data: thisModel.getPanelsDataFromHtml( widgetContent, editorClass ),
-									panels_info: {
-										class: 'SiteOrigin_Panels_Widgets_Layout',
-										raw: false,
-										grid: ri,
-										cell: ci
-									}
+									panels_info: panels_info
 								} );
 
 								// continue
@@ -425,17 +423,13 @@ module.exports = Backbone.Model.extend({
 						}
 
 						// This is a standard editor class widget
+						panels_info.class = editorClass;
 						panels_data.widgets.push( {
 							filter: "1",
 							text: widgetContent,
 							title: "",
 							type: "visual",
-							panels_info: {
-								class: editorClass,
-								raw: false,
-								grid: ri,
-								cell: ci
-							}
+							panels_info: panels_info
 						} );
 						return true;
 					} );

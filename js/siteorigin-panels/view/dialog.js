@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 	dialogClass: '',
 	parentDialog: false,
 	dialogOpen: false,
-	editableTitle: false,
+	editableLabel: false,
 
 	events: {
 		'click .so-close': 'closeDialog',
@@ -118,7 +118,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.dialog}
 	 */
 	renderDialog: function ( attributes ) {
-		attributes = _.extend( { editableTitle: this.editableTitle }, attributes );
+		attributes = _.extend( { editableLabel: this.editableLabel }, attributes );
 		this.$el.html( this.dialogTemplate( attributes ) ).hide();
 		this.$el.data( 'view', this );
 		this.$el.addClass( 'so-panels-dialog-wrapper' );
@@ -136,7 +136,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		if( this.$( '.so-title-bar .so-title-editable' ).length ) {
-			this.initEditableTitle();
+			this.initEditableLabel();
 		}
 
 		return this;
@@ -222,7 +222,7 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Initialize the editable dialog title
 	 */
-	initEditableTitle: function(){
+	initEditableLabel: function(){
 		// Added here because .so-edit-title is only available after the template has been rendered.
 		var $editElt = this.$( '.so-title-bar .so-title-editable' );
 		var saveTitle = function( event ) {
@@ -238,7 +238,7 @@ module.exports = Backbone.View.extend( {
 				}
 
 				$editElt.text( value );
-				this.trigger( 'edit_title', value );
+				this.trigger( 'edit_label', value );
 
 				if( event.type !== 'blur' ) {
 					$editElt.blur();

@@ -45,10 +45,11 @@ module.exports = Backbone.Model.extend( {
 			} else {
 				return '';
 			}
-		} else if ( this.has( 'title' ) ) {
-			return this.get( 'title' );
+		} else if ( this.has( 'label' ) ) {
+			// Use the label instead of the actual widget title
+			return this.get( 'label' );
 		} else {
-			return panelsOptions.widgets[this.get( 'class' )][field];
+			return panelsOptions.widgets[ this.get( 'class' ) ][ field ];
 		}
 	},
 

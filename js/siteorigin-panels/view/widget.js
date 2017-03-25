@@ -26,8 +26,7 @@ module.exports = Backbone.View.extend( {
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		this.model.on( 'change:values', this.onModelChange, this );
-
-		this.model.on( 'change:title', this.onTitleChange, this );
+		this.model.on( 'change:label', this.onLabelChange, this );
 	},
 
 	/**
@@ -167,8 +166,8 @@ module.exports = Backbone.View.extend( {
 		this.$( '.description' ).html( this.model.getTitle() );
 	},
 
-	onTitleChange: function( model, title) {
-		this.$( '.title > h4' ).text( title );
+	onLabelChange: function( model, text ) {
+		this.$( '.title > h4' ).text( text );
 	},
 
 	/**
