@@ -1,25 +1,25 @@
 var liveEditor = window.liveEditor, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	// rows: [],
-
 	liveEditor: null,
+
+	rows: [],
 
 	initialize: function( options ){
 		this.setElement( options.$el );
-
-		options.$el.data( 'view', this );
+		this.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var layoutView = this;
 
 		layoutView.$( '> .panel-grid' ).each( function( i, el ){
-			var $$ = $(el);
+			var $$ = $( el );
 			var rowView = new liveEditor.view.row( {
-				model: layoutView.model.rows.at( i ),
+				model: layoutView.model.get('rows').at( i ),
 				$el: $$
 			} );
 			rowView.layout = layoutView;
+			layoutView.rows.push( rowView );
 		} );
 
 		// Store the main Page Builder Live Editor manager

@@ -4,12 +4,11 @@ module.exports = Backbone.View.extend( {
 	// The layout view that this widget belongs to
 	layout: null,
 
-	// cells: [],
+	cells: [],
 
 	initialize: function( options ){
 		this.setElement( options.$el );
-
-		options.$el.data( 'view', this );
+		this.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var rowView = this;
@@ -17,11 +16,11 @@ module.exports = Backbone.View.extend( {
 		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
 			var $$ = $(el);
 			var cellView = new liveEditor.view.cell( {
-				model: rowView.model.cells.at( i ),
+				model: rowView.model.get('cells').at( i ),
 				$el: $$
 			} );
 			cellView.row = rowView;
-			// rowView.cells.push( cellView );
+			rowView.cells.push( cellView );
 		} );
 
 		this.listenTo( this.model, 'move', this.handleReposition );
@@ -29,8 +28,8 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model, 'change:style', this.handleChangeStyle );
 
 		// For adding and removing cells
-		this.listenTo( this.model.cells, 'add', this.handleCellAddRemove );
-		this.listenTo( this.model.cells, 'remove', this.handleCellAddRemove );
+		this.listenTo( this.model.get('cells'), 'add', this.handleCellAddRemove );
+		this.listenTo( this.model.get('cells'), 'remove', this.handleCellAddRemove );
 	},
 
 	/**
@@ -42,7 +41,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	handleReposition: function(){
-		var rowIndex = this.model.builder.rows.indexOf( this.model ),
+		var rowIndex = this.model.builder.get('rows').indexOf( this.model ),
 			rowContainer = this.layout.getRowsContainer();
 
 		if( rowContainer.length ) {
@@ -70,7 +69,7 @@ module.exports = Backbone.View.extend( {
 		var rowView = this;
 		rowView.$( '> .panel-row-style > .panel-grid-cell, > .panel-grid-cell' ).each( function( i, el ){
 			var $$ = $(this);
-			var cell = rowView.model.cells.at( i );
+			var cell = rowView.model.get('cells').at( i );
 			if( cell !== undefined ) {
 				$$.css( 'width', ( cell.get('weight') * 100 ) + '%' );
 			}

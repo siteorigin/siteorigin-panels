@@ -4,12 +4,11 @@ module.exports = Backbone.View.extend( {
 	// The row view that this widget belongs to
 	row: null,
 
-	// widgets: [],
+	widgets: [],
 
 	initialize: function( options ){
 		this.setElement( options.$el );
-
-		options.$el.data( 'view', this );
+		this.$el.data( 'view', this );
 
 		// Create the rows, cells and widget views
 		var cellView = this;
@@ -17,11 +16,11 @@ module.exports = Backbone.View.extend( {
 		cellView.$( '> .so-panel' ).each( function( i, el ){
 			var $$ = $(el);
 			var widgetView = new liveEditor.view.widget( {
-				model: cellView.model.widgets.at( i ),
+				model: cellView.model.get('widgets').at( i ),
 				$el: $$
 			} );
 			widgetView.cell = cellView;
-			// cellView.widgets.push( widgetView );
+			cellView.widgets.push( widgetView );
 		} );
 	},
 

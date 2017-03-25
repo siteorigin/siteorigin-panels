@@ -17,9 +17,11 @@ module.exports = Backbone.View.extend( {
 	handleReposition: function(){
 		// We need to move this view
 
-		var rowIndex = this.model.cell.row.builder.rows.indexOf( this.model.cell.row ),
-			cellIndex = this.model.cell.row.cells.indexOf( this.model.cell ),
-			widgetIndex = this.model.cell.widgets.indexOf( this.model );
+		console.log( this.model );
+
+		var rowIndex = this.model.cell.row.builder.get('rows').indexOf( this.model.cell.row ),
+			cellIndex = this.model.cell.row.get('cells').indexOf( this.model.cell ),
+			widgetIndex = this.model.cell.get('widgets').indexOf( this.model );
 
 		var rowView = this.cell.row.layout.rowAt( rowIndex ),
 			cellView = rowView.cellAt( cellIndex ),

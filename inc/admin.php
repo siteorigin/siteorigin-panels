@@ -242,6 +242,7 @@ class SiteOrigin_Panels_Admin {
 			$user = wp_get_current_user();
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
+				'post_id'                   => get_the_ID(),
 				'ajaxurl'                   => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ),
 				'widgets'                   => $widgets,
 				'text_widget'               => $text_widget,
