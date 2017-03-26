@@ -183,9 +183,11 @@ class SiteOrigin_Panels_Admin {
 			if( siteorigin_panels_setting( 'copy-content' ) ) {
 				// Store a version of the HTML in post_content
 				SiteOrigin_Panels_Post_Content_Filters::add_filters();
+				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
 				$post_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data );
 				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = false;
 
 				// Update the post_content
 				$post->post_content = $post_content . "\n\n";

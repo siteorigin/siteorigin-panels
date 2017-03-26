@@ -44,6 +44,8 @@ class SiteOrigin_Panels_Cache {
 	 */
 	private function start_cache_render( $post_id ){
 		$this->clear_cache( $post_id );
+
+		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = true;
 		$this->cache_render = true;
 		$this->post_id = $post_id;
 
@@ -57,6 +59,7 @@ class SiteOrigin_Panels_Cache {
 	 * Let the caching system know that we're no longer in a cache render.
 	 */
 	private function end_cache_render( ){
+		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = false;
 		$this->cache_render = false;
 		do_action( 'siteorigin_panels_end_cache_render', $this->post_id );
 	}

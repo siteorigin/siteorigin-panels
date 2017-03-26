@@ -45,7 +45,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {
 			$the_widget = $wp_widget_factory->widgets[ $attr[ 'class' ] ];
 
-			$meta = json_decode( html_entity_decode( $content ), true );
+			$meta = json_decode( self::unescape_json( $content ), true );
 
 			$widget_args = ! empty( $meta[ 'args' ] ) ? $meta[ 'args' ] : array();
 			$widget_instance = ! empty( $meta[ 'instance' ] ) ? $meta[ 'instance' ] : array();
@@ -75,28 +75,21 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	static function get_shortcode( $widget, $args, $instance ){
 		unset( $instance[ 'panels_info' ] );
 
-		$widget_data = array(
-			'instance' => $instance,
-			'args' => $args,
-		);
-
 		// This will always be handled by Page Builder or the cached version
-		unset( $args['before_widget'] );
-		unset( $args['after_widget'] );
 
 		// This allows other plugins to implement their own shortcode. For example, to work when Page Builder isn't active
 		$shortcode_name = apply_filters( 'siteorigin_panels_cache_shortcode', 'siteorigin_widget', $widget, $instance, $args );
 
 		$shortcode = '[' . $shortcode_name . ' ';
 		$shortcode .= 'class="' . htmlentities( get_class( $widget ) ) . '"]';
-		$shortcode .= htmlentities( wp_json_encode( $widget_data ) );
+		$shortcode .= self::escape_json( wp_json_encode( $instance ) ) ;
 		$shortcode .= '[/' . $shortcode_name . ']';
 
 		return $shortcode;
 	}
 
 	/**
-	 *
+	 * A filter to replace widgets with
 	 */
 	static function widget_html( $html, $widget, $args, $instance ){
 		if(
@@ -109,5 +102,13 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		}
 
 		return self::get_shortcode( $widget, $args, $instance );
+	}
+
+	static function escape_json( $string ){
+		return $string;
+	}
+
+	static function unescape_json( $string ){
+		return $string;
 	}
 }
