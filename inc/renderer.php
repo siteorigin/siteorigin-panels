@@ -18,6 +18,7 @@ class SiteOrigin_Panels_Renderer {
 	/**
 	 * Add CSS that needs to go inline.
 	 *
+	 * @param $post_id
 	 * @param $css
 	 */
 	public function add_inline_css( $post_id, $css ) {
@@ -28,6 +29,11 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		$this->inline_css[ $post_id ] = $css;
+
+		// Enqueue the front styles, if they haven't already been enqueued
+		if( ! wp_style_is( 'siteorigin-panels-front', 'enqueued' ) ) {
+			wp_enqueue_style( 'siteorigin-panels-front' );
+		}
 	}
 
 	/**
@@ -39,12 +45,15 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return string
 	 */
-	public function generate_css( $post_id, $panels_data, $layout_data) {
+	public function generate_css( $post_id, $panels_data = false, $layout_data = false) {
 		// Exit if we don't have panels data
-		if ( empty( $layout_data ) ) {
-			if ( empty( $panels_data ) ) {
+		if ( empty( $panels_data ) ) {
+			$panels_data = get_post_meta( $post_id, 'panels_data', true );
+			if( empty( $panels_data ) ) {
 				return '';
 			}
+		}
+		if ( empty( $layout_data ) ) {
 			$layout_data = $this->get_panels_layout_data( $panels_data );
 		}
 
@@ -99,7 +108,7 @@ class SiteOrigin_Panels_Renderer {
 
 				if( ! isset( $row[ 'style' ][ 'mobile_collapse' ] ) || $row[ 'style' ][ 'mobile_collapse' ] ) {
 					// Mobile Responsive
-					$css->add_row_css( $post_id, $ri, ! empty( $row[ 'has_style_wrapper' ] ) ? ' > .panel-row-style' : '', array(
+					$css->add_row_css( $post_id, $ri, array( '.panel-no-style', '.panel-has-style > .panel-row-style' ), array(
 						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 						'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					), $panels_mobile_width );
@@ -137,12 +146,12 @@ class SiteOrigin_Panels_Renderer {
 			), $panels_mobile_width );
 
 			// Hide empty cells on mobile
-			$css->add_row_css( $post_id, false, '.panel-grid-cell-empty', array(
+			$css->add_row_css( $post_id, false, ' .panel-grid-cell-empty', array(
 				'display' => 'none',
 			), $panels_mobile_width );
 
 			// Hide empty cells on mobile
-			$css->add_row_css( $post_id, false, '.panel-grid-cell-mobile-last', array(
+			$css->add_row_css( $post_id, false, ' .panel-grid-cell-mobile-last', array(
 				'margin-bottom' => '0px',
 			), $panels_mobile_width );
 		}
@@ -170,8 +179,7 @@ class SiteOrigin_Panels_Renderer {
 
 		foreach ( $panels_data['widgets'] as $widget_id => $widget ) {
 			if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
-				$selector = '#panel-' . $post_id . '-' . $widget['panels_info']['grid'] . '-' . $widget['panels_info']['cell'] . '-' . $widget['panels_info']['cell_index'] . ' a';
-				$css->add_css( $selector, array(
+				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], ' a', array(
 					'color' => $widget['panels_info']['style']['link_color']
 				) );
 			}
@@ -465,7 +473,7 @@ class SiteOrigin_Panels_Renderer {
 			if ( ! empty( $the_css ) ) {
 				?>
 				<style type="text/css" media="all"
-				       id="siteorigin-panels-grids-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
+				       id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
 			}
 		}
 	}
@@ -475,7 +483,7 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	function enqueue_styles() {
 		// Register the style to support possible lazy loading
-		wp_register_style( 'siteorigin-panels-front', plugin_dir_url( __FILE__ ) . '../css/front.css', array(), SITEORIGIN_PANELS_VERSION );
+		wp_register_style( 'siteorigin-panels-front', SiteOrigin_Panels::front_css_url(), array(), SITEORIGIN_PANELS_VERSION );
 	}
 
 	/**
@@ -600,7 +608,6 @@ class SiteOrigin_Panels_Renderer {
 		$this->render_element( 'div', $row_attributes );
 
 		if ( ! empty( $row_style_wrapper ) ) {
-			$row['has_style_wrapper'] = true;
 			echo $row_style_wrapper;
 		}
 
@@ -667,7 +674,6 @@ class SiteOrigin_Panels_Renderer {
 		$cell_style = ! empty( $cell['style'] ) ? $cell['style'] : array();
 		$cell_style_wrapper = $this->start_style_wrapper( 'cell', $cell_style, $post_id . '-' . $ri . '-' . $ci );
 		if ( ! empty( $cell_style_wrapper ) ) {
-			$cell[ 'has_style_wrapper' ] = true;
 			echo $cell_style_wrapper;
 		}
 
@@ -703,9 +709,6 @@ class SiteOrigin_Panels_Renderer {
 			! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array(),
 			$post_id . '-' . $ri . '-' . $ci . '-' . $wi
 		);
-		if( ! empty( $widget_style_wrapper ) ) {
-			$widget['has_style_wrapper'] = true;
-		}
 
 		$this->the_widget(
 			$widget['panels_info'],

@@ -345,9 +345,14 @@ module.exports = Backbone.Model.extend({
 				return decodeHTMLEntities;
 			})();
 
-			$html.find('> .panel-layout > .panel-grid').each( function( ri, el ){
+			var $layout = $html.find( '.panel-layout' ).eq(0);
+			var filterNestedLayout = function( i, el ){
+				return jQuery( el ).closest( '.panel-layout' ).isEqualNode( $layout );
+			};
+
+			$html.find('> .panel-layout > .panel-grid').filter( filterNestedLayout ).each( function( ri, el ){
 				var $row = jQuery( el ),
-					$cells = $row.find( '> .panel-grid-cell, > .panel-row-style > .panel-grid-cell' );
+					$cells = $row.find( '.panel-grid-cell' ).filter( filterNestedLayout );
 
 				panels_data.grids.push( {
 					cells: $cells.length,
@@ -357,7 +362,7 @@ module.exports = Backbone.Model.extend({
 
 				$cells.each( function( ci, el ){
 					var $cell = jQuery( el ),
-						$widgets = $cell.find( '> .so-panel, > .panel-cell-style > .so-panel' );
+						$widgets = $cell.find( '.so-panel' ).filter( filterNestedLayout );
 
 					panels_data.grid_cells.push( {
 						grid: ri,
