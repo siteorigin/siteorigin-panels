@@ -91,7 +91,6 @@ module.exports = Backbone.View.extend( {
 
 		// Handle a content change
 		this.on( 'content_change', this.handleContentChange, this );
-		this.on( 'display_builder', this.handleContentChange, this );
 		this.on( 'display_builder', this.handleDisplayBuilder, this );
 		this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
 		this.model.on( 'change:data load_panels_data', this.toggleWelcomeDisplay, this );
