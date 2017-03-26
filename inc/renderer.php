@@ -29,7 +29,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		$this->inline_css[ $post_id ] = $css;
-		
+
 		// Enqueue the front styles, if they haven't already been enqueued
 		if( ! wp_style_is( 'siteorigin-panels-front', 'enqueued' ) ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );

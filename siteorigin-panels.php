@@ -212,7 +212,8 @@ class SiteOrigin_Panels {
 		if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
 			$panel_content = SiteOrigin_Panels_Renderer::single()->render(
 				get_the_ID(),
-				! is_singular() || get_the_ID() !== get_queried_object_id()
+				// Add CSS if this is not the main single post, this is handled by add_single_css
+				get_the_ID() !== get_queried_object_id()
 			);
 
 			if ( ! empty( $panel_content ) ) {
@@ -241,6 +242,9 @@ class SiteOrigin_Panels {
 		return $content;
 	}
 
+	/**
+	 * Add CSS for the single post/page
+	 */
 	public function add_single_css(){
 		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
 			$renderer = SiteOrigin_Panels_Renderer::single();
