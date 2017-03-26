@@ -347,7 +347,7 @@ module.exports = Backbone.Model.extend({
 
 			var $layout = $html.find( '.panel-layout' ).eq(0);
 			var filterNestedLayout = function( i, el ){
-				return jQuery( el ).closest( '.panel-layout' ).isEqualNode( $layout );
+				return jQuery( el ).closest( '.panel-layout' ).is( $layout );
 			};
 
 			$html.find('> .panel-layout > .panel-grid').filter( filterNestedLayout ).each( function( ri, el ){
