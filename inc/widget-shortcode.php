@@ -45,10 +45,10 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {
 			$the_widget = $wp_widget_factory->widgets[ $attr[ 'class' ] ];
 
-			$meta = json_decode( self::unescape_json( $content ), true );
+			$data = self::decode_data( $content );
 
-			$widget_args = ! empty( $meta[ 'args' ] ) ? $meta[ 'args' ] : array();
-			$widget_instance = ! empty( $meta[ 'instance' ] ) ? $meta[ 'instance' ] : array();
+			$widget_args = ! empty( $data[ 'args' ] ) ? $data[ 'args' ] : array();
+			$widget_instance = ! empty( $data[ 'instance' ] ) ? $data[ 'instance' ] : array();
 
 			$widget_args = wp_parse_args( array(
 				'before_widget' => '',
@@ -75,14 +75,17 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	static function get_shortcode( $widget, $args, $instance ){
 		unset( $instance[ 'panels_info' ] );
 
-		// This will always be handled by Page Builder or the cached version
+		$data = array(
+			'instance' => $instance,
+			'args' => $args,
+		);
 
 		// This allows other plugins to implement their own shortcode. For example, to work when Page Builder isn't active
 		$shortcode_name = apply_filters( 'siteorigin_panels_cache_shortcode', 'siteorigin_widget', $widget, $instance, $args );
 
 		$shortcode = '[' . $shortcode_name . ' ';
 		$shortcode .= 'class="' . htmlentities( get_class( $widget ) ) . '"]';
-		$shortcode .= self::escape_json( wp_json_encode( $instance ) ) ;
+		$shortcode .= self::encode_data( $data ) ;
 		$shortcode .= '[/' . $shortcode_name . ']';
 
 		return $shortcode;
@@ -104,11 +107,18 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		return self::get_shortcode( $widget, $args, $instance );
 	}
 
-	static function escape_json( $string ){
-		return $string;
+	static function encode_data( $data ){
+		return '<input type="hidden" value="' . htmlentities( json_encode( $data ), ENT_QUOTES ) . '" />';
 	}
 
-	static function unescape_json( $string ){
-		return $string;
+	static function decode_data( $string ){
+		preg_match( '/value="(.*)" \/>/', trim( $string ), $matches );
+		if( ! empty( $matches[1] ) ) {
+			$data = json_decode( html_entity_decode( $matches[1], ENT_QUOTES ), true );
+			return $data;
+		}
+		else {
+			return array();
+		}
 	}
 }
