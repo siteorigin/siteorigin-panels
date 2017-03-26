@@ -180,32 +180,20 @@ class SiteOrigin_Panels_Admin {
 		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
 			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
-			if(
-				siteorigin_panels_setting( 'copy-content' ) ||
-				siteorigin_panels_setting( 'cache-html' ) ||
-				siteorigin_panels_setting( 'cache-css' )
-			) {
-				// Save a copy of all this content into the posts's post_content
-				$cache = SiteOrigin_Panels_Cache::single();
-				$cache->generate_cache(
-					$post_id,
-					$panels_data,
-					siteorigin_panels_setting( 'cache-html' ) || siteorigin_panels_setting( 'cache-css' )
-				);
+			if( siteorigin_panels_setting( 'copy-content' ) ) {
+				// Store a version of the HTML in post_content
+				SiteOrigin_Panels_Post_Content_Filters::add_filters();
+				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
+				$post_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data );
+				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 
-				if( siteorigin_panels_setting( 'copy-content' ) ) {
-					SiteOrigin_Panels_Post_Content_Filters::add_filters();
-					$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
-					SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-
-					// Update the post_content
-					$post->post_content = $post_content . "\n\n";
-					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">';
-					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-					$post->post_content .= $cache->get_css();
-					$post->post_content .= '</style>';
-					wp_update_post( $post );
-				}
+				// Update the post_content
+				$post->post_content = $post_content . "\n\n";
+				$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">';
+				$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+				$post->post_content .= $post_css;
+				$post->post_content .= '</style>';
+				wp_update_post( $post );
 			}
 
 		} else {

@@ -32,15 +32,16 @@ class SiteOrigin_Panels {
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
-		if( siteorigin_panels_setting( 'cache-html' ) ) {
-			// We can use the cached content
-			add_filter( 'the_content', array( $this, 'cached_post_content' ), 5 );
-			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
-			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
-		}
-		else {
+		if( ! siteorigin_panels_setting( 'cache-content' ) ) {
 			// We need to generate fresh post content
 			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
+			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
+		}
+		else {
+			// We can use the cached content
+			add_filter( 'the_content', array( $this, 'cached_post_content' ), 1 ); // Run early to pretend to be post_content
+			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
+			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
 		}
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
@@ -209,7 +210,7 @@ class SiteOrigin_Panels {
 	 *
 	 * @filter the_content
 	 */
-	public function filter_content( $content ) {
+	public function generate_post_content( $content ) {
 		global $post;
 		if ( empty( $post ) && ! in_the_loop() ) {
 			return $content;
@@ -253,47 +254,37 @@ class SiteOrigin_Panels {
 		return $content;
 	}
 
+	public function generate_post_css() {
+		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+			$renderer = SiteOrigin_Panels_Renderer::single();
+			$renderer->add_inline_css( get_the_ID(), $renderer->generate_css( get_the_ID() ) );
+		}
+	}
+
 	public function cached_post_content( $content ){
-		global $post;
 		if (
-			( empty( $post ) && ! in_the_loop() ) ||
+			! in_the_loop() ||
 			! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ||
-			! get_post_meta( $post->ID, 'panels_data', true )
+			! get_post_meta( get_the_ID(), 'panels_data', true )
 		) {
 			return $content;
 		}
 
 		$cache = SiteOrigin_Panels_Cache::single();
-		$stored = $cache->get( $post->ID, true );
-		return $stored[ 'html' ];
-
-		return $content;
+		return $cache->get( 'html', get_the_ID() );
 	}
 
 	public function cached_post_css(){
 		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
 			$cache = SiteOrigin_Panels_Cache::single();
-			$stored = $cache->get( get_the_ID(), true );
-
-			?>
-			<style type="text/css"><?php echo $stored[ 'css' ] ?></style>
-			<?php
+			$stored = $cache->get( 'css', get_the_ID() );
+			SiteOrigin_Panels_Renderer::single()->add_inline_css( get_the_ID(), $stored );
 		}
 	}
 
 	public function cached_post_enqueue(){
 		wp_enqueue_style( 'siteorigin-panels-front' );
 		wp_enqueue_script( 'siteorigin-panels-front-styles' );
-	}
-
-	/**
-	 * Add CSS for the single post/page
-	 */
-	public function add_single_css(){
-		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
-			$renderer = SiteOrigin_Panels_Renderer::single();
-			$renderer->add_inline_css( get_the_ID(), $renderer->generate_css( get_the_ID() ) );
-		}
 	}
 
 	/**

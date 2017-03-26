@@ -4,16 +4,29 @@ class SiteOrigin_Panels_Cache {
 
 	private $cache_render;
 	private $post_id;
-	private $css;
-	private $html;
+	private $cache;
 
 	function __construct() {
 		$this->cache_render = false;
 
-		// Some situations to clear the cache
-		add_action( 'siteorigin_panels_version_changed', array( $this, 'clear_cache' ) );
-		add_action( 'activated_plugin', array( $this, 'clear_cache' ) );
-		add_action( 'switch_theme', array( $this, 'clear_cache' ) );
+		$this->cache = array(
+			'html' => array(),
+			'css' => array(),
+		);
+
+		// Clear cache when the Page Builder version changes
+		add_action( 'siteorigin_panels_version_changed', array( $this, 'clear_cache' ), 10, 0 );
+
+		// When we activate/deactivate a plugin or switch themes that might change rendering
+		add_action( 'activated_plugin', array( $this, 'clear_cache' ), 10, 0 );
+		add_action( 'deactivated_plugin', array( $this, 'clear_cache' ), 10, 0 );
+		add_action( 'switch_theme', array( $this, 'clear_cache' ), 10, 0 );
+
+		// When settings are saved, this is also a good way to force a cache refresh
+		add_action( 'siteorigin_panels_save_settings', array( $this, 'clear_cache' ), 10, 0 );
+
+		// When a single post is saved
+		add_action( 'save_post', array( $this, 'clear_cache' ), 10, 2 );
 	}
 
 	/**
@@ -25,48 +38,17 @@ class SiteOrigin_Panels_Cache {
 	}
 
 	/**
-	 * Generate the HTML and CSS for a given post.
-	 *
-	 * @param $post_id
-	 * @param $panels_data
-	 * @param bool $save
-	 */
- 	public function generate_cache( $post_id, $panels_data, $save = false ){
- 		if( empty( $panels_data ) ) {
-		    $panels_data = get_post_meta( $post_id, 'panels_data', true );
-		    if( empty( $panels_data ) ) return;
-	    }
-
-	    $this->start_cache_render( $post_id );
-
-	    // Generate the HTML for the post
-	    $panels_html = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data, $layout_data );
-	    $this->add_html( $panels_html );
-
-	    // Create a single line version of the CSS
-	    $panels_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data, $layout_data );
-	    $this->add_css( $panels_css );
-
-	    $this->end_cache_render();
-
-	    if( $save ) {
-	    	$this->save( $post_id );
-	    }
-	}
-
-	/**
 	 * Tell the caching object that we're starting a cache
 	 *
 	 * @param $post_id
 	 */
 	private function start_cache_render( $post_id ){
 		$this->clear_cache( $post_id );
-		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = true;
 		$this->cache_render = true;
 		$this->post_id = $post_id;
 
-		$this->css = '';
-		$this->html = '';
+		$this->cache[ 'html' ][ $post_id ] = '';
+		$this->cache[ 'css' ][ $post_id ] = '';
 
 		do_action( 'siteorigin_panels_start_cache_render', $post_id );
 	}
@@ -74,10 +56,20 @@ class SiteOrigin_Panels_Cache {
 	/**
 	 * Let the caching system know that we're no longer in a cache render.
 	 */
-	private function end_cache_render(  ){
-		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = false;
+	private function end_cache_render( ){
 		$this->cache_render = false;
 		do_action( 'siteorigin_panels_end_cache_render', $this->post_id );
+	}
+
+	/**
+	 * Save the generated cache data.
+	 */
+	public function save( $post_id ){
+		update_post_meta( $this->post_id, 'siteorigin_panels_cache', array(
+			'version' => SITEORIGIN_PANELS_VERSION,
+			'html' => SiteOrigin_Panels_Admin::double_slash_string( $this->cache[ 'html' ][ $post_id ] ),
+			'css' => SiteOrigin_Panels_Admin::double_slash_string( $this->cache[ 'css' ][ $post_id ] ),
+		) );
 	}
 
 	/**
@@ -89,58 +81,30 @@ class SiteOrigin_Panels_Cache {
 		return $this->cache_render;
 	}
 
-	public function add_css( $css ){
-		if( ! $this->is_cache_render() ) {
-			throw new Exception( 'A cache render must be started before adding CSS' );
-		}
-		$this->css .= trim( preg_replace( '/\s+/', ' ', $css ) ) . ' ';
-	}
-
-	public function add_html( $html ){
+	public function add( $type, $html ){
 		if( ! $this->is_cache_render() ) {
 			throw new Exception( 'A cache render must be started before adding HTML' );
 		}
-		$this->html .= trim( $html ) . ' ';
+		$this->cache[ $type ][ $this->post_id ] .= trim( $html ) . ' ';
 	}
 
-	public function get_css( ){
-		return $this->css;
-	}
-
-	public function get_html( ){
-		return $this->css;
-	}
-
-	/**
-	 * Save the generated cache data.
-	 */
-	public function save( ){
-		add_post_meta( $this->post_id, 'siteorigin_panels_cache', array(
-			'version' => SITEORIGIN_PANELS_VERSION,
-			'html' => SiteOrigin_Panels_Admin::double_slash_string( $this->html ),
-			'css' => SiteOrigin_Panels_Admin::double_slash_string( $this->css ),
-		) );
-	}
-
-	/**
-	 * Get the current value of the post meta
-	 *
-	 * @param $post_id
-	 * @param bool $generate
-	 *
-	 * @return bool|mixed The current value of the HTML and css cache.
-	 */
-	public function get( $post_id, $generate = true ){
-		$meta = get_post_meta( $post_id, 'siteorigin_panels_cache', true );
-		if( ! empty( $meta[ 'version' ] ) && $meta[ 'version' ] == SITEORIGIN_PANELS_VERSION ) {
-			unset( $meta[ 'version' ] );
-			return $meta;
-		}
-		else if( $generate ) {
-			$this->generate_cache( $post_id );
+	public function get( $type, $post_id ){
+		if( ! empty( $this->cache[ $type ][ $post_id ] ) ) {
+			return $this->cache[ $type ][ $post_id ];
 		}
 		else {
-			return false;
+			// Try get this from the meta
+			$cache_meta = get_post_meta( $post_id, 'siteorigin_panels_cache', true );
+			if(
+				! empty( $cache_meta ) &&
+				! empty( $cache_meta[ $type ] ) &&
+				$cache_meta[ 'version' ] == SITEORIGIN_PANELS_VERSION
+			) {
+				return $cache_meta[ $type ];
+			}
+
+			$this->refresh_cache( $post_id );
+			return $this->cache[ $type ][ $post_id ];
 		}
 	}
 
@@ -157,5 +121,32 @@ class SiteOrigin_Panels_Cache {
 		else {
 			delete_post_meta( $post_id, 'siteorigin_panels_cache' );
 		}
+	}
+
+	private function refresh_cache( $post_id, $save = true ) {
+		$this->start_cache_render( $post_id );
+
+		if( empty( $this->cache[ 'html' ][ $post_id ] ) ) {
+			// Generate the HTML for the post
+			$panels_html = SiteOrigin_Panels_Renderer::single()->render( $post_id, false );
+			$this->add( 'html', $panels_html );
+		}
+
+		if( empty( $this->cache[ 'css' ][ $post_id ] ) ) {
+			// Create a single line version of the CSS
+			$panels_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id );
+			$this->add( 'css', $panels_css );
+		}
+
+		$this->end_cache_render();
+
+		if( $save ) {
+			$this->save( $post_id );
+		}
+
+		return array(
+			'html' => $this->cache[ 'html' ][ $post_id ],
+			'css' => $this->cache[ 'css' ][ $post_id ],
+		);
 	}
 }

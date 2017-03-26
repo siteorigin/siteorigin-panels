@@ -3,14 +3,18 @@
 class SiteOrigin_Panels_Widget_Shortcode {
 
 	static $text_widgets = array(
-		'SiteOrigin_Panels_Editor_Widget',
+		'SiteOrigin_Widget_Editor_Widget',
 		'SiteOrigin_Panels_Widgets_Layout',
 		'WP_Widget_Black_Studio_TinyMCE',
 		'WP_Widget_Text',
 	);
 
 	static function init() {
-		add_shortcode( 'siteorigin_widget', array( 'SiteOrigin_Panels_Widget_Shortcode', 'shortcode' ) );
+		add_shortcode( 'siteorigin_widget', 'SiteOrigin_Panels_Widget_Shortcode::shortcode' );
+
+		// Integration with the cache rendering system
+		add_action( 'siteorigin_panels_start_cache_render', 'SiteOrigin_Panels_Widget_Shortcode::add_filters' );
+		add_action( 'siteorigin_panels_end_cache_render', 'SiteOrigin_Panels_Widget_Shortcode::remove_filters' );
 	}
 
 	static function add_filters() {
@@ -21,11 +25,21 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		remove_filter( 'siteorigin_panels_the_widget_html', 'SiteOrigin_Panels_Widget_Shortcode::widget_html' );
 	}
 
+	/**
+	 * This shortcode just displays a widget based on the given arguments
+	 *
+	 * @param $attr
+	 * @param $content
+	 *
+	 * @return string
+	 */
 	static function shortcode( $attr, $content ){
 		$attr = shortcode_atts( array(
 			'class' => false,
 			'id' => '',
 		), $attr, 'panels_widget' );
+
+		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
 
 		global $wp_widget_factory;
 		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {
