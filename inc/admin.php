@@ -886,16 +886,12 @@ class SiteOrigin_Panels_Admin {
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
-		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
-
-		do_action( 'siteorigin_panels_setup_database_render', $_POST['post_id'] );
-		$filters = SiteOrigin_Panels_Post_Content_Filters::single();
-		$filters->clear_filters();
-		$filters->setup_filters();
-
+		// Create a version of the builder data for post content
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
-
-		unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
 		wp_die();
 	}
