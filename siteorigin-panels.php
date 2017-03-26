@@ -33,6 +33,7 @@ class SiteOrigin_Panels {
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
 		// This is the main filter
+		add_filter( 'wp_enqueue_scripts', array( $this, 'add_single_css' ) );
 		add_filter( 'the_content', array( $this, 'filter_content' ) );
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 
@@ -197,7 +198,7 @@ class SiteOrigin_Panels {
 	 *
 	 * @filter the_content
 	 */
-	function filter_content( $content ) {
+	public function filter_content( $content ) {
 		global $post;
 
 		if ( empty( $post ) && ! in_the_loop() ) {
@@ -208,9 +209,11 @@ class SiteOrigin_Panels {
 		}
 
 		// Check if this post has panels_data
-		$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-		if ( ! empty( $panels_data ) ) {
-			$panel_content = SiteOrigin_Panels_Renderer::single()->render( $post->ID );
+		if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
+			$panel_content = SiteOrigin_Panels_Renderer::single()->render(
+				get_the_ID(),
+				! is_singular() || get_the_ID() !== get_queried_object_id()
+			);
 
 			if ( ! empty( $panel_content ) ) {
 				$content = $panel_content;
@@ -236,6 +239,13 @@ class SiteOrigin_Panels {
 		}
 
 		return $content;
+	}
+
+	public function add_single_css(){
+		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
+			$renderer = SiteOrigin_Panels_Renderer::single();
+			$renderer->add_inline_css( get_the_ID(), $renderer->generate_css( get_the_ID() ) );
+		}
 	}
 
 	/**

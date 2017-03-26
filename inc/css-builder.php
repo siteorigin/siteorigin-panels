@@ -77,21 +77,13 @@ class SiteOrigin_Panels_Css_Builder {
 			} else {
 				$selector[] = '#pg-' . $li . '-' . $ri;
 			}
-
 		}
 
-		// Add in the sub selector
-		if ( ! empty( $sub_selector ) ) {
-			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
-				$selector[ count( $selector )-1 ] .= $sub_selector;
-			}
-			else {
-				$selector[] = $sub_selector;
-			}
-		}
+		$selector = implode( ' ', $selector );
+		$selector = $this->add_sub_selector( $selector, $sub_selector );
 
 		// Add this to the CSS array
-		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
+		$this->add_css( $selector, $attributes, $resolution );
 	}
 
 	/**
@@ -127,18 +119,11 @@ class SiteOrigin_Panels_Css_Builder {
 			$selector[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
 		}
 
-		// Add in the sub selector
-		if ( ! empty( $sub_selector ) ) {
-			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
-				$selector[ count( $selector )-1 ] .= $sub_selector;
-			}
-			else {
-				$selector[] = $sub_selector;
-			}
-		}
+		$selector = implode( ' ', $selector );
+		$selector = $this->add_sub_selector( $selector, $sub_selector );
 
 		// Add this to the CSS array
-		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
+		$this->add_css( $selector, $attributes, $resolution );
 	}
 
 	/**
@@ -181,18 +166,36 @@ class SiteOrigin_Panels_Css_Builder {
 			$selector[] = '#panel-' . $li . '-' . $ri . '-' . $ci . '-' . $wi;
 		}
 
-		// Add in the sub selector
-		if ( ! empty( $sub_selector ) ) {
-			if( ! empty( $selector ) && substr( $sub_selector, 0, 1 ) == ':' ) {
-				$selector[ count( $selector )-1 ] .= $sub_selector;
-			}
-			else {
-				$selector[] = $sub_selector;
-			}
-		}
+		$selector = implode( ' ', $selector );
+		$selector = $this->add_sub_selector( $selector, $sub_selector );
 
 		// Add this to the CSS array
-		$this->add_css( implode( ' ', $selector ), $attributes, $resolution );
+		$this->add_css( $selector, $attributes, $resolution );
+	}
+
+	/**
+	 * Add a sub selector to the main selector
+	 *
+	 * @param string $selector
+	 * @param string|array $sub_selector
+	 *
+	 * @return string
+	 */
+	private function add_sub_selector( $selector, $sub_selector ){
+		$return = array();
+
+		if( ! empty( $sub_selector ) ) {
+			if( ! is_array( $sub_selector ) ) $sub_selector = array( $sub_selector );
+
+			foreach( $sub_selector as $sub ) {
+				$return[] = $selector . $sub;
+			}
+		}
+		else {
+			$return = array( $selector );
+		}
+
+		return implode( ', ', $return );
 	}
 
 	/**
