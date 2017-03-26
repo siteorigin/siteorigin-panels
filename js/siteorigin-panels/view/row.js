@@ -36,6 +36,7 @@ module.exports = Backbone.View.extend( {
 			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
+		this.model.on( 'change:label', this.onLabelChange, this );
 	},
 
 	/**
@@ -45,7 +46,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	render: function () {
 		var rowColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : 1;
-		this.setElement( this.template( { rowColorLabel: rowColorLabel } ) );
+		var rowLabel = this.model.has( 'label' ) ? this.model.get( 'label' ) : '';
+		this.setElement( this.template( { rowColorLabel: rowColorLabel, rowLabel: rowLabel } ) );
 		this.$el.data( 'view', this );
 
 		// Create views for the cells in this row
@@ -151,6 +153,14 @@ module.exports = Backbone.View.extend( {
 			thisView.model.destroy();
 			thisView.builder.model.refreshPanelsData();
 		} );
+	},
+
+	onLabelChange: function( model, text ) {
+		if ( this.$('.so-row-label').length == 0 ) {
+			this.$( '.so-row-toolbar' ).prepend( '<h3 class="so-row-label">' + text + '</h3>' );
+		} else {
+			this.$('.so-row-label').text( text );
+		}
 	},
 
 	/**

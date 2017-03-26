@@ -4,6 +4,8 @@ module.exports = panels.view.dialog.extend({
 
 	cellPreviewTemplate: _.template( panels.helpers.utils.processTemplate( $('#siteorigin-panels-dialog-row-cell-preview').html() ) ),
 
+	editableLabel: true,
+
 	events: {
 		'click .so-close': 'closeDialog',
 
@@ -67,6 +69,10 @@ module.exports = panels.view.dialog.extend({
 		});
 
 		this.on('close_dialog', this.closeHandler);
+
+		this.on( 'edit_label', function ( text ) {
+			this.model.set( 'label', text );
+		}.bind( this ) );
 	},
 
 	/**
@@ -82,6 +88,11 @@ module.exports = panels.view.dialog.extend({
 	 */
 	render: function () {
 		this.renderDialog(this.parseDialogContent($('#siteorigin-panels-dialog-row').html(), {dialogType: this.dialogType}));
+
+		var titleElt = this.dialogType === 'create' ? this.$( '.so-title  .add-row') : this.$( '.so-title .edit-row' );
+
+		var title = this.model.has( 'label' ) ? this.model.get( 'label' ) : titleElt.text();
+		this.$( '.so-edit-title' ).val( title );
 
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();

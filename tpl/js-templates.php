@@ -100,6 +100,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorLabel %}}">
 
 		<div class="so-row-toolbar">
+			{{% if( rowLabel ) { %}}
+			<h3 class="so-row-label">{{%= rowLabel %}}</h3>
+			{{% } %}}
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
 
 			<span class="so-dropdown-wrapper">
@@ -294,9 +297,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<h3 class="title">
 			{{% if( dialogType == 'create' ) { %}}
-				<span class="add-row"><?php _e('Add New Row', 'siteorigin-panels') ?></span>
+				<span class="add-row"><?php _e('New Row', 'siteorigin-panels') ?></span>
 			{{% } else { %}}
-				<span class="edit-row"><?php _e('Edit Row', 'siteorigin-panels') ?></span>
+				<span class="edit-row"><?php _e('Row', 'siteorigin-panels') ?></span>
 			{{% } %}}
 		</h3>
 
