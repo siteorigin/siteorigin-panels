@@ -756,7 +756,6 @@ module.exports = Backbone.View.extend( {
 	},
 
 	handleHideBuilder: function(){
-		console.log( 'hide builder' );
 		$('#post-status-info').show().removeClass( 'for-siteorigin-panels' );
 	},
 
