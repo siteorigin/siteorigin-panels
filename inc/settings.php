@@ -140,6 +140,7 @@ class SiteOrigin_Panels_Settings {
 
 		// Content fields
 		$defaults['copy-content'] = true;
+		$defaults['copy-styles'] = false;
 		$defaults['cache-content'] = true;
 
 		return $defaults;
@@ -386,6 +387,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Copy Content', 'siteorigin-panels' ),
 			'description' => __( 'Copy content from Page Builder to post content.', 'siteorigin-panels' ),
+		);
+
+		$fields['content']['fields']['copy-styles'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Copy Styles', 'siteorigin-panels' ),
+			'description' => __( 'Include styles into your Post Content. This keeps page layouts, even when Page Builder is deactivated.', 'siteorigin-panels' ),
 		);
 
 		$fields['content']['fields']['cache-content'] = array(

@@ -190,11 +190,14 @@ class SiteOrigin_Panels_Admin {
 				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
 				// Update the post_content
-				$post->post_content = $post_content . "\n\n";
-				$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">';
-				$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-				$post->post_content .= $post_css;
-				$post->post_content .= '</style>';
+				$post->post_content = $post_content;
+				if( siteorigin_panels_setting( 'copy-styles' ) ) {
+					$post->post_content .= "\n\n";
+					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">';
+					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+					$post->post_content .= $post_css;
+					$post->post_content .= '</style>';
+				}
 				wp_update_post( $post );
 			}
 
