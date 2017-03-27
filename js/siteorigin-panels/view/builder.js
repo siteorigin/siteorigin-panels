@@ -212,6 +212,12 @@ module.exports = Backbone.View.extend( {
 				// metabox.hide();
 				$( '#wp-content-wrap' ).removeClass( 'panels-active' );
 				$( '#content-resize-handle' ).show();
+
+				// Make sure the word count is visible
+				$('#post-status-info').css({
+					'margin-top' : null
+				});
+
 				thisView.trigger( 'hide_builder' );
 			} ).end()
 			.append(
@@ -220,7 +226,7 @@ module.exports = Backbone.View.extend( {
 					// Switch to the Page Builder interface
 					e.preventDefault();
 
-					var $$ = jQuery( this );
+					var $$ = $( this );
 
 					// Hide the standard content editor
 					$( '#wp-content-wrap, #post-status-info' ).hide();
@@ -231,6 +237,11 @@ module.exports = Backbone.View.extend( {
 					// Triggers full refresh
 					$( window ).resize();
 					$( document ).scroll();
+
+					// Make sure the word count is visible
+					$('#post-status-info').show().css({
+						'margin-top' : -21
+					});
 
 					thisView.trigger( 'display_builder' );
 
