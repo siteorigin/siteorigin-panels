@@ -367,6 +367,7 @@ module.exports = Backbone.Model.extend({
 					panels_data.grid_cells.push( {
 						grid: ri,
 						weight: ! _.isUndefined( $cell.data( 'weight' ) ) ? parseFloat( $cell.data( 'weight' ) ) : 1,
+						style: $cell.data( 'style' ),
 					} );
 
 					$widgets.each( function( wi, el ){
