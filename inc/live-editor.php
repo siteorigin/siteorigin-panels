@@ -1,6 +1,10 @@
 <?php
 
-
+/**
+ * The live editor class. Only loaded when in live editor mode.
+ *
+ * Class SiteOrigin_Panels_Live_Editor
+ */
 class SiteOrigin_Panels_Live_Editor {
 
 	function __construct() {
@@ -10,6 +14,9 @@ class SiteOrigin_Panels_Live_Editor {
 
 		// Don't display the admin bar when in live editor mode
 		add_filter( 'show_admin_bar', '__return_false' );
+
+		// Don't use the cached version
+		add_filter( 'siteorigin_panels_use_cached', '__return_false' );
 	}
 
 	public static function single() {

@@ -347,7 +347,7 @@ module.exports = Backbone.Model.extend({
 
 			var $layout = $html.find( '.panel-layout' ).eq(0);
 			var filterNestedLayout = function( i, el ){
-				return jQuery( el ).closest( '.panel-layout' ).isEqualNode( $layout );
+				return jQuery( el ).closest( '.panel-layout' ).is( $layout );
 			};
 
 			$html.find('> .panel-layout > .panel-grid').filter( filterNestedLayout ).each( function( ri, el ){
@@ -385,10 +385,10 @@ module.exports = Backbone.Model.extend({
 						var match = re.exec( widgetContent );
 						if( ! _.isNull( match ) && widgetContent.replace( re, '' ).trim() === '' ) {
 							try {
-								var classMatch = /class="(.*?)"/.exec( match[3] );
-								var meta = JSON.parse( decodeEntities( match[5] ) );
-
-								var newWidget = meta.instance;
+								var classMatch = /class="(.*?)"/.exec( match[3] ),
+									dataInput = jQuery( match[5] ),
+									data = JSON.parse( decodeEntities( dataInput.val( ) ) ),
+									newWidget = data.instance;
 
 								panels_info.class = classMatch[1];
 								panels_info.raw = false;
@@ -397,7 +397,7 @@ module.exports = Backbone.Model.extend({
 								panels_data.widgets.push( newWidget );
 							}
 							catch ( err ) {
-								// This is a standard editor class widget
+								// There was a problem, so treat this as a standard editor widget
 								panels_info.class = editorClass;
 								panels_data.widgets.push( {
 									filter: "1",

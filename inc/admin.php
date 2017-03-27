@@ -9,6 +9,11 @@ class SiteOrigin_Panels_Admin {
 
 	const LAYOUT_URL = 'http://layouts.siteorigin.com/';
 
+	/**
+	 * @var bool Store that we're in the save post action, to prevent infinite loops
+	 */
+	private $in_save_post;
+
 	function __construct() {
 
 		add_action( 'plugin_action_links_siteorigin-panels/siteorigin-panels.php', array(
@@ -59,6 +64,8 @@ class SiteOrigin_Panels_Admin {
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
+
+		$this->in_save_post = false;
 	}
 
 	/**
@@ -150,7 +157,7 @@ class SiteOrigin_Panels_Admin {
 	function save_post( $post_id, $post ) {
 		// Check that everything is valid with this save.
 		if(
-			isset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ||
+			$this->in_save_post ||
 			( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ||
 			empty( $_POST['_sopanels_nonce'] ) ||
 			! wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ||
@@ -159,7 +166,7 @@ class SiteOrigin_Panels_Admin {
 		) {
 			return;
 		}
-
+		$this->in_save_post     = true;
 		$old_panels_data        = get_post_meta( $post_id, 'panels_data', true );
 		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 
@@ -174,33 +181,32 @@ class SiteOrigin_Panels_Admin {
 			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
 			if( siteorigin_panels_setting( 'copy-content' ) ) {
-				// Save a copy of all this content into the posts's post_content
-				$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
+				// Store a version of the HTML in post_content
+				SiteOrigin_Panels_Post_Content_Filters::add_filters();
+				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
+				$post_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data );
+				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
-				// This gives other plugins the chance to
-				do_action( 'siteorigin_panels_setup_database_render', $post_id );
-				$filters = SiteOrigin_Panels_Post_Content_Filters::single();
-				$filters->clear_filters();
-				$filters->setup_filters();
-
-				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data, $layout_data );
-
-				$post_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-				$post_css .= SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data, $layout_data );
-				$post_css = preg_replace( '/\s+/', ' ', $post_css );
-
-				$post_content .=  "\n\n" . '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">' . $post_css . '</style>';
+				// Update the post_content
 				$post->post_content = $post_content;
-
-				// Update the post_content for this post
+				if( siteorigin_panels_setting( 'copy-styles' ) ) {
+					$post->post_content .= "\n\n";
+					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $post_id ) . '">';
+					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+					$post->post_content .= $post_css;
+					$post->post_content .= '</style>';
+				}
 				wp_update_post( $post );
-				unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
 			}
 
 		} else {
 			// There are no widgets or rows, so delete the panels data
 			delete_post_meta( $post_id, 'panels_data' );
 		}
+
+		$this->in_save_post = false;
 	}
 
 	/**
@@ -883,16 +889,12 @@ class SiteOrigin_Panels_Admin {
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
-		$GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] = true;
-
-		do_action( 'siteorigin_panels_setup_database_render', $_POST['post_id'] );
-		$filters = SiteOrigin_Panels_Post_Content_Filters::single();
-		$filters->clear_filters();
-		$filters->setup_filters();
-
+		// Create a version of the builder data for post content
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
-
-		unset( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] );
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
 		wp_die();
 	}
