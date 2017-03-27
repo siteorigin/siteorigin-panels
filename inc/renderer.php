@@ -186,7 +186,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Let other plugins and components filter the CSS object.
-		$css = apply_filters( 'siteorigin_panels_css_object', $css, $panels_data, $post_id );
+		$css = apply_filters( 'siteorigin_panels_css_object', $css, $panels_data, $post_id, $layout_data );
 
 		return $css->get_css();
 	}
