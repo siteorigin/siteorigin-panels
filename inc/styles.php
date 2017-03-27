@@ -31,7 +31,7 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_widget_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
 
 		// Main filter to add any custom CSS.
-		add_filter( 'siteorigin_panels_css_object', array( $this, 'filter_css_object' ), 10, 3 );
+		add_filter( 'siteorigin_panels_css_object', array( $this, 'filter_css_object' ), 10, 4 );
 
 		// Filtering specific attributes
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
@@ -484,14 +484,14 @@ class SiteOrigin_Panels_Styles {
 	 *
 	 * @return mixed
 	 */
-	static function filter_css_object( $css, $panels_data, $post_id ) {
+	static function filter_css_object( $css, $panels_data, $post_id, $layout ) {
 		$mobile_width = siteorigin_panels_setting( 'mobile-width' );
+		if( empty( $layout ) ) {
+			return $css;
+		}
 
-		// Add in the row  styling
-		foreach ( $panels_data['grids'] as $i => $row ) {
-			if ( empty( $row['style'] ) ) {
-				continue;
-			}
+		foreach( $layout as $ri => $row ) {
+			if( empty( $row[ 'style' ] ) ) $row[ 'style' ] = array();
 
 			$standard_css = apply_filters( 'siteorigin_panels_row_style_css', array(), $row['style'] );
 			$mobile_css = apply_filters( 'siteorigin_panels_row_style_mobile_css', array(), $row['style'] );
@@ -499,7 +499,7 @@ class SiteOrigin_Panels_Styles {
 			if ( ! empty( $standard_css ) ) {
 				$css->add_row_css(
 					$post_id,
-					$i,
+					$ri,
 					'> .panel-row-style',
 					$standard_css
 				);
@@ -507,7 +507,7 @@ class SiteOrigin_Panels_Styles {
 			if ( ! empty( $mobile_css ) ) {
 				$css->add_row_css(
 					$post_id,
-					$i,
+					$ri,
 					'> .panel-row-style',
 					$mobile_css,
 					$mobile_width
@@ -518,7 +518,7 @@ class SiteOrigin_Panels_Styles {
 			if ( ! empty( $row['style']['cell_alignment'] ) ) {
 				$css->add_row_css(
 					$post_id,
-					$i,
+					$ri,
 					'',
 					array(
 						'-webkit-align-items' => $row['style']['cell_alignment'],
@@ -526,78 +526,80 @@ class SiteOrigin_Panels_Styles {
 					)
 				);
 			}
-		}
 
-		foreach ( $panels_data['grid_cells'] as $i => $cell ) {
-			if ( empty( $cell['style'] ) ) {
-				continue;
-			}
+			// Process the cells if there are any
+			if( empty( $row[ 'cells' ] ) ) continue;
 
-			$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
-			$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
+			foreach( $row[ 'cells' ] as $ci => $cell ) {
+				if( empty( $cell[ 'style' ] ) ) $cell[ 'style' ] = array();
 
-			if ( ! empty( $standard_css ) ) {
-				$css->add_cell_css(
-					$post_id,
-					$cell['grid'],
-					$cell['index'],
-					'> .panel-cell-style',
-					$standard_css
-				);
-			}
-			if ( ! empty( $mobile_css ) ) {
-				$css->add_cell_css(
-					$post_id,
-					$cell['grid'],
-					$cell['index'],
-					'> .panel-cell-style',
-					$mobile_css,
-					$mobile_width
-				);
-			}
-			if ( ! empty( $style['vertical_alignment'] ) ) {
-				$css->add_cell_css(
-					$post_id,
-					$cell['grid'],
-					$cell['index'],
-					'',
-					array(
-						'align-self' => $style['vertical_alignment']
-					)
-				);
-			}
-		}
+				$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
+				$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
 
-		// Add in the widget padding styling
-		foreach ( $panels_data['widgets'] as $i => $widget ) {
-			if ( empty( $widget['panels_info'] ) ) {
-				continue;
-			}
+				if ( ! empty( $standard_css ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'> .panel-cell-style',
+						$standard_css
+					);
+				}
+				if ( ! empty( $mobile_css ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'> .panel-cell-style',
+						$mobile_css,
+						$mobile_width
+					);
+				}
+				if ( ! empty( $style['vertical_alignment'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'',
+						array(
+							'align-self' => $style['vertical_alignment']
+						)
+					);
+				}
 
-			$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), ! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array() );
-			$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), ! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array() );
+				// Process the widgets if there are any
+				if( empty( $cell[ 'widgets' ] ) ) continue;
 
-			if( ! empty( $standard_css ) ) {
-				$css->add_widget_css(
-					$post_id,
-					$widget['panels_info']['grid'],
-					$widget['panels_info']['cell'],
-					$widget['panels_info']['cell_index'],
-					'> .panel-widget-style',
-					$standard_css
-				);
-			}
+				foreach( $cell['widgets'] as $wi => $widget ) {
+					if ( empty( $widget['panels_info'] ) ) continue;
+					if ( empty( $widget['panels_info']['style'] ) ) $widget['panels_info']['style'] = array();
 
-			if( ! empty( $mobile_css ) ) {
-				$css->add_widget_css(
-					$post_id,
-					$widget['panels_info']['grid'],
-					$widget['panels_info']['cell'],
-					$widget['panels_info']['cell_index'],
-					'> .panel-widget-style',
-					$mobile_css,
-					$mobile_width
-				);
+					$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
+					$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
+
+					if( ! empty( $standard_css ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'> .panel-widget-style',
+							$standard_css
+						);
+					}
+
+					if( ! empty( $mobile_css ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'> .panel-widget-style',
+							$mobile_css,
+							$mobile_width
+						);
+					}
+				}
 			}
 		}
 
