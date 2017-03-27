@@ -187,7 +187,7 @@ class SiteOrigin_Panels_Admin {
 				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
 				$post_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data );
 				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = false;
+				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
 				// Update the post_content
 				$post->post_content = $post_content . "\n\n";

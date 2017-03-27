@@ -37,7 +37,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		$attr = shortcode_atts( array(
 			'class' => false,
 			'id' => '',
-		), $attr, 'panels_widget' );
+		), $attr, 'siteorigin_widget' );
 
 		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
 
@@ -112,7 +112,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	}
 
 	static function decode_data( $string ){
-		preg_match( '/value="(.*)" \/>/', trim( $string ), $matches );
+		preg_match( '/value="([^"]*)"/', trim( $string ), $matches );
 		if( ! empty( $matches[1] ) ) {
 			$data = json_decode( html_entity_decode( $matches[1], ENT_QUOTES ), true );
 			return $data;

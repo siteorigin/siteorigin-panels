@@ -55,7 +55,7 @@ class SiteOrigin_Panels {
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
-		SiteOrigin_Panels_Cache::single();
+		SiteOrigin_Panels_Cache_Renderer::single();
 
 		if( apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) ) {
 			// We can use the cached content
@@ -270,13 +270,13 @@ class SiteOrigin_Panels {
 			return $content;
 		}
 
-		$cache = SiteOrigin_Panels_Cache::single();
+		$cache = SiteOrigin_Panels_Cache_Renderer::single();
 		return $cache->get( 'html', get_the_ID() );
 	}
 
 	public function cached_post_css(){
 		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
-			$cache = SiteOrigin_Panels_Cache::single();
+			$cache = SiteOrigin_Panels_Cache_Renderer::single();
 			$stored = $cache->get( 'css', get_the_ID() );
 			SiteOrigin_Panels_Renderer::single()->add_inline_css( get_the_ID(), $stored );
 		}

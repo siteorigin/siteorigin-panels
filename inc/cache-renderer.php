@@ -1,9 +1,8 @@
 <?php
 
-class SiteOrigin_Panels_Cache {
+class SiteOrigin_Panels_Cache_Renderer {
 
 	private $cache_render;
-	private $post_id;
 	private $cache;
 
 	function __construct() {
@@ -30,7 +29,7 @@ class SiteOrigin_Panels_Cache {
 	}
 
 	/**
-	 * @return SiteOrigin_Panels_Cache
+	 * @return SiteOrigin_Panels_Cache_Renderer
 	 */
 	static function single() {
 		static $single;
@@ -47,7 +46,6 @@ class SiteOrigin_Panels_Cache {
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = true;
 		$this->cache_render = true;
-		$this->post_id = $post_id;
 
 		$this->cache[ 'html' ][ $post_id ] = '';
 		$this->cache[ 'css' ][ $post_id ] = '';
@@ -58,17 +56,17 @@ class SiteOrigin_Panels_Cache {
 	/**
 	 * Let the caching system know that we're no longer in a cache render.
 	 */
-	private function end_cache_render( ){
-		$GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] = false;
+	private function end_cache_render( $post_id ){
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] );
 		$this->cache_render = false;
-		do_action( 'siteorigin_panels_end_cache_render', $this->post_id );
+		do_action( 'siteorigin_panels_end_cache_render', $post_id );
 	}
 
 	/**
 	 * Save the generated cache data.
 	 */
 	public function save( $post_id ){
-		update_post_meta( $this->post_id, 'siteorigin_panels_cache', array(
+		update_post_meta( $post_id, 'siteorigin_panels_cache', array(
 			'version' => SITEORIGIN_PANELS_VERSION,
 			'html' => SiteOrigin_Panels_Admin::double_slash_string( $this->cache[ 'html' ][ $post_id ] ),
 			'css' => SiteOrigin_Panels_Admin::double_slash_string( $this->cache[ 'css' ][ $post_id ] ),
@@ -84,11 +82,11 @@ class SiteOrigin_Panels_Cache {
 		return $this->cache_render;
 	}
 
-	public function add( $type, $html ){
+	public function add( $type, $content, $post_id ){
 		if( ! $this->is_cache_render() ) {
 			throw new Exception( 'A cache render must be started before adding HTML' );
 		}
-		$this->cache[ $type ][ $this->post_id ] .= trim( $html ) . ' ';
+		$this->cache[ $type ][ $post_id ] .= trim( $content ) . ' ';
 	}
 
 	public function get( $type, $post_id ){
@@ -132,16 +130,16 @@ class SiteOrigin_Panels_Cache {
 		if( empty( $this->cache[ 'html' ][ $post_id ] ) ) {
 			// Generate the HTML for the post
 			$panels_html = SiteOrigin_Panels_Renderer::single()->render( $post_id, false );
-			$this->add( 'html', $panels_html );
+			$this->add( 'html', $panels_html, $post_id );
 		}
 
 		if( empty( $this->cache[ 'css' ][ $post_id ] ) ) {
 			// Create a single line version of the CSS
 			$panels_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id );
-			$this->add( 'css', $panels_css );
+			$this->add( 'css', $panels_css, $post_id );
 		}
 
-		$this->end_cache_render();
+		$this->end_cache_render( $post_id );
 
 		if( $save ) {
 			$this->save( $post_id );
