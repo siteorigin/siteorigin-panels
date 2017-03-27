@@ -345,6 +345,23 @@ module.exports = Backbone.Model.extend({
 				return decodeHTMLEntities;
 			})();
 
+			// Remove all wrapping divs from a widget to get its html
+			var getTextWidgetContents = function( $el ){
+				var $divs = $el.find( 'div' );
+				if( ! $divs.length ) {
+					return $el.html();
+				}
+
+				var i;
+				for( i = 0; i < $divs.length - 1; i++ ) {
+					if( jQuery.trim( $divs.eq(i).text() ) != jQuery.trim( $divs.eq(i+1).text() ) ) {
+						break;
+					}
+				}
+
+				return $divs.eq(i).html();
+			};
+
 			var $layout = $html.find( '.panel-layout' ).eq(0);
 			var filterNestedLayout = function( i, el ){
 				return jQuery( el ).closest( '.panel-layout' ).is( $layout );
@@ -402,7 +419,7 @@ module.exports = Backbone.Model.extend({
 								panels_info.class = editorClass;
 								panels_data.widgets.push( {
 									filter: "1",
-									text: widgetContent,
+									text: getTextWidgetContents( $widget ),
 									title: "",
 									type: "visual",
 									panels_info: panels_info
@@ -432,7 +449,7 @@ module.exports = Backbone.Model.extend({
 						panels_info.class = editorClass;
 						panels_data.widgets.push( {
 							filter: "1",
-							text: widgetContent,
+							text: getTextWidgetContents( $widget ),
 							title: "",
 							type: "visual",
 							panels_info: panels_info
