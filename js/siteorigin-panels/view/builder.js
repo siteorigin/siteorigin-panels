@@ -92,6 +92,7 @@ module.exports = Backbone.View.extend( {
 		// Handle a content change
 		this.on( 'content_change', this.handleContentChange, this );
 		this.on( 'display_builder', this.handleDisplayBuilder, this );
+		this.on( 'hide_builder', this.handleHideBuilder, this );
 		this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
 		this.model.on( 'change:data load_panels_data', this.toggleWelcomeDisplay, this );
 
@@ -208,16 +209,13 @@ module.exports = Backbone.View.extend( {
 			.find( '.wp-switch-editor' )
 			.click( function ( e ) {
 				e.preventDefault();
-				$( '#wp-content-editor-container, #post-status-info' ).show();
+				$( '#wp-content-editor-container' ).show();
+
 				// metabox.hide();
 				$( '#wp-content-wrap' ).removeClass( 'panels-active' );
 				$( '#content-resize-handle' ).show();
 
 				// Make sure the word count is visible
-				$('#post-status-info').css({
-					'margin-top' : null
-				});
-
 				thisView.trigger( 'hide_builder' );
 			} ).end()
 			.append(
@@ -229,7 +227,7 @@ module.exports = Backbone.View.extend( {
 					var $$ = $( this );
 
 					// Hide the standard content editor
-					$( '#wp-content-wrap, #post-status-info' ).hide();
+					$( '#wp-content-wrap' ).hide();
 
 					// Show page builder and the inside div
 					metabox.show().find( '> .inside' ).show();
@@ -239,10 +237,6 @@ module.exports = Backbone.View.extend( {
 					$( document ).scroll();
 
 					// Make sure the word count is visible
-					$('#post-status-info').show().css({
-						'margin-top' : -21
-					});
-
 					thisView.trigger( 'display_builder' );
 
 				} )
@@ -262,11 +256,12 @@ module.exports = Backbone.View.extend( {
 				thisView.model.loadPanelsData( false );
 
 				// Switch back to the standard editor
-				$( '#wp-content-wrap, #post-status-info' ).show();
+				$( '#wp-content-wrap' ).show();
 				metabox.hide();
 
 				// Resize to trigger reflow of WordPress editor stuff
 				$( window ).resize();
+				thisView.trigger( 'hide_builder' );
 			} ).show();
 		}
 
@@ -756,6 +751,13 @@ module.exports = Backbone.View.extend( {
 			this.model.trigger( 'change' );
 			this.model.trigger( 'change:data' );
 		}
+
+		$('#post-status-info').addClass( 'for-siteorigin-panels' );
+	},
+
+	handleHideBuilder: function(){
+		console.log( 'hide builder' );
+		$('#post-status-info').show().removeClass( 'for-siteorigin-panels' );
 	},
 
 	/**
