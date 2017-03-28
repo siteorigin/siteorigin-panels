@@ -4,6 +4,8 @@ module.exports = panels.view.dialog.extend({
 
 	cellPreviewTemplate: _.template( panels.helpers.utils.processTemplate( $('#siteorigin-panels-dialog-row-cell-preview').html() ) ),
 
+	editableLabel: true,
+
 	events: {
 		'click .so-close': 'closeDialog',
 
@@ -67,6 +69,18 @@ module.exports = panels.view.dialog.extend({
 		});
 
 		this.on('close_dialog', this.closeHandler);
+
+		this.on( 'edit_label', function ( text ) {
+			// If text is set to default values, just clear it.
+			if ( text === panelsOptions.loc.row.add || text === panelsOptions.loc.row.edit ) {
+				text = '';
+			}
+			this.model.set( 'label', text );
+			if ( _.isEmpty( text ) ) {
+				var title = this.dialogType === 'create' ? panelsOptions.loc.row.add : panelsOptions.loc.row.edit;
+				this.$( '.so-title').text( title );
+			}
+		}.bind( this ) );
 	},
 
 	/**
@@ -81,7 +95,18 @@ module.exports = panels.view.dialog.extend({
 	 * Render the new row dialog
 	 */
 	render: function () {
-		this.renderDialog(this.parseDialogContent($('#siteorigin-panels-dialog-row').html(), {dialogType: this.dialogType}));
+		var title = this.dialogType === 'create' ? panelsOptions.loc.row.add : panelsOptions.loc.row.edit;
+		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-row' ).html(), {
+			title: title,
+			dialogType: this.dialogType
+		} ) );
+
+		var titleElt = this.$( '.so-title' );
+
+		if ( this.model.has( 'label' ) && ! _.isEmpty( this.model.get( 'label' ) ) ) {
+			titleElt.text( this.model.get( 'label' ) );
+		}
+		this.$( '.so-edit-title' ).val( titleElt.text() );
 
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();

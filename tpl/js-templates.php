@@ -93,6 +93,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorLabel %}}">
 
 		<div class="so-row-toolbar">
+			{{% if( rowLabel ) { %}}
+			<h3 class="so-row-label">{{%= rowLabel %}}</h3>
+			{{% } %}}
 			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
 
 			<span class="so-dropdown-wrapper">
@@ -162,7 +165,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-overlay"></div>
 
 		<div class="so-title-bar">
-			<h3 class="so-title{{% if ( editableLabel ) print(' so-title-editable')%}}" {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false"')%}}>{{%= title %}}</h3>
+			<h3 class="so-title{{% if ( editableLabel ) print(' so-title-editable')%}}"
+			    {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false" tabIndex="1"')%}}
+				>{{%= title %}}</h3>
 			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-close"><span class="so-dialog-icon"></span></a>
@@ -286,11 +291,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="dialog-data">
 
 		<h3 class="title">
-			{{% if( dialogType == 'create' ) { %}}
-				<span class="add-row"><?php _e('Add New Row', 'siteorigin-panels') ?></span>
-			{{% } else { %}}
-				<span class="edit-row"><?php _e('Edit Row', 'siteorigin-panels') ?></span>
-			{{% } %}}
+			{{%= title %}}
 		</h3>
 
 		<div class="right-sidebar"></div>

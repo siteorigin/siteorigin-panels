@@ -98,6 +98,10 @@ module.exports = Backbone.Model.extend({
 				if ( ! _.isUndefined( data.grids[i].color_label) ) {
 					rowAttrs.color_label = data.grids[i].color_label;
 				}
+
+				if ( ! _.isUndefined( data.grids[i].label) ) {
+					rowAttrs.label = data.grids[i].label;
+				}
 				// This will create and add the row model and its cells
 				builderModel.addRow(rowAttrs, row, {noAnimate: true} );
 			} );
@@ -262,7 +266,8 @@ module.exports = Backbone.Model.extend({
 			data.grids.push( {
 				cells: row.get('cells').length,
 				style: row.get( 'style' ),
-				color_label: row.get( 'color_label' )
+				color_label: row.get( 'color_label' ),
+				label: row.get( 'label' ),
 			} );
 
 		} );
@@ -374,7 +379,8 @@ module.exports = Backbone.Model.extend({
 				panels_data.grids.push( {
 					cells: $cells.length,
 					style: $row.data( 'style' ),
-					color_label: $row.data( 'color-label' )
+					color_label: $row.data( 'color-label' ),
+					label: $row.data( 'label' ),
 				} );
 
 				$cells.each( function( ci, el ){

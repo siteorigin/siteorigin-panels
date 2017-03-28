@@ -136,6 +136,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		if( this.$( '.so-title-bar .so-title-editable' ).length ) {
+			// Added here because .so-edit-title is only available after the template has been rendered.
 			this.initEditableLabel();
 		}
 
@@ -223,30 +224,31 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the editable dialog title
 	 */
 	initEditableLabel: function(){
-		// Added here because .so-edit-title is only available after the template has been rendered.
 		var $editElt = this.$( '.so-title-bar .so-title-editable' );
-		var saveTitle = function( event ) {
-			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
-				var value = $editElt.text().replace(/^\s+|\s+$/gm,'');
-				if( value === '' ) {
-					if( ! _.isEmpty( $editElt.data( 'original-value' ) ) ) {
-						value = $editElt.data( 'original-value' );
-					}
-					else {
-						value = panelsOptions.loc.untitled;
-					}
-				}
 
-				$editElt.text( value );
-				this.trigger( 'edit_label', value );
-
-				if( event.type !== 'blur' ) {
-					$editElt.blur();
-				}
+		$editElt.keypress( function ( event ) {
+			var enterPressed = event.type === 'keypress' && event.keyCode === 13;
+			if ( enterPressed ) {
+				// Need to make sure tab focus is on another element, otherwise pressing enter multiple times refocuses
+				// the element and allows newlines.
+				var tabbables = $( ':tabbable' );
+				var curTabIndex = tabbables.index( $editElt );
+				tabbables.eq( curTabIndex + 1 ).focus();
+				// After the above, we're somehow left with the first letter of text selected,
+				// so this removes the selection.
+				window.getSelection().removeAllRanges();
 			}
-		}.bind( this );
+			return !enterPressed;
+		} ).blur( function () {
+			var newValue = $editElt.text().replace( /^\s+|\s+$/gm, '' );
+			var oldValue = $editElt.data( 'original-value' ).replace( /^\s+|\s+$/gm, '' );
+			if ( newValue !== oldValue ) {
+				$editElt.text( newValue );
+				this.trigger( 'edit_label', newValue );
+			}
 
-		$editElt.keyup( saveTitle ).blur( saveTitle );
+		}.bind( this ) );
+
 		$editElt.focus( function() {
 			$editElt.data( 'original-value', $editElt.text() );
 			panels.helpers.utils.selectElementContents( this );

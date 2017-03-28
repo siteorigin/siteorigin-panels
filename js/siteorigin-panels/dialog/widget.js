@@ -38,7 +38,14 @@ module.exports = panels.view.dialog.extend( {
 		} );
 
 		this.on( 'edit_label', function ( text ) {
+			// If text is set to default value, just clear it.
+			if ( text === panelsOptions.widgets[ this.model.get( 'class' ) ][ 'title' ] ) {
+				text = '';
+			}
 			this.model.set( 'label', text );
+			if ( _.isEmpty( text ) ) {
+				this.$( '.so-title' ).text( this.model.getWidgetField( 'title' ) );
+			}
 		}.bind( this ) );
 	},
 

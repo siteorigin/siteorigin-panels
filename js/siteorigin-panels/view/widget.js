@@ -166,8 +166,8 @@ module.exports = Backbone.View.extend( {
 		this.$( '.description' ).html( this.model.getTitle() );
 	},
 
-	onLabelChange: function( model, text ) {
-		this.$( '.title > h4' ).text( text );
+	onLabelChange: function( model ) {
+		this.$( '.title > h4' ).text( model.getWidgetField( 'title' ) );
 	},
 
 	/**

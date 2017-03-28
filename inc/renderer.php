@@ -536,7 +536,8 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $panels_data[ 'grids' ] as $grid ) {
 			$layout_data[] = array(
 				'style' => ! empty( $grid[ 'style' ] ) ? $grid[ 'style' ] : array(),
-				'color_label' => ! empty( $grid[ 'color_label' ] ) ? $grid[ 'color_label' ] : array(),
+				'color_label' => ! empty( $grid[ 'color_label' ] ) ? $grid[ 'color_label' ] : '',
+				'label' => ! empty( $grid[ 'label' ] ) ? $grid[ 'label' ] : '',
 				'cells' => array()
 			);
 		}
