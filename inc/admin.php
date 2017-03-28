@@ -1238,12 +1238,13 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function filter_learn_lessons( $lessons ) {
 		$lessons[ 'page-builder-tips' ] = array(
-			'title' => __( 'Page Builder Tips', 'siteorigin-panels' ),
+			'title' => __( 'Learn How To Use Page Builder', 'siteorigin-panels' ),
 			'video' => 'p39wf0yay1',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
-			'description' => __( 'A set of tips that every Page Builder user should know.', 'siteorigin-panels' ) . ' ' .
-			                 __( "After going through these tips, you'll be a Page Building master.", 'siteorigin-panels' ),
-			'form_description' => __( 'This is a form description', 'siteorigin-panels' ),
+			'description' => __( "A refined collection of 12 tips to help you get the most from Page Builder.", 'siteorigin-panels' ) . ' ' .
+			                 __( "Watch the video to find out more.", 'siteorigin-panels' )  . ' ' .
+			                 __( "This course is yours free, when you sign up to our newsletter - and existing subscribers are welcome.", 'siteorigin-panels' ),
+			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
 		return $lessons;
