@@ -426,6 +426,11 @@ class SiteOrigin_Panels {
 			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
 		}
 	}
+
+	static function display_learn_button() {
+		return siteorigin_panels_setting( 'display-learn' ) &&
+		       apply_filters( 'siteorigin_panels_learn', true );
+	}
 }
 
 SiteOrigin_Panels::single();
