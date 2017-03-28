@@ -99,7 +99,7 @@ module.exports = panels.view.dialog.extend({
 
 		var titleElt = this.$( '.so-title' );
 
-		if ( this.model.has( 'label' ) ) {
+		if ( this.model.has( 'label' ) && ! _.isEmpty( this.model.get( 'label' ) ) ) {
 			titleElt.text( this.model.get( 'label' ) );
 		}
 		this.$( '.so-edit-title' ).val( titleElt.text() );

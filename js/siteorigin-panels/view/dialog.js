@@ -226,9 +226,10 @@ module.exports = Backbone.View.extend( {
 		// Added here because .so-edit-title is only available after the template has been rendered.
 		var $editElt = this.$( '.so-title-bar .so-title-editable' );
 		var saveTitle = function( event ) {
-			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
-				var newValue = $editElt.text().replace(/^\s+|\s+$/gm,'');
-				var oldValue = $editElt.data( 'original-value' );
+			var enterPressed = event.type === 'keypress' && event.keyCode === 13;
+			if( enterPressed || event.type === 'blur' ) {
+				var newValue = $editElt.text().replace( /^\s+|\s+$/gm, '' );
+				var oldValue = $editElt.data( 'original-value' ).replace( /^\s+|\s+$/gm, '' );
 				if ( newValue !== oldValue ) {
 
 					$editElt.text( newValue );
@@ -239,9 +240,10 @@ module.exports = Backbone.View.extend( {
 					}
 				}
 			}
+			return !enterPressed;
 		}.bind( this );
 
-		$editElt.keyup( saveTitle ).blur( saveTitle );
+		$editElt.keypress( saveTitle ).blur( saveTitle );
 		$editElt.focus( function() {
 			$editElt.data( 'original-value', $editElt.text() );
 			panels.helpers.utils.selectElementContents( this );
