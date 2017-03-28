@@ -141,7 +141,7 @@ class SiteOrigin_Panels_Settings {
 		// Content fields
 		$defaults['copy-content'] = true;
 		$defaults['copy-styles'] = false;
-		$defaults['cache-content'] = true;
+		$defaults['cache-content'] = false;
 
 		return $defaults;
 	}
