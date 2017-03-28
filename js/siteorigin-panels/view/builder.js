@@ -102,7 +102,7 @@ module.exports = Backbone.View.extend( {
 
 		if( this.config.loadOnAttach ) {
 			this.on( 'builder_attached_to_editor', function(){
-				$( '#content-panels' ).click();
+				this.displayAttachedBuilder( { confirm: false } );
 			}, this );
 		}
 
@@ -219,35 +219,13 @@ module.exports = Backbone.View.extend( {
 				thisView.trigger( 'hide_builder' );
 			} ).end()
 			.append(
-			$( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</a>' )
-				.click( function ( e ) {
-					// Switch to the Page Builder interface
-					var editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( 'content' ) : false;
-					var editorContent = ( editor && _.isFunction( editor.getContent ) ) ? editor.getContent() : $( 'textarea#content' ).val();
-
-					if ( editorContent !== '' && ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
-						return;
-					}
-
-					e.preventDefault();
-
-					var $$ = $( this );
-
-					// Hide the standard content editor
-					$( '#wp-content-wrap' ).hide();
-
-					// Show page builder and the inside div
-					metabox.show().find( '> .inside' ).show();
-
-					// Triggers full refresh
-					$( window ).resize();
-					$( document ).scroll();
-
-					// Make sure the word count is visible
-					thisView.trigger( 'display_builder' );
-
-				} )
-		);
+				$( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</a>' )
+					.click( function ( e ) {
+						if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
+							e.preventDefault();
+						}
+					} )
+			);
 
 		// Switch back to the standard editor
 		if( this.supports( 'revertToEditor' ) ) {
@@ -277,12 +255,8 @@ module.exports = Backbone.View.extend( {
 
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets
 		var data = this.model.get( 'data' );
-		if ( (
-				 ! _.isEmpty( data.widgets )
-			 ) || (
-				 ! _.isEmpty( data.grids )
-			 ) ) {
-			$( '#content-panels.switch-panels' ).click();
+		if ( ! _.isEmpty( data.widgets ) || ! _.isEmpty( data.grids ) ) {
+			this.displayAttachedBuilder( { confirm: false } );
 		}
 
 		// We will also make this sticky if its attached to an editor.
@@ -342,6 +316,41 @@ module.exports = Backbone.View.extend( {
 		this.trigger('builder_attached_to_editor');
 
 		return this;
+	},
+
+	/**
+	 * Display the builder interface when attached to a WordPress editor
+	 */
+	displayAttachedBuilder: function( options ){
+		options = _.extend( {
+			confirm: true
+		}, options );
+
+		// Switch to the Page Builder interface
+
+		if( options.confirm ) {
+			var editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( 'content' ) : false;
+			var editorContent = ( editor && _.isFunction( editor.getContent ) ) ? editor.getContent() : $( 'textarea#content' ).val();
+
+			if ( editorContent !== '' && ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
+				return false;
+			}
+		}
+
+		// Hide the standard content editor
+		$( '#wp-content-wrap' ).hide();
+
+		// Show page builder and the inside div
+		this.metabox.show().find( '> .inside' ).show();
+
+		// Triggers full refresh
+		$( window ).resize();
+		$( document ).scroll();
+
+		// Make sure the word count is visible
+		this.trigger( 'display_builder' );
+
+		return true;
 	},
 
 	/**
