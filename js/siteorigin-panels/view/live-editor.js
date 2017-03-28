@@ -52,9 +52,9 @@ module.exports = Backbone.View.extend( {
 			} );
 
 		// Handle highlighting the relevant widget in the live editor preview
-		thisView.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
+		this.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
 			var $$ = $( this ),
-				previewWidget = $( this ).data( 'live-editor-preview-widget' );
+				previewWidget = $$.data( 'live-editor-preview-widget' );
 
 			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! thisView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
 				thisView.highlightElement( previewWidget );
@@ -340,16 +340,17 @@ module.exports = Backbone.View.extend( {
 					thisView.$( '.so-preview-overlay' ).hide();
 				}, 100 );
 
+
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
-				$iframeContents.find( '.panel-grid .panel-grid-cell .so-panel' )
+				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
+				layoutWrapper.find( '.panel-grid .panel-grid-cell .so-panel' )
 					.filter( function () {
 						// Filter to only include non nested
-						return $( this ).parents( '.so-panel' ).length === 0;
+						return $( this ).closest( '.panel-layout' ).is( layoutWrapper );
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
 						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
-
 						widgetEdit.data( 'live-editor-preview-widget', $$ );
 
 						$$
