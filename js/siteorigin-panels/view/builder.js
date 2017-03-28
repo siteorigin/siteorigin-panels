@@ -222,6 +222,13 @@ module.exports = Backbone.View.extend( {
 			$( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</a>' )
 				.click( function ( e ) {
 					// Switch to the Page Builder interface
+					var editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( 'content' ) : false;
+					var editorContent = ( editor && _.isFunction( editor.getContent ) ) ? editor.getContent() : $( 'textarea#content' ).val();
+
+					if ( editorContent !== '' && ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
+						return;
+					}
+
 					e.preventDefault();
 
 					var $$ = $( this );
@@ -716,17 +723,8 @@ module.exports = Backbone.View.extend( {
 	 * Handle displaying the builder
 	 */
 	handleDisplayBuilder: function () {
-		var editorContent = '';
-		var editor;
-
-		if ( typeof tinyMCE !== 'undefined' ) {
-			editor = tinyMCE.get( 'content' );
-		}
-		if ( editor && _.isFunction( editor.getContent ) ) {
-			editorContent = editor.getContent();
-		} else {
-			editorContent = $( 'textarea#content' ).val();
-		}
+		var editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( 'content' ) : false;
+		var editorContent = ( editor && _.isFunction( editor.getContent ) ) ? editor.getContent() : $( 'textarea#content' ).val();
 
 		if (
 			(
@@ -738,11 +736,6 @@ module.exports = Backbone.View.extend( {
 			var editorClass = panelsOptions.text_widget;
 			// There is a small chance a theme will have removed this, so check
 			if ( _.isEmpty( editorClass ) ) {
-				return;
-			}
-
-			// Confirm that the user wants to copy their content to Page Builder.
-			if ( ! confirm( panelsOptions.loc.confirm_use_builder ) ) {
 				return;
 			}
 
