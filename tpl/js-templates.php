@@ -296,11 +296,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="dialog-data">
 
 		<h3 class="title">
-			{{% if( dialogType == 'create' ) { %}}
-				<span class="add-row"><?php _e('New Row', 'siteorigin-panels') ?></span>
-			{{% } else { %}}
-				<span class="edit-row"><?php _e('Row', 'siteorigin-panels') ?></span>
-			{{% } %}}
+			{{%= title %}}
 		</h3>
 
 		<div class="right-sidebar"></div>

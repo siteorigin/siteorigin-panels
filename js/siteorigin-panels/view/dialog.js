@@ -227,21 +227,16 @@ module.exports = Backbone.View.extend( {
 		var $editElt = this.$( '.so-title-bar .so-title-editable' );
 		var saveTitle = function( event ) {
 			if( ( event.type === 'keyup' && event.keyCode === 13 ) || event.type === 'blur' ) {
-				var value = $editElt.text().replace(/^\s+|\s+$/gm,'');
-				if( value === '' ) {
-					if( ! _.isEmpty( $editElt.data( 'original-value' ) ) ) {
-						value = $editElt.data( 'original-value' );
-					}
-					else {
-						value = panelsOptions.loc.untitled;
-					}
-				}
+				var newValue = $editElt.text().replace(/^\s+|\s+$/gm,'');
+				var oldValue = $editElt.data( 'original-value' );
+				if ( newValue !== oldValue ) {
 
-				$editElt.text( value );
-				this.trigger( 'edit_label', value );
+					$editElt.text( newValue );
+					this.trigger( 'edit_label', newValue );
 
-				if( event.type !== 'blur' ) {
-					$editElt.blur();
+					if( event.type !== 'blur' ) {
+						$editElt.blur();
+					}
 				}
 			}
 		}.bind( this );

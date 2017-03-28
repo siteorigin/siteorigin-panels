@@ -72,6 +72,10 @@ module.exports = panels.view.dialog.extend({
 
 		this.on( 'edit_label', function ( text ) {
 			this.model.set( 'label', text );
+			if ( _.isEmpty( text ) ) {
+				var title = this.dialogType === 'create' ? panelsOptions.loc.row.add : panelsOptions.loc.row.edit;
+				this.$( '.so-title').text( title );
+			}
 		}.bind( this ) );
 	},
 
@@ -87,12 +91,18 @@ module.exports = panels.view.dialog.extend({
 	 * Render the new row dialog
 	 */
 	render: function () {
-		this.renderDialog(this.parseDialogContent($('#siteorigin-panels-dialog-row').html(), {dialogType: this.dialogType}));
+		var title = this.dialogType === 'create' ? panelsOptions.loc.row.add : panelsOptions.loc.row.edit;
+		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-row' ).html(), {
+			title: title,
+			dialogType: this.dialogType
+		} ) );
 
-		var titleElt = this.dialogType === 'create' ? this.$( '.so-title  .add-row') : this.$( '.so-title .edit-row' );
+		var titleElt = this.$( '.so-title' );
 
-		var title = this.model.has( 'label' ) ? this.model.get( 'label' ) : titleElt.text();
-		this.$( '.so-edit-title' ).val( title );
+		if ( this.model.has( 'label' ) ) {
+			titleElt.text( this.model.get( 'label' ) );
+		}
+		this.$( '.so-edit-title' ).val( titleElt.text() );
 
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();
