@@ -829,7 +829,7 @@ module.exports = Backbone.View.extend( {
 		) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
-				.add( builder.$( '.so-panels-welcome-message' ) )
+				.add( builder.$( '.so-panels-welcome-message:visible' ) )
 				.add( builder.$( '.so-rows-container > .so-row-container' ) )
 				.add( builder.$( '.so-cells > .cell' ) )
 				.add( builder.$( '.cell-wrapper > .so-widget' ) )
