@@ -38,7 +38,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 
 		echo $args['before_widget'];
 		echo SiteOrigin_Panels_Renderer::single()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'], $layout_data );
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_DATABASE_RENDER' ] ) ) {
+		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) && siteorigin_panels_setting( 'copy-styles' ) ) {
 			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
 			$widget_css .= SiteOrigin_Panels_Renderer::single()->generate_css( 'w'.$instance['builder_id'], $instance['panels_data'], $layout_data );
 			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
