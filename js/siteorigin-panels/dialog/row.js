@@ -71,6 +71,10 @@ module.exports = panels.view.dialog.extend({
 		this.on('close_dialog', this.closeHandler);
 
 		this.on( 'edit_label', function ( text ) {
+			// If text is set to default values, just clear it.
+			if ( text === panelsOptions.loc.row.add || text === panelsOptions.loc.row.edit ) {
+				text = '';
+			}
 			this.model.set( 'label', text );
 			if ( _.isEmpty( text ) ) {
 				var title = this.dialogType === 'create' ? panelsOptions.loc.row.add : panelsOptions.loc.row.edit;
