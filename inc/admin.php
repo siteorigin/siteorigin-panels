@@ -16,7 +16,7 @@ class SiteOrigin_Panels_Admin {
 			'plugin_action_links'
 		) );
 
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'current_screen', array( $this, 'admin_init' ) );
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_init', array( $this, 'save_home_page' ) );
@@ -83,6 +83,12 @@ class SiteOrigin_Panels_Admin {
 					add_action( 'manage_' . $post_type . 's_custom_column' , array( $this, 'display_custom_column' ), 10, 2 );
 				}
 			}
+		}
+
+		if( self::is_admin() ) {
+			// Setup everything for Page Builder learning
+			SiteOrigin_Learn_Dialog::single();
+			add_filter( 'siteorigin_learn_lessons', array( $this, 'filter_learn_lessons' ) );
 		}
 	}
 
@@ -1221,6 +1227,26 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public static function double_slash_string( $value ){
 		return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
+	}
+
+	/**
+	 * Add all the courses to the learning dialog
+	 *
+	 * @param $lessons
+	 *
+	 * @return mixed
+	 */
+	public function filter_learn_lessons( $lessons ) {
+		$lessons[ 'page-builder-tips' ] = array(
+			'title' => __( 'Page Builder Tips', 'siteorigin-panels' ),
+			'video' => 'p39wf0yay1',
+			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
+			'description' => __( 'A set of tips that every Page Builder user should know.', 'siteorigin-panels' ) . ' ' .
+			                 __( "After going through these tips, you'll be a Page Building master.", 'siteorigin-panels' ),
+			'form_description' => __( 'This is a form description', 'siteorigin-panels' ),
+		);
+
+		return $lessons;
 	}
 
 }

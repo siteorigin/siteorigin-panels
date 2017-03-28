@@ -43,6 +43,10 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
 			SiteOrigin_Panels_Admin::single();
+
+			if( ! class_exists( 'SiteOrigin_Learn_Dialog' ) ) {
+				include plugin_dir_path( __FILE__ ) . 'learn/learn.php';
+			}
 		}
 
 		// Include the live editor file if we're in live editor mode.
