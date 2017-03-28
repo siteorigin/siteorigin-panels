@@ -45,7 +45,7 @@ module.exports = Backbone.Model.extend( {
 			} else {
 				return '';
 			}
-		} else if ( this.has( 'label' ) ) {
+		} else if ( this.has( 'label' ) && ! _.isEmpty( this.get( 'label' ) ) ) {
 			// Use the label instead of the actual widget title
 			return this.get( 'label' );
 		} else {
