@@ -132,6 +132,7 @@ module.exports = panels.view.dialog.extend( {
 		this.previewScrollTop = iframe.contents().scrollTop();
 
 		this.$( 'form.history-form input[name="live_editor_panels_data"]' ).val( entry.get( 'data' ) );
+		this.$( 'form.history-form input[name="live_editor_post_ID"]' ).val( this.builder.config.postId );
 		this.$( 'form.history-form' ).submit();
 	},
 
