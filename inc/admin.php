@@ -1247,9 +1247,9 @@ class SiteOrigin_Panels_Admin {
 			'title' => __( 'Learn How To Use Page Builder', 'siteorigin-panels' ),
 			'video' => 'p39wf0yay1',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
-			'description' => __( "A refined collection of 12 tips to help you get the most from Page Builder.", 'siteorigin-panels' ) . ' ' .
-			                 __( "Watch the video to find out more.", 'siteorigin-panels' )  . ' ' .
-			                 __( "This course is yours free, when you sign up to our newsletter - and existing subscribers are welcome.", 'siteorigin-panels' ),
+			'description' => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
+			                 __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' )  . ' ' .
+			                 __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
