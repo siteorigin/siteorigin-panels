@@ -364,7 +364,18 @@ module.exports = Backbone.Model.extend({
 					}
 				}
 
-				return $divs.eq(i).html();
+				var title = $divs.eq( i ).find( '.widget-title:header' ),
+					titleText = '';
+
+				if( title.length ) {
+					titleText = title.html();
+					title.remove();
+				}
+
+				return {
+					title: titleText,
+					text: $divs.eq(i).html(),
+				};
 			};
 
 			var $layout = $html.find( '.panel-layout' ).eq(0);
@@ -423,13 +434,11 @@ module.exports = Backbone.Model.extend({
 							catch ( err ) {
 								// There was a problem, so treat this as a standard editor widget
 								panels_info.class = editorClass;
-								panels_data.widgets.push( {
+								panels_data.widgets.push( _.extend( getTextWidgetContents( $widget ), {
 									filter: "1",
-									text: getTextWidgetContents( $widget ),
-									title: "",
 									type: "visual",
 									panels_info: panels_info
-								} );
+								} ) );
 							}
 
 							// Continue
@@ -453,13 +462,11 @@ module.exports = Backbone.Model.extend({
 
 						// This is a standard editor class widget
 						panels_info.class = editorClass;
-						panels_data.widgets.push( {
+						panels_data.widgets.push( _.extend( getTextWidgetContents( $widget ), {
 							filter: "1",
-							text: getTextWidgetContents( $widget ),
-							title: "",
 							type: "visual",
 							panels_info: panels_info
-						} );
+						} ) );
 						return true;
 					} );
 				} );
