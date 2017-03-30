@@ -78,7 +78,8 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'flex' => round( $weight * 1000 )
+					'flex' => round( $weight * 1000 ),
+					'width' => 0, // Workaround for flex child elements growing with their content.
 				) );
 			}
 
