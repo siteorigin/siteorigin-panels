@@ -170,7 +170,7 @@
 				}
 
 				&.cell-selected .cell-wrapper {
-					background-color: darken( @row_color, 7% );
+					background-color: darken( @row_color, 18% );
 				}
 
 				.resize-handle {
@@ -278,6 +278,10 @@
 		.so-row-container {
 			margin-bottom: 15px;
 			.user-select(none);
+
+			&.ui-sortable-helper {
+				opacity: 0.9;
+			}
 
 			.so-cells {
 				.clearfix();
