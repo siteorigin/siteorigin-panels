@@ -15,10 +15,10 @@ jQuery( function ( $ ) {
 
 			// Reset all the styles associated with row stretching
 			$$.css( {
-				'margin-left': '',
-				'margin-right': '',
-				'padding-left': '',
-				'padding-right': ''
+				'margin-left': 0,
+				'margin-right': 0,
+				'padding-left': 0,
+				'padding-right': 0
 			} );
 
 			var leftSpace = $$.offset().left - fullContainer.offset().left,
@@ -27,8 +27,8 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': - leftSpace,
 				'margin-right': - rightSpace,
-				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : '',
-				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : ''
+				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : 0,
+				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : 0
 			} );
 
 			var cells = $$.find( '> .panel-grid-cell' );
