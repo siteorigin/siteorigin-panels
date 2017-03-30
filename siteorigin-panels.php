@@ -299,7 +299,10 @@ class SiteOrigin_Panels {
 	 * @return array
 	 */
 	function body_class( $classes ) {
-		if( self::is_panel() ) $classes[] = 'siteorigin-panels';
+		if( self::is_panel() ) {
+			$classes[] = 'siteorigin-panels';
+			$classes[] = 'siteorigin-panels-before-styling';
+		}
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
 

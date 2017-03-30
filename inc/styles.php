@@ -335,10 +335,6 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			if ( $style['background_display'] == 'parallax' || $style['background_display'] == 'parallax-original' ) {
-				wp_enqueue_script( 'siteorigin-panels-front-styles' );
-			}
-
 			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if (

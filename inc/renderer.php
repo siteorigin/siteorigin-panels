@@ -31,9 +31,8 @@ class SiteOrigin_Panels_Renderer {
 		$this->inline_css[ $post_id ] = $css;
 
 		// Enqueue the front styles, if they haven't already been enqueued
-		if( ! wp_style_is( 'siteorigin-panels-front', 'enqueued' ) ) {
-			wp_enqueue_style( 'siteorigin-panels-front' );
-		}
+		wp_enqueue_style( 'siteorigin-panels-front' );
+		wp_enqueue_script( 'siteorigin-panels-front-styles' );
 	}
 
 	/**
@@ -274,6 +273,7 @@ class SiteOrigin_Panels_Renderer {
 
 		if ( $enqueue_css && ! isset( $this->inline_css[ $post_id ] ) ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
+			wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			$this->add_inline_css( $post_id, $this->generate_css( $post_id, $panels_data, $layout_data ) );
 		}
 
