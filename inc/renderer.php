@@ -103,7 +103,6 @@ class SiteOrigin_Panels_Renderer {
 					$css->add_cell_css( $post_id, $ri, false, '', array(
 						'flex'      => '1',
 						'flex-wrap' => 'wrap',
-						'margin-right' => 0,
 					), $panels_tablet_width );
 				}
 
