@@ -70,6 +70,10 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $layout_data as $ri => $row ) {
 			if( empty( $row['cells'] ) ) continue;
 
+			// Let other themes and plugins change the gutter.
+			$gutter = apply_filters( 'siteorigin_panels_css_row_gutter', $settings['margin-sides'] . 'px', $row, $ri, $panels_data );
+			preg_match( '/([0-9\.,]+)(.*)/', $gutter, $gutter_parts );
+
 			$cell_count = count( $row['cells'] );
 
 			// Add the cell sizing
@@ -98,15 +102,39 @@ class SiteOrigin_Panels_Renderer {
 
 			if ( $settings['responsive'] ) {
 
-				if ( $settings['tablet-layout'] && $cell_count >= 3 && $panels_tablet_width > $panels_mobile_width ) {
-					// Tablet responsiveness
-					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'flex'      => '1',
-						'flex-wrap' => 'wrap',
-					), $panels_tablet_width );
-				}
-
 				if( ! isset( $row[ 'style' ][ 'mobile_collapse' ] ) || $row[ 'style' ][ 'mobile_collapse' ] ) {
+
+					if (
+						$settings[ 'tablet-layout' ] &&
+						$cell_count >= 3 &&
+						$panels_tablet_width > $panels_mobile_width
+					) {
+						// Tablet responsive css for the row
+
+						$css->add_row_css( $post_id, $ri, '', array(
+							'flex-wrap' => 'wrap',
+						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+
+						$css->add_cell_css( $post_id, $ri, false, '', array(
+							'flex' => '0 1 50%',
+							'margin-right' => '0',
+							'margin-bottom' => $panels_margin_bottom . 'px',
+						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+
+						if ( ! empty( $gutter_parts[1] ) ) {
+							// Tablet responsive css for cells
+
+							$css->add_cell_css( $post_id, $ri, false, ':nth-child(even)', array(
+								'padding-left' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+
+							$css->add_cell_css( $post_id, $ri, false, ':nth-child(odd)', array(
+								'padding-right' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+						}
+
+					}
+
 					// Mobile Responsive
 					$css->add_row_css( $post_id, $ri, array( '.panel-no-style', '.panel-has-style > .panel-row-style' ), array(
 						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
@@ -129,6 +157,15 @@ class SiteOrigin_Panels_Renderer {
 						), $panels_mobile_width );
 					}
 				}
+			}
+
+			if ( ! empty( $gutter_parts[1] ) ) {
+				$css->add_cell_css( $post_id, $ri, false, '', array(
+					'margin-right' => floatval( $gutter_parts[1] ) . $gutter_parts[2],
+				) );
+				$css->add_cell_css( $post_id, $ri, false, ':last-child', array(
+					'margin-right' => 0,
+				) );
 			}
 		}
 
@@ -154,27 +191,6 @@ class SiteOrigin_Panels_Renderer {
 			$css->add_row_css( $post_id, false, ' .panel-grid-cell-mobile-last', array(
 				'margin-bottom' => '0px',
 			), $panels_mobile_width );
-		}
-
-		// Let other plugins customize various aspects of the rows
-		foreach ( $layout_data as $ri => $row ) {
-			// Let other themes and plugins change the gutter.
-			$gutter = apply_filters( 'siteorigin_panels_css_row_gutter', $settings['margin-sides'] . 'px', $row, $ri, $panels_data );
-
-			if ( ! empty( $gutter ) ) {
-				// We actually need to find half the gutter.
-				preg_match( '/([0-9\.,]+)(.*)/', $gutter, $match );
-				if ( ! empty( $match[1] ) ) {
-					$margin = floatval( $match[1] ) . $match[2];
-					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'margin-right' => $margin,
-					) );
-
-					$css->add_cell_css( $post_id, $ri, false, ':last-child', array(
-						'margin-right' => 0,
-					) );
-				}
-			}
 		}
 
 		foreach ( $panels_data['widgets'] as $widget_id => $widget ) {

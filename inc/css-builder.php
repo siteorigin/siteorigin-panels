@@ -206,12 +206,23 @@ class SiteOrigin_Panels_Css_Builder {
 		$css_text = '';
 		krsort( $this->css );
 		foreach ( $this->css as $res => $def ) {
+			if( strpos( $res, ':' ) ) {
+				list( $max_res, $min_res ) = explode( ':', $res, 2 );
+			}
+			else {
+				$min_res = false;
+				$max_res = $res;
+			}
+
 			if ( empty( $def ) ) {
 				continue;
 			}
 
-			if ( $res < 1920 ) {
-				$css_text .= '@media (max-width:' . $res . 'px)';
+			if ( $max_res < 1920 ) {
+				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
+				if( ! empty( $min_res ) ) {
+					$css_text .= ' and (min-width:' . intval( $min_res ) . 'px) ';
+				}
 				$css_text .= '{ ';
 			}
 
@@ -220,7 +231,7 @@ class SiteOrigin_Panels_Css_Builder {
 				$css_text .= implode( ' , ', $selector ) . ' { ' . $property . ' } ';
 			}
 
-			if ( $res < 1920 ) {
+			if ( $max_res < 1920 ) {
 				$css_text .= ' } ';
 			}
 		}
