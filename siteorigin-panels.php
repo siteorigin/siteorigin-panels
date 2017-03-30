@@ -303,7 +303,7 @@ class SiteOrigin_Panels {
 			$classes[] = 'siteorigin-panels';
 			$classes[] = 'siteorigin-panels-before-js';
 
-			add_action( 'wp_footer', array( $this, 'strip_before_js' ) );
+			add_action( 'wp_footer', array( $this, 'strip_before_js' ), 99 );
 		}
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
