@@ -301,7 +301,9 @@ class SiteOrigin_Panels {
 	function body_class( $classes ) {
 		if( self::is_panel() ) {
 			$classes[] = 'siteorigin-panels';
-			$classes[] = 'siteorigin-panels-before-styling';
+			$classes[] = 'siteorigin-panels-before-js';
+
+			add_action( 'wp_footer', array( $this, 'strip_before_js' ) );
 		}
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
@@ -433,6 +435,13 @@ class SiteOrigin_Panels {
 	static function display_learn_button() {
 		return siteorigin_panels_setting( 'display-learn' ) &&
 		       apply_filters( 'siteorigin_panels_learn', true );
+	}
+
+	/**
+	 * Script that removes the siteorigin-panels-before-js class from the body.
+	 */
+	public function strip_before_js(){
+		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 }
 

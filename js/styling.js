@@ -53,4 +53,7 @@ jQuery( function ( $ ) {
 	$( window ).resize( stretchFullWidthRows );
 	stretchFullWidthRows();
 
+	// This should have been done in the footer, but run it here just incase.
+	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
+
 } );
