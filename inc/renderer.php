@@ -127,6 +127,20 @@ class SiteOrigin_Panels_Renderer {
 							'margin-bottom' => $panels_margin_bottom . 'px',
 						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
 
+
+						$remove_bottom_margin = ':nth-';
+						if( $collapse_order == 'left-top' ) {
+							$remove_bottom_margin .= 'last-';
+						}
+						else {
+							$remove_bottom_margin .= 'child(' . '-n+2' . ')';
+						}
+
+						$css->add_cell_css( $post_id, $ri, false, $remove_bottom_margin, array(
+							'margin-bottom' => 0,
+							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 )
+						);
+
 						if ( ! empty( $gutter_parts[1] ) ) {
 							// Tablet responsive css for cells
 
