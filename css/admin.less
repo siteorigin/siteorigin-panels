@@ -42,9 +42,8 @@
 	/* These are generic iconic buttons used in the page builder interface */
 	.so-tool-button {
 		padding: 6px 7px;
-		font-size: 11px;
 		text-decoration: none;
-		line-height: 0.9em;
+		line-height: 1em;
 
 		float: left;
 		margin-right: 2px;
@@ -59,6 +58,10 @@
 		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF");
 		outline: none;
 		.rounded(2px);
+
+		.so-panels-icon {
+			font-size: 12px;
+		}
 
 		span {
 			display: inline-block;
@@ -104,14 +107,20 @@
 		.clearfix();
 
 		/* The toolbar buttons */
-		> .so-tool-button {
+		.so-tool-button {
 			display: inline-block;
 			color: #666666;
-			padding-right: 8px;
+			padding: 3px 10px 3px 8px;
+
+			.so-button-text {
+				margin: 3px 0 2px 0;
+				font-size: 12px;
+			}
 
 			.so-panels-icon {
 				float: left;
-				margin: 0 5px 0 0;
+				margin: 3px 8px 2px 0;
+				font-size: 14px;
 			}
 
 			&:hover {
@@ -120,10 +129,8 @@
 		}
 
 		.so-switch-to-standard {
-			position: absolute;
-			top: 5px;
-			right: 10px;
 			cursor: pointer;
+			float: right;
 
 			display: none;
 			text-decoration: none;
@@ -200,10 +207,18 @@
 
 			.so-tool-button {
 				.box-sizing(border-box);
-				height: 22px;
 				padding: 5px;
-				font-size: 10px;
 				float: right;
+
+				.so-panels-icon {
+					color: #777;
+				}
+
+				&:hover {
+					.so-panels-icon {
+						color: #555;
+					}
+				}
 
 				&.so-row-move {
 					cursor: move;
