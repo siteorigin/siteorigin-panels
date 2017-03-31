@@ -53,11 +53,11 @@
 
 		cursor: pointer;
 
-		border: 1px solid #C0C0C0;
-		.gradient(#F0F0F0, #F0F0F0, #F9F9F9);
-		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF");
+		border: 1px solid #bebebe;
+		.gradient(#eeeeee, #eeeeee, #f9f9f9);
+		box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 -1px 0 rgba( 255,255,255,0.75 );
 		outline: none;
-		.rounded(2px);
+		border-radius: 2px;
 
 		.so-panels-icon {
 			font-size: 12px;
@@ -77,12 +77,6 @@
 			span {
 				color: #444444;
 			}
-		}
-
-		&.so-siteorigin-premium,
-		&.so-learn {
-			.gradient(#ebebeb, #ebebeb, #f3f3f3);
-			.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05)");
 		}
 	}
 
@@ -110,21 +104,28 @@
 		.so-tool-button {
 			display: inline-block;
 			color: #666666;
-			padding: 3px 10px 3px 8px;
+			padding: 2px 10px 2px 8px;
 
 			.so-button-text {
 				margin: 3px 0 2px 0;
-				font-size: 12px;
+				font-size: 11px;
 			}
 
 			.so-panels-icon {
 				float: left;
-				margin: 3px 8px 2px 0;
+				margin: 3px 7px 2px 0;
 				font-size: 14px;
 			}
 
 			&:hover {
 				color: #444444;
+			}
+
+			&.so-learn {
+				.gradient(#e5e5e5, #e5e5e5, #f6f6f6);
+				&:hover {
+					background: #FFFFFF;
+				}
 			}
 		}
 
