@@ -1244,12 +1244,22 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function filter_learn_lessons( $lessons ) {
 		$lessons[ 'page-builder-tips' ] = array(
-			'title' => __( 'Learn How To Use Page Builder', 'siteorigin-panels' ),
+			'title' => __( '12 Page Builder Tips', 'siteorigin-panels' ),
 			'video' => 'p39wf0yay1',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
 			'description' => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
 			                 __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' )  . ' ' .
 			                 __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
+			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
+		);
+
+		$lessons[ 'page-builder-addons' ] = array(
+			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
+			'video' => 'p39wf0yay1',
+			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
+			'description' => __( "We'll show you some of the most useful free addons for Page Builder.", 'siteorigin-panels' ) . ' ' .
+			                 __( "Sign up to our newsletter and you'll also get early access to the free addons we release.", 'siteorigin-panels' )  . ' ' .
+			                 __( "Plus, you can tell us which free features you want.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
