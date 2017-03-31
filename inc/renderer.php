@@ -130,10 +130,10 @@ class SiteOrigin_Panels_Renderer {
 
 						$remove_bottom_margin = ':nth-';
 						if( $collapse_order == 'left-top' ) {
-							$remove_bottom_margin .= 'last-';
+							$remove_bottom_margin .= 'last-child(' . ( count( $row[ 'cells' ] ) % 2 == 0 ? '-n+2' : '1' ) . ')';
 						}
 						else {
-							$remove_bottom_margin .= 'child(' . '-n+2' . ')';
+							$remove_bottom_margin .= 'child(-n+2)';
 						}
 
 						$css->add_cell_css( $post_id, $ri, false, $remove_bottom_margin, array(
