@@ -515,7 +515,7 @@ class SiteOrigin_Panels_Styles {
 				$css->add_row_css(
 					$post_id,
 					$ri,
-					'',
+					array( '.panel-no-style', '.panel-has-style > .panel-row-style' ),
 					array(
 						'-webkit-align-items' => $row['style']['cell_alignment'],
 						'align-items'         => $row['style']['cell_alignment'],
