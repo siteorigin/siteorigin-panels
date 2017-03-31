@@ -551,14 +551,15 @@ class SiteOrigin_Panels_Styles {
 						$mobile_width
 					);
 				}
-				if ( ! empty( $style['vertical_alignment'] ) ) {
+
+				if ( ! empty( $cell[ 'style' ]['vertical_alignment'] ) ) {
 					$css->add_cell_css(
 						$post_id,
 						$ri,
 						$ci,
 						'',
 						array(
-							'align-self' => $style['vertical_alignment']
+							'align-self' => $cell[ 'style' ]['vertical_alignment']
 						)
 					);
 				}
