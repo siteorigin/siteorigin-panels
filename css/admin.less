@@ -178,7 +178,7 @@
 				}
 
 				&.cell-selected .cell-wrapper {
-					background-color: darken( @row_color, 18% );
+					background-color: darken( @row_color, 14% );
 				}
 
 				.resize-handle {
@@ -543,54 +543,6 @@
 		}
 	}
 
-	/* Page Builder icons */
-
-	.so-panels-icon {
-		font-family: 'siteorigin-panels';
-		speak: none;
-		font-style: normal;
-		font-weight: normal;
-		font-variant: normal;
-		text-transform: none;
-		line-height: 1;
-
-		/* Better Font Rendering =========== */
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-
-		&.so-panels-icon-plus:before {
-			content: "\f067";
-		}
-		&.so-panels-icon-film:before {
-			content: "\f008";
-		}
-		&.so-panels-icon-th-large:before {
-			content: "\f009";
-		}
-		&.so-panels-icon-arrows:before {
-			content: "\f047";
-		}
-		&.so-panels-icon-arrow-up:before {
-			content: "\f062";
-		}
-		&.so-panels-icon-eye:before {
-			content: "\f06e";
-		}
-		&.so-panels-icon-hdd-o:before {
-			content: "\f0a0";
-		}
-		&.so-panels-icon-wrench:before {
-			content: "\f0ad";
-		}
-		&.so-panels-icon-rotate-left:before {
-			content: "\f0e2";
-		}
-		&.so-panels-icon-undo:before {
-			content: "\f0e2";
-		}
-
-	}
-
 	.so-panels-welcome-message {
 		text-align: center;
 		padding: 0px 15px 20px 15px;
@@ -818,8 +770,6 @@
 
 		}
 
-
-
 		/* These are the action buttons in the title bar */
 		a {
 			cursor: pointer;
@@ -898,6 +848,27 @@
 				}
 			}
 
+		}
+
+		// Icons in the dialog title
+
+		&.so-has-icon {
+			padding-left: 40px;
+
+			.so-panels-icon {
+				position: absolute;
+				top: 17px;
+				left: 15px;
+
+				font-size: 18px;
+				line-height: 18px;
+				display: block;
+				width: 18px;
+				height: 18px;
+				text-align: center;
+
+				color: #555;
+			}
 		}
 	}
 
@@ -2491,6 +2462,54 @@
 			}
 		}
 	}
+}
+
+/* Page Builder icons */
+
+.so-panels-icon {
+	font-family: 'siteorigin-panels';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	&.so-panels-icon-plus:before {
+		content: "\f067";
+	}
+	&.so-panels-icon-film:before {
+		content: "\f008";
+	}
+	&.so-panels-icon-th-large:before {
+		content: "\f009";
+	}
+	&.so-panels-icon-arrows:before {
+		content: "\f047";
+	}
+	&.so-panels-icon-arrow-up:before {
+		content: "\f062";
+	}
+	&.so-panels-icon-eye:before {
+		content: "\f06e";
+	}
+	&.so-panels-icon-hdd-o:before {
+		content: "\f0a0";
+	}
+	&.so-panels-icon-wrench:before {
+		content: "\f0ad";
+	}
+	&.so-panels-icon-rotate-left:before {
+		content: "\f0e2";
+	}
+	&.so-panels-icon-undo:before {
+		content: "\f0e2";
+	}
+
 }
 
 #post-status-info.for-siteorigin-panels {

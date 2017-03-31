@@ -6,6 +6,7 @@ module.exports = panels.view.dialog.extend( {
 
 	builder: null,
 	dialogClass: 'so-panels-dialog-prebuilt-layouts',
+	dialogIcon: 'hdd-o',
 
 	layoutCache: {},
 	currentTab: false,

@@ -9,6 +9,7 @@ module.exports = Backbone.View.extend( {
 	builder: false,
 	className: 'so-panels-dialog-wrapper',
 	dialogClass: '',
+	dialogIcon: '',
 	parentDialog: false,
 	dialogOpen: false,
 	editableLabel: false,
@@ -118,7 +119,13 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.dialog}
 	 */
 	renderDialog: function ( attributes ) {
-		attributes = _.extend( { editableLabel: this.editableLabel }, attributes );
+		attributes = _.extend( {
+			editableLabel: this.editableLabel,
+			dialogIcon: this.dialogIcon,
+		}, attributes );
+
+		console.log( attributes );
+
 		this.$el.html( this.dialogTemplate( attributes ) ).hide();
 		this.$el.data( 'view', this );
 		this.$el.addClass( 'so-panels-dialog-wrapper' );
