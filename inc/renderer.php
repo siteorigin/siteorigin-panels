@@ -82,7 +82,9 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'flex' => round( $weight * 1000 ),
+					'-ms-flex' => $weight,
+					'-webkit-flex' => $weight,
+					'flex' => $weight,
 					'width' => 0, // Workaround for flex child elements growing with their content.
 				) );
 			}
@@ -111,11 +113,15 @@ class SiteOrigin_Panels_Renderer {
 					) {
 						// Tablet responsive css for the row
 
-						$css->add_row_css( $post_id, $ri, '', array(
-							'flex-wrap' => 'wrap',
+						$css->add_row_css( $post_id, $ri, array( '.panel-no-style', '.panel-has-style > .panel-row-style' ), array(
+							'-ms-flex-wrap' => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
+							'-webkit-flex-wrap' => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
+							'flex-wrap' => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
 						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
 
 						$css->add_cell_css( $post_id, $ri, false, '', array(
+							'-ms-flex' => '0 1 50%',
+							'-webkit-flex' => '0 1 50%',
 							'flex' => '0 1 50%',
 							'margin-right' => '0',
 							'margin-bottom' => $panels_margin_bottom . 'px',
@@ -138,6 +144,7 @@ class SiteOrigin_Panels_Renderer {
 					// Mobile Responsive
 					$css->add_row_css( $post_id, $ri, array( '.panel-no-style', '.panel-has-style > .panel-row-style' ), array(
 						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+						'-ms-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 						'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					), $panels_mobile_width );
 
