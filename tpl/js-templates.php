@@ -61,22 +61,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-panels-welcome-message">
 			<div class="so-message-wrapper">
 				<?php
-				echo preg_replace(
-					array(
-						'/1\{ *(.*?) *\}/',
-						'/2\{ *(.*?) *\}/',
-						'/3\{ *(.*?) *\}/',
-						'/4\{ *(.*?) *\}/',
-					),
-					array(
-						"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-th-large'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-hdd-o'></span> $1</a>",
-						"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
-					),
-					// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
-					__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
-				);
+
+                printf(
+                    __( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
+                    "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
+                    "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
+                    "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
+                    "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+                );
 				?>
 			</div>
 
