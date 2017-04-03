@@ -62,8 +62,10 @@ class SiteOrigin_Panels_Styles_Admin {
 	 * @return bool
 	 */
 	function render_styles_fields( $section, $before = '', $after = '', $current = array(), $post_id = 0, $args = array() ) {
-		$fields = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', array(), $post_id, $args );
-		if ( empty( $fields ) ) {
+        $fields = array();
+        $fields = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', $fields, $post_id, $args );
+        $fields = apply_filters( 'siteorigin_panels_general_style_fields', $fields, $post_id, $args );
+        if ( empty( $fields ) ) {
 			return false;
 		}
 
@@ -95,10 +97,11 @@ class SiteOrigin_Panels_Styles_Admin {
 			}
 		}
 		$groups = apply_filters( 'siteorigin_panels_' . $section . '_style_groups', $groups, $post_id, $args );
+		$groups = apply_filters( 'siteorigin_panels_general_style_groups', $groups, $post_id, $args );
 
 		// Sort the style fields and groups by priority
-		uasort( $fields, array( self, 'sort_fields' ) );
-		uasort( $groups, array( self, 'sort_fields' ) );
+		uasort( $fields, array( $this, 'sort_fields' ) );
+		uasort( $groups, array( $this, 'sort_fields' ) );
 
 		echo $before;
 
@@ -327,7 +330,9 @@ class SiteOrigin_Panels_Styles_Admin {
 		if ( empty( $fields_cache[ $section ] ) ) {
 			// This filter doesn't pass in the arguments $post_id and $args
 			// Plugins looking to extend fields, should always add their fields if these are empty
-			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', array(), false, false );
+            $fields_cache[ $section ] = array();
+			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', $fields_cache[ $section ], false, false );
+			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_general_style_fields', $fields_cache[ $section ], false, false );
 		}
 		$fields = $fields_cache[ $section ];
 

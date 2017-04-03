@@ -325,11 +325,18 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Get everything related to the style wrapper
-		$attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
-		$standard_css = apply_filters( 'siteorigin_panels_' . $name . '_style_css', array(), $style );
-		$mobile_css = apply_filters( 'siteorigin_panels_' . $name . '_style_mobile_css', array(), $style );
+        $attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
+        $attributes = apply_filters( 'siteorigin_panels_general_style_attributes', $attributes, $style );
 
-		// Remove anything we didn't actually use
+        $standard_css = array();
+        $standard_css = apply_filters( 'siteorigin_panels_' . $name . '_style_css', $standard_css, $style );
+        $standard_css = apply_filters( 'siteorigin_panels_general_style_css', $standard_css, $style );
+
+        $mobile_css = array();
+        $mobile_css = apply_filters( 'siteorigin_panels_' . $name . '_style_mobile_css', $mobile_css, $style );
+        $mobile_css = apply_filters( 'siteorigin_panels_general_style_mobile_css', $mobile_css, $style );
+
+        // Remove anything we didn't actually use
 		if ( empty( $attributes['class'] ) ) {
 			unset( $attributes['class'] );
 		}
