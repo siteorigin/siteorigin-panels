@@ -55,6 +55,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 		if ( empty( $layout_data ) ) {
 			$layout_data = $this->get_panels_layout_data( $panels_data );
+			$layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
 		}
 
 		// Get some of the default settings
@@ -267,6 +268,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		$layout_data = $this->get_panels_layout_data( $panels_data );
+        $layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
 
 		ob_start();
 
