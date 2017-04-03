@@ -120,6 +120,9 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			);
 		}
 
+		// Add the Widgets Bundle message to the main widgets tab
+        $tabs[0]['message'] = $tabs['widgets_bundle']['message'];
+
 		$tabs['page_builder'] = array(
 			'title'   => __( 'Page Builder Widgets', 'siteorigin-panels' ),
 			'message' => preg_replace(
