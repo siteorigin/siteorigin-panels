@@ -96,6 +96,9 @@ module.exports = Backbone.View.extend( {
 		this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
 		this.model.on( 'change:data load_panels_data', this.toggleWelcomeDisplay, this );
 
+		this.on( 'display_builder', function(){ this.disableEditorExpandAdjust( 'show' ); }, this );
+		this.on( 'hide_builder', function(){ this.disableEditorExpandAdjust( 'hide' ); }, this );
+
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
 		this.menu.on( 'activate_context', this.activateContextMenu, this );
@@ -105,6 +108,7 @@ module.exports = Backbone.View.extend( {
 				this.displayAttachedBuilder( { confirm: false } );
 			}, this );
 		}
+
 
 		return this;
 	},
@@ -746,6 +750,34 @@ module.exports = Backbone.View.extend( {
 
 	handleHideBuilder: function(){
 		$('#post-status-info').show().removeClass( 'for-siteorigin-panels' );
+	},
+
+    disableEditorExpandAdjust: function( event ){
+		// Skip this if we're not attached to the editor
+		if( event === 'show' ) {
+        	// We need to remove the editor-expand handler
+			try {
+				var events = ( $.hasData( window ) && $._data( window ) ).events.scroll;
+
+				for( var i = 0; i < events.length; i++ ) {
+					if( events[i].namespace === 'editor-expand' ) {
+						console.log( 'remove editor expand handler' );
+						this._editorExpandHandler = events[i].handler;
+						$( window ).unbind( 'scroll', events[i].handler );
+						break;
+					}
+				}
+			}
+			catch( e ){
+				// We tried, we failed
+				return;
+			}
+		}
+		else if( event === 'hide' && ! _.isEmpty( this._editorExpandHandler ) ) {
+			// We need to readd the editor expand handler
+            console.log( 'add editor expand handler' );
+			$( window ).on( 'scroll', this._editorExpandHandler );
+		}
 	},
 
 	/**
