@@ -124,8 +124,6 @@ module.exports = Backbone.View.extend( {
 			dialogIcon: this.dialogIcon,
 		}, attributes );
 
-		console.log( attributes );
-
 		this.$el.html( this.dialogTemplate( attributes ) ).hide();
 		this.$el.data( 'view', this );
 		this.$el.addClass( 'so-panels-dialog-wrapper' );
