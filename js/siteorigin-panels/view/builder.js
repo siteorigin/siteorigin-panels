@@ -12,6 +12,7 @@ module.exports = Backbone.View.extend( {
 	currentData: '',
 
 	attachedToEditor: false,
+	attachedVisible: false,
 	liveEditor: undefined,
 	menu: false,
 
@@ -96,8 +97,7 @@ module.exports = Backbone.View.extend( {
 		this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
 		this.model.on( 'change:data load_panels_data', this.toggleWelcomeDisplay, this );
 
-		this.on( 'display_builder', function(){ this.disableEditorExpandAdjust( 'show' ); }, this );
-		this.on( 'hide_builder', function(){ this.disableEditorExpandAdjust( 'hide' ); }, this );
+		this.on( 'display_builder', this.wrapEditorExpandAdjust, this );
 
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
@@ -237,6 +237,8 @@ module.exports = Backbone.View.extend( {
 
 				// Resize to trigger reflow of WordPress editor stuff
 				$( window ).resize();
+
+                thisView.attachedVisible = false;
 				thisView.trigger( 'hide_builder' );
 			} ).show();
 		}
@@ -339,6 +341,7 @@ module.exports = Backbone.View.extend( {
 		$( document ).scroll();
 
 		// Make sure the word count is visible
+		this.attachedVisible = true;
 		this.trigger( 'display_builder' );
 
 		return true;
@@ -752,31 +755,30 @@ module.exports = Backbone.View.extend( {
 		$('#post-status-info').show().removeClass( 'for-siteorigin-panels' );
 	},
 
-    disableEditorExpandAdjust: function( event ){
-		// Skip this if we're not attached to the editor
-		if( event === 'show' ) {
-        	// We need to remove the editor-expand handler
-			try {
-				var events = ( $.hasData( window ) && $._data( window ) ).events.scroll;
+    wrapEditorExpandAdjust: function( ){
+		try {
+			var events = ( $.hasData( window ) && $._data( window ) ).events.scroll,
+				event;
 
-				for( var i = 0; i < events.length; i++ ) {
-					if( events[i].namespace === 'editor-expand' ) {
-						console.log( 'remove editor expand handler' );
-						this._editorExpandHandler = events[i].handler;
-						$( window ).unbind( 'scroll', events[i].handler );
-						break;
-					}
+			for( var i = 0; i < events.length; i++ ) {
+				if( events[i].namespace === 'editor-expand' ) {
+                    event = events[i];
+
+                    // Wrap the call
+					$( window ).unbind( 'scroll', event.handler );
+					$( window ).bind( 'scroll', function( e ){
+						if( ! this.attachedVisible ) {
+                            event.handler( e );
+						}
+					}.bind( this ) );
+
+					break;
 				}
 			}
-			catch( e ){
-				// We tried, we failed
-				return;
-			}
 		}
-		else if( event === 'hide' && ! _.isEmpty( this._editorExpandHandler ) ) {
-			// We need to readd the editor expand handler
-            console.log( 'add editor expand handler' );
-			$( window ).on( 'scroll', this._editorExpandHandler );
+		catch( e ){
+			// We tried, we failed
+			return;
 		}
 	},
 
