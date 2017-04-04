@@ -193,7 +193,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Gutter', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'layout',
-			'description' => sprintf( __( 'Amount of space between columns. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
+			'description' => sprintf( __( 'Amount of space between cells. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
 			'priority'    => 6,
 		);
 

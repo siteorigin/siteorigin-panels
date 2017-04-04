@@ -20,7 +20,7 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form button.set-row': 'setCellsFromForm',
 	},
 
-	dialogIcon: 'th-large',
+	dialogIcon: 'add-row',
 	dialogClass: 'so-panels-dialog-row-edit',
 	styleType: 'row',
 

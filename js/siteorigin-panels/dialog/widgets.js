@@ -7,7 +7,7 @@ module.exports = panels.view.dialog.extend( {
 	filter: {},
 
 	dialogClass: 'so-panels-dialog-add-widget',
-	dialogIcon: 'plus',
+	dialogIcon: 'add-widget',
 
 	events: {
 		'click .so-close': 'closeDialog',

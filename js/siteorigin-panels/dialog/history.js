@@ -12,7 +12,7 @@ module.exports = panels.view.dialog.extend( {
 	previewScrollTop: null,
 
 	dialogClass: 'so-panels-dialog-history',
-	dialogIcon: 'undo',
+	dialogIcon: 'history',
 
 	events: {
 		'click .so-close': 'closeDialog',
