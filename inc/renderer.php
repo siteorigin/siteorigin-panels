@@ -284,7 +284,7 @@ class SiteOrigin_Panels_Renderer {
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
 		foreach ( $layout_data as $ri => & $row ) {
-			$this->render_row( $post_id, $ri, $row );
+			$this->render_row( $post_id, $ri, $row, $panels_data );
 		}
 
 		echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data, $post_id );
@@ -635,9 +635,10 @@ class SiteOrigin_Panels_Renderer {
 	 * @param string $post_id The ID of the post containing this layout.
 	 * @param int $ri The index of this row.
 	 * @param array $row The model containing this row's data and child cells.
+	 * @param array $panels_data A copy of panels_data for filters.
 	 *
 	 */
-	private function render_row( $post_id, $ri, & $row ) {
+	private function render_row( $post_id, $ri, & $row, & $panels_data ) {
 		$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $row['style'] ) ? $row['style'] : array(), $post_id . '-' . $ri );
 
 		$row_classes   = array( 'panel-grid' );
@@ -661,7 +662,7 @@ class SiteOrigin_Panels_Renderer {
 		$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
 		foreach ( $row['cells'] as $ci => & $cell ) {
-			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'] );
+			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
 
 		// Close the style wrapper
@@ -689,9 +690,9 @@ class SiteOrigin_Panels_Renderer {
 	 * @param int $ci The index of this cell.
 	 * @param array $cell The model containing this cell's data and child widgets.
 	 * @param array $cells The array of cells containing this cell.
-	 *
+     * @param array $panels_data A copy of panels_data for filters
 	 */
-	private function render_cell( $post_id, $ri, $ci, & $cell, $cells ) {
+	private function render_cell( $post_id, $ri, $ci, & $cell, $cells, & $panels_data ) {
 
 		$cell_classes = array( 'panel-grid-cell' );
 
@@ -705,10 +706,17 @@ class SiteOrigin_Panels_Renderer {
 
 		// Themes can add their own styles to cells
 		$cell_classes    = apply_filters( 'siteorigin_panels_cell_classes', $cell_classes, $cell );
+
+		// Legacy filter, use `siteorigin_panels_cell_classes` instead
+		$cell_classes    = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data, $cell );
+
 		$cell_attributes = apply_filters( 'siteorigin_panels_cell_attributes', array(
 			'id'    => 'pgc-' . $post_id . '-' . $ri . '-' . $ci,
 			'class' => implode( ' ', $cell_classes ),
 		), $cell );
+
+		// Legacy filter, use `siteorigin_panels_cell_attributes` instead
+        $cell_attributes = apply_filters( 'siteorigin_panels_row_cell_attributes', $cell_attributes, $panels_data, $cell );
 
 		echo apply_filters( 'siteorigin_panels_before_cell', '', $cell, $cell_attributes );
 
