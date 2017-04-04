@@ -551,9 +551,9 @@ module.exports = Backbone.View.extend( {
 			}
 		}
 
+		// Make sure the active cell isn't empty, and it's in a row that exists
 		var activeCell = this.activeCell;
-
-		if( _.isEmpty( activeCell ) || this.model.get('rows').indexOf(activeCell.model) === -1 ) {
+		if( _.isEmpty( activeCell ) || this.model.get('rows').indexOf( activeCell.model.row ) === -1 ) {
 			return this.model.get('rows').last().get('cells').first();
 		} else {
 			return activeCell.model;
