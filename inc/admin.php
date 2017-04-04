@@ -60,6 +60,7 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_import_layout', array( $this, 'action_import_layout' ) );
 		add_action( 'wp_ajax_so_panels_export_layout', array( $this, 'action_export_layout' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
+        add_action('wp_ajax_so_panels_directory_enable', array( $this, 'action_directory_enable' ) );
 
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
@@ -1171,6 +1172,16 @@ class SiteOrigin_Panels_Admin {
 
 		exit();
 	}
+
+    /**
+     * Enable the directory.
+     */
+	function action_directory_enable(){
+        if( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
+        $user = get_current_user_id();
+        update_user_meta( $user, 'so_panels_directory_enabled', true );
+        wp_die();
+    }
 
 	/**
 	 * Add a column that indicates if a column is powered by Page Builder
