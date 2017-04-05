@@ -4,7 +4,10 @@ module.exports = panels.view.dialog.extend( {
 
 	builder: null,
 	sidebarWidgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html() ) ),
+
 	dialogClass: 'so-panels-dialog-edit-widget',
+    dialogIcon: 'add-widget',
+
 	widgetView: false,
 	savingWidget: false,
 	editableLabel: true,
