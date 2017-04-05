@@ -127,7 +127,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				<div class="style-section-fields" style="display: none">
 					<?php
 					foreach ( $fields as $field_id => $field ) {
-						$default = isset( $field['default'] ) ? $field['default'] : false;
+						$default = isset( $field[ 'default' ] ) ? $field[ 'default' ] : false;
 
 						if ( $field['group'] == $group_id ) {
 							?>
@@ -155,8 +155,9 @@ class SiteOrigin_Panels_Styles_Admin {
 	/**
 	 * Generate the style field
 	 *
-	 * @param $field
+	 * @param array $field Everything needed to display the field
 	 * @param $current
+	 * @param $field_id
 	 */
 	function render_style_field( $field, $current, $field_id ) {
 		$field_name = 'style[' . $field_id . ']';

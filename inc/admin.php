@@ -1266,10 +1266,10 @@ class SiteOrigin_Panels_Admin {
 
 		$lessons[ 'page-builder-addons' ] = array(
 			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
-			'video' => 'p39wf0yay1',
+			'video' => 'j6yn1jk7rj',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
 			'description' => __( "We'll show you some of the most useful free addons for Page Builder.", 'siteorigin-panels' ) . ' ' .
-			                 __( "Sign up to our newsletter and you'll also get early access to the free addons we release.", 'siteorigin-panels' )  . ' ' .
+			                 __( "Sign up to our newsletter and you'll also get access to the free addons we release.", 'siteorigin-panels' )  . ' ' .
 			                 __( "Plus, you can tell us which free features you want.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
