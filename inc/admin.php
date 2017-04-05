@@ -683,7 +683,7 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * @return array
 	 */
-	function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = true ) {
+	function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = true, $force = false ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -712,7 +712,7 @@ class SiteOrigin_Panels_Admin {
 			}
 			unset( $widget['info'] );
 
-			if ( ! empty( $info['raw'] ) ) {
+			if ( ! empty( $info['raw'] ) || $force ) {
 				if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
 
 					if(
@@ -727,6 +727,7 @@ class SiteOrigin_Panels_Admin {
 					}
 
 					$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
+						/** @var SiteOrigin_Widget $the_widget */
 					$instance   = $the_widget->update( $widget, $old_widget );
 					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
 
@@ -1069,6 +1070,7 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		header( 'content-type: application/json' );
+		$panels_data = array();
 
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
@@ -1094,36 +1096,34 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			// A theme or plugin could use this to change the data in the layout
-			$layout = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $lid );
+			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $lid );
 
 			// Remove all the layout specific attributes
-			if ( isset( $layout['name'] ) ) unset( $layout['name'] );
-			if ( isset( $layout['screenshot'] ) ) unset( $layout['screenshot'] );
-			if ( isset( $layout['filename'] ) ) unset( $layout['filename'] );
+			if ( isset( $panels_data['name'] ) ) unset( $panels_data['name'] );
+			if ( isset( $panels_data['screenshot'] ) ) unset( $panels_data['screenshot'] );
+			if ( isset( $panels_data['filename'] ) ) unset( $panels_data['filename'] );
 
-			$layout = apply_filters( 'siteorigin_panels_data', $layout );
-
-			echo json_encode( $layout );
-			wp_die();
-		}
-		if ( $_REQUEST['type'] == 'directory' ) {
+		} elseif ( $_REQUEST['type'] == 'directory' ) {
 			$response = wp_remote_get(
 				self::LAYOUT_URL . 'layout/' . urlencode( $_REQUEST['lid'] ) . '/?action=download'
 			);
 
 			if ( $response['response']['code'] == 200 ) {
 				// For now, we'll just pretend to load this
-				echo $response['body'];
-				wp_die();
+				$panels_data = json_decode( $response['body'], true );
 			} else {
 				// Display some sort of error message
 			}
 		} elseif ( current_user_can( 'edit_post', $_REQUEST['lid'] ) ) {
 			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
-			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data );
-			echo json_encode( $panels_data );
-			wp_die();
 		}
+
+		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data );
+
+		$panels_data['widgets'] = $this->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+
+		echo json_encode( $panels_data );
+		wp_die();
 	}
 
 	/**
