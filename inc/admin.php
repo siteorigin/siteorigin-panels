@@ -726,8 +726,8 @@ class SiteOrigin_Panels_Admin {
 						$old_widget = $widget;
 					}
 
+					/** @var WP_Widget $the_widget */
 					$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
-						/** @var SiteOrigin_Widget $the_widget */
 					$instance   = $the_widget->update( $widget, $old_widget );
 					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
 
