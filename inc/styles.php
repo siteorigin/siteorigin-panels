@@ -209,11 +209,14 @@ class SiteOrigin_Panels_Styles {
 			'priority' => 10,
 		);
 
-		$fields['mobile_collapse'] = array(
-			'name'     => __( 'Collapse On Mobile', 'siteorigin-panels' ),
-			'type'     => 'checkbox',
+		$fields['collapse_behaviour'] = array(
+			'name'     => __( 'Collapse Behaviour', 'siteorigin-panels' ),
+			'type'     => 'select',
 			'group'    => 'layout',
-			'default'  => true,
+			'options'  => array(
+				''               => __( 'Standard', 'siteorigin-panels' ),
+				'no_collapse'    => __( 'No Collapse', 'siteorigin-panels' ),
+			),
 			'priority' => 15,
 		);
 

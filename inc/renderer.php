@@ -105,7 +105,8 @@ class SiteOrigin_Panels_Renderer {
 
 			if ( $settings['responsive'] ) {
 
-				if( ! isset( $row[ 'style' ][ 'mobile_collapse' ] ) || $row[ 'style' ][ 'mobile_collapse' ] ) {
+			    // The default collapse behaviour
+				if( empty( $row[ 'style' ][ 'collapse_behaviour' ] ) ) {
 
 					if (
 						$settings[ 'tablet-layout' ] &&
