@@ -351,8 +351,8 @@ class SiteOrigin_Panels_Settings {
 		$fields['layout']['fields']['margin-bottom'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Row Bottom Margin', 'siteorigin-panels' ),
-			'description' => __( 'Default margin below rows.', 'siteorigin-panels' ),
+			'label'       => __( 'Row/Widget Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'Default margin below rows and widgets.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-bottom-last-row'] = array(
