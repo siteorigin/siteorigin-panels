@@ -1256,7 +1256,7 @@ class SiteOrigin_Panels_Admin {
 	public function filter_learn_lessons( $lessons ) {
 		$lessons[ 'page-builder-tips' ] = array(
 			'title' => __( '12 Page Builder Tips', 'siteorigin-panels' ),
-			'video' => 'p39wf0yay1',
+			'video' => '212380146',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
 			'description' => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
 			                 __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' )  . ' ' .
@@ -1266,7 +1266,7 @@ class SiteOrigin_Panels_Admin {
 
 		$lessons[ 'page-builder-addons' ] = array(
 			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
-			'video' => 'j6yn1jk7rj',
+			'video' => '212380210',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
 			'description' => __( "We'll show you some of the most useful free addons for Page Builder.", 'siteorigin-panels' ) . ' ' .
 			                 __( "Sign up to our newsletter and you'll also get access to the free addons we release.", 'siteorigin-panels' )  . ' ' .
