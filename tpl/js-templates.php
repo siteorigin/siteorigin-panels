@@ -10,44 +10,42 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-builder-toolbar">
 
 			<a class="so-tool-button so-widget-add" title="<?php esc_attr_e( 'Add Widget', 'siteorigin-panels' ) ?>">
-				<span class="so-panels-icon so-panels-icon-plus"></span>
+				<span class="so-panels-icon so-panels-icon-add-widget"></span>
 				<span class="so-button-text"><?php esc_html_e('Add Widget', 'siteorigin-panels') ?></span>
 			</a>
 
 			<a class="so-tool-button so-row-add" title="<?php esc_attr_e( 'Add Row', 'siteorigin-panels' ) ?>">
-				<span class="so-panels-icon so-panels-icon-th-large"></span>
+				<span class="so-panels-icon so-panels-icon-add-row"></span>
 				<span class="so-button-text"><?php esc_html_e('Add Row', 'siteorigin-panels') ?></span>
 			</a>
 
 			<a class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ) ?>">
-				<span class="so-panels-icon so-panels-icon-hdd-o"></span>
+				<span class="so-panels-icon so-panels-icon-layouts"></span>
 				<span class="so-button-text"><?php esc_html_e('Layouts', 'siteorigin-panels') ?></span>
 			</a>
 
 			<?php if( !empty($post) ) : ?>
 
 				<a class="so-tool-button so-history" style="display: none" title="<?php esc_attr_e( 'Edit History', 'siteorigin-panels' ) ?>">
-					<span class="so-panels-icon so-panels-icon-undo"></span>
+					<span class="so-panels-icon so-panels-icon-history"></span>
 					<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
 				</a>
 
 				<a class="so-tool-button so-live-editor" style="display: none" title="<?php esc_html_e( 'Live Editor', 'siteorigin-panels' ) ?>">
-					<span class="so-panels-icon so-panels-icon-eye"></span>
+					<span class="so-panels-icon so-panels-icon-live-editor"></span>
 					<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
 				</a>
 
 			<?php endif; ?>
 
-			<?php if( siteorigin_panels_display_premium_teaser() ) : ?>
-				<a class="so-tool-button so-siteorigin-premium" title="<?php echo esc_attr_e( 'SiteOrigin Premium Addons', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( siteorigin_panels_premium_url() ) ?>" target="_blank">
-					<span class="so-panels-icon so-panels-icon-arrow-up"></span>
-					<span class="so-button-text"><?php echo esc_html_e( 'Get Addons', 'siteorigin-panels' ) ?></span>
+			<?php if( SiteOrigin_Panels::display_learn_button() ) : ?>
+				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Addons', 'siteorigin-panels' ) ?>" href="#siteorigin-learn-page-builder-animations" style="margin-left: 10px;">
+					<span class="so-panels-icon so-panels-icon-addons"></span>
+					<span class="so-button-text"><?php echo esc_html_e( 'Addons', 'siteorigin-panels' ) ?></span>
 				</a>
-			<?php endif ?>
 
-			<?php if( SiteOrigin_Panels_Learn::display_learn_button() ) : ?>
-				<a class="so-tool-button so-learn so-lesson-modal" title="<?php echo esc_attr_e( 'Learn Page Builder', 'siteorigin-panels' ) ?>" href="<?php echo SiteOrigin_Panels_Learn::get_url( false, 'page-builder' ) ?>" target="_blank">
-					<span class="so-panels-icon so-panels-icon-film"></span>
+				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Learn Page Builder', 'siteorigin-panels' ) ?>" href="#siteorigin-learn-page-builder-tips">
+					<span class="so-panels-icon so-panels-icon-learn"></span>
 					<span class="so-button-text"><?php echo esc_html_e( 'Learn', 'siteorigin-panels' ) ?></span>
 				</a>
 			<?php endif ?>
@@ -63,29 +61,21 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-panels-welcome-message">
 			<div class="so-message-wrapper">
 				<?php
-				echo preg_replace(
-					array(
-						'/1\{ *(.*?) *\}/',
-						'/2\{ *(.*?) *\}/',
-						'/3\{ *(.*?) *\}/',
-						'/4\{ *(.*?) *\}/',
-					),
-					array(
-						"<a href='#' class='so-tool-button so-widget-add'><span class='so-panels-icon so-panels-icon-plus'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-row-add'><span class='so-panels-icon so-panels-icon-th-large'></span> $1</a>",
-						"<a href='#' class='so-tool-button so-prebuilt-add'><span class='so-panels-icon so-panels-icon-hdd-o'></span> $1</a>",
-						"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>$1</a>"
-					),
-					// TRANSLATORS: This message gives suggestions of next steps for the user x{...} is used to insert links
-					__("Add a 1{widget}, 2{row} or 3{prebuilt layout} to get started. Read our 4{documentation} if you need help.", 'siteorigin-panels')
-				);
+
+                printf(
+                    __( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
+                    "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
+                    "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
+                    "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
+                    "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+                );
 				?>
 			</div>
 
-			<?php if( SiteOrigin_Panels_Learn::display_learn_button() ) : ?>
+			<?php if( SiteOrigin_Panels::display_learn_button() ) : ?>
 				<div class="so-tip-wrapper">
 					<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
-					<a href="<?php echo SiteOrigin_Panels_Learn::get_url( 39424 ) ?>" class="so-lesson-modal">
+					<a href="#siteorigin-learn-page-builder-tips" class="so-lesson-modal">
 						<?php _e( '12 tips every Page Builder user should know.', 'siteorigin-panels' ) ?>
 					</a>
 				</div>
@@ -97,19 +87,38 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-builder-row">
-	<div class="so-row-container ui-draggable">
+	<div class="so-row-container ui-draggable so-row-color-{{%= rowColorLabel %}}">
 
 		<div class="so-row-toolbar">
-			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-arrows"></span></span>
+			{{% if( rowLabel ) { %}}
+			<h3 class="so-row-label">{{%= rowLabel %}}</h3>
+			{{% } %}}
+			<span class="so-row-move so-tool-button"><span class="so-panels-icon so-panels-icon-move"></span></span>
 
 			<span class="so-dropdown-wrapper">
-				<a class="so-row-settings so-tool-button"><span class="so-panels-icon so-panels-icon-wrench"></span></a>
+				<a class="so-row-settings so-tool-button"><span class="so-panels-icon so-panels-icon-settings"></span></a>
 
 				<div class="so-dropdown-links-wrapper">
 					<ul>
 						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
+						<li class="so-row-colors-container">
+							<?php
+							// See css/admin.less variable @row_colors. This should match the number of colors defined there.
+							$row_color_count = 5;
+
+							for ( $i = 1; $i <= $row_color_count; $i++ ) {
+								$classes = array( 'so-row-color', 'so-row-color-' . $i );
+
+								?>
+								<div data-color-label="<?php echo esc_attr( $i ); ?>"
+							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorLabel == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
+							         ></div>
+								<?php
+							}
+							?>
+						</li>
 						<div class="so-pointer"></div>
 					</ul>
 				</div>
@@ -136,11 +145,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-widget-wrapper">
 			<div class="title">
 				<h4>{{%= title %}}</h4>
-					<span class="actions">
-						<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
-						<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
-						<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
-					</span>
+				<span class="actions">
+					<a class="widget-edit"><?php _e('Edit', 'siteorigin-panels') ?></a>
+					<a class="widget-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+					<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
+				</span>
 			</div>
 			<small class="description">{{%= description %}}</small>
 		</div>
@@ -152,8 +161,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-overlay"></div>
 
-		<div class="so-title-bar">
-			<h3 class="so-title">{{%= title %}}</h3>
+		<div class="so-title-bar {{% if ( dialogIcon ) print( 'so-has-icon' ) %}}">
+			{{% if ( ! _.isEmpty( dialogIcon ) ) { %}}
+				<div class="so-panels-icon so-panels-icon-{{%- dialogIcon %}}" />
+			{{% } %}}
+			<h3 class="so-title{{% if ( editableLabel ) print(' so-title-editable')%}}"
+			    {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false" tabIndex="1"')%}}
+				>{{%= title %}}</h3>
 			<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 			<a class="so-close"><span class="so-dialog-icon"></span></a>
@@ -277,22 +291,16 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="dialog-data">
 
 		<h3 class="title">
-			{{% if( dialogType == 'create' ) { %}}
-				<span class="add-row"><?php _e('Add New Row', 'siteorigin-panels') ?></span>
-			{{% } else { %}}
-				<span class="edit-row"><?php _e('Edit Row', 'siteorigin-panels') ?></span>
-			{{% } %}}
+			{{%= title %}}
 		</h3>
 
-		{{% if( dialogType == 'edit' ) { %}}
-			<div class="right-sidebar"></div>
-		{{% } %}}
+		<div class="right-sidebar"></div>
 
 		<div class="content">
 
 			<div class="row-set-form">
 				<?php
-				$cells_field = '<input type="number" min="1" max="8" name="cells"  class="so-row-field" value="2" />';
+				$cells_field = apply_filters('siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />');
 				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
 					'Even' => 1,
 					'Golden' => 0.61803398,
@@ -382,8 +390,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php endif; ?>
 
-				<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
+				<?php if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) : ?>
+					<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
+				<?php endif; ?>
+
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
+
 				<?php
 				$post_types = siteorigin_panels_setting('post-types');
 				foreach($post_types as $post_type) {
@@ -507,8 +519,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo siteorigin_panels_live_editor_preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
+			<form method="post" action="<?php echo SiteOrigin_Panels::preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
 				<input type="hidden" name="live_editor_panels_data" value="">
+				<input type="hidden" name="live_editor_post_ID" value="">
 			</form>
 			<iframe class="siteorigin-panels-history-iframe" name="siteorigin-panels-history-iframe-{{%= cid %}}" src=""></iframe>
 		</div>

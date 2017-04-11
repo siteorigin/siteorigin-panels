@@ -3,10 +3,14 @@ var panels = window.panels, $ = jQuery;
 module.exports = panels.view.dialog.extend( {
 
 	builder: null,
-	sidebarWidgetTemplate: _.template( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html().panelsProcessTemplate() ),
+	sidebarWidgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html() ) ),
+
 	dialogClass: 'so-panels-dialog-edit-widget',
+    dialogIcon: 'add-widget',
+
 	widgetView: false,
 	savingWidget: false,
+	editableLabel: true,
 
 	events: {
 		'click .so-close': 'saveHandler',
@@ -35,6 +39,17 @@ module.exports = panels.view.dialog.extend( {
 				} );
 			}
 		} );
+
+		this.on( 'edit_label', function ( text ) {
+			// If text is set to default value, just clear it.
+			if ( text === panelsOptions.widgets[ this.model.get( 'class' ) ][ 'title' ] ) {
+				text = '';
+			}
+			this.model.set( 'label', text );
+			if ( _.isEmpty( text ) ) {
+				this.$( '.so-title' ).text( this.model.getWidgetField( 'title' ) );
+			}
+		}.bind( this ) );
 	},
 
 	/**
@@ -45,11 +60,9 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		if ( ! _.isUndefined( panelsOptions.widgets[this.model.get( 'class' )] ) ) {
-			this.$( '.so-title .widget-name' ).html( panelsOptions.widgets[this.model.get( 'class' )].title );
-		} else {
-			this.$( '.so-title .widget-name' ).html( panelsOptions.loc.missing_widget.title );
-		}
+		var title = this.model.getWidgetField( 'title' );
+		this.$( '.so-title .widget-name' ).html( title );
+		this.$( '.so-edit-title' ).val( title );
 
 		if( ! this.builder.supports( 'addWidget' ) ) {
 			this.$( '.so-buttons .so-duplicate' ).remove();

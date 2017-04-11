@@ -12,6 +12,8 @@ jQuery( function ( $ ) {
 
 		$( '.siteorigin-panels-stretch.panel-row-style' ).each( function () {
 			var $$ = $( this );
+
+			// Reset all the styles associated with row stretching
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
@@ -19,8 +21,8 @@ jQuery( function ( $ ) {
 				'padding-right': 0
 			} );
 
-			var leftSpace = $$.offset().left - fullContainer.offset().left;
-			var rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
+			var leftSpace = $$.offset().left - fullContainer.offset().left,
+				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
 			$$.css( {
 				'margin-left': - leftSpace,
@@ -48,7 +50,10 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	$( window ).resize( stretchFullWidthRows );
+	$( window ).resize( stretchFullWidthRows ).load( stretchFullWidthRows );
 	stretchFullWidthRows();
+
+	// This should have been done in the footer, but run it here just incase.
+	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
 
 } );

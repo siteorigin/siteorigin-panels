@@ -3,3 +3,7 @@ lang/siteorigin-panels.mo
 *.min.js
 node_modules/
 dist/
+/tmp
+/js/siteorigin-panels.js
+/css/*.css
+/settings/admin-settings.css

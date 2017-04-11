@@ -1,12 +1,12 @@
 @import "mixins";
 
 @font-face {
-	font-family: 'siteorigin-panels';
-	src:url('icons/siteorigin-panels.eot');
-	src:url('icons/siteorigin-panels.eot') format('embedded-opentype'),
-	url('icons/siteorigin-panels.woff') format('woff'),
-	url('icons/siteorigin-panels.ttf') format('truetype'),
-	url('icons/siteorigin-panels.svg') format('svg');
+	font-family: 'siteorigin-panels-icons';
+	src:url('icons/panels-icons.eot');
+	src:url('icons/panels-icons.eot') format('embedded-opentype'),
+	url('icons/panels-icons.woff') format('woff'),
+	url('icons/panels-icons.ttf') format('truetype'),
+	url('icons/panels-icons.svg') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -42,9 +42,8 @@
 	/* These are generic iconic buttons used in the page builder interface */
 	.so-tool-button {
 		padding: 6px 7px;
-		font-size: 11px;
 		text-decoration: none;
-		line-height: 0.9em;
+		line-height: 1em;
 
 		float: left;
 		margin-right: 2px;
@@ -54,11 +53,15 @@
 
 		cursor: pointer;
 
-		border: 1px solid #C0C0C0;
-		.gradient(#F0F0F0, #F0F0F0, #F9F9F9);
-		.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF");
+		border: 1px solid #bebebe;
+		.gradient(#eeeeee, #eeeeee, #f9f9f9);
+		box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 rgba( 255,255,255,0.5 );
 		outline: none;
-		.rounded(2px);
+		border-radius: 2px;
+
+		.so-panels-icon {
+			font-size: 12px;
+		}
 
 		span {
 			display: inline-block;
@@ -74,12 +77,6 @@
 			span {
 				color: #444444;
 			}
-		}
-
-		&.so-siteorigin-premium,
-		&.so-learn {
-			.gradient(#ebebeb, #ebebeb, #f3f3f3);
-			.box-shadow(~"0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 #FFF, inset 0 -1px rgba(0,0,0,0.05)");
 		}
 	}
 
@@ -104,26 +101,40 @@
 		.clearfix();
 
 		/* The toolbar buttons */
-		> .so-tool-button {
+		.so-tool-button {
 			display: inline-block;
 			color: #666666;
-			padding-right: 8px;
+			padding: 2px 10px 2px 8px;
+
+			.so-button-text {
+				margin: 3px 0 2px 0;
+				font-size: 11px;
+			}
 
 			.so-panels-icon {
 				float: left;
-				margin: 0 5px 0 0;
+				margin: 3px 7px 2px 0;
+				font-size: 14px;
+				color: #747474;
 			}
 
 			&:hover {
-				color: #444444;
+				&, .so-panels-icon {
+					color: #444444;
+				}
+			}
+
+			&.so-learn {
+				.gradient(#e5e5e5, #e5e5e5, #f6f6f6);
+				&:hover {
+					background: #FFFFFF;
+				}
 			}
 		}
 
 		.so-switch-to-standard {
-			position: absolute;
-			top: 5px;
-			right: 10px;
 			cursor: pointer;
+			float: right;
 
 			display: none;
 			text-decoration: none;
@@ -131,7 +142,6 @@
 			padding: 5px 6px;
 			.rounded(2px);
 			border: 1px solid transparent;
-			margin-top: 2px;
 			font-size: 11px;
 
 			&:hover {
@@ -145,15 +155,77 @@
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
+		// See tpl/js-templates.php variable $row_color_count. It should match the number of colors defined here.
+		@row_colors: #CDE2EC, #F2C2BE, #D5CCDF, #CAE7CD, #E2DCB1;
+
+		.row-colors( @i: 1 ) when ( @i <= length( @row_colors ) ) {
+			@row_color: extract( @row_colors, @i );
+
+			// The color selectors
+			.so-row-color-@{i} {
+				&.so-row-color {
+					background-color: @row_color;
+					border: 1px solid darken( @row_color, 11% );
+
+					&.so-row-color-selected:before {
+						background: darken( @row_color, 10% );
+					}
+				}
+			}
+
+			// The actual container
+			.so-row-container.so-row-color-@{i} .so-cells .cell {
+				.cell-wrapper {
+					background-color: @row_color;
+				}
+
+				&.cell-selected .cell-wrapper {
+					background-color: darken( @row_color, 14% );
+				}
+
+				.resize-handle {
+					background-color: lighten( @row_color, 7% );
+
+					&:hover {
+						background-color: lighten( @row_color, 4% );
+					}
+				}
+			}
+
+			.row-colors( ( @i + 1 ) );
+		} .row-colors();
+
+		h3.so-row-label {
+			display: inline-block;
+			font-size: 1em;
+			font-weight: 500;
+			color: #474747;
+			margin: 0 0 0 4px;
+			line-height: 22px;
+			float: left;
+		}
+
 		.so-row-toolbar {
 			.clearfix();
 
 			.so-tool-button {
 				.box-sizing(border-box);
-				height: 22px;
-				padding: 5px;
-				font-size: 10px;
+				padding: 4px;
 				float: right;
+
+				.so-panels-icon {
+					color: #777;
+					font-size: 11px;
+					width: 11px;
+					height: 11px;
+					display: block;
+				}
+
+				&:hover {
+					.so-panels-icon {
+						color: #555;
+					}
+				}
 
 				&.so-row-move {
 					cursor: move;
@@ -180,6 +252,35 @@
 						}
 					}
 
+					ul li.so-row-colors-container {
+						display: flex;
+						justify-content: space-around;
+
+						padding: 5px;
+
+						.so-row-color {
+							@row_color_checkbox_size: 14px;
+
+							display: inline-block;
+							cursor: pointer;
+							position: relative;
+							text-align: center;
+
+							width: @row_color_checkbox_size;
+							height: @row_color_checkbox_size;
+
+							&.so-row-color-selected:before {
+								content: "";
+								display: block;
+								position: absolute;
+								top: 2px;
+								bottom: 2px;
+								left: 2px;
+								right: 2px;
+							}
+						}
+					}
+
 				}
 
 				&:hover .so-dropdown-links-wrapper {
@@ -200,6 +301,10 @@
 			margin-bottom: 15px;
 			.user-select(none);
 
+			&.ui-sortable-helper {
+				opacity: 0.9;
+			}
+
 			.so-cells {
 				.clearfix();
 				margin: 0 -5px;
@@ -209,7 +314,6 @@
 					width: 10px;
 					left: -11px;
 					cursor: col-resize;
-					background: rgba(0,150,211, 0);
 					background: rgba(0,150,211, 0.25);
 
 					-webkit-transition: background 0.25s ease-in-out;
@@ -239,16 +343,15 @@
 
 					.cell-wrapper{
 						background: #e4eff4;
-						border: 1px solid #bcccd2;
-						padding: 7px 7px 1px 7px; /* 6px bottom to remove bottom margin from panels */
+						padding: 7px 7px 0px 7px;
 						height: 100%;
 						min-height: 70px;
+
+						.transition(0.25s, background, ease-in-out);
 					}
 
 					&.cell-selected .cell-wrapper{
-						background: #cae7f4 url("images/cell-selected.png") repeat;
-						border-color: #9abcc7;
-						box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
 					}
 
 					@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
@@ -265,27 +368,29 @@
 
 						.so-widget {
 							cursor: move;
+
 							&.so-widget-no-move {
 								cursor: auto;
 							}
 
-							margin-bottom: 5px;
+							margin-bottom: 7px;
 
 							background: #f9f9fb;
 
-							border: 1px solid #9bafb5;
+							border: 1px solid rgba( 255, 255, 255, 0.75 );
 							max-height: 49px;
+
+							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
 							.box-sizing(border-box);
-							.box-shadow(~"0 1px 2px rgba(0,0,0,0.075)");
 
 							&:hover {
-								border: 1px solid #93a7ad;
+								border: 1px solid rgba( 255, 255, 255, 0.55 );
 								background: #fff;
-								.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
+								.box-shadow(~"0 0 2px rgba(0,0,0,0.1)");
 							}
 
-							.so-widget-wrapper{
-								padding: 7px 9px;
+							.so-widget-wrapper {
+								padding: 7px 8px;
 								overflow: hidden;
 								position: relative;
 							}
@@ -404,14 +509,14 @@
 						}
 
 						.so-widget-sortable-highlight{
-							border: 1px solid;
+							border: 1px solid rgba( 0,0,0,0.075 );
+							background: rgba( 0,0,0,0.025 );
+
 							.box-sizing(border-box);
 
 							height: 49px;
 
-							background: #ddebef;
-							border-color: #bcccd2;
-							margin-bottom: 5px;
+							margin-bottom: 7px;
 
 							position: relative;
 
@@ -427,14 +532,10 @@
 						width: 10px;
 						left: -5px;
 						cursor: col-resize;
-						background: #e5f4fa;
+						background: #f6fafb;
 						height: 100%;
 
 						.transition(0.25s, background, ease-in-out);
-
-						&:hover{
-							background: #bfe4f3;
-						}
 					}
 
 					&:first-child {
@@ -446,54 +547,6 @@
 			}
 
 		}
-	}
-
-	/* Page Builder icons */
-
-	.so-panels-icon {
-		font-family: 'siteorigin-panels';
-		speak: none;
-		font-style: normal;
-		font-weight: normal;
-		font-variant: normal;
-		text-transform: none;
-		line-height: 1;
-
-		/* Better Font Rendering =========== */
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-
-		&.so-panels-icon-plus:before {
-			content: "\f067";
-		}
-		&.so-panels-icon-film:before {
-			content: "\f008";
-		}
-		&.so-panels-icon-th-large:before {
-			content: "\f009";
-		}
-		&.so-panels-icon-arrows:before {
-			content: "\f047";
-		}
-		&.so-panels-icon-arrow-up:before {
-			content: "\f062";
-		}
-		&.so-panels-icon-eye:before {
-			content: "\f06e";
-		}
-		&.so-panels-icon-hdd-o:before {
-			content: "\f0a0";
-		}
-		&.so-panels-icon-wrench:before {
-			content: "\f0ad";
-		}
-		&.so-panels-icon-rotate-left:before {
-			content: "\f0e2";
-		}
-		&.so-panels-icon-undo:before {
-			content: "\f0e2";
-		}
-
 	}
 
 	.so-panels-welcome-message {
@@ -544,6 +597,10 @@
 				span.so-button-text {
 					display: none;
 				}
+
+				&.so-learn {
+					display: none;
+				}
 			}
 
 			.so-switch-to-standard {
@@ -566,6 +623,7 @@
 
 	opacity: 0.9;
 	pointer-events: none;
+	border: 1px solid rgba( 0,0,0,0.35 ) !important;
 
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
@@ -656,8 +714,38 @@
 		border-bottom: 1px solid @border_color;
 
 		h3.so-title {
-			margin: 0 !important;
-			padding: 0 !important;
+			.box-sizing( border-box );
+			margin: -3px 150px 0 -3px;
+			padding: 5px 6px;
+			display: block;
+
+			&.so-title-editable {
+				&:hover,
+				&:focus {
+					outline: none;
+					background-color: #F0F0F0;
+				}
+
+				&:focus {
+					margin-top: -4px;
+					margin-left: -4px;
+					border: 1px solid #E4E4E4;
+				}
+			}
+		}
+
+		input[type=text].so-edit-title {
+			margin-top: -3px;
+			margin-left: -3px;
+
+			display: none;
+			color: #23282d;
+			font-size: 1.3em;
+			font-weight: 600;
+			border: none;
+			box-shadow: none;
+			background-color: #F0F0F0;
+			padding: 4px 5px;
 		}
 
 		h3.so-parent-link {
@@ -687,8 +775,6 @@
 
 
 		}
-
-
 
 		/* These are the action buttons in the title bar */
 		a {
@@ -768,6 +854,29 @@
 				}
 			}
 
+		}
+
+		// Icons in the dialog title
+
+		&.so-has-icon {
+			@icon_size: 22px;
+
+			padding-left: ( 15px * 2 ) + @icon_size - 6px - 1px;
+
+			.so-panels-icon {
+				position: absolute;
+				top: ( 50px - @icon_size + 1px ) / 2;
+				left: 14px;
+
+				font-size: @icon_size;
+				line-height: @icon_size;
+				display: block;
+				width: @icon_size;
+				height: @icon_size;
+				text-align: center;
+
+				color: #666;
+			}
 		}
 	}
 
@@ -1150,12 +1259,19 @@
 					display: inline-block;
 					position: relative;
 					padding: 0 6px;
+					cursor: pointer;
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;
 						min-height: @preview_height;
 						background: #e4eff4;
 						position: relative;
+
+						&.cell-selected {
+							background: #cae7f4 url("images/cell-selected.png") repeat;
+							border-color: #9abcc7;
+							box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+						}
 
 						.preview-cell-weight,
 						.preview-cell-weight-input {
@@ -1203,7 +1319,8 @@
 
 						.transition(0.15s, background, ease-in-out);
 
-						&:hover, &.ui-draggable-dragging {
+						&:hover,
+						&.ui-draggable-dragging {
 							background: #b7e0f1;
 						}
 					}
@@ -1728,6 +1845,9 @@
 			clear:both;
 		}
 
+		&.so-cell-styles {
+			margin-top: 15px;
+		}
 	}
 
 	/* Special case of the builder interface being inside a dialog */
@@ -1777,6 +1897,9 @@
 .wp-customizer .so-panels-dialog {
 	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
 		z-index: 500001;
+	}
+	.so-toolbar {
+		z-index: 500002;
 	}
 }
 
@@ -1876,9 +1999,16 @@
 		width: @live_editor_width;
 		overflow-y: auto;
 
-		background: #F2F2F2;
+		background: #f7f7f7;
 
 		border-right: 1px solid #D0D0D0;
+
+		// Style the builder differently in the live editor sidebar to make better use of space
+		.siteorigin-panels-builder {
+			.so-rows-container {
+				padding: 10px 10px 0 10px !important;
+			}
+		}
 	}
 
 	.so-preview {
@@ -2340,4 +2470,52 @@
 			}
 		}
 	}
+}
+
+/* Page Builder icons */
+
+.so-panels-icon {
+	font-family: 'siteorigin-panels-icons';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	&.so-panels-icon-add-row:before {
+		content: "\e900";
+	}
+	&.so-panels-icon-add-widget:before {
+		content: "\e901";
+	}
+	&.so-panels-icon-addons:before {
+		content: "\e902";
+	}
+	&.so-panels-icon-history:before {
+		content: "\e903";
+	}
+	&.so-panels-icon-layouts:before {
+		content: "\e904";
+	}
+	&.so-panels-icon-learn:before {
+		content: "\e905";
+	}
+	&.so-panels-icon-live-editor:before {
+		content: "\e906";
+	}
+	&.so-panels-icon-move:before {
+		content: "\e907";
+	}
+	&.so-panels-icon-settings:before {
+		content: "\e908";
+	}
+}
+
+#post-status-info.for-siteorigin-panels {
+	margin-top: -21px !important;
 }

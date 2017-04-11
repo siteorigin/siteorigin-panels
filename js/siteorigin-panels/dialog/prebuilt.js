@@ -2,10 +2,11 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-	directoryTemplate: _.template( $( '#siteorigin-panels-directory-items' ).html().panelsProcessTemplate() ),
+	directoryTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-directory-items' ).html() ) ),
 
 	builder: null,
 	dialogClass: 'so-panels-dialog-prebuilt-layouts',
+	dialogIcon: 'layouts',
 
 	layoutCache: {},
 	currentTab: false,
@@ -248,8 +249,8 @@ module.exports = panels.view.dialog.extend( {
 				c.find( '.so-screenshot' ).each( function () {
 					var $$ = $( this ), $a = $$.find( '.so-screenshot-wrapper' );
 					$a.css( 'height', (
-					                  $a.width() / 4 * 3
-					                  ) + 'px' ).addClass( 'so-loading' );
+									  $a.width() / 4 * 3
+									  ) + 'px' ).addClass( 'so-loading' );
 
 					if ( $$.data( 'src' ) !== '' ) {
 						// Set the initial height
@@ -327,8 +328,8 @@ module.exports = panels.view.dialog.extend( {
 
 	canAddLayout: function () {
 		return (
-		       this.selectedLayoutItem || this.uploadedLayout
-		       ) && ! this.addingLayout;
+			   this.selectedLayoutItem || this.uploadedLayout
+			   ) && ! this.addingLayout;
 	},
 
 	/**

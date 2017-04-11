@@ -1,12 +1,25 @@
 @import "mixins";
 
 .panel-grid {
-    zoom: 1;
-	.clearfix();
+
+	&.panel-no-style,
+	&.panel-has-style > .panel-row-style{
+		display: -webkit-flex;
+		display: flex;
+
+		-ms-flex-wrap: wrap;
+		-webkit-flex-wrap: wrap;
+		flex-wrap: nowrap;
+	}
 }
+
 .panel-grid-cell {
-	.box-sizing(border-box);
-    min-height: 1em;
+
+	.box-sizing( border-box );
+
+	.panel-cell-style {
+		height: 100%;
+	}
 
 	.so-panel {
 		.clearfix();
@@ -23,4 +36,15 @@
 
 .panel-row-style {
 	.clearfix();
+}
+
+.siteorigin-panels-stretch {
+	margin-right: -1000px;
+	margin-left: -1000px;
+	padding-right: 1000px;
+	padding-left: 1000px;
+}
+
+body.siteorigin-panels-before-js {
+	overflow-x: hidden;
 }

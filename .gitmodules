@@ -1,3 +1,6 @@
 [submodule "build"]
 	path = build
 	url = git@github.com:siteorigin/plugin-build.git
+[submodule "learn"]
+	path = learn
+	url = git@github.com:siteorigin/learn.git

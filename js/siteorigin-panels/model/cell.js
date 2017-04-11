@@ -6,7 +6,8 @@ module.exports = Backbone.Model.extend( {
 	row: null,
 
 	defaults: {
-		weight: 0
+		weight: 0,
+		style: {}
 	},
 
 	indexes: null,
@@ -15,7 +16,7 @@ module.exports = Backbone.Model.extend( {
 	 * Set up the cell model
 	 */
 	initialize: function () {
-		this.widgets = new panels.collection.widgets();
+		this.set( 'widgets', new panels.collection.widgets() );
 		this.on( 'destroy', this.onDestroy, this );
 	},
 
@@ -23,8 +24,9 @@ module.exports = Backbone.Model.extend( {
 	 * Triggered when we destroy a cell
 	 */
 	onDestroy: function () {
-		_.invoke( this.widgets.toArray(), 'destroy' );
-		this.widgets.reset();
+		// Destroy all the widgets
+		_.invoke( this.get('widgets').toArray(), 'destroy' );
+		this.get('widgets').reset();
 	},
 
 	/**
@@ -37,13 +39,13 @@ module.exports = Backbone.Model.extend( {
 		cloneOptions = _.extend( {cloneWidgets: true}, cloneOptions );
 
 		var clone = new this.constructor( this.attributes );
-		clone.set( 'collection', row.cells, {silent: true} );
+		clone.set( 'collection', row.get('cells'), {silent: true} );
 		clone.row = row;
 
 		if ( cloneOptions.cloneWidgets ) {
 			// Now we're going add all the widgets that belong to this, to the clone
-			this.widgets.each( function ( widget ) {
-				clone.widgets.add( widget.clone( clone, cloneOptions ), {silent: true} );
+			this.get('widgets').each( function ( widget ) {
+				clone.get('widgets').add( widget.clone( clone, cloneOptions ), {silent: true} );
 			} );
 		}
 

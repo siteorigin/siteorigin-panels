@@ -114,7 +114,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 	function update($new, $old) {
 
 		// We wont clear cache if this is a preview
-		if(!siteorigin_panels_is_preview()){
+		if( !is_preview() ){
 			// Remove the old CSS file
 			if(!empty($old['origin_style'])) {
 				list($style, $preset) = explode(':', $old['origin_style']);
@@ -153,6 +153,20 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 	 * @return string|void
 	 */
 	public function form($instance){
+
+		?>
+		<div class="notice notice-error">
+			<p>
+				<?php
+				_e( 'This is a legacy widget. ', 'siteorigin-panels' );
+				_e( 'Ideally you should move to using widgets from the SiteOrigin Widgets Bundle instead. ', 'siteorigin-panels' );
+				_e( 'These widgets will be removed in Page Builder 2.6. ', 'siteorigin-panels' );
+				_e( 'You will need to stay on Page Builder 2.5.x to continue using these widgets. ', 'siteorigin-panels' );
+				echo '<a href="https://siteorigin.com/widgets-bundle/" target="_blank">' . __( 'Widgets Bundle', 'siteorigin-panels' ) . '</a>';
+				?>
+			</p>
+		</div>
+		<?php
 
 		foreach($this->form_args as $field_id => $field_args) {
 			if(isset($field_args['default']) && !isset($instance[$field_id])) {

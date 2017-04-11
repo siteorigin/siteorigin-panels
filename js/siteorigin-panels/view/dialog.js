@@ -1,21 +1,23 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	dialogTemplate: _.template( $( '#siteorigin-panels-dialog' ).html().panelsProcessTemplate() ),
-	dialogTabTemplate: _.template( $( '#siteorigin-panels-dialog-tab' ).html().panelsProcessTemplate() ),
+	dialogTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog' ).html() ) ),
+	dialogTabTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-tab' ).html() ) ),
 
 	tabbed: false,
 	rendered: false,
 	builder: false,
 	className: 'so-panels-dialog-wrapper',
 	dialogClass: '',
+	dialogIcon: '',
 	parentDialog: false,
 	dialogOpen: false,
+	editableLabel: false,
 
 	events: {
 		'click .so-close': 'closeDialog',
 		'click .so-nav.so-previous': 'navToPrevious',
-		'click .so-nav.so-next': 'navToNext'
+		'click .so-nav.so-next': 'navToNext',
 	},
 
 	initialize: function () {
@@ -90,7 +92,7 @@ module.exports = Backbone.View.extend( {
 
 
 		var c = $( (
-			_.template( html.panelsProcessTemplate() )
+			_.template( panels.helpers.utils.processTemplate( html ) )
 		)( args ) );
 		var r = {
 			title: c.find( '.title' ).html(),
@@ -117,6 +119,11 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.dialog}
 	 */
 	renderDialog: function ( attributes ) {
+		attributes = _.extend( {
+			editableLabel: this.editableLabel,
+			dialogIcon: this.dialogIcon,
+		}, attributes );
+
 		this.$el.html( this.dialogTemplate( attributes ) ).hide();
 		this.$el.data( 'view', this );
 		this.$el.addClass( 'so-panels-dialog-wrapper' );
@@ -131,6 +138,11 @@ module.exports = Backbone.View.extend( {
 				thisDialog.parentDialog.openDialog();
 			} );
 			this.$( '.so-title-bar' ).prepend( dialogParent );
+		}
+
+		if( this.$( '.so-title-bar .so-title-editable' ).length ) {
+			// Added here because .so-edit-title is only available after the template has been rendered.
+			this.initEditableLabel();
 		}
 
 		return this;
@@ -202,15 +214,50 @@ module.exports = Backbone.View.extend( {
 			this.$( '.so-dropdown-links-wrapper' ).not( '.hidden' ).each( function ( index, el ) {
 				var $dropdownList = $( el );
 				var $trgt = $( e.target );
-				if ( $trgt.length === 0 || ! (
-				     (
-				     $trgt.is( '.so-needs-confirm' ) && ! $trgt.is( '.so-confirmed' )
-				     ) || $trgt.is( '.so-dropdown-button' )
+				if ( $trgt.length === 0 || !(
+						(
+							$trgt.is('.so-needs-confirm') && !$trgt.is('.so-confirmed')
+						) || $trgt.is('.so-dropdown-button')
 					) ) {
-					$dropdownList.addClass( 'hidden' );
+					$dropdownList.addClass('hidden');
 				}
 			} );
 		}.bind( this ) );
+	},
+
+	/**
+	 * Initialize the editable dialog title
+	 */
+	initEditableLabel: function(){
+		var $editElt = this.$( '.so-title-bar .so-title-editable' );
+
+		$editElt.keypress( function ( event ) {
+			var enterPressed = event.type === 'keypress' && event.keyCode === 13;
+			if ( enterPressed ) {
+				// Need to make sure tab focus is on another element, otherwise pressing enter multiple times refocuses
+				// the element and allows newlines.
+				var tabbables = $( ':tabbable' );
+				var curTabIndex = tabbables.index( $editElt );
+				tabbables.eq( curTabIndex + 1 ).focus();
+				// After the above, we're somehow left with the first letter of text selected,
+				// so this removes the selection.
+				window.getSelection().removeAllRanges();
+			}
+			return !enterPressed;
+		} ).blur( function () {
+			var newValue = $editElt.text().replace( /^\s+|\s+$/gm, '' );
+			var oldValue = $editElt.data( 'original-value' ).replace( /^\s+|\s+$/gm, '' );
+			if ( newValue !== oldValue ) {
+				$editElt.text( newValue );
+				this.trigger( 'edit_label', newValue );
+			}
+
+		}.bind( this ) );
+
+		$editElt.focus( function() {
+			$editElt.data( 'original-value', $editElt.text() );
+			panels.helpers.utils.selectElementContents( this );
+		} );
 	},
 
 	/**
@@ -266,7 +313,7 @@ module.exports = Backbone.View.extend( {
 		this.refreshDialogNav();
 
 		// Stop scrolling for the main body
-		this.builder.lockPageScroll();
+		panels.helpers.pageScroll.lock();
 
 		// Start listen for keyboard keypresses.
 		$( window ).on( 'keyup', this.keyboardListen );
@@ -298,7 +345,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogOpen = false;
 
 		this.$el.hide();
-		this.builder.unlockPageScroll();
+		panels.helpers.pageScroll.unlock();
 
 		// Stop listen for keyboard keypresses.
 		$( window ).off( 'keyup', this.keyboardListen );

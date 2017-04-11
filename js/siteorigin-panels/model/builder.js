@@ -1,4 +1,4 @@
-module.exports = Backbone.Model.extend( {
+module.exports = Backbone.Model.extend({
 	layoutPosition: {
 		BEFORE: 'before',
 		AFTER: 'after',
@@ -17,27 +17,33 @@ module.exports = Backbone.Model.extend( {
 
 	initialize: function () {
 		// These are the main rows in the interface
-		this.rows = new panels.collection.rows();
+		this.set( 'rows', new panels.collection.rows() );
 	},
 
 	/**
 	 * Add a new row to this builder.
 	 *
-	 * @param weights
+	 * @param attrs
+	 * @param cells
+	 * @param options
 	 */
-	addRow: function ( weights, options ) {
-		options = _.extend( {
+	addRow: function (attrs, cells, options) {
+		options = _.extend({
 			noAnimate: false
-		}, options );
-		// Create the actual row
-		var row = new panels.model.row( {
-			collection: this.rows
-		} );
+		}, options);
 
-		row.setCells( weights );
+		var cellCollection = new panels.collection.cells(cells);
+
+		attrs = _.extend({
+			collection: this.get('rows'),
+			cells: cellCollection,
+		}, attrs);
+
+		// Create the actual row
+		var row = new panels.model.row(attrs);
 		row.builder = this;
 
-		this.rows.add( row, options );
+		this.get('rows').add( row, options );
 
 		return row;
 	},
@@ -47,7 +53,7 @@ module.exports = Backbone.Model.extend( {
 	 *
 	 * @param data Object the layout and widgets data to load.
 	 * @param position string Where to place the new layout. Allowed options are 'before', 'after'. Anything else will
-	 *                          cause the new layout to replace the old one.
+	 *						  cause the new layout to replace the old one.
 	 */
 	loadPanelsData: function ( data, position ) {
 		try {
@@ -78,17 +84,26 @@ module.exports = Backbone.Model.extend( {
 					rows[gi] = [];
 				}
 
-				rows[gi].push( parseFloat( data.grid_cells[ci].weight ) );
+				rows[gi].push( data.grid_cells[ci] );
 			}
 
 			var builderModel = this;
 			_.each( rows, function ( row, i ) {
-				// This will create and add the row model and its cells
-				var newRow = builderModel.addRow( row, {noAnimate: true} );
+				var rowAttrs = {};
 
 				if ( ! _.isUndefined( data.grids[i].style ) ) {
-					newRow.set( 'style', data.grids[i].style );
+					rowAttrs.style = data.grids[i].style;
 				}
+
+				if ( ! _.isUndefined( data.grids[i].color_label) ) {
+					rowAttrs.color_label = data.grids[i].color_label;
+				}
+
+				if ( ! _.isUndefined( data.grids[i].label) ) {
+					rowAttrs.label = data.grids[i].label;
+				}
+				// This will create and add the row model and its cells
+				builderModel.addRow(rowAttrs, row, {noAnimate: true} );
 			} );
 
 
@@ -107,8 +122,8 @@ module.exports = Backbone.Model.extend( {
 					delete widgetData.info;
 				}
 
-				var row = builderModel.rows.at( parseInt( panels_info.grid ) );
-				var cell = row.cells.at( parseInt( panels_info.cell ) );
+				var row = builderModel.get('rows').at( parseInt( panels_info.grid ) );
+				var cell = row.get('cells').at( parseInt( panels_info.cell ) );
 
 				var newWidget = new panels.model.widget( {
 					class: panels_info.class,
@@ -126,11 +141,15 @@ module.exports = Backbone.Model.extend( {
 					newWidget.set( 'widget_id', panels_info.widget_id );
 				}
 				else {
-					newWidget.set( 'widget_id', builderModel.generateUUID() );
+					newWidget.set( 'widget_id', panels.helpers.utils.generateUUID() );
+				}
+
+				if ( ! _.isUndefined( panels_info.label ) ) {
+					newWidget.set( 'label', panels_info.label );
 				}
 
 				newWidget.cell = cell;
-				cell.widgets.add( newWidget, { noAnimate: true } );
+				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
 
 			this.trigger( 'load_panels_data' );
@@ -148,7 +167,7 @@ module.exports = Backbone.Model.extend( {
 	concatPanelsData: function ( panelsDataA, panelsDataB ) {
 
 		if ( _.isUndefined( panelsDataB ) || _.isUndefined( panelsDataB.grids ) || _.isEmpty( panelsDataB.grids ) ||
-		     _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
+			 _.isUndefined( panelsDataB.grid_cells ) || _.isEmpty( panelsDataB.grid_cells ) ) {
 			return panelsDataA;
 		}
 
@@ -206,11 +225,11 @@ module.exports = Backbone.Model.extend( {
 		};
 		var widgetId = 0;
 
-		this.rows.each( function ( row, ri ) {
+		this.get('rows').each( function ( row, ri ) {
 
-			row.cells.each( function ( cell, ci ) {
+			row.get('cells').each( function ( cell, ci ) {
 
-				cell.widgets.each( function ( widget, wi ) {
+				cell.get('widgets').each( function ( widget, wi ) {
 					// Add the data for the widget, including the panels_info field.
 					var panels_info = {
 						class: widget.get( 'class' ),
@@ -220,11 +239,12 @@ module.exports = Backbone.Model.extend( {
 						// Strictly this should be an index
 						id: widgetId ++,
 						widget_id: widget.get( 'widget_id' ),
-						style: widget.get( 'style' )
+						style: widget.get( 'style' ),
+						label: widget.get( 'label' ),
 					};
 
 					if( _.isEmpty( panels_info.widget_id ) ) {
-						panels_info.widget_id = builder.generateUUID();
+						panels_info.widget_id = panels.helpers.utils.generateUUID();
 					}
 
 					var values = _.extend( _.clone( widget.get( 'values' ) ), {
@@ -236,14 +256,18 @@ module.exports = Backbone.Model.extend( {
 				// Add the cell info
 				data.grid_cells.push( {
 					grid: ri,
-					weight: cell.get( 'weight' )
+					index: ci,
+					weight: cell.get( 'weight' ),
+					style: cell.get( 'style' ),
 				} );
 
 			} );
 
 			data.grids.push( {
-				cells: row.cells.length,
-				style: row.get( 'style' )
+				cells: row.get('cells').length,
+				style: row.get( 'style' ),
+				color_label: row.get( 'color_label' ),
+				label: row.get( 'label' ),
 			} );
 
 		} );
@@ -276,29 +300,228 @@ module.exports = Backbone.Model.extend( {
 	 * Empty all the rows and the cells/widgets they contain.
 	 */
 	emptyRows: function () {
-		_.invoke( this.rows.toArray(), 'destroy' );
-		this.rows.reset();
+		_.invoke( this.get('rows').toArray(), 'destroy' );
+		this.get('rows').reset();
 
 		return this;
 	},
 
 	isValidLayoutPosition: function ( position ) {
 		return position === this.layoutPosition.BEFORE ||
-		       position === this.layoutPosition.AFTER ||
-		       position === this.layoutPosition.REPLACE;
+			   position === this.layoutPosition.AFTER ||
+			   position === this.layoutPosition.REPLACE;
 	},
 
-	generateUUID: function(){
-		var d = new Date().getTime();
-		if( window.performance && typeof window.performance.now === "function" ){
-			d += performance.now(); //use high-precision timer if available
-		}
-		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function(c) {
-			var r = (d + Math.random()*16)%16 | 0;
-			d = Math.floor(d/16);
-			return ( c == 'x' ? r : (r&0x3|0x8) ).toString(16);
-		} );
-		return uuid;
-	}
+	/**
+	 * Convert HTML into Panels Data
+	 * @param html
+	 */
+	getPanelsDataFromHtml: function( html, editorClass ){
+		var thisModel = this;
+		var $html = jQuery( '<div id="wrapper">' + html + '</div>' );
 
+		if( $html.find('.panel-layout .panel-grid').length ) {
+			// This looks like Page Builder html, lets try parse it
+			var panels_data = {
+				grids: [],
+				grid_cells: [],
+				widgets: [],
+			};
+
+			// The Regex object that'll match SiteOrigin widgets
+			var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
+			var decodeEntities = (function() {
+				// this prevents any overhead from creating the object each time
+				var element = document.createElement('div');
+
+				function decodeHTMLEntities (str) {
+					if(str && typeof str === 'string') {
+						// strip script/html tags
+						str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+						str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+						element.innerHTML = str;
+						str = element.textContent;
+						element.textContent = '';
+					}
+
+					return str;
+				}
+
+				return decodeHTMLEntities;
+			})();
+
+			// Remove all wrapping divs from a widget to get its html
+			var getTextWidgetContents = function( $el ){
+				var $divs = $el.find( 'div' );
+				if( ! $divs.length ) {
+					return $el.html();
+				}
+
+				var i;
+				for( i = 0; i < $divs.length - 1; i++ ) {
+					if( jQuery.trim( $divs.eq(i).text() ) != jQuery.trim( $divs.eq(i+1).text() ) ) {
+						break;
+					}
+				}
+
+				var title = $divs.eq( i ).find( '.widget-title:header' ),
+					titleText = '';
+
+				if( title.length ) {
+					titleText = title.html();
+					title.remove();
+				}
+
+				return {
+					title: titleText,
+					text: $divs.eq(i).html(),
+				};
+			};
+
+			var $layout = $html.find( '.panel-layout' ).eq(0);
+			var filterNestedLayout = function( i, el ){
+				return jQuery( el ).closest( '.panel-layout' ).is( $layout );
+			};
+
+			$html.find('> .panel-layout > .panel-grid').filter( filterNestedLayout ).each( function( ri, el ){
+				var $row = jQuery( el ),
+					$cells = $row.find( '.panel-grid-cell' ).filter( filterNestedLayout );
+
+				panels_data.grids.push( {
+					cells: $cells.length,
+					style: $row.data( 'style' ),
+					color_label: $row.data( 'color-label' ),
+					label: $row.data( 'label' ),
+				} );
+
+				$cells.each( function( ci, el ){
+					var $cell = jQuery( el ),
+						$widgets = $cell.find( '.so-panel' ).filter( filterNestedLayout );
+
+					panels_data.grid_cells.push( {
+						grid: ri,
+						weight: ! _.isUndefined( $cell.data( 'weight' ) ) ? parseFloat( $cell.data( 'weight' ) ) : 1,
+						style: $cell.data( 'style' ),
+					} );
+
+					$widgets.each( function( wi, el ){
+						var $widget = jQuery(el),
+							widgetContent = $widget.find('.panel-widget-style').length ? $widget.find('.panel-widget-style').html() : $widget.html(),
+							panels_info = {
+								grid: ri,
+								cell: ci,
+								raw: false,
+								label: $widget.data( 'label' )
+							};
+
+						widgetContent = widgetContent.trim();
+
+						// Check if this is a SiteOrigin Widget
+						var match = re.exec( widgetContent );
+						if( ! _.isNull( match ) && widgetContent.replace( re, '' ).trim() === '' ) {
+							try {
+								var classMatch = /class="(.*?)"/.exec( match[3] ),
+									dataInput = jQuery( match[5] ),
+									data = JSON.parse( decodeEntities( dataInput.val( ) ) ),
+									newWidget = data.instance;
+
+								panels_info.class = classMatch[1];
+								panels_info.raw = false;
+
+								newWidget.panels_info = panels_info;
+								panels_data.widgets.push( newWidget );
+							}
+							catch ( err ) {
+								// There was a problem, so treat this as a standard editor widget
+								panels_info.class = editorClass;
+								panels_data.widgets.push( _.extend( getTextWidgetContents( $widget ), {
+									filter: "1",
+									type: "visual",
+									panels_info: panels_info
+								} ) );
+							}
+
+							// Continue
+							return true;
+						}
+						else if( widgetContent.indexOf( 'panel-layout' ) !== -1 ) {
+							// Check if this is a layout widget
+							var $widgetContent = jQuery( '<div>' + widgetContent + '</div>' );
+							if( $widgetContent.find('.panel-layout .panel-grid').length ) {
+								// This is a standard editor class widget
+								panels_info.class = 'SiteOrigin_Panels_Widgets_Layout';
+								panels_data.widgets.push( {
+									panels_data: thisModel.getPanelsDataFromHtml( widgetContent, editorClass ),
+									panels_info: panels_info
+								} );
+
+								// continue
+								return true;
+							}
+						}
+
+						// This is a standard editor class widget
+						panels_info.class = editorClass;
+						panels_data.widgets.push( _.extend( getTextWidgetContents( $widget ), {
+							filter: "1",
+							type: "visual",
+							panels_info: panels_info
+						} ) );
+						return true;
+					} );
+				} );
+			} );
+
+			// Remove all the Page Builder content
+			$html.find('.panel-layout').remove();
+			$html.find('style[data-panels-style-for-post]').remove();
+
+			// If there's anything left, add it to an editor widget at the end of panels_data
+			if( $html.html().replace(/^\s+|\s+$/gm,'').length ) {
+				panels_data.grids.push( {
+					cells: 1,
+					style: {},
+				} );
+				panels_data.grid_cells.push( {
+					grid: panels_data.grids.length - 1,
+					weight: 1,
+				} );
+				panels_data.widgets.push( {
+					filter: "1",
+					text: $html.html().replace(/^\s+|\s+$/gm,''),
+					title: "",
+					type: "visual",
+					panels_info: {
+						class: editorClass,
+						raw: false,
+						grid: panels_data.grids.length - 1,
+						cell: 0
+					}
+				} );
+			}
+
+			return panels_data;
+		}
+		else {
+			// This is probably just old school post content
+			return {
+				grid_cells: [ { grid: 0, weight: 1 } ],
+				grids: [ { cells: 1 } ],
+				widgets: [
+					{
+						filter: "1",
+						text: html,
+						title: "",
+						type: "visual",
+						panels_info: {
+							class: editorClass,
+							raw: false,
+							grid: 0,
+							cell: 0
+						}
+					}
+				]
+			};
+		}
+	}
 } );

@@ -28,10 +28,25 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 		if(empty($instance['panels_data']['widgets'])) return;
 
+		if( ! empty( $instance['panels_data']['widgets'] ) ) {
+			foreach( $instance['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
+			}
+		}
+
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
 
 		echo $args['before_widget'];
-		echo siteorigin_panels_render( 'w'.$instance['builder_id'], true, $instance['panels_data'] );
+		echo SiteOrigin_Panels_Renderer::single()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'], $layout_data );
+		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) && siteorigin_panels_setting( 'copy-styles' ) ) {
+			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+			$widget_css .= SiteOrigin_Panels_Renderer::single()->generate_css( 'w'.$instance['builder_id'], $instance['panels_data'], $layout_data );
+			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
+			echo "\n\n" .
+			     '<style type="text/css" class="panels-style" data-panels-style-for-post="' . esc_attr( 'w'.$instance['builder_id'] ) . '">' .
+			     $widget_css .
+			     '</style>';
+		}
 		echo $args['after_widget'];
 	}
 
@@ -44,24 +59,38 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		if ( ! empty( $new['panels_data'] ) && ! empty( $new['panels_data']['widgets'] ) ) {
-			$new['panels_data']['widgets'] = siteorigin_panels_process_raw_widgets( $new['panels_data']['widgets'] );
+			$new['panels_data']['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets(
+				$new['panels_data']['widgets'],
+				! empty( $old['panels_data']['widgets'] ) ? $old['panels_data']['widgets'] : false,
+				false
+			);
+			foreach( $new['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '\\', '&#92;', $widget['panels_info']['class'] );
+			}
 		}
 
 		return $new;
 	}
 
-	function form($instance){
+	function form( $instance ){
 		$instance = wp_parse_args($instance, array(
 			'panels_data' => '',
 			'builder_id' => uniqid(),
 		) );
+		$form_id = uniqid();
+
+		if( ! empty( $instance['panels_data']['widgets'] ) ) {
+			foreach( $instance['panels_data']['widgets'] as & $widget ) {
+				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
+			}
+		}
 
 		if( ! is_string( $instance['panels_data'] ) ) {
 			$instance['panels_data'] = json_encode( $instance['panels_data'] );
 		}
 
 		?>
-		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>" data-builder-id="<?php echo esc_attr( $instance['builder_id'] ) ?>" data-type="layout_widget">
+		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>" data-builder-id="<?php echo esc_attr( $form_id ) ?>" data-type="layout_widget">
 			<p>
 				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></button>
 			</p>
@@ -78,8 +107,11 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />
 		</div>
 		<script type="text/javascript">
-			if( typeof jQuery.fn.soPanelsSetupBuilderWidget != 'undefined' && !jQuery('body').hasClass('wp-customizer') ) {
-				jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $instance['builder_id'] ) ?>").soPanelsSetupBuilderWidget();
+			if(
+				typeof jQuery.fn.soPanelsSetupBuilderWidget != 'undefined' &&
+				( ! jQuery('body').hasClass('wp-customizer') || jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>").closest( '.panel-dialog' ).length )
+			) {
+				jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>").soPanelsSetupBuilderWidget();
 			}
 		</script>
 		<?php

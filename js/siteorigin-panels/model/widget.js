@@ -45,8 +45,11 @@ module.exports = Backbone.Model.extend( {
 			} else {
 				return '';
 			}
+		} else if ( this.has( 'label' ) && ! _.isEmpty( this.get( 'label' ) ) ) {
+			// Use the label instead of the actual widget title
+			return this.get( 'label' );
 		} else {
-			return panelsOptions.widgets[this.get( 'class' )][field];
+			return panelsOptions.widgets[ this.get( 'class' ) ][ field ];
 		}
 	},
 
@@ -54,23 +57,25 @@ module.exports = Backbone.Model.extend( {
 	 * Move this widget model to a new cell. Called by the views.
 	 *
 	 * @param panels.model.cell newCell
+	 * @param object options The options passed to the
 	 *
-	 * @return bool Indicating if the widget was moved into a different cell
+	 * @return boolean Indicating if the widget was moved into a different cell
 	 */
-	moveToCell: function ( newCell, options ) {
+	moveToCell: function ( newCell, options, at ) {
 		options = _.extend( {
-			silent: true
+			silent: true,
 		}, options );
-
-		if ( this.cell.cid === newCell.cid ) {
-			return false;
-		}
 
 		this.cell = newCell;
 		this.collection.remove( this, options );
-		newCell.widgets.add( this, options );
+		newCell.get('widgets').add( this, _.extend( {
+			at: at
+		}, options ) );
 
-		return true;
+		// This should be used by views to reposition everything.
+		this.trigger( 'move_to_cell', newCell, at );
+
+		return this;
 	},
 
 	/**
@@ -143,7 +148,7 @@ module.exports = Backbone.Model.extend( {
 		}
 
 		clone.set( 'values', cloneValues, {silent: true} );
-		clone.set( 'collection', cell.widgets, {silent: true} );
+		clone.set( 'collection', cell.get('widgets'), {silent: true} );
 		clone.cell = cell;
 
 		// This is used to force a form reload later on

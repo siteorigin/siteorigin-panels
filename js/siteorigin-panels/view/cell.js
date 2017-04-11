@@ -1,7 +1,7 @@
 var panels = window.panels, $ = jQuery;
 
 module.exports = Backbone.View.extend( {
-	template: _.template( $( '#siteorigin-panels-builder-cell' ).html().panelsProcessTemplate() ),
+	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-builder-cell' ).html() ) ),
 	events: {
 		'click .cell-wrapper': 'handleCellClick'
 	},
@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 	widgetSortable: null,
 
 	initialize: function () {
-		this.model.widgets.on( 'add', this.onAddWidget, this );
+		this.model.get('widgets').on( 'add', this.onAddWidget, this );
 	},
 
 	/**
@@ -20,7 +20,7 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		var templateArgs = {
 			weight: this.model.get( 'weight' ),
-			totalWeight: this.row.model.cells.totalWeight()
+			totalWeight: this.row.model.get('cells').totalWeight()
 		};
 
 		this.setElement( this.template( templateArgs ) );
@@ -28,7 +28,7 @@ module.exports = Backbone.View.extend( {
 
 		// Now lets render any widgets that are currently in the row
 		var thisView = this;
-		this.model.widgets.each( function ( widget ) {
+		this.model.get('widgets').each( function ( widget ) {
 			var widgetView = new panels.view.widget( {model: widget} );
 			widgetView.cell = thisView;
 			widgetView.render();
@@ -68,14 +68,15 @@ module.exports = Backbone.View.extend( {
 			stop: function ( e, ui ) {
 				cellView.row.builder.addHistoryEntry( 'widget_moved' );
 
-				var widget = $( ui.item ).data( 'view' );
-				var targetCell = $( ui.item ).closest( '.cell' ).data( 'view' );
+				var $$ =  $( ui.item ),
+					widget = $$.data( 'view' ),
+					targetCell = $$.closest( '.cell' ).data( 'view' );
 
 				// Move the model and the view to the new cell
-				widget.model.moveToCell( targetCell.model );
+				widget.model.moveToCell( targetCell.model, {}, $$.index() );
 				widget.cell = targetCell;
 
-				cellView.row.builder.sortCollections();
+				widget.cell.row.builder.model.refreshPanelsData();
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()
@@ -266,8 +267,30 @@ module.exports = Backbone.View.extend( {
 	 * @returns {boolean}
 	 */
 	handleCellClick: function ( e ) {
-		var cells = this.$el.closest( '.so-rows-container' ).find( '.so-cells .cell' ).removeClass( 'cell-selected' );
-		$( e.target ).parent().addClass( 'cell-selected' );
+		// Remove all existing selected cell indication for this builder
+		this.row.builder.$el.find( '.so-cells .cell' ).removeClass( 'cell-selected' );
+
+		if( this.row.builder.activeCell === this && ! this.model.get('widgets').length ) {
+			// This is a click on an empty cell
+			this.row.builder.activeCell = null;
+		}
+		else {
+			this.$el.addClass( 'cell-selected' );
+			this.row.builder.activeCell = this;
+		}
+	},
+
+	/**
+	 * Insert a widget from the clipboard
+	 */
+	pasteHandler: function(){
+		var pastedModel = panels.helpers.clipboard.getModel( 'widget-model' );
+		if( ! _.isEmpty( pastedModel ) && pastedModel instanceof panels.model.widget ) {
+			this.row.builder.addHistoryEntry( 'widget_pasted' );
+			pastedModel.cell = this.model;
+			this.model.get('widgets').add( pastedModel );
+			this.row.builder.model.refreshPanelsData();
+		}
 	},
 
 	/**
@@ -278,28 +301,58 @@ module.exports = Backbone.View.extend( {
 	 */
 	buildContextualMenu: function ( e, menu ) {
 		var thisView = this;
-		menu.addSection(
-			{
-				sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
-				searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
-				defaultDisplay: panelsOptions.contextual.default_widgets
-			},
-			panelsOptions.widgets,
-			function ( c ) {
-				thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				var widget = new panels.model.widget( {
-					class: c
-				} );
+		if( ! menu.hasSection( 'add-widget-below' ) ) {
+			menu.addSection(
+				'add-widget-cell',
+				{
+					sectionTitle: panelsOptions.loc.contextual.add_widget_cell,
+					searchPlaceholder: panelsOptions.loc.contextual.search_widgets,
+					defaultDisplay: panelsOptions.contextual.default_widgets
+				},
+				panelsOptions.widgets,
+				function ( c ) {
+					thisView.row.builder.addHistoryEntry( 'widget_added' );
 
-				// Add the widget to the cell model
-				widget.cell = thisView.model;
-				widget.cell.widgets.add( widget );
+					var widget = new panels.model.widget( {
+						class: c
+					} );
 
-				thisView.row.builder.model.refreshPanelsData();
-			}
-		);
+					// Add the widget to the cell model
+					widget.cell = thisView.model;
+					widget.cell.get('widgets').add( widget );
 
+					thisView.row.builder.model.refreshPanelsData();
+				}
+			);
+		}
+
+		var actions = {};
+		if ( this.row.builder.supports('addWidget') && panels.helpers.clipboard.isModel( 'widget-model' ) ) {
+			actions.paste = {title: panelsOptions.loc.contextual.cell_paste_widget};
+		}
+
+		if( ! _.isEmpty( actions ) ) {
+			menu.addSection(
+				'cell-actions',
+				{
+					sectionTitle: panelsOptions.loc.contextual.cell_actions,
+					search: false,
+				},
+				actions,
+				function ( c ) {
+					switch ( c ) {
+						case 'paste':
+							this.pasteHandler();
+							break;
+					}
+
+					this.row.builder.model.refreshPanelsData();
+				}.bind( this )
+			);
+		}
+
+		// Add the contextual menu for the parent row
 		this.row.buildContextualMenu( e, menu );
 	}
 } );

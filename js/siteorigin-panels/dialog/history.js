@@ -2,7 +2,7 @@ var panels = window.panels, $ = jQuery;
 
 module.exports = panels.view.dialog.extend( {
 
-	historyEntryTemplate: _.template( $( '#siteorigin-panels-dialog-history-entry' ).html().panelsProcessTemplate() ),
+	historyEntryTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-history-entry' ).html() ) ),
 
 	entries: {},
 	currentEntry: null,
@@ -12,6 +12,7 @@ module.exports = panels.view.dialog.extend( {
 	previewScrollTop: null,
 
 	dialogClass: 'so-panels-dialog-history',
+	dialogIcon: 'history',
 
 	events: {
 		'click .so-close': 'closeDialog',
@@ -132,6 +133,7 @@ module.exports = panels.view.dialog.extend( {
 		this.previewScrollTop = iframe.contents().scrollTop();
 
 		this.$( 'form.history-form input[name="live_editor_panels_data"]' ).val( entry.get( 'data' ) );
+		this.$( 'form.history-form input[name="live_editor_post_ID"]' ).val( this.builder.config.postId );
 		this.$( 'form.history-form' ).submit();
 	},
 
