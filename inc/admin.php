@@ -1268,9 +1268,9 @@ class SiteOrigin_Panels_Admin {
 			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
 			'video' => '212380210',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
-			'description' => __( "We'll show you some of the most useful free addons for Page Builder.", 'siteorigin-panels' ) . ' ' .
-			                 __( "Sign up to our newsletter and you'll also get access to the free addons we release.", 'siteorigin-panels' )  . ' ' .
-			                 __( "Plus, you can tell us which free features you want.", 'siteorigin-panels' ),
+			'description' => __( "The free animations addon allows you to add beautiful animations to Page Builder elements.", 'siteorigin-panels' ) . ' ' .
+			                 __( "Sign up to our newsletter and we'll send you the addon as a free gift.", 'siteorigin-panels' )  . ' ' .
+			                 __( "Plus, we'll send you even more powerful addons, for as long as you're subscribed.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
