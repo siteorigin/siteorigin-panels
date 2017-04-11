@@ -1264,7 +1264,7 @@ class SiteOrigin_Panels_Admin {
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
-		$lessons[ 'page-builder-addons' ] = array(
+		$lessons[ 'page-builder-animations' ] = array(
 			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
 			'video' => '212380210',
 			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
