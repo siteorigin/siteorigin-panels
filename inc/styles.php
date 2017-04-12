@@ -374,7 +374,7 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	static function vantage_row_style_attributes( $attributes, $style ) {
-		if ( isset( $style['class'] ) && $style['class'] == 'wide-grey' ) {
+		if ( isset( $style['class'] ) && $style['class'] == 'wide-grey' && ! empty( $attributes['style'] ) ) {
 			$attributes['style'] = preg_replace( '/padding-left: 1000px; padding-right: 1000px;/', '', $attributes['style'] );
 		}
 
