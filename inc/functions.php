@@ -72,3 +72,12 @@ function siteorigin_panels_setting( $key = '' ) {
 function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name, $source = false ) {
 	return SiteOrigin_Panels_Admin_Widgets_Bundle::install_url( $plugin, $plugin_name, $source );
 }
+
+/**
+ * A null function for compatibility with aTheme themes.
+ *
+ * @return bool
+ */
+function siteorigin_panels_activate(){
+	return false;
+}
