@@ -722,6 +722,8 @@ class SiteOrigin_Panels_Renderer {
 		echo apply_filters( 'siteorigin_panels_before_cell', '', $cell, $cell_attributes );
 
 		$this->render_element( 'div', $cell_attributes );
+		
+		$grid = $panels_data['grids'][$ri];
 
 		if ( empty( $cell['style']['class'] ) && ! empty( $grid['style']['cell_class'] ) ) {
 			$cell['style']['class'] = $grid['style']['cell_class'];
