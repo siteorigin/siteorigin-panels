@@ -18,6 +18,7 @@ class SiteOrigin_Panels_Styles {
 		// Style wrapper attributes
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'row_style_attributes' ), 10, 2 );
+		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'vantage_row_style_attributes' ), 11, 2 );
 		add_filter( 'siteorigin_panels_cell_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 
@@ -367,6 +368,14 @@ class SiteOrigin_Panels_Styles {
 			$attributes['class'][]           = 'siteorigin-panels-stretch';
 			$attributes['data-stretch-type'] = $style['row_stretch'];
 			wp_enqueue_script( 'siteorigin-panels-front-styles' );
+		}
+
+		return $attributes;
+	}
+
+	static function vantage_row_style_attributes( $attributes, $style ) {
+		if ( isset( $style['class'] ) && $style['class'] == 'wide-grey' ) {
+			$attributes['style'] = preg_replace( '/padding-left: 1000px; padding-right: 1000px;/', '', $attributes['style'] );
 		}
 
 		return $attributes;
