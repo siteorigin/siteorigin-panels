@@ -1008,11 +1008,11 @@ class SiteOrigin_Panels_Admin {
 				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
 					foreach ( $results['items'] as $item ) {
 						$item['id']         = $item['slug'];
-						$item['type']       = 'directory';
+						$item['type']       = $type;
 
 						if( empty( $item['screenshot'] ) ) {
 							$screenshot_url = add_query_arg( 'screenshot_preview', 1, $item['preview'] );
-							$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=400';
+							$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=700';
 						}
 
 						$return['items'][]  = $item;
@@ -1289,7 +1289,7 @@ class SiteOrigin_Panels_Admin {
 			    // The title of the layouts directory in the sidebar.
 			    'title' => __( 'Custom Directory', 'siteorigin-panels' ),
 			    // The URL of the directory.
-			    'url' => self::LAYOUT_URL,
+			    'url' => 'http://layouts.localhost:8080/',
 			    // Any additional arguments to pass to the layouts server
 			    'args' => array( )
 		    );
