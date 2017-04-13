@@ -60,7 +60,10 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_import_layout', array( $this, 'action_import_layout' ) );
 		add_action( 'wp_ajax_so_panels_export_layout', array( $this, 'action_export_layout' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-        add_action('wp_ajax_so_panels_directory_enable', array( $this, 'action_directory_enable' ) );
+        add_action( 'wp_ajax_so_panels_directory_enable', array( $this, 'action_directory_enable' ) );
+
+        // Filter all the available external layout directories.
+        add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_layout_directories' ), 8 );
 
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
@@ -945,7 +948,7 @@ class SiteOrigin_Panels_Admin {
 		// Get any layouts that the current user could edit.
 		header( 'content-type: application/json' );
 
-		$type   = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory';
+		$type   = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory-siteorigin';
 		$search = ! empty( $_REQUEST['search'] ) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
 		$page   = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
@@ -974,7 +977,7 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			$return['max_num_pages'] = 1;
-		} elseif ( $type == 'directory' ) {
+		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
 			$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
 
 			// This is a query of the prebuilt layout directory
@@ -984,18 +987,34 @@ class SiteOrigin_Panels_Admin {
 			}
 			$query['page'] = $page;
 
-			$url      = add_query_arg( $query, self::LAYOUT_URL . 'wp-admin/admin-ajax.php?action=query_layouts' );
-			$url      = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
+			$directory_id = str_replace( 'directory-', '', $type );
+			$directories = apply_filters( 'siteorigin_panels_external_layout_directories', array( ) );
+			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
+
+			if( empty( $directory ) ) {
+			    return false;
+			}
+
+			$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
+			if( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
+			    $url = add_query_arg( $directory[ 'args' ], $url );
+			}
+
+			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
 			$response = wp_remote_get( $url );
 
 			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
 				$results = json_decode( $response['body'], true );
 				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
 					foreach ( $results['items'] as $item ) {
-						$screenshot_url = add_query_arg( 'screenshot_preview', 1, $item['preview'] );
 						$item['id']         = $item['slug'];
-						$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=400';
 						$item['type']       = 'directory';
+
+						if( empty( $item['screenshot'] ) ) {
+							$screenshot_url = add_query_arg( 'screenshot_preview', 1, $item['preview'] );
+							$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=400';
+						}
+
 						$return['items'][]  = $item;
 					}
 				}
@@ -1103,17 +1122,23 @@ class SiteOrigin_Panels_Admin {
 			if ( isset( $panels_data['screenshot'] ) ) unset( $panels_data['screenshot'] );
 			if ( isset( $panels_data['filename'] ) ) unset( $panels_data['filename'] );
 
-		} elseif ( $_REQUEST['type'] == 'directory' ) {
-			$response = wp_remote_get(
-				self::LAYOUT_URL . 'layout/' . urlencode( $_REQUEST['lid'] ) . '/?action=download'
-			);
+		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
+		    $directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
+			$directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
 
-			if ( $response['response']['code'] == 200 ) {
-				// For now, we'll just pretend to load this
-				$panels_data = json_decode( $response['body'], true );
-			} else {
-				// Display some sort of error message
-			}
+			if( ! empty( $directories[ $directory_id ] ) ) {
+				$response = wp_remote_get(
+					$directories[ $directory_id ][ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download'
+				);
+
+				if ( $response['response']['code'] == 200 ) {
+					// For now, we'll just pretend to load this
+					$panels_data = json_decode( $response['body'], true );
+				} else {
+					// Display some sort of error message
+				}
+            }
+
 		} elseif ( current_user_can( 'edit_post', $_REQUEST['lid'] ) ) {
 			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
 		}
@@ -1245,6 +1270,33 @@ class SiteOrigin_Panels_Admin {
 	public static function double_slash_string( $value ){
 		return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
 	}
+
+	/**
+	 * Add the main SiteOrigin layout directory
+	 */
+	public function filter_layout_directories( $directories ){
+	    if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) {
+		    $directories[ 'siteorigin' ] = array(
+		        // The title of the layouts directory in the sidebar.
+			    'title' => __( 'Layouts Directory', 'siteorigin-panels' ),
+			    // The URL of the directory.
+			    'url' => self::LAYOUT_URL,
+                // Any additional arguments to pass to the layouts server
+                'args' => array( )
+		    );
+
+		    $directories[ 'custom' ] = array(
+			    // The title of the layouts directory in the sidebar.
+			    'title' => __( 'Custom Directory', 'siteorigin-panels' ),
+			    // The URL of the directory.
+			    'url' => self::LAYOUT_URL,
+			    // Any additional arguments to pass to the layouts server
+			    'args' => array( )
+		    );
+        }
+
+		return $directories;
+    }
 
 	/**
 	 * Add all the courses to the learning dialog

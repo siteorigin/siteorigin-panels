@@ -181,10 +181,10 @@ module.exports = panels.view.dialog.extend( {
 			page = 1;
 		}
 		if ( type === undefined ) {
-			type = 'directory';
+			type = 'directory-siteorigin';
 		}
 
-		if ( type === 'directory' && ! panelsOptions.directory_enabled ) {
+		if ( type.startsWith( 'directory-' ) && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
 			c.find( '.so-panels-enable-directory' ).click( function ( e ) {
@@ -201,7 +201,7 @@ module.exports = panels.view.dialog.extend( {
 				// Enable the layout directory
 				panelsOptions.directory_enabled = true;
 				c.addClass( 'so-panels-loading' );
-				thisView.displayLayoutDirectory( search, page );
+				thisView.displayLayoutDirectory( search, page, type );
 			} );
 			return;
 		}

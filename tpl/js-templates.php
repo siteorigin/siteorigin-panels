@@ -390,10 +390,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php endif; ?>
 
-				<?php if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) : ?>
-					<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
-				<?php endif; ?>
-
+                <?php
+                $directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
+                if( ! empty( $directories ) ) {
+                    foreach( $directories as $id => $directory ) {
+                        ?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory[ 'title' ] ) ?></a></li><?php
+                    }
+                }
+                ?>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 
 				<?php
