@@ -237,8 +237,9 @@
 			.so-dropdown-wrapper {
 
 				.so-dropdown-links-wrapper {
-					.transition(0.2s, all, ease, 0.1s);
-					opacity: 0;
+					visibility: hidden;
+					opacity:0;
+					transition: 0s visibility linear 0.1s, opacity 0.2s linear;
 					z-index: 101;
 					right: -10px;
 					top: 22px;
@@ -285,8 +286,9 @@
 				}
 
 				&:hover .so-dropdown-links-wrapper {
-					opacity: 1;
-					.transition(0.2s, all, ease);
+					visibility: visible;
+					opacity:1;
+					transition-delay:0s;
 				}
 
 			}
