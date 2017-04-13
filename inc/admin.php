@@ -1284,15 +1284,6 @@ class SiteOrigin_Panels_Admin {
                 // Any additional arguments to pass to the layouts server
                 'args' => array( )
 		    );
-
-		    $directories[ 'custom' ] = array(
-			    // The title of the layouts directory in the sidebar.
-			    'title' => __( 'Custom Directory', 'siteorigin-panels' ),
-			    // The URL of the directory.
-			    'url' => 'http://layouts.localhost:8080/',
-			    // Any additional arguments to pass to the layouts server
-			    'args' => array( )
-		    );
         }
 
 		return $directories;
