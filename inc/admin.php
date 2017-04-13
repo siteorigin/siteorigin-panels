@@ -60,10 +60,10 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_import_layout', array( $this, 'action_import_layout' ) );
 		add_action( 'wp_ajax_so_panels_export_layout', array( $this, 'action_export_layout' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-        add_action( 'wp_ajax_so_panels_directory_enable', array( $this, 'action_directory_enable' ) );
-
-        // Filter all the available external layout directories.
-        add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_layout_directories' ), 8 );
+		add_action( 'wp_ajax_so_panels_directory_enable', array( $this, 'action_directory_enable' ) );
+		
+		// Filter all the available external layout directories.
+		add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_layout_directories' ), 8 );
 
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
@@ -992,12 +992,12 @@ class SiteOrigin_Panels_Admin {
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
 			if( empty( $directory ) ) {
-			    return false;
+				return false;
 			}
 
 			$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
 			if( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
-			    $url = add_query_arg( $directory[ 'args' ], $url );
+				$url = add_query_arg( $directory[ 'args' ], $url );
 			}
 
 			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
@@ -1123,12 +1123,12 @@ class SiteOrigin_Panels_Admin {
 			if ( isset( $panels_data['filename'] ) ) unset( $panels_data['filename'] );
 
 		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
-		    $directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
+			$directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
 			$directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
 			if( ! empty( $directory ) ) {
-			    $url = $directory[ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download';
+				$url = $directory[ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download';
 				if( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
 					$url = add_query_arg( $directory[ 'args' ], $url );
 				}
@@ -1140,7 +1140,7 @@ class SiteOrigin_Panels_Admin {
 				} else {
 					// Display some sort of error message
 				}
-            }
+			}
 
 		} elseif ( current_user_can( 'edit_post', $_REQUEST['lid'] ) ) {
 			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
@@ -1200,16 +1200,18 @@ class SiteOrigin_Panels_Admin {
 
 		exit();
 	}
-
-    /**
-     * Enable the directory.
-     */
-	function action_directory_enable(){
-        if( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce($_REQUEST['_panelsnonce'], 'panels_action') ) wp_die();
-        $user = get_current_user_id();
-        update_user_meta( $user, 'so_panels_directory_enabled', true );
-        wp_die();
-    }
+	
+	/**
+	 * Enable the directory.
+	 */
+	function action_directory_enable() {
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
+		$user = get_current_user_id();
+		update_user_meta( $user, 'so_panels_directory_enabled', true );
+		wp_die();
+	}
 
 	/**
 	 * Add a column that indicates if a column is powered by Page Builder
@@ -1228,9 +1230,9 @@ class SiteOrigin_Panels_Admin {
 			);
 		}
 		else {
-			$columns = array_slice($columns, 0, $index, true) +
-			           array( 'panels' => __( 'Page Builder', 'siteorigin-panels' ) ) +
-			           array_slice( $columns, $index, count( $columns ) - 1, true) ;
+			$columns = array_slice( $columns, 0, $index, true ) +
+					   array( 'panels' => __( 'Page Builder', 'siteorigin-panels' ) ) +
+					   array_slice( $columns, $index, count( $columns ) - 1, true );
 		}
 
 		return $columns;
@@ -1278,19 +1280,19 @@ class SiteOrigin_Panels_Admin {
 	 * Add the main SiteOrigin layout directory
 	 */
 	public function filter_layout_directories( $directories ){
-	    if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) {
-		    $directories[ 'siteorigin' ] = array(
-		        // The title of the layouts directory in the sidebar.
-			    'title' => __( 'Layouts Directory', 'siteorigin-panels' ),
-			    // The URL of the directory.
-			    'url' => self::LAYOUT_URL,
-                // Any additional arguments to pass to the layouts server
-                'args' => array( )
-		    );
-        }
-
+		if ( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) {
+			$directories['siteorigin'] = array(
+				// The title of the layouts directory in the sidebar.
+				'title' => __( 'Layouts Directory', 'siteorigin-panels' ),
+				// The URL of the directory.
+				'url'   => self::LAYOUT_URL,
+				// Any additional arguments to pass to the layouts server
+				'args'  => array()
+			);
+		}
+		
 		return $directories;
-    }
+	}
 
 	/**
 	 * Add all the courses to the learning dialog
@@ -1300,23 +1302,23 @@ class SiteOrigin_Panels_Admin {
 	 * @return mixed
 	 */
 	public function filter_learn_lessons( $lessons ) {
-		$lessons[ 'page-builder-tips' ] = array(
-			'title' => __( '12 Page Builder Tips', 'siteorigin-panels' ),
-			'video' => '212380146',
-			'poster' => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
-			'description' => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
-			                 __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' )  . ' ' .
-			                 __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
+		$lessons['page-builder-tips'] = array(
+			'title'            => __( '12 Page Builder Tips', 'siteorigin-panels' ),
+			'video'            => '212380146',
+			'poster'           => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
+			'description'      => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
+								  __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' ) . ' ' .
+								  __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
-
-		$lessons[ 'page-builder-animations' ] = array(
-			'title' => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
-			'video' => '212380210',
-			'poster' => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
-			'description' => __( "The free animations addon allows you to add beautiful animations to Page Builder elements.", 'siteorigin-panels' ) . ' ' .
-			                 __( "Sign up to our newsletter and we'll send you the addon as a free gift.", 'siteorigin-panels' )  . ' ' .
-			                 __( "Plus, we'll send you even more powerful addons, for as long as you're subscribed.", 'siteorigin-panels' ),
+		
+		$lessons['page-builder-animations'] = array(
+			'title'            => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
+			'video'            => '212380210',
+			'poster'           => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
+			'description'      => __( "The free animations addon allows you to add beautiful animations to Page Builder elements.", 'siteorigin-panels' ) . ' ' .
+								  __( "Sign up to our newsletter and we'll send you the addon as a free gift.", 'siteorigin-panels' ) . ' ' .
+								  __( "Plus, we'll send you even more powerful addons, for as long as you're subscribed.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
 
