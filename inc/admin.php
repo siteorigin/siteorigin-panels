@@ -1287,12 +1287,6 @@ class SiteOrigin_Panels_Admin {
                 // Any additional arguments to pass to the layouts server
                 'args' => array( )
 		    );
-
-		    $directories[ 'custom' ] = array(
-		        'title' => __( 'MyTheme Layouts', 'mytheme' ),
-		        'url' => 'http://layouts.localhost:8080/',
-                'args' => array(  )
-            );
         }
 
 		return $directories;

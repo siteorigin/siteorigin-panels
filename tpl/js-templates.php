@@ -392,7 +392,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
                 <?php
                 $directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
-                if( ! empty( $directories ) ) {
+                if( ! empty( $directories ) && is_array( $directories ) ) {
                     foreach( $directories as $id => $directory ) {
                         ?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory[ 'title' ] ) ?></a></li><?php
                     }
