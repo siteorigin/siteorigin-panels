@@ -237,7 +237,8 @@
 			.so-dropdown-wrapper {
 
 				.so-dropdown-links-wrapper {
-					display: none;
+					.transition(0.2s, all, ease, 0.1s);
+					opacity: 0;
 					z-index: 101;
 					right: -10px;
 					top: 22px;
@@ -284,7 +285,8 @@
 				}
 
 				&:hover .so-dropdown-links-wrapper {
-					display: block;
+					opacity: 1;
+					.transition(0.2s, all, ease);
 				}
 
 			}
@@ -2457,17 +2459,17 @@
 
 				}
 			}
+		}
 
-			.so-pointer {
-				width: 12px;
-				height: 6px;
-				position: absolute;
-				z-index: 12;
-				background: url("./images/dropdown-pointer.png");
-				background-size: 12px 6px;
-				top: 1px;
-				right: 18px;
-			}
+		.so-pointer {
+			width: 12px;
+			height: 6px;
+			position: absolute;
+			z-index: 12;
+			background: url("./images/dropdown-pointer.png");
+			background-size: 12px 6px;
+			top: 1px;
+			right: 18px;
 		}
 	}
 }

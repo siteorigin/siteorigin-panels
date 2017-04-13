@@ -119,8 +119,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 							}
 							?>
 						</li>
-						<div class="so-pointer"></div>
 					</ul>
+					<div class="so-pointer"></div>
 				</div>
 			</span>
 		</div>
