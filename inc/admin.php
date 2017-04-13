@@ -1125,12 +1125,15 @@ class SiteOrigin_Panels_Admin {
 		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
 		    $directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
 			$directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
+			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
-			if( ! empty( $directories[ $directory_id ] ) ) {
-				$response = wp_remote_get(
-					$directories[ $directory_id ][ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download'
-				);
+			if( ! empty( $directory ) ) {
+			    $url = $directory[ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download';
+				if( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
+					$url = add_query_arg( $directory[ 'args' ], $url );
+				}
 
+				$response = wp_remote_get( $url );
 				if ( $response['response']['code'] == 200 ) {
 					// For now, we'll just pretend to load this
 					$panels_data = json_decode( $response['body'], true );
@@ -1284,6 +1287,12 @@ class SiteOrigin_Panels_Admin {
                 // Any additional arguments to pass to the layouts server
                 'args' => array( )
 		    );
+
+		    $directories[ 'custom' ] = array(
+		        'title' => __( 'MyTheme Layouts', 'mytheme' ),
+		        'url' => 'http://layouts.localhost:8080/',
+                'args' => array(  )
+            );
         }
 
 		return $directories;
