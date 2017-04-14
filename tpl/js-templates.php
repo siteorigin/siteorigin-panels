@@ -389,15 +389,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<?php if( !empty( $layouts ) ) : ?>
 					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php endif; ?>
-
-                <?php
-                $directories = apply_filters( 'siteorigin_panels_external_layout_directories', array() );
-                if( ! empty( $directories ) && is_array( $directories ) ) {
-                    foreach( $directories as $id => $directory ) {
-                        ?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory[ 'title' ] ) ?></a></li><?php
-                    }
-                }
-                ?>
+				
+				<?php
+				$directories = SiteOrigin_Panels_Admin_Layouts::single()->get_directories();
+				foreach ( $directories as $id => $directory ) {
+					?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory['title'] ) ?></a></li><?php
+				}
+				?>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 
 				<?php
