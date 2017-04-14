@@ -73,7 +73,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$type   = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory-siteorigin';
 		$search = ! empty( $_REQUEST['search'] ) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
-		$page   = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
+		$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 		
 		$return = array(
 			'title' => '',
@@ -108,7 +108,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			if ( ! empty( $search ) ) {
 				$query['search'] = $search;
 			}
-			$query['page'] = $page;
+			$query['page'] = $page_num;
 			
 			$directory_id = str_replace( 'directory-', '', $type );
 			$directories = $this->get_directories();
@@ -133,7 +133,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 						$item['id']         = $item['slug'];
 						$item['type']       = $type;
 						
-						if( empty( $item['screenshot'] ) ) {
+						if( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
 							$screenshot_url = add_query_arg( 'screenshot_preview', 1, $item['preview'] );
 							$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=700';
 						}
@@ -168,7 +168,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 					" . ( ! empty( $search ) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
 					AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
 				ORDER BY post_date DESC
-				LIMIT 16 OFFSET " . intval( ( $page - 1 ) * 16 ) );
+				LIMIT 16 OFFSET " . intval( ( $page_num - 1 ) * 16 ) );
 			$total_posts = $wpdb->get_var( "SELECT FOUND_ROWS();" );
 			
 			foreach ( $results as $result ) {
@@ -247,7 +247,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			
 		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
 			$directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
-			$directories = SiteOrigin_Panels_Admin_Layouts::single()->get_directories();
+			$directories = $this->get_directories();
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 			
 			if( ! empty( $directory ) ) {

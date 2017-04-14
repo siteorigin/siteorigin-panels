@@ -184,7 +184,7 @@ module.exports = panels.view.dialog.extend( {
 			type = 'directory-siteorigin';
 		}
 
-		if ( type.startsWith( 'directory-' ) && ! panelsOptions.directory_enabled ) {
+		if ( type.match('^directory-') && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
 			c.find( '.so-panels-enable-directory' ).click( function ( e ) {
@@ -248,9 +248,7 @@ module.exports = panels.view.dialog.extend( {
 				// Handle nice preloading of the screenshots
 				c.find( '.so-screenshot' ).each( function () {
 					var $$ = $( this ), $a = $$.find( '.so-screenshot-wrapper' );
-					$a.css( 'height', (
-									  $a.width() / 4 * 3
-									  ) + 'px' ).addClass( 'so-loading' );
+					$a.css( 'height', ( $a.width() / 4 * 3 ) + 'px' ).addClass( 'so-loading' );
 
 					if ( $$.data( 'src' ) !== '' ) {
 						// Set the initial height
