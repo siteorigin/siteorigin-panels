@@ -447,7 +447,7 @@ class SiteOrigin_Panels_Renderer {
 
 		$before_widget = '<div ';
 		foreach( $attributes as $k => $v ) {
-			$before_widget .= esc_attr( $k ) . '="' . esc_attr( $v ) . '"';
+			$before_widget .= esc_attr( $k ) . '="' . esc_attr( $v ) . '" ';
 		}
 		$before_widget .= '>';
 
