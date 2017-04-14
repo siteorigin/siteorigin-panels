@@ -197,24 +197,19 @@ module.exports = Backbone.View.extend( {
 	 * @param over
 	 */
 	scrollToElement: function( over ) {
-		var contentWindow = this.$( '.so-preview iframe' )[0].contentWindow;
-		contentWindow.liveEditorScrollTo( over );
+		this.$( '.so-preview iframe' )[0].contentWindow.liveEditorScrollTo( over );
 	},
 
 	handleRefreshData: function ( newData, args ) {
-		if ( ! this.$el.is( ':visible' ) ) {
-			return this;
+		if ( this.$el.is( ':visible' ) ) {
+			this.$( '.so-preview iframe' )[0].contentWindow.handlePanelsDataChange( newData );
 		}
-
-		this.refreshPreview( newData );
 	},
 
-	handleLoadData: function () {
-		if ( ! this.$el.is( ':visible' ) ) {
-			return this;
+	handleLoadData: function ( ) {
+		if ( this.$el.is( ':visible' ) ) {
+			this.$( '.so-preview iframe' )[0].contentWindow.handlePanelsDataChange( this.builder.model.getPanelsData() );
 		}
-
-		this.refreshPreview( this.builder.model.getPanelsData() );
 	},
 
 	/**
@@ -383,6 +378,10 @@ module.exports = Backbone.View.extend( {
 				if( ! $$.data( 'iframeready' ) ) {
 					$$.trigger('iframeready');
 				}
+			} )
+			.on( 'live-editor-refresh', function(){
+				// When the iframe requests a reload, give it a reload
+				thisView.refreshPreview( thisView.builder.model.getPanelsData() );
 			} );
 	},
 

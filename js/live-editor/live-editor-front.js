@@ -9,6 +9,10 @@ if ( iframe ) {
 		jQuery( function () {
 			windowParent.jQuery( iframe ).trigger( "iframeready" );
 		} );
+
+		window.liveEditorRefresh = function(){
+			windowParent.jQuery( iframe ).trigger( "live-editor-refresh" );
+		};
 	}
 }
 
@@ -34,8 +38,21 @@ function liveEditorScrollTo( el ){
 
 		$( window )
 			.clearQueue()
-			.animate({
+			.animate( {
 				scrollTop: newScrollTop
 			}, 450 );
 	}
 };
+
+jQuery( function( $ ){
+
+	window.handlePanelsDataChange = function( panelsData ) {
+		var currentPanelsData = liveEditor.panelsData;
+
+		// Call this if we can't figure out how to refresh the page.
+		window.liveEditorRefresh();
+
+		// After we've
+		liveEditor.panelsData = panelsData;
+	}
+} );

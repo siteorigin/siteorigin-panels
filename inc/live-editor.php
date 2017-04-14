@@ -23,7 +23,10 @@ class SiteOrigin_Panels_Live_Editor {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
 	}
-
+	
+	/**
+	 * Disable XSS checks in the live editor. We'll do security checks using current_user_can.
+	 */
 	public function xss_headers(){
 		global $post;
 		if(
@@ -74,25 +77,40 @@ class SiteOrigin_Panels_Live_Editor {
 	 * Load the frontend scripts for the live editor
 	 */
 	function frontend_scripts() {
-		wp_enqueue_script(
-			'live-editor-front',
-			plugin_dir_url( __FILE__ ) . '../js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-			array( 'jquery' ),
-			SITEORIGIN_PANELS_VERSION
-		);
-
-		wp_enqueue_script(
-			'live-editor-scrollto',
-			plugin_dir_url( __FILE__ ) . '../js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-			array( 'jquery' ),
-			SITEORIGIN_PANELS_VERSION
-		);
-
-		wp_enqueue_style(
-			'live-editor-front',
-			plugin_dir_url( __FILE__ ) . '../css/live-editor-front.css',
-			array(),
-			SITEORIGIN_PANELS_VERSION
-		);
+		if (
+			current_user_can( 'edit_post', get_the_ID() ) &&
+			! empty( $_POST['live_editor_panels_data'] ) &&
+			! empty( $_POST['live_editor_post_ID'] )
+		) {
+			wp_enqueue_script(
+				'live-editor-front',
+				plugin_dir_url( __FILE__ ) . '../js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION
+			);
+			
+			wp_localize_script(
+				'live-editor-front',
+				'liveEditor',
+				array(
+					'postId' => intval( $_POST['live_editor_post_ID'] ),
+					'panelsData' => json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true ),
+				)
+			);
+			
+			wp_enqueue_script(
+				'live-editor-scrollto',
+				plugin_dir_url( __FILE__ ) . '../js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION
+			);
+			
+			wp_enqueue_style(
+				'live-editor-front',
+				plugin_dir_url( __FILE__ ) . '../css/live-editor-front.css',
+				array(),
+				SITEORIGIN_PANELS_VERSION
+			);
+		}
 	}
 }
