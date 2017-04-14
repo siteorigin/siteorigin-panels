@@ -72,6 +72,8 @@ class SiteOrigin_Panels {
 			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
 			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		}
+		
+		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
 
 
