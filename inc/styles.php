@@ -339,7 +339,7 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if (
 				! empty( $url ) &&
@@ -397,7 +397,7 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if ( ! empty( $url ) ) {
 				$css[ 'background-image' ] = 'url(' . $url[0] . ')';
@@ -629,6 +629,19 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		return $gutter;
+	}
+	
+	public static function get_attachment_image_src( $image, $size = 'full' ){
+		if( empty( $image ) ) {
+			return false;
+		}
+		else if( is_numeric( $image ) ) {
+			return wp_get_attachment_image_src( $image, $size );
+		}
+		else if( is_string( $image ) ) {
+			preg_match( '/(.*?)\#([0-9]+)x([0-9]+)$/', $image, $matches );
+			return ! empty( $matches ) ? $matches : false;
+		}
 	}
 
 }
