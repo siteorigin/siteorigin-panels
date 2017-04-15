@@ -93,6 +93,7 @@ class SiteOrigin_Panels_Live_Editor {
 				'live-editor',
 				'liveEditor',
 				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 					'postId' => intval( $_POST['live_editor_post_ID'] ),
 					'panelsData' => json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true ),
 				)
