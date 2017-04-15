@@ -61,13 +61,7 @@ jQuery( function( $ ){
 			windowParent.jQuery( iframe ).trigger( 'live-editor-refresh' );
 		}
 
-		// var differences = diff( currentPanelsData.widgets[0], panelsData.widgets[0] );
-		// console.log( differences );
-
-		// Call this if we can't figure out how to refresh the page.
-		// liveEditor.refresh();
-
-		// After we've
+		// After we've processed everything, store the new panelsData
 		liveEditor.panelsData = panelsData;
 	}
 } );

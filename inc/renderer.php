@@ -611,7 +611,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array $attributes The attributes for the HTML element.
 	 *
 	 */
-	private function render_element( $tag, $attributes ) {
+	public function render_element( $tag, $attributes ) {
 
 		echo '<' . $tag;
 		foreach ( $attributes as $name => $value ) {
@@ -636,7 +636,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array $panels_data A copy of panels_data for filters.
 	 *
 	 */
-	private function render_row( $post_id, $ri, & $row, & $panels_data ) {
+	public function render_row( $post_id, $ri, & $row, & $panels_data ) {
 		$row_style_wrapper = $this->start_style_wrapper( 'row', ! empty( $row['style'] ) ? $row['style'] : array(), $post_id . '-' . $ri );
 
 		$row_classes   = array( 'panel-grid' );
@@ -690,7 +690,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array $cells The array of cells containing this cell.
      * @param array $panels_data A copy of panels_data for filters
 	 */
-	private function render_cell( $post_id, $ri, $ci, & $cell, $cells, & $panels_data ) {
+	public function render_cell( $post_id, $ri, $ci, & $cell, $cells, & $panels_data ) {
 
 		$cell_classes = array( 'panel-grid-cell' );
 
@@ -757,7 +757,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @param bool $is_last Whether this is the last widget in the parent cell.
 	 *
 	 */
-	private function render_widget( $post_id, $ri, $ci, $wi, & $widget, $is_last ) {
+	public function render_widget( $post_id, $ri, $ci, $wi, & $widget, $is_last ) {
 
 		$widget_style_wrapper = $this->start_style_wrapper(
 			'widget',

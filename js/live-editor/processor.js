@@ -1,3 +1,5 @@
+var $ = jQuery;
+
 module.exports = {
 
 	liveEditor: null,
@@ -17,7 +19,7 @@ module.exports = {
 		this.currentData = JSON.parse( JSON.stringify( currentData ) );
 
 		for( var step in this.steps ) {
-			this.steps[ step ].apply( this );
+			this.steps[ step ].apply( this, [ newData ] );
 		}
 
 		// Check if we've been able to convert the data properly
@@ -79,9 +81,59 @@ module.exports = {
 		 * @param newData
 		 */
 		reloadWidgets: function( newData ) {
+			var widgetDiff, $widget;
+			for( var i = 0; i < newData.widgets.length; i++ ) {
+				widgetDiff = this.diff( this.currentData.widgets[i], newData.widgets[i] );
+				if( widgetDiff !== undefined ) {
+					// TODO give widgets a chance to handle their own live edits
+					$widget = this.getElements( 'widgets' ).eq( i );
 
+					console.log( $widget );
+
+					$widget.addClass( 'live-editor-reloading' );
+					$.post(
+						liveEditor.ajaxUrl,
+						{
+							action: 'so_panels_live_partial_widget',
+							widget: JSON.stringify( newData.widgets[i] ),
+							post_id: liveEditor.postId,
+						},
+						function( r ){
+							$widget.replaceWith( r );
+						}
+					);
+
+					this.currentData.widgets[ i ] = newData.widgets[i];
+				}
+			}
 		}
 
+	},
+
+	getElements: function( type ) {
+		var $layout = this.$layout;
+		var elementFilter = function(){
+			return $( this ).closest( '.panel-layout' ).is( $layout );
+		};
+
+		var elements;
+
+		switch( type ) {
+			case 'rows':
+				elements = this.$layout.find( '.panel-grid' ).filter( elementFilter );
+				break;
+			case 'cells':
+				elements = this.$layout.find( '.panel-grid-cell' ).filter( elementFilter );
+				break;
+			case 'widgets':
+				elements = this.$layout.find( '.so-panel' ).filter( elementFilter );
+				break;
+			default:
+				elements = this.$layout;
+				break;
+		}
+
+		return elements;
 	},
 
 };

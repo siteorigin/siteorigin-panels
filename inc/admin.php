@@ -59,6 +59,7 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
 		SiteOrigin_Panels_Admin_Layouts::single();
+		SiteOrigin_Panels_Admin_Live_Editor::single();
 
 		$this->in_save_post = false;
 	}

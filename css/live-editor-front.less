@@ -2,12 +2,19 @@
 .so-panel {
 	-webkit-transition-duration: 0.6s !important;
 	transition-duration: 0.6s !important;
-}
 
-.so-panel.so-panels-highlighted {
-	opacity: 1 !important;
-}
+	&.so-panels-highlighted {
+		opacity: 1 !important;
+	}
 
-.so-panel.so-panels-faded {
-	opacity: 0.275 !important;
+	&.so-panels-faded {
+		opacity: 0.275 !important;
+	}
+
+	&.live-editor-reloading {
+		background-color: #efefef;
+		> * {
+			opacity: 0.4;
+		}
+	}
 }
