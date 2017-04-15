@@ -197,7 +197,7 @@ module.exports = Backbone.View.extend( {
 	 * @param over
 	 */
 	scrollToElement: function( over ) {
-		this.$( '.so-preview iframe' )[0].contentWindow.liveEditorScrollTo( over );
+		this.$( '.so-preview iframe' )[0].contentWindow.liveEditor.scrollTo( over );
 	},
 
 	handleRefreshData: function ( newData, args ) {

@@ -35,14 +35,24 @@ module.exports = {
             '!{tmp,tmp/**}'               // Ignore tmp/ and contents
         ]
     },
-    browserify : {
-        src: 'js/siteorigin-panels/main.js',
-        dest: 'js/',
-        fileName: 'siteorigin-panels.js',
-        watchFiles: [
-            'js/siteorigin-panels/**',
-        ]
-    },
+	browserify : [
+		{
+			src: 'js/siteorigin-panels/main.js',
+			dest: 'js/',
+			fileName: 'siteorigin-panels.js',
+			watchFiles: [
+				'js/siteorigin-panels/**',
+			]
+		},
+		{
+			src: 'js/live-editor/main.js',
+			dest: 'js/',
+			fileName: 'live-editor.js',
+			watchFiles: [
+				'js/live-editor/**',
+			]
+		}
+	],
 	bust : {
 		src: [
 			'js/siteorigin-panels.js',

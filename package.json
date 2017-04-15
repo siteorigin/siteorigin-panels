@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "deep-diff": "^0.3.4",
+    "md5": "^2.2.1"
+  }
+}

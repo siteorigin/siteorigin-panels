@@ -83,26 +83,19 @@ class SiteOrigin_Panels_Live_Editor {
 			! empty( $_POST['live_editor_post_ID'] )
 		) {
 			wp_enqueue_script(
-				'live-editor-front',
-				plugin_dir_url( __FILE__ ) . '../js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
+				'live-editor',
+				plugin_dir_url( __FILE__ ) . '../js/live-editor' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
 				array( 'jquery' ),
 				SITEORIGIN_PANELS_VERSION
 			);
 			
 			wp_localize_script(
-				'live-editor-front',
+				'live-editor',
 				'liveEditor',
 				array(
 					'postId' => intval( $_POST['live_editor_post_ID'] ),
 					'panelsData' => json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true ),
 				)
-			);
-			
-			wp_enqueue_script(
-				'live-editor-scrollto',
-				plugin_dir_url( __FILE__ ) . '../js/live-editor/jquery.scrollTo' . SITEORIGIN_PANELS_JS_SUFFIX . '.js',
-				array( 'jquery' ),
-				SITEORIGIN_PANELS_VERSION
 			);
 			
 			wp_enqueue_style(
