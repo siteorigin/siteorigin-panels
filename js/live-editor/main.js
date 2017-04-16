@@ -1,57 +1,54 @@
 var iframe = window.frameElement,
-	md5 = require( 'md5' );
+	windowParent = window.parent;
 
+if(
+	typeof iframe === 'undefined' ||
+	typeof windowParent === 'undefined' ||
+	typeof windowParent.jQuery === 'undefined'
+) {
+	throw "Live editor must be run in an iframe";
+}
+
+iframe.contentDocument = document;
+
+var md5 = require( 'md5' );
+require( './jquery-layout-children' );
+
+// The variable setup
 liveEditor.scrollTo = require( './scrollTo' );
 liveEditor.processor = require('./processor');
-
 liveEditor.processor.liveEditor = liveEditor;
 
-if ( iframe ) {
-	iframe.contentDocument = document;
-	var windowParent = window.parent;
+// This is all for the loading time prediction
+windowParent.jQuery( iframe ).trigger( "iframeloading" );
+jQuery( function () {
+	windowParent.jQuery( iframe ).trigger( "iframeready" );
+} );
+liveEditor.refresh = function(){
+	windowParent.jQuery( iframe ).trigger( "live-editor-refresh" );
+};
 
-	// This is all for the loading time prediction
-	if( typeof windowParent !== 'undefined' && typeof windowParent.jQuery !== 'undefined' ) {
-		windowParent.jQuery( iframe ).trigger( "iframeloading" );
-		jQuery( function () {
-			windowParent.jQuery( iframe ).trigger( "iframeready" );
-		} );
-
-		liveEditor.refresh = function(){
-			windowParent.jQuery( iframe ).trigger( "live-editor-refresh" );
-		};
-	}
-}
+var triggerLiveEditorEvent = function( e ){
+	windowParent.jQuery( iframe ).trigger( 'live-editor-event', e );
+};
 
 jQuery( function( $ ){
 
-
-	var $layout, $rows, $cells, $widgets;
-
-	$layout = $( '#pl-' + liveEditor.postId );
+	var $layout = $( '#pl-' + liveEditor.postId );
 	liveEditor.processor.$layout = $layout;
 
-	var elementFilter = function(){
-		return $( this ).closest( '.panel-layout' ).is( $layout );
-	};
+	// Setup all the events that 
+	$layout
+		.on( 'click', '.so-panel', function(){
+			var $widgets = $layout.findLayoutChildren( '.so-panel' );
+			if( $widgets.index( $( this ) ) === -1 ) return;
 
-	var setupElements = function( panelsData ){
-		$rows = $layout.find( '.panel-grid' ).filter( elementFilter );
-		$cells = $layout.find( '.panel-grid-cell' ).filter( elementFilter );
-		$widgets = $layout.find( '.so-panel' ).filter( elementFilter );
-
-		// Lets add some data to each of the elements
-		$widgets.each( function( i, el ){
-			var info = panelsData.widgets[ i ].panels_info,
-				widget = JSON.parse( JSON.stringify( panelsData.widgets[ i ] ) );
-			delete widget.panels_info;
-
-			$( el )
-				.data( 'style', md5( JSON.stringify( info.style ) ) )
-				.data( 'widget',md5( JSON.stringify( widget ) ) );
+			triggerLiveEditorEvent( {
+				type: 'widget-click',
+				target: $( this ),
+				index: $widgets.index( $( this ) ),
+			} );
 		} );
-	};
-	setupElements( liveEditor.panelsData );
 
 	window.handlePanelsDataChange = function( panelsData ) {
 		var currentPanelsData = liveEditor.panelsData;

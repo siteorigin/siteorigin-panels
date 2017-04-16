@@ -334,44 +334,6 @@ module.exports = Backbone.View.extend( {
 					$iframeContents.scrollTop( thisView.previewScrollTop );
 					thisView.$( '.so-preview-overlay' ).hide();
 				}, 100 );
-
-
-				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
-				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
-				layoutWrapper.find( '.panel-grid .panel-grid-cell .so-panel' )
-					.filter( function () {
-						// Filter to only include non nested
-						return $( this ).closest( '.panel-layout' ).is( layoutWrapper );
-					} )
-					.each( function ( i, el ) {
-						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
-						widgetEdit.data( 'live-editor-preview-widget', $$ );
-
-						$$
-							.css( {
-								'cursor': 'pointer'
-							} )
-							.mouseenter( function () {
-								widgetEdit.parent().addClass( 'so-hovered' );
-								thisView.highlightElement( $$ );
-							} )
-							.mouseleave( function () {
-								widgetEdit.parent().removeClass( 'so-hovered' );
-								thisView.resetHighlights();
-							} )
-							.click( function ( e ) {
-								e.preventDefault();
-								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).click();
-							} );
-					} );
-
-				// Prevent default clicks inside the preview iframe
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
-					e.preventDefault();
-				} );
-
 			} )
 			.on( 'load', function(){
 				var $$ = $( this );
@@ -382,6 +344,13 @@ module.exports = Backbone.View.extend( {
 			.on( 'live-editor-refresh', function(){
 				// When the iframe requests a reload, give it a reload
 				thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+			} )
+			.on( 'live-editor-event', function( e, args ){
+				switch( args.type ) {
+					case 'widget-click':
+						thisView.$( '.so-widget-wrapper .title h4' ).eq( args.index ).click();
+						break;
+				}
 			} );
 	},
 

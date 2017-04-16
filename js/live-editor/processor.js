@@ -81,14 +81,16 @@ module.exports = {
 		 * @param newData
 		 */
 		reloadWidgets: function( newData ) {
-			var widgetDiff, $widget;
+			var widgetDiff,
+				$widget,
+				$widgets = this.getElements( 'widgets' );
+
 			for( var i = 0; i < newData.widgets.length; i++ ) {
 				widgetDiff = this.diff( this.currentData.widgets[i], newData.widgets[i] );
+
 				if( widgetDiff !== undefined ) {
 					// TODO give widgets a chance to handle their own live edits
-					$widget = this.getElements( 'widgets' ).eq( i );
-
-					console.log( $widget );
+					$widget = $widgets.eq( i );
 
 					$widget.addClass( 'live-editor-reloading' );
 					$.post(
@@ -99,11 +101,11 @@ module.exports = {
 							post_id: liveEditor.postId,
 						},
 						function( r ){
-							$widget.replaceWith( r );
-						}
+							this.replaceWith( r );
+						}.bind( $widget )
 					);
 
-					this.currentData.widgets[ i ] = newData.widgets[i];
+					this.currentData.widgets[ i ] = newData.widgets[ i ];
 				}
 			}
 		}
