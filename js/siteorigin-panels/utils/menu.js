@@ -48,11 +48,29 @@ module.exports = Backbone.View.extend( {
 				e.preventDefault();
 
 				thisView.openMenu( {
-					left: e.pageX,
-					top: e.pageY
+					left: e.clientX,
+					top: e.clientY
 				} );
 			}
 		} );
+	},
+
+	/**
+	 * Show the contextual menu for a specific view in the builder.
+	 * @param e
+	 * @param view
+	 */
+	showContextMenu: function( e, view ){
+		this.closeMenu();
+		this.active = false;
+		this.trigger( 'activate_context_for', e, view, this );
+
+		if( this.active ) {
+			this.openMenu( {
+				left: e.pageX,
+				top: e.pageY
+			} );
+		}
 	},
 
 	render: function () {
@@ -87,11 +105,11 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Check top position
-		if ( position.top + this.$el.outerHeight() - $( window ).scrollTop() + 10 >= $( window ).height() ) {
-			position.top = $( window ).height() + $( window ).scrollTop() - this.$el.outerHeight() - 10;
+		if ( position.top + this.$el.outerHeight() + 10 >= $( window ).height() ) {
+			position.top = $( window ).height() - this.$el.outerHeight() - 10;
 		}
-		if ( position.left <= 0 ) {
-			position.left = 10;
+		if ( position.top <= 0 ) {
+			position.top = 10;
 		}
 
 		// position the contextual menu
