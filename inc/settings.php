@@ -131,6 +131,7 @@ class SiteOrigin_Panels_Settings {
 		// The layout fields
 		$defaults['responsive']             = true;
 		$defaults['tablet-layout']          = false;
+		$defaults['legacy-layout']          = false;
 		$defaults['tablet-width']           = 1024;
 		$defaults['mobile-width']           = 780;
 		$defaults['margin-bottom']          = 30;
@@ -332,6 +333,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Use Tablet Layout', 'siteorigin-panels' ),
 			'description' => __( 'Collapses columns differently on tablet devices.', 'siteorigin-panels' ),
+		);
+		
+		$fields['layout']['fields']['legacy-layout'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Use Legacy Layout Engine', 'siteorigin-panels' ),
+			'description' => __( 'The CSS and HTML uses floats instead of flexbox for compatibility with very old browsers.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['tablet-width'] = array(

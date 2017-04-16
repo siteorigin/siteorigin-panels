@@ -185,8 +185,8 @@ class SiteOrigin_Panels_Admin {
 				// Store a version of the HTML in post_content
 				SiteOrigin_Panels_Post_Content_Filters::add_filters();
 				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-				$post_content = SiteOrigin_Panels_Renderer::single()->render( $post_id, false, $panels_data );
-				$post_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id, $panels_data );
+				$post_content = SiteOrigin_Panels::renderer()->render( $post_id, false, $panels_data );
+				$post_css = SiteOrigin_Panels::renderer()->generate_css( $post_id, $panels_data );
 				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
@@ -898,7 +898,7 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		echo SiteOrigin_Panels_Renderer::single()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		echo SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 

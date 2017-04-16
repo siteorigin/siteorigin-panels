@@ -1,0 +1,27 @@
+@import "mixins";
+
+.panel-grid {
+	zoom: 1;
+	.clearfix();
+}
+.panel-grid-cell {
+	.box-sizing(border-box);
+	min-height: 1em;
+	float: left;
+
+	.so-panel {
+		.clearfix();
+	}
+
+	.panel-last-child {
+		margin-bottom: 0;
+	}
+
+	.widget-title {
+		margin-top: 0;
+	}
+}
+
+.panel-row-style {
+	.clearfix();
+}
