@@ -103,6 +103,8 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Fixed Firefox layout issues.
 * Fixed positioning of edit row dropdown.
 * Fixed warning coming from legacy widgets.
+* Added legacy layout rendering for old browsers.
+* Switched to using calc for cell sizing.
 
 = 2.5 - 11 April 2017 =
 * Large code refactoring for improved performance.
