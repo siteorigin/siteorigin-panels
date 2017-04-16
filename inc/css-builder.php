@@ -24,16 +24,15 @@ class SiteOrigin_Panels_Css_Builder {
 	public function add_css( $selector, $attributes, $resolution = 1920 ) {
 		$attribute_string = array();
 		foreach ( $attributes as $k => $v ) {
-			if ( ! strlen( (string) $v ) ) {
-				continue;
-			}
-
+			
 			if( is_array( $v ) ) {
 				for( $i = 0; $i < count( $v ); $i++ ) {
+					if ( ! strlen( (string) $v[ $i ] ) ) continue;
 					$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v[ $i ] );
 				}
 			}
 			else {
+				if ( ! strlen( (string) $v ) ) continue;
 				$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v );
 			}
 		}

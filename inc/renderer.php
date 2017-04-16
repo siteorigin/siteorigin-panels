@@ -11,7 +11,6 @@ class SiteOrigin_Panels_Renderer {
 
 	public static function single() {
 		static $single;
-
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -83,7 +82,7 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'width' => round( $weight * 100, 4 ) . '%',
+					'width' => 'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )'
 				) );
 			}
 
@@ -179,14 +178,6 @@ class SiteOrigin_Panels_Renderer {
 				}
 			}
 
-			if ( ! empty( $gutter_parts[1] ) ) {
-				$css->add_cell_css( $post_id, $ri, false, '', array(
-					'margin-right' => floatval( $gutter_parts[1] ) . $gutter_parts[2],
-				) );
-				$css->add_cell_css( $post_id, $ri, false, ':last-child', array(
-					'margin-right' => 0,
-				) );
-			}
 		}
 
 		// Add the bottom margins
