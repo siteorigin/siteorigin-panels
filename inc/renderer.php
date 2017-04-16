@@ -82,7 +82,10 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'width' => 'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )'
+					'width' => array(
+						round( $weight * 100, 4 ) . '%',
+						'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )',
+					)
 				) );
 			}
 
@@ -768,5 +771,9 @@ class SiteOrigin_Panels_Renderer {
 			$widget_style_wrapper
 		);
 
+	}
+	
+	public function front_css_url(){
+		return plugin_dir_url( __FILE__ ) . '../css/front.css';
 	}
 }

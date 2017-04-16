@@ -90,10 +90,36 @@ class SiteOrigin_Panels {
 	public static function renderer(){
 		static $renderer;
 		if( empty( $renderer ) ) {
-			$renderer = siteorigin_panels_setting( 'legacy-layout' ) ? SiteOrigin_Panels_Renderer_Legacy::single() : SiteOrigin_Panels_Renderer::single();
+			switch( siteorigin_panels_setting( 'legacy-layout' ) ) {
+				case 'always':
+					$renderer = SiteOrigin_Panels_Renderer_Legacy::single();
+					break;
+					
+				case 'never':
+					$renderer = SiteOrigin_Panels_Renderer::single();
+					break;
+					
+				default :
+					$renderer = self::is_legacy_browser() ?
+						SiteOrigin_Panels_Renderer_Legacy::single() :
+						SiteOrigin_Panels_Renderer::single();
+					break;
+			}
 		}
 		
 		return $renderer;
+	}
+	
+	public static function is_legacy_browser(){
+		return
+			// IE lte 10
+			( preg_match('/MSIE\s(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 10 ) ||
+			// Chrome lte 25
+			( preg_match('/Chrome\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 25 ) ||
+			// Firefox lte 21
+			( preg_match('/Firefox\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 21 ) ||
+			// Safari lte 7
+			( preg_match('/Safari\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 6 );
 	}
 
 	/**
@@ -434,7 +460,7 @@ class SiteOrigin_Panels {
 	}
 
 	public static function front_css_url(){
-		return plugin_dir_url( __FILE__ ) . 'css/front' . ( siteorigin_panels_setting( 'legacy-layout' ) ? '-legacy' : '' ) . '.css';
+		return self::renderer()->front_css_url();
 	}
 
 	/**

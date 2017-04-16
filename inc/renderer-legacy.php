@@ -142,4 +142,8 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 
 		return $css->get_css();
 	}
+	
+	public function front_css_url(){
+		return plugin_dir_url( __FILE__ ) . '../css/front' . ( siteorigin_panels_setting( 'legacy-layout' ) ? '-legacy' : '' ) . '.css';
+	}
 }
