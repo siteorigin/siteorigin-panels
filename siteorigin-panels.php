@@ -111,15 +111,18 @@ class SiteOrigin_Panels {
 	}
 	
 	public static function is_legacy_browser(){
+		$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
+		if( empty( $agent ) ) return false;
+		
 		return
 			// IE lte 10
-			( preg_match('/MSIE\s(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 10 ) ||
+			( preg_match('/MSIE\s(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 10 ) ||
 			// Chrome lte 25
-			( preg_match('/Chrome\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 25 ) ||
+			( preg_match('/Chrome\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 25 ) ||
 			// Firefox lte 21
-			( preg_match('/Firefox\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 21 ) ||
+			( preg_match('/Firefox\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 21 ) ||
 			// Safari lte 7
-			( preg_match('/Safari\/(?P<v>\d+)/i', @$_SERVER['HTTP_USER_AGENT'], $B) && $B['v'] <= 6 );
+			( preg_match('/Version\/(?P<v>\d+).*?Safari\/\d+/i', $agent, $B) && $B['v'] <= 6 );
 	}
 
 	/**
