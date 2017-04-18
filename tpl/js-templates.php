@@ -119,8 +119,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 							}
 							?>
 						</li>
-						<div class="so-pointer"></div>
 					</ul>
+					<div class="so-pointer"></div>
 				</div>
 			</span>
 		</div>
@@ -389,11 +389,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<?php if( !empty( $layouts ) ) : ?>
 					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
 				<?php endif; ?>
-
-				<?php if( apply_filters( 'siteorigin_panels_layouts_directory_enabled', true ) ) : ?>
-					<li><a href="#directory"><?php _e('Layouts Directory', 'siteorigin-panels') ?></a></li>
-				<?php endif; ?>
-
+				
+				<?php
+				$directories = SiteOrigin_Panels_Admin_Layouts::single()->get_directories();
+				foreach ( $directories as $id => $directory ) {
+					?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory['title'] ) ?></a></li><?php
+				}
+				?>
 				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
 
 				<?php

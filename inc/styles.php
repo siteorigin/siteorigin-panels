@@ -18,6 +18,7 @@ class SiteOrigin_Panels_Styles {
 		// Style wrapper attributes
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'row_style_attributes' ), 10, 2 );
+		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'vantage_row_style_attributes' ), 11, 2 );
 		add_filter( 'siteorigin_panels_cell_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 
@@ -338,7 +339,7 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if (
 				! empty( $url ) &&
@@ -372,6 +373,14 @@ class SiteOrigin_Panels_Styles {
 		return $attributes;
 	}
 
+	static function vantage_row_style_attributes( $attributes, $style ) {
+		if ( isset( $style['class'] ) && $style['class'] == 'wide-grey' && ! empty( $attributes['style'] ) ) {
+			$attributes['style'] = preg_replace( '/padding-left: 1000px; padding-right: 1000px;/', '', $attributes['style'] );
+		}
+
+		return $attributes;
+	}
+
 	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets
 	 *
@@ -388,7 +397,7 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
 
-			$url = wp_get_attachment_image_src( $style['background_image_attachment'], 'full' );
+			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if ( ! empty( $url ) ) {
 				$css[ 'background-image' ] = 'url(' . $url[0] . ')';
@@ -599,6 +608,12 @@ class SiteOrigin_Panels_Styles {
 							$mobile_width
 						);
 					}
+					
+					if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
+						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a', array(
+							'color' => $widget['panels_info']['style']['link_color']
+						) );
+					}
 				}
 			}
 		}
@@ -620,6 +635,19 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		return $gutter;
+	}
+	
+	public static function get_attachment_image_src( $image, $size = 'full' ){
+		if( empty( $image ) ) {
+			return false;
+		}
+		else if( is_numeric( $image ) ) {
+			return wp_get_attachment_image_src( $image, $size );
+		}
+		else if( is_string( $image ) ) {
+			preg_match( '/(.*?)\#([0-9]+)x([0-9]+)$/', $image, $matches );
+			return ! empty( $matches ) ? $matches : false;
+		}
 	}
 
 }

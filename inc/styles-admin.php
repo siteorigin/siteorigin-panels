@@ -214,7 +214,7 @@ class SiteOrigin_Panels_Styles_Admin {
 			case 'image' :
 				$image = false;
 				if ( ! empty( $current ) ) {
-					$image = wp_get_attachment_image_src( $current, 'thumbnail' );
+					$image = SiteOrigin_Panels_Styles::get_attachment_image_src( $current, 'thumbnail' );
 				}
 
 				?>
@@ -365,7 +365,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					}
 					break;
 				case 'image' :
-					$return[ $k ] = ! empty( $styles[ $k ] ) ? intval( $styles[ $k ] ) : false;
+					$return[ $k ] = ! empty( $styles[ $k ] ) ? sanitize_text_field( $styles[ $k ] ) : false;
 					break;
 				case 'url' :
 					$return[ $k ] = esc_url_raw( $styles[ $k ] );

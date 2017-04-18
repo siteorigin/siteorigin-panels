@@ -101,11 +101,11 @@
 	.transform(scale(@ratio));
 }
 
-.transition(@duration:0.2s, @on: all, @ease:ease) {
-	-webkit-transition: @on @duration @ease;
-	-moz-transition: @on @duration @ease;
-	-o-transition: @on @duration @ease;
-	transition: @on @duration @ease;
+.transition(@duration:0.2s, @on: all, @ease:ease, @delay:0s) {
+	-webkit-transition: @on @duration @ease @delay;
+	-moz-transition: @on @duration @ease @delay;
+	-o-transition: @on @duration @ease @delay;
+	transition: @on @duration @ease @delay;
 }
 
 .inner-shadow(@horizontal:0, @vertical:1px, @blur:2px, @alpha: 0.4) {

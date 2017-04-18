@@ -129,13 +129,13 @@ class SiteOrigin_Panels_Cache_Renderer {
 
 		if( empty( $this->cache[ 'html' ][ $post_id ] ) ) {
 			// Generate the HTML for the post
-			$panels_html = SiteOrigin_Panels_Renderer::single()->render( $post_id, false );
+			$panels_html = SiteOrigin_Panels::renderer()->render( $post_id, false );
 			$this->add( 'html', $panels_html, $post_id );
 		}
 
 		if( empty( $this->cache[ 'css' ][ $post_id ] ) ) {
 			// Create a single line version of the CSS
-			$panels_css = SiteOrigin_Panels_Renderer::single()->generate_css( $post_id );
+			$panels_css = SiteOrigin_Panels::renderer()->generate_css( $post_id );
 			$this->add( 'css', $panels_css, $post_id );
 		}
 

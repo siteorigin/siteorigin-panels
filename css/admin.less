@@ -237,10 +237,12 @@
 			.so-dropdown-wrapper {
 
 				.so-dropdown-links-wrapper {
-					display: none;
+					visibility: hidden;
+					opacity:0;
+					transition: 0s visibility linear 0.075s, opacity 0.075s linear;
 					z-index: 101;
 					right: -10px;
-					top: 22px;
+					top: 100%;
 					width: 125px;
 
 					ul li a.so-row-delete {
@@ -284,7 +286,9 @@
 				}
 
 				&:hover .so-dropdown-links-wrapper {
-					display: block;
+					visibility: visible;
+					opacity:1;
+					transition-delay:0s;
 				}
 
 			}
@@ -345,7 +349,7 @@
 						background: #e4eff4;
 						padding: 7px 7px 0px 7px;
 						height: 100%;
-						min-height: 70px;
+						min-height: 63px;
 
 						.transition(0.25s, background, ease-in-out);
 					}
@@ -2457,17 +2461,17 @@
 
 				}
 			}
+		}
 
-			.so-pointer {
-				width: 12px;
-				height: 6px;
-				position: absolute;
-				z-index: 12;
-				background: url("./images/dropdown-pointer.png");
-				background-size: 12px 6px;
-				top: 1px;
-				right: 18px;
-			}
+		.so-pointer {
+			width: 12px;
+			height: 6px;
+			position: absolute;
+			z-index: 12;
+			background: url("./images/dropdown-pointer.png");
+			background-size: 12px 6px;
+			top: 1px;
+			right: 18px;
 		}
 	}
 }

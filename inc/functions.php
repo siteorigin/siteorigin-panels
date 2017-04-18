@@ -38,7 +38,7 @@ function siteorigin_panels_get_home_page_data() {
  * @return string The HTML content.
  */
 function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panels_data = false ) {
-	return SiteOrigin_Panels_Renderer::single()->render( $post_id, $enqueue_css, $panels_data );
+	return SiteOrigin_Panels::renderer()->render( $post_id, $enqueue_css, $panels_data );
 }
 
 /**
@@ -55,7 +55,7 @@ function siteorigin_panels_process_raw_widgets( $widgets, $old_widgets = false, 
 }
 
 function siteorigin_panels_the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
-	SiteOrigin_Panels_Renderer::single()->the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id, $style_wrapper );
+	SiteOrigin_Panels::renderer()->the_widget( $widget_info, $instance, $grid, $cell, $panel, $is_first, $is_last, $post_id, $style_wrapper );
 }
 
 /**
@@ -71,4 +71,13 @@ function siteorigin_panels_setting( $key = '' ) {
 
 function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name, $source = false ) {
 	return SiteOrigin_Panels_Admin_Widgets_Bundle::install_url( $plugin, $plugin_name, $source );
+}
+
+/**
+ * A null function for compatibility with aTheme themes.
+ *
+ * @return bool
+ */
+function siteorigin_panels_activate(){
+	return false;
 }

@@ -50,8 +50,8 @@ class SiteOrigin_Panels {
 		if ( self::is_live_editor() ) {
 			SiteOrigin_Panels_Live_Editor::single();
 		}
-
-		SiteOrigin_Panels_Renderer::single();
+		
+		SiteOrigin_Panels::renderer();
 		SiteOrigin_Panels_Styles_Admin::single();
 
 		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
@@ -72,12 +72,57 @@ class SiteOrigin_Panels {
 			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
 			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		}
+		
+		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
 
 
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
+	}
+	
+	/**
+	 * Get an instance of the renderer
+	 *
+	 * @return SiteOrigin_Panels_Renderer
+	 */
+	public static function renderer(){
+		static $renderer;
+		if( empty( $renderer ) ) {
+			switch( siteorigin_panels_setting( 'legacy-layout' ) ) {
+				case 'always':
+					$renderer = SiteOrigin_Panels_Renderer_Legacy::single();
+					break;
+					
+				case 'never':
+					$renderer = SiteOrigin_Panels_Renderer::single();
+					break;
+					
+				default :
+					$renderer = self::is_legacy_browser() ?
+						SiteOrigin_Panels_Renderer_Legacy::single() :
+						SiteOrigin_Panels_Renderer::single();
+					break;
+			}
+		}
+		
+		return $renderer;
+	}
+	
+	public static function is_legacy_browser(){
+		$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
+		if( empty( $agent ) ) return false;
+		
+		return
+			// IE lte 10
+			( preg_match('/MSIE\s(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 10 ) ||
+			// Chrome lte 25
+			( preg_match('/Chrome\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 25 ) ||
+			// Firefox lte 21
+			( preg_match('/Firefox\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 21 ) ||
+			// Safari lte 7
+			( preg_match('/Version\/(?P<v>\d+).*?Safari\/\d+/i', $agent, $B) && $B['v'] <= 6 );
 	}
 
 	/**
@@ -226,7 +271,7 @@ class SiteOrigin_Panels {
 
 		// Check if this post has panels_data
 		if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
-			$panel_content = SiteOrigin_Panels_Renderer::single()->render(
+			$panel_content = SiteOrigin_Panels::renderer()->render(
 				get_the_ID(),
 				// Add CSS if this is not the main single post, this is handled by add_single_css
 				get_the_ID() !== get_queried_object_id()
@@ -260,7 +305,7 @@ class SiteOrigin_Panels {
 
 	public function generate_post_css() {
 		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
-			$renderer = SiteOrigin_Panels_Renderer::single();
+			$renderer = SiteOrigin_Panels::renderer();
 			$renderer->add_inline_css( get_the_ID(), $renderer->generate_css( get_the_ID() ) );
 		}
 	}
@@ -282,7 +327,7 @@ class SiteOrigin_Panels {
 		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
 			$cache = SiteOrigin_Panels_Cache_Renderer::single();
 			$stored = $cache->get( 'css', get_the_ID() );
-			SiteOrigin_Panels_Renderer::single()->add_inline_css( get_the_ID(), $stored );
+			SiteOrigin_Panels::renderer()->add_inline_css( get_the_ID(), $stored );
 		}
 	}
 
@@ -418,7 +463,7 @@ class SiteOrigin_Panels {
 	}
 
 	public static function front_css_url(){
-		return plugin_dir_url( __FILE__ ) . 'css/front.css';
+		return self::renderer()->front_css_url();
 	}
 
 	/**
