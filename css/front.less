@@ -17,6 +17,17 @@
 	}
 }
 
+.panel-layout.panel-is-rtl {
+	.panel-grid {
+		&.panel-no-style,
+		&.panel-has-style > .panel-row-style {
+			-ms-flex-direction: row-reverse;
+			-webkit-flex-direction: row-reverse;
+			flex-direction: row-reverse;
+		}
+	}
+}
+
 .panel-grid-cell {
 
 	.box-sizing( border-box );

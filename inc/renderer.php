@@ -258,6 +258,7 @@ class SiteOrigin_Panels_Renderer {
 
 		// Add the panel layout wrapper
 		$layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array( 'panel-layout' ), $post_id, $panels_data );
+		if( is_rtl() ) $layout_classes[] = 'panel-is-rtl';
 		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
 			'id'    => 'pl-' . $post_id,
 			'class' => implode( ' ', $layout_classes ),
@@ -642,8 +643,6 @@ class SiteOrigin_Panels_Renderer {
 		if ( ! empty( $row_style_wrapper ) ) {
 			echo $row_style_wrapper;
 		}
-
-		$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
