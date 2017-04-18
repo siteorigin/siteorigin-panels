@@ -207,14 +207,6 @@ class SiteOrigin_Panels_Renderer {
 			), $panels_mobile_width );
 		}
 
-		foreach ( $panels_data['widgets'] as $widget_id => $widget ) {
-			if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], ' a', array(
-					'color' => $widget['panels_info']['style']['link_color']
-				) );
-			}
-		}
-
 		// Let other plugins and components filter the CSS object.
 		$css = apply_filters( 'siteorigin_panels_css_object', $css, $panels_data, $post_id, $layout_data );
 

@@ -608,6 +608,12 @@ class SiteOrigin_Panels_Styles {
 							$mobile_width
 						);
 					}
+					
+					if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
+						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a', array(
+							'color' => $widget['panels_info']['style']['link_color']
+						) );
+					}
 				}
 			}
 		}
