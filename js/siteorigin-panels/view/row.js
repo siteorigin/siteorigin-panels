@@ -117,6 +117,7 @@ module.exports = Backbone.View.extend( {
 
 		// Reset everything to have an automatic height
 		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
+		this.$( '.so-cells .resize-handle' ).css( 'height', 0 );
 
 		// We'll tie the values to the row view, to prevent issue with values going to different rows
 		var height = 0;
@@ -134,6 +135,7 @@ module.exports = Backbone.View.extend( {
 
 		// Resize all the grids and cell wrappers
 		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', Math.max( height, 63 ) );
+		this.$( '.so-cells .resize-handle' ).css( 'height', this.$( '.so-cells .cell-wrapper' ).outerHeight() );
 	},
 
 	/**

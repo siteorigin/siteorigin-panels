@@ -96,6 +96,16 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.1 - 14 April 2017 =
+* Added null function for Sydney theme compatibility.
+* Added method for including additional external layout directories.
+* Added fix for old Vantage PB layout compatibility.
+* Fixed Firefox layout issues.
+* Fixed positioning of edit row dropdown.
+* Fixed warning coming from legacy widgets.
+* Added legacy layout rendering for old browsers.
+* Switched to using calc for cell sizing.
+
 = 2.5 - 11 April 2017 =
 * Large code refactoring for improved performance.
 * Added row and widget labelling, and color labels for rows.

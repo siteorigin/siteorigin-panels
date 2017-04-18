@@ -82,7 +82,10 @@ class SiteOrigin_Panels_Renderer {
 
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
-					'width' => 'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )'
+					'width' => array(
+						round( $weight * 100, 4 ) . '%',
+						'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )',
+					)
 				) );
 			}
 
@@ -202,14 +205,6 @@ class SiteOrigin_Panels_Renderer {
 			$css->add_row_css( $post_id, false, ' .panel-grid-cell-mobile-last', array(
 				'margin-bottom' => '0px',
 			), $panels_mobile_width );
-		}
-
-		foreach ( $panels_data['widgets'] as $widget_id => $widget ) {
-			if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], ' a', array(
-					'color' => $widget['panels_info']['style']['link_color']
-				) );
-			}
 		}
 
 		// Let other plugins and components filter the CSS object.
@@ -768,5 +763,9 @@ class SiteOrigin_Panels_Renderer {
 			$widget_style_wrapper
 		);
 
+	}
+	
+	public function front_css_url(){
+		return plugin_dir_url( __FILE__ ) . '../css/front.css';
 	}
 }
