@@ -309,4 +309,16 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		wp_die();
 	}
+	
+	/**
+	 * Enable the directory.
+	 */
+	function action_directory_enable() {
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
+		$user = get_current_user_id();
+		update_user_meta( $user, 'so_panels_directory_enabled', true );
+		wp_die();
+	}
 }
