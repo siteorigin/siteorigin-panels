@@ -59,10 +59,13 @@ class SiteOrigin_Panels {
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
-		SiteOrigin_Panels_Cache_Renderer::single();
 
-		if( apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) ) {
+		if(
+			apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) &&
+			( siteorigin_panels_setting( 'legacy-layout' ) != 'auto' || ! self::is_legacy_browser() )
+		) {
 			// We can use the cached content
+			SiteOrigin_Panels_Cache_Renderer::single();
 			add_filter( 'the_content', array( $this, 'cached_post_content' ), 1 ); // Run early to pretend to be post_content
 			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
 			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
