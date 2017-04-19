@@ -55,7 +55,7 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels::renderer();
 		SiteOrigin_Panels_Styles_Admin::single();
 
-		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
+		if( siteorigin_panels_setting( 'bundled-widgets' ) && ! function_exists( 'origin_widgets_init' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';
 		}
 
