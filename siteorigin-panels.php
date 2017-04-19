@@ -34,6 +34,7 @@ class SiteOrigin_Panels {
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
+		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 
 		if ( is_admin() ) {
 			// Setup all the admin classes
@@ -463,6 +464,17 @@ class SiteOrigin_Panels {
 		}
 
 		return $panels_data;
+	}
+	
+	/**
+	 * Fix class names that have been incorrectly escaped
+	 *
+	 * @param $class
+	 *
+	 * @return mixed
+	 */
+	public function fix_namespace_escaping( $class ){
+		return preg_replace( '/\\\\+/', '\\', $class );
 	}
 
 	public static function front_css_url(){
