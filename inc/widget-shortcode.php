@@ -38,8 +38,9 @@ class SiteOrigin_Panels_Widget_Shortcode {
 			'class' => false,
 			'id' => '',
 		), $attr, 'siteorigin_widget' );
-
+		
 		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
+		$attr[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $attr[ 'class' ] );
 
 		global $wp_widget_factory;
 		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {

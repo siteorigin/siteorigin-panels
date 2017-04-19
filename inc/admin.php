@@ -173,7 +173,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			$panels_data['widgets'],
-			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+			false
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
@@ -668,16 +669,18 @@ class SiteOrigin_Panels_Admin {
 
 		return $a['title'] > $b['title'] ? 1 : - 1;
 	}
-
+	
 	/**
 	 * Process raw widgets that have come from the Page Builder front end.
 	 *
 	 * @param array $widgets An array of widgets from panels_data.
+	 * @param array $old_widgets
 	 * @param bool $escape_classes Should the class names be escaped. Set to false if not saving in post_meta.
+	 * @param bool $force
 	 *
 	 * @return array
 	 */
-	function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = true, $force = false ) {
+	function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -705,6 +708,8 @@ class SiteOrigin_Panels_Admin {
 				$info = array();
 			}
 			unset( $widget['info'] );
+			
+			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 
 			if ( ! empty( $info['raw'] ) || $force ) {
 				if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
@@ -732,7 +737,7 @@ class SiteOrigin_Panels_Admin {
 
 			if( $escape_classes ) {
 				// Escaping for namespaced widgets
-				$info['class'] = preg_replace( '/\\\\([^\\\\])/', '\\\\\\\\$1', $info['class'] );
+				$info[ 'class' ] = preg_replace( '/\\\\([^\\\\])/', '\\\\\\\\$1', $info['class'] );
 			}
 			$widget['panels_info'] = $info;
 		}
@@ -918,11 +923,12 @@ class SiteOrigin_Panels_Admin {
 
 		$request = array_map( 'stripslashes_deep', $_REQUEST );
 
-		$widget   = $request['widget'];
+		$widget_class = $request['widget'];
+		$widget_class = apply_filters( 'siteorigin_panels_widget_class', $widget_class );
 		$instance = ! empty( $request['instance'] ) ? json_decode( $request['instance'], true ) : array();
 
-		$form = $this->render_form( $widget, $instance, $_REQUEST['raw'] == 'true' );
-		$form = apply_filters( 'siteorigin_panels_ajax_widget_form', $form, $widget, $instance );
+		$form = $this->render_form( $widget_class, $instance, $_REQUEST['raw'] == 'true' );
+		$form = apply_filters( 'siteorigin_panels_ajax_widget_form', $form, $widget_class, $instance );
 
 		echo $form;
 		wp_die();
