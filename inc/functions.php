@@ -42,6 +42,17 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 }
 
 /**
+ * Generate the CSS for the page layout.
+ *
+ * @param $post_id
+ * @param $panels_data
+ * @return string
+ */
+function siteorigin_panels_generate_css($post_id, $panels_data = false){
+	return SiteOrigin_Panels::renderer()->generate_css( $post_id, $panels_data );
+}
+
+/**
  * Legacy function to process raw widgets.
  *
  * @param $widgets
