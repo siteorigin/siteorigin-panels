@@ -61,8 +61,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if ( ! empty( $new['panels_data'] ) && ! empty( $new['panels_data']['widgets'] ) ) {
 			$new['panels_data']['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets(
 				$new['panels_data']['widgets'],
-				! empty( $old['panels_data']['widgets'] ) ? $old['panels_data']['widgets'] : false,
-				false
+				! empty( $old['panels_data']['widgets'] ) ? $old['panels_data']['widgets'] : false
 			);
 			foreach( $new['panels_data']['widgets'] as & $widget ) {
 				$widget['panels_info']['class'] = str_replace( '\\', '&#92;', $widget['panels_info']['class'] );

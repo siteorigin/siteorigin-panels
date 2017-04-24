@@ -258,6 +258,7 @@ class SiteOrigin_Panels_Renderer {
 
 		// Add the panel layout wrapper
 		$layout_classes    = apply_filters( 'siteorigin_panels_layout_classes', array( 'panel-layout' ), $post_id, $panels_data );
+		if( is_rtl() ) $layout_classes[] = 'panel-is-rtl';
 		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
 			'id'    => 'pl-' . $post_id,
 			'class' => implode( ' ', $layout_classes ),
@@ -381,11 +382,12 @@ class SiteOrigin_Panels_Renderer {
 		global $wp_widget_factory;
 
 		// Set widget class to $widget
-		$widget = $widget_info['class'];
+		$widget_class = $widget_info['class'];
+		$widget_class = apply_filters( 'siteorigin_panels_widget_class', $widget_class );
 
 		// Load the widget from the widget factory and give themes and plugins a chance to provide their own
-		$the_widget = ! empty( $wp_widget_factory->widgets[ $widget ] ) ? $wp_widget_factory->widgets[ $widget ] : false;
-		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget, $instance );
+		$the_widget = ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ? $wp_widget_factory->widgets[ $widget_class ] : false;
+		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class, $instance );
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
@@ -410,7 +412,7 @@ class SiteOrigin_Panels_Renderer {
 		$id = 'panel-' . $post_id . '-' . $grid_index . '-' . $cell_index . '-' . $widget_index;
 
 		// Filter and sanitize the classes
-		$classes = apply_filters( 'siteorigin_panels_widget_classes', $classes, $widget, $instance, $widget_info );
+		$classes = apply_filters( 'siteorigin_panels_widget_classes', $classes, $widget_class, $instance, $widget_info );
 		$classes = explode( ' ', implode( ' ', $classes ) );
 		$classes = array_filter( $classes );
 		$classes = array_unique( $classes );
@@ -465,7 +467,7 @@ class SiteOrigin_Panels_Renderer {
 			$the_widget->widget( $args, $instance );
 		} else {
 			// This gives themes a chance to display some sort of placeholder for missing widgets
-			echo apply_filters( 'siteorigin_panels_missing_widget', $args['before_widget'] . $args['after_widget'], $widget, $args, $instance );
+			echo apply_filters( 'siteorigin_panels_missing_widget', $args['before_widget'] . $args['after_widget'], $widget_class, $args, $instance );
 		}
 	}
 
@@ -643,8 +645,6 @@ class SiteOrigin_Panels_Renderer {
 			echo $row_style_wrapper;
 		}
 
-		$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
-
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
@@ -766,6 +766,6 @@ class SiteOrigin_Panels_Renderer {
 	}
 	
 	public function front_css_url(){
-		return plugin_dir_url( __FILE__ ) . '../css/front.css';
+		return plugin_dir_url( __FILE__ ) . '../css/front-flex.css';
 	}
 }

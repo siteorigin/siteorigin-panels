@@ -38,8 +38,9 @@ class SiteOrigin_Panels_Widget_Shortcode {
 			'class' => false,
 			'id' => '',
 		), $attr, 'siteorigin_widget' );
-
+		
 		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
+		$attr[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $attr[ 'class' ] );
 
 		global $wp_widget_factory;
 		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {
@@ -84,10 +85,10 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		$shortcode_name = apply_filters( 'siteorigin_panels_cache_shortcode', 'siteorigin_widget', $widget, $instance, $args );
 
 		$shortcode = '[' . $shortcode_name . ' ';
-		$shortcode .= 'class="' . htmlentities( get_class( $widget ) ) . '"]';
+		$shortcode .= 'class="' . htmlentities( preg_replace( '/\\\\+/', '\\\\\\\\', get_class( $widget ) ) ) . '"]';
 		$shortcode .= self::encode_data( $data ) ;
 		$shortcode .= '[/' . $shortcode_name . ']';
-
+		
 		return $shortcode;
 	}
 

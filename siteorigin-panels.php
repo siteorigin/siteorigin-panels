@@ -34,6 +34,7 @@ class SiteOrigin_Panels {
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
+		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 
 		if ( is_admin() ) {
 			// Setup all the admin classes
@@ -54,15 +55,18 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels::renderer();
 		SiteOrigin_Panels_Styles_Admin::single();
 
-		if( siteorigin_panels_setting( 'bundled-widgets' ) ) {
+		if( siteorigin_panels_setting( 'bundled-widgets' ) && ! function_exists( 'origin_widgets_init' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
-		SiteOrigin_Panels_Cache_Renderer::single();
 
-		if( apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) ) {
+		if(
+			apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) &&
+			( siteorigin_panels_setting( 'legacy-layout' ) != 'auto' || ! self::is_legacy_browser() )
+		) {
 			// We can use the cached content
+			SiteOrigin_Panels_Cache_Renderer::single();
 			add_filter( 'the_content', array( $this, 'cached_post_content' ), 1 ); // Run early to pretend to be post_content
 			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
 			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
@@ -460,6 +464,17 @@ class SiteOrigin_Panels {
 		}
 
 		return $panels_data;
+	}
+	
+	/**
+	 * Fix class names that have been incorrectly escaped
+	 *
+	 * @param $class
+	 *
+	 * @return mixed
+	 */
+	public function fix_namespace_escaping( $class ){
+		return preg_replace( '/\\\\+/', '\\', $class );
 	}
 
 	public static function front_css_url(){

@@ -425,7 +425,7 @@ module.exports = Backbone.Model.extend({
 									data = JSON.parse( decodeEntities( dataInput.val( ) ) ),
 									newWidget = data.instance;
 
-								panels_info.class = classMatch[1];
+								panels_info.class = classMatch[1].replace( /\\\\+/g, '\\' );
 								panels_info.raw = false;
 
 								newWidget.panels_info = panels_info;

@@ -134,8 +134,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 						$item['type']       = $type;
 						
 						if( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
-							$screenshot_url = add_query_arg( 'screenshot_preview', 1, $item['preview'] );
-							$item['screenshot'] = 'http://s.wordpress.com/mshots/v1/' . urlencode( $screenshot_url ) . '?w=700';
+							$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $item[ 'preview' ] ) . '?w=700';
 						}
 						
 						$return['items'][]  = $item;
@@ -308,6 +307,18 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$export_data = wp_unslash( $_POST['panels_export_data'] );
 		echo $export_data;
 		
+		wp_die();
+	}
+	
+	/**
+	 * Enable the directory.
+	 */
+	function action_directory_enable() {
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
+		$user = get_current_user_id();
+		update_user_meta( $user, 'so_panels_directory_enabled', true );
 		wp_die();
 	}
 }
