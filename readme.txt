@@ -96,6 +96,13 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.2 - 19 April 2017 =
+* Fixed RTL layouts for new flexbox layout.
+* Renamed front.css to ensure cache busting.
+* Allow cache with auto legacy layout.
+* Use HTTPS for layout directory screenshots.
+* Fixed namespaced widget escaping.
+
 = 2.5.1 - 18 April 2017 =
 * Added null function for Sydney theme compatibility.
 * Added method for including additional external layout directories.

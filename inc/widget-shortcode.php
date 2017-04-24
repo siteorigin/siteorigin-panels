@@ -85,10 +85,10 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		$shortcode_name = apply_filters( 'siteorigin_panels_cache_shortcode', 'siteorigin_widget', $widget, $instance, $args );
 
 		$shortcode = '[' . $shortcode_name . ' ';
-		$shortcode .= 'class="' . htmlentities( get_class( $widget ) ) . '"]';
+		$shortcode .= 'class="' . htmlentities( preg_replace( '/\\\\+/', '\\\\\\\\', get_class( $widget ) ) ) . '"]';
 		$shortcode .= self::encode_data( $data ) ;
 		$shortcode .= '[/' . $shortcode_name . ']';
-
+		
 		return $shortcode;
 	}
 
