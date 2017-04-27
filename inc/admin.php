@@ -86,11 +86,12 @@ class SiteOrigin_Panels_Admin {
 				}
 			}
 		}
-
+		
 		if( self::is_admin() ) {
-			// Setup everything for Page Builder learning
+			// Setup everything for Page Builder learning as long as we're viewing a Page Builder page
 			SiteOrigin_Learn_Dialog::single();
 			add_filter( 'siteorigin_learn_lessons', array( $this, 'filter_learn_lessons' ) );
+			add_filter( 'siteorigin_learn_strings', array( $this, 'filter_learn_strings' ), 99 );
 		}
 	}
 
@@ -1017,6 +1018,27 @@ class SiteOrigin_Panels_Admin {
 		);
 
 		return $lessons;
+	}
+	
+	/**
+	 * Filter the translation strings for SiteOrigin learning dialogs
+	 *
+	 * @param $strings
+	 *
+	 * @return array
+	 */
+	public function filter_learn_strings( $strings ){
+		$strings = array(
+			'watch_video' => __( 'Watch Intro Video', 'siteorigin-panels' ),
+			'loaded_from_vimeo' => __( 'Loaded from Vimeo Servers', 'siteorigin-panels' ),
+			'valid_email' => __( 'Please enter a valid email address.', 'siteorigin-panels' ),
+			
+			'your_name' => __( 'Your Name', 'siteorigin-panels' ),
+			'your_email' => __( 'Your Email', 'siteorigin-panels' ),
+			'sign_up' => __( 'Sign Up', 'siteorigin-panels' ),
+			'close' => __( 'Close', 'siteorigin-panels' ),
+		);
+		return $strings;
 	}
 
 }
