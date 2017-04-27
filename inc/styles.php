@@ -334,7 +334,10 @@ class SiteOrigin_Panels_Styles {
 	 */
 	static function general_style_attributes( $attributes, $style ){
 		if ( ! empty( $style['class'] ) ) {
-			$attributes['class'] = array_merge( $attributes['class'], explode( ' ', $style['class'] ) );
+			if( ! is_array( $style['class'] ) ) {
+				$style['class'] = explode( ' ', $style[ 'class' ] );
+			}
+			$attributes['class'] = array_merge( $attributes['class'], $style['class'] );
 		}
 
 		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
