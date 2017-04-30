@@ -1,199 +1,6 @@
 <?php
 
 /**
- * This widget give you the full Page Builder interface inside a widget. Fully nestable.
- *
- * Class SiteOrigin_Panels_Widgets_Builder
- */
-class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
-	function __construct() {
-		parent::__construct(
-			'siteorigin-panels-builder',
-			// TRANSLATORS: This is the name of a widget
-			__( 'Layout Builder', 'siteorigin-panels' ),
-			array(
-				'description' => __( 'A complete SiteOrigin Page Builder layout as a widget.', 'siteorigin-panels' ),
-				'panels_title' => false,
-			),
-			array(
-			)
-		);
-	}
-
-	function widget($args, $instance) {
-		if( empty($instance['panels_data']) ) return;
-
-		if( is_string( $instance['panels_data'] ) ) {
-			$instance['panels_data'] = json_decode( $instance['panels_data'], true );
-		}
-		if(empty($instance['panels_data']['widgets'])) return;
-
-		if( ! empty( $instance['panels_data']['widgets'] ) ) {
-			foreach( $instance['panels_data']['widgets'] as & $widget ) {
-				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
-			}
-		}
-
-		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
-
-		echo $args['before_widget'];
-		echo SiteOrigin_Panels::renderer()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'], $layout_data );
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) && siteorigin_panels_setting( 'copy-styles' ) ) {
-			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-			$widget_css .= SiteOrigin_Panels::renderer()->generate_css( 'w'.$instance['builder_id'], $instance['panels_data'], $layout_data );
-			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
-			echo "\n\n" .
-			     '<style type="text/css" class="panels-style" data-panels-style-for-post="' . esc_attr( 'w'.$instance['builder_id'] ) . '">' .
-			     $widget_css .
-			     '</style>';
-		}
-		echo $args['after_widget'];
-	}
-
-	function update($new, $old) {
-		$new['builder_id'] = uniqid();
-
-		if( is_string($new['panels_data']) && ! empty( $new['panels_data'] ) ) {
-			// This is still in a string format, so we'll convert it to an array for sanitization
-			$new['panels_data'] = json_decode( $new['panels_data'], true );
-		}
-
-		if ( ! empty( $new['panels_data'] ) && ! empty( $new['panels_data']['widgets'] ) ) {
-			$new['panels_data']['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets(
-				$new['panels_data']['widgets'],
-				! empty( $old['panels_data']['widgets'] ) ? $old['panels_data']['widgets'] : false
-			);
-			foreach( $new['panels_data']['widgets'] as & $widget ) {
-				$widget['panels_info']['class'] = str_replace( '\\', '&#92;', $widget['panels_info']['class'] );
-			}
-		}
-
-		return $new;
-	}
-
-	function form( $instance ){
-		$instance = wp_parse_args($instance, array(
-			'panels_data' => '',
-			'builder_id' => uniqid(),
-		) );
-		$form_id = uniqid();
-
-		if( ! empty( $instance['panels_data']['widgets'] ) ) {
-			foreach( $instance['panels_data']['widgets'] as & $widget ) {
-				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
-			}
-		}
-
-		if( ! is_string( $instance['panels_data'] ) ) {
-			$instance['panels_data'] = json_encode( $instance['panels_data'] );
-		}
-
-		?>
-		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>" data-builder-id="<?php echo esc_attr( $form_id ) ?>" data-type="layout_widget">
-			<p>
-				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></button>
-			</p>
-
-			<input type="hidden" data-panels-filter="json_parse" value="" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" id="<?php echo $this->get_field_id('panels_data') ?>" />
-
-			<script type="text/javascript">
-				( function( panelsData ){
-					// Create the panels_data input
-					document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = JSON.stringify( panelsData );
-				} )( <?php echo $instance['panels_data']; ?> );
-			</script>
-
-			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />
-		</div>
-		<script type="text/javascript">
-			if(
-				typeof jQuery.fn.soPanelsSetupBuilderWidget != 'undefined' &&
-				( ! jQuery('body').hasClass('wp-customizer') || jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>").closest( '.panel-dialog' ).length )
-			) {
-				jQuery( "#siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>").soPanelsSetupBuilderWidget();
-			}
-		</script>
-		<?php
-	}
-
-}
-
-/**
- * Widget for displaying content from a post
- *
- * Class SiteOrigin_Panels_Widgets_PostContent
- */
-class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
-	function __construct() {
-		parent::__construct(
-			'siteorigin-panels-post-content',
-			__( 'Post Content', 'siteorigin-panels' ),
-			array(
-				'description' => __( 'Displays content from the current post.', 'siteorigin-panels' ),
-			)
-		);
-	}
-
-	function widget( $args, $instance ) {
-		if( is_admin() ) return;
-
-		echo $args['before_widget'];
-		$content = apply_filters('siteorigin_panels_widget_post_content', $this->default_content($instance['type']));
-		echo $content;
-		echo $args['after_widget'];
-	}
-
-	/**
-	 * The default content for post types
-	 * @param $type
-	 * @return string
-	 */
-	function default_content($type){
-		global $post;
-		if(empty($post)) return;
-
-		switch($type) {
-			case 'title' :
-				return '<h1 class="entry-title">' . $post->post_title . '</h1>';
-			case 'content' :
-				return '<div class="entry-content">' . wpautop($post->post_content) . '</div>';
-			case 'featured' :
-				if(!has_post_thumbnail()) return '';
-				return '<div class="featured-image">' . get_the_post_thumbnail($post->ID) . '</div>';
-			default :
-				return '';
-		}
-	}
-
-	function update($new, $old){
-		return $new;
-	}
-
-	function form( $instance ) {
-		$instance = wp_parse_args($instance, array(
-			'type' => 'content',
-		));
-
-		$types = apply_filters('siteorigin_panels_widget_post_content_types', array(
-			'' => __('None', 'siteorigin-panels'),
-			'title' => __('Title', 'siteorigin-panels'),
-			'featured' => __('Featured Image', 'siteorigin-panels'),
-		));
-
-		?>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'type' ) ?>"><?php _e( 'Display Content', 'siteorigin-panels' ) ?></label>
-			<select id="<?php echo $this->get_field_id( 'type' ) ?>" name="<?php echo $this->get_field_name( 'type' ) ?>">
-				<?php foreach ($types as $type_id => $title) : ?>
-					<option value="<?php echo esc_attr($type_id) ?>" <?php selected($type_id, $instance['type']) ?>><?php echo esc_html($title) ?></option>
-				<?php endforeach ?>
-			</select>
-		</p>
-		<?php
-	}
-}
-
-/**
  * Display a loop of posts.
  *
  * Class SiteOrigin_Panels_Widgets_PostLoop
@@ -208,7 +15,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			)
 		);
 	}
-
+	
 	/**
 	 * @param array $args
 	 * @param array $instance
@@ -216,7 +23,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	function widget( $args, $instance ) {
 		if( empty( $instance['template'] ) ) return;
 		if( is_admin() ) return;
-
+		
 		static $depth = 0;
 		$depth++;
 		if( $depth > 1 ) {
@@ -225,7 +32,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			echo $args['before_widget'].$args['after_widget'];
 			return;
 		}
-
+		
 		$query_args = $instance;
 		//If Widgets Bundle post selector is available and a posts query has been saved using it.
 		if ( function_exists( 'siteorigin_widget_post_selector_process_query' ) && ! empty( $instance['posts'] ) ) {
@@ -236,7 +43,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			if ( ! empty( $instance['posts'] ) ) {
 				$query_args = wp_parse_args( $instance['posts'], $query_args );
 			}
-
+			
 			switch($query_args['sticky']){
 				case 'ignore' :
 					$query_args['ignore_sticky_posts'] = 1;
@@ -257,11 +64,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 		$query_args = wp_parse_args($query_args['additional'], $query_args);
 		unset($query_args['additional']);
-
+		
 		global $wp_rewrite;
-
+		
 		if( $wp_rewrite->using_permalinks() ) {
-
+			
 			if( get_query_var('paged') ) {
 				// When the widget appears on a sub page.
 				$query_args['paged'] = get_query_var('paged');
@@ -278,11 +85,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			// Get current page number when we're not using permalinks
 			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
 		}
-
+		
 		// Exclude the current post to prevent possible infinite loop
-
+		
 		global $siteorigin_panels_current_post;
-
+		
 		if( !empty($siteorigin_panels_current_post) ){
 			if( !empty( $query_args['post__not_in'] ) ){
 				if( !is_array( $query_args['post__not_in'] ) ){
@@ -295,22 +102,22 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 				$query_args['post__not_in'] = array( $siteorigin_panels_current_post );
 			}
 		}
-
+		
 		if( !empty($query_args['post__in']) && !is_array($query_args['post__in']) ) {
 			$query_args['post__in'] = explode(',', $query_args['post__in']);
 			$query_args['post__in'] = array_map('intval', $query_args['post__in']);
 		}
-
+		
 		// Create the query
 		query_posts( apply_filters( 'siteorigin_panels_postloop_query_args', $query_args ) );
 		echo $args['before_widget'];
-
+		
 		// Filter the title
 		$instance['title'] = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
 		if ( !empty( $instance['title'] ) ) {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
-
+		
 		global $more; $old_more = $more; $more = empty($instance['more']);
 		self::$rendering_loop = true;
 		if(strpos('/'.$instance['template'], '/content') !== false) {
@@ -323,20 +130,20 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			locate_template($instance['template'], true, false);
 		}
 		self::$rendering_loop = false;
-
+		
 		echo $args['after_widget'];
-
+		
 		// Reset everything
 		wp_reset_query();
 		$depth--;
 	}
-
+	
 	static $rendering_loop;
-
+	
 	static function is_rendering_loop() {
 		return self::$rendering_loop;
 	}
-
+	
 	/**
 	 * Update the widget
 	 *
@@ -348,7 +155,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		$new['more'] = !empty( $new['more'] );
 		return $new;
 	}
-
+	
 	/**
 	 * Get all the existing files
 	 *
@@ -356,14 +163,14 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	 */
 	function get_loop_templates(){
 		$templates = array();
-
+		
 		$template_files = array(
 			'loop*.php',
 			'*/loop*.php',
 			'content*.php',
 			'*/content*.php',
 		);
-
+		
 		$template_dirs = array(get_template_directory(), get_stylesheet_directory());
 		$template_dirs = array_unique($template_dirs);
 		foreach($template_dirs  as $dir ){
@@ -373,14 +180,14 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 				}
 			}
 		}
-
+		
 		$templates = array_unique($templates);
 		$templates = apply_filters('siteorigin_panels_postloop_templates', $templates);
 		sort($templates);
-
+		
 		return $templates;
 	}
-
+	
 	/**
 	 * Display the form for the post loop.
 	 *
@@ -391,26 +198,26 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		$instance = wp_parse_args($instance, array(
 			'title' => '',
 			'template' => 'loop.php',
-
+			
 			// Query args
 			'post_type' => 'post',
 			'posts_per_page' => '',
-
+			
 			'order' => 'DESC',
 			'orderby' => 'date',
-
+			
 			'sticky' => '',
-
+			
 			'additional' => '',
 			'more' => false,
 		));
-
+		
 		$templates = $this->get_loop_templates();
 		if( empty($templates) ) {
 			?><p><?php _e("Your theme doesn't have any post loops.", 'siteorigin-panels') ?></p><?php
 			return;
 		}
-
+		
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ) ?>"><?php _e( 'Title', 'siteorigin-panels' ) ?></label>
@@ -431,14 +238,14 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 				<?php endforeach; ?>
 			</select>
 		</p>
-
+		
 		<p>
 			<label for="<?php echo $this->get_field_id('more') ?>"><?php _e('More Link', 'siteorigin-panels') ?></label>
 			<input type="checkbox" class="widefat" id="<?php echo $this->get_field_id( 'more' ) ?>" name="<?php echo $this->get_field_name( 'more' ) ?>" <?php checked( $instance['more'] ) ?> /><br/>
 			<small><?php _e('If the template supports it, cut posts and display the more link.', 'siteorigin-panels') ?></small>
 		</p>
 		<?php
-
+		
 		// If the Widgets Bundle is installed and the post selector is available, use that.
 		// Otherwise revert back to our own form fields.
 		if ( function_exists( 'siteorigin_widget_post_selector_enqueue_admin_scripts' ) ) {
@@ -476,12 +283,12 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<?php endforeach; ?>
 				</select>
 			</p>
-
+			
 			<p>
 				<label for="<?php echo $this->get_field_id('posts_per_page') ?>"><?php _e('Posts Per Page', 'siteorigin-panels') ?></label>
 				<input type="text" class="small-text" id="<?php echo $this->get_field_id( 'posts_per_page' ) ?>" name="<?php echo $this->get_field_name( 'posts_per_page' ) ?>" value="<?php echo esc_attr($instance['posts_per_page']) ?>" />
 			</p>
-
+			
 			<p>
 				<label <?php echo $this->get_field_id('orderby') ?>><?php _e('Order By', 'siteorigin-panels') ?></label>
 				<select id="<?php echo $this->get_field_id( 'orderby' ) ?>" name="<?php echo $this->get_field_name( 'orderby' ) ?>" value="<?php echo esc_attr($instance['orderby']) ?>">
@@ -499,7 +306,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<option value="post__in" <?php selected($instance['orderby'], 'post__in') ?>><?php esc_html_e('Post In Order', 'siteorigin-panels') ?></option>
 				</select>
 			</p>
-
+			
 			<p>
 				<label for="<?php echo $this->get_field_id('order') ?>"><?php _e('Order', 'siteorigin-panels') ?></label>
 				<select id="<?php echo $this->get_field_id( 'order' ) ?>" name="<?php echo $this->get_field_name( 'order' ) ?>" value="<?php echo esc_attr($instance['order']) ?>">
@@ -507,7 +314,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<option value="ASC" <?php selected($instance['order'], 'ASC') ?>><?php esc_html_e('Ascending', 'siteorigin-panels') ?></option>
 				</select>
 			</p>
-
+			
 			<p>
 				<label for="<?php echo $this->get_field_id('sticky') ?>"><?php _e('Sticky Posts', 'siteorigin-panels') ?></label>
 				<select id="<?php echo $this->get_field_id( 'sticky' ) ?>" name="<?php echo $this->get_field_name( 'sticky' ) ?>" value="<?php echo esc_attr($instance['sticky']) ?>">
@@ -517,7 +324,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 					<option value="only" <?php selected($instance['sticky'], 'only') ?>><?php esc_html_e('Only Sticky', 'siteorigin-panels') ?></option>
 				</select>
 			</p>
-
+			
 			<p>
 				<label for="<?php echo $this->get_field_id('additional') ?>"><?php _e('Additional ', 'siteorigin-panels') ?></label>
 				<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'additional' ) ?>" name="<?php echo $this->get_field_name( 'additional' ) ?>" value="<?php echo esc_attr($instance['additional']) ?>" />
@@ -535,13 +342,3 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		}
 	}
 }
-
-/**
- * Register the widgets.
- */
-function siteorigin_panels_basic_widgets_init(){
-	register_widget('SiteOrigin_Panels_Widgets_PostContent');
-	register_widget('SiteOrigin_Panels_Widgets_PostLoop');
-	register_widget('SiteOrigin_Panels_Widgets_Layout');
-}
-add_action('widgets_init', 'siteorigin_panels_basic_widgets_init');
