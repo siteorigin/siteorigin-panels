@@ -146,6 +146,7 @@ class SiteOrigin_Panels {
 				class_exists( 'SiteOrigin_Widget' ) &&
 				class_exists( 'SiteOrigin_Widget_Field_Posts' )
 			) {
+				// In this case, we'll use the special Widgets Bundle version of the Post Loop widget.
 				$filename = 'post-loop-widgets-bundle';
 			}
 			
