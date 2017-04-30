@@ -137,7 +137,7 @@ class SiteOrigin_Panels {
 	 */
 	public static function autoloader( $class ) {
 		$filename = false;
-		if ( strpos( $class, 'SiteOrigin_Panels_Widgets' ) === 0 ) {
+		if ( strpos( $class, 'SiteOrigin_Panels_Widgets_' ) === 0 ) {
 			$filename = str_replace( 'SiteOrigin_Panels_Widgets_', '', $class );
 			$filename = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $filename ) );
 			
