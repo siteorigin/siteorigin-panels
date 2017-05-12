@@ -134,7 +134,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 						$item['type']       = $type;
 						
 						if( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
-							$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $item[ 'preview' ] ) . '?w=700';
+							$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
+							$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700';
 						}
 						
 						$return['items'][]  = $item;

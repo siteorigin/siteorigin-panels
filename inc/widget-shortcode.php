@@ -97,8 +97,10 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	 */
 	static function widget_html( $html, $widget, $args, $instance ){
 		if(
+			empty( $GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] ) ||
 			// Don't try create HTML if there already is some
 			! empty( $html ) ||
+			! is_object( $widget ) ||
 			// Skip for known text based widgets
 			in_array( get_class( $widget ), self::$text_widgets )
 		) {
