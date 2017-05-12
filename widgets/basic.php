@@ -439,11 +439,12 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		</p>
 		<?php
 
-		// If the Widgets Bundle is installed and the post selector field is available, use that.
+		// If the Widgets Bundle is installed and the post selector is available, use that.
 		// Otherwise revert back to our own form fields.
-		if ( class_exists( 'SiteOrigin_Widget_Field_Posts' ) && class_exists( 'SiteOrigin_Widget_PostCarousel_Widget' ) ) {
+		if ( function_exists( 'siteorigin_widget_post_selector_enqueue_admin_scripts' ) ) {
+			siteorigin_widget_post_selector_enqueue_admin_scripts();
 			$value = '';
-			if ( ! empty( $instance['posts'] ) ) {
+			if ( ! empty( $instance['posts'] ) && ! is_array( $instance['posts'] ) ) {
 				$value = $instance['posts'];
 			}
 			else if ( ! empty( $instance['post_type'] ) ) {
@@ -454,33 +455,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 				$value .= '&sticky=' . $instance['sticky'];
 				$value .= '&additional=' . $instance['additional'];
 			}
-			// Field factory needs a `SiteOrigin_Widget` to properly set a field's name and id.
-			$so_pc_widget = new SiteOrigin_Widget_PostCarousel_Widget();
-			$so_pc_widget->id_base = $this->id_base;
-			$so_pc_widget->id = $this->id;
-			$so_pc_widget->number = $this->number;
-			$factory = SiteOrigin_Widget_Field_Factory::single();
-			$posts_field = $factory->create_field(
-				'posts',
-				array( 'type' => 'posts', 'label' => __( 'Posts query', 'so-widgets-bundle' ), 'hide' => true ),
-				$so_pc_widget
-			);
-			?><div class="siteorigin-widget-form-main siteorigin-widget-form sowb-post-selector-form"><?php
-			$posts_field->render( $value, $instance );
-			?></div>
-			<script type="text/javascript">
-				( function($) {
-					if( typeof $.fn.sowSetupForm !== 'undefined' ) {
-						$('.sowb-post-selector-form').sowSetupForm();
-					}
-					else {
-						// Init once admin scripts have been loaded
-						$( document).on('sowadminloaded', function(){
-							$('sowb-post-selector-form').sowSetupForm();
-						});
-					}
-				} )( jQuery );
-			</script><?php
+			siteorigin_widget_post_selector_admin_form_field( $value, $this->get_field_name( 'posts' ) );
 		}
 		else {
 			if ( ! empty( $instance['posts'] ) ) {

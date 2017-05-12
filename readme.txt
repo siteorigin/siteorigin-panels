@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.3 - 9 May 2017 =
+* Added legacy function wrapper for siteorigin_panels_generate_css
+* Added more cache render checks
+* Handle translation of Learn submodule strings
+* Added screenshot argument to preview URL
+
 = 2.5.2 - 19 April 2017 =
 * Fixed RTL layouts for new flexbox layout.
 * Renamed front.css to ensure cache busting.
