@@ -526,7 +526,8 @@ class SiteOrigin_Panels_Styles {
 			}
 
 			// Add in flexbox alignment to the main row element
-			if ( ! empty( $row['style']['cell_alignment'] ) ) {
+			$flexbox_align_styles = array('auto','flex-start', 'center', 'flex-end', 'stretch');
+			if ( ! empty( $row['style']['cell_alignment'] ) && in_array($row['style']['cell_alignment'], $flexbox_align_styles ) ) {
 				$css->add_row_css(
 					$post_id,
 					$ri,
