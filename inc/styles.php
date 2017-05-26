@@ -450,7 +450,7 @@ class SiteOrigin_Panels_Styles {
 			}
 		}
 		if ( ! empty( $css_key ) && ! empty( $style[ $css_key ] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ $css_key ], $matches );
+			preg_match_all( '/^([A-Za-z0-9\-]+?):(.+?);?$/m', $style[ $css_key ], $matches );
 
 			if ( ! empty( $matches[0] ) ) {
 				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
@@ -476,7 +476,7 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if ( ! empty( $style[ 'mobile_css' ] ) ) {
-			preg_match_all( '/^(.+?):(.+?);?$/m', $style[ 'mobile_css' ], $matches );
+			preg_match_all( '/^([A-Za-z0-9\-]+?):(.+?);?$/m', $style[ 'mobile_css' ], $matches );
 
 			if ( ! empty( $matches[0] ) ) {
 				for ( $i = 0; $i < count( $matches[0] ); $i ++ ) {
