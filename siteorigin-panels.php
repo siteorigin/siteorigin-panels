@@ -139,17 +139,8 @@ class SiteOrigin_Panels {
 		$filename = false;
 		if ( strpos( $class, 'SiteOrigin_Panels_Widgets_' ) === 0 ) {
 			$filename = str_replace( 'SiteOrigin_Panels_Widgets_', '', $class );
+			$filename = str_replace( '_', '-', $filename );
 			$filename = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $filename ) );
-			
-			if(
-				$filename == 'post-loop' &&
-				class_exists( 'SiteOrigin_Widget' ) &&
-				class_exists( 'SiteOrigin_Widget_Field_Posts' )
-			) {
-				// In this case, we'll use the special Widgets Bundle version of the Post Loop widget.
-				$filename = 'post-loop-widgets-bundle';
-			}
-			
 			$filename = plugin_dir_path( __FILE__ ) . 'inc/widgets/' . $filename . '.php';
 		}
 		else if ( strpos( $class, 'SiteOrigin_Panels_' ) === 0 ) {

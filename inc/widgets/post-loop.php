@@ -6,6 +6,9 @@
  * Class SiteOrigin_Panels_Widgets_PostLoop
  */
 class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
+	
+	static $rendering_loop;
+	
 	function __construct() {
 		parent::__construct(
 			'siteorigin-panels-postloop',
@@ -17,7 +20,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	}
 	
 	static function is_rendering_loop() {
-		return SiteOrigin_Panels_Widgets_PostLoopHelper::$rendering_loop;
+		return self::$rendering_loop;
 	}
 	
 	/**
@@ -27,9 +30,15 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	 * @param array $old
 	 * @return array
 	 */
-	function update($new, $old){
-		$new['more'] = !empty( $new['more'] );
-		return $new;
+	function update( $new, $old ){
+		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
+			$helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $this->get_loop_templates() );
+			return $helper->update( $new, $old );
+		}
+		else {
+			$new['more'] = !empty( $new['more'] );
+			return $new;
+		}
 	}
 	
 	/**
@@ -37,7 +46,124 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	 * @param array $instance
 	 */
 	function widget( $args, $instance ) {
-		SiteOrigin_Panels_Widgets_PostLoopHelper::widget( $args, $instance, $this );
+		if( empty( $instance['template'] ) ) return;
+		if( is_admin() ) return;
+		
+		static $depth = 0;
+		$depth++;
+		if( $depth > 1 ) {
+			// Because of infinite loops, don't render this post loop if its inside another
+			$depth--;
+			echo $args['before_widget'].$args['after_widget'];
+			return;
+		}
+		
+		$query_args = $instance;
+		//If Widgets Bundle post selector is available and a posts query has been saved using it.
+		if ( function_exists( 'siteorigin_widget_post_selector_process_query' ) && ! empty( $instance['posts'] ) ) {
+			$query_args = siteorigin_widget_post_selector_process_query($instance['posts']);
+			$query_args['additional'] = empty($instance['additional']) ? array() : $instance['additional'];
+		}
+		else {
+			if ( ! empty( $instance['posts'] ) ) {
+				// This is using the new WB 1.9 posts field
+				$query_args = wp_parse_args( $instance['posts'], $query_args );
+			}
+			
+			if( ! empty( $query_args['sticky'] ) ) {
+				switch( $query_args['sticky'] ){
+					case 'ignore' :
+						$query_args['ignore_sticky_posts'] = 1;
+						break;
+					case 'only' :
+						$query_args['post__in'] = get_option( 'sticky_posts' );
+						break;
+					case 'exclude' :
+						$query_args['post__not_in'] = get_option( 'sticky_posts' );
+						break;
+				}
+			}
+			unset($query_args['template']);
+			unset($query_args['title']);
+			unset($query_args['sticky']);
+			if (empty($query_args['additional'])) {
+				$query_args['additional'] = array();
+			}
+		}
+		$query_args = wp_parse_args($query_args['additional'], $query_args);
+		unset($query_args['additional']);
+		
+		global $wp_rewrite;
+		
+		if( $wp_rewrite->using_permalinks() ) {
+			
+			if( get_query_var('paged') ) {
+				// When the widget appears on a sub page.
+				$query_args['paged'] = get_query_var('paged');
+			}
+			elseif( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
+				// When the widget appears on the home page.
+				preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
+				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
+				else $query_args['paged'] = 1;
+			}
+			else $query_args['paged'] = 1;
+		}
+		else {
+			// Get current page number when we're not using permalinks
+			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+		}
+		
+		// Exclude the current post to prevent possible infinite loop
+		
+		global $siteorigin_panels_current_post;
+		
+		if( !empty($siteorigin_panels_current_post) ){
+			if( !empty( $query_args['post__not_in'] ) ){
+				if( !is_array( $query_args['post__not_in'] ) ){
+					$query_args['post__not_in'] = explode( ',', $query_args['post__not_in'] );
+					$query_args['post__not_in'] = array_map( 'intval', $query_args['post__not_in'] );
+				}
+				$query_args['post__not_in'][] = $siteorigin_panels_current_post;
+			}
+			else {
+				$query_args['post__not_in'] = array( $siteorigin_panels_current_post );
+			}
+		}
+		
+		if( !empty($query_args['post__in']) && !is_array($query_args['post__in']) ) {
+			$query_args['post__in'] = explode(',', $query_args['post__in']);
+			$query_args['post__in'] = array_map('intval', $query_args['post__in']);
+		}
+		
+		// Create the query
+		query_posts( apply_filters( 'siteorigin_panels_postloop_query_args', $query_args ) );
+		echo $args['before_widget'];
+		
+		// Filter the title
+		$instance['title'] = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
+		if ( !empty( $instance['title'] ) ) {
+			echo $args['before_title'] . $instance['title'] . $args['after_title'];
+		}
+		
+		global $more; $old_more = $more; $more = empty($instance['more']);
+		self::$rendering_loop = true;
+		if(strpos('/'.$instance['template'], '/content') !== false) {
+			while( have_posts() ) {
+				the_post();
+				locate_template($instance['template'], true, false);
+			}
+		}
+		else {
+			locate_template($instance['template'], true, false);
+		}
+		self::$rendering_loop = false;
+		
+		echo $args['after_widget'];
+		
+		// Reset everything
+		wp_reset_query();
+		$depth--;
 	}
 	
 	/**
@@ -47,76 +173,71 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	 * @return string|void
 	 */
 	function form( $instance ) {
-		$instance = wp_parse_args($instance, array(
-			'title' => '',
-			'template' => 'loop.php',
-			
-			// Query args
-			'post_type' => 'post',
-			'posts_per_page' => '',
-			
-			'order' => 'DESC',
-			'orderby' => 'date',
-			
-			'sticky' => '',
-			
-			'additional' => '',
-			'more' => false,
-		));
-		
-		$templates = SiteOrigin_Panels_Widgets_PostLoopHelper::get_loop_templates();
+		$templates = $this->get_loop_templates();
 		if( empty($templates) ) {
 			?><p><?php _e("Your theme doesn't have any post loops.", 'siteorigin-panels') ?></p><?php
 			return;
 		}
 		
-		?>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ) ?>"><?php _e( 'Title', 'siteorigin-panels' ) ?></label>
-			<input type="text" class="widefat" name="<?php echo $this->get_field_name( 'title' ) ?>" id="<?php echo $this->get_field_id( 'title' ) ?>" value="<?php echo esc_attr( $instance['title'] ) ?>">
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('template') ?>"><?php _e('Template', 'siteorigin-panels') ?></label>
-			<select id="<?php echo $this->get_field_id( 'template' ) ?>" name="<?php echo $this->get_field_name( 'template' ) ?>">
-				<?php foreach($templates as $template) : ?>
-					<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
-						<?php
-						$headers = get_file_data( locate_template($template), array(
-							'loop_name' => 'Loop Name',
-						) );
-						echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
-						?>
-					</option>
-				<?php endforeach; ?>
-			</select>
-		</p>
-		
-		<p>
-			<label for="<?php echo $this->get_field_id('more') ?>"><?php _e('More Link', 'siteorigin-panels') ?></label>
-			<input type="checkbox" class="widefat" id="<?php echo $this->get_field_id( 'more' ) ?>" name="<?php echo $this->get_field_name( 'more' ) ?>" <?php checked( $instance['more'] ) ?> /><br/>
-			<small><?php _e('If the template supports it, cut posts and display the more link.', 'siteorigin-panels') ?></small>
-		</p>
-		<?php
-		
 		// If the Widgets Bundle is installed and the post selector is available, use that.
 		// Otherwise revert back to our own form fields.
-		if ( function_exists( 'siteorigin_widget_post_selector_enqueue_admin_scripts' ) ) {
-			siteorigin_widget_post_selector_enqueue_admin_scripts();
-			$value = '';
-			if ( ! empty( $instance['posts'] ) && ! is_array( $instance['posts'] ) ) {
-				$value = $instance['posts'];
-			}
-			else if ( ! empty( $instance['post_type'] ) ) {
-				$value .= 'post_type=' . $instance['post_type'];
-				$value .= '&posts_per_page=' . $instance['posts_per_page'];
-				$value .= '&order=' . $instance['order'];
-				$value .= '&orderby=' . $instance['orderby'];
-				$value .= '&sticky=' . $instance['sticky'];
-				$value .= '&additional=' . $instance['additional'];
-			}
-			siteorigin_widget_post_selector_admin_form_field( $value, $this->get_field_name( 'posts' ) );
+		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
+			$helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
+			
+			ob_start();
+			$helper->form( $instance );
+			$form_html = ob_get_clean();
+			
+			$form_html = preg_replace_callback( '/name="widget-siteorigin-panels-postloop-helper[^\"]+\[(.*?)\]"/', array( $this, 'fix_helper_form_callback' ), $form_html );
+			
+			echo $form_html;
 		}
 		else {
+			$instance = wp_parse_args( $instance, array(
+				'title' => '',
+				'template' => 'loop.php',
+				
+				// Query args
+				'post_type' => 'post',
+				'posts_per_page' => '',
+				
+				'order' => 'DESC',
+				'orderby' => 'date',
+				
+				'sticky' => '',
+				
+				'additional' => '',
+				'more' => false,
+			) );
+			
+			?>
+			<p>
+				<label for="<?php echo $this->get_field_id( 'title' ) ?>"><?php _e( 'Title', 'siteorigin-panels' ) ?></label>
+				<input type="text" class="widefat" name="<?php echo $this->get_field_name( 'title' ) ?>" id="<?php echo $this->get_field_id( 'title' ) ?>" value="<?php echo esc_attr( $instance['title'] ) ?>">
+			</p>
+			<p>
+				<label for="<?php echo $this->get_field_id('template') ?>"><?php _e('Template', 'siteorigin-panels') ?></label>
+				<select id="<?php echo $this->get_field_id( 'template' ) ?>" name="<?php echo $this->get_field_name( 'template' ) ?>">
+					<?php foreach($templates as $template) : ?>
+						<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
+							<?php
+							$headers = get_file_data( locate_template($template), array(
+								'loop_name' => 'Loop Name',
+							) );
+							echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
+							?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</p>
+			
+			<p>
+				<label for="<?php echo $this->get_field_id('more') ?>"><?php _e('More Link', 'siteorigin-panels') ?></label>
+				<input type="checkbox" class="widefat" id="<?php echo $this->get_field_id( 'more' ) ?>" name="<?php echo $this->get_field_name( 'more' ) ?>" <?php checked( $instance['more'] ) ?> /><br/>
+				<small><?php _e('If the template supports it, cut posts and display the more link.', 'siteorigin-panels') ?></small>
+			</p>
+			<?php
+			
 			if ( ! empty( $instance['posts'] ) ) {
 				$instance = wp_parse_args( $instance['posts'] , $instance );
 				unset( $instance['posts'] );
@@ -192,5 +313,41 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			</p>
 			<?php
 		}
+	}
+	
+	/**
+	 * Get all the existing files
+	 *
+	 * @return array
+	 */
+	function get_loop_templates(){
+		$templates = array();
+		
+		$template_files = array(
+			'loop*.php',
+			'*/loop*.php',
+			'content*.php',
+			'*/content*.php',
+		);
+		
+		$template_dirs = array( get_template_directory(), get_stylesheet_directory() );
+		$template_dirs = array_unique( $template_dirs );
+		foreach( $template_dirs  as $dir ){
+			foreach( $template_files as $template_file ) {
+				foreach( (array) glob($dir.'/'.$template_file) as $file ) {
+					if( file_exists( $file ) ) $templates[] = str_replace($dir.'/', '', $file);
+				}
+			}
+		}
+		
+		$templates = array_unique( $templates );
+		$templates = apply_filters('siteorigin_panels_postloop_templates', $templates);
+		sort( $templates );
+		
+		return $templates;
+	}
+	
+	function fix_helper_form_callback( $match ){
+		return 'name="' . $this->get_field_name( $match[1] ) . '"';
 	}
 }
