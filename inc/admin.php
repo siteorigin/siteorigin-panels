@@ -887,7 +887,12 @@ class SiteOrigin_Panels_Admin {
 			'WP_Widget_Media_Video',
 			'WP_Widget_Text',
 		);
-		return in_array( get_class( $widget ), $js_widgets );
+		
+		$is_js_widget = in_array( get_class( $widget ), $js_widgets ) &&
+						// Need to check this for `WP_Widget_Text` which was not a JS widget before 4.8
+		                method_exists( $widget, 'render_control_template_scripts' );
+		
+		return $is_js_widget;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
