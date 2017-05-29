@@ -6,7 +6,24 @@
  * Class SiteOrigin_Panels_Widgets_PostLoop_Helper
  */
 class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
+	
+	/**
+	 * SiteOrigin_Panels_Widgets_PostLoop_Helper constructor.
+	 *
+	 * @param array $templates
+	 */
 	function __construct( $templates ) {
+		
+		$template_options = array();
+		if( ! empty( $templates ) ) {
+			foreach( $templates as $template ) {
+				$headers = get_file_data( locate_template( $template ), array(
+					'loop_name' => 'Loop Name',
+				) );
+				$template_options[ $template ] = esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
+			}
+		}
+		
 		parent::__construct(
 			'siteorigin-panels-postloop-helper',
 			__( 'Post Loop', 'siteorigin-panels' ),
@@ -22,7 +39,7 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 				'template' => array(
 					'type' => 'select',
 					'label' => __( 'Template', 'siteorigin-panels' ),
-					'options' => $templates,
+					'options' => $template_options,
 					'default' => 'loop.php',
 				),
 				'more' => array(
