@@ -402,7 +402,8 @@ class SiteOrigin_Panels_Admin {
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 			) );
-
+			
+			$js_widgets = array();
 			if ( $screen->base != 'widgets' ) {
 				// Render all the widget forms. A lot of widgets use this as a chance to enqueue their scripts
 				$original_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null; // Make sure widgets don't change the global post.
@@ -417,12 +418,20 @@ class SiteOrigin_Panels_Admin {
 					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
 					ob_clean();
+					
+					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
+					if ( $this->is_js_widget( $widget_obj ) ) {
+						$js_widgets[] = $widget_obj;
+					}
 				}
 				$GLOBALS['post'] = $original_post;
 			}
 
 			// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
 			if ( $screen->base != 'widgets' && $screen->base != 'customize' ) {
+				foreach ( $js_widgets as $js_widget ) {
+					$js_widget->render_control_template_scripts();
+				}
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
 			}
