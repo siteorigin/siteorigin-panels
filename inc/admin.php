@@ -857,15 +857,15 @@ class SiteOrigin_Panels_Admin {
 
 		ob_start();
 		if ( $this->is_js_widget( $the_widget ) ) {
-		?><div class="widget-content"><?php
+			?><div class="widget-content"><?php
 		}
 		$return = $the_widget->form( $instance );
 		do_action_ref_array( 'in_widget_form', array( &$the_widget, &$return, $instance ) );
 		if ( $this->is_js_widget( $the_widget ) ) {
-		?>
-		</div>
-		<input type="hidden" name="id_base" class="id_base" value="<?php echo esc_attr( $the_widget->id_base ); ?>" />
-		<?php
+			?>
+			</div>
+			<input type="hidden" name="id_base" class="id_base" value="<?php echo esc_attr( $the_widget->id_base ); ?>" />
+			<?php
 		}
 		$form = ob_get_clean();
 
