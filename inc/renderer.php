@@ -447,8 +447,17 @@ class SiteOrigin_Panels_Renderer {
 			'widget_id'     => 'widget-' . $grid_index . '-' . $cell_index . '-' . $widget_index
 		);
 
+		// Allow plugins/themes to filter widget title
+		if ( !empty( $instance['title'] ) && !empty( $the_widget ) && !empty( $the_widget->id_base ) ) {
+			$args['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $the_widget->id_base );
+		}
+
 		// Let other themes and plugins change the arguments that go to the widget class.
 		$args = apply_filters( 'siteorigin_panels_widget_args', $args );
+
+		if( isset( $args['title'] ) ) {
+			$instance['title'] = $args['title'];
+		}
 
 		// If there is a style wrapper, add it.
 		if ( ! empty( $style_wrapper ) ) {
