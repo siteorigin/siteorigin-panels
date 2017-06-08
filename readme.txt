@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.5.4 - 9 May 2017 =
+= 2.5.4 - 1 June 2017 =
 * Compatibility with WordPress 4.8 widgets.
 * Refactored core widgets.
 * Compatibility with Widgets Bundle 1.9 posts selector.
