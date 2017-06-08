@@ -49,12 +49,14 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'load-appearance_page_so_panels_home_page', array( $this, 'add_help_tab' ), 12 );
 
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'js_templates' ) );
+		add_action( 'admin_footer-post.php', array( $this, 'js_widget_templates' ) );
+		add_action( 'admin_footer-post-new.php', array( $this, 'js_widget_templates' ) );
 
 		// Register all the admin actions
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
 		add_action( 'wp_ajax_so_panels_widget_form', array( $this, 'action_widget_form' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-		
+
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
@@ -86,7 +88,7 @@ class SiteOrigin_Panels_Admin {
 				}
 			}
 		}
-		
+
 		if( self::is_admin() ) {
 			// Setup everything for Page Builder learning as long as we're viewing a Page Builder page
 			SiteOrigin_Learn_Dialog::single();
@@ -400,21 +402,36 @@ class SiteOrigin_Panels_Admin {
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 			) );
-
+			
+			$js_widgets = array();
 			if ( $screen->base != 'widgets' ) {
 				// Render all the widget forms. A lot of widgets use this as a chance to enqueue their scripts
 				$original_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null; // Make sure widgets don't change the global post.
-				foreach ( $GLOBALS['wp_widget_factory']->widgets as $class => $widget_obj ) {
+				global $wp_widget_factory;
+				foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
 					ob_start();
 					$return = $widget_obj->form( array() );
+					// These are the new widgets in WP 4.8 which are largely JS based. They only enqueue their own
+					// scripts on the 'widgets' screen.
+					if ( method_exists( $widget_obj, 'enqueue_admin_scripts' ) ) {
+						$widget_obj->enqueue_admin_scripts();
+					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
 					ob_clean();
+					
+					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
+					if ( $this->is_js_widget( $widget_obj ) ) {
+						$js_widgets[] = $widget_obj;
+					}
 				}
 				$GLOBALS['post'] = $original_post;
 			}
 
 			// This gives panels a chance to enqueue scripts too, without having to check the screen ID.
 			if ( $screen->base != 'widgets' && $screen->base != 'customize' ) {
+				foreach ( $js_widgets as $js_widget ) {
+					$js_widget->render_control_template_scripts();
+				}
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
 			}
@@ -671,7 +688,7 @@ class SiteOrigin_Panels_Admin {
 
 		return $a['title'] > $b['title'] ? 1 : - 1;
 	}
-	
+
 	/**
 	 * Process raw widgets that have come from the Page Builder front end.
 	 *
@@ -710,7 +727,7 @@ class SiteOrigin_Panels_Admin {
 				$info = array();
 			}
 			unset( $widget['info'] );
-			
+
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 
 			if ( ! empty( $info['raw'] ) || $force ) {
@@ -752,6 +769,23 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function js_templates() {
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
+	}
+
+
+	/**
+	 * Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
+	 */
+	function js_widget_templates() {
+		$screen = get_current_screen();
+
+		if ( $screen->base != 'widgets' ) {
+			global $wp_widget_factory;
+			foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+				if ( method_exists( $widget_obj, 'render_control_template_scripts' ) ) {
+					$widget_obj->render_control_template_scripts();
+				}
+			}
+		}
 	}
 
 	/**
@@ -831,8 +865,17 @@ class SiteOrigin_Panels_Admin {
 		$the_widget->number = $widget_number;
 
 		ob_start();
+		if ( $this->is_js_widget( $the_widget ) ) {
+			?><div class="widget-content"><?php
+		}
 		$return = $the_widget->form( $instance );
 		do_action_ref_array( 'in_widget_form', array( &$the_widget, &$return, $instance ) );
+		if ( $this->is_js_widget( $the_widget ) ) {
+			?>
+			</div>
+			<input type="hidden" name="id_base" class="id_base" value="<?php echo esc_attr( $the_widget->id_base ); ?>" />
+			<?php
+		}
 		$form = ob_get_clean();
 
 		// Convert the widget field naming into ones that Page Builder uses
@@ -844,6 +887,21 @@ class SiteOrigin_Panels_Admin {
 
 		// Add all the information fields
 		return $form;
+	}
+
+	function is_js_widget( $widget ) {
+		$js_widgets = array(
+			'WP_Widget_Media_Audio',
+			'WP_Widget_Media_Image',
+			'WP_Widget_Media_Video',
+			'WP_Widget_Text',
+		);
+		
+		$is_js_widget = in_array( get_class( $widget ), $js_widgets ) &&
+						// Need to check this for `WP_Widget_Text` which was not a JS widget before 4.8
+		                method_exists( $widget, 'render_control_template_scripts' );
+		
+		return $is_js_widget;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -921,7 +979,7 @@ class SiteOrigin_Panels_Admin {
 
 		exit();
 	}
-	
+
 	/**
 	 * Add a column that indicates if a column is powered by Page Builder
 	 *
@@ -986,7 +1044,7 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	public function get_layout_directories(){
-	
+
 	}
 
 	/**
@@ -1006,7 +1064,7 @@ class SiteOrigin_Panels_Admin {
 								  __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
 			'form_description' => __( "We'll email you a confirmation. You can unsubscribe at any time.", 'siteorigin-panels' ),
 		);
-		
+
 		$lessons['page-builder-animations'] = array(
 			'title'            => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
 			'video'            => '212380210',
@@ -1019,7 +1077,7 @@ class SiteOrigin_Panels_Admin {
 
 		return $lessons;
 	}
-	
+
 	/**
 	 * Filter the translation strings for SiteOrigin learning dialogs
 	 *
@@ -1032,7 +1090,7 @@ class SiteOrigin_Panels_Admin {
 			'watch_video' => __( 'Watch Intro Video', 'siteorigin-panels' ),
 			'loaded_from_vimeo' => __( 'Loaded from Vimeo Servers', 'siteorigin-panels' ),
 			'valid_email' => __( 'Please enter a valid email address.', 'siteorigin-panels' ),
-			
+
 			'your_name' => __( 'Your Name', 'siteorigin-panels' ),
 			'your_email' => __( 'Your Email', 'siteorigin-panels' ),
 			'sign_up' => __( 'Sign Up', 'siteorigin-panels' ),

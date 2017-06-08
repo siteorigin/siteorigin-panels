@@ -1,4 +1,5 @@
 var panels = window.panels, $ = jQuery;
+var jsWidget = require( '../view/widgets/js-widget' );
 
 module.exports = panels.view.dialog.extend( {
 
@@ -156,7 +157,6 @@ module.exports = panels.view.dialog.extend( {
 			return;
 		}
 
-		var thisView = this;
 		this.$( '.so-content' ).addClass( 'so-panels-loading' );
 
 		var data = {
@@ -171,22 +171,31 @@ module.exports = panels.view.dialog.extend( {
 			data,
 			function ( result ) {
 				// Add in the CID of the widget model
-				var html = result.replace( /{\$id}/g, thisView.model.cid );
+				var html = result.replace( /{\$id}/g, this.model.cid );
 
 				// Load this content into the form
-				thisView.$( '.so-content' )
+				var $soContent = this.$( '.so-content' );
+				$soContent
 					.removeClass( 'so-panels-loading' )
 					.html( html );
 
 				// Trigger all the necessary events
-				thisView.trigger( 'form_loaded', thisView );
+				this.trigger( 'form_loaded', this );
 
 				// For legacy compatibility, trigger a panelsopen event
-				thisView.$( '.panel-dialog' ).trigger( 'panelsopen' );
+				this.$( '.panel-dialog' ).trigger( 'panelsopen' );
 
 				// If the main dialog is closed from this point on, save the widget content
-				thisView.on( 'close_dialog', thisView.updateModel, thisView );
-			},
+				this.on( 'close_dialog', this.updateModel, this );
+
+				var widgetContent = $soContent.find( '> .widget-content' );
+				// If there's a widget content wrapper, this is one of the new widgets in WP 4.8 which need some special
+				// handling in JS.
+				if ( widgetContent.length > 0 ) {
+					jsWidget.addWidget( $soContent, this.model.widget_id );
+				}
+
+			}.bind( this ),
 			'html'
 		);
 	},
