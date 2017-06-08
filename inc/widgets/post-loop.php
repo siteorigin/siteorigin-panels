@@ -9,6 +9,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	
 	static $rendering_loop;
 	
+	/**
+	 * @var SiteOrigin_Panels_Widgets_PostLoop_Helper
+	 */
+	private $helper;
+	
 	function __construct() {
 		parent::__construct(
 			'siteorigin-panels-postloop',
@@ -32,7 +37,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 	 */
 	function update( $new, $old ){
 		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
-			$helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $this->get_loop_templates() );
+			$helper = $this->get_helper_widget( $this->get_loop_templates() );
 			return $helper->update( $new, $old );
 		}
 		else {
@@ -182,15 +187,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		// If the Widgets Bundle is installed and the post selector is available, use that.
 		// Otherwise revert back to our own form fields.
 		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
-			$helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
-			
-			ob_start();
+			$helper = $this->get_helper_widget( $templates );
 			$helper->form( $instance );
-			$form_html = ob_get_clean();
-			
-			$form_html = preg_replace_callback( '/name="widget-siteorigin-panels-postloop-helper[^\"]+\[(.*?)\]"/', array( $this, 'fix_helper_form_callback' ), $form_html );
-			
-			echo $form_html;
 		}
 		else {
 			$instance = wp_parse_args( $instance, array(
@@ -347,7 +345,25 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		return $templates;
 	}
 	
-	function fix_helper_form_callback( $match ){
-		return 'name="' . $this->get_field_name( $match[1] ) . '"';
+	
+	/**
+	 * Get the helper widget based on the Widgets Bundle's classes.
+	 *
+	 * @param $templates array Blog loop templates.
+	 *
+	 * @return mixed
+	 */
+	private function get_helper_widget( $templates ) {
+		if ( empty( $this->helper ) &&
+		     class_exists( 'SiteOrigin_Widget' ) &&
+		     class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
+			$this->helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
+			// These ensure the form fields name attributes are correct.
+			$this->helper->id_base = $this->id_base;
+			$this->helper->id = $this->id;
+			$this->helper->number = $this->number;
+		}
+		
+		return $this->helper;
 	}
 }

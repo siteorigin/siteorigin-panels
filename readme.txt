@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.5 - 8 June 2017 =
+* Ensure form fields name attributes are correct when using the Widgets Bundle post loop helper.
+* Prevent display of unimplemented preview button for Post Loop widget.
+
 = 2.5.4 - 1 June 2017 =
 * Compatibility with WordPress 4.8 widgets.
 * Refactored core widgets.
