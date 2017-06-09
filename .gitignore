@@ -1,4 +1,5 @@
-lang/siteorigin-panels.mo
+lang/*
+languages/*
 .DS_Store
 *.min.js
 node_modules/
