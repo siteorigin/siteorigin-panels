@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.6 - 13 June 2017 =
+* Pass empty post id to 'siteorigin_panels_data' filter to avoid potential fatal errors.
+* Remove unnecessary output of JS widget templates.
+
 = 2.5.5 - 8 June 2017 =
 * Ensure form fields name attributes are correct when using the Widgets Bundle post loop helper.
 * Prevent display of unimplemented preview button for Post Loop widget.
