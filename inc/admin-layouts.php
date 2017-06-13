@@ -269,7 +269,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
 		}
 		
-		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
 		
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 		

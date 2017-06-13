@@ -49,8 +49,6 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'load-appearance_page_so_panels_home_page', array( $this, 'add_help_tab' ), 12 );
 
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'js_templates' ) );
-		add_action( 'admin_footer-post.php', array( $this, 'js_widget_templates' ) );
-		add_action( 'admin_footer-post-new.php', array( $this, 'js_widget_templates' ) );
 
 		// Register all the admin actions
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
@@ -769,23 +767,6 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function js_templates() {
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
-	}
-
-
-	/**
-	 * Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
-	 */
-	function js_widget_templates() {
-		$screen = get_current_screen();
-
-		if ( $screen->base != 'widgets' ) {
-			global $wp_widget_factory;
-			foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
-				if ( method_exists( $widget_obj, 'render_control_template_scripts' ) ) {
-					$widget_obj->render_control_template_scripts();
-				}
-			}
-		}
 	}
 
 	/**
