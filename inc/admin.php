@@ -118,6 +118,10 @@ class SiteOrigin_Panels_Admin {
 		unset( $links['edit'] );
 		$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __( 'Support Forum', 'siteorigin-panels' ) . '</a>';
 		$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __( 'Newsletter', 'siteorigin-panels' ) . '</a>';
+		
+		if( SiteOrigin_Panels::display_premium_teaser() ) {
+			$links[] = '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" style="color: #3db634" target="_blank">' . __('Addons', 'siteorigin-panels') . '</a>';
+		}
 
 		return $links;
 	}

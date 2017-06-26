@@ -517,6 +517,31 @@ class SiteOrigin_Panels {
 	public function strip_before_js(){
 		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
+	
+	/**
+	 * Should we display premium addon messages
+	 *
+	 * @return bool
+	 */
+	public static function display_premium_teaser(){
+		return siteorigin_panels_setting( 'display-teaser' ) &&
+			   apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
+			   ! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+	}
+	
+	/**
+	 * Get the premium upgrade URL
+	 *
+	 * @return string
+	 */
+	public static function premium_url() {
+		$ref = apply_filters( 'siteorigin_premium_affiliate_id', '' );
+		$url = 'https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels';
+		if( $ref ) {
+			$url = add_query_arg( 'ref', urlencode( $ref ), $url );
+		}
+		return $url;
+	}
 }
 
 SiteOrigin_Panels::single();

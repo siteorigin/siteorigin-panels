@@ -260,13 +260,23 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Sidebars Emulator', 'siteorigin-panels' ),
 			'description' => __( 'Page Builder will create an emulated sidebar, that contains all widgets in the page.', 'siteorigin-panels' ),
 		);
+		
+		$fields['general']['fields']['display-teaser'] = array(
+			'type' => 'checkbox',
+			'label' => __('Upgrade Teaser', 'siteorigin-panels'),
+			'description' => sprintf(
+				__('Display the %sSiteOrigin Premium%s upgrade teaser in the Page Builder toolbar.', 'siteorigin-panels'),
+				'<a href="siteorigin.com/downloads/premium/" target="_blank">',
+				'</a>'
+			)
+		);
 
 		$fields['general']['fields']['display-learn'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
 			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
 		);
-
+		
 		$fields['general']['fields']['load-on-attach'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),
