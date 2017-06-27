@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.5.6 - 27 June 2017 =
+= 2.5.7 - 27 June 2017 =
 * Get post from DB before saving for 'copy content' to avoid overwriting changes by other plugins.
 * Switched toolbar links.
 * Skip cache rendering for password protected posts.
