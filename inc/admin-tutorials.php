@@ -27,14 +27,20 @@ class SiteOrigin_Panels_Admin_Tutorials {
 		
 		header( 'content-type:application/json' );
 		
-		$response = wp_remote_get('https://siteorigin.com/wp-json/siteorigin/v1/tutorials/page-builder/');
-		if ( is_array( $response ) && $response['response']['code'] == 200 ) {
-			$tutorials = json_decode( $response['body'] );
-			echo json_encode( $tutorials );
+		$tutorials = get_transient( 'siteorigin_panels_tutorials' );
+		
+		if( empty( $tutorials ) ) {
+			$response = wp_remote_get('https://siteorigin.com/wp-json/siteorigin/v1/tutorials/page-builder/');
+			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
+				$tutorials = json_decode( $response['body'] );
+				set_transient( 'siteorigin_panels_tutorials', $tutorials, 86400 );
+			}
+			else {
+				$tutorials = array();
+			}
 		}
-		else {
-			echo json_encode( array() );
-		}
+		
+		echo json_encode( $tutorials );
 		
 		wp_die();
 	}
