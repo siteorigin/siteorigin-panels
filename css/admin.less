@@ -80,6 +80,75 @@
 		}
 	}
 
+	.so-tool-button-wrapper {
+		float: left;
+		position: relative;
+
+		.so-tool-button-dropdown {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			padding: 15px;
+			background-color: #fff;
+			border: 1px solid #e0e0e0;
+			z-index: 100;
+			width: 300px;
+			margin-left: -140px;
+			box-sizing: border-box;
+			min-height: 114px;
+			white-space: normal;
+			box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+
+			ul {
+				margin: 0 0 10px 0;
+
+				li{
+					line-height: 1.4em;
+					margin-bottom: 0.8em;
+					font-size: 0.925em;
+
+					a {
+						display: block;
+						font-weight: 500;
+						text-decoration: none;
+					}
+
+					small {
+						font-size: 0.95em;
+						display: block;
+						line-height: 1.4em;
+						max-height: 2.8em;
+						overflow: hidden;
+						color: #777;
+					}
+				}
+			}
+
+			p{
+				margin-top: 0;
+				margin-bottom: 20px;
+			}
+
+			&.so-loading {
+				background-image: url("images/wpspin_light.gif");
+				background-position: center center;
+				background-repeat: no-repeat;
+
+				@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+					& {
+						background-image: url(images/wpspin_light-2x.gif);
+						background-size: 16px 16px;
+					}
+				}
+			}
+		}
+
+		&:hover .so-tool-button-dropdown {
+			display: block;
+		}
+	}
+
 	.so-builder-toolbar {
 		.box-sizing(border-box);
 		border-bottom: 1px solid #D0D0D0;
@@ -87,7 +156,6 @@
 		line-height: 1em;
 		z-index: 101;
 		white-space: nowrap;
-		overflow-x: hidden;
 		position: relative;
 
 		box-shadow: 0 1px 1px rgba(0,0,0,0.04);
@@ -124,7 +192,8 @@
 				}
 			}
 
-			&.so-learn {
+			&.so-learn,
+			&.so-premium {
 				.gradient(#e5e5e5, #e5e5e5, #f6f6f6);
 				&:hover {
 					background: #FFFFFF;
@@ -602,9 +671,11 @@
 					display: none;
 				}
 
-				&.so-learn {
-					display: none;
-				}
+			}
+
+			.so-learn-wrapper,
+			.so-premium {
+				display: none !important;
 			}
 
 			.so-switch-to-standard {

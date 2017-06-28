@@ -23,7 +23,8 @@ module.exports = Backbone.View.extend( {
 		'click .so-tool-button.so-row-add': 'displayAddRowDialog',
 		'click .so-tool-button.so-prebuilt-add': 'displayAddPrebuiltDialog',
 		'click .so-tool-button.so-history': 'displayHistoryDialog',
-		'click .so-tool-button.so-live-editor': 'displayLiveEditor'
+		'click .so-tool-button.so-live-editor': 'displayLiveEditor',
+		'click .so-learn-wrapper .show-tutorials': 'loadTutorials'
 	},
 
 	/* A row collection */
@@ -124,6 +125,10 @@ module.exports = Backbone.View.extend( {
 		this.$el
 			.attr( 'id', 'siteorigin-panels-builder-' + this.cid )
 			.addClass( 'so-builder-container' );
+
+		if( panelsOptions.tutorials_enabled ) {
+			this.loadTutorials();
+		}
 
 		this.trigger( 'builder_rendered' );
 
@@ -920,5 +925,40 @@ module.exports = Backbone.View.extend( {
 				}.bind( this )
 			);
 		}
+	},
+
+	loadTutorials: function( event ){
+		console.log( event );
+		if( ! _.isUndefined( event ) ) {
+			event.preventDefault();
+		}
+
+		var $dd = this.$('.so-learn-wrapper .so-tool-button-dropdown');
+		$dd.addClass( 'so-loading' ).find( '.view-message' ).hide();
+
+		$.get(
+			panelsOptions.ajaxurl,
+			{
+				action: 'so_panels_get_tutorials',
+			},
+			function( response ){
+				for( var i in response ) {
+					$dd.find( '.view-tutorials ul' ).append(
+						$('<li></li>')
+							.append(
+								$('<a target="_blank"></a>')
+									.html( response[i].title )
+									.attr( 'href', response[i].url )
+							)
+							.append(
+								$('<small></small>').html( response[i].excerpt )
+							)
+					);
+					console.log( response[i] );
+				}
+				$dd.find('.view-tutorials').show();
+				$dd.removeClass( 'so-loading' );
+			}
+		);
 	},
 } );
