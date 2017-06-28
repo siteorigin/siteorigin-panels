@@ -942,19 +942,20 @@ module.exports = Backbone.View.extend( {
 				action: 'so_panels_get_tutorials',
 			},
 			function( response ){
-				for( var i in response ) {
-					$dd.find( '.view-tutorials ul' ).append(
-						$('<li></li>')
-							.append(
-								$('<a target="_blank"></a>')
-									.html( response[i].title )
-									.attr( 'href', response[i].url )
-							)
-							.append(
-								$('<small></small>').html( response[i].excerpt )
-							)
-					);
-					console.log( response[i] );
+				if( response.length ) {
+					for( var i in response.slice( 0,4 ) ) {
+						$dd.find( '.view-tutorials ul' ).append(
+							$('<li></li>')
+								.append(
+									$('<a target="_blank"></a>')
+										.text( response[i].title )
+										.attr( 'href', response[i].url )
+								)
+								.append(
+									$('<small></small>').text( response[i].excerpt )
+								)
+						);
+					}
 				}
 				$dd.find('.view-tutorials').show();
 				$dd.removeClass( 'so-loading' );
