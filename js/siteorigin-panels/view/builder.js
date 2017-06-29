@@ -928,7 +928,6 @@ module.exports = Backbone.View.extend( {
 	},
 
 	loadTutorials: function( event ){
-		console.log( event );
 		if( ! _.isUndefined( event ) ) {
 			event.preventDefault();
 		}
@@ -936,30 +935,37 @@ module.exports = Backbone.View.extend( {
 		var $dd = this.$('.so-learn-wrapper .so-tool-button-dropdown');
 		$dd.addClass( 'so-loading' ).find( '.view-message' ).hide();
 
-		$.get(
-			panelsOptions.ajaxurl,
-			{
-				action: 'so_panels_get_tutorials',
-			},
-			function( response ){
-				if( response.length ) {
-					for( var i in response.slice( 0,4 ) ) {
-						$dd.find( '.view-tutorials ul' ).append(
-							$('<li></li>')
-								.append(
-									$('<a target="_blank"></a>')
-										.text( response[i].title )
-										.attr( 'href', response[i].url )
-								)
-								.append(
-									$('<small></small>').text( response[i].excerpt )
-								)
-						);
-					}
+		var loadResponse = function( response ){
+			if( response.length ) {
+				panelsOptions.cache.tutorials = response;
+
+				for( var i in response.slice( 0,4 ) ) {
+					$dd.find( '.view-tutorials ul' ).append(
+						$('<li></li>')
+							.append(
+								$('<a target="_blank"></a>')
+									.text( response[i].title )
+									.attr( 'href', response[i].url )
+							)
+							.append(
+								$('<small></small>').text( response[i].excerpt )
+							)
+					);
 				}
-				$dd.find('.view-tutorials').show();
-				$dd.removeClass( 'so-loading' );
 			}
-		);
+			$dd.find('.view-tutorials').show();
+			$dd.removeClass( 'so-loading' );
+		};
+
+		if( typeof panelsOptions.cache.tutorials === 'undefined' ) {
+			$.get(
+				panelsOptions.ajaxurl,
+				{ action: 'so_panels_get_tutorials' },
+				loadResponse
+			);
+		}
+		else {
+			loadResponse( panelsOptions.cache.tutorials );
+		}
 	},
 } );

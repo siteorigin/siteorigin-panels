@@ -275,6 +275,7 @@ class SiteOrigin_Panels_Admin {
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'tutorials_enabled'         => ! empty( $tutorials_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
+				'cache'						=> array(),
 
 				// Settings for the contextual menu
 				'contextual'                => array(
