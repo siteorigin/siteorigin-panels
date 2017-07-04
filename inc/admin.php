@@ -59,6 +59,7 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
 		SiteOrigin_Panels_Admin_Layouts::single();
+		SiteOrigin_Panels_Admin_Tutorials::single();
 
 		$this->in_save_post = false;
 	}
@@ -247,6 +248,7 @@ class SiteOrigin_Panels_Admin {
 
 			$widgets = $this->get_widgets();
 			$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
+			$tutorials_enabled = get_user_meta( get_current_user_id(), 'so_panels_tutorials_enabled', true );
 
 			// This is the widget we'll use for default text
 			if( ! empty( $widgets[ 'SiteOrigin_Widget_Editor_Widget' ] ) ) $text_widget = 'SiteOrigin_Widget_Editor_Widget';
@@ -271,7 +273,9 @@ class SiteOrigin_Panels_Admin {
 				) ),
 				'row_layouts'               => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled'         => ! empty( $directory_enabled ),
+				'tutorials_enabled'         => ! empty( $tutorials_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
+				'cache'						=> array(),
 
 				// Settings for the contextual menu
 				'contextual'                => array(
