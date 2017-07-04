@@ -45,7 +45,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				</a>
 			<?php endif; ?>
 				
-			<?php if( ! get_theme_support( 'siteorigin-panels' ) ) : ?>
+			<?php if( siteorigin_panels_setting( 'display-learn' ) ) : ?>
 				<div class="so-tool-button-wrapper so-learn-wrapper">
 					<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Tutorials', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/tag/page-builder/" target="_blank" style="margin-left: 10px;">
 						<span class="so-panels-icon so-panels-icon-learn"></span>
