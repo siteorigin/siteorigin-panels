@@ -36,7 +36,9 @@ class SiteOrigin_Panels_Admin_Tutorials {
 				set_transient( 'siteorigin_panels_tutorials', $tutorials, 86400 );
 			}
 			else {
-				$tutorials = array();
+				$tutorials = array(
+					'error' => __( 'Error loading latest tutorials. Please try again after a few minutes.', 'siteorigin-panels' ),
+				);
 			}
 		}
 		

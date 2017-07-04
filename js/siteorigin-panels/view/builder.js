@@ -936,7 +936,10 @@ module.exports = Backbone.View.extend( {
 		$dd.addClass( 'so-loading' ).find( '.view-message' ).hide();
 
 		var loadResponse = function( response ){
-			if( response.length ) {
+			if( ! _.isUndefined( response.error ) ) {
+				$dd.find( '.view-message' ).show().find('p').html(response.error);
+			}
+			else if( response.length ) {
 				panelsOptions.cache.tutorials = response;
 
 				for( var i in response.slice( 0,4 ) ) {
@@ -952,8 +955,9 @@ module.exports = Backbone.View.extend( {
 							)
 					);
 				}
+
+				$dd.find('.view-tutorials').show();
 			}
-			$dd.find('.view-tutorials').show();
 			$dd.removeClass( 'so-loading' );
 		};
 
