@@ -39,17 +39,31 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<?php endif; ?>
 
 			<?php if( SiteOrigin_Panels::display_premium_teaser() ) : ?>
-				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Addons', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( SiteOrigin_Panels::premium_url() ) ?>" style="margin-left: 10px;">
+				<a class="so-tool-button so-premium" title="<?php echo esc_attr_e( 'Page Builder Addons', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( SiteOrigin_Panels::premium_url() ) ?>" target="_blank" style="margin-left: 10px;">
 					<span class="so-panels-icon so-panels-icon-addons"></span>
 					<span class="so-button-text"><?php echo esc_html_e( 'Addons', 'siteorigin-panels' ) ?></span>
 				</a>
 			<?php endif; ?>
 				
-			<?php if( ! get_theme_support( 'siteorigin-panels' ) ) : ?>
-				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Themes', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/theme/" target="_blank" style="margin-left: 10px;">
-					<span class="so-panels-icon so-panels-icon-learn"></span>
-					<span class="so-button-text"><?php echo esc_html_e( 'Themes', 'siteorigin-panels' ) ?></span>
-				</a>
+			<?php if( siteorigin_panels_setting( 'display-learn' ) ) : ?>
+				<div class="so-tool-button-wrapper so-learn-wrapper">
+					<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Tutorials', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/tag/page-builder/" target="_blank" style="margin-left: 10px;">
+						<span class="so-panels-icon so-panels-icon-learn"></span>
+						<span class="so-button-text"><?php echo esc_html_e( 'Tutorials', 'siteorigin-panels' ) ?></span>
+					</a>
+					<div class="so-tool-button-dropdown">
+						<div class="view-tutorials" style="display: none;">
+							<ul></ul>
+							<a href="https://siteorigin.com/tag/page-builder/" target="_blank" class="view-more button button-small"><?php _e( 'View More', 'siteorigin-panels' ) ?></a>
+						</div>
+						
+						<div class="view-message">
+							<p><?php _e( 'View a list of Page Builder tutorials from SiteOrigin.' ) ?></p>
+							<a href="#" target="_blank" class="show-tutorials button button-small"><?php _e( 'Show Tutorials', 'siteorigin-panels' ) ?></a>
+						</div>
+						
+					</div>
+				</div>
 			<?php endif ?>
 
 			<a class="so-switch-to-standard"><?php _e('Revert to Editor', 'siteorigin-panels') ?></a>
