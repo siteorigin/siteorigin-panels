@@ -5,7 +5,7 @@
  *
  * Class SiteOrigin_Panels_Widgets_PostLoop
  */
-class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
+class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	
 	static $rendering_loop;
 	
@@ -20,6 +20,9 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			__( 'Post Loop', 'siteorigin-panels' ),
 			array(
 				'description' => __( 'Displays a post loop.', 'siteorigin-panels' ),
+			),
+			array(
+				'width' => 800,
 			)
 		);
 	}
