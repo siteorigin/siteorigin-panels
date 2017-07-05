@@ -358,11 +358,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		     class_exists( 'SiteOrigin_Widget' ) &&
 		     class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
 			$this->helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
-			// These ensure the form fields name attributes are correct.
-			$this->helper->id_base = $this->id_base;
-			$this->helper->id = $this->id;
-			$this->helper->number = $this->number;
 		}
+		// These ensure the form fields name attributes are correct.
+		$this->helper->id_base = $this->id_base;
+		$this->helper->id = $this->id;
+		$this->helper->number = $this->number;
 		
 		return $this->helper;
 	}
