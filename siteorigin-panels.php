@@ -272,7 +272,7 @@ class SiteOrigin_Panels {
 	 * @filter the_content
 	 */
 	public function generate_post_content( $content ) {
-		global $post;
+		global $post, $preview;
 		if ( empty( $post ) && ! in_the_loop() ) {
 			return $content;
 		}
@@ -280,13 +280,21 @@ class SiteOrigin_Panels {
 		if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) {
 			return $content;
 		}
-
+		
+		$post_id = get_the_ID();
+		// If we're viewing a preview make sure we load and render the autosave post's meta.
+		if ( $preview ) {
+			$preview_post = wp_get_post_autosave( $post_id );
+			if ( ! empty( $preview_post ) ) {
+				$post_id = $preview_post->ID;
+			}
+		}
 		// Check if this post has panels_data
-		if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
+		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
 			$panel_content = SiteOrigin_Panels::renderer()->render(
-				get_the_ID(),
+				$post_id,
 				// Add CSS if this is not the main single post, this is handled by add_single_css
-				get_the_ID() !== get_queried_object_id()
+				$preview || $post_id !== get_queried_object_id()
 			);
 
 			if ( ! empty( $panel_content ) ) {
@@ -333,9 +341,16 @@ class SiteOrigin_Panels {
 	 * @return string
 	 */
 	public function cached_post_content( $content ){
-		if( post_password_required( get_the_ID() ) ) {
+		if ( post_password_required( get_the_ID() ) ) {
 			// Don't use cache for password protected
 			return $this->generate_post_content( $content );
+		}
+		global $preview;
+		if ( $preview ) {
+			// If we're previewing a post, rather call `generate_post_content` and `generate_post_css` at the right time.
+			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
+			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
+			return $content;
 		}
 		
 		if (
