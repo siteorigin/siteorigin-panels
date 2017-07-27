@@ -96,6 +96,15 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.9 - 27 July 2017 =
+* Post Loop widget: Use correct base widget properties for post loop helper on Widgets page.
+* Post Loop widget: Set default width of post loop widget control.
+* Reset `widget_id` when cloning widgets.
+* "Reset" fixed background image display setting on mobile.
+* Previews work without saving panels data to parent post meta.
+* Removed tutorials view.
+* Learn dialog fixes.
+
 = 2.5.8 - 4 July 2017 =
 * Replaced themes link with tutorials.
 
