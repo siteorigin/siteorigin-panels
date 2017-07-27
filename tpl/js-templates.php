@@ -44,11 +44,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<span class="so-button-text"><?php echo esc_html_e( 'Addons', 'siteorigin-panels' ) ?></span>
 				</a>
 			<?php endif; ?>
-				
-			<?php if( ! get_theme_support( 'siteorigin-panels' ) ) : ?>
-				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Page Builder Themes', 'siteorigin-panels' ) ?>" href="https://siteorigin.com/theme/" target="_blank" style="margin-left: 10px;">
+			
+			<?php if( SiteOrigin_Panels::display_learn_button() ) : ?>
+				<a class="so-tool-button so-learn" title="<?php echo esc_attr_e( 'Learn Page Builder', 'siteorigin-panels' ) ?>" href="#siteorigin-learn-page-builder-tips" style="margin-left: 10px;">
 					<span class="so-panels-icon so-panels-icon-learn"></span>
-					<span class="so-button-text"><?php echo esc_html_e( 'Themes', 'siteorigin-panels' ) ?></span>
+					<span class="so-button-text"><?php echo esc_html_e( 'Learn', 'siteorigin-panels' ) ?></span>
 				</a>
 			<?php endif ?>
 
