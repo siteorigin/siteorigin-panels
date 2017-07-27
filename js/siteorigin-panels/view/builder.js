@@ -23,7 +23,8 @@ module.exports = Backbone.View.extend( {
 		'click .so-tool-button.so-row-add': 'displayAddRowDialog',
 		'click .so-tool-button.so-prebuilt-add': 'displayAddPrebuiltDialog',
 		'click .so-tool-button.so-history': 'displayHistoryDialog',
-		'click .so-tool-button.so-live-editor': 'displayLiveEditor'
+		'click .so-tool-button.so-live-editor': 'displayLiveEditor',
+		'click .so-learn-wrapper .show-tutorials': 'loadTutorials'
 	},
 
 	/* A row collection */
@@ -124,6 +125,10 @@ module.exports = Backbone.View.extend( {
 		this.$el
 			.attr( 'id', 'siteorigin-panels-builder-' + this.cid )
 			.addClass( 'so-builder-container' );
+
+		if( panelsOptions.tutorials_enabled ) {
+			this.loadTutorials();
+		}
 
 		this.trigger( 'builder_rendered' );
 
@@ -919,6 +924,52 @@ module.exports = Backbone.View.extend( {
 					}
 				}.bind( this )
 			);
+		}
+	},
+
+	loadTutorials: function( event ){
+		if( ! _.isUndefined( event ) ) {
+			event.preventDefault();
+		}
+
+		var $dd = this.$('.so-learn-wrapper .so-tool-button-dropdown');
+		$dd.addClass( 'so-loading' ).find( '.view-message' ).hide();
+
+		var loadResponse = function( response ){
+			if( ! _.isUndefined( response.error ) ) {
+				$dd.find( '.view-message' ).show().find('p').html(response.error);
+			}
+			else if( response.length ) {
+				panelsOptions.cache.tutorials = response;
+
+				for( var i in response.slice( 0,4 ) ) {
+					$dd.find( '.view-tutorials ul' ).append(
+						$('<li></li>')
+							.append(
+								$('<a target="_blank"></a>')
+									.text( response[i].title )
+									.attr( 'href', response[i].url )
+							)
+							.append(
+								$('<small></small>').text( response[i].excerpt )
+							)
+					);
+				}
+
+				$dd.find('.view-tutorials').show();
+			}
+			$dd.removeClass( 'so-loading' );
+		};
+
+		if( typeof panelsOptions.cache.tutorials === 'undefined' ) {
+			$.get(
+				panelsOptions.ajaxurl,
+				{ action: 'so_panels_get_tutorials' },
+				loadResponse
+			);
+		}
+		else {
+			loadResponse( panelsOptions.cache.tutorials );
 		}
 	},
 } );
