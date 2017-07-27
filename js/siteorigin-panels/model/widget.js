@@ -147,6 +147,7 @@ module.exports = Backbone.Model.extend( {
 			cloneValues.builder_id = Math.random().toString( 36 ).substr( 2 );
 		}
 
+		clone.set( 'widget_id', '' );
 		clone.set( 'values', cloneValues, {silent: true} );
 		clone.set( 'collection', cell.get('widgets'), {silent: true} );
 		clone.cell = cell;

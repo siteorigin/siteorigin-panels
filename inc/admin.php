@@ -59,7 +59,6 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
 		SiteOrigin_Panels_Admin_Layouts::single();
-		SiteOrigin_Panels_Admin_Tutorials::single();
 
 		$this->in_save_post = false;
 	}
@@ -173,7 +172,7 @@ class SiteOrigin_Panels_Admin {
 		) {
 			return;
 		}
-		$this->in_save_post     = true;
+		$this->in_save_post = true;
 		// Get post from db as it might have been changed and saved by other plugins.
 		$post = get_post( $post_id );
 		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
@@ -184,11 +183,12 @@ class SiteOrigin_Panels_Admin {
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
-		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
 		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
-			update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
+			// Use `update_metadata` instead of `update_post_meta` to prevent saving to parent post when it's a revision, e.g. preview.
+			update_metadata( 'post', $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
 			if( siteorigin_panels_setting( 'copy-content' ) ) {
 				// Store a version of the HTML in post_content
@@ -248,7 +248,6 @@ class SiteOrigin_Panels_Admin {
 
 			$widgets = $this->get_widgets();
 			$directory_enabled = get_user_meta( get_current_user_id(), 'so_panels_directory_enabled', true );
-			$tutorials_enabled = get_user_meta( get_current_user_id(), 'so_panels_tutorials_enabled', true );
 
 			// This is the widget we'll use for default text
 			if( ! empty( $widgets[ 'SiteOrigin_Widget_Editor_Widget' ] ) ) $text_widget = 'SiteOrigin_Widget_Editor_Widget';
@@ -273,7 +272,6 @@ class SiteOrigin_Panels_Admin {
 				) ),
 				'row_layouts'               => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled'         => ! empty( $directory_enabled ),
-				'tutorials_enabled'         => ! empty( $tutorials_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'						=> array(),
 
