@@ -5,7 +5,7 @@
  *
  * Class SiteOrigin_Panels_Widgets_PostLoop
  */
-class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
+class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	
 	static $rendering_loop;
 	
@@ -20,6 +20,9 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 			__( 'Post Loop', 'siteorigin-panels' ),
 			array(
 				'description' => __( 'Displays a post loop.', 'siteorigin-panels' ),
+			),
+			array(
+				'width' => 800,
 			)
 		);
 	}
@@ -358,11 +361,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget{
 		     class_exists( 'SiteOrigin_Widget' ) &&
 		     class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
 			$this->helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
-			// These ensure the form fields name attributes are correct.
-			$this->helper->id_base = $this->id_base;
-			$this->helper->id = $this->id;
-			$this->helper->number = $this->number;
 		}
+		// These ensure the form fields name attributes are correct.
+		$this->helper->id_base = $this->id_base;
+		$this->helper->id = $this->id;
+		$this->helper->number = $this->number;
 		
 		return $this->helper;
 	}

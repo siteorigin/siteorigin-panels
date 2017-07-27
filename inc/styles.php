@@ -474,6 +474,10 @@ class SiteOrigin_Panels_Styles {
 		if( ! empty( $style['mobile_padding'] ) ) {
 			$css['padding'] = $style[ 'mobile_padding' ];
 		}
+		
+		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) && $style['background_display'] == 'fixed' ) {
+			$css[ 'background-attachment' ] = 'scroll';
+		}
 
 		if ( ! empty( $style[ 'mobile_css' ] ) ) {
 			preg_match_all( '/^([A-Za-z0-9\-]+?):(.+?);?$/m', $style[ 'mobile_css' ], $matches );
