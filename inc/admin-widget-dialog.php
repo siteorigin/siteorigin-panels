@@ -29,8 +29,8 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			$widgets['WP_Widget_Black_Studio_TinyMCE']['icon']   = 'dashicons dashicons-edit';
 		}
 
-		if ( siteorigin_panels_setting( 'recommended-widgets' ) ) {
-			// Add in all the widgets bundle widgets
+		if ( siteorigin_panels_setting( 'recommended-widgets' ) && ! class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
+			// Add in all the widgets bundle widgets if WB isn't active.
 			$widgets = wp_parse_args(
 				$widgets,
 				include plugin_dir_path( __FILE__ ) . 'data/widgets-bundle.php'
