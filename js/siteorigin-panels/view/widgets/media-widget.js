@@ -10,12 +10,12 @@ var mediaWidget = {
 		}
 
 		var ModelConstructor = component.modelConstructors[ idBase ] || component.MediaWidgetModel;
-		var widgetContent = widgetContainer.find( '> .widget-content' );
+		var syncContainer = widgetContainer.find( '> .widget-content' );
 		var controlContainer = $( '<div class="media-widget-control"></div>' );
-		widgetContent.before( controlContainer );
+		syncContainer.before( controlContainer );
 
 		var modelAttributes = {};
-		widgetContent.find( '.media-widget-instance-property' ).each( function() {
+		syncContainer.find( '.media-widget-instance-property' ).each( function() {
 			var input = $( this );
 			modelAttributes[ input.data( 'property' ) ] = input.val();
 		});
@@ -25,7 +25,8 @@ var mediaWidget = {
 
 		var widgetControl = new ControlConstructor({
 			el: controlContainer,
-			model: widgetModel
+			syncContainer: syncContainer,
+			model: widgetModel,
 		});
 
 		widgetControl.render();

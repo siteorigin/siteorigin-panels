@@ -4,7 +4,6 @@ var textWidget = {
 	addWidget: function( idBase, widgetContainer, widgetId ) {
 		var component = wp.textWidgets;
 
-
 		var options = {};
 		var visualField = widgetContainer.find( '.visual' );
 		// 'visual' field and syncContainer were introduced together in 4.8.1
