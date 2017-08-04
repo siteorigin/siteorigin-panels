@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.10 - 4 August 2017 =
+* Fixed WP widget wrappers broken by WP4.8.1 changes.
+
 = 2.5.9 - 27 July 2017 =
 * Post Loop widget: Use correct base widget properties for post loop helper on Widgets page.
 * Post Loop widget: Set default width of post loop widget control.
