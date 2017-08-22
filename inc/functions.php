@@ -92,3 +92,7 @@ function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name,
 function siteorigin_panels_activate(){
 	return false;
 }
+
+function siteorigin_panels_url( $path = '' ) {
+	return plugins_url( 'siteorigin-panels/' . $path );
+}
