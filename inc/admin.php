@@ -234,16 +234,22 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			// Media is required for row styles
 			wp_enqueue_media();
-			wp_enqueue_script( 'so-panels-admin', plugin_dir_url( __FILE__ ) . '../js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array(
-				'jquery',
-				'jquery-ui-resizable',
-				'jquery-ui-sortable',
-				'jquery-ui-draggable',
-				'underscore',
-				'backbone',
-				'plupload',
-				'plupload-all'
-			), SITEORIGIN_PANELS_VERSION, true );
+			wp_enqueue_script(
+				'so-panels-admin',
+				siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array(
+					'jquery',
+					'jquery-ui-resizable',
+					'jquery-ui-sortable',
+					'jquery-ui-draggable',
+					'underscore',
+					'backbone',
+					'plupload',
+					'plupload-all'
+				),
+				SITEORIGIN_PANELS_VERSION,
+				true
+			);
 			add_action( 'admin_footer', array( $this, 'js_templates' ) );
 
 			$widgets = $this->get_widgets();
@@ -404,7 +410,7 @@ class SiteOrigin_Panels_Admin {
 					'error_message'       => __( 'Error uploading or importing file.', 'siteorigin-panels' ),
 				),
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
-				'prebuiltDefaultScreenshot' => plugin_dir_url( __FILE__ ) . '../css/images/prebuilt-default.png',
+				'prebuiltDefaultScreenshot' => siteorigin_panels_url( 'css/images/prebuilt-default.png' ),
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 			) );
@@ -455,7 +461,12 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function enqueue_admin_styles( $prefix = '', $force = false ) {
 		if ( $force || self::is_admin() ) {
-			wp_enqueue_style( 'so-panels-admin', plugin_dir_url( __FILE__ ) . '../css/admin.css', array( 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION );
+			wp_enqueue_style(
+				'so-panels-admin',
+				siteorigin_panels_url( 'css/admin.css' ),
+				array( 'wp-color-picker' ),
+				SITEORIGIN_PANELS_VERSION
+			);
 			do_action( 'siteorigin_panel_enqueue_admin_styles' );
 		}
 	}
@@ -1047,7 +1058,7 @@ class SiteOrigin_Panels_Admin {
 		$lessons['page-builder-tips'] = array(
 			'title'            => __( '12 Page Builder Tips', 'siteorigin-panels' ),
 			'video'            => '212380146',
-			'poster'           => plugin_dir_url( __FILE__ ) . '../posters/page-builder-tips.svg',
+			'poster'           => siteorigin_panels_url( 'posters/page-builder-tips.svg' ),
 			'description'      => __( "Sign up to our newsletter and we'll send you this free Page Builder video course.", 'siteorigin-panels' ) . ' ' .
 								  __( "12 tips that'll help you get the most out of Page Builder.", 'siteorigin-panels' ) . ' ' .
 								  __( "Watch the video to find out more, then sign up below to get started.", 'siteorigin-panels' ),
@@ -1057,7 +1068,7 @@ class SiteOrigin_Panels_Admin {
 		$lessons['page-builder-animations'] = array(
 			'title'            => __( 'Free Page Builder Addons', 'siteorigin-panels' ),
 			'video'            => '212380210',
-			'poster'           => plugin_dir_url( __FILE__ ) . '../posters/addons.svg',
+			'poster'           => siteorigin_panels_url( 'posters/addons.svg' ),
 			'description'      => __( "The free animations addon allows you to add beautiful animations to Page Builder elements.", 'siteorigin-panels' ) . ' ' .
 								  __( "Sign up to our newsletter and we'll send you the addon as a free gift.", 'siteorigin-panels' ) . ' ' .
 								  __( "Plus, we'll send you even more powerful addons, for as long as you're subscribed.", 'siteorigin-panels' ),

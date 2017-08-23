@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-wp_enqueue_style( 'siteorigin-preview-style', plugin_dir_url( __FILE__ ) . '../css/live-editor-preview.css', array(), SITEORIGIN_PANELS_VERSION );
+wp_enqueue_style( 'siteorigin-preview-style', siteorigin_panels_url( 'css/live-editor-preview.css' ), array(), SITEORIGIN_PANELS_VERSION );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
