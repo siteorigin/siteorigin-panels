@@ -93,6 +93,14 @@ function siteorigin_panels_activate(){
 	return false;
 }
 
+
+/**
+ * Returns the base URL of our widget with `$path` appended.
+ *
+ * @param string $path Extra path to append to the end of the URL.
+ *
+ * @return string Base URL of the widget, with $path appended.
+ */
 function siteorigin_panels_url( $path = '' ) {
 	return plugins_url( 'siteorigin-panels/' . $path );
 }

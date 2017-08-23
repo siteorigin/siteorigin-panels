@@ -234,16 +234,22 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			// Media is required for row styles
 			wp_enqueue_media();
-			wp_enqueue_script( 'so-panels-admin', siteorigin_panels_url( 'js/siteorigin-panels' ) . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array(
-				'jquery',
-				'jquery-ui-resizable',
-				'jquery-ui-sortable',
-				'jquery-ui-draggable',
-				'underscore',
-				'backbone',
-				'plupload',
-				'plupload-all'
-			), SITEORIGIN_PANELS_VERSION, true );
+			wp_enqueue_script(
+				'so-panels-admin',
+				siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array(
+					'jquery',
+					'jquery-ui-resizable',
+					'jquery-ui-sortable',
+					'jquery-ui-draggable',
+					'underscore',
+					'backbone',
+					'plupload',
+					'plupload-all'
+				),
+				SITEORIGIN_PANELS_VERSION,
+				true
+			);
 			add_action( 'admin_footer', array( $this, 'js_templates' ) );
 
 			$widgets = $this->get_widgets();
@@ -455,7 +461,12 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function enqueue_admin_styles( $prefix = '', $force = false ) {
 		if ( $force || self::is_admin() ) {
-			wp_enqueue_style( 'so-panels-admin', siteorigin_panels_url( 'css/admin.css' ), array( 'wp-color-picker' ), SITEORIGIN_PANELS_VERSION );
+			wp_enqueue_style(
+				'so-panels-admin',
+				siteorigin_panels_url( 'css/admin.css' ),
+				array( 'wp-color-picker' ),
+				SITEORIGIN_PANELS_VERSION
+			);
 			do_action( 'siteorigin_panel_enqueue_admin_styles' );
 		}
 	}
