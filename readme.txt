@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.11 - 24 August 2017 =
+* Prevent creating multiple new entries in post meta every time a post is previewed.
+* Avoid using relative asset URLs which may break caching plugins.
+* Import custom widget class from HTML.
+
 = 2.5.10 - 4 August 2017 =
 * Fixed WP widget wrappers broken by WP4.8.1 changes.
 
