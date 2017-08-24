@@ -410,6 +410,7 @@ module.exports = Backbone.Model.extend({
 							panels_info = {
 								grid: ri,
 								cell: ci,
+								style: $widget.data( 'style' ),
 								raw: false,
 								label: $widget.data( 'label' )
 							};

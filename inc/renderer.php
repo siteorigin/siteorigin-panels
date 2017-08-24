@@ -766,6 +766,6 @@ class SiteOrigin_Panels_Renderer {
 	}
 	
 	public function front_css_url(){
-		return plugin_dir_url( __FILE__ ) . '../css/front-flex.css';
+		return siteorigin_panels_url( 'css/front-flex.css' );
 	}
 }
