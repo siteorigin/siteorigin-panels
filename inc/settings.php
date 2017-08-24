@@ -175,8 +175,18 @@ class SiteOrigin_Panels_Settings {
 		if ( $prefix != 'settings_page_siteorigin_panels' ) {
 			return;
 		}
-		wp_enqueue_style( 'siteorigin-panels-settings', plugin_dir_url( __FILE__ ) . '../settings/admin-settings.css', array(), SITEORIGIN_PANELS_VERSION );
-		wp_enqueue_script( 'siteorigin-panels-settings', plugin_dir_url( __FILE__ ) . '../settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', array(), SITEORIGIN_PANELS_VERSION );
+		wp_enqueue_style(
+			'siteorigin-panels-settings',
+			siteorigin_panels_url( 'settings/admin-settings.css' ),
+			array(),
+			SITEORIGIN_PANELS_VERSION
+		);
+		wp_enqueue_script(
+			'siteorigin-panels-settings',
+			siteorigin_panels_url( 'settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+			array(),
+			SITEORIGIN_PANELS_VERSION
+		);
 	}
 
 	/**
