@@ -14,6 +14,9 @@ module.exports = {
 	},
 
 	processTemplate: function ( s ) {
+		if ( _.isUndefined( s ) || _.isNull( s ) ) {
+			return '';
+		}
 		s = s.replace( /{{%/g, '<%' );
 		s = s.replace( /%}}/g, '%>' );
 		s = s.trim();
