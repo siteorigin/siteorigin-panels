@@ -542,7 +542,7 @@ class SiteOrigin_Panels_Styles {
 			}
 
 			// Add in flexbox alignment to the main row element
-			if ( ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' || ! self::is_legacy_browser() ) && ! empty( $row['style']['cell_alignment'] ) ) {
+			if ( ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' || ! SiteOrigin_Panels::is_legacy_browser() ) && ! empty( $row['style']['cell_alignment'] ) ) {
 				$css->add_row_css(
 					$post_id,
 					$ri,
