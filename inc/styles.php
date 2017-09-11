@@ -243,18 +243,20 @@ class SiteOrigin_Panels_Styles {
 			'priority' => 16,
 		);
 
-		$fields['cell_alignment'] = array(
-			'name'     => __( 'Cell Vertical Alignment', 'siteorigin-panels' ),
-			'type'     => 'select',
-			'group'    => 'layout',
-			'options'  => array(
-				'flex-start' => __( 'Top', 'siteorigin-panels' ),
-				'center'     => __( 'Center', 'siteorigin-panels' ),
-				'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
-				'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
-			),
-			'priority' => 17,
-		);
+		if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always'  ) {
+			$fields['cell_alignment'] = array(
+				'name'     => __( 'Cell Vertical Alignment', 'siteorigin-panels' ),
+				'type'     => 'select',
+				'group'    => 'layout',
+				'options'  => array(
+					'flex-start' => __( 'Top', 'siteorigin-panels' ),
+					'center'     => __( 'Center', 'siteorigin-panels' ),
+					'flex-end'   => __( 'Bottom', 'siteorigin-panels' ),
+					'stretch'    => __( 'Stretch', 'siteorigin-panels' ),
+				),
+				'priority' => 17,
+			);
+		}
 
 		return $fields;
 	}
@@ -540,7 +542,7 @@ class SiteOrigin_Panels_Styles {
 			}
 
 			// Add in flexbox alignment to the main row element
-			if ( ! empty( $row['style']['cell_alignment'] ) ) {
+			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
 				$css->add_row_css(
 					$post_id,
 					$ri,
