@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.11 - 14 September 2017 =
+* Learn: fixed broken image.
+* Prevent JS error when PB active alongside Elementor.
+* Disabling DFW mode no longer hides PB.
+* Hide Cell Vertical Alignment options if Legacy Layout is set to always.
+
 = 2.5.11 - 24 August 2017 =
 * Prevent creating multiple new entries in post meta every time a post is previewed.
 * Avoid using relative asset URLs which may break caching plugins.

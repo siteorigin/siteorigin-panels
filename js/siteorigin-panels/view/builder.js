@@ -333,6 +333,13 @@ module.exports = Backbone.View.extend( {
 		// Hide the standard content editor
 		$( '#wp-content-wrap' ).hide();
 
+
+		$( '#editor-expand-toggle' ).on( 'change.editor-expand', function () {
+			if ( ! $( this ).prop( 'checked' ) ) {
+				$( '#wp-content-wrap' ).hide();
+			}
+		} );
+
 		// Show page builder and the inside div
 		this.metabox.show().find( '> .inside' ).show();
 
