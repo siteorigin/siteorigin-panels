@@ -383,9 +383,13 @@ class SiteOrigin_Panels {
 		}
 	}
 
+	/**
+	 * Enqueue scripts and styles when using cache.
+	 */
 	public function cached_post_enqueue(){
 		wp_enqueue_style( 'siteorigin-panels-front' );
 		wp_enqueue_script( 'siteorigin-panels-front-styles' );
+		wp_enqueue_script( 'siteorigin-parallax' );
 	}
 
 	/**
