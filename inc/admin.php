@@ -156,6 +156,7 @@ class SiteOrigin_Panels_Admin {
 	 * Save the panels data
 	 *
 	 * @param $post_id
+	 * @param $post
 	 *
 	 * @action save_post
 	 */
@@ -167,12 +168,10 @@ class SiteOrigin_Panels_Admin {
 			empty( $_POST['_sopanels_nonce'] ) ||
 			! wp_verify_nonce( $_POST['_sopanels_nonce'], 'save' ) ||
 			! current_user_can( 'edit_post', $post_id ) ||
-			! isset( $_POST['panels_data'] ) ||
-            ( empty( $_POST['post_ID'] ) || $_POST['post_ID'] != $post_id )
+			! isset( $_POST['panels_data'] )
 		) {
 			return;
 		}
-
 		$this->in_save_post = true;
 		// Get post from db as it might have been changed and saved by other plugins.
 		$post = get_post( $post_id );
