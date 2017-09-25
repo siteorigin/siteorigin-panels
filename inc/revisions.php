@@ -30,8 +30,9 @@ class SiteOrigin_Panels_Revisions {
 	 * @param $post
 	 */
 	function save_post( $post_id, $post ) {
-		$parent_id = wp_is_post_revision( $post_id );
+		if( is_preview() ) return;
 
+		$parent_id = wp_is_post_revision( $post_id );
 		if ( $parent_id ) {
 			// If the panels data meta exists, copy it into the revision.
 			$panels_data = get_post_meta( $parent_id, 'panels_data', true );
