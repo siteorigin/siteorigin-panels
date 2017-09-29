@@ -96,7 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.5.11 - 14 September 2017 =
+= 2.5.13 - 29 September 2017 =
+* Always enqueue parallax when in cache mode.
+* Skip saving post meta for revisions in previews.
+* Cast post types as string when adding meta boxes.
+
+= 2.5.12 - 14 September 2017 =
 * Learn: fixed broken image.
 * Prevent JS error when PB active alongside Elementor.
 * Disabling DFW mode no longer hides PB.
