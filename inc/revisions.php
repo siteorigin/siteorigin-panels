@@ -8,6 +8,7 @@
 class SiteOrigin_Panels_Revisions {
 
 	function __construct() {
+		add_action( 'save_post', array( $this, 'save_post' ), 11, 2 );
 		add_action( 'wp_restore_post_revision', array( $this, 'revisions_restore' ), 10, 2 );
 
 		add_filter( '_wp_post_revision_fields', array( $this, 'revisions_fields' ) );
@@ -20,6 +21,25 @@ class SiteOrigin_Panels_Revisions {
 	public static function single() {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
+	}
+
+	/**
+	 * Store the Page Builder meta in the revision.
+	 *
+	 * @param $post_id
+	 * @param $post
+	 */
+	function save_post( $post_id, $post ) {
+		if( is_preview() ) return;
+
+		$parent_id = wp_is_post_revision( $post_id );
+		if ( $parent_id ) {
+			// If the panels data meta exists, copy it into the revision.
+			$panels_data = get_post_meta( $parent_id, 'panels_data', true );
+			if ( ! empty( $panels_data ) ) {
+				add_metadata( 'post', $post_id, 'panels_data', $panels_data );
+			}
+		}
 	}
 
 	/**
