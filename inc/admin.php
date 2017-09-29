@@ -135,7 +135,7 @@ class SiteOrigin_Panels_Admin {
 				'so-panels-panels',
 				__( 'Page Builder', 'siteorigin-panels' ),
 				array( $this, 'render_meta_boxes' ),
-				$type,
+				( string ) $type,
 				'advanced',
 				'high'
 			);

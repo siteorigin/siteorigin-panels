@@ -64,6 +64,8 @@ class SiteOrigin_Panels_Cache_Renderer {
 
 	/**
 	 * Save the generated cache data.
+	 *
+	 * @param int $post_id
 	 */
 	public function save( $post_id ){
 		update_post_meta( $post_id, 'siteorigin_panels_cache', array(
@@ -82,6 +84,12 @@ class SiteOrigin_Panels_Cache_Renderer {
 		return $this->cache_render;
 	}
 
+	/**
+	 * @param $type
+	 * @param $content
+	 * @param $post_id
+	 * @throws Exception
+	 */
 	public function add( $type, $content, $post_id ){
 		if( ! $this->is_cache_render() ) {
 			throw new Exception( 'A cache render must be started before adding HTML' );
@@ -89,6 +97,13 @@ class SiteOrigin_Panels_Cache_Renderer {
 		$this->cache[ $type ][ $post_id ] .= trim( $content ) . ' ';
 	}
 
+	/**
+	 * Get a value from the cache renderer
+	 *
+	 * @param $type html or css
+	 * @param $post_id
+	 * @return mixed
+	 */
 	public function get( $type, $post_id ){
 		if( ! empty( $this->cache[ $type ][ $post_id ] ) ) {
 			return $this->cache[ $type ][ $post_id ];
@@ -101,6 +116,7 @@ class SiteOrigin_Panels_Cache_Renderer {
 				! empty( $cache_meta[ $type ] ) &&
 				$cache_meta[ 'version' ] == SITEORIGIN_PANELS_VERSION
 			) {
+				// This is a cache hit, so return what we need
 				return $cache_meta[ $type ];
 			}
 
@@ -124,6 +140,13 @@ class SiteOrigin_Panels_Cache_Renderer {
 		}
 	}
 
+	/**
+	 * Refresh the stored cache for a given post
+	 *
+	 * @param $post_id
+	 * @param bool $save
+	 * @return array
+	 */
 	private function refresh_cache( $post_id, $save = true ) {
 		$this->start_cache_render( $post_id );
 
