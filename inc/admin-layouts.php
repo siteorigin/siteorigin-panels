@@ -148,7 +148,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			// Check that the user can view the given page types
 			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
 			if( empty( $post_type ) ) {
-				return;
+				 return;
 			}
 			
 			$return['title'] = sprintf( __( 'Clone %s', 'siteorigin-panels' ), esc_html( $post_type->labels->singular_name ) );
@@ -316,7 +316,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		wp_die();
 	}
-	
+
 	/**
 	 * Enable the directory.
 	 */
@@ -328,4 +328,26 @@ class SiteOrigin_Panels_Admin_Layouts {
 		update_user_meta( $user, 'so_panels_directory_enabled', true );
 		wp_die();
 	}
+
+    /**
+     * Load a layout from a json file
+     *
+     * @param $id
+     * @param $name
+	 * @param $json_file
+     * @param bool $screenshot
+     *
+     * @return array The data for the layout
+     */
+	public static function load_layout( $id, $name, $json_file, $screenshot = false ){
+        $layout_data = json_decode( file_get_contents( $json_file ), true );
+        $layout_data = apply_filters( 'siteorigin_panels_load_layout_' . $id, $layout_data );
+
+        $layout_data = array_merge( array(
+            'name' => $name,
+            'screenshot' => $screenshot,
+        ), $layout_data);
+
+        return $layout_data;
+    }
 }
