@@ -213,6 +213,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		header( 'content-type: application/json' );
 		$panels_data = array();
+		$raw_panels_data = false;
 		
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
@@ -244,6 +245,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 			if ( isset( $panels_data['name'] ) ) unset( $panels_data['name'] );
 			if ( isset( $panels_data['screenshot'] ) ) unset( $panels_data['screenshot'] );
 			if ( isset( $panels_data['filename'] ) ) unset( $panels_data['filename'] );
+
+			$raw_panels_data = true;
 			
 		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
 			$directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
@@ -264,14 +267,17 @@ class SiteOrigin_Panels_Admin_Layouts {
 					// Display some sort of error message
 				}
 			}
-			
+			$raw_panels_data = true;
+
 		} elseif ( current_user_can( 'edit_post', $_REQUEST['lid'] ) ) {
 			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
 		}
-		
-		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
-		
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+
+		if( $raw_panels_data ) {
+			// This panels_data is flagged as raw, so it needs to be processed.
+			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+		}
 		
 		echo json_encode( $panels_data );
 		wp_die();
