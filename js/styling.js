@@ -51,7 +51,7 @@ jQuery( function ( $ ) {
 		}
 	}
 	$( window ).resize( stretchFullWidthRows ).on("load",function(){
-		stretchFullWidthRows
+		stretchFullWidthRows;
 	});
 	stretchFullWidthRows();
 
