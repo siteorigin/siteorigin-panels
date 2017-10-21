@@ -329,25 +329,25 @@ class SiteOrigin_Panels_Admin_Layouts {
 		wp_die();
 	}
 
-    /**
-     * Load a layout from a json file
-     *
-     * @param $id
-     * @param $name
+	/**
+	 * Load a layout from a json file
+	 *
+	 * @param $id
+	 * @param $name
 	 * @param $json_file
-     * @param bool $screenshot
-     *
-     * @return array The data for the layout
-     */
-	public static function load_layout( $id, $name, $json_file, $screenshot = false ){
-        $layout_data = json_decode( file_get_contents( $json_file ), true );
-        $layout_data = apply_filters( 'siteorigin_panels_load_layout_' . $id, $layout_data );
+	 * @param bool $screenshot
+	 *
+	 * @return array The data for the layout
+	 */
+	public static function load_layout($id, $name, $json_file, $screenshot = false) {
+		$layout_data = json_decode(file_get_contents($json_file), true);
+		$layout_data = apply_filters('siteorigin_panels_load_layout_' . $id, $layout_data);
 
-        $layout_data = array_merge( array(
-            'name' => $name,
-            'screenshot' => $screenshot,
-        ), $layout_data);
+		$layout_data = array_merge(array(
+			'name' => $name,
+			'screenshot' => $screenshot,
+		), $layout_data);
 
-        return $layout_data;
-    }
+		return $layout_data;
+	}
 }
