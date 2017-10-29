@@ -50,7 +50,7 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	$( window ).resize( stretchFullWidthRows ).on("load",function(){
+	$( window ).resize( stretchFullWidthRows ).on('load',function(){
 		stretchFullWidthRows();
 	});
 	stretchFullWidthRows();
