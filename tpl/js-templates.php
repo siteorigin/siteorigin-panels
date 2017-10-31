@@ -463,7 +463,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								<h4 class="so-title">{{%= item.title %}}</h4>
 								{{% if( item.preview ) { %}}
 									<div class="so-buttons">
-										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank" rel="noopener">Preview</a>
+										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank" rel="noopener noreferrer">Preview</a>
 									</div>
 								{{% } %}}
 							</div>

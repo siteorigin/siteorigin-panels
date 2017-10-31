@@ -120,7 +120,7 @@ class SiteOrigin_Panels_Admin {
 		$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __( 'Newsletter', 'siteorigin-panels' ) . '</a>';
 		
 		if( SiteOrigin_Panels::display_premium_teaser() ) {
-			$links[] = '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" style="color: #3db634" target="_blank" rel="noopener">' . __('Addons', 'siteorigin-panels') . '</a>';
+			$links[] = '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" style="color: #3db634" target="_blank" rel="noopener noreferrer">' . __('Addons', 'siteorigin-panels') . '</a>';
 		}
 
 		return $links;
@@ -821,7 +821,7 @@ class SiteOrigin_Panels_Admin {
 							'/2\{ *(.*?) *\}/',
 						),
 						array(
-							'<a href="' . $install_url . '" target="_blank" rel="noopener">$1</a>',
+							'<a href="' . $install_url . '" target="_blank" rel="noopener noreferrer">$1</a>',
 							'<strong>$1</strong>'
 						),
 						sprintf(
@@ -844,7 +844,7 @@ class SiteOrigin_Panels_Admin {
 						),
 						array(
 							'<strong>$1</strong>',
-							'<a href="https://siteorigin.com/thread/" target="_blank" rel="noopener">$1</a>'
+							'<a href="https://siteorigin.com/thread/" target="_blank" rel="noopener noreferrer">$1</a>'
 						),
 						sprintf(
 							__( 'The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help.', 'siteorigin-panels' ),
