@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.14 - 6 November 2017 =
+* Content Cache: Add Enqueue hook to allow 3rd parties to enqueue cache friendly assets.
+* Added raw_panels_data flag for layout imports.
+* Save ratio and ratio_direction as row attributes.
+* Add rel="noopener noreferrer" for all 3rd party/unknown links.
+
 = 2.5.13 - 29 September 2017 =
 * Always enqueue parallax when in cache mode.
 * Skip saving post meta for revisions in previews.
