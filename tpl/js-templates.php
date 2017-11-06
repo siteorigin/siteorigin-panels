@@ -69,7 +69,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
                     "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
                     "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
                     "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
-                    "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+                    "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
                 );
 				?>
 			</div>
@@ -463,7 +463,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								<h4 class="so-title">{{%= item.title %}}</h4>
 								{{% if( item.preview ) { %}}
 									<div class="so-buttons">
-										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank">Preview</a>
+										<a href="{{%- item.preview %}}" class="button-secondary so-button-preview" target="_blank" rel="noopener noreferrer">Preview</a>
 									</div>
 								{{% } %}}
 							</div>

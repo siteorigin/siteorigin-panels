@@ -390,6 +390,7 @@ class SiteOrigin_Panels {
 		wp_enqueue_style( 'siteorigin-panels-front' );
 		wp_enqueue_script( 'siteorigin-panels-front-styles' );
 		wp_enqueue_script( 'siteorigin-parallax' );
+		do_action( 'siteorigin_panels_cache_enqueue' );
 	}
 
 	/**

@@ -11,9 +11,9 @@
 			'/3\{ *(.*?) *\}/',
 		),
 		array(
-			'<a href="http://siteorigin.com/page-builder/documentation/" target="_blank">$1</a>',
-			'<a href="http://siteorigin.com/threads/plugin-page-builder/" target="_blank">$1</a>',
-			'<a href="http://siteorigin.com/#newsletter" target="_blank">$1</a>',
+			'<a href="http://siteorigin.com/page-builder/documentation/" target="_blank" rel="noopener noreferrer">$1</a>',
+			'<a href="http://siteorigin.com/threads/plugin-page-builder/" target="_blank" rel="noopener noreferrer">$1</a>',
+			'<a href="http://siteorigin.com/#newsletter" target="_blank" rel="noopener noreferrer">$1</a>',
 		),
 		__('Read the 1{full documentation} on SiteOrigin. Ask a question on our 2{support forum} if you need help and sign up to 3{our newsletter} to stay up to date with future developments.', 'siteorigin-panels')
 	);

@@ -95,6 +95,14 @@ module.exports = Backbone.Model.extend({
 					rowAttrs.style = data.grids[i].style;
 				}
 
+				if ( ! _.isUndefined( data.grids[i].ratio) ) {
+					rowAttrs.ratio = data.grids[i].ratio;
+				}
+
+				if ( ! _.isUndefined( data.grids[i].ratio_direction) ) {
+					rowAttrs.ratio_direction = data.grids[i].ratio_direction
+				}
+
 				if ( ! _.isUndefined( data.grids[i].color_label) ) {
 					rowAttrs.color_label = data.grids[i].color_label;
 				}
@@ -266,6 +274,8 @@ module.exports = Backbone.Model.extend({
 			data.grids.push( {
 				cells: row.get('cells').length,
 				style: row.get( 'style' ),
+				ratio: row.get('ratio'),
+				ratio_direction: row.get('ratio_direction'),
 				color_label: row.get( 'color_label' ),
 				label: row.get( 'label' ),
 			} );
@@ -390,6 +400,8 @@ module.exports = Backbone.Model.extend({
 				panels_data.grids.push( {
 					cells: $cells.length,
 					style: $row.data( 'style' ),
+					ratio: $row.data( 'ratio' ),
+					ratio_direction: $row.data( 'ratio-direction' ),
 					color_label: $row.data( 'color-label' ),
 					label: $row.data( 'label' ),
 				} );
