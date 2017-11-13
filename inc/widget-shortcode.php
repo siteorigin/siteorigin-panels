@@ -97,7 +97,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	 */
 	static function widget_html( $html, $widget, $args, $instance ){
 		if(
-			empty( $GLOBALS[ 'SITEORIGIN_PANELS_CACHE_RENDER' ] ) ||
+			empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) ||
 			// Don't try create HTML if there already is some
 			! empty( $html ) ||
 			! is_object( $widget ) ||
