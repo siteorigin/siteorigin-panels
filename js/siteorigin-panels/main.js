@@ -69,21 +69,22 @@ jQuery( function ( $ ) {
 		field,
 		form,
 		builderConfig;
-
-	if ( $( '#siteorigin-panels-metabox' ).length && $( 'form#post' ).length ) {
+	
+	var $panelsMetabox = $( '#siteorigin-panels-metabox' );
+	form = $( 'form#post' );
+	if ( $panelsMetabox.length && form.length ) {
 		// This is usually the case when we're in the post edit interface
-		container = $( '#siteorigin-panels-metabox' );
-		field = $( '#siteorigin-panels-metabox .siteorigin-panels-data-field' );
-		form = $( 'form#post' );
+		container = $panelsMetabox;
+		field = $panelsMetabox.find( '.siteorigin-panels-data-field' );
 
 		builderConfig = {
 			editorType: 'tinyMCE',
 			postId: $( '#post_ID' ).val(),
 			editorId: '#content',
-			builderType: $( '#siteorigin-panels-metabox' ).data( 'builder-type' ),
-			builderSupports: $( '#siteorigin-panels-metabox' ).data( 'builder-supports' ),
+			builderType: $panelsMetabox.data( 'builder-type' ),
+			builderSupports: $panelsMetabox.data( 'builder-supports' ),
 			loadOnAttach: panelsOptions.loadOnAttach && $( '#auto_draft' ).val() == 1,
-			loadLiveEditor: $( '#siteorigin-panels-metabox' ).data('live-editor') == 1,
+			loadLiveEditor: $panelsMetabox.data('live-editor') == 1,
 			liveEditorPreview: container.data('preview-url')
 		};
 	}
