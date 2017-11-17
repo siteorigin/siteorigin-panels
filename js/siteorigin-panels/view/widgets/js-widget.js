@@ -1,7 +1,9 @@
+var customHtmlWidget = require( './custom-html-widget' );
 var mediaWidget = require( './media-widget' );
 var textWidget = require( './text-widget' );
 
 var jsWidget = {
+	CUSTOM_HTML: 'custom_html',
 	MEDIA_AUDIO: 'media_audio',
 	MEDIA_IMAGE: 'media_image',
 	MEDIA_VIDEO: 'media_video',
@@ -12,6 +14,9 @@ var jsWidget = {
 		var widget;
 
 		switch ( idBase ) {
+			case this.CUSTOM_HTML:
+				widget = customHtmlWidget;
+				break;
 			case this.MEDIA_AUDIO:
 			case this.MEDIA_IMAGE:
 			case this.MEDIA_VIDEO:

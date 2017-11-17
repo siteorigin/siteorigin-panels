@@ -891,6 +891,7 @@ class SiteOrigin_Panels_Admin {
 
 	function is_js_widget( $widget ) {
 		$js_widgets = array(
+			'WP_Widget_Custom_HTML',
 			'WP_Widget_Media_Audio',
 			'WP_Widget_Media_Image',
 			'WP_Widget_Media_Video',
