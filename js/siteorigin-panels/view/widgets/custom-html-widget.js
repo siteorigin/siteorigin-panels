@@ -14,7 +14,10 @@ var customHtmlWidget = {
 		} );
 
 		widgetControl.initializeEditor();
-
+		
+		// HACK: To ensure CodeMirror resize for the gutter.
+		widgetControl.editor.codemirror.refresh();
+		
 		return widgetControl;
 	}
 };
