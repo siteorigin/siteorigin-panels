@@ -115,6 +115,10 @@ class SiteOrigin_Panels_Admin {
 	 * @return array
 	 */
 	function plugin_action_links( $links ) {
+		if( ! is_array( $links ) ) {
+			return $links;
+		}
+		
 		unset( $links['edit'] );
 		$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __( 'Support Forum', 'siteorigin-panels' ) . '</a>';
 		$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __( 'Newsletter', 'siteorigin-panels' ) . '</a>';
