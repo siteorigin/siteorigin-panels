@@ -246,9 +246,10 @@ module.exports = Backbone.View.extend( {
 		// Move the panels box into a tab of the content editor
 		metabox.insertAfter( '#wp-content-wrap' ).hide().addClass( 'attached-to-editor' );
 
-		// Switch to the Page Builder interface as soon as we load the page if there are widgets
+		// Switch to the Page Builder interface as soon as we load the page if there are widgets or the normal editor
+		// isn't supported.
 		var data = this.model.get( 'data' );
-		if ( ! _.isEmpty( data.widgets ) || ! _.isEmpty( data.grids ) ) {
+		if ( ! _.isEmpty( data.widgets ) || ! _.isEmpty( data.grids ) || ! this.supports( 'revertToEditor' ) ) {
 			this.displayAttachedBuilder( { confirm: false } );
 		}
 

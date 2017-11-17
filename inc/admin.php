@@ -115,6 +115,10 @@ class SiteOrigin_Panels_Admin {
 	 * @return array
 	 */
 	function plugin_action_links( $links ) {
+		if( ! is_array( $links ) ) {
+			return $links;
+		}
+		
 		unset( $links['edit'] );
 		$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __( 'Support Forum', 'siteorigin-panels' ) . '</a>';
 		$links[] = '<a href="http://siteorigin.com/page-builder/#newsletter">' . __( 'Newsletter', 'siteorigin-panels' ) . '</a>';
@@ -891,7 +895,9 @@ class SiteOrigin_Panels_Admin {
 
 	function is_js_widget( $widget ) {
 		$js_widgets = array(
+			'WP_Widget_Custom_HTML',
 			'WP_Widget_Media_Audio',
+			'WP_Widget_Media_Gallery',
 			'WP_Widget_Media_Image',
 			'WP_Widget_Media_Video',
 			'WP_Widget_Text',

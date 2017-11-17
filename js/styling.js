@@ -50,7 +50,7 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	$( window ).resize( stretchFullWidthRows ).load( stretchFullWidthRows );
+	$( window ).on( 'resize load', stretchFullWidthRows );
 	stretchFullWidthRows();
 
 	// This should have been done in the footer, but run it here just incase.

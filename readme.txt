@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.4
-Tested up to: 4.8.1
+Tested up to: 4.9
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,14 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.5.15 - 17 November 2017 =
+* Don't use deprecated `load` event jQuery function shortcut.
+* Immediately switch to Page Builder if `revertToEditor` feature isn't supported.
+* Fix switching between standard editor and Page Builder.
+* Removed some duplicated jQuery selectors.
+* Prevent error with invalid plugin action links.
+* Add compatibility for new WP core Custom HTML and Media Gallery widgets.
 
 = 2.5.14 - 6 November 2017 =
 * Content Cache: Add Enqueue hook to allow 3rd parties to enqueue cache friendly assets.
