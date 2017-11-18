@@ -11,10 +11,6 @@ class SiteOrigin_Panels_Widget_Shortcode {
 
 	static function init() {
 		add_shortcode( 'siteorigin_widget', 'SiteOrigin_Panels_Widget_Shortcode::shortcode' );
-
-		// Integration with the cache rendering system
-		add_action( 'siteorigin_panels_start_cache_render', 'SiteOrigin_Panels_Widget_Shortcode::add_filters' );
-		add_action( 'siteorigin_panels_end_cache_render', 'SiteOrigin_Panels_Widget_Shortcode::remove_filters' );
 	}
 
 	static function add_filters() {
