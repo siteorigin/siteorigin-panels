@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.5.16 - 22 November 2017 =
+* Disabled the Content Cache feature until we've resolved all issues and conflicts.
+
 = 2.5.15 - 17 November 2017 =
 * Don't use deprecated `load` event jQuery function shortcut.
 * Immediately switch to Page Builder if `revertToEditor` feature isn't supported.
