@@ -61,22 +61,14 @@ class SiteOrigin_Panels {
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
-
-		if(
-			apply_filters( 'siteorigin_panels_use_cached', siteorigin_panels_setting( 'cache-content' ) ) &&
-			( siteorigin_panels_setting( 'legacy-layout' ) != 'auto' || ! self::is_legacy_browser() )
-		) {
-			// We can use the cached content
-			SiteOrigin_Panels_Cache_Renderer::single();
-			add_filter( 'the_content', array( $this, 'cached_post_content' ), 1 ); // Run early to pretend to be post_content
-			add_filter( 'wp_head', array( $this, 'cached_post_css' ) );
-			add_filter( 'wp_enqueue_scripts', array( $this, 'cached_post_enqueue' ) );
-		}
-		else {
-			// We need to generate fresh post content
-			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
-			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
-		}
+		
+		// We need to generate fresh post content
+		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
+		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
+		
+		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
+		SiteOrigin_Panels_Cache_Renderer::single();
+		
 		
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
@@ -331,66 +323,6 @@ class SiteOrigin_Panels {
 			$renderer = SiteOrigin_Panels::renderer();
 			$renderer->add_inline_css( get_the_ID(), $renderer->generate_css( get_the_ID() ) );
 		}
-	}
-	
-	/**
-	 * Get cached post content for the current post
-	 *
-	 * @param $content
-	 *
-	 * @return string
-	 */
-	public function cached_post_content( $content ){
-		if ( post_password_required( get_the_ID() ) ) {
-			// Don't use cache for password protected
-			return $this->generate_post_content( $content );
-		}
-		global $preview;
-		if ( $preview ) {
-			// If we're previewing a post, rather call `generate_post_content` and `generate_post_css` at the right time.
-			add_filter( 'the_content', array( $this, 'generate_post_content' ) );
-			add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
-			return $content;
-		}
-		
-		if (
-			! in_the_loop() ||
-			! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ||
-			! get_post_meta( get_the_ID(), 'panels_data', true )
-		) {
-			return $content;
-		}
-		
-		$cache = SiteOrigin_Panels_Cache_Renderer::single();
-		$html = $cache->get( 'html', get_the_ID() );
-		
-		return $html;
-	}
-	
-	/**
-	 * Add cached CSS for the current post
-	 */
-	public function cached_post_css(){
-		if( post_password_required( get_the_ID() ) ) {
-			// Don't use cache for password protected
-			return $this->generate_post_css();
-		}
-		
-		if( is_singular() && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
-			$cache = SiteOrigin_Panels_Cache_Renderer::single();
-			$css = $cache->get( 'css', get_the_ID() );
-			SiteOrigin_Panels::renderer()->add_inline_css( get_the_ID(), $css );
-		}
-	}
-
-	/**
-	 * Enqueue scripts and styles when using cache.
-	 */
-	public function cached_post_enqueue(){
-		wp_enqueue_style( 'siteorigin-panels-front' );
-		wp_enqueue_script( 'siteorigin-panels-front-styles' );
-		wp_enqueue_script( 'siteorigin-parallax' );
-		do_action( 'siteorigin_panels_cache_enqueue' );
 	}
 
 	/**
