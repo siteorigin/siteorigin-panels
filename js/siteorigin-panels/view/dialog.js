@@ -536,10 +536,13 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Set a status message for the dialog
 	 */
-	setStatusMessage: function ( message, loading ) {
-		this.$( '.so-toolbar .so-status' ).html( message );
+	setStatusMessage: function ( message, loading, error ) {
+		var msg = error ? '<span class="dashicons dashicons-warning"></span>' + message : message;
+		this.$( '.so-toolbar .so-status' ).html( msg );
 		if ( ! _.isUndefined( loading ) && loading ) {
 			this.$( '.so-toolbar .so-status' ).addClass( 'so-panels-loading' );
+		} else {
+			this.$( '.so-toolbar .so-status' ).removeClass( 'so-panels-loading' );
 		}
 	},
 
