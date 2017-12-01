@@ -12,6 +12,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 	function __construct() {
 		// Filter all the available external layout directories.
 		add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_directories' ), 8 );
+		// Filter all the available local layout folders.
+		add_filter( 'siteorigin_panels_prebuilt_layouts', array( $this, 'get_local_layouts' ), 8 );
 		
 		add_action( 'wp_ajax_so_panels_layouts_query', array( $this, 'action_get_prebuilt_layouts' ) );
 		add_action( 'wp_ajax_so_panels_get_layout', array( $this, 'action_get_prebuilt_layout' ) );
@@ -77,7 +79,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 		
 		// This allows themes and plugins to customize where we look for layouts.
-		$layout_folders = apply_filters( 'siteorigin_panels_prebuilt_layouts_directories', $layout_folders );
+		$layout_folders = apply_filters( 'siteorigin_panels_local_layouts_directories', $layout_folders );
 		
 		$layouts = array();
 		foreach ( $layout_folders as $folder ) {
@@ -135,10 +137,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 		if ( $type == 'prebuilt' ) {
 			$return['title'] = __( 'Theme Defined Layouts', 'siteorigin-panels' );
 			
-			$layouts = $this->get_local_layouts();
-			
 			// This is for theme bundled prebuilt directories
-			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', $layouts );
+			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			
 			foreach ( $layouts as $id => $vals ) {
 				if ( ! empty( $search ) && strpos( strtolower( $vals['name'] ), $search ) === false ) {
@@ -271,8 +271,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$raw_panels_data = false;
 		
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
-			$layouts = $this->get_local_layouts();
-			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', $layouts );
+			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			$lid = ! empty( $_REQUEST['lid'] ) ? $_REQUEST['lid'] : false;
 			
 			if ( empty( $lid ) || empty( $layouts[ $lid ] ) ) {
