@@ -1482,10 +1482,13 @@
 				font-weight: bold;
 			}
 
+			.so-directory-items-wrapper {
+				display: flex;
+				flex-flow: row wrap;
+			}
+
 			// For a list of directory items
 			.so-directory-items {
-
-				.clearfix();
 
 				.so-no-results {
 					margin: 20px 0;
@@ -1495,10 +1498,11 @@
 				.so-directory-item {
 
 					.box-sizing(border-box);
-					float: left;
 					padding: 6px;
 
 					.so-directory-item-wrapper {
+						height: 100%;
+						box-sizing: border-box;
 						padding: 15px 10px;
 						background: #F7F7F7;
 						border: 1px solid #d0d0d0;
@@ -1511,6 +1515,8 @@
 					}
 
 					.so-screenshot {
+						// This is an escaped string to prevent LESS compilation from messing with the calc.
+						height: ~"calc(100% - 50px)";
 						background: #ffffff;
 						margin-bottom: 10px;
 						border: 1px solid #d0d0d0;
@@ -1521,7 +1527,7 @@
 							background-position: center center;
 							background-repeat: no-repeat;
 
-							@media  (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+							@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
 								& {
 									background-image: url(images/wpspin_light-2x.gif);
 									background-size: 16px 16px;
@@ -1609,40 +1615,24 @@
 				@media only screen and (min-width: 1680px) {
 					.so-directory-item {
 						width: 20%;
-
-						&:nth-of-type(5n+1) {
-							clear: both;
-						}
 					}
 				}
 
 				@media only screen and (max-width: 1679px) and (min-width: 1280px) {
 					.so-directory-item {
 						width: 25%;
-
-						&:nth-of-type(4n+1) {
-							clear: both;
-						}
 					}
 				}
 
 				@media only screen and (max-width: 1279px) and (min-width: 1140px) {
 					.so-directory-item {
 						width: 33.333%;
-
-						&:nth-of-type(3n+1) {
-							clear: both;
-						}
 					}
 				}
 
 				@media only screen and (max-width: 1139px) {
 					.so-directory-item {
 						width: 50%;
-
-						&:nth-of-type(2n+1) {
-							clear: both;
-						}
 					}
 				}
 			}
