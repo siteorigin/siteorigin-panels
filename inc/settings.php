@@ -596,11 +596,18 @@ class SiteOrigin_Panels_Settings {
 	 * @return array
 	 */
 	function get_post_types() {
-		$types = array_merge( array(
+		$post_types = get_post_types( array( '_builtin' => false ) );
+		
+		$types = array(
 			'page' => 'page',
 			'post' => 'post'
-		), get_post_types( array( '_builtin' => false ) ) );
-
+		);
+		
+		// Don't use `array_merge` here as it will break things if a post type has a numeric slug.
+		foreach ( $post_types as $key => $value ) {
+			$types[ $key ] = $value;
+		}
+		
 		// These are post types we know we don't want to show Page Builder on
 		unset( $types['ml-slider'] );
 
