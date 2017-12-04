@@ -22,6 +22,7 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	public function add_inline_css( $post_id, $css ) {
 		if ( is_null( $this->inline_css ) ) {
+			// Initialize the inline CSS array and add actions to handle printing.
 			$this->inline_css = array();
 			add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
 			add_action( 'wp_footer', array( $this, 'print_inline_css' ) );
@@ -501,6 +502,9 @@ class SiteOrigin_Panels_Renderer {
 					$css_id = sanitize_html_class( current_filter() );
 					break;
 			}
+			
+			// Allow third party developers to change the inline styles or remove them completely.
+			$the_css = apply_filters( 'siteorigin_panels_inline_styles', $the_css );
 
 			if ( ! empty( $the_css ) ) {
 				?>
