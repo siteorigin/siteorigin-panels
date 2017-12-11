@@ -74,12 +74,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				?>
 			</div>
 
-			<?php if( SiteOrigin_Panels::display_learn_button() ) : ?>
+			<?php if( SiteOrigin_Panels::display_premium_teaser() ) : ?>
 				<div class="so-tip-wrapper">
 					<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
-					<a href="#siteorigin-learn-page-builder-tips" class="so-lesson-modal">
-						<?php _e( '12 tips every Page Builder user should know.', 'siteorigin-panels' ) ?>
-					</a>
+                    <?php SiteOrigin_Panels_Admin::display_footer_premium_link() ?>
 				</div>
 			<?php endif; ?>
 		</div>
