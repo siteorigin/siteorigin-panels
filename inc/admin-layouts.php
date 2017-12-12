@@ -83,31 +83,32 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$layouts = array();
 		foreach ( $layout_folders as $folder ) {
+			$files = array();
 			if ( file_exists( $folder ) && is_dir( $folder ) ) {
 				$files = list_files( $folder, 1 );
-				if ( ! empty( $files ) ) {
-					foreach ( $files as $file ) {
-						$panels_data = json_decode( file_get_contents( $file ), true );
-						if ( ! ( empty( $panels_data['id'] ) && empty( $panels_data['name'] ) ) ) {
-							$name = isset( $panels_data['id'] ) ? $panels_data['id'] : $panels_data['name'];
-							$paths = glob( $folder . "/$name.{jpg,jpeg,gif,png}", GLOB_BRACE );
-							// Highlander Condition. There can be only one.
-							$screenshot_path = empty( $paths ) ? '' : $paths[0];
-							if ( empty( $panels_data['screenshot'] ) &&
-								 file_exists( $screenshot_path ) &&
-								 strrpos( $screenshot_path, wp_normalize_path( WP_CONTENT_DIR ) ) === 0 ) {
-								$screenshot_url = str_replace(
-									wp_normalize_path( WP_CONTENT_DIR ),
-									content_url(),
-									$screenshot_path
-								);
-								if ( ! empty( $screenshot_url ) ) {
-									$panels_data['screenshot'] = $screenshot_url;
-								}
-							}
-							$layouts[ sanitize_title_with_dashes( $panels_data['name'] ) ] = $panels_data;
-						}
+			}
+			
+			foreach ( $files as $file ) {
+				$panels_data = json_decode( file_get_contents( $file ), true );
+				if ( ! ( empty( $panels_data['id'] ) && empty( $panels_data['name'] ) ) ) {
+					$name = isset( $panels_data['id'] ) ? $panels_data['id'] : $panels_data['name'];
+					$paths = glob( $folder . "/$name.{jpg,jpeg,gif,png}", GLOB_BRACE );
+					// Highlander Condition. There can be only one.
+					$screenshot_path = empty( $paths ) ? '' : $paths[0];
+					$screenshot_url = '';
+					if ( empty( $panels_data['screenshot'] ) &&
+						 file_exists( $screenshot_path ) &&
+						 strrpos( $screenshot_path, wp_normalize_path( WP_CONTENT_DIR ) ) === 0 ) {
+						$screenshot_url = str_replace(
+							wp_normalize_path( WP_CONTENT_DIR ),
+							content_url(),
+							$screenshot_path
+						);
 					}
+					if ( ! empty( $screenshot_url ) ) {
+						$panels_data['screenshot'] = $screenshot_url;
+					}
+					$layouts[ sanitize_title_with_dashes( $name ) ] = $panels_data;
 				}
 			}
 		}
@@ -372,7 +373,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$decoded_export_data = json_decode( $export_data, true );
 		
 		if ( ! empty( $decoded_export_data['name'] ) ) {
-			$decoded_export_data['id'] = sanitize_title( $decoded_export_data['name'] );
+			$decoded_export_data['id'] = sanitize_title_with_dashes( $decoded_export_data['name'] );
 			$filename = $decoded_export_data['id'];
 		} else {
 			$filename = 'layout-' . date( 'dmY' );
