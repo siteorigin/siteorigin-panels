@@ -88,8 +88,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 				if ( ! empty( $files ) ) {
 					foreach ( $files as $file ) {
 						$panels_data = json_decode( file_get_contents( $file ), true );
-						if ( ! empty( $panels_data['name'] ) ) {
-							$name = $panels_data['name'];
+						if ( ! ( empty( $panels_data['id'] ) && empty( $panels_data['name'] ) ) ) {
+							$name = isset( $panels_data['id'] ) ? $panels_data['id'] : $panels_data['name'];
 							$paths = glob( $folder . "/$name.{jpg,jpeg,gif,png}", GLOB_BRACE );
 							// Highlander Condition. There can be only one.
 							$screenshot_path = empty( $paths ) ? '' : $paths[0];
@@ -371,7 +371,13 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$decoded_export_data = json_decode( $export_data, true );
 		
-		$filename = empty( $decoded_export_data['name'] ) ? 'layout-' . date( 'dmY' ) : $decoded_export_data['name'];
+		if ( ! empty( $decoded_export_data['name'] ) ) {
+			$decoded_export_data['id'] = sanitize_title( $decoded_export_data['name'] );
+			$filename = $decoded_export_data['id'];
+		} else {
+			$filename = 'layout-' . date( 'dmY' );
+		}
+		
 		
 		header( 'content-type: application/json' );
 		header( "Content-Disposition: attachment; filename=$filename.json" );
