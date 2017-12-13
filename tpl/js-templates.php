@@ -63,7 +63,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-panels-welcome-message">
 			<div class="so-message-wrapper">
 				<?php
-
                 printf(
                     __( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
                     "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
@@ -387,7 +386,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<ul class="so-sidebar-tabs">
 				<?php if( !empty( $layouts ) ) : ?>
-					<li><a href="#prebuilt"><?php _e('Theme Defined', 'siteorigin-panels') ?></a></li>
+					<li>
+                        <a href="#prebuilt">
+                            <?php _e('Prebuilt Layouts', 'siteorigin-panels') ?>
+                        </a>
+                    </li>
 				<?php endif; ?>
 				
 				<?php

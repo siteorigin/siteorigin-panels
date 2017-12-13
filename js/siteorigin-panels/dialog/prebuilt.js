@@ -160,7 +160,13 @@ module.exports = panels.view.dialog.extend( {
 		// Handle exporting the file
 		c.find( '.so-export' ).submit( function ( e ) {
 			var $$ = $( this );
-			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( thisView.builder.model.getPanelsData() ) );
+			var panelsData = thisView.builder.model.getPanelsData();
+			var postName = $('input[name="post_title"]').val();
+			if ( ! postName ) {
+				postName = $('input[name="post_ID"]').val();
+			}
+			panelsData.name = postName;
+			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( panelsData ) );
 		} );
 
 	},
@@ -343,14 +349,15 @@ module.exports = panels.view.dialog.extend( {
 			panelsOptions.ajaxurl,
 			args,
 			function ( layout ) {
-				if ( layout.error !== undefined ) {
-					// There was an error
-					alert( layout.error );
-					deferredLayout.reject( layout );
+				var msg = '';
+				if ( ! layout.success ) {
+					msg = layout.data.message;
+					deferredLayout.reject( layout.data );
 				} else {
-					this.setStatusMessage( '', false );
-					deferredLayout.resolve( layout );
+					deferredLayout.resolve( layout.data );
 				}
+				this.setStatusMessage( msg, false, ! layout.success );
+				this.updateButtonState( true );
 			}.bind( this )
 		);
 		return deferredLayout.promise();

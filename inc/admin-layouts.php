@@ -12,6 +12,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 	function __construct() {
 		// Filter all the available external layout directories.
 		add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_directories' ), 8 );
+		// Filter all the available local layout folders.
+		add_filter( 'siteorigin_panels_prebuilt_layouts', array( $this, 'get_local_layouts' ), 8 );
 		
 		add_action( 'wp_ajax_so_panels_layouts_query', array( $this, 'action_get_prebuilt_layouts' ) );
 		add_action( 'wp_ajax_so_panels_get_layout', array( $this, 'action_get_prebuilt_layout' ) );
@@ -60,12 +62,66 @@ class SiteOrigin_Panels_Admin_Layouts {
 		return $directories;
 	}
 	
+	
 	/**
-	 * Gets all the prebuilt layouts
+	 * Looks through local folders in the active theme and any others filtered in by theme and plugins, to find JSON
+	 * prebuilt layouts.
+	 *
+	 */
+	public function get_local_layouts() {
+		
+		// By default we'll look for layouts in a directory in the active theme
+		$layout_folders = array( get_template_directory() . '/siteorigin-page-builder-layouts' );
+		
+		// And the child theme if there is one.
+		if ( is_child_theme() ) {
+			$layout_folders[] = get_stylesheet_directory() . '/siteorigin-page-builder-layouts';
+		}
+		
+		// This allows themes and plugins to customize where we look for layouts.
+		$layout_folders = apply_filters( 'siteorigin_panels_local_layouts_directories', $layout_folders );
+		
+		$layouts = array();
+		foreach ( $layout_folders as $folder ) {
+			$files = array();
+			if ( file_exists( $folder ) && is_dir( $folder ) ) {
+				$files = list_files( $folder, 1 );
+			}
+			
+			foreach ( $files as $file ) {
+				$panels_data = json_decode( file_get_contents( $file ), true );
+				if ( ! ( empty( $panels_data['id'] ) && empty( $panels_data['name'] ) ) ) {
+					$name = isset( $panels_data['id'] ) ? $panels_data['id'] : $panels_data['name'];
+					$paths = glob( $folder . "/$name.{jpg,jpeg,gif,png}", GLOB_BRACE );
+					// Highlander Condition. There can be only one.
+					$screenshot_path = empty( $paths ) ? '' : $paths[0];
+					$screenshot_url = '';
+					if ( empty( $panels_data['screenshot'] ) &&
+						 file_exists( $screenshot_path ) &&
+						 strrpos( $screenshot_path, wp_normalize_path( WP_CONTENT_DIR ) ) === 0 ) {
+						$screenshot_url = str_replace(
+							wp_normalize_path( WP_CONTENT_DIR ),
+							content_url(),
+							$screenshot_path
+						);
+					}
+					if ( ! empty( $screenshot_url ) ) {
+						$panels_data['screenshot'] = $screenshot_url;
+					}
+					$layouts[ sanitize_title_with_dashes( $name ) ] = $panels_data;
+				}
+			}
+		}
+		
+		return $layouts;
+	}
+	
+	/**
+	 * Gets all the prebuilt layouts.
 	 */
 	function action_get_prebuilt_layouts() {
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
-			wp_die();
+			wp_die( __( 'Invalid request.', 'siteorigin-panels' ), 403 );
 		}
 		
 		// Get any layouts that the current user could edit.
@@ -148,7 +204,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			// Check that the user can view the given page types
 			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
 			if( empty( $post_type ) ) {
-				return;
+				 return;
 			}
 			
 			$return['title'] = sprintf( __( 'Clone %s', 'siteorigin-panels' ), esc_html( $post_type->labels->singular_name ) );
@@ -220,8 +276,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$lid = ! empty( $_REQUEST['lid'] ) ? $_REQUEST['lid'] : false;
 			
 			if ( empty( $lid ) || empty( $layouts[ $lid ] ) ) {
-				// Display an error message
-				wp_die();
+				wp_send_json_error( array(
+					'error'   => true,
+					'message' => __( 'Missing layout ID or no such layout exists', 'siteorigin-panels' ),
+				) );
 			}
 			
 			$layout = $layouts[ $_REQUEST['lid'] ];
@@ -264,7 +322,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 					// For now, we'll just pretend to load this
 					$panels_data = json_decode( $response['body'], true );
 				} else {
-					// Display some sort of error message
+					wp_send_json_error( array(
+						'error'   => true,
+						'message' => __( 'There was a problem fetching the layout. Please try again later.', 'siteorigin-panels' ),
+					) );
 				}
 			}
 			$raw_panels_data = true;
@@ -279,8 +340,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 		}
 		
-		echo json_encode( $panels_data );
-		wp_die();
+		wp_send_json_success( $panels_data );
 	}
 	
 	/**
@@ -308,15 +368,26 @@ class SiteOrigin_Panels_Admin_Layouts {
 			wp_die();
 		}
 		
-		header( 'content-type: application/json' );
-		header( 'Content-Disposition: attachment; filename=layout-' . date( 'dmY' ) . '.json' );
-		
 		$export_data = wp_unslash( $_POST['panels_export_data'] );
+		
+		$decoded_export_data = json_decode( $export_data, true );
+		
+		if ( ! empty( $decoded_export_data['name'] ) ) {
+			$decoded_export_data['id'] = sanitize_title_with_dashes( $decoded_export_data['name'] );
+			$filename = $decoded_export_data['id'];
+		} else {
+			$filename = 'layout-' . date( 'dmY' );
+		}
+		
+		
+		header( 'content-type: application/json' );
+		header( "Content-Disposition: attachment; filename=$filename.json" );
+		
 		echo $export_data;
 		
 		wp_die();
 	}
-	
+
 	/**
 	 * Enable the directory.
 	 */
@@ -327,5 +398,27 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$user = get_current_user_id();
 		update_user_meta( $user, 'so_panels_directory_enabled', true );
 		wp_die();
+	}
+
+	/**
+	 * Load a layout from a json file
+	 *
+	 * @param $id
+	 * @param $name
+	 * @param $json_file
+	 * @param bool $screenshot
+	 *
+	 * @return array The data for the layout
+	 */
+	public static function load_layout($id, $name, $json_file, $screenshot = false) {
+		$layout_data = json_decode(file_get_contents($json_file), true);
+		$layout_data = apply_filters('siteorigin_panels_load_layout_' . $id, $layout_data);
+
+		$layout_data = array_merge(array(
+			'name' => $name,
+			'screenshot' => $screenshot,
+		), $layout_data);
+
+		return $layout_data;
 	}
 }
