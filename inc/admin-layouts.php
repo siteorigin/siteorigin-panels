@@ -142,12 +142,16 @@ class SiteOrigin_Panels_Admin_Layouts {
 		} else {
 			$paths = glob( $folder_path . "/$file_name.{jpg,jpeg,gif,png}", GLOB_BRACE );
 			// Highlander Condition. There can be only one.
-			$screenshot_path = empty( $paths ) ? '' : $paths[0];
+			$screenshot_path = empty( $paths ) ? '' : wp_normalize_path( $paths[0] );
+			$wp_content_dir = wp_normalize_path( WP_CONTENT_DIR );
+			$screenshot_url = '';
 			if ( file_exists( $screenshot_path ) &&
-			     strrpos( $screenshot_path, wp_normalize_path( WP_CONTENT_DIR ) ) === 0 ) {
+			     strrpos( $screenshot_path, $wp_content_dir ) === 0 ) {
 				
-				return str_replace( wp_normalize_path( WP_CONTENT_DIR ), content_url(), $screenshot_path );
+				$screenshot_url = str_replace( $wp_content_dir, content_url(), $screenshot_path );
 			}
+			
+			return $screenshot_url;
 		}
 	}
 	
