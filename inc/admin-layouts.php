@@ -113,6 +113,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 					$panels_data['name'] = $file_name;
 				}
 				
+				$panels_data['name'] = sanitize_text_field( $panels_data['name'] );
+				
 				// get screenshot: check for screenshot prop else try use image file with same filename.
 				$panels_data['screenshot'] = $this->get_layout_file_screenshot( $panels_data, $folder, $file_name );
 				
