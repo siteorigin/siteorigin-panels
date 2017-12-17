@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.0 - 17 December 2017 =
+* Load prebuilt layout JSON files found in themes!
+* Allow post types with numeric slugs.
+* Add a filter for inline styles.
+
 = 2.5.16 - 22 November 2017 =
 * Disabled the Content Cache feature until we've resolved all issues and conflicts.
 
