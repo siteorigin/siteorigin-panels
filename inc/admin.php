@@ -1105,4 +1105,31 @@ class SiteOrigin_Panels_Admin {
 		return $strings;
 	}
 
+	/**
+	 * Display links for various SiteOrigin addons
+	 */
+	public static function display_footer_premium_link(){
+		$links = array(
+			array(
+				'text' => __('Get a lightbox addon for SiteOrigin widgets', 'siteorigin-panels'),
+				'url' => SiteOrigin_Panels::premium_url('plugin/lightbox')
+			),
+			array(
+				'text' => __('Get the row, cell and widget animations addon', 'siteorigin-panels'),
+				'url' => SiteOrigin_Panels::premium_url('plugin/lightbox')
+			),
+			array(
+				'text' => __('Get premium email support for SiteOrigin Page Builder', 'siteorigin-panels'),
+				'url' => SiteOrigin_Panels::premium_url()
+			),
+		);
+		$link = $links[array_rand($links)];
+
+		?>
+        <a href="<?php echo esc_url( $link['url'] ) ?>" target="_blank" rel='noopener noreferrer'>
+			<?php echo esc_html( $link['text'] ) ?>.
+        </a>
+		<?php
+	}
+
 }
