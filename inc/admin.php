@@ -433,7 +433,7 @@ class SiteOrigin_Panels_Admin {
 						$widget_obj->enqueue_admin_scripts();
 					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
-					ob_clean();
+					ob_end_clean();
 					
 					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
 					if ( $this->is_js_widget( $widget_obj ) ) {
