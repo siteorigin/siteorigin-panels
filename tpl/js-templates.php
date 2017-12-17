@@ -63,20 +63,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-panels-welcome-message">
 			<div class="so-message-wrapper">
 				<?php
-                printf(
-                    __( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
-                    "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
-                    "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
-                    "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
-                    "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
-                );
+				printf(
+					__( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
+					"<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
+					"<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
+					"<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
+					"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+				);
 				?>
 			</div>
 
 			<?php if( SiteOrigin_Panels::display_premium_teaser() ) : ?>
 				<div class="so-tip-wrapper">
 					<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
-                    <?php SiteOrigin_Panels_Admin::display_footer_premium_link() ?>
+					<?php SiteOrigin_Panels_Admin::display_footer_premium_link() ?>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -112,8 +112,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 								?>
 								<div data-color-label="<?php echo esc_attr( $i ); ?>"
-							         class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorLabel == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
-							         ></div>
+									class="<?php echo esc_attr( implode( ' ', $classes ) ) ?>{{% if( rowColorLabel == '<?php echo esc_attr( $i ); ?>' ) print(' so-row-color-selected'); %}}"
+									></div>
 								<?php
 							}
 							?>
@@ -387,10 +387,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<ul class="so-sidebar-tabs">
 				<?php if( !empty( $layouts ) ) : ?>
 					<li>
-                        <a href="#prebuilt">
-                            <?php _e('Prebuilt Layouts', 'siteorigin-panels') ?>
-                        </a>
-                    </li>
+						<a href="#prebuilt"><?php _e('Prebuilt Layouts', 'siteorigin-panels') ?></a>
+					</li>
 				<?php endif; ?>
 				
 				<?php
