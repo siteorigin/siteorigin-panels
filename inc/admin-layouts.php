@@ -89,31 +89,70 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 			
 			foreach ( $files as $file ) {
-				$panels_data = json_decode( file_get_contents( $file ), true );
-				if ( ! ( empty( $panels_data['id'] ) && empty( $panels_data['name'] ) ) ) {
-					$name = isset( $panels_data['id'] ) ? $panels_data['id'] : $panels_data['name'];
-					$paths = glob( $folder . "/$name.{jpg,jpeg,gif,png}", GLOB_BRACE );
-					// Highlander Condition. There can be only one.
-					$screenshot_path = empty( $paths ) ? '' : $paths[0];
-					$screenshot_url = '';
-					if ( empty( $panels_data['screenshot'] ) &&
-						 file_exists( $screenshot_path ) &&
-						 strrpos( $screenshot_path, wp_normalize_path( WP_CONTENT_DIR ) ) === 0 ) {
-						$screenshot_url = str_replace(
-							wp_normalize_path( WP_CONTENT_DIR ),
-							content_url(),
-							$screenshot_path
-						);
-					}
-					if ( ! empty( $screenshot_url ) ) {
-						$panels_data['screenshot'] = $screenshot_url;
-					}
-					$layouts[ sanitize_title_with_dashes( $name ) ] = $panels_data;
+				// get file mime type
+				$mime_type = mime_content_type( $file );
+				
+				// skip non text files.
+				if ( strpos( $mime_type, 'text/' ) !== 0 ) {
+					continue;
 				}
+				
+				// get file contents
+				$file_contents = file_get_contents( $file );
+				// json decode
+				$panels_data = json_decode( $file_contents, true );
+				
+				// get file name by stripping out folder path and .json extension
+				$file_name = str_replace( $folder . '/' , '', $file );
+				$file_name = str_replace( '.json', '', $file_name );
+				
+				// get name: check for id or name else use filename
+				$panels_data['id'] = sanitize_title_with_dashes( $this->get_layout_id( $panels_data, $file_name ) );
+				
+				if ( empty( $panels_data['name'] ) ) {
+					$panels_data['name'] = $file_name;
+				}
+				
+				$panels_data['name'] = sanitize_text_field( $panels_data['name'] );
+				
+				// get screenshot: check for screenshot prop else try use image file with same filename.
+				$panels_data['screenshot'] = $this->get_layout_file_screenshot( $panels_data, $folder, $file_name );
+				
+				// set item on layouts array
+				$layouts[ $panels_data['id'] ] = $panels_data;
 			}
 		}
 		
 		return $layouts;
+	}
+	
+	private function get_layout_id( $layout_data, $fallback ) {
+		if ( ! empty( $layout_data['id'] ) ) {
+			return $layout_data['id'];
+		} else if ( ! empty( $layout_data['name'] ) ) {
+			return $layout_data['name'];
+		} else {
+			return $fallback;
+		}
+	}
+	
+	private function get_layout_file_screenshot( $panels_data, $folder_path, $file_name ) {
+		if ( ! empty( $panels_data['screenshot'] ) ) {
+			return $panels_data['screenshot'];
+		} else {
+			$paths = glob( $folder_path . "/$file_name.{jpg,jpeg,gif,png}", GLOB_BRACE );
+			// Highlander Condition. There can be only one.
+			$screenshot_path = empty( $paths ) ? '' : wp_normalize_path( $paths[0] );
+			$wp_content_dir = wp_normalize_path( WP_CONTENT_DIR );
+			$screenshot_url = '';
+			if ( file_exists( $screenshot_path ) &&
+			     strrpos( $screenshot_path, $wp_content_dir ) === 0 ) {
+				
+				$screenshot_url = str_replace( $wp_content_dir, content_url(), $screenshot_path );
+			}
+			
+			return $screenshot_url;
+		}
 	}
 	
 	/**

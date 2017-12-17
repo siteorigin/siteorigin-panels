@@ -485,7 +485,7 @@ class SiteOrigin_Panels {
 
 	static function display_learn_button() {
 		return siteorigin_panels_setting( 'display-learn' ) &&
-		       apply_filters( 'siteorigin_panels_learn', true );
+			   apply_filters( 'siteorigin_panels_learn', true );
 	}
 
 	/**
@@ -516,7 +516,7 @@ class SiteOrigin_Panels {
 		$url = 'https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels';
 		if( ! empty( $featured_addon ) ) {
 			$url = add_query_arg( 'featured_addon', urlencode( $featured_addon ), $url );
-        }
+		}
 		if( ! empty( $ref ) ) {
 			$url = add_query_arg( 'ref', urlencode( $ref ), $url );
 		}
