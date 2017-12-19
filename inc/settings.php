@@ -622,7 +622,7 @@ class SiteOrigin_Panels_Settings {
 			$types[ $type_id ] = $type_object->label;
 		}
 
-		return $types;
+		return apply_filters( 'siteorigin_panels_settings_enabled_post_types', $types );
 	}
 
 }
