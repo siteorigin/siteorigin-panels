@@ -43,7 +43,9 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			}
 		}
 
-		$widgets['SiteOrigin_Panels_Widgets_Layout']['icon'] = 'dashicons dashicons-analytics';
+		if ( ! empty( $widgets['SiteOrigin_Panels_Widgets_Layout'] ) ) {
+			$widgets['SiteOrigin_Panels_Widgets_Layout']['icon'] = 'dashicons dashicons-analytics';
+		}
 
 		$wordpress_widgets = array(
 			'WP_Widget_Pages',
