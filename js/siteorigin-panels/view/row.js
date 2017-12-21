@@ -67,16 +67,16 @@ module.exports = Backbone.View.extend( {
 			this.$el.addClass('so-row-no-actions');
 		}
 		else {
-			if( ! this.builder.supports( 'editWidget' ) ) {
-				this.$('.so-row-toolbar .so-row-settings' ).parent().remove();
+			if( ! this.builder.supports( 'editRow' ) ) {
+				this.$('.so-row-toolbar .so-dropdown-links-wrapper .so-row-settings' ).parent().remove();
 				this.$el.addClass('so-row-no-edit');
 			}
-			if( ! this.builder.supports( 'addWidget' ) ) {
-				this.$('.so-row-toolbar .so-row-duplicate' ).parent().remove();
+			if( ! this.builder.supports( 'addRow' ) ) {
+				this.$('.so-row-toolbar .so-dropdown-links-wrapper .so-row-duplicate' ).parent().remove();
 				this.$el.addClass('so-row-no-duplicate');
 			}
-			if( ! this.builder.supports( 'deleteWidget' ) ) {
-				this.$('.so-row-toolbar .so-row-delete' ).parent().remove();
+			if( ! this.builder.supports( 'deleteRow' ) ) {
+				this.$('.so-row-toolbar .so-dropdown-links-wrapper .so-row-delete' ).parent().remove();
 				this.$el.addClass('so-row-no-delete');
 			}
 		}
@@ -235,6 +235,9 @@ module.exports = Backbone.View.extend( {
 	 * Handle displaying the settings dialog
 	 */
 	editSettingsHandler: function () {
+		if ( ! this.builder.supports( 'editRow' ) ) {
+			return;
+		}
 		// Lets open up an instance of the settings dialog
 		if ( this.dialog === null ) {
 			// Create the dialog
