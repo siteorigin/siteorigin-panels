@@ -168,15 +168,41 @@ module.exports = Backbone.View.extend( {
 
 		// Hide toolbar buttons we don't support
 		var toolbar = this.$('.so-builder-toolbar');
+		var welcomeMessageContainer = this.$('.so-panels-welcome-message');
+        var welcomeMessage = panelsOptions.loc.welcomeMessage;
+
+        var supportedItems = [];
+
 		if( ! this.supports( 'addWidget' ) ) {
 			toolbar.find('.so-widget-add' ).hide();
-		}
+		} else {
+            supportedItems.push(welcomeMessage.addWidgetButton);
+        }
 		if( ! this.supports( 'addRow' ) ) {
 			toolbar.find('.so-row-add' ).hide();
+		} else {
+            supportedItems.push(welcomeMessage.addRowButton);
 		}
 		if( ! this.supports( 'prebuilt' ) ) {
 			toolbar.find('.so-prebuilt-add' ).hide();
+		} else {
+            supportedItems.push(welcomeMessage.addPrebuiltButton);
 		}
+
+        var msg = '';
+		if ( supportedItems.length === 3 ) {
+			msg = welcomeMessage.threeEnabled;
+        } else if ( supportedItems.length === 2 ) {
+            msg = welcomeMessage.twoEnabled;
+        } else if ( supportedItems.length === 1 ) {
+            msg = welcomeMessage.oneEnabled;
+        } else if ( supportedItems.length === 0 ) {
+            msg = welcomeMessage.addingDisabled;
+		}
+
+        var resTemplate = _.template( panels.helpers.utils.processTemplate( msg ) );
+        var msgHTML = resTemplate({items: supportedItems}) + ' ' + welcomeMessage.docsMessage;
+        welcomeMessageContainer.find('.so-message-wrapper').html( msgHTML );
 
 		return this;
 	},
