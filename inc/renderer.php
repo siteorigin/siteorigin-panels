@@ -80,12 +80,16 @@ class SiteOrigin_Panels_Renderer {
 			// Add the cell sizing
 			foreach( $row['cells'] as $ci => $cell ) {
 				$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $row, $ri, $cell, $ci - 1, $panels_data, $post_id );
-
+				$rounded_width = round( $weight * 100, 4 ) . '%';
+                $calc_width = 'calc(' . $rounded_width . ' - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )';
 				// Add the width and ensure we have correct formatting for CSS.
 				$css->add_cell_css( $post_id, $ri, $ci, '', array(
 					'width' => array(
-						round( $weight * 100, 4 ) . '%',
-						'calc(' . round( $weight * 100, 4 ) . '% - ( ' . ( 1 - $weight ) . ' * ' . $gutter . ' ) )',
+                        // For some locales PHP uses ',' for decimal separation.
+                        // This seems to happen when a plugin calls `setlocale(LC_ALL, 'de_DE');` or `setlocale(LC_NUMERIC, 'de_DE');`
+                        // This should prevent issues with column sizes in these cases.
+						str_replace( ',', '.', $rounded_width ),
+						str_replace( ',', '.', $calc_width ),
 					)
 				) );
 			}
