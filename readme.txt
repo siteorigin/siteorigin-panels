@@ -96,6 +96,15 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.1 - 18 January 2018 =
+* Switch off output buffering when enqueueing admin scripts.
+* Prevent custom post types from showing in the settings list.
+* Make sure 'SiteOrigin_Panels_Widgets_Layout' exists before setting icon for widgets lists.
+* Hide individual action links when features disabled and prevent editing by clicking directly on spanner when edit row disabled.
+* Adapt PB welcome message when some features not supported.
+* Column width CSS output correctly for locales which use ',' as decimal separator.
+* Fixed prebuilt layout directory items.
+
 = 2.6.0 - 17 December 2017 =
 * Load prebuilt layout JSON files found in themes!
 * Allow post types with numeric slugs.
