@@ -1501,6 +1501,8 @@
 					padding: 6px;
 
 					.so-directory-item-wrapper {
+						display: flex;
+						flex-flow: column nowrap;
 						height: 100%;
 						box-sizing: border-box;
 						padding: 15px 10px;
@@ -1515,11 +1517,8 @@
 					}
 
 					.so-screenshot {
-						// This is an escaped string to prevent LESS compilation from messing with the calc.
-						height: ~"calc(100% - 50px)";
-						background: #ffffff;
+						flex: 3 auto;
 						margin-bottom: 10px;
-						border: 1px solid #d0d0d0;
 						cursor: pointer;
 
 						&.so-loading {
@@ -1544,22 +1543,31 @@
 						.so-screenshot-wrapper {
 							display: block;
 							min-height: 40px;
+							background: #808080;
+							border: 1px solid #d0d0d0;
 						}
 					}
 
 					.so-description {
+						flex: 1 auto;
 						font-size: 0.9em;
 						color: #666;
 						margin-bottom: 10px;
+						max-height: 60px;
+						overflow: hidden;
 					}
 
 					.so-bottom {
+						flex: 1 auto;
 						position: relative;
+						max-height: 50px;
 
 						.so-title {
 							margin: 0;
 							padding: 16px 10px;
 							cursor: pointer;
+							overflow: hidden;
+							white-space: nowrap;
 						}
 
 						.so-buttons {

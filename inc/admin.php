@@ -403,7 +403,20 @@ class SiteOrigin_Panels_Admin {
 					'row' => array(
 						'add' => __( 'New Row', 'siteorigin-panels' ),
 						'edit' => __( 'Row', 'siteorigin-panels' ),
-					)
+					),
+					'welcomeMessage' => array(
+						'addingDisabled' => __( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),
+                        'oneEnabled' => __( 'Add a {{%= items[0] %}} to get started.', 'siteorigin-panels' ),
+                        'twoEnabled' => __( 'Add a {{%= items[0] %}} or {{%= items[1] %}} to get started.', 'siteorigin-panels' ),
+                        'threeEnabled' => __( 'Add a {{%= items[0] %}}, {{%= items[1] %}} or {{%= items[2] %}} to get started.', 'siteorigin-panels' ),
+                        'addWidgetButton' => "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
+                        'addRowButton' => "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
+                        'addPrebuiltButton' => "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
+                        'docsMessage' => sprintf(
+                                __( 'Read our %s if you need help.', 'siteorigin-panels' ),
+                            "<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+                        ),
+					),
 				),
 				'plupload'                  => array(
 					'max_file_size'       => wp_max_upload_size() . 'b',
@@ -433,7 +446,7 @@ class SiteOrigin_Panels_Admin {
 						$widget_obj->enqueue_admin_scripts();
 					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
-					ob_clean();
+					ob_end_clean();
 					
 					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
 					if ( $this->is_js_widget( $widget_obj ) ) {
