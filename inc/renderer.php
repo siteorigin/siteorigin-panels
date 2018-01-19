@@ -667,10 +667,14 @@ class SiteOrigin_Panels_Renderer {
 		if ( ! empty( $row_style_wrapper ) ) {
 			echo $row_style_wrapper;
 		}
+		
+		echo apply_filters( 'siteorigin_panels_before_cells', '', $row, $row_attributes );
 
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
+		
+		echo apply_filters( 'siteorigin_panels_after_cells', '', $row, $row_attributes );
 
 		// Close the style wrapper
 		if ( ! empty( $row_style_wrapper ) ) {
