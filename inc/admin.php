@@ -61,6 +61,8 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Layouts::single();
 
 		$this->in_save_post = false;
+
+		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
 	}
 
 	/**
@@ -1145,4 +1147,13 @@ class SiteOrigin_Panels_Admin {
 		<?php
 	}
 
+	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
+		$screen = get_current_screen();
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+
+		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
+
+		return ! $is_panels_page && $can_edit;
+	}
 }
