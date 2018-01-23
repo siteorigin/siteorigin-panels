@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.2 - 23 January 2018 =
+* Prevent Gutenberg from taking over existing PB pages.
+* Remove PB metaboxes from Gutenberg editor.
+
 = 2.6.1 - 18 January 2018 =
 * Switch off output buffering when enqueueing admin scripts.
 * Prevent custom post types from showing in the settings list.
