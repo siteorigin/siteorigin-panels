@@ -61,6 +61,9 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Layouts::single();
 
 		$this->in_save_post = false;
+
+		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
+		add_filter( 'filter_gutenberg_meta_boxes', array( $this, 'disable_panels_for_gutenberg_posts' ) );
 	}
 
 	/**
@@ -1144,5 +1147,42 @@ class SiteOrigin_Panels_Admin {
         </a>
 		<?php
 	}
+	
+	/**
+	 * Disable the Gutenberg editor for existing PB posts.
+	 *
+	 * @param $can_edit
+	 * @param $post_type
+	 *
+	 * @return bool
+	 */
+	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
+		$screen = get_current_screen();
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
 
+		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
+
+		return ! $is_panels_page && $can_edit;
+	}
+	
+	/**
+	 * Disable PB when we're in the Gutenberg editor.
+	 *
+	 * @param $wp_meta_boxes
+	 *
+	 * @return mixed
+	 */
+	public function disable_panels_for_gutenberg_posts( $wp_meta_boxes ) {
+		foreach ( $wp_meta_boxes as &$locations ) {
+			foreach ( $locations as &$priorities ) {
+				foreach ( $priorities as &$boxes ) {
+					unset( $boxes['so-panels-panels'] );
+					unset( $boxes['siteorigin_page_settings'] );
+
+				}
+			}
+		}
+		return $wp_meta_boxes;
+	}
 }
