@@ -454,19 +454,6 @@ module.exports = Backbone.View.extend( {
 						return;
 					}
 				}
-				else if ( $$.prop( 'tagName' ) === 'TEXTAREA' && $$.hasClass( 'wp-editor-area' ) ) {
-					// This is a TinyMCE editor, so we'll use the tinyMCE object to get the content
-					var editor = null;
-					if ( typeof tinyMCE !== 'undefined' ) {
-						editor = tinyMCE.get( $$.attr( 'id' ) );
-					}
-
-					if ( editor !== null && _.isFunction( editor.getContent ) && ! editor.isHidden() ) {
-						fieldValue = editor.getContent();
-					} else {
-						fieldValue = $$.val();
-					}
-				}
 				else if ( $$.prop( 'tagName' ) === 'SELECT' ) {
 					var selected = $$.find( 'option:selected' );
 
