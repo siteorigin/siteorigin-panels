@@ -276,7 +276,7 @@ class SiteOrigin_Panels {
 		$post_id = get_the_ID();
 		// If we're viewing a preview make sure we load and render the autosave post's meta.
 		if ( $preview ) {
-			$preview_post = wp_get_post_autosave( $post_id );
+			$preview_post = wp_get_post_autosave( $post_id, get_current_user_id() );
 			if ( ! empty( $preview_post ) ) {
 				$post_id = $preview_post->ID;
 			}
