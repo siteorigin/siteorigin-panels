@@ -435,6 +435,7 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Set the field that's used to store the data
 	 * @param field
+	 * @param options
 	 */
 	setDataField: function ( field, options ) {
 		options = _.extend( {
@@ -453,12 +454,29 @@ module.exports = Backbone.View.extend( {
 				data = {};
 			}
 			
-			this.model.loadPanelsData( data );
-			this.currentData = data;
-			this.toggleWelcomeDisplay();
+			this.setData( data );
 		}
 		
 		return this;
+	},
+	
+	/**
+	 * Set the current panels data to be used.
+	 *
+	 * @param data
+	 */
+	setData: function( data ) {
+		this.model.loadPanelsData( data );
+		this.currentData = data;
+		this.toggleWelcomeDisplay();
+	},
+	
+	/**
+	 * Get the current panels data.
+	 *
+	 */
+	getData: function() {
+		return this.model.get( 'data' );
 	},
 	
 	/**

@@ -69,6 +69,10 @@ class SiteOrigin_Panels {
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
 		
+		if ( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '2.0.0', '>=' ) ) {
+			SiteOrigin_Panels_Compat_Gutenberg_Block::single();
+		}
+		
 		
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
@@ -134,6 +138,10 @@ class SiteOrigin_Panels {
 			$filename = str_replace( '_', '-', $filename );
 			$filename = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $filename ) );
 			$filename = plugin_dir_path( __FILE__ ) . 'inc/widgets/' . $filename . '.php';
+		}
+		else if ( strpos( $class, 'SiteOrigin_Panels_Compat_' ) === 0 ) {
+			$filename = str_replace( array( 'SiteOrigin_Panels_Compat_', '_' ), array( '', '-' ), $class );
+			$filename = plugin_dir_path( __FILE__ ) . 'compat/' . strtolower( $filename ) . '.php';
 		}
 		else if ( strpos( $class, 'SiteOrigin_Panels_' ) === 0 ) {
 			$filename = str_replace( array( 'SiteOrigin_Panels_', '_' ), array( '', '-' ), $class );
