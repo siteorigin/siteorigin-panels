@@ -36,7 +36,6 @@
 					var $panelsContainer = jQuery( panelsContainer );
 					
 					var config = {
-							loadLiveEditor: false,
 							editorType: 'standalone'
 						};
 					
