@@ -654,7 +654,7 @@
 
 }
 
-.so-panels-dialog {
+.so-panels-dialog, .gutenberg {
 
 	@edge_spacing: 30px;
 
@@ -1859,9 +1859,9 @@
 		}
 	}
 
-	/* Special case of the builder interface being inside a dialog */
+	/* Special case of the builder interface being inside a dialog, or gutenberg editor. */
 
-	.so-content {
+	.so-content, .siteorigin-panels-layout-block-container {
 		.siteorigin-panels-builder {
 			.so-builder-toolbar {
 				border: 1px solid #dedede;
@@ -1875,6 +1875,17 @@
 				padding-left: 0;
 				padding-right: 0;
 			}
+		}
+	}
+
+	/* Styles for PB in Gutenberg editor. */
+	.siteorigin-panels-layout-block-container {
+		font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
+		font-size: 13px;
+		line-height: 1.4em;
+
+		ul {
+			list-style: none;
 		}
 	}
 

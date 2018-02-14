@@ -83,7 +83,7 @@
 				),
 				el( 'div', {
 					key: 'pageBuilder',
-					className: 'siteorigin-panels-layout-container',
+					className: 'siteorigin-panels-layout-block-container',
 					ref: setupPanels,
 				} )
 			];
