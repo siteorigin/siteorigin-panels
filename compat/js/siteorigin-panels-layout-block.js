@@ -2,8 +2,10 @@
 	
 	var el = element.createElement;
 	var BlockControls = blocks.BlockControls;
+	var withAPIData = components.withAPIData;
 	var withState = components.withState;
 	var IconButton = components.IconButton;
+	var Spinner  = components.Spinner;
 	var __ = i18n.__;
 	
 	blocks.registerBlockType( 'siteorigin-panels/layout-block', {
@@ -24,11 +26,32 @@
 		edit: withState( {
 			editing: true,
 			panelsInitialized: false,
-		} )( function ( props ) {
+		} )( withAPIData( function( props ) {
+				var toGet = {};
+				
+				if ( props.attributes.panelsData ) {
+					if ( ! props.editing ) {
+						var data = props.attributes.panelsData || {};
+						toGet.preview = '/so-panels/v1/layouts/previews';
+						toGet.preview += '?panelsData=' + encodeURIComponent( JSON.stringify( data ) );
+					}
+				} else if ( ! props.editing ) {
+					props.setState( { editing: true } );
+				}
+				
+				return toGet;
+			} )( function ( props ) {
 			var editing = props.editing;
+			var loadingPreview = !!props.preview && !props.preview.data;
 			
 			function togglePreview() {
-				console.log( 'Toggle Preview ' );
+				props.setState( { editing: ! editing, panelsInitialized: editing } );
+			}
+			
+			function setupPreview() {
+				if ( ! editing ) {
+					$( document ).trigger( 'panels_setup_preview' );
+				}
 			}
 			
 			function setupPanels( panelsContainer ) {
@@ -65,28 +88,60 @@
 					props.setState( { panelsInitialized: true } );
 				}
 			}
-			
-			return [
-				!! props.focus && el(
-					BlockControls,
-					{ key: 'controls' },
+			if ( editing ) {
+				return [
+					!!props.focus && el(
+						BlockControls,
+						{ key: 'controls' },
+						el(
+							IconButton,
+							{
+								className: 'components-icon-button components-toolbar__control',
+								label: __( 'Preview layout.', 'siteorigin-panels' ),
+								onClick: togglePreview,
+								icon: 'visibility'
+							}
+						)
+					),
+					el( 'div', {
+						key: 'pageBuilder',
+						className: 'siteorigin-panels-layout-block-container',
+						ref: setupPanels,
+					} )
+				];
+			} else {
+				var preview = props.preview ? props.preview.data : '';
+				return [
+					!! props.focus && el(
+						BlockControls,
+						{ key: 'controls' },
+						el(
+							IconButton,
+							{
+								className: 'components-icon-button components-toolbar__control',
+								label: __( 'Edit layout.', 'siteorigin-panels' ),
+								onClick: togglePreview,
+								icon: 'edit'
+							}
+						)
+					),
 					el(
-						IconButton,
+						'div',
 						{
-							className: 'components-icon-button components-toolbar__control',
-							label: editing ? __( 'Edit layout.', 'siteorigin-panels' ) : __( 'Preview layout.', 'siteorigin-panels' ),
-							onClick: togglePreview,
-							icon: editing ? 'visibility' : 'edit'
-						}
+							key: 'preview',
+							className: 'so-panels-gutenberg-layout-preview-container'
+						},
+						( loadingPreview ?
+								el( Spinner ) :
+								el( 'div', {
+									dangerouslySetInnerHTML: { __html: preview },
+									ref: setupPreview,
+								} )
+						)
 					)
-				),
-				el( 'div', {
-					key: 'pageBuilder',
-					className: 'siteorigin-panels-layout-block-container',
-					ref: setupPanels,
-				} )
-			];
-		} ),
+				];
+			}
+		} ) ),
 		
 		save: function () {
 			// Render in PHP
