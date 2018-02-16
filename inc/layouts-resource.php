@@ -66,15 +66,7 @@ class SiteOrigin_Panels_Layouts_Resource extends WP_REST_Controller {
 		
 		$builder_id = 'gbp' . uniqid();
 		
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data );
-		
-		$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-		$widget_css .= SiteOrigin_Panels::renderer()->generate_css( $builder_id, $panels_data, $layout_data );
-		$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
-		$rendered_layout .= "\n\n" .
-			 '<style type="text/css" class="panels-style" data-panels-style-for-post="' . esc_attr( $builder_id ) . '">' .
-			 $widget_css .
-			 '</style>';
+		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
 		
 		return rest_ensure_response( $rendered_layout );
 	}
