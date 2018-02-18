@@ -258,6 +258,7 @@ module.exports = Backbone.View.extend( {
 
 		this.refreshSortable();
 		this.row.resize();
+		this.row.builder.trigger( 'widget_added' );
 	},
 
 	/**

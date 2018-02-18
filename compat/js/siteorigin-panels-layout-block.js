@@ -71,7 +71,28 @@
 					
 					// Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
 					var panelsData = JSON.parse( JSON.stringify( $.extend( {}, props.attributes.panelsData ) ) );
-	
+					
+					// Disable Gutenberg block selection while dragging rows or widgets.
+					function disableSelection() {
+						props.toggleSelection( false );
+						$( document ).on( 'mouseup', function enableSelection() {
+							props.toggleSelection( true );
+							$( document ).off( 'mouseup', enableSelection );
+						} );
+					}
+					
+					builderView.on( 'row_added', function() {
+						builderView.$( '.so-row-move' ).off( 'mousedown', disableSelection );
+						builderView.$( '.so-row-move' ).on( 'mousedown', disableSelection );
+						builderView.$( '.so-widget' ).off( 'mousedown', disableSelection );
+						builderView.$( '.so-widget' ).on( 'mousedown', disableSelection );
+					} );
+					
+					builderView.on( 'widget_added', function() {
+						builderView.$( '.so-widget' ).off( 'mousedown', disableSelection );
+						builderView.$( '.so-widget' ).on( 'mousedown', disableSelection );
+					} );
+					
 					builderView
 					.render()
 					.attach( {

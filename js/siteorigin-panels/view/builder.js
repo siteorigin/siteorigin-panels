@@ -524,6 +524,7 @@ module.exports = Backbone.View.extend( {
 		
 		this.refreshSortable();
 		rowView.resize();
+		this.trigger( 'row_added' );
 	},
 	
 	/**
