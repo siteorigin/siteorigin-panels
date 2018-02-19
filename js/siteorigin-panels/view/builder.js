@@ -396,26 +396,45 @@ module.exports = Backbone.View.extend( {
 			appendTo: '#wpwrap',
 			items: '.so-row-container',
 			handle: '.so-row-move',
+			connectWith: '.so-rows-container', // For Gutenberg, where it's possible to have multiple Page Builder blocks on a page.
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,
-			stop: function ( e, ui ) {
-				builderView.addHistoryEntry( 'row_moved' );
-				
-				var $$ = $( ui.item ),
-					row = $$.data( 'view' );
-				
-				builderView.model.get( 'rows' ).remove( row.model, {
-					'silent': true
-				} );
-				builderView.model.get( 'rows' ).add( row.model, {
-					'silent': true,
-					'at': $$.index()
-				} );
-				
-				row.trigger( 'move', $$.index() );
-				
+			remove: function ( e, ui ) {
+				builderView.model.get( 'rows' ).remove(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true }
+				);
 				builderView.model.refreshPanelsData();
+			},
+			receive: function ( e, ui ) {
+				builderView.model.get( 'rows' ).add(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true, at: $( ui.item ).index() }
+				);
+				builderView.model.refreshPanelsData();
+			},
+			stop: function ( e, ui ) {
+				var $$ = $( ui.item ),
+					row = $$.data( 'view' ),
+					rows = builderView.model.get( 'rows' );
+				
+				// If this has already been removed and added to a different builder.
+				if ( rows.get( row.model ) ) {
+					builderView.addHistoryEntry( 'row_moved' );
+					
+					rows.remove( row.model, {
+						'silent': true
+					} );
+					rows.add( row.model, {
+						'silent': true,
+						'at': $$.index()
+					} );
+					
+					row.trigger( 'move', $$.index() );
+					
+					builderView.model.refreshPanelsData();
+				}
 			}
 		} );
 		
