@@ -927,7 +927,11 @@ module.exports = Backbone.View.extend( {
 		
 		// Only run this if its element is the topmost builder, in the topmost dialog
 		if (
-			builder.$el.is( topmostBuilder ) &&
+			(
+				builder.$el.is( topmostBuilder ) ||
+				builder.$el.parent().is( '.siteorigin-panels-layout-block-container' ) // Gutenberg builder
+			)
+				&&
 			(
 				topmostDialog.length === 0 ||
 				topmostDialog.is( closestDialog )
