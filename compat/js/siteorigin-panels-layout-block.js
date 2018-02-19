@@ -13,7 +13,14 @@
 		
 		description: __( 'Build a layout using SiteOrigin\'s Page Builder.', 'siteorigin-panels' ),
 		
-		icon: 'siteorigin-panels-icon',
+		icon: function() {
+			return el(
+				'span',
+				{
+					className: 'siteorigin-panels-gutenberg-icon'
+				}
+			)
+		},
 		
 		category: 'layout',
 		
