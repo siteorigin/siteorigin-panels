@@ -51,32 +51,50 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var cellView = this;
-
-		// Go up the view hierarchy until we find the ID attribute
-		var builderID = cellView.row.builder.$el.attr( 'id' );
+		
+		var builderModel = cellView.row.builder.model;
 
 		// Create a widget sortable that's connected with all other cells
 		this.widgetSortable = this.$( '.widgets-container' ).sortable( {
 			placeholder: "so-widget-sortable-highlight",
-			connectWith: '#' + builderID + ' .so-cells .cell .widgets-container',
+			connectWith: '.so-cells .cell .widgets-container',
 			tolerance: 'pointer',
 			scroll: false,
 			over: function ( e, ui ) {
 				// This will make all the rows in the current builder resize
 				cellView.row.builder.trigger( 'widget_sortable_move' );
 			},
+			remove: function ( e, ui ) {
+				cellView.model.get( 'widgets' ).remove(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true }
+				);
+				builderModel.refreshPanelsData();
+			},
+			receive: function ( e, ui ) {
+				cellView.model.get( 'widgets' ).add(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true, at: $( ui.item ).index() }
+				);
+				builderModel.refreshPanelsData();
+			},
 			stop: function ( e, ui ) {
-				cellView.row.builder.addHistoryEntry( 'widget_moved' );
-
 				var $$ =  $( ui.item ),
 					widget = $$.data( 'view' ),
 					targetCell = $$.closest( '.cell' ).data( 'view' );
-
-				// Move the model and the view to the new cell
-				widget.model.moveToCell( targetCell.model, {}, $$.index() );
-				widget.cell = targetCell;
-
-				widget.cell.row.builder.model.refreshPanelsData();
+				
+				
+				// If this hasn't already been removed and added to a different builder.
+				if ( cellView.model.get( 'widgets' ).get( widget.model ) ) {
+					
+					cellView.row.builder.addHistoryEntry( 'widget_moved' );
+					
+					// Move the model and the view to the new cell
+					widget.model.moveToCell( targetCell.model, {}, $$.index() );
+					widget.cell = targetCell;
+					
+					builderModel.refreshPanelsData();
+				}
 			},
 			helper: function ( e, el ) {
 				var helper = el.clone()

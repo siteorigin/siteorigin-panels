@@ -419,7 +419,7 @@ module.exports = Backbone.View.extend( {
 					row = $$.data( 'view' ),
 					rows = builderView.model.get( 'rows' );
 				
-				// If this has already been removed and added to a different builder.
+				// If this hasn't already been removed and added to a different builder.
 				if ( rows.get( row.model ) ) {
 					builderView.addHistoryEntry( 'row_moved' );
 					
