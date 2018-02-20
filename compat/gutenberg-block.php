@@ -18,9 +18,6 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_layout_block' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_layout_block_editor_assets' ) );
-		
-		add_filter( 'rest_pre_insert_post', array( $this, 'sanitize_panels_data' ) );
-		add_filter( 'rest_pre_insert_page', array( $this, 'sanitize_panels_data' ) );
 	}
 	
 	public function register_layout_block() {
@@ -45,24 +42,15 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 	
 	public function render_layout_block( $attributes ) {
 		$panels_data = $attributes['panelsData'];
+		$panels_data = $this->sanitize_panels_data( $panels_data );
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
 		return $rendered_layout;
 	}
 	
-	public function sanitize_panels_data( $post ) {
-		if ( gutenberg_content_has_blocks( $post->post_content ) ) {
-			$blocks = gutenberg_parse_blocks( $post->post_content );
-			foreach ( $blocks as &$block ) {
-				if ( isset( $block['blockName'] ) && $block['blockName'] == self::BLOCK_NAME ) {
-					$panels_data = $block['attrs']['panelsData'];
-					$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
-					$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-					$block['attrs']['panelsData'] = $panels_data;
-				}
-			}
-			$post->post_content = gutenberg_serialize_blocks( $blocks );
-		}
-		return $post;
+	private function sanitize_panels_data( $panels_data ) {
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		return $panels_data;
 	}
 }
