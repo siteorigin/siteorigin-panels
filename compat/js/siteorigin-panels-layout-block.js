@@ -24,6 +24,10 @@
 		
 		category: 'layout',
 		
+		supports: {
+			html: false,
+		},
+		
 		attributes: {
 			panelsData: {
 				type: 'object',
