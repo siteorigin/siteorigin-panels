@@ -4,6 +4,7 @@
 	var BlockControls = blocks.BlockControls;
 	var withAPIData = components.withAPIData;
 	var withState = components.withState;
+	var Toolbar = components.Toolbar;
 	var IconButton = components.IconButton;
 	var Spinner  = components.Spinner;
 	var __ = i18n.__;
@@ -126,13 +127,17 @@
 						BlockControls,
 						{ key: 'controls' },
 						el(
-							IconButton,
-							{
-								className: 'components-icon-button components-toolbar__control',
-								label: __( 'Preview layout.', 'siteorigin-panels' ),
-								onClick: togglePreview,
-								icon: 'visibility'
-							}
+							Toolbar,
+							null,
+							el(
+								IconButton,
+								{
+									className: 'components-icon-button components-toolbar__control',
+									label: __( 'Preview layout.', 'siteorigin-panels' ),
+									onClick: togglePreview,
+									icon: 'visibility'
+								}
+							)
 						)
 					),
 					el( 'div', {
@@ -148,13 +153,17 @@
 						BlockControls,
 						{ key: 'controls' },
 						el(
-							IconButton,
-							{
-								className: 'components-icon-button components-toolbar__control',
-								label: __( 'Edit layout.', 'siteorigin-panels' ),
-								onClick: togglePreview,
-								icon: 'edit'
-							}
+							Toolbar,
+							null,
+							el(
+								IconButton,
+								{
+									className: 'components-icon-button components-toolbar__control',
+									label: __( 'Edit layout.', 'siteorigin-panels' ),
+									onClick: togglePreview,
+									icon: 'edit'
+								}
+							)
 						)
 					),
 					el(
