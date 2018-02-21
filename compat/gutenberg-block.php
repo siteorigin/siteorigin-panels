@@ -41,6 +41,11 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 	}
 	
 	public function render_layout_block( $attributes ) {
+		if ( empty( $attributes['panelsData'] ) ) {
+			return '<div>'.
+				   __( 'You need to add a widget, row, or prebuilt layout before you\'ll see anything here. :)', 'siteorigin-panels' ) .
+				   '</div>';
+		}
 		$panels_data = $attributes['panelsData'];
 		$panels_data = $this->sanitize_panels_data( $panels_data );
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
