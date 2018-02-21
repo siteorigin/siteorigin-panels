@@ -72,8 +72,10 @@ module.exports = Backbone.View.extend( {
 				builderModel.refreshPanelsData();
 			},
 			receive: function ( e, ui ) {
+				var widgetModel = $( ui.item ).data( 'view' ).model;
+				widgetModel.cell = cellView.model;
 				cellView.model.get( 'widgets' ).add(
-					$( ui.item ).data( 'view' ).model,
+					widgetModel,
 					{ silent: true, at: $( ui.item ).index() }
 				);
 				builderModel.refreshPanelsData();
