@@ -2,7 +2,6 @@
 	
 	var el = element.createElement;
 	var BlockControls = blocks.BlockControls;
-	var withAPIData = components.withAPIData;
 	var withState = components.withState;
 	var Toolbar = components.Toolbar;
 	var IconButton = components.IconButton;
@@ -38,26 +37,30 @@
 		edit: withState( {
 			editing: true,
 			panelsInitialized: false,
-		} )( withAPIData( function( props ) {
-				var toGet = {};
-				
-				if ( props.attributes.panelsData ) {
-					if ( ! props.editing ) {
-						var data = props.attributes.panelsData || {};
-						toGet.preview = '/so-panels/v1/layouts/previews';
-						toGet.preview += '?panelsData=' + encodeURIComponent( JSON.stringify( data ) );
-					}
-				} else if ( ! props.editing ) {
-					props.setState( { editing: true } );
-				}
-				
-				return toGet;
-			} )( function ( props ) {
+			loadingPreview: false,
+			previewHtml: ''
+		} )( function ( props ) {
 			var editing = props.editing;
-			var loadingPreview = !!props.preview && !props.preview.data;
+			var loadingPreview = props.loadingPreview;
+			function fetchPreview() {
+				if ( props.attributes.panelsData ) {
+					fetch( wpApiSettings.root + 'so-panels/v1/layouts/previews', {
+						method: 'POST',
+						body: JSON.stringify( { panelsData:  props.attributes.panelsData } ),
+						headers: { 'content-type': 'application/json' },
+					} ).then( function( response ) {
+						response.json().then( function ( result ) {
+							props.setState( { previewHtml: result.html, loadingPreview: false } );
+						} );
+					});
+					props.setState( { editing: false, loadingPreview: true } );
+				} else {
+					showEdit();
+				}
+			}
 			
-			function togglePreview() {
-				props.setState( { editing: ! editing, panelsInitialized: editing } );
+			function showEdit() {
+				props.setState( { editing: true, panelsInitialized: false } );
 			}
 			
 			function setupPreview() {
@@ -134,7 +137,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Preview layout.', 'siteorigin-panels' ),
-									onClick: togglePreview,
+									onClick: fetchPreview,
 									icon: 'visibility'
 								}
 							)
@@ -147,7 +150,7 @@
 					} )
 				];
 			} else {
-				var preview = props.preview ? props.preview.data : '';
+				var preview = props.previewHtml;
 				return [
 					!! props.focus && el(
 						BlockControls,
@@ -160,7 +163,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Edit layout.', 'siteorigin-panels' ),
-									onClick: togglePreview,
+									onClick: showEdit,
 									icon: 'edit'
 								}
 							)
@@ -173,16 +176,16 @@
 							className: 'so-panels-gutenberg-layout-preview-container'
 						},
 						( loadingPreview ?
-								el( Spinner ) :
-								el( 'div', {
-									dangerouslySetInnerHTML: { __html: preview },
-									ref: setupPreview,
-								} )
+							el( Spinner ) :
+							el( 'div', {
+								dangerouslySetInnerHTML: { __html: preview },
+								ref: setupPreview,
+							} )
 						)
 					)
 				];
 			}
-		} ) ),
+		} ),
 		
 		save: function () {
 			// Render in PHP

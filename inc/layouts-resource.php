@@ -19,11 +19,12 @@ class SiteOrigin_Panels_Layouts_Resource extends WP_REST_Controller {
 		
 		$subresource = 'previews';
 		register_rest_route( $namespace, '/' . $resource . '/' . $subresource, array(
-			'methods' => WP_REST_Server::READABLE,
+			'methods' => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'get_layout_preview'),
 			'args' => array(
 				'panelsData' => array(
 					'validate_callback' => array( $this, 'validate_panels_data'),
+					'required' => true,
 				),
 			),
 			'permission_callback' => array( $this, 'permissions_check' ),
@@ -57,18 +58,19 @@ class SiteOrigin_Panels_Layouts_Resource extends WP_REST_Controller {
 	/**
 	 * Render and return the layout based in the supplied panels data.
 	 *
+	 * This does not actually persist anywhere. It's just used for server side rendering of layout previews.
+	 *
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_layout_preview( $request ) {
-		$panels_data = json_decode( $request['panelsData'], true );
-		
+		$panels_data = $request['panelsData'];
 		$builder_id = 'gbp' . uniqid();
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
 		
-		return rest_ensure_response( $rendered_layout );
+		return rest_ensure_response( array( 'html' => $rendered_layout ) );
 	}
 }
