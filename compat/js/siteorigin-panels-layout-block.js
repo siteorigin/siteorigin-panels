@@ -54,13 +54,7 @@
 						} );
 					});
 					props.setState( { editing: false, loadingPreview: true } );
-				} else {
-					showEdit();
 				}
-			}
-			
-			function showEdit() {
-				props.setState( { editing: true, panelsInitialized: false } );
 			}
 			
 			function setupPreview() {
@@ -163,7 +157,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Edit layout.', 'siteorigin-panels' ),
-									onClick: showEdit,
+									onClick: props.setState( { editing: true, panelsInitialized: false } ),
 									icon: 'edit'
 								}
 							)
