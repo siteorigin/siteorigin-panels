@@ -63,6 +63,10 @@
 				}
 			}
 			
+			function showEdit() {
+				props.setState( { editing: true, panelsInitialized: false } );
+			}
+			
 			function setupPanels( panelsContainer ) {
 				if ( ! props.panelsInitialized ) {
 					var $panelsContainer = jQuery( panelsContainer );
@@ -157,7 +161,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Edit layout.', 'siteorigin-panels' ),
-									onClick: props.setState( { editing: true, panelsInitialized: false } ),
+									onClick: showEdit,
 									icon: 'edit'
 								}
 							)
