@@ -174,7 +174,15 @@
 							className: 'so-panels-gutenberg-layout-preview-container'
 						},
 						( loadingPreview ?
-							el( Spinner ) :
+							el( 'div', {
+									className: 'so-panels-spinner-container'
+								},
+								el(
+									'span',
+									null,
+									el( Spinner )
+								)
+							) :
 							el( 'div', {
 								dangerouslySetInnerHTML: { __html: preview },
 								ref: setupPreview,
