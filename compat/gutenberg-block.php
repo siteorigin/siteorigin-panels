@@ -38,6 +38,8 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'so-panels-admin' ),
 			SITEORIGIN_PANELS_VERSION
 		);
+		SiteOrigin_Panels_Styles::register_scripts();
+		wp_enqueue_script( 'siteorigin-panels-front-styles' );
 	}
 	
 	public function render_layout_block( $attributes ) {
