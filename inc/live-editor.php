@@ -87,7 +87,7 @@ class SiteOrigin_Panels_Live_Editor {
 
 		wp_enqueue_style(
 			'live-editor-front',
-			siteorigin_panels_url( 'css/live-editor-front.css' ),
+			siteorigin_panels_url( 'css/live-editor-front' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
 			array(),
 			SITEORIGIN_PANELS_VERSION
 		);
