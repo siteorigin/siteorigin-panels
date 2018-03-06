@@ -83,43 +83,47 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$layouts = array();
 		foreach ( $layout_folders as $folder ) {
-			$files = array();
 			if ( file_exists( $folder ) && is_dir( $folder ) ) {
 				$files = list_files( $folder, 1 );
-			}
-			
-			foreach ( $files as $file ) {
-				// get file mime type
-				$mime_type = mime_content_type( $file );
-				
-				// skip non text files.
-				if ( strpos( $mime_type, 'text/' ) !== 0 ) {
+				if ( empty( $files ) ) {
 					continue;
 				}
 				
-				// get file contents
-				$file_contents = file_get_contents( $file );
-				// json decode
-				$panels_data = json_decode( $file_contents, true );
-				
-				// get file name by stripping out folder path and .json extension
-				$file_name = str_replace( $folder . '/' , '', $file );
-				$file_name = str_replace( '.json', '', $file_name );
-				
-				// get name: check for id or name else use filename
-				$panels_data['id'] = sanitize_title_with_dashes( $this->get_layout_id( $panels_data, $file_name ) );
-				
-				if ( empty( $panels_data['name'] ) ) {
-					$panels_data['name'] = $file_name;
+				foreach ( $files as $file ) {
+					// get file mime type
+					$mime_type = mime_content_type( $file );
+					
+					// skip non text files.
+					if ( strpos( $mime_type, 'text/' ) !== 0 ) {
+						continue;
+					}
+					
+					// get file contents
+					$file_contents = file_get_contents( $file );
+					
+					// json decode
+					$panels_data = json_decode( $file_contents, true );
+					
+					if ( ! empty( $panels_data ) ) {
+						// get file name by stripping out folder path and .json extension
+						$file_name = str_replace( array( $folder . '/', '.json' ), '', $file );
+						
+						// get name: check for id or name else use filename
+						$panels_data['id'] = sanitize_title_with_dashes( $this->get_layout_id( $panels_data, $file_name ) );
+						
+						if ( empty( $panels_data['name'] ) ) {
+							$panels_data['name'] = $file_name;
+						}
+						
+						$panels_data['name'] = sanitize_text_field( $panels_data['name'] );
+						
+						// get screenshot: check for screenshot prop else try use image file with same filename.
+						$panels_data['screenshot'] = $this->get_layout_file_screenshot( $panels_data, $folder, $file_name );
+						
+						// set item on layouts array
+						$layouts[ $panels_data['id'] ] = $panels_data;
+					}
 				}
-				
-				$panels_data['name'] = sanitize_text_field( $panels_data['name'] );
-				
-				// get screenshot: check for screenshot prop else try use image file with same filename.
-				$panels_data['screenshot'] = $this->get_layout_file_screenshot( $panels_data, $folder, $file_name );
-				
-				// set item on layouts array
-				$layouts[ $panels_data['id'] ] = $panels_data;
 			}
 		}
 		

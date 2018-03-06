@@ -15,6 +15,7 @@ define( 'SITEORIGIN_PANELS_VERSION', 'dev' );
 if ( ! defined( 'SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 	define( 'SITEORIGIN_PANELS_JS_SUFFIX', '' );
 }
+define( 'SITEORIGIN_PANELS_CSS_SUFFIX', '' );
 define( 'SITEORIGIN_PANELS_VERSION_SUFFIX', '' );
 
 require_once plugin_dir_path( __FILE__ ) . 'inc/functions.php';
@@ -276,7 +277,7 @@ class SiteOrigin_Panels {
 		$post_id = get_the_ID();
 		// If we're viewing a preview make sure we load and render the autosave post's meta.
 		if ( $preview ) {
-			$preview_post = wp_get_post_autosave( $post_id );
+			$preview_post = wp_get_post_autosave( $post_id, get_current_user_id() );
 			if ( ! empty( $preview_post ) ) {
 				$post_id = $preview_post->ID;
 			}

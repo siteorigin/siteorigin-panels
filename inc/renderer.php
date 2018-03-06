@@ -789,6 +789,6 @@ class SiteOrigin_Panels_Renderer {
 	}
 
 	public function front_css_url() {
-		return siteorigin_panels_url( 'css/front-flex.css' );
+		return siteorigin_panels_url( 'css/front-flex' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' );
 	}
 }

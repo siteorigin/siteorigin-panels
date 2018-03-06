@@ -43,6 +43,11 @@ module.exports = {
             'js/siteorigin-panels/**',
         ]
     },
+	css: {
+		src: [
+			'css/**/*.css',
+		],
+	},
 	bust : {
 		src: [
 			'js/siteorigin-panels.js',
