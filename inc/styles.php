@@ -415,7 +415,7 @@ class SiteOrigin_Panels_Styles {
 			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if ( ! empty( $url ) ) {
-				$css[ 'background-image' ] = 'url(' . $url[0] . ')';
+				$css[ 'background-image' ] = 'url(' . apply_filters( 'siteorigin_panels_background_image_url' ,$url[0] ) . ')';
 
 				switch ( $style['background_display'] ) {
 					case 'parallax':
