@@ -1,5 +1,4 @@
 <?php
-
 class SiteOrigin_Panels_Renderer {
 
 	private $inline_css;
@@ -27,6 +26,10 @@ class SiteOrigin_Panels_Renderer {
 			$this->inline_css = array();
 			add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
 			add_action( 'wp_footer', array( $this, 'print_inline_css' ) );
+
+			if ( !siteorigin_panels_setting('inline-styles') ) {
+				add_action('wp_enqueue_scripts', $this->print_css_to_file($post_id));
+			}
 		}
 
 		$this->inline_css[ $post_id ] = $css;
@@ -523,12 +526,25 @@ class SiteOrigin_Panels_Renderer {
 			// Allow third party developers to change the inline styles or remove them completely.
 			$the_css = apply_filters( 'siteorigin_panels_inline_styles', $the_css );
 
-			if ( ! empty( $the_css ) ) {
-				?>
-                <style type="text/css" media="all"
-                       id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
+			if(! empty( $the_css )) {
+				if ( siteorigin_panels_setting('inline-styles') ) {
+					?>
+					<style type="text/css" media="all"
+						   id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ) ?>"><?php echo $the_css ?></style><?php
+				} else {
+
+				$file = plugin_dir_path( __DIR__ ) . "css/layout-" . esc_attr($post_id) . ".css";
+				file_put_contents($file, $the_css);
+
+				}
 			}
 		}
+	}
+
+
+	function print_css_to_file($post_id) {
+		wp_register_style( 'layout-' . esc_attr($post_id) , plugin_dir_url( __DIR__ ) . 'css/layout-' . esc_attr($post_id) . '.css' );
+		wp_enqueue_style('layout-' . esc_attr($post_id) );
 	}
 
 	/**
@@ -537,7 +553,7 @@ class SiteOrigin_Panels_Renderer {
 	function enqueue_styles() {
 		// Register the style to support possible lazy loading
 		wp_register_style( 'siteorigin-panels-front', SiteOrigin_Panels::front_css_url(), array(), SITEORIGIN_PANELS_VERSION );
-	}
+		}
 
 	/**
 	 * Retrieve panels data for a post or a prebuilt layout or the home page layout.

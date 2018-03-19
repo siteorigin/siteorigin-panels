@@ -142,6 +142,7 @@ class SiteOrigin_Panels_Settings {
 		// Content fields
 		$defaults['copy-content'] = true;
 		$defaults['copy-styles'] = false;
+		$defaults['inline-styles'] = true;
 
 		return $defaults;
 	}
@@ -269,7 +270,7 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Sidebars Emulator', 'siteorigin-panels' ),
 			'description' => __( 'Page Builder will create an emulated sidebar, that contains all widgets in the page.', 'siteorigin-panels' ),
 		);
-		
+
 		$fields['general']['fields']['display-teaser'] = array(
 			'type' => 'checkbox',
 			'label' => __('Upgrade Teaser', 'siteorigin-panels'),
@@ -285,7 +286,7 @@ class SiteOrigin_Panels_Settings {
 			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
 			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
 		);
-		
+
 		$fields['general']['fields']['load-on-attach'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),
@@ -343,7 +344,7 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Use Tablet Layout', 'siteorigin-panels' ),
 			'description' => __( 'Collapses columns differently on tablet devices.', 'siteorigin-panels' ),
 		);
-		
+
 		$fields['layout']['fields']['legacy-layout'] = array(
 			'type'        => 'select',
 			'options'     => array(
@@ -415,6 +416,12 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Copy Styles', 'siteorigin-panels' ),
 			'description' => __( 'Include styles into your Post Content. This keeps page layouts, even when Page Builder is deactivated.', 'siteorigin-panels' ),
 		);
+
+		$fields['content']['fields']['inline-styles'] = array(
+        			'type'        => 'checkbox',
+        			'label'       => __( 'Inline Styles', 'siteorigin-panels' ),
+        			'description' => __( 'Include styles in the head tag of HTML. If unchecked, a new file will be generated for CSS.', 'siteorigin-panels' ),
+        		);
 
 		return $fields;
 	}
@@ -582,7 +589,7 @@ class SiteOrigin_Panels_Settings {
 
 		// Don't let mobile width go below 320
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
-		
+
 		// Save the values to the database
 		update_option( 'siteorigin_panels_settings', $values );
 		do_action( 'siteorigin_panels_save_settings', $values );
@@ -597,17 +604,17 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function get_post_types() {
 		$post_types = get_post_types( array( '_builtin' => false ) );
-		
+
 		$types = array(
 			'page' => 'page',
 			'post' => 'post'
 		);
-		
+
 		// Don't use `array_merge` here as it will break things if a post type has a numeric slug.
 		foreach ( $post_types as $key => $value ) {
 			$types[ $key ] = $value;
 		}
-		
+
 		// These are post types we know we don't want to show Page Builder on
 		unset( $types['ml-slider'] );
 
