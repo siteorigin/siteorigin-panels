@@ -483,7 +483,7 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			wp_enqueue_style(
 				'so-panels-admin',
-				siteorigin_panels_url( 'css/admin.css' ),
+				siteorigin_panels_url( 'css/admin' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
 				array( 'wp-color-picker' ),
 				SITEORIGIN_PANELS_VERSION
 			);

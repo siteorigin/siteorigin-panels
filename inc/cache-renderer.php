@@ -30,12 +30,8 @@ class SiteOrigin_Panels_Cache_Renderer {
 	 * Clear post meta cache.
 	 *
 	 * Keep this around for a bit in attempt to delete any existing caches.
-	 *
-	 * @param bool|int $post_id The ID of the post to clear or false for all
 	 */
-	public function clear_cache( $post_id = false ){
-		global $wpdb;
-		
-		$wpdb->query( "DELETE FROM $wpdb->postmeta WHERE meta_key = 'siteorigin_panels_cache'" );
+	public function clear_cache(){
+		delete_post_meta_by_key( 'siteorigin_panels_cache' );
 	}
 }
