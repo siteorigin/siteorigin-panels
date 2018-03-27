@@ -90,16 +90,32 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 				
 				foreach ( $files as $file ) {
-					// get file mime type
-					$mime_type = mime_content_type( $file );
 					
-					// skip non text files.
-					if ( strpos( $mime_type, 'text/' ) !== 0 ) {
+					if ( function_exists( 'mime_content_type' ) ) {
+						// get file mime type
+						$mime_type = mime_content_type( $file );
+						
+						// Valid if text files.
+						$valid_file_type = strpos( $mime_type, 'text/' ) === 0;
+					} else {
+						// If `mime_content_type` isn't available, just check file extension.
+						$ext = pathinfo( $file, PATHINFO_EXTENSION );
+						
+						// skip files which don't have a `.json` extension.
+						$valid_file_type = ! empty( $ext ) && $ext === 'json';
+					}
+					
+					if ( ! $valid_file_type ) {
 						continue;
 					}
 					
 					// get file contents
 					$file_contents = file_get_contents( $file );
+					
+					// skip if file_get_contents fails
+					if ( $file_contents === false ) {
+						continue;
+					}
 					
 					// json decode
 					$panels_data = json_decode( $file_contents, true );
