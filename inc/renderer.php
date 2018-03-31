@@ -240,6 +240,10 @@ class SiteOrigin_Panels_Renderer {
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
+			
+			if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+				$post_id = wc_get_page_id( 'shop' );
+			}
 		}
 
 		global $siteorigin_panels_current_post;
@@ -409,6 +413,10 @@ class SiteOrigin_Panels_Renderer {
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
+			
+			if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+				$post_id = wc_get_page_id( 'shop' );
+			}
 		}
 
 		$classes = array( 'so-panel' );
