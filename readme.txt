@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.4 - 4 April 2018 =
+* Only call widget `enqueue_admin_scripts` function for WP core JS widgets.
+
 = 2.6.3 - 6 March 2018 =
 * Use `delete_post_meta_by_key` instead of direct DB query to clear old cache renders.
 * Removed special handling for retrieving data from TinyMCE editor fields. Just use the field value directly.
