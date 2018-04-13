@@ -352,8 +352,10 @@ class SiteOrigin_Panels_Styles {
 			$attributes['class'] = array_merge( $attributes['class'], $style['class'] );
 		}
 
-		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
-
+		if ( ! empty( $style['background_display'] ) &&
+			 ! empty( $style['background_image_attachment'] )
+		) {
+			
 			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
 			if (
@@ -410,12 +412,17 @@ class SiteOrigin_Panels_Styles {
 			$css[ 'background-color' ] = $style['background'];
 		}
 
-		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) ) {
-
+		if ( ! empty( $style['background_display'] ) &&
+			 ! ( empty( $style['background_image_attachment'] ) && empty( $style['background_image_attachment_fallback'] ) )
+		) {
 			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
+			
+			if ( empty( $url ) ) {
+				$url = $style['background_image_attachment_fallback'];
+			}
 
 			if ( ! empty( $url ) ) {
-				$css[ 'background-image' ] = 'url(' . $url[0] . ')';
+				$css['background-image'] = 'url(' .( is_array( $url ) ? $url[0] : $url ) . ')';
 
 				switch ( $style['background_display'] ) {
 					case 'parallax':
@@ -487,7 +494,10 @@ class SiteOrigin_Panels_Styles {
 			$css['padding'] = $style[ 'mobile_padding' ];
 		}
 		
-		if ( ! empty( $style['background_display'] ) && ! empty( $style['background_image_attachment'] ) && $style['background_display'] == 'fixed' ) {
+		if ( ! empty( $style['background_display'] ) &&
+			 $style['background_display'] == 'fixed'  &&
+			 ! ( empty( $style['background_image_attachment'] ) && empty( $style['background_image_attachment_fallback'] ) )
+		) {
 			$css[ 'background-attachment' ] = 'scroll';
 		}
 

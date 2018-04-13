@@ -143,7 +143,9 @@ module.exports = Backbone.View.extend( {
 						$s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
 
 						// Store the ID
-						$s.find( 'input' ).val( attachment.id )
+						$s.find( '.so-image-selector > input' ).val( attachment.id );
+						
+						$s.find( '.remove-image' ).removeClass( 'hidden' );
 					} );
 				}
 
@@ -155,7 +157,8 @@ module.exports = Backbone.View.extend( {
 			$s.find( '.remove-image' ).click( function ( e ) {
 				e.preventDefault();
 				$s.find( '.current-image' ).css( 'background-image', 'none' );
-				$s.find( 'input' ).val( '' );
+				$s.find( '.so-image-selector > input' ).val( '' );
+				$s.find( '.remove-image' ).addClass( 'hidden' );
 			} );
 		} );
 
