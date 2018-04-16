@@ -922,7 +922,17 @@ class SiteOrigin_Panels_Admin {
 		// Add all the information fields
 		return $form;
 	}
-
+	
+	/**
+	 * Checks whether a widget is considered to be a JS widget. I.e. it needs to have scripts and/or styles enqueued for
+	 * it's admin form to work.
+	 *
+	 * Can remove the whitelist of core widgets when all widgets are following a similar pattern.
+	 *
+	 * @param $widget The widget to be tested.
+	 *
+	 * @return bool Whether or not the widget is considered a JS widget.
+	 */
 	function is_core_js_widget( $widget ) {
 		$js_widgets = array(
 			'WP_Widget_Custom_HTML',
