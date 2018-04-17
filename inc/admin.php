@@ -433,6 +433,9 @@ class SiteOrigin_Panels_Admin {
 				'prebuiltDefaultScreenshot' => siteorigin_panels_url( 'css/images/prebuilt-default.png' ),
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
+				'widgetForms' 				=> array(
+					'loadingFailed' => __( 'Unknown error. Failed to load the widget form. Please check your internet connection, contact your web site administrator, or try again later.', 'so-widgets-bundle' ),
+				)
 			) );
 			
 			$js_widgets = array();
@@ -993,13 +996,13 @@ class SiteOrigin_Panels_Admin {
 	 * Display a widget form with the provided data
 	 */
 	function action_widget_form() {
-		if ( empty( $_REQUEST['widget'] ) ) {
-			wp_die();
-		}
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
-			wp_die();
+			wp_die( 'The supplied nonce is invalid.', 'Invalid nonce.', 403 );
 		}
-
+		if ( empty( $_REQUEST['widget'] ) ) {
+			wp_die( 'Please specify the type of widget form to be rendered.', 'Missing widget type.', 400 );
+		}
+		
 		$request = array_map( 'stripslashes_deep', $_REQUEST );
 
 		$widget_class = $request['widget'];
