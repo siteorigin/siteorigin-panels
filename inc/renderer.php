@@ -95,6 +95,35 @@ class SiteOrigin_Panels_Renderer {
 						str_replace( ',', '.', $calc_width ),
 					)
 				) );
+				
+				// Add in any widget specific CSS
+				foreach ( $cell['widgets'] as $wi => $widget ) {
+					$widget_style_data = ! empty( $widget['panels_info']['style'] ) ? $widget['panels_info']['style'] : array();
+					$widget_css = apply_filters(
+						'siteorigin_panels_css_widget_css',
+						array(),
+						$widget_style_data,
+						$row,
+						$ri,
+						$cell,
+						$ci - 1,
+						$widget,
+						$wi,
+						$panels_data,
+						$post_id
+					);
+
+					$css->add_widget_css(
+						$post_id,
+						$ri,
+						$ci,
+						$wi,
+						'',
+						$widget_css,
+						1920,
+						true
+					);
+				}
 			}
 
 			if (

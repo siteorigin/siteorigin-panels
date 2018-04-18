@@ -37,6 +37,7 @@ class SiteOrigin_Panels_Styles {
 		// Filtering specific attributes
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
+		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
 	}
 
 	public static function single() {
@@ -314,6 +315,15 @@ class SiteOrigin_Panels_Styles {
 
 		// Add the general fields
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
+		
+		$fields['margin'] = array(
+			'name'        => __( 'Margin', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'layout',
+			'description' => __( 'Margins around the widget.', 'siteorigin-panels' ),
+			'priority'    => 6,
+			'multiple'    => true
+		);
 
 		// How lets add the design fields
 
@@ -664,6 +674,22 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		return $gutter;
+	}
+	
+	/**
+	 * Adds widget specific styles not included in the general style fields.
+	 *
+	 * @param $widget_css The CSS properties and values
+	 * @param $widget_style_data The style settings as obtained from the style fields.
+	 *
+	 * @return mixed
+	 */
+	static function filter_widget_style_css( $widget_css, $widget_style_data ) {
+		if ( ! empty( $widget_style_data['margin'] ) ) {
+			$widget_css['margin'] = $widget_style_data['margin'];
+		}
+		
+		return $widget_css;
 	}
 	
 	public static function get_attachment_image_src( $image, $size = 'full' ){
