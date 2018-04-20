@@ -18,12 +18,22 @@ class SiteOrigin_Panels_Styles_Admin {
 	 * Admin action for handling fetching the style fields
 	 */
 	function action_style_form() {
-		$type = $_REQUEST['type'];
-		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
-			exit();
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
 		}
-		if ( empty( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
-			exit();
+		
+		$type = $_REQUEST['type'];
+		
+		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
+			wp_die(
+				__( 'Please specify the type of style form to be rendered.', 'siteorigin-panels' ),
+				__( 'Missing style form type.', 'siteorigin-panels' ),
+				400
+			);
 		}
 
 		$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();

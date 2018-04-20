@@ -85,15 +85,12 @@ module.exports = panels.view.dialog.extend( {
 
 		// Handle the loading class
 		this.styles.on( 'styles_loaded', function ( hasStyles ) {
-			// If we have styles remove the loading spinner, else remove the whole empty sidebar.
-			if ( hasStyles ) {
-				$rightSidebar.removeClass( 'so-panels-loading' );
-			} else {
+			// If we don't have styles remove the empty sidebar.
+			if ( ! hasStyles ) {
 				$rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
 				$rightSidebar.remove();
 			}
 		}, this );
-		$rightSidebar.addClass( 'so-panels-loading' );
 	},
 
 	/**
@@ -200,7 +197,7 @@ module.exports = panels.view.dialog.extend( {
 			if ( error && error.responseText ) {
 				html = error.responseText;
 			} else {
-				html = panelsOptions.widgetForms.loadingFailed;
+				html = panelsOptions.forms.loadingFailed;
 			}
 			
 			$soContent
