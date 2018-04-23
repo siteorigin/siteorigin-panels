@@ -85,15 +85,12 @@ module.exports = panels.view.dialog.extend( {
 
 		// Handle the loading class
 		this.styles.on( 'styles_loaded', function ( hasStyles ) {
-			// If we have styles remove the loading spinner, else remove the whole empty sidebar.
-			if ( hasStyles ) {
-				$rightSidebar.removeClass( 'so-panels-loading' );
-			} else {
+			// If we don't have styles remove the empty sidebar.
+			if ( ! hasStyles ) {
 				$rightSidebar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
 				$rightSidebar.remove();
 			}
 		}, this );
-		$rightSidebar.addClass( 'so-panels-loading' );
 	},
 
 	/**
@@ -165,39 +162,48 @@ module.exports = panels.view.dialog.extend( {
 			'instance': JSON.stringify( this.model.get( 'values' ) ),
 			'raw': this.model.get( 'raw' )
 		};
+		
+		var $soContent = this.$( '.so-content' );
 
-		$.post(
-			panelsOptions.ajaxurl,
-			data,
-			function ( result ) {
-				// Add in the CID of the widget model
-				var html = result.replace( /{\$id}/g, this.model.cid );
-
-				// Load this content into the form
-				var $soContent = this.$( '.so-content' );
-				$soContent
-					.removeClass( 'so-panels-loading' )
-					.html( html );
-
-				// Trigger all the necessary events
-				this.trigger( 'form_loaded', this );
-
-				// For legacy compatibility, trigger a panelsopen event
-				this.$( '.panel-dialog' ).trigger( 'panelsopen' );
-
-				// If the main dialog is closed from this point on, save the widget content
-				this.on( 'close_dialog', this.updateModel, this );
-
-				var widgetContent = $soContent.find( '> .widget-content' );
-				// If there's a widget content wrapper, this is one of the new widgets in WP 4.8 which need some special
-				// handling in JS.
-				if ( widgetContent.length > 0 ) {
-					jsWidget.addWidget( $soContent, this.model.widget_id );
-				}
-
-			}.bind( this ),
-			'html'
-		);
+		$.post( panelsOptions.ajaxurl, data, null, 'html' )
+		.done( function ( result ) {
+			// Add in the CID of the widget model
+			var html = result.replace( /{\$id}/g, this.model.cid );
+			
+			// Load this content into the form
+			$soContent
+			.removeClass( 'so-panels-loading' )
+			.html( html );
+			
+			// Trigger all the necessary events
+			this.trigger( 'form_loaded', this );
+			
+			// For legacy compatibility, trigger a panelsopen event
+			this.$( '.panel-dialog' ).trigger( 'panelsopen' );
+			
+			// If the main dialog is closed from this point on, save the widget content
+			this.on( 'close_dialog', this.updateModel, this );
+			
+			var widgetContent = $soContent.find( '> .widget-content' );
+			// If there's a widget content wrapper, this is one of the new widgets in WP 4.8 which need some special
+			// handling in JS.
+			if ( widgetContent.length > 0 ) {
+				jsWidget.addWidget( $soContent, this.model.widget_id );
+			}
+			
+		}.bind( this ) )
+		.fail( function ( error ) {
+			var html;
+			if ( error && error.responseText ) {
+				html = error.responseText;
+			} else {
+				html = panelsOptions.forms.loadingFailed;
+			}
+			
+			$soContent
+			.removeClass( 'so-panels-loading' )
+			.html( html );
+		} );
 	},
 
 	/**
