@@ -96,6 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.5 - 23 April 2018 =
+* Don't use `mime_content_type` for external layouts if it's not available. Just check file extensions.
+* Get correct ID for WooCommerce shop page to allow PB to render correctly.
+* Added image fallback url field for background images in row, cell and widget styles.
+* Temporarily remove Jetpack widgets requiring scripts for admin form, until we can reliably enqueue their scripts.
+* Remove loading indicator and display message when loading widget and style forms fail.
+* Allow setting margins around specific widgets.
+
 = 2.6.4 - 4 April 2018 =
 * Only call widget `enqueue_admin_scripts` function for WP core JS widgets.
 
