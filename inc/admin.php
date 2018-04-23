@@ -433,6 +433,9 @@ class SiteOrigin_Panels_Admin {
 				'prebuiltDefaultScreenshot' => siteorigin_panels_url( 'css/images/prebuilt-default.png' ),
 				'loadOnAttach'              => siteorigin_panels_setting( 'load-on-attach' ),
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
+				'forms' 				=> array(
+					'loadingFailed' => __( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
+				)
 			) );
 			
 			$js_widgets = array();
@@ -445,14 +448,14 @@ class SiteOrigin_Panels_Admin {
 					$return = $widget_obj->form( array() );
 					// These are the new widgets in WP 4.8 which are largely JS based. They only enqueue their own
 					// scripts on the 'widgets' screen.
-					if ( method_exists( $widget_obj, 'enqueue_admin_scripts' ) ) {
+					if ( $this->is_core_js_widget( $widget_obj ) && method_exists( $widget_obj, 'enqueue_admin_scripts' ) ) {
 						$widget_obj->enqueue_admin_scripts();
 					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
 					ob_end_clean();
 					
 					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
-					if ( $this->is_js_widget( $widget_obj ) ) {
+					if ( $this->is_core_js_widget( $widget_obj ) ) {
 						$js_widgets[] = $widget_obj;
 					}
 				}
@@ -700,6 +703,20 @@ class SiteOrigin_Panels_Admin {
 
 		// Other plugins can manipulate the list of widgets. Possibly to add recommended widgets
 		$widgets = apply_filters( 'siteorigin_panels_widgets', $widgets );
+		
+		// Exclude these temporarily, as they won't work until we have a reliable way to enqueue their admin form scripts.
+		$to_exclude = array(
+			'Jetpack_Gallery_Widget',
+			'WPCOM_Widget_GooglePlus_Badge',
+			'Jetpack_Widget_Social_Icons',
+			'Jetpack_Twitter_Timeline_Widget'
+		);
+		
+		foreach ( $to_exclude as $widget_class ) {
+			if ( in_array( $widget_class, $widgets ) ) {
+				unset( $widgets[ $widget_class ] );
+			}
+		}
 
 		// Sort the widgets alphabetically
 		uasort( $widgets, array( $this, 'widgets_sorter' ) );
@@ -885,12 +902,12 @@ class SiteOrigin_Panels_Admin {
 		$the_widget->number = $widget_number;
 
 		ob_start();
-		if ( $this->is_js_widget( $the_widget ) ) {
+		if ( $this->is_core_js_widget( $the_widget ) ) {
 			?><div class="widget-content"><?php
 		}
 		$return = $the_widget->form( $instance );
 		do_action_ref_array( 'in_widget_form', array( &$the_widget, &$return, $instance ) );
-		if ( $this->is_js_widget( $the_widget ) ) {
+		if ( $this->is_core_js_widget( $the_widget ) ) {
 			?>
 			</div>
 			<input type="hidden" name="id_base" class="id_base" value="<?php echo esc_attr( $the_widget->id_base ); ?>" />
@@ -908,8 +925,18 @@ class SiteOrigin_Panels_Admin {
 		// Add all the information fields
 		return $form;
 	}
-
-	function is_js_widget( $widget ) {
+	
+	/**
+	 * Checks whether a widget is considered to be a JS widget. I.e. it needs to have scripts and/or styles enqueued for
+	 * it's admin form to work.
+	 *
+	 * Can remove the whitelist of core widgets when all widgets are following a similar pattern.
+	 *
+	 * @param $widget The widget to be tested.
+	 *
+	 * @return bool Whether or not the widget is considered a JS widget.
+	 */
+	function is_core_js_widget( $widget ) {
 		$js_widgets = array(
 			'WP_Widget_Custom_HTML',
 			'WP_Widget_Media_Audio',
@@ -969,13 +996,21 @@ class SiteOrigin_Panels_Admin {
 	 * Display a widget form with the provided data
 	 */
 	function action_widget_form() {
-		if ( empty( $_REQUEST['widget'] ) ) {
-			wp_die();
-		}
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
-			wp_die();
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
 		}
-
+		if ( empty( $_REQUEST['widget'] ) ) {
+			wp_die(
+				__( 'Please specify the type of widget form to be rendered.', 'siteorigin-panels' ),
+				__( 'Missing widget type.', 'siteorigin-panels' ),
+				400
+			);
+		}
+		
 		$request = array_map( 'stripslashes_deep', $_REQUEST );
 
 		$widget_class = $request['widget'];

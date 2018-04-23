@@ -25,7 +25,7 @@ module.exports = Backbone.View.extend( {
 			dialog: null
 		}, args );
 
-		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles' );
+		this.$el.addClass( 'so-visual-styles so-' + stylesType + '-styles so-panels-loading' );
 
 		var postArgs = {
 			builderType: args.builderType
@@ -34,7 +34,7 @@ module.exports = Backbone.View.extend( {
 		if ( stylesType === 'cell') {
 			postArgs.index = args.index;
 		}
-
+		
 		// Load the form
 		$.post(
 			panelsOptions.ajaxurl,
@@ -45,16 +45,30 @@ module.exports = Backbone.View.extend( {
 				args: JSON.stringify( postArgs ),
 				postId: postId
 			},
-			function ( response ) {
-				this.$el.html( response );
-				this.setupFields();
-				this.stylesLoaded = true;
-				this.trigger( 'styles_loaded', ! _.isEmpty( response ) );
-				if ( ! _.isNull( args.dialog ) ) {
-					args.dialog.trigger( 'styles_loaded', ! _.isEmpty( response ) );
-				}
-			}.bind(this)
-		);
+			null,
+			'html'
+		).done( function ( response ) {
+			this.$el.html( response );
+			this.setupFields();
+			this.stylesLoaded = true;
+			this.trigger( 'styles_loaded', !_.isEmpty( response ) );
+			if ( !_.isNull( args.dialog ) ) {
+				args.dialog.trigger( 'styles_loaded', !_.isEmpty( response ) );
+			}
+		}.bind( this ) )
+		.fail( function ( error ) {
+			var html;
+			if ( error && error.responseText ) {
+				html = error.responseText;
+			} else {
+				html = panelsOptions.forms.loadingFailed;
+			}
+			
+			this.$el.html( html );
+		}.bind( this ) )
+		.always( function () {
+			this.$el.removeClass( 'so-panels-loading' );
+		}.bind( this ) );
 
 		return this;
 	},
@@ -143,7 +157,9 @@ module.exports = Backbone.View.extend( {
 						$s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
 
 						// Store the ID
-						$s.find( 'input' ).val( attachment.id )
+						$s.find( '.so-image-selector > input' ).val( attachment.id );
+						
+						$s.find( '.remove-image' ).removeClass( 'hidden' );
 					} );
 				}
 
@@ -155,7 +171,8 @@ module.exports = Backbone.View.extend( {
 			$s.find( '.remove-image' ).click( function ( e ) {
 				e.preventDefault();
 				$s.find( '.current-image' ).css( 'background-image', 'none' );
-				$s.find( 'input' ).val( '' );
+				$s.find( '.so-image-selector > input' ).val( '' );
+				$s.find( '.remove-image' ).addClass( 'hidden' );
 			} );
 		} );
 

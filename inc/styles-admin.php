@@ -18,12 +18,22 @@ class SiteOrigin_Panels_Styles_Admin {
 	 * Admin action for handling fetching the style fields
 	 */
 	function action_style_form() {
-		$type = $_REQUEST['type'];
-		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
-			exit();
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
 		}
-		if ( empty( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
-			exit();
+		
+		$type = $_REQUEST['type'];
+		
+		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
+			wp_die(
+				__( 'Please specify the type of style form to be rendered.', 'siteorigin-panels' ),
+				__( 'Missing style form type.', 'siteorigin-panels' ),
+				400
+			);
 		}
 
 		$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
@@ -135,7 +145,7 @@ class SiteOrigin_Panels_Styles_Admin {
 								<label><?php echo $field['name'] ?></label>
 								<div
 									class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
-									<?php $this->render_style_field( $field, isset( $current[ $field_id ] ) ? $current[ $field_id ] : $default, $field_id ) ?>
+									<?php $this->render_style_field( $field, isset( $current[ $field_id ] ) ? $current[ $field_id ] : $default, $field_id, $current ) ?>
 								</div>
 							</div>
 							<?php
@@ -158,8 +168,9 @@ class SiteOrigin_Panels_Styles_Admin {
 	 * @param array $field Everything needed to display the field
 	 * @param $current
 	 * @param $field_id
+	 * @param $current_styles
 	 */
-	function render_style_field( $field, $current, $field_id ) {
+	function render_style_field( $field, $current, $field_id, $current_styles ) {
 		$field_name = 'style[' . $field_id . ']';
 
 		echo '<div class="style-input-wrapper">';
@@ -216,6 +227,9 @@ class SiteOrigin_Panels_Styles_Admin {
 				if ( ! empty( $current ) ) {
 					$image = SiteOrigin_Panels_Styles::get_attachment_image_src( $current, 'thumbnail' );
 				}
+				
+				$fallback_url = $current_styles[ $field_id . '_fallback' ];
+				$fallback_field_name = 'style[' . $field_id . '_fallback]';
 
 				?>
 				<div class="so-image-selector">
@@ -230,7 +244,12 @@ class SiteOrigin_Panels_Styles_Admin {
 					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
 					       value="<?php echo intval( $current ) ?>"/>
 				</div>
-				<a href="#" class="remove-image"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+				<a href="#" class="remove-image<?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+				
+				<input type="text" value="<?php if ( $fallback_url !== 'false' ) echo esc_url( $fallback_url ) ?>"
+					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ) ?>"
+					   name="<?php echo esc_attr( $fallback_field_name ) ?>"
+					   class="image-fallback widefat" />
 				<?php
 				break;
 
@@ -350,8 +369,8 @@ class SiteOrigin_Panels_Styles_Admin {
 				continue;
 			}
 
-			// Ignore this if we don't even have a value for the style
-			if ( ! isset( $styles[ $k ] ) || $styles[ $k ] == '' ) {
+			// Ignore this if we don't even have a value for the style, unless 'image' field which might have a fallback.
+			if ( ! isset( $styles[ $k ] ) || ( $field['type'] != 'image' && $styles[ $k ] == '' ) ) {
 				continue;
 			}
 
@@ -366,6 +385,11 @@ class SiteOrigin_Panels_Styles_Admin {
 					break;
 				case 'image' :
 					$return[ $k ] = ! empty( $styles[ $k ] ) ? sanitize_text_field( $styles[ $k ] ) : false;
+					$fallback_name = $k . '_fallback';
+					if ( $styles[ $k ] == '' && $styles[ $fallback_name ] == '' ) {
+						continue;
+					}
+					$return[ $fallback_name ] = ! empty( $styles[ $fallback_name ] ) ? esc_url_raw( $styles[ $fallback_name ] ) : false;
 					break;
 				case 'url' :
 					$return[ $k ] = esc_url_raw( $styles[ $k ] );
