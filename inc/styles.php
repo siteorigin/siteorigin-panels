@@ -427,7 +427,7 @@ class SiteOrigin_Panels_Styles {
 		) {
 			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 			
-			if ( empty( $url ) ) {
+			if ( empty( $url ) && ! empty( $style['background_image_attachment_fallback'] ) ) {
 				$url = $style['background_image_attachment_fallback'];
 			}
 
