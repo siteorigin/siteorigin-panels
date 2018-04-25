@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.6 - 25 April 2018 =
+* Only filter WooCommerce content when on the shop page.
+* Fix Background fallback URL notices.
+
 = 2.6.5 - 23 April 2018 =
 * Don't use `mime_content_type` for external layouts if it's not available. Just check file extensions.
 * Get correct ID for WooCommerce shop page to allow PB to render correctly.
