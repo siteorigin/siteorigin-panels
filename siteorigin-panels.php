@@ -65,7 +65,7 @@ class SiteOrigin_Panels {
 		
 		// We need to generate fresh post content
 		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
-		add_filter( 'woocommerce_format_content', array( $this, 'generate_post_content' ) );
+		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ) );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
@@ -254,6 +254,23 @@ class SiteOrigin_Panels {
 		}
 
 		return $panels_data;
+	}
+	
+	/**
+	 * Generate post content for WooCommerce shop page if it's using a PB layout.
+	 *
+	 * @param $content
+	 *
+	 * @return string
+	 *
+	 * @filter woocommerce_format_content
+	 */
+	public function generate_woocommerce_content( $content ) {
+		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+			return $this->generate_post_content( $content );
+		}
+		
+		return $content;
 	}
 
 	/**
