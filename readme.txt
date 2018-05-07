@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.7 - 7 May 2018 =
+* Prevent debug notice when background fallback image hasn't been set.
+
 = 2.6.6 - 25 April 2018 =
 * Only filter WooCommerce content when on the shop page.
 * Fix Background fallback URL notices.
