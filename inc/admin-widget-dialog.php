@@ -8,7 +8,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	}
 
 	/**
-	 * @return SiteOrigin_Panels_Admin
+	 * @return SiteOrigin_Panels_Admin_Widget_Dialog
 	 */
 	public static function single() {
 		static $single;

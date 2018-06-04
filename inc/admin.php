@@ -60,6 +60,9 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Widgets_Bundle::single();
 		SiteOrigin_Panels_Admin_Layouts::single();
 
+		// Check to make sure we have all the correct markup
+		SiteOrigin_Panels_Admin_Dashboard::single();
+
 		$this->in_save_post = false;
 
 		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
