@@ -21,7 +21,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 	public function register_dashboard_widgets(){
 		// Check that we have all the correct markup
 		if( function_exists( 'wp_print_community_events_markup' ) ) {
-			wp_add_dashboard_widget( 'so-dashboard-news', __( 'SiteOrigin Page Builder', 'siteorigin-panels' ), array( $this, 'dashboard_overview_widget' ) );
+			wp_add_dashboard_widget( 'so-dashboard-news', __( 'SiteOrigin Page Builder News', 'siteorigin-panels' ), array( $this, 'dashboard_overview_widget' ) );
 
 			// Move Page Builder widget to the top
 			global $wp_meta_boxes;
@@ -67,14 +67,6 @@ class SiteOrigin_Panels_Admin_Dashboard {
 		?>
 		<p class="community-events-footer">
 			<?php
-			printf(
-				'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
-				'https://siteorigin.com/blog/',
-				__( 'Blog', 'siteorigin-panels' ),
-				/* translators: accessibility text */
-				__( '(opens in a new window)', 'siteorigin-panels' )
-			);
-			?> | <?php
 			printf(
 				'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 				'https://siteorigin.com/thread/',
