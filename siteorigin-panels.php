@@ -43,10 +43,6 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
 			SiteOrigin_Panels_Admin::single();
-
-			if( ! class_exists( 'SiteOrigin_Learn_Dialog' ) ) {
-				include plugin_dir_path( __FILE__ ) . 'learn/learn.php';
-			}
 		}
 
 		// Include the live editor file if we're in live editor mode.
@@ -511,11 +507,6 @@ class SiteOrigin_Panels {
 			do_action( 'siteorigin_panels_version_changed' );
 			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
 		}
-	}
-
-	static function display_learn_button() {
-		return siteorigin_panels_setting( 'display-learn' ) &&
-			   apply_filters( 'siteorigin_panels_learn', true );
 	}
 
 	/**
