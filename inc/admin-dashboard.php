@@ -69,7 +69,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 			<?php
 			printf(
 				'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
-				'https://siteorigin.com/thread/',
+				esc_url( 'https://siteorigin.com/thread/' ),
 				__( 'Support Forum', 'siteorigin-panels' ),
 				/* translators: accessibility text */
 				__( '(opens in a new window)', 'siteorigin-panels' )
@@ -79,7 +79,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 				printf(
 					'<a href="%1$s" target="_blank" style="color: #2ebd59">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 					/* translators: If a Rosetta site exists (e.g. https://es.wordpress.org/news/), then use that. Otherwise, leave untranslated. */
-					esc_url( _x( 'https://wordpress.org/news/', 'Events and News dashboard widget' ) ),
+					esc_url( 'https://siteorigin.com/downloads/premium/' ),
 					__( 'Get Premium', 'siteorigin-panels' ),
 					/* translators: accessibility text */
 					__( '(opens in a new window)', 'siteorigin-panels' )
