@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .widget-edit': 'editHandler',
-		'click .title h4': 'titleClickHandler',
+		'click .title h4': 'editHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
 		'click .actions .widget-delete': 'deleteHandler'
 	},
@@ -107,19 +107,14 @@ module.exports = Backbone.View.extend( {
 
 	/**
 	 * Handle clicking on edit widget.
-	 *
-	 * @returns {boolean}
 	 */
 	editHandler: function () {
 		// Create a new dialog for editing this
-		this.getEditDialog().openDialog();
-	},
-
-	titleClickHandler: function( event ){
 		if ( ! this.cell.row.builder.supports( 'editWidget' ) || this.model.get( 'read_only' ) ) {
 			return this;
 		}
-		this.editHandler();
+
+		this.getEditDialog().openDialog();
 		return this;
 	},
 
