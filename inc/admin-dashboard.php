@@ -71,7 +71,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 			<p class="community-events-footer">
 				<?php
 				printf(
-					'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+					'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 					esc_url( 'https://siteorigin.com/blog/' ),
 					__( 'Blog', 'siteorigin-panels' ),
 					/* translators: accessibility text */
@@ -81,7 +81,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 
 				if( class_exists( 'SiteOrigin_Premium' ) ) {
 					printf(
-						'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-email-alt"></span></a>',
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-email-alt"></span></a>',
 						esc_url( 'mailto:support@siteorigin.com' ),
 						__( 'Email Support', 'siteorigin-panels' ),
 						/* translators: accessibility text */
@@ -90,7 +90,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 				}
 				else {
 					printf(
-						'<a href="%1$s" target="_blank">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 						esc_url( 'https://siteorigin.com/thread/' ),
 						__( 'Support Forum', 'siteorigin-panels' ),
 						/* translators: accessibility text */
@@ -101,7 +101,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 				if ( SiteOrigin_Panels::display_premium_teaser() ) {
 					echo ' | ';
 					printf(
-						'<a href="%1$s" target="_blank" style="color: #2ebd59">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer" style="color: #2ebd59">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
 						/* translators: If a Rosetta site exists (e.g. https://es.wordpress.org/news/), then use that. Otherwise, leave untranslated. */
 						esc_url( 'https://siteorigin.com/downloads/premium/' ),
 						__( 'Get Premium', 'siteorigin-panels' ),
