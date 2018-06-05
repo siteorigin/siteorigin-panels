@@ -185,6 +185,8 @@ module.exports = panels.view.dialog.extend( {
 
 		this.closeDialog();
 		this.builder.model.refreshPanelsData();
+
+		widget.trigger('user_created_new');
 	},
 
 	/**

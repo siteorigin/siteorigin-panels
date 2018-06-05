@@ -323,6 +323,8 @@ module.exports = Backbone.View.extend( {
 					widget.cell.get('widgets').add( widget );
 
 					thisView.row.builder.model.refreshPanelsData();
+
+					widget.trigger('user_created_new');
 				}
 			);
 		}

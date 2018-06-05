@@ -20,8 +20,13 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget
 	 */
 	initialize: function () {
-		this.model.on( 'user_edit', this.editHandler, this );				 // When a user wants to edit the widget model
-		this.model.on( 'user_duplicate', this.duplicateHandler, this );	   // When a user wants to duplicate the widget model
+		// When a user wants to edit the widget model
+		this.model.on( 'user_edit', this.editHandler, this );
+		// When a user wants to duplicate the widget model
+		this.model.on( 'user_duplicate', this.duplicateHandler, this );
+		// When the user created a new widget through a direct action
+		this.model.on( 'user_created_new', this.createdNewHandler, this );
+		
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
@@ -221,6 +226,8 @@ module.exports = Backbone.View.extend( {
 					} );
 
 					this.cell.row.builder.model.refreshPanelsData();
+
+					widget.trigger('user_created_new');
 				}.bind( this )
 			);
 		}
@@ -273,6 +280,18 @@ module.exports = Backbone.View.extend( {
 
 		// Lets also add the contextual menu for the entire row
 		this.cell.buildContextualMenu( e, menu );
+	},
+
+	/**
+	 * Action when we're told that the widget was newly created by the user.
+	 */
+	createdNewHandler: function(){
+		if( panelsOptions.instant_open ) {
+			var widget = this.model;
+			setTimeout(function(){
+				widget.triggerEdit();
+			}, 350);
+		}
 	}
 
 } );

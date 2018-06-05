@@ -281,6 +281,7 @@ class SiteOrigin_Panels_Admin {
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'						=> array(),
+				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
 
 				// Settings for the contextual menu
 				'contextual'                => array(
