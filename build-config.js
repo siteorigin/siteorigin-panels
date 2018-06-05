@@ -20,9 +20,7 @@ module.exports = {
         ]
     },
     sass: {
-        src: [
-        	'learn/css/*.scss',
-		],
+        src: [],
         include:[]
     },
     js: {
@@ -30,7 +28,6 @@ module.exports = {
             'js/**/*.js',
             'settings/**/*.js',
             'widgets/**/*.js',
-            'learn/js/*.js',
             '!js/siteorigin-panels/**',   // Ignore the SiteOrigin Panels JS, they're handled by Browserify
             '!{tmp,tmp/**}'               // Ignore tmp/ and contents
         ]
