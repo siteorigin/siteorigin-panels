@@ -465,6 +465,16 @@ class SiteOrigin_Panels_Admin {
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
 			}
+
+			if( defined( 'WPSEO_FILE' ) ) {
+				wp_enqueue_script(
+					'so-panels-yoast-compat',
+					siteorigin_panels_url( 'js/yoast-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+					array('jquery', 'yoast-seo-metabox' ),
+					SITEORIGIN_PANELS_VERSION,
+					true
+				);
+			}
 		}
 	}
 
