@@ -749,7 +749,7 @@ module.exports = panels.view.dialog.extend({
 	 */
 	deleteHandler: function () {
 		// Trigger a destroy on the model that will happen with a visual indication to the user
-		this.model.trigger('visual_destroy');
+		this.visualDestroyModel();
 		this.closeDialog({silent: true});
 
 		return false;

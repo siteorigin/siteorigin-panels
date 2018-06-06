@@ -24,7 +24,6 @@ module.exports = Backbone.View.extend( {
 		this.model.on( 'reweight_cells', this.resize, this );
 
 		this.model.on( 'destroy', this.onModelDestroy, this );
-		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {

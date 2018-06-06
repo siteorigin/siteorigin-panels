@@ -102,7 +102,7 @@ module.exports = panels.view.dialog.extend( {
 		if ( widgets.length <= 1 ) {
 			return false;
 		}
-		var currentIndex = widgets.index( this.widgetView.$el );
+		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
 
 		if ( currentIndex === 0 ) {
 			return false;
@@ -274,8 +274,7 @@ module.exports = panels.view.dialog.extend( {
 	 * @returns {boolean}
 	 */
 	deleteHandler: function () {
-
-		this.model.trigger( 'visual_destroy' );
+		this.widgetView.visualDestroyModel();
 		this.closeDialog( {silent: true} );
 		this.builder.model.refreshPanelsData();
 
@@ -283,7 +282,8 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	duplicateHandler: function () {
-		this.model.trigger( 'user_duplicate' );
+		// Call the widget duplicate handler directly
+		this.widgetView.duplicateHandler();
 
 		this.closeDialog( {silent: true} );
 		this.builder.model.refreshPanelsData();

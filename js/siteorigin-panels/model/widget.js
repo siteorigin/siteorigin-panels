@@ -79,20 +79,6 @@ module.exports = Backbone.Model.extend( {
 	},
 
 	/**
-	 * Trigger an event on the model that indicates a user wants to edit it
-	 */
-	triggerEdit: function () {
-		this.trigger( 'user_edit', this );
-	},
-
-	/**
-	 * Trigger an event on the widget that indicates a user wants to duplicate it
-	 */
-	triggerDuplicate: function () {
-		this.trigger( 'user_duplicate', this );
-	},
-
-	/**
 	 * This is basically a wrapper for set that checks if we need to trigger a change
 	 */
 	setValues: function ( values ) {
