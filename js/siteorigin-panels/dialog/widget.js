@@ -25,8 +25,8 @@ module.exports = panels.view.dialog.extend( {
 
 	initializeDialog: function () {
 		var thisView = this;
-		this.model.on( 'change:values', this.handleChangeValues, this );
-		this.model.on( 'destroy', this.remove, this );
+		this.listenTo( this.model, 'change:values', this.handleChangeValues );
+		this.listenTo( this.model, 'destroy', this.remove );
 
 		// Refresh panels data after both dialog form components are loaded
 		this.dialogFormsLoaded = 0;

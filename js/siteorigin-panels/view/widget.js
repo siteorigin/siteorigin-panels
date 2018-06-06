@@ -20,10 +20,9 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget
 	 */
 	initialize: function () {
-		this.model.on( 'destroy', this.onModelDestroy, this );
-
-		this.model.on( 'change:values', this.onModelChange, this );
-		this.model.on( 'change:label', this.onLabelChange, this );
+		this.listenTo(this.model, 'destroy', this.onModelDestroy);
+		this.listenTo(this.model, 'change:values', this.onModelChange);
+		this.listenTo(this.model, 'change:label', this.onLabelChange);
 	},
 
 	/**

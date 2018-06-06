@@ -21,9 +21,9 @@ module.exports = Backbone.View.extend( {
 		var rowCells = this.model.get('cells');
 		rowCells.on( 'add', this.handleCellAdd, this );
 		rowCells.on( 'remove', this.handleCellRemove, this );
-		this.model.on( 'reweight_cells', this.resize, this );
 
-		this.model.on( 'destroy', this.onModelDestroy, this );
+		this.listenTo( this.model, 'reweight_cells', this.resize );
+		this.listenTo( this.mode, 'destroy', this.onModelDestroy );
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
@@ -35,7 +35,7 @@ module.exports = Backbone.View.extend( {
 			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
-		this.model.on( 'change:label', this.onLabelChange, this );
+		this.listenTo( this.model, 'change:label', this.onLabelChange );
 	},
 
 	/**
