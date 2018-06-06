@@ -442,10 +442,7 @@ module.exports = panels.view.dialog.extend({
 
 								// So the draggable handle is not hidden.
 								rowPreview.find('.preview-cell').css('overflow', 'visible');
-
-								setTimeout(function () {
-									thisDialog.regenerateRowPreview();
-								}, 260);
+								setTimeout(thisDialog.regenerateRowPreview, 260);
 
 							}, 100);
 						})
@@ -629,9 +626,7 @@ module.exports = panels.view.dialog.extend({
 				// So the draggable handle is not hidden.
 				this.$('.preview-cell').css('overflow', 'visible');
 
-				setTimeout(function () {
-					thisDialog.regenerateRowPreview();
-				}, 260);
+				setTimeout(thisDialog.regenerateRowPreview, 260);
 			}
 		}
 		catch (err) {
