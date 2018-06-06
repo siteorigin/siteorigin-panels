@@ -171,6 +171,7 @@ module.exports = panels.view.dialog.extend( {
 	 */
 	widgetClickHandler: function ( e ) {
 		// Add the history entry
+		this.builder.trigger('before_user_adds_widget');
 		this.builder.addHistoryEntry( 'widget_added' );
 
 		var $w = $( e.currentTarget );
@@ -186,7 +187,7 @@ module.exports = panels.view.dialog.extend( {
 		this.closeDialog();
 		this.builder.model.refreshPanelsData();
 
-		widget.trigger('user_created_new');
+		this.builder.trigger('after_user_adds_widget', widget);
 	},
 
 	/**

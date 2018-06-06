@@ -312,6 +312,7 @@ module.exports = Backbone.View.extend( {
 				},
 				panelsOptions.widgets,
 				function ( c ) {
+					thisView.row.builder.trigger('before_user_adds_widget')
 					thisView.row.builder.addHistoryEntry( 'widget_added' );
 
 					var widget = new panels.model.widget( {
@@ -323,8 +324,7 @@ module.exports = Backbone.View.extend( {
 					widget.cell.get('widgets').add( widget );
 
 					thisView.row.builder.model.refreshPanelsData();
-
-					widget.trigger('user_created_new');
+					thisView.row.builder.trigger('after_user_adds_widget', widget);
 				}
 			);
 		}

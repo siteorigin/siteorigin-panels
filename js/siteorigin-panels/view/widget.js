@@ -24,9 +24,7 @@ module.exports = Backbone.View.extend( {
 		this.model.on( 'user_edit', this.editHandler, this );
 		// When a user wants to duplicate the widget model
 		this.model.on( 'user_duplicate', this.duplicateHandler, this );
-		// When the user created a new widget through a direct action
-		this.model.on( 'user_created_new', this.createdNewHandler, this );
-		
+
 		this.model.on( 'destroy', this.onModelDestroy, this );
 		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
 
@@ -81,6 +79,10 @@ module.exports = Backbone.View.extend( {
 			// Setup the dialog to load the form
 			dialog.setupDialog();
 		}
+
+		// Add the global builder listeners
+		this.listenTo(this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler);
+
 
 		return this;
 	},
@@ -212,6 +214,7 @@ module.exports = Backbone.View.extend( {
 				},
 				panelsOptions.widgets,
 				function ( c ) {
+					this.cell.row.builder.trigger('before_user_adds_widget');
 					this.cell.row.builder.addHistoryEntry( 'widget_added' );
 
 					var widget = new panels.model.widget( {
@@ -227,7 +230,7 @@ module.exports = Backbone.View.extend( {
 
 					this.cell.row.builder.model.refreshPanelsData();
 
-					widget.trigger('user_created_new');
+					this.cell.row.builder.trigger('after_user_adds_widget', widget);
 				}.bind( this )
 			);
 		}
@@ -283,11 +286,11 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Action when we're told that the widget was newly created by the user.
+	 * Handler for any action after the user adds a new widget.
+	 * @param widget
 	 */
-	createdNewHandler: function(){
+	afterUserAddsWidgetHandler: function( widget ) {
 		if( panelsOptions.instant_open ) {
-			var widget = this.model;
 			setTimeout(function(){
 				widget.triggerEdit();
 			}, 350);
