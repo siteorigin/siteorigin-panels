@@ -83,6 +83,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$layouts = array();
 		foreach ( $layout_folders as $folder ) {
+			$folder = realpath($folder);
 			if ( file_exists( $folder ) && is_dir( $folder ) ) {
 				$files = list_files( $folder, 1 );
 				if ( empty( $files ) ) {

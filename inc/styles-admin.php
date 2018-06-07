@@ -228,7 +228,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					$image = SiteOrigin_Panels_Styles::get_attachment_image_src( $current, 'thumbnail' );
 				}
 				
-				$fallback_url = $current_styles[ $field_id . '_fallback' ];
+				$fallback_url = ( ! empty( $current_styles[ $field_id . '_fallback' ] ) &&  $current_styles[ $field_id . '_fallback' ] !== 'false' ? $current_styles[ $field_id . '_fallback' ] : '' );
 				$fallback_field_name = 'style[' . $field_id . '_fallback]';
 
 				?>
@@ -246,7 +246,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				</div>
 				<a href="#" class="remove-image<?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				
-				<input type="text" value="<?php if ( $fallback_url !== 'false' ) echo esc_url( $fallback_url ) ?>"
+				<input type="text" value="<?php echo esc_url( $fallback_url ) ?>"
 					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ) ?>"
 					   name="<?php echo esc_attr( $fallback_field_name ) ?>"
 					   class="image-fallback widefat" />
@@ -386,7 +386,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				case 'image' :
 					$return[ $k ] = ! empty( $styles[ $k ] ) ? sanitize_text_field( $styles[ $k ] ) : false;
 					$fallback_name = $k . '_fallback';
-					if ( $styles[ $k ] == '' && $styles[ $fallback_name ] == '' ) {
+					if ( empty( $styles[ $k ] ) && empty( $styles[ $fallback_name ] ) ) {
 						continue;
 					}
 					$return[ $fallback_name ] = ! empty( $styles[ $fallback_name ] ) ? esc_url_raw( $styles[ $fallback_name ] ) : false;

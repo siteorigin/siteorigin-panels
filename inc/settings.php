@@ -280,12 +280,6 @@ class SiteOrigin_Panels_Settings {
 			)
 		);
 
-		$fields['general']['fields']['display-learn'] = array(
-			'type' => 'checkbox',
-			'label' => __( 'Page Builder Learning', 'siteorigin-panels' ),
-			'description' => __( 'Display buttons for Page Builder learning.', 'siteorigin-panels' )
-		);
-		
 		$fields['general']['fields']['load-on-attach'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),

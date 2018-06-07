@@ -43,10 +43,6 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
 			SiteOrigin_Panels_Admin::single();
-
-			if( ! class_exists( 'SiteOrigin_Learn_Dialog' ) ) {
-				include plugin_dir_path( __FILE__ ) . 'learn/learn.php';
-			}
 		}
 
 		// Include the live editor file if we're in live editor mode.
@@ -65,7 +61,7 @@ class SiteOrigin_Panels {
 		
 		// We need to generate fresh post content
 		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
-		add_filter( 'woocommerce_format_content', array( $this, 'generate_post_content' ) );
+		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ) );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
@@ -267,6 +263,23 @@ class SiteOrigin_Panels {
 		}
 
 		return $panels_data;
+	}
+	
+	/**
+	 * Generate post content for WooCommerce shop page if it's using a PB layout.
+	 *
+	 * @param $content
+	 *
+	 * @return string
+	 *
+	 * @filter woocommerce_format_content
+	 */
+	public function generate_woocommerce_content( $content ) {
+		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+			return $this->generate_post_content( $content );
+		}
+		
+		return $content;
 	}
 
 	/**
@@ -507,11 +520,6 @@ class SiteOrigin_Panels {
 			do_action( 'siteorigin_panels_version_changed' );
 			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
 		}
-	}
-
-	static function display_learn_button() {
-		return siteorigin_panels_setting( 'display-learn' ) &&
-			   apply_filters( 'siteorigin_panels_learn', true );
 	}
 
 	/**
