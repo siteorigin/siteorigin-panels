@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.6.9 - 7 June 2018 =
+* Changed dashboard feed URL to use cloudfront for caching.
+
 = 2.6.8 - 5 June 2018 =
 * Remove learn dialogs.
 * Added SiteOrigin news dashboard widget
