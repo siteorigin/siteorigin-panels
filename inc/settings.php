@@ -118,6 +118,7 @@ class SiteOrigin_Panels_Settings {
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
+		$defaults['hash-by-number'] 		= false;
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
 		$defaults['sidebars-emulator']      = true;
@@ -253,6 +254,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Display a Live Editor button in the admin bar.', 'siteorigin-panels' ),
 		);
 
+		$fields['general']['fields']['hash-by-number'] = array(
+			'type' => 'checkbox',
+			'label' => __('Style hash by number', 'siteorigin-panels'),
+			'description' => __('Hash for css files and classes generate by number', 'siteorigin-panels'),
+		);
+
 		$fields['general']['fields']['admin-widget-count'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
@@ -270,7 +277,7 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Sidebars Emulator', 'siteorigin-panels' ),
 			'description' => __( 'Page Builder will create an emulated sidebar, that contains all widgets in the page.', 'siteorigin-panels' ),
 		);
-		
+
 		$fields['general']['fields']['display-teaser'] = array(
 			'type' => 'checkbox',
 			'label' => __('Upgrade Teaser', 'siteorigin-panels'),
@@ -344,7 +351,7 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Use Tablet Layout', 'siteorigin-panels' ),
 			'description' => __( 'Collapses columns differently on tablet devices.', 'siteorigin-panels' ),
 		);
-		
+
 		$fields['layout']['fields']['legacy-layout'] = array(
 			'type'        => 'select',
 			'options'     => array(
@@ -583,7 +590,7 @@ class SiteOrigin_Panels_Settings {
 
 		// Don't let mobile width go below 320
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
-		
+
 		// Save the values to the database
 		update_option( 'siteorigin_panels_settings', $values );
 		do_action( 'siteorigin_panels_save_settings', $values );
@@ -598,17 +605,17 @@ class SiteOrigin_Panels_Settings {
 	 */
 	function get_post_types() {
 		$post_types = get_post_types( array( '_builtin' => false ) );
-		
+
 		$types = array(
 			'page' => 'page',
 			'post' => 'post'
 		);
-		
+
 		// Don't use `array_merge` here as it will break things if a post type has a numeric slug.
 		foreach ( $post_types as $key => $value ) {
 			$types[ $key ] = $value;
 		}
-		
+
 		// These are post types we know we don't want to show Page Builder on
 		unset( $types['ml-slider'] );
 
