@@ -23,7 +23,7 @@ module.exports = Backbone.View.extend( {
 		rowCells.on( 'remove', this.handleCellRemove, this );
 
 		this.listenTo( this.model, 'reweight_cells', this.resize );
-		this.listenTo( this.mode, 'destroy', this.onModelDestroy );
+		this.listenTo( this.model, 'destroy', this.onModelDestroy );
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
