@@ -113,6 +113,8 @@
 					} )
 					.setData( panelsData );
 					
+					builderView.trigger( 'builder_resize' );
+					
 					builderView.on( 'content_change', function () {
 						props.setAttributes( { panelsData: builderView.getData() } );
 					} );
@@ -124,7 +126,7 @@
 			}
 			if ( editing ) {
 				return [
-					!!props.focus && el(
+					el(
 						BlockControls,
 						{ key: 'controls' },
 						el(
@@ -150,7 +152,7 @@
 			} else {
 				var preview = props.previewHtml;
 				return [
-					!! props.focus && el(
+					el(
 						BlockControls,
 						{ key: 'controls' },
 						el(
