@@ -21,10 +21,9 @@ module.exports = Backbone.View.extend( {
 		var rowCells = this.model.get('cells');
 		rowCells.on( 'add', this.handleCellAdd, this );
 		rowCells.on( 'remove', this.handleCellRemove, this );
-		this.model.on( 'reweight_cells', this.resize, this );
 
-		this.model.on( 'destroy', this.onModelDestroy, this );
-		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
+		this.listenTo( this.model, 'reweight_cells', this.resize );
+		this.listenTo( this.model, 'destroy', this.onModelDestroy );
 
 		var thisView = this;
 		rowCells.each( function ( cell ) {
@@ -36,7 +35,7 @@ module.exports = Backbone.View.extend( {
 			thisView.listenTo( cell.get('widgets'), 'add', thisView.resize );
 		}, this );
 
-		this.model.on( 'change:label', this.onLabelChange, this );
+		this.listenTo( this.model, 'change:label', this.onLabelChange );
 	},
 
 	/**
@@ -243,6 +242,7 @@ module.exports = Backbone.View.extend( {
 			// Create the dialog
 			this.dialog = new panels.dialog.row();
 			this.dialog.setBuilder( this.builder ).setRowModel( this.model );
+			this.dialog.rowView = this;
 		}
 
 		this.dialog.openDialog();

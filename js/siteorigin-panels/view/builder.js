@@ -88,21 +88,21 @@ module.exports = Backbone.View.extend( {
 		} );
 		
 		// When the data changes in the model, store it in the field
-		this.model.on( 'change:data load_panels_data', this.storeModelData, this );
+		this.listenTo( this.model, 'change:data load_panels_data', this.storeModelData );
+		this.listenTo( this.model, 'change:data load_panels_data', this.toggleWelcomeDisplay );
 		
 		// Handle a content change
 		this.on( 'content_change', this.handleContentChange, this );
 		this.on( 'display_builder', this.handleDisplayBuilder, this );
 		this.on( 'hide_builder', this.handleHideBuilder, this );
 		this.on( 'builder_rendered builder_resize', this.handleBuilderSizing, this );
-		this.model.on( 'change:data load_panels_data', this.toggleWelcomeDisplay, this );
-		
+
 		this.on( 'display_builder', this.wrapEditorExpandAdjust, this );
 		
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
-		this.menu.on( 'activate_context', this.activateContextMenu, this );
-		
+		this.listenTo( this.menu, 'activate_context', this.activateContextMenu )
+
 		if ( this.config.loadOnAttach ) {
 			this.on( 'builder_attached_to_editor', function () {
 				this.displayAttachedBuilder( { confirm: false } );

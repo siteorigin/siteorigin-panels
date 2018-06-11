@@ -20,16 +20,9 @@ module.exports = Backbone.View.extend( {
 	 * Initialize the widget
 	 */
 	initialize: function () {
-		// When a user wants to edit the widget model
-		this.model.on( 'user_edit', this.editHandler, this );
-		// When a user wants to duplicate the widget model
-		this.model.on( 'user_duplicate', this.duplicateHandler, this );
-
-		this.model.on( 'destroy', this.onModelDestroy, this );
-		this.model.on( 'visual_destroy', this.visualDestroyModel, this );
-
-		this.model.on( 'change:values', this.onModelChange, this );
-		this.model.on( 'change:label', this.onLabelChange, this );
+		this.listenTo(this.model, 'destroy', this.onModelDestroy);
+		this.listenTo(this.model, 'change:values', this.onModelChange);
+		this.listenTo(this.model, 'change:label', this.onLabelChange);
 	},
 
 	/**
@@ -82,7 +75,6 @@ module.exports = Backbone.View.extend( {
 
 		// Add the global builder listeners
 		this.listenTo(this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler);
-
 
 		return this;
 	},
@@ -159,7 +151,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {boolean}
 	 */
 	deleteHandler: function () {
-		this.model.trigger( 'visual_destroy' );
+		this.visualDestroyModel();
 		return this;
 	},
 
@@ -186,13 +178,12 @@ module.exports = Backbone.View.extend( {
 		// Add the history entry
 		this.cell.row.builder.addHistoryEntry( 'widget_deleted' );
 
-		var thisView = this;
 		this.$el.fadeOut( 'fast', function () {
-			thisView.cell.row.resize();
-			thisView.model.destroy();
-			thisView.cell.row.builder.model.refreshPanelsData();
-			thisView.remove();
-		} );
+			this.cell.row.resize();
+			this.model.destroy();
+			this.cell.row.builder.model.refreshPanelsData();
+			this.remove();
+		}.bind(this) );
 
 		return this;
 	},
