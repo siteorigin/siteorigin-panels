@@ -102,11 +102,12 @@ module.exports = panels.view.dialog.extend( {
 		if ( widgets.length <= 1 ) {
 			return false;
 		}
-		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
+		var currentIndex = widgets.index( this.widgetView.$el );
 
 		if ( currentIndex === 0 ) {
 			return false;
 		} else {
+			var widgetView;
 			do {
 				widgetView = widgets.eq( --currentIndex ).data( 'view' );
 				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
@@ -128,11 +129,12 @@ module.exports = panels.view.dialog.extend( {
 			return false;
 		}
 
-		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
+		var currentIndex = widgets.index( this.widgetView.$el );
 
 		if ( currentIndex === widgets.length - 1 ) {
 			return false;
 		} else {
+			var widgetView;
 			do {
 				widgetView = widgets.eq( ++currentIndex ).data( 'view' );
 				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
