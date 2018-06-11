@@ -65,7 +65,7 @@ module.exports = Backbone.View.extend( {
 			this.resetHighlights();
 		}.bind(this) );
 
-		this.builder.on( this.builder, 'open_dialog', function () {
+		this.listenTo( this.builder, 'open_dialog', function () {
 			this.resetHighlights();
 		} );
 
