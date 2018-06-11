@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 	widgetSortable: null,
 
 	initialize: function () {
-		this.model.get('widgets').on( 'add', this.onAddWidget, this );
+		this.listenTo(this.model.get('widgets'), 'add', this.onAddWidget );
 	},
 
 	/**

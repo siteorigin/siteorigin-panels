@@ -78,7 +78,7 @@ module.exports = Backbone.View.extend( {
 		this.dialogs.row.setRowDialogType( 'create' );
 		
 		// This handles a new row being added to the collection - we'll display it in the interface
-		this.model.get( 'rows' ).on( 'add', this.onAddRow, this );
+		this.listenTo( this.model.get( 'rows' ), 'add', this.onAddRow );
 		
 		// Reflow the entire builder when ever the
 		$( window ).resize( function ( e ) {

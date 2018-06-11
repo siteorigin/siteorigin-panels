@@ -19,8 +19,8 @@ module.exports = Backbone.View.extend( {
 	initialize: function () {
 
 		var rowCells = this.model.get('cells');
-		rowCells.on( 'add', this.handleCellAdd, this );
-		rowCells.on( 'remove', this.handleCellRemove, this );
+		this.listenTo(rowCells, 'add', this.handleCellAdd );
+		this.listenTo(rowCells, 'remove', this.handleCellRemove );
 
 		this.listenTo( this.model, 'reweight_cells', this.resize );
 		this.listenTo( this.model, 'destroy', this.onModelDestroy );
@@ -88,8 +88,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Resize the rows when ever the widget sortable moves
-		this.builder.on( 'widget_sortable_move', this.resize, this );
-		this.builder.on( 'builder_resize', this.resize, this );
+		this.listenTo( this.builder, 'widget_sortable_move', this.resize );
+		this.listenTo( this.builder, 'builder_resize', this.resize );
 
 		this.resize();
 

@@ -29,8 +29,8 @@ module.exports = Backbone.View.extend( {
 		this.builder = options.builder;
 		this.previewUrl = options.previewUrl;
 
-		this.builder.model.on( 'refresh_panels_data', this.handleRefreshData, this );
-		this.builder.model.on( 'load_panels_data', this.handleLoadData, this );
+		this.listenTo( this.builder.model, 'refresh_panels_data', this.handleRefreshData );
+		this.listenTo( this.builder.model, 'load_panels_data', this.handleLoadData );
 	},
 
 	/**
@@ -39,10 +39,8 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		this.setElement( this.template() );
 		this.$el.hide();
-		var thisView = this;
 
 		var isMouseDown = false;
-
 		$( document )
 			.mousedown( function () {
 				isMouseDown = true;
@@ -52,22 +50,23 @@ module.exports = Backbone.View.extend( {
 			} );
 
 		// Handle highlighting the relevant widget in the live editor preview
+		var liveEditorView = this;
 		this.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
 			var $$ = $( this ),
 				previewWidget = $$.data( 'live-editor-preview-widget' );
 
-			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! thisView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
-				thisView.highlightElement( previewWidget );
-				thisView.scrollToElement( previewWidget );
+			if ( ! isMouseDown && previewWidget !== undefined && previewWidget.length && ! liveEditorView.$( '.so-preview-overlay' ).is( ':visible' ) ) {
+				liveEditorView.highlightElement( previewWidget );
+				liveEditorView.scrollToElement( previewWidget );
 			}
 		} );
 
-		thisView.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
-			thisView.resetHighlights();
-		} );
+		this.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
+			this.resetHighlights();
+		}.bind(this) );
 
-		thisView.builder.on( 'open_dialog', function () {
-			thisView.resetHighlights();
+		this.builder.on( this.builder, 'open_dialog', function () {
+			this.resetHighlights();
 		} );
 
 		return this;
