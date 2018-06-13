@@ -706,6 +706,11 @@ class SiteOrigin_Panels_Renderer {
 			echo $row_style_wrapper;
 		}
 
+		if( method_exists( $this, 'modify_row_cells' ) ) {
+			// This gives other renderers a chance to change the cell order
+			$row['cells'] = $cells = $this->modify_row_cells( $row['cells'], $row );
+		}
+
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
