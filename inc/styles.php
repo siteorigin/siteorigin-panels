@@ -543,6 +543,26 @@ class SiteOrigin_Panels_Styles {
 			$standard_css = apply_filters( 'siteorigin_panels_row_style_css', array(), $row['style'] );
 			$mobile_css = apply_filters( 'siteorigin_panels_row_style_mobile_css', array(), $row['style'] );
 
+			if( isset($standard_css['margin-bottom']) ){
+				$css->add_row_css(
+					$post_id,
+					$ri,
+					'',
+					array('margin-bottom' => $standard_css['margin-bottom'])
+				);
+				unset($standard_css['margin-bottom']);
+			}
+			if( isset($mobile_css['margin-bottom']) ){
+				$css->add_row_css(
+					$post_id,
+					$ri,
+					'',
+					array('margin-bottom' => $mobile_css['margin-bottom']),
+					$mobile_width
+				);
+				unset($mobile_css['margin-bottom']);
+			}
+
 			if ( ! empty( $standard_css ) ) {
 				$css->add_row_css(
 					$post_id,
@@ -582,6 +602,28 @@ class SiteOrigin_Panels_Styles {
 
 				$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
 				$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
+
+				if( isset($standard_css['margin-bottom']) ){
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'',
+						array('margin-bottom' => $standard_css['margin-bottom'])
+					);
+					unset($standard_css['margin-bottom']);
+				}
+				if( isset($mobile_css['margin-bottom']) ){
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'',
+						array('margin-bottom' => $mobile_css['margin-bottom']),
+						$mobile_width
+					);
+					unset($mobile_css['margin-bottom']);
+				}
 
 				if ( ! empty( $standard_css ) ) {
 					$css->add_cell_css(
@@ -624,6 +666,30 @@ class SiteOrigin_Panels_Styles {
 
 					$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
 					$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
+
+					if( isset($standard_css['margin-bottom']) ){
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'',
+							array('margin-bottom' => $standard_css['margin-bottom'])
+						);
+						unset($standard_css['margin-bottom']);
+					}
+					if( isset($mobile_css['margin-bottom']) ){
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'',
+							array('margin-bottom' => $mobile_css['margin-bottom']),
+							$mobile_width
+						);
+						unset($mobile_css['margin-bottom']);
+					}
 
 					if( ! empty( $standard_css ) ) {
 						$css->add_widget_css(
