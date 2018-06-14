@@ -17,8 +17,8 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
-				'padding-left': 0,
-				'padding-right': 0
+				'padding-left': '',
+				'padding-right': ''
 			} );
 
 			var leftSpace = $$.offset().left - fullContainer.offset().left,
@@ -27,8 +27,8 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': - leftSpace,
 				'margin-right': - rightSpace,
-				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : 0,
-				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : 0
+				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : '',
+				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : ''
 			} );
 
 			var cells = $$.find( '> .panel-grid-cell' );
