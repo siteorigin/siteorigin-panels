@@ -148,6 +148,14 @@ module.exports = panels.view.dialog.extend( {
 		} );
 		uploader.init();
 
+		if ( /Edge\/\d./i.test(navigator.userAgent) ){
+			// A very dirty fix for a Microsoft Edge issue.
+			// TODO find a more elegant fix if Edge gains market share
+			setTimeout( function(){
+				uploader.refresh();
+			}, 250 );
+		}
+
 		// This is
 		uploadUi.find( '.drag-upload-area' )
 			.on( 'dragover', function () {
