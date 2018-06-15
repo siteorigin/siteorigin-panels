@@ -7,7 +7,7 @@
  */
 class SiteOrigin_Panels_Admin_Layouts {
 	
-	const LAYOUT_URL = 'http://layouts.siteorigin.com/';
+	const LAYOUT_URL = 'https://layouts.siteorigin.com/';
 	
 	function __construct() {
 		// Filter all the available external layout directories.
