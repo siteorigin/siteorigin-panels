@@ -56,7 +56,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 	public function dashboard_overview_widget(){
 		$feeds = array(
 			array(
-				'url'          => 'https://d3teieis3prgof.cloudfront.net/',
+				'url'          => 'https://siteorigin.com/feed/',
 				'items'        => 4,
 				'show_summary' => 0,
 				'show_author'  => 0,
