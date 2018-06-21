@@ -8,7 +8,10 @@
 class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	
 	static $rendering_loop;
-	
+
+	static $current_loop_template;
+	static $current_loop_instance;
+
 	/**
 	 * @var SiteOrigin_Panels_Widgets_PostLoop_Helper
 	 */
@@ -26,11 +29,34 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			)
 		);
 	}
-	
+
+	/**
+	 * Are we currently rendering a post loop
+	 *
+	 * @return bool
+	 */
 	static function is_rendering_loop() {
 		return self::$rendering_loop;
 	}
-	
+
+	/**
+	 * Which post loop is currently being rendered
+	 *
+	 * @return array
+	 */
+	static function get_current_loop_template() {
+		return self::$current_loop_template;
+	}
+
+	/**
+	 * Which post loop is currently being rendered
+	 *
+	 * @return array
+	 */
+	static function get_current_loop_instance() {
+		return self::$current_loop_instance;
+	}
+
 	/**
 	 * Update the widget
 	 *
@@ -156,6 +182,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		
 		global $more; $old_more = $more; $more = empty($instance['more']);
 		self::$rendering_loop = true;
+		self::$current_loop_instance = $instance;
+		self::$current_loop_template = $instance['template'];
 		if(strpos('/'.$instance['template'], '/content') !== false) {
 			while( have_posts() ) {
 				the_post();
@@ -166,7 +194,9 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			locate_template($instance['template'], true, false);
 		}
 		self::$rendering_loop = false;
-		
+		self::$current_loop_instance = null;
+		self::$current_loop_template = null;
+
 		echo $args['after_widget'];
 		
 		// Reset everything
