@@ -209,7 +209,9 @@ class SiteOrigin_Panels_Admin {
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
 				}
+				remove_action( 'post_updated', 'wp_save_post_revision' );
 				wp_update_post( $post );
+				add_action( 'post_updated', 'wp_save_post_revision' );
 			}
 
 		} else {
