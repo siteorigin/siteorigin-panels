@@ -96,6 +96,20 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.7.0 - 27 June 2018 =
+* New setting to automatically open widget forms when they're added.
+* New row layout option to make provision for row style padding in full width stretched rows.
+* Make sure prebuilt layouts path is a real path.
+* Better compatibility with Yoast SEO.
+* Row Cell options: Prevent Yoast from resizing fields.
+* Added `panels_data` filter to `generate_css`.
+* Don’t hide the upload UI before initializing it.
+* Fix collapse order in legacy layout.
+* Clear SO widgets' id and timestamp metadata when cloning a PB Page.
+* Fix layout imports in Edge.
+* Apply bottom margin custom styles to main wrapper where PB adds it's bottom margin, to allow users to override.
+* Use https for layouts directory.
+
 = 2.6.9 - 7 June 2018 =
 * Changed dashboard feed URL to use cloudfront for caching.
 
