@@ -281,6 +281,7 @@ class SiteOrigin_Panels_Admin {
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'						=> array(),
+				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
 
 				// Settings for the contextual menu
 				'contextual'                => array(
@@ -463,6 +464,16 @@ class SiteOrigin_Panels_Admin {
 				}
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
+			}
+
+			if( defined( 'WPSEO_FILE' ) ) {
+				wp_enqueue_script(
+					'so-panels-yoast-compat',
+					siteorigin_panels_url( 'js/yoast-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+					array('jquery', 'yoast-seo-metabox' ),
+					SITEORIGIN_PANELS_VERSION,
+					true
+				);
 			}
 		}
 	}

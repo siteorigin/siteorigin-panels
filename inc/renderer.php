@@ -50,6 +50,7 @@ class SiteOrigin_Panels_Renderer {
 		// Exit if we don't have panels data
 		if ( empty( $panels_data ) ) {
 			$panels_data = get_post_meta( $post_id, 'panels_data', true );
+			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 			if ( empty( $panels_data ) ) {
 				return '';
 			}
@@ -703,6 +704,11 @@ class SiteOrigin_Panels_Renderer {
 
 		if ( ! empty( $row_style_wrapper ) ) {
 			echo $row_style_wrapper;
+		}
+
+		if( method_exists( $this, 'modify_row_cells' ) ) {
+			// This gives other renderers a chance to change the cell order
+			$row['cells'] = $cells = $this->modify_row_cells( $row['cells'], $row );
 		}
 
 		foreach ( $row['cells'] as $ci => & $cell ) {

@@ -9,16 +9,19 @@ jQuery( function ( $ ) {
 
 	// Stretch all the full width rows
 	var stretchFullWidthRows = function () {
-
-		$( '.siteorigin-panels-stretch.panel-row-style' ).each( function () {
+		var $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
+		$panelsRow.each( function () {
 			var $$ = $( this );
-
+			
+			var stretchType = $$.data( 'stretch-type' );
+			var defaultSidePadding = stretchType === 'full-stretched-padded' ? '' : 0;
+			
 			// Reset all the styles associated with row stretching
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
-				'padding-left': 0,
-				'padding-right': 0
+				'padding-left': defaultSidePadding,
+				'padding-right': defaultSidePadding
 			} );
 
 			var leftSpace = $$.offset().left - fullContainer.offset().left,
@@ -27,13 +30,13 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': - leftSpace,
 				'margin-right': - rightSpace,
-				'padding-left': $$.data( 'stretch-type' ) === 'full' ? leftSpace : 0,
-				'padding-right': $$.data( 'stretch-type' ) === 'full' ? rightSpace : 0
+				'padding-left': stretchType === 'full' ? leftSpace : defaultSidePadding,
+				'padding-right': stretchType === 'full' ? rightSpace : defaultSidePadding
 			} );
 
 			var cells = $$.find( '> .panel-grid-cell' );
 
-			if ( $$.data( 'stretch-type' ) === 'full-stretched' && cells.length === 1 ) {
+			if ( stretchType === 'full-stretched' && cells.length === 1 ) {
 				cells.css( {
 					'padding-left': 0,
 					'padding-right': 0
@@ -46,7 +49,7 @@ jQuery( function ( $ ) {
 			} );
 		} );
 
-		if ( $( '.siteorigin-panels-stretch.panel-row-style' ).length ) {
+		if ( $panelsRow.length ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}

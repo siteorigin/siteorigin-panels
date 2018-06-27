@@ -86,7 +86,7 @@ module.exports = panels.view.dialog.extend( {
 		c.html( $( '#siteorigin-panels-dialog-prebuilt-importexport' ).html() );
 
 		var thisView = this;
-		var uploadUi = thisView.$( '.import-upload-ui' ).hide();
+		var uploadUi = thisView.$( '.import-upload-ui' );
 
 		// Create the uploader
 		var uploader = new plupload.Uploader( {
@@ -115,7 +115,7 @@ module.exports = panels.view.dialog.extend( {
 					if ( uploader.features.dragdrop ) {
 						uploadUi.addClass( 'has-drag-drop' );
 					}
-					uploadUi.show().find( '.progress-precent' ).css( 'width', '0%' );
+					uploadUi.find( '.progress-precent' ).css( 'width', '0%' );
 				},
 				FilesAdded: function ( uploader ) {
 					uploadUi.find( '.file-browse-button' ).blur();
@@ -147,6 +147,14 @@ module.exports = panels.view.dialog.extend( {
 			}
 		} );
 		uploader.init();
+
+		if ( /Edge\/\d./i.test(navigator.userAgent) ){
+			// A very dirty fix for a Microsoft Edge issue.
+			// TODO find a more elegant fix if Edge gains market share
+			setTimeout( function(){
+				uploader.refresh();
+			}, 250 );
+		}
 
 		// This is
 		uploadUi.find( '.drag-upload-area' )

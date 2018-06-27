@@ -123,10 +123,11 @@ class SiteOrigin_Panels_Settings {
 		$defaults['sidebars-emulator']      = true;
 
 		// Widgets fields
-		$defaults['title-html']          = '<h3 class="widget-title">{{title}}</h3>';
-		$defaults['add-widget-class']    = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
-		$defaults['bundled-widgets']     = get_option( 'siteorigin_panels_is_using_bundled', false );
-		$defaults['recommended-widgets'] = true;
+		$defaults['title-html']           = '<h3 class="widget-title">{{title}}</h3>';
+		$defaults['add-widget-class']     = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
+		$defaults['bundled-widgets']      = get_option( 'siteorigin_panels_is_using_bundled', false );
+		$defaults['recommended-widgets']  = true;
+		$defaults['instant-open-widgets'] = false;
 
 		// The layout fields
 		$defaults['responsive']             = true;
@@ -315,6 +316,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Recommended Widgets', 'siteorigin-panels' ),
 			'description' => __( 'Display recommend widgets in Page Builder add widget dialog.', 'siteorigin-panels' ),
+		);
+
+		$fields['widgets']['fields']['instant-open-widgets'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Instant Open Widgets', 'siteorigin-panels' ),
+			'description' => __( 'Open a widget form as soon as its added to a page.', 'siteorigin-panels' ),
 		);
 
 		// The layout fields
