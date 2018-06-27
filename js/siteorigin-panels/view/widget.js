@@ -282,7 +282,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	afterUserAddsWidgetHandler: function( widget ) {
 		if( this.model === widget && panelsOptions.instant_open ) {
-			setTimeout(this.editHandler, 350);
+			setTimeout(this.editHandler.bind(this), 350);
 		}
 	}
 
