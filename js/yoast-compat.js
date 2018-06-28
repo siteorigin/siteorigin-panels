@@ -2,6 +2,11 @@
 
 jQuery(function($){
 
+	if( typeof YoastSEO.app === 'undefined' ){
+		// Skip all this if we don't have the yoast app
+		return;
+	}
+
 	var decodeEntities = (function() {
 		// this prevents any overhead from creating the object each time
 		var element = document.createElement('div');

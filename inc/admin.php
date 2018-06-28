@@ -65,6 +65,11 @@ class SiteOrigin_Panels_Admin {
 
 		$this->in_save_post = false;
 
+
+        // Enqueue Yoast compatibility
+        add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+        add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+
 		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
 		add_filter( 'filter_gutenberg_meta_boxes', array( $this, 'disable_panels_for_gutenberg_posts' ) );
 	}
@@ -465,17 +470,19 @@ class SiteOrigin_Panels_Admin {
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
 			}
-
-			if( defined( 'WPSEO_FILE' ) ) {
-				wp_enqueue_script(
-					'so-panels-yoast-compat',
-					siteorigin_panels_url( 'js/yoast-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-					array('jquery', 'yoast-seo-metabox' ),
-					SITEORIGIN_PANELS_VERSION,
-					true
-				);
-			}
 		}
+	}
+
+	public function enqueue_yoast_compat(){
+        if( self::is_admin() && defined( 'WPSEO_FILE' ) && wp_script_is( 'yoast-seo-metabox' ) ) {
+            wp_enqueue_script(
+                'so-panels-yoast-compat',
+                siteorigin_panels_url( 'js/yoast-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+                array('jquery', 'yoast-seo-metabox' ),
+                SITEORIGIN_PANELS_VERSION,
+                true
+            );
+        }
 	}
 
 	/**
