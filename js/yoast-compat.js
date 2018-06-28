@@ -34,8 +34,12 @@ jQuery(function($){
 
 	SiteOriginYoastCompat.prototype.contentModification = function(data) {
 		var re = new RegExp( panelsOptions.siteoriginWidgetRegex , "i" );
-		var $data = $(data);
+		var $data = $( '<div>' + data + '</div>' );
 
+		if( $data.find('.so-panel.widget').length === 0 ) {
+			// Skip this for non Page builder pages
+			return data;
+		}
 
 		$data.find('.so-panel.widget').each(function(i, el){
 			var $widget = $(el),
