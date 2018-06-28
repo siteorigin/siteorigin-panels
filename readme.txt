@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.7.1 - 28 June 2018 =
+* Check for yoast metabox before enqueuing compat JS.
+
 = 2.7.0 - 27 June 2018 =
 * New setting to automatically open widget forms when they're added.
 * New row layout option to make provision for row style padding in full width stretched rows.
