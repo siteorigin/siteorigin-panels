@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.7.2 - 29 June 2018 =
+* Skip Yoast compat for non PB content.
+
 = 2.7.1 - 28 June 2018 =
 * Check for yoast metabox before enqueuing compat JS.
 
