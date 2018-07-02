@@ -40,7 +40,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 	 */
 	public function enqueue_admin_styles( $page ){
 		$screen = get_current_screen();
-		if( $screen->id == 'dashboard' ) {
+		if( ! empty( $screen ) && $screen->id == 'dashboard' ) {
 			wp_enqueue_style(
 				'so-panels-dashboard',
 				siteorigin_panels_url( 'css/dashboard.css' ),
