@@ -25,8 +25,8 @@ module.exports = panels.view.dialog.extend( {
 
 	initializeDialog: function () {
 		var thisView = this;
-		this.model.on( 'change:values', this.handleChangeValues, this );
-		this.model.on( 'destroy', this.remove, this );
+		this.listenTo( this.model, 'change:values', this.handleChangeValues );
+		this.listenTo( this.model, 'destroy', this.remove );
 
 		// Refresh panels data after both dialog form components are loaded
 		this.dialogFormsLoaded = 0;
@@ -107,6 +107,7 @@ module.exports = panels.view.dialog.extend( {
 		if ( currentIndex === 0 ) {
 			return false;
 		} else {
+			var widgetView;
 			do {
 				widgetView = widgets.eq( --currentIndex ).data( 'view' );
 				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
@@ -128,11 +129,12 @@ module.exports = panels.view.dialog.extend( {
 			return false;
 		}
 
-		var currentIndex = widgets.index( this.widgetView.$el ), widgetView;
+		var currentIndex = widgets.index( this.widgetView.$el );
 
 		if ( currentIndex === widgets.length - 1 ) {
 			return false;
 		} else {
+			var widgetView;
 			do {
 				widgetView = widgets.eq( ++currentIndex ).data( 'view' );
 				if ( ! _.isUndefined( widgetView ) && ! widgetView.model.get( 'read_only' ) ) {
@@ -274,8 +276,7 @@ module.exports = panels.view.dialog.extend( {
 	 * @returns {boolean}
 	 */
 	deleteHandler: function () {
-
-		this.model.trigger( 'visual_destroy' );
+		this.widgetView.visualDestroyModel();
 		this.closeDialog( {silent: true} );
 		this.builder.model.refreshPanelsData();
 
@@ -283,7 +284,8 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	duplicateHandler: function () {
-		this.model.trigger( 'user_duplicate' );
+		// Call the widget duplicate handler directly
+		this.widgetView.duplicateHandler();
 
 		this.closeDialog( {silent: true} );
 		this.builder.model.refreshPanelsData();

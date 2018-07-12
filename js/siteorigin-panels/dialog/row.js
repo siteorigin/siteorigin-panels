@@ -20,6 +20,7 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form button.set-row': 'setCellsFromForm',
 	},
 
+	rowView: null,
 	dialogIcon: 'add-row',
 	dialogClass: 'so-panels-dialog-row-edit',
 	styleType: 'row',
@@ -442,10 +443,7 @@ module.exports = panels.view.dialog.extend({
 
 								// So the draggable handle is not hidden.
 								rowPreview.find('.preview-cell').css('overflow', 'visible');
-
-								setTimeout(function () {
-									thisDialog.regenerateRowPreview();
-								}, 260);
+								setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
 
 							}, 100);
 						})
@@ -629,9 +627,7 @@ module.exports = panels.view.dialog.extend({
 				// So the draggable handle is not hidden.
 				this.$('.preview-cell').css('overflow', 'visible');
 
-				setTimeout(function () {
-					thisDialog.regenerateRowPreview();
-				}, 260);
+				setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
 			}
 		}
 		catch (err) {
@@ -749,7 +745,7 @@ module.exports = panels.view.dialog.extend({
 	 */
 	deleteHandler: function () {
 		// Trigger a destroy on the model that will happen with a visual indication to the user
-		this.model.trigger('visual_destroy');
+		this.rowView.visualDestroyModel();
 		this.closeDialog({silent: true});
 
 		return false;

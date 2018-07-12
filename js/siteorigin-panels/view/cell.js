@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend( {
 	widgetSortable: null,
 
 	initialize: function () {
-		this.model.get('widgets').on( 'add', this.onAddWidget, this );
+		this.listenTo(this.model.get('widgets'), 'add', this.onAddWidget );
 	},
 
 	/**
@@ -333,6 +333,7 @@ module.exports = Backbone.View.extend( {
 				},
 				panelsOptions.widgets,
 				function ( c ) {
+					thisView.row.builder.trigger('before_user_adds_widget')
 					thisView.row.builder.addHistoryEntry( 'widget_added' );
 
 					var widget = new panels.model.widget( {
@@ -344,6 +345,7 @@ module.exports = Backbone.View.extend( {
 					widget.cell.get('widgets').add( widget );
 
 					thisView.row.builder.model.refreshPanelsData();
+					thisView.row.builder.trigger('after_user_adds_widget', widget);
 				}
 			);
 		}

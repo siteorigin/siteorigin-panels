@@ -72,6 +72,16 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 	}
 	
 	function form( $instance ){
+		
+		if ( ! is_admin() ) {
+			?>
+			<p>
+				<?php _e( 'This widget can currently only be used in the WordPress admin interface.', 'siteorigin-panels' ) ?>
+			</p>
+			<?php
+			return;
+		}
+		
 		$instance = wp_parse_args($instance, array(
 			'panels_data' => '',
 			'builder_id' => uniqid(),
