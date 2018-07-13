@@ -44,14 +44,13 @@
 			var loadingPreview = props.loadingPreview;
 			function fetchPreview() {
 				if ( props.attributes.panelsData ) {
-					fetch( wpApiSettings.root + 'so-panels/v1/layouts/previews', {
-						method: 'POST',
-						body: JSON.stringify( { panelsData:  props.attributes.panelsData } ),
-						headers: { 'content-type': 'application/json' },
-					} ).then( function( response ) {
-						response.json().then( function ( result ) {
+					$.post( soPanelsGutenbergAdmin.previewUrl, {
+						panelsData:  props.attributes.panelsData,
+						action: 'so_panels_gutenberg_preview',
+					} ).then( function( result ) {
+						if ( result.html ) {
 							props.setState( { previewHtml: result.html, loadingPreview: false } );
-						} );
+						}
 					});
 					props.setState( { editing: false, loadingPreview: true } );
 				}

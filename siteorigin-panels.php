@@ -73,7 +73,6 @@ class SiteOrigin_Panels {
 		
 		if ( $gutenberg_supported || $gutenberg_dev_mode ) {
 			SiteOrigin_Panels_Compat_Gutenberg_Block::single();
-			SiteOrigin_Panels_Rest_Routes::single();
 		}
 		
 		

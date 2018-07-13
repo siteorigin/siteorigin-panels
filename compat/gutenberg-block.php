@@ -38,6 +38,13 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'so-panels-admin' ),
 			SITEORIGIN_PANELS_VERSION
 		);
+		wp_localize_script(
+			'siteorigin-panels-layout-block',
+			'soPanelsGutenbergAdmin',
+			array(
+				'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'gutenberg-preview', '_panelsnonce' ),
+			)
+		);
 		SiteOrigin_Panels_Styles::register_scripts();
 		wp_enqueue_script( 'siteorigin-panels-front-styles' );
 	}
