@@ -62,7 +62,7 @@ jQuery(function($){
 						switch( widgetClass ) {
 							case 'SiteOrigin_Widget_Image_Widget':
 								// We want a direct assignment for the SO Image Widget to get rid of the title
-								newHTML = $('img').attr({
+								newHTML = $('<img/>').attr({
 									'src': '#' + widgetInstance.image,
 									'srcset': '',
 									'alt': widgetInstance.alt,
@@ -71,7 +71,7 @@ jQuery(function($){
 								break;
 
 							case 'WP_Widget_Media_Image':
-								newHTML = $('img').attr({
+								newHTML = $('<img/>').attr({
 									'src': '#' + widgetInstance.attachment_id,
 									'srcset': '',
 									'alt': widgetInstance.alt,
