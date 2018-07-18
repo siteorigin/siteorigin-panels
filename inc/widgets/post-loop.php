@@ -362,6 +362,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		);
 		
 		$template_dirs = array( get_template_directory(), get_stylesheet_directory() );
+		$template_dirs = apply_filters( 'siteorigin_panels_postloop_template_directory', $template_dirs );
 		$template_dirs = array_unique( $template_dirs );
 		foreach( $template_dirs  as $dir ){
 			foreach( $template_files as $template_file ) {
