@@ -1173,7 +1173,6 @@ class SiteOrigin_Panels_Admin {
 			foreach ( $locations as &$priorities ) {
 				foreach ( $priorities as &$boxes ) {
 					unset( $boxes['so-panels-panels'] );
-					unset( $boxes['siteorigin_page_settings'] );
 
 				}
 			}
