@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.7.3 - 20 July 2018 =
+* Post Loop: Add filter to allow for custom template directories.
+* Dashboard Assets: Check if $screen exists.
+* Remove Page Builder button from widgets when not in admin context.
+* Fix Yoast compat: Properly create rather than select an image.
+
 = 2.7.2 - 29 June 2018 =
 * Skip Yoast compat for non PB content.
 
