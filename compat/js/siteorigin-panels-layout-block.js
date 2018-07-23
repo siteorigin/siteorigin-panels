@@ -45,8 +45,8 @@
 			function fetchPreview() {
 				if ( props.attributes.panelsData ) {
 					$.post( soPanelsGutenbergAdmin.previewUrl, {
-						panelsData:  props.attributes.panelsData,
 						action: 'so_panels_gutenberg_preview',
+						panelsData:  JSON.stringify( props.attributes.panelsData ),
 					} ).then( function( result ) {
 						if ( result.html ) {
 							props.setState( { previewHtml: result.html, loadingPreview: false } );
