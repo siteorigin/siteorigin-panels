@@ -11,7 +11,7 @@
 	blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 		title: __( 'SiteOrigin Layout' ),
 		
-		description: __( 'Build a layout using SiteOrigin\'s Page Builder.' ),
+		description: __( "Build a layout using SiteOrigin's Page Builder." ),
 		
 		icon: function() {
 			return el(
