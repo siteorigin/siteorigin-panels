@@ -185,9 +185,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
 		if(strpos('/'.$instance['template'], '/content') !== false) {
+		    $index = 0;
 			while( have_posts() ) {
 				the_post();
-				locate_template($instance['template'], true, false);
+				$index++;
+				include( locate_template( $instance['template'], false, false ) );
 			}
 		}
 		else {
