@@ -396,26 +396,45 @@ module.exports = Backbone.View.extend( {
 			appendTo: '#wpwrap',
 			items: '.so-row-container',
 			handle: '.so-row-move',
+			connectWith: '.so-rows-container', // For Gutenberg, where it's possible to have multiple Page Builder blocks on a page.
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,
-			stop: function ( e, ui ) {
-				builderView.addHistoryEntry( 'row_moved' );
-				
-				var $$ = $( ui.item ),
-					row = $$.data( 'view' );
-				
-				builderView.model.get( 'rows' ).remove( row.model, {
-					'silent': true
-				} );
-				builderView.model.get( 'rows' ).add( row.model, {
-					'silent': true,
-					'at': $$.index()
-				} );
-				
-				row.trigger( 'move', $$.index() );
-				
+			remove: function ( e, ui ) {
+				builderView.model.get( 'rows' ).remove(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true }
+				);
 				builderView.model.refreshPanelsData();
+			},
+			receive: function ( e, ui ) {
+				builderView.model.get( 'rows' ).add(
+					$( ui.item ).data( 'view' ).model,
+					{ silent: true, at: $( ui.item ).index() }
+				);
+				builderView.model.refreshPanelsData();
+			},
+			stop: function ( e, ui ) {
+				var $$ = $( ui.item ),
+					row = $$.data( 'view' ),
+					rows = builderView.model.get( 'rows' );
+				
+				// If this hasn't already been removed and added to a different builder.
+				if ( rows.get( row.model ) ) {
+					builderView.addHistoryEntry( 'row_moved' );
+					
+					rows.remove( row.model, {
+						'silent': true
+					} );
+					rows.add( row.model, {
+						'silent': true,
+						'at': $$.index()
+					} );
+					
+					row.trigger( 'move', $$.index() );
+					
+					builderView.model.refreshPanelsData();
+				}
 			}
 		} );
 		
@@ -435,6 +454,7 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Set the field that's used to store the data
 	 * @param field
+	 * @param options
 	 */
 	setDataField: function ( field, options ) {
 		options = _.extend( {
@@ -453,12 +473,29 @@ module.exports = Backbone.View.extend( {
 				data = {};
 			}
 			
-			this.model.loadPanelsData( data );
-			this.currentData = data;
-			this.toggleWelcomeDisplay();
+			this.setData( data );
 		}
 		
 		return this;
+	},
+	
+	/**
+	 * Set the current panels data to be used.
+	 *
+	 * @param data
+	 */
+	setData: function( data ) {
+		this.model.loadPanelsData( data );
+		this.currentData = data;
+		this.toggleWelcomeDisplay();
+	},
+	
+	/**
+	 * Get the current panels data.
+	 *
+	 */
+	getData: function() {
+		return this.model.get( 'data' );
 	},
 	
 	/**
@@ -506,6 +543,7 @@ module.exports = Backbone.View.extend( {
 		
 		this.refreshSortable();
 		rowView.resize();
+		this.trigger( 'row_added' );
 	},
 	
 	/**
@@ -889,7 +927,11 @@ module.exports = Backbone.View.extend( {
 		
 		// Only run this if its element is the topmost builder, in the topmost dialog
 		if (
-			builder.$el.is( topmostBuilder ) &&
+			(
+				builder.$el.is( topmostBuilder ) ||
+				builder.$el.parent().is( '.siteorigin-panels-layout-block-container' ) // Gutenberg builder
+			)
+				&&
 			(
 				topmostDialog.length === 0 ||
 				topmostDialog.is( closestDialog )

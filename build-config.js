@@ -25,6 +25,7 @@ module.exports = {
     },
     js: {
         src: [
+            'compat/**/*.js',
             'js/**/*.js',
             'settings/**/*.js',
             'widgets/**/*.js',

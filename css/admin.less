@@ -306,6 +306,7 @@
 				.clearfix();
 				margin: 0 -5px;
 				position: relative;
+				display: flex;
 
 				.ui-resizable-handle.ui-resizable-w{
 					width: 10px;
@@ -326,7 +327,6 @@
 				.cell {
 
 					.box-sizing(border-box);
-					float: left;
 					position: relative;
 					padding: 0 5px;
 
@@ -647,7 +647,7 @@
 
 }
 
-.so-panels-dialog {
+.so-panels-dialog, .gutenberg {
 
 	@edge_spacing: 30px;
 
@@ -1858,12 +1858,13 @@
 		}
 	}
 
-	/* Special case of the builder interface being inside a dialog */
+	/* Special case of the builder interface being inside a dialog, or gutenberg editor. */
 
-	.so-content {
+	.so-content, .siteorigin-panels-layout-block-container {
 		.siteorigin-panels-builder {
 			.so-builder-toolbar {
 				border: 1px solid #dedede;
+				z-index: 1;
 			}
 
 			.so-rows-container {
@@ -1873,10 +1874,48 @@
 			.so-panels-welcome-message {
 				padding-left: 0;
 				padding-right: 0;
+				line-height: 2.5em;
 			}
 		}
 	}
 
+	/* Styles for PB in Gutenberg editor. */
+	.siteorigin-panels-layout-block-container {
+		
+		font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
+		font-size: 13px;
+		line-height: 1.4em;
+
+		ul {
+			list-style: none;
+		}
+		
+		.so-builder-container {
+			margin: 0 -28px;
+			
+			&.so-display-narrow {
+				margin: 0 -15px;
+			}
+		}
+	}
+
+	/* PB Icon in Gutenberg */
+	.siteorigin-panels-gutenberg-icon {
+		display: inline-block;
+		background-size: cover;
+		background-image: url('../compat/pb-icon.svg');
+		width: 20px;
+		height: 20px;
+	}
+
+	.so-panels-gutenberg-layout-preview-container {
+		.so-panels-spinner-container {
+			text-align: center;
+			> span {
+				display: inline-block;
+			}
+		}
+	}
 
 	.so-dropdown-wrapper {
 
