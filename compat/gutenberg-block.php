@@ -50,6 +50,9 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 		
 		// Enqueue front end scripts for our widgets bundle.
 		if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
+			$sowb = SiteOrigin_Widgets_Bundle::single();
+			$sowb->register_general_scripts();
+			
 			global $wp_widget_factory;
 			
 			foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
