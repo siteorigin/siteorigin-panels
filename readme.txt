@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.8.0 - 06 August 2018 =
+* SiteOrigin Layouts Gutenberg block!
+
 = 2.7.3 - 20 July 2018 =
 * Post Loop: Add filter to allow for custom template directories.
 * Dashboard Assets: Check if $screen exists.

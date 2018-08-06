@@ -1063,7 +1063,20 @@ class SiteOrigin_Panels_Admin {
 		$builder_id = 'gbp' . uniqid();
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		$sowb_active = class_exists( 'SiteOrigin_Widgets_Bundle' );
+		if ( $sowb_active ) {
+			// We need this to get our widgets bundle to add it's styles inline for previews.
+			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
+		}
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
+		
+		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
+		// so neither the `wp_head` nor the `wp_footer` actions are called, which usually trigger `siteorigin_widget_print_styles`.
+		if ( $sowb_active ) {
+			ob_start();
+			siteorigin_widget_print_styles();
+			$rendered_layout .= ob_get_clean();
+		}
 		
 		wp_send_json( array( 'html' => $rendered_layout ) );
 	}

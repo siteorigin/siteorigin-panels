@@ -47,6 +47,23 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 		);
 		SiteOrigin_Panels_Styles::register_scripts();
 		wp_enqueue_script( 'siteorigin-panels-front-styles' );
+		
+		// Enqueue front end scripts for our widgets bundle.
+		if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
+			$sowb = SiteOrigin_Widgets_Bundle::single();
+			$sowb->register_general_scripts();
+			
+			global $wp_widget_factory;
+			
+			foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+				if ( ! empty( $widget_obj ) && is_object( $widget_obj ) && is_subclass_of( $widget_obj, 'SiteOrigin_Widget' ) ) {
+					/* @var $widget_obj SiteOrigin_Widget */
+					ob_start();
+					$widget_obj->widget( array(), array() );
+					ob_clean();
+				}
+			}
+		}
 	}
 	
 	public function render_layout_block( $attributes ) {

@@ -9,7 +9,7 @@
 	var __ = i18n.__;
 	
 	blocks.registerBlockType( 'siteorigin-panels/layout-block', {
-		title: __( 'SiteOrigin Layout' ),
+		title: __( 'SiteOrigin Layout (in beta)' ),
 		
 		description: __( "Build a layout using SiteOrigin's Page Builder." ),
 		
@@ -59,6 +59,9 @@
 			function setupPreview() {
 				if ( ! editing ) {
 					$( document ).trigger( 'panels_setup_preview' );
+					if ( window.sowb ) {
+						$ ( window.sowb ).trigger( 'setup_widgets' );
+					}
 				}
 			}
 			
