@@ -59,6 +59,9 @@
 			function setupPreview() {
 				if ( ! editing ) {
 					$( document ).trigger( 'panels_setup_preview' );
+					if ( window.sowb ) {
+						$ ( window.sowb ).trigger( 'setup_widgets' );
+					}
 				}
 			}
 			
