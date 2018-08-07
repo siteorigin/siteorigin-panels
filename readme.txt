@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.8.1 - 07 August 2018 =
+* Fix for PHP5.2 :(
+
 = 2.8.0 - 06 August 2018 =
 * SiteOrigin Layouts Gutenberg block!
 

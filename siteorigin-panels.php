@@ -67,11 +67,7 @@ class SiteOrigin_Panels {
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
 		
-		$gutenberg_dev_mode = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && ! empty( GUTENBERG_DEVELOPMENT_MODE );
-		$gutenberg_supported = defined( 'GUTENBERG_VERSION' ) &&
-							   version_compare( GUTENBERG_VERSION, '2.0.0', '>=' );
-		
-		if ( $gutenberg_supported || $gutenberg_dev_mode ) {
+		if ( function_exists( 'register_block_type' ) ) {
 			SiteOrigin_Panels_Compat_Gutenberg_Block::single();
 		}
 		
