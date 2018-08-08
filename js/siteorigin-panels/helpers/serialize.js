@@ -55,7 +55,14 @@ module.exports = {
 			case 'row-model' :
 				retObj = new panels.model.row();
 				retObj.builder = parent;
-				retObj.set( 'style', thing.style );
+				var atts = { style: thing.style };
+				if ( thing.hasOwnProperty( 'label' ) ) {
+					atts.label = thing.label;
+				}
+				if ( thing.hasOwnProperty( 'color_label' ) ) {
+					atts.color_label = thing.color_label;
+				}
+				retObj.set( atts );
 				retObj.setCells( this.unserialize( thing.cells, 'cell-collection', retObj ) );
 				break;
 
