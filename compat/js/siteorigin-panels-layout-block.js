@@ -1,8 +1,8 @@
-( function ( editor, blocks, i18n, element, components ) {
+( function ( editor, blocks, i18n, element, components, compose ) {
 	
 	var el = element.createElement;
 	var BlockControls = editor.BlockControls;
-	var withState = components.withState;
+	var withState = compose.withState;
 	var Toolbar = components.Toolbar;
 	var IconButton = components.IconButton;
 	var Spinner  = components.Spinner;
@@ -202,4 +202,4 @@
 			return null;
 		}
 	} );
-} )( window.wp.editor, window.wp.blocks, window.wp.i18n, window.wp.element, window.wp.components );
+} )( window.wp.editor, window.wp.blocks, window.wp.i18n, window.wp.element, window.wp.components, window.wp.compose );
