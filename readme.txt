@@ -96,6 +96,13 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.8.2 - 10 August 2018 =
+* Use post ID in content, not revision ID, when saving revisions.
+* Prevent adding duplicate `panels_data` metadata to posts for revisions.
+* Include row labels and colors when copy/pasting rows.
+* Process raw widgets when importing a layout file.
+* Fix after breaking change in gutenberg API.
+
 = 2.8.1 - 07 August 2018 =
 * Fix for PHP5.2 :(
 
