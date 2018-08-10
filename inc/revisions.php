@@ -34,10 +34,14 @@ class SiteOrigin_Panels_Revisions {
 
 		$parent_id = wp_is_post_revision( $post_id );
 		if ( $parent_id ) {
-			// If the panels data meta exists, copy it into the revision.
-			$panels_data = get_post_meta( $parent_id, 'panels_data', true );
-			if ( ! empty( $panels_data ) ) {
-				add_metadata( 'post', $post_id, 'panels_data', $panels_data );
+			// Check whether the panels data needs to be copied to the revision.
+			$panels_data = get_metadata( 'post', $post_id, 'panels_data', true );
+			if ( empty( $panels_data ) ) {
+				// If the panels data meta exists for the post parent, copy it into the revision.
+				$panels_data = get_post_meta( $parent_id, 'panels_data', true );
+				if ( ! empty( $panels_data ) ) {
+					add_metadata( 'post', $post_id, 'panels_data', $panels_data );
+				}
 			}
 		}
 	}

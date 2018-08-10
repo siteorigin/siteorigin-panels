@@ -35,7 +35,7 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 		wp_enqueue_script(
 			'siteorigin-panels-layout-block',
 			plugins_url( 'js/siteorigin-panels-layout-block' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', __FILE__ ),
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'so-panels-admin' ),
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-compose', 'so-panels-admin' ),
 			SITEORIGIN_PANELS_VERSION
 		);
 		wp_localize_script(

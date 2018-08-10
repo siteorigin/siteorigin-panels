@@ -420,6 +420,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 		if ( ! empty( $_FILES['panels_import_data']['tmp_name'] ) ) {
 			header( 'content-type:application/json' );
 			$json = file_get_contents( $_FILES['panels_import_data']['tmp_name'] );
+			$panels_data = json_decode( $json, true );
+			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+			$json = json_encode( $panels_data );
 			@unlink( $_FILES['panels_import_data']['tmp_name'] );
 			echo $json;
 		}
