@@ -81,6 +81,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 */
 	function widget( $args, $instance ) {
 		if( empty( $instance['template'] ) ) return;
+		if( doing_action('wp_head') ) return;
 		if( is_admin() ) return;
 		
 		static $depth = 0;
