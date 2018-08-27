@@ -217,7 +217,9 @@ class SiteOrigin_Panels_Css_Builder {
 				continue;
 			}
 
-			if ( $max_res < 1920 ) {
+			if ( $max_res == 0 && ! empty( $min_res ) ) {
+				$css_text .= '@media (min-width:' . intval( $min_res ) . 'px) {';
+			} elseif( $max_res < 1920 ) {
 				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
 				if( ! empty( $min_res ) ) {
 					$css_text .= ' and (min-width:' . intval( $min_res ) . 'px) ';
@@ -230,7 +232,7 @@ class SiteOrigin_Panels_Css_Builder {
 				$css_text .= implode( ' , ', $selector ) . ' { ' . $property . ' } ';
 			}
 
-			if ( $max_res < 1920 ) {
+			if ( ( $max_res == 0 && ! empty( $min_res ) ) ||  $max_res < 1920 ) {
 				$css_text .= ' } ';
 			}
 		}
