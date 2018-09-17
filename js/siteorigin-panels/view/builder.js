@@ -389,14 +389,18 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 		
-		// Create the sortable for the rows
 		var builderView = this;
+		var builderID = builderView.$el.attr( 'id' );
 		
+		// Create the sortable for the rows
 		this.rowsSortable = this.$( '.so-rows-container' ).sortable( {
 			appendTo: '#wpwrap',
 			items: '.so-row-container',
 			handle: '.so-row-move',
-			connectWith: '.so-rows-container', // For Gutenberg, where it's possible to have multiple Page Builder blocks on a page.
+			// For Gutenberg, where it's possible to have multiple Page Builder blocks on a page.
+			// Also specify builderID when not in gutenberg to prevent being able to drop rows from builder in a dialog
+			// into builder on the page under the dialog.
+			connectWith: '#' + builderID + '.so-rows-container,.gutenberg .so-rows-container',
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,

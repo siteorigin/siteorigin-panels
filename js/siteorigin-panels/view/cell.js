@@ -51,13 +51,16 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var cellView = this;
+		var builder = cellView.row.builder;
 		
-		var builderModel = cellView.row.builder.model;
+		// Go up the view hierarchy until we find the ID attribute
+		var builderID = builder.$el.attr( 'id' );
+		var builderModel = builder.model;
 
 		// Create a widget sortable that's connected with all other cells
 		this.widgetSortable = this.$( '.widgets-container' ).sortable( {
 			placeholder: "so-widget-sortable-highlight",
-			connectWith: '.so-cells .cell .widgets-container',
+			connectWith: '#' + builderID + ' .so-cells .cell .widgets-container,.gutenberg .so-cells .cell .widgets-container',
 			tolerance: 'pointer',
 			scroll: false,
 			over: function ( e, ui ) {
