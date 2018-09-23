@@ -149,7 +149,6 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				if ( empty( $widget_instance['id'] ) && empty( $widget_instance['panels_info']['class'] ) ) {
 					continue;
 				}
-				// var_dump($widget_instance['panels_info']['class']);
 				//Sidebars widgets and the global $wp_registered widgets use full widget ids as keys
 				$siteorigin_panels_widget_ids[] = ! empty( $widget_instance['id'] ) ? $widget_instance['id'] : strtolower( $widget_instance['panels_info']['class'] );
 			}
