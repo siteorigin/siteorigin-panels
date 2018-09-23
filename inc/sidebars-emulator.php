@@ -6,7 +6,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-		add_action( 'widgets_init', array( $this, 'register_widgets' ), 99 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
@@ -146,11 +146,12 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		foreach ( array_keys( $this->all_posts_widgets ) as $post_id ) {
 			$post_widgets = $this->all_posts_widgets[ $post_id ];
 			foreach ( $post_widgets as $widget_instance ) {
-				if ( empty( $widget_instance['id'] ) ) {
+				if ( empty( $widget_instance['id'] ) && empty( $widget_instance['panels_info']['class'] ) ) {
 					continue;
 				}
+				// var_dump($widget_instance['panels_info']['class']);
 				//Sidebars widgets and the global $wp_registered widgets use full widget ids as keys
-				$siteorigin_panels_widget_ids[] = $widget_instance['id'];
+				$siteorigin_panels_widget_ids[] = ! empty( $widget_instance['id'] ) ? $widget_instance['id'] : strtolower( $widget_instance['panels_info']['class'] );
 			}
 			if ( ! empty( $siteorigin_panels_widget_ids ) ) {
 				$sidebars_widgets[ 'sidebar-siteorigin_panels-post-' . $post_id ] = $siteorigin_panels_widget_ids;
