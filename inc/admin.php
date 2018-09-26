@@ -1187,13 +1187,19 @@ class SiteOrigin_Panels_Admin {
 	 * @return bool
 	 */
 	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
-		$screen = get_current_screen();
+		
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+		} else {
+			// Fall back to just checking the global $post for 'panels_data' metadata.
+			global $post;
+			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+		}
 		$post_types = siteorigin_panels_setting( 'post-types' );
-		$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
-
 		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
-
-		return ! $is_panels_page && $can_edit;
+		
+		return empty( $is_panels_page ) && $can_edit;
 	}
 	
 	/**
