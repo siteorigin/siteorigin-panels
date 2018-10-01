@@ -205,7 +205,7 @@ class SiteOrigin_Panels_Css_Builder {
 		$css_text = '';
 		krsort( $this->css );
 		foreach ( $this->css as $res => $def ) {
-			if( strpos( $res, ':' ) ) {
+			if( strpos( $res, ':' ) !== false ) {
 				list( $max_res, $min_res ) = explode( ':', $res, 2 );
 			}
 			else {
@@ -217,7 +217,7 @@ class SiteOrigin_Panels_Css_Builder {
 				continue;
 			}
 
-			if ( $max_res == 0 && ! empty( $min_res ) ) {
+			if ( empty( $max_res ) && ! empty( $min_res ) ) {
 				$css_text .= '@media (min-width:' . intval( $min_res ) . 'px) {';
 			} elseif ( $max_res < 1920 ) {
 				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
