@@ -232,7 +232,7 @@ class SiteOrigin_Panels_Css_Builder {
 				$css_text .= implode( ' , ', $selector ) . ' { ' . $property . ' } ';
 			}
 
-			if ( ( $max_res == 0 && ! empty( $min_res ) ) ||  $max_res < 1920 ) {
+			if ( ( $max_res === 0 && ! empty( $min_res ) ) ||  $max_res < 1920 ) {
 				$css_text .= ' } ';
 			}
 		}
