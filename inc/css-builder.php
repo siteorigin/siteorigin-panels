@@ -217,7 +217,7 @@ class SiteOrigin_Panels_Css_Builder {
 				continue;
 			}
 
-			if ( empty( $max_res ) && ! empty( $min_res ) ) {
+			if ( $max_res === '' && ! empty( $min_res ) ) {
 				$css_text .= '@media (min-width:' . intval( $min_res ) . 'px) {';
 			} elseif ( $max_res < 1920 ) {
 				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
