@@ -64,6 +64,10 @@ class SiteOrigin_Panels {
 		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ) );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		
+		// Remove the default excerpt function
+		remove_filter( 'get_the_excerpt', 'wp_trim_excerpt' );
+		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ) );
+		
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
 		
@@ -296,19 +300,8 @@ class SiteOrigin_Panels {
 			return $content;
 		}
 		
-		$post_id = get_the_ID();
+		$post_id = $this->get_post_id();
 		
-		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
-			$post_id = wc_get_page_id( 'shop' );
-		}
-		
-		// If we're viewing a preview make sure we load and render the autosave post's meta.
-		if ( $preview ) {
-			$preview_post = wp_get_post_autosave( $post_id, get_current_user_id() );
-			if ( ! empty( $preview_post ) ) {
-				$post_id = $preview_post->ID;
-			}
-		}
 		// Check if this post has panels_data
 		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
 			$panel_content = SiteOrigin_Panels::renderer()->render(
@@ -344,19 +337,82 @@ class SiteOrigin_Panels {
 	}
 	
 	/**
+	 * Generate an excerpt for the current post, if possible.
+	 *
+	 * @param $text
+	 *
+	 * @return mixed|string
+	 */
+	public function generate_post_excerpt( $text ) {
+		global $post;
+		if ( empty( $post ) && ! in_the_loop() ) {
+			return wp_trim_excerpt( $text );
+		}
+		
+		$post_id = $this->get_post_id();
+		
+		// Check if this post has panels_data
+		$panels_data = get_post_meta( $post_id, 'panels_data', true );
+		if ( $panels_data && ! empty( $panels_data['widgets'] ) ) {
+			
+			foreach ( $panels_data['widgets'] as $widget ) {
+				$panels_info = $widget['panels_info'];
+				if ( $panels_info['grid'] > 1 ) {
+					// Limiting search for a text type widget to the first two PB rows to avoid having excerpt content
+					// that's very far down in a post.
+					break;
+				}
+				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' ) {
+					$text = $widget['text'];
+					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
+					// We're just applying it to the first text type widget's content.
+					$raw_excerpt = $text;
+					$text = strip_shortcodes( $text );
+					$text = str_replace(']]>', ']]&gt;', $text);
+					$excerpt_length = apply_filters( 'excerpt_length', 55 );
+					$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+					$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
+					
+					return apply_filters( 'wp_trim_excerpt', $text, $raw_excerpt );
+				}
+			}
+		}
+		
+		return wp_trim_excerpt( $text );
+	}
+	
+	/**
 	 * Generate CSS for the current post
 	 */
 	public function generate_post_css() {
-		$post_id = get_the_ID();
-		
-		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
-			$post_id = wc_get_page_id( 'shop' );
-		}
+		$post_id = $this->get_post_id();
 		
 		if( is_singular() && get_post_meta( $post_id, 'panels_data', true ) ) {
 			$renderer = SiteOrigin_Panels::renderer();
 			$renderer->add_inline_css( $post_id, $renderer->generate_css( $post_id ) );
 		}
+	}
+	
+	/**
+	 * Get the post id for the current post.
+	 */
+	function get_post_id() {
+		
+		$post_id = get_the_ID();
+		
+		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+			$post_id = wc_get_page_id( 'shop' );
+		}
+		global $preview;
+		// If we're viewing a preview make sure we load and render the autosave post's meta.
+		if ( $preview ) {
+			$preview_post = wp_get_post_autosave( $post_id, get_current_user_id() );
+			if ( ! empty( $preview_post ) ) {
+				$post_id = $preview_post->ID;
+			}
+		}
+		
+		return $post_id;
 	}
 
 	/**
