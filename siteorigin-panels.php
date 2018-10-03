@@ -65,8 +65,7 @@ class SiteOrigin_Panels {
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		
 		// Remove the default excerpt function
-		remove_filter( 'get_the_excerpt', 'wp_trim_excerpt' );
-		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ) );
+		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 11 );
 		
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
@@ -346,7 +345,7 @@ class SiteOrigin_Panels {
 	public function generate_post_excerpt( $text ) {
 		global $post;
 		if ( empty( $post ) && ! in_the_loop() ) {
-			return wp_trim_excerpt( $text );
+			return $text;
 		}
 		
 		$post_id = $this->get_post_id();
@@ -368,7 +367,7 @@ class SiteOrigin_Panels {
 					// We're just applying it to the first text type widget's content.
 					$raw_excerpt = $text;
 					$text = strip_shortcodes( $text );
-					$text = str_replace(']]>', ']]&gt;', $text);
+					$text = str_replace( ']]>', ']]&gt;', $text );
 					$excerpt_length = apply_filters( 'excerpt_length', 55 );
 					$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
 					$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
@@ -378,7 +377,7 @@ class SiteOrigin_Panels {
 			}
 		}
 		
-		return wp_trim_excerpt( $text );
+		return $text;
 	}
 	
 	/**
