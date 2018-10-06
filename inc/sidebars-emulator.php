@@ -6,7 +6,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-		add_action( 'widgets_init', array( $this, 'register_widgets' ), 99 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
@@ -79,7 +79,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		}
 
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
-		$widget_option_names = $this->get_widget_option_names( $post_id, $panels_data, 1 );
+		$widget_option_names = $this->get_widget_option_names( $post_id, $panels_data );
 		$widget_option_names = array_unique( $widget_option_names );
 
 		foreach ( $widget_option_names as $widget_option_name ) {
