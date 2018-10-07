@@ -65,7 +65,7 @@ class SiteOrigin_Panels {
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 		
 		// Remove the default excerpt function
-		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 11 );
+		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 9 );
 		
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
@@ -344,7 +344,7 @@ class SiteOrigin_Panels {
 	 */
 	public function generate_post_excerpt( $text ) {
 		global $post;
-		if ( empty( $post ) && ! in_the_loop() ) {
+		if ( ( empty( $post ) && ! in_the_loop() ) || $text !== '' ) {
 			return $text;
 		}
 		
@@ -353,8 +353,9 @@ class SiteOrigin_Panels {
 		// Check if this post has panels_data
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
 		if ( $panels_data && ! empty( $panels_data['widgets'] ) ) {
-			
-			foreach ( $panels_data['widgets'] as $widget ) {
+			$raw_excerpt = '';
+			$excerpt_length = apply_filters( 'excerpt_length', 55 );
+			foreach ( $panels_data['widgets'] as $i => $widget ) {
 				$panels_info = $widget['panels_info'];
 				if ( $panels_info['grid'] > 1 ) {
 					// Limiting search for a text type widget to the first two PB rows to avoid having excerpt content
@@ -362,22 +363,37 @@ class SiteOrigin_Panels {
 					break;
 				}
 				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' ) {
-					$text = $widget['text'];
+					$raw_excerpt .= ( $i > 0 ? ' ' : '' ) . $widget['text'];
 					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
-					// We're just applying it to the first text type widget's content.
-					$raw_excerpt = $text;
-					$text = strip_shortcodes( $text );
+					// We're just applying it to text type widgets content in the first two rows.
+					$text = strip_shortcodes( $raw_excerpt );
 					$text = str_replace( ']]>', ']]&gt;', $text );
-					$excerpt_length = apply_filters( 'excerpt_length', 55 );
-					$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
-					$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
-					
-					return apply_filters( 'wp_trim_excerpt', $text, $raw_excerpt );
+					if ( $this->get_localized_word_count( $text ) >= $excerpt_length ) {
+						break;
+					}
 				}
 			}
+			
+			$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+			$text = wp_trim_words( $raw_excerpt, $excerpt_length, $excerpt_more );
 		}
 		
 		return $text;
+	}
+	
+	private function get_localized_word_count( $text ) {
+		
+		// From the core `wp_trim_words` function to get localized word count.
+		$text = wp_strip_all_tags( $text );
+		if ( strpos( _x( 'words', 'Word count type. Do not translate!' ), 'characters' ) === 0 && preg_match( '/^utf\-?8$/i', get_option( 'blog_charset' ) ) ) {
+			$text = trim( preg_replace( "/[\n\r\t ]+/", ' ', $text ), ' ' );
+			preg_match_all( '/./u', $text, $words_array );
+			$words_array = $words_array[0];
+		} else {
+			$words_array = preg_split( "/[\n\r\t ]+/", $text, -1, PREG_SPLIT_NO_EMPTY );
+		}
+		
+		return count( $words_array );
 	}
 	
 	/**
