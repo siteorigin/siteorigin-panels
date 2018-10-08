@@ -6,7 +6,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 	function __construct() {
 		$this->all_posts_widgets = array();
-		add_action( 'widgets_init', array( $this, 'register_widgets' ), 99 );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'sidebars_widgets', array( $this, 'add_widgets_to_sidebars' ) );
 	}
 
@@ -79,7 +79,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		}
 
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
-		$widget_option_names = $this->get_widget_option_names( $post_id, $panels_data, 1 );
+		$widget_option_names = $this->get_widget_option_names( $post_id, $panels_data );
 		$widget_option_names = array_unique( $widget_option_names );
 
 		foreach ( $widget_option_names as $widget_option_name ) {
@@ -92,12 +92,10 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 *
 	 * @param int|string $post_id
 	 * @param array $panels_data
-	 * @param int $start This keeps track of recursive depth
 	 *
 	 * @return array A list of widget option names from the post and its Layout Builder widgets.
 	 */
-	private function get_widget_option_names( $post_id, $panels_data, $start = 1 ) {
-		global $wp_widget_factory;
+	private function get_widget_option_names( $post_id, $panels_data ) {
 		if( empty( $panels_data ) || empty( $panels_data[ 'widgets' ] ) ) {
 			return array();
 		}
@@ -115,20 +113,50 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 			if( $widget_instance['panels_info']['class'] === 'SiteOrigin_Panels_Widgets_Layout' ) {
 				// Add the widget option names from the layout widget
-				$widget_option_names = array_merge( $widget_option_names, $this->get_widget_option_names( $post_id, $widget_instance[ 'panels_data' ], ++$start ) );
+				$widget_option_names = array_merge( $widget_option_names, $this->get_widget_option_names( $post_id, $widget_instance[ 'panels_data' ] ) );
 			}
-
-			$id_val  = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
-			$widget_class = $widget_instance['panels_info']['class'];
-			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
-				$widget                = $wp_widget_factory->widgets[ $widget_class ];
-				$widget_instance['id'] = $widget->id_base . '-' . $id_val;
-				$widget_option_names[] = $widget->option_name;
+			
+			if ( ! empty( $widget_instance['id'] ) ) {
+				$widget_option_names[] = $widget_instance['option_name'];
 			}
 			$this->all_posts_widgets[ $post_id ][] = $widget_instance;
 		}
 
 		return $widget_option_names;
+	}
+	
+	/**
+	 * This should be called when a post is saved to set ids required for `is_active_widget` checks. It's necessary to
+	 * do this separately for widgets that call `is_active_widget` in their constructors, e.g. some of Jetpack's widgets
+	 * like Twitter Timeline, Milestone etc.
+	 *
+	 * @param $widgets array The widgets in the layout from $panels_data for which to generate ids.
+	 * @param $post_id int The post id which is used to derive ids.
+	 * @param int $start This keeps track of recursive depth.
+	 *
+	 * @return array The widgets array containing updated widgets.
+	 */
+	public function generate_sidebar_widget_ids( $widgets, $post_id, $start = 1 ) {
+		global $wp_widget_factory;
+		
+		foreach ( $widgets as $i => &$widget_instance ) {
+			$id_val = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
+			$widget_class = $widget_instance['panels_info']['class'];
+			
+			
+			if( $widget_instance['panels_info']['class'] === 'SiteOrigin_Panels_Widgets_Layout' ) {
+				// Recursively set widget ids in layout widgets.
+				$widget_instance[ 'panels_data' ]['widgets'] = $this->generate_sidebar_widget_ids( $widget_instance[ 'panels_data' ]['widgets'], $post_id, ++$start );
+			}
+			
+			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
+				$widget = $wp_widget_factory->widgets[ $widget_class ];
+				$widget_instance['id'] = $widget->id_base . '-' . $id_val;
+				$widget_instance['option_name'] = $widget->option_name;
+			}
+		}
+		
+		return $widgets;
 	}
 
 	/**
