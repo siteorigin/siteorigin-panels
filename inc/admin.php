@@ -193,7 +193,7 @@ class SiteOrigin_Panels_Admin {
 		
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
-			$panels_data['widgets'] = $sidebars_emulator->set_widget_ids( $panels_data['widgets'], $post_id );
+			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
 		}
 		
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
@@ -642,7 +642,7 @@ class SiteOrigin_Panels_Admin {
 		
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
-			$panels_data['widgets'] = $sidebars_emulator->set_widget_ids( $panels_data['widgets'], $page_id );
+			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $page_id );
 		}
 		
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );

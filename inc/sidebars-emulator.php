@@ -130,13 +130,13 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 * do this separately for widgets that call `is_active_widget` in their constructors, e.g. some of Jetpack's widgets
 	 * like Twitter Timeline, Milestone etc.
 	 *
-	 * @param $widgets array The widgets in the layout from $panels_data
-	 * @param $post_id int The post id.
+	 * @param $widgets array The widgets in the layout from $panels_data for which to generate ids.
+	 * @param $post_id int The post id which is used to derive ids.
 	 * @param int $start This keeps track of recursive depth.
 	 *
 	 * @return array The widgets array containing updated widgets.
 	 */
-	public function set_widget_ids( $widgets, $post_id, $start = 1 ) {
+	public function generate_sidebar_widget_ids( $widgets, $post_id, $start = 1 ) {
 		global $wp_widget_factory;
 		
 		foreach ( $widgets as $i => &$widget_instance ) {
@@ -146,7 +146,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 			
 			if( $widget_instance['panels_info']['class'] === 'SiteOrigin_Panels_Widgets_Layout' ) {
 				// Recursively set widget ids in layout widgets.
-				$widget_instance[ 'panels_data' ]['widgets'] = $this->set_widget_ids( $widget_instance[ 'panels_data' ]['widgets'], $post_id, ++$start );
+				$widget_instance[ 'panels_data' ]['widgets'] = $this->generate_sidebar_widget_ids( $widget_instance[ 'panels_data' ]['widgets'], $post_id, ++$start );
 			}
 			
 			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
