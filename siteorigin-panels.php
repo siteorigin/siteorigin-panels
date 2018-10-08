@@ -355,7 +355,7 @@ class SiteOrigin_Panels {
 		if ( $panels_data && ! empty( $panels_data['widgets'] ) ) {
 			$raw_excerpt = '';
 			$excerpt_length = apply_filters( 'excerpt_length', 55 );
-			foreach ( $panels_data['widgets'] as $i => $widget ) {
+			foreach ( $panels_data['widgets'] as $widget ) {
 				$panels_info = $widget['panels_info'];
 				if ( $panels_info['grid'] > 1 ) {
 					// Limiting search for a text type widget to the first two PB rows to avoid having excerpt content
@@ -363,7 +363,7 @@ class SiteOrigin_Panels {
 					break;
 				}
 				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' ) {
-					$raw_excerpt .= ( $i > 0 ? ' ' : '' ) . $widget['text'];
+					$raw_excerpt .= ' ' . $widget['text'];
 					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
 					// We're just applying it to text type widgets content in the first two rows.
 					$text = strip_shortcodes( $raw_excerpt );
