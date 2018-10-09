@@ -190,6 +190,12 @@ class SiteOrigin_Panels_Admin {
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
+		
+		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
+			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
+			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
+		}
+		
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
@@ -633,6 +639,12 @@ class SiteOrigin_Panels_Admin {
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
+		
+		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
+			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
+			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $page_id );
+		}
+		
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
@@ -820,6 +832,7 @@ class SiteOrigin_Panels_Admin {
 					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
 
 					$widget = $instance;
+					
 					unset( $info['raw'] );
 				}
 			}
@@ -828,6 +841,7 @@ class SiteOrigin_Panels_Admin {
 				// Escaping for namespaced widgets
 				$info[ 'class' ] = preg_replace( '/\\\\+/', '\\\\\\\\', $info['class'] );
 			}
+			
 			$widget['panels_info'] = $info;
 		}
 
@@ -1187,13 +1201,19 @@ class SiteOrigin_Panels_Admin {
 	 * @return bool
 	 */
 	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
-		$screen = get_current_screen();
+		
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+		} else {
+			// Fall back to just checking the global $post for 'panels_data' metadata.
+			global $post;
+			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+		}
 		$post_types = siteorigin_panels_setting( 'post-types' );
-		$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
-
 		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
-
-		return ! $is_panels_page && $can_edit;
+		
+		return empty( $is_panels_page ) && $can_edit;
 	}
 	
 	/**

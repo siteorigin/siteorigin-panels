@@ -96,6 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.0 - 9 October 2018 =
+* Automatically extract excerpts from text type widgets found in the first two Page Builder layout rows.
+* Allow media queries with only `min-width`.
+* Only allow moving widgets and rows between Page Builder instances when in Gutenberg editor.
+* Fallback to checking for global `$post` when attempting to disable Gutenberg for existing posts with Page Builder layout data.
+* Yoast compat: Custom widget content handler for WB Accordion and Tabs widgets.
+* Jetpack compat: Fix for Jetpack widgets using the `is_active_widget` check.
+
 = 2.8.2 - 10 August 2018 =
 * Use post ID in content, not revision ID, when saving revisions.
 * Prevent adding duplicate `panels_data` metadata to posts for revisions.

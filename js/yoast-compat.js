@@ -78,6 +78,22 @@ jQuery(function($){
 									'title': widgetInstance.image_title,
 								}).prop('outerHTML');
 								break;
+
+							case 'SiteOrigin_Widget_Accordion_Widget':
+							case 'SiteOrigin_Widget_Tabs_Widget':
+								var contentItems = widgetClass === 'SiteOrigin_Widget_Accordion_Widget' ? widgetInstance.panels : widgetInstance.tabs;
+								newHTML = $( '<div/>' );
+								for( var i = 0; i < contentItems.length; i++ ) {
+									var item = contentItems[ i ];
+									if ( item.content_type !== 'text' ) {
+										continue;
+									}
+									
+									newHTML.append( '<h3>' + item.title + '</h3>' );
+									newHTML.append( '<div>' + item.content_text + '</div>')
+								}
+								newHTML = newHTML.prop( 'outerHTML' );
+								break;
 						}
 					}
 
