@@ -180,17 +180,16 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 		
-		global $more; $old_more = $more; $more = empty($instance['more']);
+		global $more; $old_more = $more; $more = empty( $instance['more'] );
 		self::$rendering_loop = true;
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
-		if(strpos('/'.$instance['template'], '/content') !== false) {
+		if ( strpos( '/'.$instance['template'], '/content' ) !== false) {
 			while( have_posts() ) {
 				the_post();
 				locate_template($instance['template'], true, false);
 			}
-		} else {
-			if( file_exists( $instance['template'] ) ) {
+		} elseif ( file_exists( $instance['template'] ) ) {
 				load_template( $instance['template'], false );
 			}
 		}
