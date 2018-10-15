@@ -180,18 +180,18 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 		
-		global $more; $old_more = $more; $more = empty($instance['more']);
+		global $more; $old_more = $more; $more = empty( $instance['more'] );
 		self::$rendering_loop = true;
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
-		if(strpos('/'.$instance['template'], '/content') !== false) {
+		if ( strpos( '/'.$instance['template'], '/content' ) !== false) {
 			while( have_posts() ) {
 				the_post();
 				locate_template($instance['template'], true, false);
 			}
-		}
-		else {
-			locate_template($instance['template'], true, false);
+		} elseif ( file_exists( $instance['template'] ) ) {
+				load_template( $instance['template'], false );
+			}
 		}
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
@@ -252,10 +252,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					<?php foreach($templates as $template) : ?>
 						<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
 							<?php
-							$headers = get_file_data( locate_template($template), array(
+							$headers = get_file_data( $template, array(
 								'loop_name' => 'Loop Name',
 							) );
-							echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
+
+							echo esc_html( !empty( $headers['loop_name'] ) ? $headers['loop_name'] : basename( $template ) );
 							?>
 						</option>
 					<?php endforeach; ?>
@@ -366,8 +367,10 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$template_dirs = array_unique( $template_dirs );
 		foreach( $template_dirs  as $dir ){
 			foreach( $template_files as $template_file ) {
-				foreach( (array) glob($dir.'/'.$template_file) as $file ) {
-					if( file_exists( $file ) ) $templates[] = str_replace($dir.'/', '', $file);
+				foreach( (array) glob( $dir.'/'.$template_file ) as $file ) {
+					if( file_exists( $file ) ) {
+						$templates[] = $file;
+					}
 				}
 			}
 		}
