@@ -2,10 +2,14 @@
 
 var panels = window.panels, $ = jQuery;
 
-module.exports = function ( config ) {
+module.exports = function ( config, force ) {
 
 	return this.each( function () {
 		var $$ = jQuery( this );
+		
+		if ( $$.data( 'soPanelsBuilderWidgetInitialized' ) && ! force ) {
+			return;
+		}
 		var widgetId = $$.closest( 'form' ).find( '.widget-id' ).val();
 
 		// Create a config for this specific widget
@@ -71,5 +75,7 @@ module.exports = function ( config ) {
 
 		// Trigger a global jQuery event after we've setup the builder view
 		$( document ).trigger( 'panels_setup', builderView );
+		
+		$$.data( 'soPanelsBuilderWidgetInitialized', true );
 	} );
 };
