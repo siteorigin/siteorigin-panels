@@ -190,8 +190,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				locate_template($instance['template'], true, false);
 			}
 		} elseif ( file_exists( $instance['template'] ) ) {
-				load_template( $instance['template'], false );
-			}
+			load_template( $instance['template'], false );
 		}
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
