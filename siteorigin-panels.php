@@ -374,8 +374,11 @@ class SiteOrigin_Panels {
 				}
 			}
 			
+			$text = strip_shortcodes( $raw_excerpt );
+			$text = str_replace( ']]>', ']]&gt;', $text );
+			
 			$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
-			$text = wp_trim_words( $raw_excerpt, $excerpt_length, $excerpt_more );
+			$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
 		}
 		
 		return $text;
