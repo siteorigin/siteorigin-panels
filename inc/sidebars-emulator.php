@@ -146,8 +146,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 			
 			if( $widget_instance['panels_info']['class'] === 'SiteOrigin_Panels_Widgets_Layout' ) {
 				if ( ! empty( $widget_instance['panels_data']['widgets'] ) ) {
-				// Recursively set widget ids in layout widgets.
-				$widget_instance[ 'panels_data' ]['widgets'] = $this->generate_sidebar_widget_ids( $widget_instance[ 'panels_data' ]['widgets'], $post_id, ++$start );
+					// Recursively set widget ids in layout widgets.
+					$widget_instance[ 'panels_data' ]['widgets'] = $this->generate_sidebar_widget_ids( $widget_instance[ 'panels_data' ]['widgets'], $post_id, ++$start );
 				}
 			}
 			
