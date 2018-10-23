@@ -96,6 +96,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.1 - 23 October 2018 =
+* Fix auto-excerpt output.
+* Layout builder: Fix 'undefined index' when saving before having added any widgets.
+* Layout builder: Prevent initializing multiple instances of widget dialog.
+* Prevent notices when style field is using 'label' instead of 'name' e.g. for checkbox field.
+
 = 2.9.0 - 9 October 2018 =
 * Automatically extract excerpts from text type widgets found in the first two Page Builder layout rows.
 * Allow media queries with only `min-width`.
