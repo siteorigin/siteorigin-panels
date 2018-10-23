@@ -17,10 +17,10 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 		$template_options = array();
 		if( ! empty( $templates ) ) {
 			foreach( $templates as $template ) {
-				$headers = get_file_data( $template, array(
+				$headers = get_file_data( locate_template( $template ), array(
 					'loop_name' => 'Loop Name',
 				) );
-				$template_options[ $template ] = esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : basename( $template ) );
+				$template_options[ $template ] = esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
 			}
 		}
 		
