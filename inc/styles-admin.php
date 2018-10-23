@@ -142,7 +142,9 @@ class SiteOrigin_Panels_Styles_Admin {
 						if ( $field['group'] == $group_id ) {
 							?>
 							<div class="style-field-wrapper">
-								<label><?php echo $field['name'] ?></label>
+								<?php if ( ! empty( $field['name'] ) ) : ?>
+									<label><?php echo $field['name'] ?></label>
+								<?php endif; ?>
 								<div
 									class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ) ?>">
 									<?php $this->render_style_field( $field, isset( $current[ $field_id ] ) ? $current[ $field_id ] : $default, $field_id, $current ) ?>
