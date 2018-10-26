@@ -52,17 +52,7 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 		if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
 			$sowb = SiteOrigin_Widgets_Bundle::single();
 			$sowb->register_general_scripts();
-			
-			global $wp_widget_factory;
-			
-			foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
-				if ( ! empty( $widget_obj ) && is_object( $widget_obj ) && is_subclass_of( $widget_obj, 'SiteOrigin_Widget' ) ) {
-					/* @var $widget_obj SiteOrigin_Widget */
-					ob_start();
-					$widget_obj->widget( array(), array() );
-					ob_clean();
-				}
-			}
+			$sowb->enqueue_registered_widgets_scripts( true, false );
 		}
 	}
 	
