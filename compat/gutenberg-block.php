@@ -17,7 +17,7 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 	
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_layout_block' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_layout_block_editor_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_layout_block_editor_assets' ) );
 	}
 	
 	public function register_layout_block() {
