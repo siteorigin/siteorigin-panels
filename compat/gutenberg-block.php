@@ -17,6 +17,8 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 	
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_layout_block' ) );
+		// This action is slightly later than `enqueue_block_editor_assets`,
+		// which we need to use to ensure our templates are loaded at the right time.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_layout_block_editor_assets' ) );
 	}
 	
