@@ -474,6 +474,7 @@ module.exports = Backbone.View.extend( {
 				data = JSON.parse( data );
 			}
 			catch ( err ) {
+				console.log( "Failed to parse Page Builder layout data from supplied data field." );
 				data = {};
 			}
 			

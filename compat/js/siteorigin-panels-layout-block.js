@@ -17,7 +17,7 @@
 			return el(
 				'span',
 				{
-					className: 'siteorigin-panels-gutenberg-icon'
+					className: 'siteorigin-panels-block-icon'
 				}
 			)
 		},
@@ -175,7 +175,7 @@
 						'div',
 						{
 							key: 'preview',
-							className: 'so-panels-gutenberg-layout-preview-container'
+							className: 'so-panels-block-layout-preview-container'
 						},
 						( loadingPreview ?
 							el( 'div', {
