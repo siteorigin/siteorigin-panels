@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.9.2 - 31 October 2018 =
+= 2.9.2 - 9 November 2018 =
 * Block editor: Call `enqueue_registered_widgets_scripts` which will reset global `$post`.
 * Block editor: Only enqueue layout block scripts when using the block editor.
 * WP 5: Fixed styles in the block editor.
