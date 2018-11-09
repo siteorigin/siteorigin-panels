@@ -26,6 +26,12 @@ var textWidget = {
 		}
 
 		var widgetControl = new component.TextWidgetControl( options );
+		var wpEditor = wp.oldEditor ? wp.oldEditor : wp.editor;
+		if ( wpEditor && wpEditor.hasOwnProperty( 'autop' ) ) {
+			wp.editor.autop = wpEditor.autop;
+			wp.editor.removep = wpEditor.removep;
+			wp.editor.initialize = wpEditor.initialize
+		}
 
 		widgetControl.initializeEditor();
 
