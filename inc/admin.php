@@ -145,7 +145,8 @@ class SiteOrigin_Panels_Admin {
 				array( $this, 'render_meta_boxes' ),
 				( string ) $type,
 				'advanced',
-				'high'
+				'high',
+				array( '__back_compat_meta_box' => true )
 			);
 		}
 	}
