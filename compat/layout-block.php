@@ -1,6 +1,6 @@
 <?php
 
-class SiteOrigin_Panels_Layout_Block {
+class SiteOrigin_Panels_Compat_Layout_Block {
 	
 	const BLOCK_NAME = 'siteorigin-panels/layout-block';
 	

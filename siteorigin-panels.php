@@ -71,7 +71,7 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels_Cache_Renderer::single();
 		
 		if ( function_exists( 'register_block_type' ) ) {
-			SiteOrigin_Panels_Layout_Block::single();
+			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
 		
 		
