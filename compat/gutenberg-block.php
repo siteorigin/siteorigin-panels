@@ -1,13 +1,13 @@
 <?php
 
-class SiteOrigin_Panels_Compat_Gutenberg_Block {
+class SiteOrigin_Panels_Layout_Block {
 	
 	const BLOCK_NAME = 'siteorigin-panels/layout-block';
 	
 	/**
 	 * Get the singleton instance
 	 *
-	 * @return SiteOrigin_Panels_Compat_Gutenberg_Block
+	 * @return SiteOrigin_Panels_Layout_Block
 	 */
 	public static function single() {
 		static $single;
@@ -60,9 +60,9 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 			);
 			wp_localize_script(
 				'siteorigin-panels-layout-block',
-				'soPanelsGutenbergAdmin',
+				'soPanelsBlockEditorAdmin',
 				array(
-					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'gutenberg-preview', '_panelsnonce' ),
+					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
 				)
 			);
 			SiteOrigin_Panels_Styles::register_scripts();

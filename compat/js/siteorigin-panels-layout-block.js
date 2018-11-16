@@ -44,8 +44,8 @@
 			var loadingPreview = props.loadingPreview;
 			function fetchPreview() {
 				if ( props.attributes.panelsData ) {
-					$.post( soPanelsGutenbergAdmin.previewUrl, {
-						action: 'so_panels_gutenberg_preview',
+					$.post( soPanelsBlockEditorAdmin.previewUrl, {
+						action: 'so_panels_block_editor_preview',
 						panelsData:  JSON.stringify( props.attributes.panelsData ),
 					} ).then( function( result ) {
 						if ( result.html ) {
@@ -87,7 +87,7 @@
 					// Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
 					var panelsData = JSON.parse( JSON.stringify( $.extend( {}, props.attributes.panelsData ) ) );
 					
-					// Disable Gutenberg block selection while dragging rows or widgets.
+					// Disable block selection while dragging rows or widgets.
 					function disableSelection() {
 						props.toggleSelection( false );
 						$( document ).on( 'mouseup', function enableSelection() {

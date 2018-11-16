@@ -397,10 +397,10 @@ module.exports = Backbone.View.extend( {
 			appendTo: '#wpwrap',
 			items: '.so-row-container',
 			handle: '.so-row-move',
-			// For Gutenberg, where it's possible to have multiple Page Builder blocks on a page.
-			// Also specify builderID when not in gutenberg to prevent being able to drop rows from builder in a dialog
+			// For the block editor, where it's possible to have multiple Page Builder blocks on a page.
+			// Also specify builderID when not in the block editor to prevent being able to drop rows from builder in a dialog
 			// into builder on the page under the dialog.
-			connectWith: '#' + builderID + '.so-rows-container,.gutenberg .so-rows-container',
+			connectWith: '#' + builderID + '.so-rows-container,.block-editor .so-rows-container',
 			axis: 'y',
 			tolerance: 'pointer',
 			scroll: false,
@@ -934,7 +934,7 @@ module.exports = Backbone.View.extend( {
 		if (
 			(
 				builder.$el.is( topmostBuilder ) ||
-				builder.$el.parent().is( '.siteorigin-panels-layout-block-container' ) // Gutenberg builder
+				builder.$el.parent().is( '.siteorigin-panels-layout-block-container' ) // Layout block builder
 			)
 				&&
 			(

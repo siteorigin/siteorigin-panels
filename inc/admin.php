@@ -54,7 +54,7 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
 		add_action( 'wp_ajax_so_panels_widget_form', array( $this, 'action_widget_form' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-		add_action( 'wp_ajax_so_panels_gutenberg_preview', array( $this, 'gutenberg_preview' ) );
+		add_action( 'wp_ajax_so_panels_block_editor_preview', array( $this, 'block_editor_preview' ) );
 
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
@@ -72,7 +72,6 @@ class SiteOrigin_Panels_Admin {
         add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
 
 		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
-		add_filter( 'filter_gutenberg_meta_boxes', array( $this, 'disable_panels_for_gutenberg_posts' ) );
 	}
 
 	/**
@@ -1069,11 +1068,11 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	/**
-	 * Preview in the gutenberg editor.
+	 * Preview in the block editor.
 	 */
-	public function gutenberg_preview() {
+	public function block_editor_preview() {
 		
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'gutenberg-preview' ) ) {
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'block-editor-preview' ) ) {
 			wp_die();
 		}
 		
@@ -1215,24 +1214,5 @@ class SiteOrigin_Panels_Admin {
 		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
 		
 		return empty( $is_panels_page ) && $can_edit;
-	}
-	
-	/**
-	 * Disable PB when we're in the Gutenberg editor.
-	 *
-	 * @param $wp_meta_boxes
-	 *
-	 * @return mixed
-	 */
-	public function disable_panels_for_gutenberg_posts( $wp_meta_boxes ) {
-		foreach ( $wp_meta_boxes as &$locations ) {
-			foreach ( $locations as &$priorities ) {
-				foreach ( $priorities as &$boxes ) {
-					unset( $boxes['so-panels-panels'] );
-
-				}
-			}
-		}
-		return $wp_meta_boxes;
 	}
 }

@@ -60,7 +60,7 @@ module.exports = Backbone.View.extend( {
 		// Create a widget sortable that's connected with all other cells
 		this.widgetSortable = this.$( '.widgets-container' ).sortable( {
 			placeholder: "so-widget-sortable-highlight",
-			connectWith: '#' + builderID + ' .so-cells .cell .widgets-container,.gutenberg .so-cells .cell .widgets-container',
+			connectWith: '#' + builderID + ' .so-cells .cell .widgets-container,.block-editor .so-cells .cell .widgets-container',
 			tolerance: 'pointer',
 			scroll: false,
 			over: function ( e, ui ) {
