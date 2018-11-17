@@ -65,6 +65,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
 				)
 			);
+			wp_set_script_translations( 'siteorigin-panels-layout-block', 'siteorigin-panels' );
 			SiteOrigin_Panels_Styles::register_scripts();
 			wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			

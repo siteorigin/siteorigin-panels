@@ -9,9 +9,9 @@
 	var __ = i18n.__;
 	
 	blocks.registerBlockType( 'siteorigin-panels/layout-block', {
-		title: __( 'SiteOrigin Layout (in beta)' ),
+		title: __( 'SiteOrigin Layout (in beta)', 'siteorigin-panels' ),
 		
-		description: __( "Build a layout using SiteOrigin's Page Builder." ),
+		description: __( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
 		
 		icon: function() {
 			return el(
@@ -138,7 +138,7 @@
 								IconButton,
 								{
 									className: 'components-icon-button components-toolbar__control',
-									label: __( 'Preview layout.' ),
+									label: __( 'Preview layout.', 'siteorigin-panels' ),
 									onClick: fetchPreview,
 									icon: 'visibility'
 								}
@@ -164,7 +164,7 @@
 								IconButton,
 								{
 									className: 'components-icon-button components-toolbar__control',
-									label: __( 'Edit layout.' ),
+									label: __( 'Edit layout.', 'siteorigin-panels' ),
 									onClick: showEdit,
 									icon: 'edit'
 								}
