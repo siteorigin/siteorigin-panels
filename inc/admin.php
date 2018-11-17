@@ -70,6 +70,8 @@ class SiteOrigin_Panels_Admin {
         // Enqueue Yoast compatibility
         add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
         add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+
+		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
 	}
 
 	/**
@@ -135,10 +137,6 @@ class SiteOrigin_Panels_Admin {
 	 * Callback to register the Page Builder Metaboxes
 	 */
 	function add_meta_boxes() {
-		global $post;
-		$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
-		$is_panels_page = ! empty( $panels_data );
-		
 		foreach ( siteorigin_panels_setting( 'post-types' ) as $type ) {
 			add_meta_box(
 				'so-panels-panels',
@@ -147,12 +145,7 @@ class SiteOrigin_Panels_Admin {
 				( string ) $type,
 				'advanced',
 				'high',
-				array(
-					// When we have panels data for a page this will cause the editor to fall back to classic editor,
-					// else the new block editor will be displayed.
-					'__back_compat_meta_box' => empty( $is_panels_page ),
-					'__block_editor_compatible_meta_box' => false
-				)
+				array( '__back_compat_meta_box' => true )
 			);
 		}
 	}
@@ -1197,5 +1190,29 @@ class SiteOrigin_Panels_Admin {
 			<?php echo esc_html( $link['text'] ) ?>.
         </a>
 		<?php
+	}
+	
+	/**
+	 * Disable the Gutenberg editor for existing PB posts.
+	 *
+	 * @param $can_edit
+	 * @param $post_type
+	 *
+	 * @return bool
+	 */
+	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
+		
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+		} else {
+			// Fall back to just checking the global $post for 'panels_data' metadata.
+			global $post;
+			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+		}
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
+		
+		return empty( $is_panels_page ) && $can_edit;
 	}
 }
