@@ -915,33 +915,8 @@ module.exports = Backbone.View.extend( {
 	activateContextMenu: function ( e, menu ) {
 		var builder = this;
 		
-		// Of all the visible builders, find the topmost
-		var topmostBuilder = $( '.siteorigin-panels-builder:visible' )
-		.sort( function ( a, b ) {
-			return $( a ).zIndex() > $( b ).zIndex() ? 1 : -1;
-		} )
-		.last();
-		
-		var topmostDialog = $( '.so-panels-dialog-wrapper:visible' )
-		.sort( function ( a, b ) {
-			return $( a ).zIndex() > $( b ).zIndex() ? 1 : -1;
-		} )
-		.last();
-		
-		var closestDialog = builder.$el.closest( '.so-panels-dialog-wrapper' );
-		
-		// Only run this if its element is the topmost builder, in the topmost dialog
-		if (
-			(
-				builder.$el.is( topmostBuilder ) ||
-				builder.$el.parent().is( '.siteorigin-panels-layout-block-container' ) // Layout block builder
-			)
-				&&
-			(
-				topmostDialog.length === 0 ||
-				topmostDialog.is( closestDialog )
-			)
-		) {
+		// Only run this if the event target is a descendant of this builder's DOM element.
+		if ( $.contains( builder.$el.get( 0 ), e.target ) ) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
 			.add( builder.$( '.so-panels-welcome-message:visible' ) )
@@ -954,7 +929,7 @@ module.exports = Backbone.View.extend( {
 			
 			var activeView = over.last().data( 'view' );
 			if ( activeView !== undefined && activeView.buildContextualMenu !== undefined ) {
-				// We'll pass this to the current active view so it can popular the contextual menu
+				// We'll pass this to the current active view so it can populate the contextual menu
 				activeView.buildContextualMenu( e, menu );
 			}
 			else if ( over.last().hasClass( 'so-panels-welcome-message' ) ) {
