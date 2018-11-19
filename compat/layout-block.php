@@ -76,7 +76,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
 				$sowb = SiteOrigin_Widgets_Bundle::single();
 				$sowb->register_general_scripts();
-				$sowb->enqueue_registered_widgets_scripts( true, false );
+				if ( method_exists( $sowb, 'enqueue_registered_widgets_scripts' ) ) {
+					$sowb->enqueue_registered_widgets_scripts( true, false );
+				}
 			}
 		}
 	}
