@@ -65,13 +65,13 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Dashboard::single();
 
 		$this->in_save_post = false;
-
-
-        // Enqueue Yoast compatibility
-        add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-        add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-
-		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
+		
+		
+		// Enqueue Yoast compatibility
+		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+		
+		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 	}
 
 	/**
@@ -137,6 +137,9 @@ class SiteOrigin_Panels_Admin {
 	 * Callback to register the Page Builder Metaboxes
 	 */
 	function add_meta_boxes() {
+		
+		$panels_data = $this->get_current_admin_panels_data();
+		
 		foreach ( siteorigin_panels_setting( 'post-types' ) as $type ) {
 			add_meta_box(
 				'so-panels-panels',
@@ -145,7 +148,12 @@ class SiteOrigin_Panels_Admin {
 				( string ) $type,
 				'advanced',
 				'high',
-				array( '__back_compat_meta_box' => true )
+				array(
+					// When we have panels data for a page this will cause the editor to fall back to classic editor,
+					// else the new block editor will be displayed.
+					'__back_compat_meta_box' => empty( $panels_data ),
+					'__block_editor_compatible_meta_box' => false,
+				)
 			);
 		}
 	}
@@ -573,8 +581,10 @@ class SiteOrigin_Panels_Admin {
 			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, 'home' );
 		} else {
 			global $post;
-			$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post->ID );
+			if ( ! empty( $post ) ) {
+				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+				$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post->ID );
+			}
 		}
 
 		if ( empty( $panels_data ) ) {
@@ -1192,27 +1202,22 @@ class SiteOrigin_Panels_Admin {
 		<?php
 	}
 	
-	/**
-	 * Disable the Gutenberg editor for existing PB posts.
-	 *
-	 * @param $can_edit
-	 * @param $post_type
-	 *
-	 * @return bool
-	 */
-	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
+	public function admin_notices() {
+		$panels_data = $this->get_current_admin_panels_data();
 		
-		if ( function_exists( 'get_current_screen' ) ) {
-			$screen = get_current_screen();
-			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
-		} else {
-			// Fall back to just checking the global $post for 'panels_data' metadata.
-			global $post;
-			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+		// This is for the Gutenberg plugin.
+		$is_block_editor = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
+		// This is for WP 5 with the integrated block editor. Let it override the Gutenberg plugin.
+		$current_screen = get_current_screen();
+		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
+			$is_block_editor = $current_screen->is_block_editor();
 		}
-		$post_types = siteorigin_panels_setting( 'post-types' );
-		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
-		
-		return empty( $is_panels_page ) && $can_edit;
+		if ( $is_block_editor && ! empty( $panels_data ) ) {
+			$install_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=classic-editor&section=changelog&TB_iframe=true&width=640&height=662' );
+			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="thickbox open-plugin-details-modal">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
+			?>
+			<div id="siteorigin-panels-notice" class="notice notice-warning"><p id="test-notice"><?php echo $notice ?></p></div>
+			<?php
+		}
 	}
 }
