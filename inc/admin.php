@@ -1213,10 +1213,10 @@ class SiteOrigin_Panels_Admin {
 			$is_block_editor = $current_screen->is_block_editor();
 		}
 		if ( $is_block_editor && ! empty( $panels_data ) ) {
-			$install_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=classic-editor&section=changelog&TB_iframe=true&width=640&height=662' );
-			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="thickbox open-plugin-details-modal">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
+			$install_url = self_admin_url( 'plugin-install.php?tab=featured' );
+			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="components-notice__action is-link">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
 			?>
-			<div id="siteorigin-panels-notice" class="notice notice-warning"><p id="test-notice"><?php echo $notice ?></p></div>
+			<div id="siteorigin-panels-notice" class="notice notice-warning is-dismissible"><p id="classic-editor-notice"><?php echo $notice ?></p></div>
 			<?php
 		}
 	}
