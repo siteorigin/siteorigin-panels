@@ -143,7 +143,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<a class="widget-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
 				</span>
 			</div>
-			<small class="description">{{%= description %}}</small>
+			<small class="so-description">{{%= description %}}</small>
 		</div>
 	</div>
 </script>
@@ -239,7 +239,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<li class="widget-type">
 		<div class="widget-type-wrapper">
 			<h3>{{%= title %}}</h3>
-			<small class="description">{{%= description %}}</small>
+			<small class="so-description">{{%= description %}}</small>
 		</div>
 	</li>
 </script>
@@ -273,7 +273,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-widget-sidebar-widget">
 	<div class="so-widget">
 		<h3>{{%= title %}}</h3>
-		<small class="description">
+		<small class="so-description">
 			{{%= description %}}
 		</small>
 	</div>

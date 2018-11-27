@@ -47,7 +47,7 @@
 										$this->display_field( $field_id, $field );
 										if( !empty($field['description']) ) {
 											?>
-											<small class="description" data-keywords="<?php if(!empty($field['keywords'])) echo esc_attr($field['keywords']) ?>">
+											<small class="so-description" data-keywords="<?php if(!empty($field['keywords'])) echo esc_attr($field['keywords']) ?>">
 												<?php
 												echo wp_kses( $field['description'], array(
 													'a' => array(

@@ -80,8 +80,8 @@ jQuery( function($){
 
             var indexes = {
                 'title' : $s.find('label').html().toLowerCase().indexOf( query ),
-                'keywords' : $s.find('.description').data('keywords').toLowerCase().indexOf( query ),
-                'description' : $s.find('.description').html().toLowerCase().indexOf( query )
+                'keywords' : $s.find('.so-description').data('keywords').toLowerCase().indexOf( query ),
+                'description' : $s.find('.so-description').html().toLowerCase().indexOf( query )
             };
 
             if( indexes.title === 0 ) isMatch += 10;

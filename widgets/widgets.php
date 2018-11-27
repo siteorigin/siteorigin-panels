@@ -201,7 +201,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 					<?php
 					break;
 			}
-			if(!empty($field_args['description'])) echo '<small class="description">'.esc_html($field_args['description']).'</small>';
+			if(!empty($field_args['description'])) echo '<small class="so-description">'.esc_html($field_args['description']).'</small>';
 
 			?></p><?php
 		}
@@ -747,7 +747,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			<a href="#" onclick="return false;" class="so-gallery-widget-select-attachments hidden"><?php _e('edit gallery', 'siteorigin-panels') ?></a>
 			<input type="text" class="widefat" value="<?php echo esc_attr($instance['ids']) ?>" name="<?php echo $this->get_field_name('ids') ?>" />
 		</p>
-		<p class="description">
+		<p class="so-description">
 			<?php _e("Comma separated attachment IDs. Defaults to all current page's attachments.", 'siteorigin-panels') ?>
 		</p>
 
@@ -956,7 +956,7 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id('poster') ?>"><?php _e('Poster URL', 'siteorigin-panels') ?></label>
 			<input id="<?php echo $this->get_field_id('poster') ?>" name="<?php echo $this->get_field_name('poster') ?>" type="text" class="widefat" value="<?php echo esc_attr($instance['poster']) ?>" />
-			<small class="description"><?php _e('An image that displays before the video starts playing.', 'siteorigin-panels') ?></small>
+			<small class="so-description"><?php _e('An image that displays before the video starts playing.', 'siteorigin-panels') ?></small>
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id('autoplay') ?>">
