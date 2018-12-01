@@ -1105,7 +1105,8 @@ class SiteOrigin_Panels_Admin {
 			$rendered_layout .= ob_get_clean();
 		}
 		
-		wp_send_json( array( 'html' => $rendered_layout ) );
+		echo $rendered_layout;
+		wp_die();
 	}
 
 	/**

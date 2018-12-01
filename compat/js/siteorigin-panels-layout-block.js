@@ -35,26 +35,13 @@
 		},
 		
 		edit: withState( {
-			editing: true,
+			editing: false,
 			panelsInitialized: false,
 			loadingPreview: false,
+			previewInitialized: false,
 			previewHtml: ''
 		} )( function ( props ) {
 			var editing = props.editing;
-			var loadingPreview = props.loadingPreview;
-			function fetchPreview() {
-				if ( props.attributes.panelsData ) {
-					$.post( soPanelsBlockEditorAdmin.previewUrl, {
-						action: 'so_panels_block_editor_preview',
-						panelsData:  JSON.stringify( props.attributes.panelsData ),
-					} ).then( function( result ) {
-						if ( result.html ) {
-							props.setState( { previewHtml: result.html, loadingPreview: false } );
-						}
-					});
-					props.setState( { editing: false, loadingPreview: true } );
-				}
-			}
 			
 			function setupPreview() {
 				if ( ! editing ) {
@@ -65,8 +52,12 @@
 				}
 			}
 			
-			function showEdit() {
+			function switchToEditing() {
 				props.setState( { editing: true, panelsInitialized: false } );
+			}
+			
+			function switchToPreview() {
+				props.setState( { editing: false, previewInitialized: false } );
 			}
 			
 			function setupPanels( panelsContainer ) {
@@ -139,7 +130,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Preview layout.', 'siteorigin-panels' ),
-									onClick: fetchPreview,
+									onClick: switchToPreview,
 									icon: 'visibility'
 								}
 							)
@@ -152,7 +143,24 @@
 					} )
 				];
 			} else {
-				var preview = props.previewHtml;
+				
+				var loadingPreview = !props.editing && !props.previewHtml && props.attributes.panelsData;
+				if ( loadingPreview ) {
+					$.post( {
+						url: soPanelsBlockEditorAdmin.previewUrl,
+						data: {
+							action: 'so_panels_block_editor_preview',
+							panelsData: JSON.stringify( props.attributes.panelsData ),
+						}
+					} )
+					.then( function ( preview ) {
+						props.setState( {
+							previewHtml: preview,
+							loadingPreview: false,
+						} );
+					} );
+				}
+				var preview = props.previewHtml ? props.previewHtml : '';
 				return [
 					el(
 						BlockControls,
@@ -165,7 +173,7 @@
 								{
 									className: 'components-icon-button components-toolbar__control',
 									label: __( 'Edit layout.', 'siteorigin-panels' ),
-									onClick: showEdit,
+									onClick: switchToEditing,
 									icon: 'edit'
 								}
 							)
