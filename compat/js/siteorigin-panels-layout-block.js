@@ -41,7 +41,7 @@
 			previewInitialized: false,
 			previewHtml: ''
 		} )( function ( props ) {
-			var editing = props.editing;
+			var editing = props.editing || ! props.attributes.panelsData;
 			
 			function setupPreview() {
 				if ( ! editing ) {
