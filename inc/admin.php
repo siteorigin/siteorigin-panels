@@ -54,7 +54,7 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
 		add_action( 'wp_ajax_so_panels_widget_form', array( $this, 'action_widget_form' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-		add_action( 'wp_ajax_so_panels_gutenberg_preview', array( $this, 'gutenberg_preview' ) );
+		add_action( 'wp_ajax_so_panels_block_editor_preview', array( $this, 'block_editor_preview' ) );
 
 		// Initialize the additional admin classes.
 		SiteOrigin_Panels_Admin_Widget_Dialog::single();
@@ -65,14 +65,15 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Dashboard::single();
 
 		$this->in_save_post = false;
-
-
-        // Enqueue Yoast compatibility
-        add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-        add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-
-		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'disable_gutenberg_for_panels_posts' ), 10, 2 );
-		add_filter( 'filter_gutenberg_meta_boxes', array( $this, 'disable_panels_for_gutenberg_posts' ) );
+		
+		
+		// Enqueue Yoast compatibility
+		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+		
+		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
+		add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
 	}
 
 	/**
@@ -138,6 +139,7 @@ class SiteOrigin_Panels_Admin {
 	 * Callback to register the Page Builder Metaboxes
 	 */
 	function add_meta_boxes() {
+		
 		foreach ( siteorigin_panels_setting( 'post-types' ) as $type ) {
 			add_meta_box(
 				'so-panels-panels',
@@ -145,7 +147,13 @@ class SiteOrigin_Panels_Admin {
 				array( $this, 'render_meta_boxes' ),
 				( string ) $type,
 				'advanced',
-				'high'
+				'high',
+				array(
+					// Ideally when we have panels data for a page we would set this to false and it would cause the
+					// editor to fall back to classic editor, but that's not the case so we just declare it as a `__back_compat_meta_box`.
+					'__back_compat_meta_box' => true,
+					'__block_editor_compatible_meta_box' => false,
+				)
 			);
 		}
 	}
@@ -573,8 +581,10 @@ class SiteOrigin_Panels_Admin {
 			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, 'home' );
 		} else {
 			global $post;
-			$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post->ID );
+			if ( ! empty( $post ) ) {
+				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+				$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post->ID );
+			}
 		}
 
 		if ( empty( $panels_data ) ) {
@@ -1068,11 +1078,11 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	/**
-	 * Preview in the gutenberg editor.
+	 * Preview in the block editor.
 	 */
-	public function gutenberg_preview() {
+	public function block_editor_preview() {
 		
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'gutenberg-preview' ) ) {
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'block-editor-preview' ) ) {
 			wp_die();
 		}
 		
@@ -1095,7 +1105,8 @@ class SiteOrigin_Panels_Admin {
 			$rendered_layout .= ob_get_clean();
 		}
 		
-		wp_send_json( array( 'html' => $rendered_layout ) );
+		echo $rendered_layout;
+		wp_die();
 	}
 
 	/**
@@ -1192,15 +1203,34 @@ class SiteOrigin_Panels_Admin {
 		<?php
 	}
 	
+	public function admin_notices() {
+		$panels_data = $this->get_current_admin_panels_data();
+		
+		// This is for the Gutenberg plugin.
+		$is_block_editor = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
+		// This is for WP 5 with the integrated block editor. Let it override the Gutenberg plugin.
+		$current_screen = get_current_screen();
+		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
+			$is_block_editor = $current_screen->is_block_editor();
+		}
+		if ( $is_block_editor && ! empty( $panels_data ) ) {
+			$install_url = self_admin_url( 'plugin-install.php?tab=featured' );
+			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="components-notice__action is-link">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
+			?>
+			<div id="siteorigin-panels-notice" class="notice notice-warning is-dismissible"><p id="classic-editor-notice"><?php echo $notice ?></p></div>
+			<?php
+		}
+	}
+	
 	/**
-	 * Disable the Gutenberg editor for existing PB posts.
+	 * Show Classic Editor for existing PB posts.
 	 *
-	 * @param $can_edit
+	 * @param $use_block_editor
 	 * @param $post_type
 	 *
 	 * @return bool
 	 */
-	public function disable_gutenberg_for_panels_posts( $can_edit, $post_type ) {
+	public function show_classic_editor_for_panels( $use_block_editor, $post_type ) {
 		
 		if ( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
@@ -1213,25 +1243,6 @@ class SiteOrigin_Panels_Admin {
 		$post_types = siteorigin_panels_setting( 'post-types' );
 		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
 		
-		return empty( $is_panels_page ) && $can_edit;
-	}
-	
-	/**
-	 * Disable PB when we're in the Gutenberg editor.
-	 *
-	 * @param $wp_meta_boxes
-	 *
-	 * @return mixed
-	 */
-	public function disable_panels_for_gutenberg_posts( $wp_meta_boxes ) {
-		foreach ( $wp_meta_boxes as &$locations ) {
-			foreach ( $locations as &$priorities ) {
-				foreach ( $priorities as &$boxes ) {
-					unset( $boxes['so-panels-panels'] );
-
-				}
-			}
-		}
-		return $wp_meta_boxes;
+		return empty( $is_panels_page ) && $use_block_editor;
 	}
 }

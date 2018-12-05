@@ -41,9 +41,14 @@ jQuery(function($){
 			return data;
 		}
 
-		$data.find('.so-panel.widget').each(function(i, el){
-			var $widget = $(el),
-				match = re.exec( $widget.html() );
+		$data.find('.so-panel.widget').each(function(i, el) {
+			
+			var $widget = $(el);
+			// Style wrappers prevent us from matching the widget shortcode correctly.
+			if ( $widget.find( '> .panel-widget-style' ).length > 0 ) {
+				$widget = $widget.find( '> .panel-widget-style' );
+			}
+			var match = re.exec( $widget.html() );
 
 			try{
 				if( ! _.isNull( match ) && $widget.html().replace( re, '' ).trim() === '' ) {

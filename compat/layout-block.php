@@ -1,13 +1,13 @@
 <?php
 
-class SiteOrigin_Panels_Compat_Gutenberg_Block {
+class SiteOrigin_Panels_Compat_Layout_Block {
 	
 	const BLOCK_NAME = 'siteorigin-panels/layout-block';
 	
 	/**
 	 * Get the singleton instance
 	 *
-	 * @return SiteOrigin_Panels_Compat_Gutenberg_Block
+	 * @return SiteOrigin_Panels_Layout_Block
 	 */
 	public static function single() {
 		static $single;
@@ -60,11 +60,15 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 			);
 			wp_localize_script(
 				'siteorigin-panels-layout-block',
-				'soPanelsGutenbergAdmin',
+				'soPanelsBlockEditorAdmin',
 				array(
-					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'gutenberg-preview', '_panelsnonce' ),
+					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
 				)
 			);
+			// This is only available in WP5.
+			if ( function_exists( 'wp_set_script_translations' ) ) {
+				wp_set_script_translations( 'siteorigin-panels-layout-block', 'siteorigin-panels' );
+			}
 			SiteOrigin_Panels_Styles::register_scripts();
 			wp_enqueue_script( 'siteorigin-panels-front-styles' );
 			
@@ -72,7 +76,9 @@ class SiteOrigin_Panels_Compat_Gutenberg_Block {
 			if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
 				$sowb = SiteOrigin_Widgets_Bundle::single();
 				$sowb->register_general_scripts();
-				$sowb->enqueue_registered_widgets_scripts( true, false );
+				if ( method_exists( $sowb, 'enqueue_registered_widgets_scripts' ) ) {
+					$sowb->enqueue_registered_widgets_scripts( true, false );
+				}
 			}
 		}
 	}

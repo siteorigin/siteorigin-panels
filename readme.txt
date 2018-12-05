@@ -96,6 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.3 - 5 December 2018 =
+* Use front end i18n for block editor.
+* Ensure contextual menu works in dialogs.
+* Yoast compat: Check for panels style wrappers before doing widget content modifications.
+* Clone Layouts: Fix to allow for private posts and pages.
+* Block editor: Show preview initially when page is loaded.
+* Block editor: Show classic editor for existing pages containing Page Builder layout data.
+
 = 2.9.2 - 9 November 2018 =
 * Block editor: Call `enqueue_registered_widgets_scripts` which will reset global `$post`.
 * Block editor: Only enqueue layout block scripts when using the block editor.
