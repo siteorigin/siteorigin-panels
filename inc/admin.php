@@ -72,6 +72,8 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
 		
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
+		add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
 	}
 
 	/**
@@ -138,8 +140,6 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function add_meta_boxes() {
 		
-		$panels_data = $this->get_current_admin_panels_data();
-		
 		foreach ( siteorigin_panels_setting( 'post-types' ) as $type ) {
 			add_meta_box(
 				'so-panels-panels',
@@ -149,9 +149,9 @@ class SiteOrigin_Panels_Admin {
 				'advanced',
 				'high',
 				array(
-					// When we have panels data for a page this will cause the editor to fall back to classic editor,
-					// else the new block editor will be displayed.
-					'__back_compat_meta_box' => empty( $panels_data ),
+					// Ideally when we have panels data for a page we would set this to false and it would cause the
+					// editor to fall back to classic editor, but that's not the case so we just declare it as a `__back_compat_meta_box`.
+					'__back_compat_meta_box' => true,
 					'__block_editor_compatible_meta_box' => false,
 				)
 			);
@@ -1220,5 +1220,29 @@ class SiteOrigin_Panels_Admin {
 			<div id="siteorigin-panels-notice" class="notice notice-warning is-dismissible"><p id="classic-editor-notice"><?php echo $notice ?></p></div>
 			<?php
 		}
+	}
+	
+	/**
+	 * Show Classic Editor for existing PB posts.
+	 *
+	 * @param $use_block_editor
+	 * @param $post_type
+	 *
+	 * @return bool
+	 */
+	public function show_classic_editor_for_panels( $use_block_editor, $post_type ) {
+		
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+		} else {
+			// Fall back to just checking the global $post for 'panels_data' metadata.
+			global $post;
+			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+		}
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
+		
+		return empty( $is_panels_page ) && $use_block_editor;
 	}
 }
