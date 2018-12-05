@@ -35,13 +35,13 @@
 		},
 		
 		edit: withState( {
-			editing: false,
+			editing: true,
 			panelsInitialized: false,
 			loadingPreview: false,
 			previewInitialized: false,
 			previewHtml: ''
 		} )( function ( props ) {
-			var editing = props.editing || ! props.attributes.panelsData;
+			var editing = props.editing;
 			
 			function setupPreview() {
 				if ( ! editing ) {
@@ -110,11 +110,12 @@
 					
 					builderView.on( 'content_change', function () {
 						props.setAttributes( { panelsData: builderView.getData() } );
+						props.setState( { previewInitialized: false, previewHtml: '' } );
 					} );
 					
 					$( document ).trigger( 'panels_setup', builderView );
 					
-					props.setState( { panelsInitialized: true } );
+					props.setState( { editing: true, panelsInitialized: true } );
 				}
 			}
 			if ( editing ) {
