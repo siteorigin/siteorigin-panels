@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.4 - 5 December 2018 =
+* Layout block: Set default state to edit mode.
+
 = 2.9.3 - 5 December 2018 =
 * Use front end i18n for block editor.
 * Ensure contextual menu works in dialogs.
