@@ -1242,22 +1242,33 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function show_classic_editor_for_panels( $use_block_editor, $post_type ) {
 		
-		if ( isset( $_GET['siteorigin-page-builder'] ) ) {
+		// For new pages.
+		if ( isset( $_GET['block-editor'] ) ) {
+			return $use_block_editor;
+		} else if ( isset( $_GET['siteorigin-page-builder'] ) ) {
 			return false;
 		}
 		
-		if ( function_exists( 'get_current_screen' ) ) {
-			$screen = get_current_screen();
-			$panels_data = $screen->base == 'post' ? $this->get_current_admin_panels_data() : array();
+		// For existing posts.
+		global $post;
+		if ( ! empty( $post ) ) {
+			// If the post has blocks just allow `$use_block_editor` to decide.
+			if ( ! has_blocks( $post ) ) {
+				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+				if ( ! empty( $panels_data ) ) {
+					$use_block_editor = false;
+				}
+			}
 		} else {
-			// Fall back to just checking the global $post for 'panels_data' metadata.
-			global $post;
-			$panels_data = empty( $post ) ? array() : get_post_meta( $post->ID, 'panels_data', true );
+			// If the `$post_type` is set to be used by Page Builder.
+			$post_types = siteorigin_panels_setting( 'post-types' );
+			$is_panels_type = in_array( $post_type, $post_types );
+			if ( $is_panels_type ){
+				$use_block_editor = false;
+			}
 		}
-		$post_types = siteorigin_panels_setting( 'post-types' );
-		$is_panels_page = in_array( $post_type, $post_types ) && ! empty( $panels_data );
 		
-		return empty( $is_panels_page ) && $use_block_editor;
+		return $use_block_editor;
 	}
 	
 	/**
@@ -1377,12 +1388,13 @@ class SiteOrigin_Panels_Admin {
 				var url = button.href;
 				var urlHasParams = ( -1 !== url.indexOf( '?' ) );
 				var panelsUrl = url + ( urlHasParams ? '&' : '?' ) + 'siteorigin-page-builder';
+				var blockEditorUrl = url + ( urlHasParams ? '&' : '?' ) + 'block-editor';
 				
 				var newbutton = '<span id="split-page-title-action" class="split-page-title-action">';
 				newbutton += '<a href="' + url + '">' + button.innerText + '</a>';
 				newbutton += '<span class="expander" tabindex="0" role="button" aria-haspopup="true" aria-label="<?php echo esc_attr( __( 'Toggle editor selection menu', 'siteorigin-panels' ) ); ?>"></span>';
 				newbutton += '<span class="dropdown"><a href="' + panelsUrl + '"><?php echo esc_html( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ) ); ?></a>';
-				newbutton += '<a href="' + url + '"><?php echo esc_html( __( 'Block Editor', 'siteorigin-panels' ) ); ?></a></span></span><span class="page-title-action" style="display:none;"></span>';
+				newbutton += '<a href="' + blockEditorUrl + '"><?php echo esc_html( __( 'Block Editor', 'siteorigin-panels' ) ); ?></a></span></span><span class="page-title-action" style="display:none;"></span>';
 				
 				button.insertAdjacentHTML( 'afterend', newbutton );
 				button.parentNode.removeChild( button );
