@@ -1291,7 +1291,9 @@ class SiteOrigin_Panels_Admin {
 			<?php
 		}
 		
-		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ) {
+		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ||
+			 // WooCommerce product type doesn't support block editor...
+			 ( class_exists( 'WooCommerce' ) && $typenow == 'product' ) ) {
 			return;
 		}
 		
