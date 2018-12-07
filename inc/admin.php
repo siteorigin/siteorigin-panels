@@ -71,13 +71,16 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
 		
-		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
-		add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
-		add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
-		
-		// If Gutenberg is active, it will already add the Classic Editor dropdown item.
-		if ( function_exists( 'register_block_type' ) && ! function_exists( 'gutenberg_init' ) ) {
-			add_action( 'admin_print_scripts-edit.php', array( $this, 'add_panels_add_new_button' ) );
+		// Block editor specific actions
+		if ( function_exists( 'register_block_type' ) ) {
+			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+			add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
+			add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
+			// If Gutenberg is active, it will already add the Classic Editor dropdown item.
+			if ( ! function_exists( 'gutenberg_init' ) ) {
+				add_action( 'admin_print_scripts-edit.php', array( $this, 'add_panels_add_new_button' ) );
+			}
+			add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
 		}
 	}
 
@@ -1402,5 +1405,15 @@ class SiteOrigin_Panels_Admin {
 			} );
 		</script>
 		<?php
+	}
+	
+	public function add_panels_post_state( $post_states, $post ) {
+		$panels_data = get_post_meta( $post->ID, 'panels_data', true );
+		
+		if ( ! empty( $panels_data ) ) {
+			$post_states[] = __( 'SiteOrigin Page Builder', 'siteorigin-panels' );
+		}
+		
+		return $post_states;
 	}
 }
