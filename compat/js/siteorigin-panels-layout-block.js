@@ -35,16 +35,15 @@
 		},
 		
 		edit: withState( {
-			editing: true,
+			editing: false,
 			panelsInitialized: false,
 			loadingPreview: false,
 			previewInitialized: false,
 			previewHtml: ''
 		} )( function ( props ) {
-			var editing = props.editing;
 			
 			function setupPreview() {
-				if ( ! editing ) {
+				if ( ! props.editing ) {
 					$( document ).trigger( 'panels_setup_preview' );
 					if ( window.sowb ) {
 						$ ( window.sowb ).trigger( 'setup_widgets' );
@@ -57,7 +56,9 @@
 			}
 			
 			function switchToPreview() {
-				props.setState( { editing: false, previewInitialized: false } );
+				if ( props.attributes.panelsData ) {
+					props.setState( { editing: false, previewInitialized: false } );
+				}
 			}
 			
 			function setupPanels( panelsContainer ) {
@@ -118,7 +119,7 @@
 					props.setState( { editing: true, panelsInitialized: true } );
 				}
 			}
-			if ( editing ) {
+			if ( props.editing || ! props.attributes.panelsData ) {
 				return [
 					el(
 						BlockControls,

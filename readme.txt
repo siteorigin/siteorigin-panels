@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.5 - 6 December 2018 =
+* Layout block: Default to preview state if block has panels data.
+* Dropdown for 'Add New' with SiteOrigin Page Builder as an option.
+* Added a label to posts list to indicate which have a Page Builder layout.
+
 = 2.9.4 - 5 December 2018 =
 * Layout block: Set default state to edit mode.
 
