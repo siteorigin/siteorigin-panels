@@ -1249,20 +1249,21 @@ class SiteOrigin_Panels_Admin {
 			return false;
 		}
 		
+		// If the `$post_type` is set to be used by Page Builder.
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$is_panels_type = in_array( $post_type, $post_types );
+		
 		// For existing posts.
 		global $post;
 		if ( ! empty( $post ) ) {
 			// If the post has blocks just allow `$use_block_editor` to decide.
 			if ( ! has_blocks( $post ) ) {
 				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-				if ( ! empty( $panels_data ) ) {
+				if ( ! empty( $panels_data ) || $is_panels_type ) {
 					$use_block_editor = false;
 				}
 			}
 		} else {
-			// If the `$post_type` is set to be used by Page Builder.
-			$post_types = siteorigin_panels_setting( 'post-types' );
-			$is_panels_type = in_array( $post_type, $post_types );
 			if ( $is_panels_type ){
 				$use_block_editor = false;
 			}
@@ -1290,7 +1291,9 @@ class SiteOrigin_Panels_Admin {
 			<?php
 		}
 		
-		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ) {
+		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ||
+			 // WooCommerce product type doesn't support block editor...
+			 ( class_exists( 'WooCommerce' ) && $typenow == 'product' ) ) {
 			return;
 		}
 		
