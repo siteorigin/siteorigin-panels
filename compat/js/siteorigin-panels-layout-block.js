@@ -9,7 +9,7 @@
 	var __ = i18n.__;
 	
 	blocks.registerBlockType( 'siteorigin-panels/layout-block', {
-		title: __( 'SiteOrigin Layout (in beta)', 'siteorigin-panels' ),
+		title: __( 'SiteOrigin Layout', 'siteorigin-panels' ),
 		
 		description: __( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
 		
