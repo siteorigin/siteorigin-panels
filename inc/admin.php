@@ -1291,9 +1291,7 @@ class SiteOrigin_Panels_Admin {
 			<?php
 		}
 		
-		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ||
-			 // WooCommerce product type doesn't support block editor...
-			 ( class_exists( 'WooCommerce' ) && $typenow == 'product' ) ) {
+		if ( ! $this->show_add_new_dropdown_for_type( $typenow ) ) {
 			return;
 		}
 		
@@ -1420,6 +1418,23 @@ class SiteOrigin_Panels_Admin {
 			} );
 		</script>
 		<?php
+	}
+	
+	private function show_add_new_dropdown_for_type( $post_type ) {
+		
+		$show = in_array( $post_type, siteorigin_panels_setting( 'post-types' ) );
+		
+		// WooCommerce product type doesn't support block editor...
+		$show = $show && ! ( class_exists( 'WooCommerce' ) && $post_type == 'product' );
+		
+		if ( class_exists( 'SiteOrigin_Premium_Plugin_Cpt_Builder' ) ) {
+			$show = $show && $post_type != SiteOrigin_Premium_Plugin_Cpt_Builder::POST_TYPE;
+			$cpt_builder = SiteOrigin_Premium_Plugin_Cpt_Builder::single();
+			$so_custom_types = $cpt_builder->get_post_types();
+			$show = $show && ! isset( $so_custom_types[ $post_type ] );
+		}
+		
+		return $show;
 	}
 	
 	public function add_panels_post_state( $post_states, $post ) {
