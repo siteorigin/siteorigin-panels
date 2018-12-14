@@ -1148,7 +1148,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
 		if( ! empty( $panels_data['widgets'] ) ) {
-			printf( __( '%s Widgets', 'siteorigin-panels' ), count( $panels_data['widgets'] ) );
+			$widgets_count = count( $panels_data['widgets'] );
+			printf( _n( '%s Widget', '%s Widgets', $widgets_count, 'siteorigin-panels' ), $widgets_count );
 		}
 		else {
 			echo '—';
