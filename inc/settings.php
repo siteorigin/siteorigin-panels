@@ -114,6 +114,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['display-teaser']    = true;
 		$defaults['display-learn']     = true;
 		$defaults['load-on-attach']    = false;
+		$defaults['use-classic']       = true;
 
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
@@ -244,7 +245,13 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'select_multi',
 			'label'       => __( 'Post Types', 'siteorigin-panels' ),
 			'options'     => $this->get_post_types(),
-			'description' => __( 'The post types to use Page Builder on.', 'siteorigin-panels' ),
+			'description' => __( 'The post types on which to use Page Builder.', 'siteorigin-panels' ),
+		);
+		
+		$fields['general']['fields']['use-classic'] = array(
+			'type' => 'checkbox',
+			'label' => __( 'Use Classic Editor for new posts', 'siteorigin-panels' ),
+			'description' => __( 'New posts of the above Post Types will be created using the Classic Editor.', 'siteorigin-panels' )
 		);
 
 		$fields['general']['fields']['live-editor-quick-link'] = array(
@@ -284,7 +291,11 @@ class SiteOrigin_Panels_Settings {
 		$fields['general']['fields']['load-on-attach'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Default To Page Builder Interface', 'siteorigin-panels' ),
-			'description' => __( 'New posts/pages that you create will start with the Page Builder loaded.', 'siteorigin-panels' )
+			'description' => sprintf(
+				__( 'New Classic Editor posts/pages that you create will start with the Page Builder loaded. The %s"Use Classic Editor for new posts"%s setting must be enabled.', 'siteorigin-panels' ),
+				'<strong>',
+				'</strong>'
+			)
 		);
 
 		// The widgets fields

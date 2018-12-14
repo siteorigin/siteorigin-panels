@@ -76,10 +76,7 @@ class SiteOrigin_Panels_Admin {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 			add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
 			add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
-			// If Gutenberg is active, it will already add the Classic Editor dropdown item.
-			if ( ! function_exists( 'gutenberg_init' ) ) {
-				add_action( 'admin_print_scripts-edit.php', array( $this, 'add_panels_add_new_button' ) );
-			}
+			add_action( 'admin_print_scripts-edit.php', array( $this, 'add_panels_add_new_button' ) );
 			add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
 		}
 	}
@@ -116,7 +113,9 @@ class SiteOrigin_Panels_Admin {
 	 */
 	static function is_admin() {
 		$screen         = get_current_screen();
-		$is_panels_page = ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting( 'post-types' ) ) ) || $screen->base == 'appearance_page_so_panels_home_page' || $screen->base == 'widgets' || $screen->base == 'customize';
+		$is_panels_page = ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting( 'post-types' ) ) ) ||
+						  in_array( $screen->base, array( 'appearance_page_so_panels_home_page', 'widgets', 'customize' ) ) ||
+						  $screen->is_block_editor;
 
 		return apply_filters( 'siteorigin_panels_is_admin_page', $is_panels_page );
 	}
@@ -1149,7 +1148,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
 		if( ! empty( $panels_data['widgets'] ) ) {
-			printf( __( '%s Widgets', 'siteorigin-panels' ), count( $panels_data['widgets'] ) );
+			$widgets_count = count( $panels_data['widgets'] );
+			printf( _n( '%s Widget', '%s Widgets', $widgets_count, 'siteorigin-panels' ), $widgets_count );
 		}
 		else {
 			echo '—';
@@ -1214,20 +1214,20 @@ class SiteOrigin_Panels_Admin {
 	}
 	
 	public function admin_notices() {
-		$panels_data = $this->get_current_admin_panels_data();
+		global $typenow, $pagenow;
+		$is_new = $pagenow == 'post-new.php';
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$is_panels_type = in_array( $typenow, $post_types );
+		$use_classic = siteorigin_panels_setting( 'use-classic' );
 		
-		// This is for the Gutenberg plugin.
-		$is_block_editor = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
-		// This is for WP 5 with the integrated block editor. Let it override the Gutenberg plugin.
-		$current_screen = get_current_screen();
-		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
-			$is_block_editor = $current_screen->is_block_editor();
-		}
-		if ( $is_block_editor && ! empty( $panels_data ) ) {
-			$install_url = self_admin_url( 'plugin-install.php?tab=featured' );
-			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="components-notice__action is-link">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
+		if ( $is_new && $is_panels_type && $use_classic ) {
+			$settings_url = self_admin_url( 'options-general.php?page=siteorigin_panels' );
+			$notice = sprintf(
+				__( 'This post type is set to use the Classic Editor by default for new posts. If you’d like to change this to the block editor, please go to <a href="%s" class="components-notice__action is-link">Page Builder Settings</a> and uncheck <strong>Use Classic Editor for new posts</strong>' ),
+				$settings_url
+			);
 			?>
-			<div id="siteorigin-panels-notice" class="notice notice-warning is-dismissible"><p id="classic-editor-notice"><?php echo $notice ?></p></div>
+			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info"><p id="use-classic-notice"><?php echo $notice ?></p></div>
 			<?php
 		}
 	}
@@ -1252,21 +1252,21 @@ class SiteOrigin_Panels_Admin {
 		// If the `$post_type` is set to be used by Page Builder.
 		$post_types = siteorigin_panels_setting( 'post-types' );
 		$is_panels_type = in_array( $post_type, $post_types );
-		
+		$use_classic = siteorigin_panels_setting( 'use-classic' );
 		// For existing posts.
 		global $post;
 		if ( ! empty( $post ) ) {
 			// If the post has blocks just allow `$use_block_editor` to decide.
 			if ( ! has_blocks( $post ) ) {
 				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-				if ( ! empty( $panels_data ) || $is_panels_type ) {
+				global $pagenow;
+				$is_new = $pagenow == 'post-new.php';
+				if ( ! empty( $panels_data ) || ( $use_classic && $is_new && $is_panels_type ) ) {
 					$use_block_editor = false;
 				}
 			}
-		} else {
-			if ( $is_panels_type ){
-				$use_block_editor = false;
-			}
+		} else if ( $is_panels_type ) {
+			$use_block_editor = false;
 		}
 		
 		return $use_block_editor;
@@ -1275,8 +1275,6 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * This was copied from Gutenberg and slightly modified as a quick way to allow users to create new Page Builder pages
 	 * in the classic editor without requiring the classic editor plugin be installed.
-	 *
-	 *
 	 */
 	function add_panels_add_new_button() {
 		global $typenow;
@@ -1291,9 +1289,7 @@ class SiteOrigin_Panels_Admin {
 			<?php
 		}
 		
-		if ( ! in_array( $typenow, siteorigin_panels_setting( 'post-types' ) ) ||
-			 // WooCommerce product type doesn't support block editor...
-			 ( class_exists( 'WooCommerce' ) && $typenow == 'product' ) ) {
+		if ( ! $this->show_add_new_dropdown_for_type( $typenow ) ) {
 			return;
 		}
 		
@@ -1420,6 +1416,23 @@ class SiteOrigin_Panels_Admin {
 			} );
 		</script>
 		<?php
+	}
+	
+	private function show_add_new_dropdown_for_type( $post_type ) {
+		
+		$show = in_array( $post_type, siteorigin_panels_setting( 'post-types' ) );
+		
+		// WooCommerce product type doesn't support block editor...
+		$show = $show && ! ( class_exists( 'WooCommerce' ) && $post_type == 'product' );
+		
+		if ( class_exists( 'SiteOrigin_Premium_Plugin_Cpt_Builder' ) ) {
+			$show = $show && $post_type != SiteOrigin_Premium_Plugin_Cpt_Builder::POST_TYPE;
+			$cpt_builder = SiteOrigin_Premium_Plugin_Cpt_Builder::single();
+			$so_custom_types = $cpt_builder->get_post_types();
+			$show = $show && ! isset( $so_custom_types[ $post_type ] );
+		}
+		
+		return $show;
 	}
 	
 	public function add_panels_post_state( $post_states, $post ) {
