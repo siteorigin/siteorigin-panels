@@ -114,7 +114,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['display-teaser']    = true;
 		$defaults['display-learn']     = true;
 		$defaults['load-on-attach']    = false;
-		$defaults['use-classic']       = false;
+		$defaults['use-classic']       = true;
 
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );

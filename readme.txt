@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.9.7 - 14 December 2018 =
+* Add setting to use Classic Editor for new posts of types selected in Page Builder settings.
+* Prevent showing the 'Add New' dropdown for SO custom post types.
+* Display notice indicating how to disable Classic Editor for new Page Builder post types.
+
 = 2.9.6 - 10 December 2018 =
 * Default to Page Builder interface for post types set to use Page Builder in Settings.
 * Add check for WooCommerce 'product' type to prevent output of 'Add New' dropdown.
