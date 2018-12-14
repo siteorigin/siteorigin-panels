@@ -1214,20 +1214,20 @@ class SiteOrigin_Panels_Admin {
 	}
 	
 	public function admin_notices() {
-		$panels_data = $this->get_current_admin_panels_data();
+		global $typenow, $pagenow;
+		$is_new = $pagenow == 'post-new.php';
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		$is_panels_type = in_array( $typenow, $post_types );
+		$use_classic = siteorigin_panels_setting( 'use-classic' );
 		
-		// This is for the Gutenberg plugin.
-		$is_block_editor = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
-		// This is for WP 5 with the integrated block editor. Let it override the Gutenberg plugin.
-		$current_screen = get_current_screen();
-		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
-			$is_block_editor = $current_screen->is_block_editor();
-		}
-		if ( $is_block_editor && ! empty( $panels_data ) ) {
-			$install_url = self_admin_url( 'plugin-install.php?tab=featured' );
-			$notice = sprintf( __( 'This page contains SiteOrigin Page Builder layout data. Please <a href="%s" class="components-notice__action is-link">install the Classic Editor plugin</a> to continue editing this layout.' ), $install_url );
+		if ( $is_new && $is_panels_type && $use_classic ) {
+			$settings_url = self_admin_url( 'options-general.php?page=siteorigin_panels' );
+			$notice = sprintf(
+				__( 'This post type is set to use the Classic Editor by default for new posts. If you’d like to change this to the block editor, please go to <a href="%s" class="components-notice__action is-link">Page Builder Settings</a> and uncheck <strong>Use Classic Editor for new posts</strong>' ),
+				$settings_url
+			);
 			?>
-			<div id="siteorigin-panels-notice" class="notice notice-warning is-dismissible"><p id="classic-editor-notice"><?php echo $notice ?></p></div>
+			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info"><p id="use-classic-notice"><?php echo $notice ?></p></div>
 			<?php
 		}
 	}
