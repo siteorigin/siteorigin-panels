@@ -389,7 +389,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					$return[ $k ] = ! empty( $styles[ $k ] ) ? sanitize_text_field( $styles[ $k ] ) : false;
 					$fallback_name = $k . '_fallback';
 					if ( empty( $styles[ $k ] ) && empty( $styles[ $fallback_name ] ) ) {
-						continue;
+						break;
 					}
 					$return[ $fallback_name ] = ! empty( $styles[ $fallback_name ] ) ? esc_url_raw( $styles[ $fallback_name ] ) : false;
 					break;
