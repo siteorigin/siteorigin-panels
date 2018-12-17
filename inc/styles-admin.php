@@ -282,6 +282,17 @@ class SiteOrigin_Panels_Styles_Admin {
 				<?php
 				break;
 
+			case 'radio' :
+				foreach ( $field['options'] as $k => $v ) : ?>
+					<label for="<?php echo esc_attr( $field_name . '-' . $k ) ?>">
+						<input type="radio" name="<?php echo esc_attr( $field_name ) ?>"
+					       id="<?php echo esc_attr( $field_name . '-' . $k ) ?>" class="siteorigin-widget-input"
+					       value="<?php echo esc_attr( $k ) ?>" <?php checked( $k, $current ) ?>> <?php echo esc_html( $v ) ?>
+					</label>
+					<?php
+				endforeach;
+				break;
+
 			case 'textarea' :
 			case 'code' :
 				?><textarea type="text" name="<?php echo esc_attr( $field_name ) ?>"
