@@ -286,7 +286,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				foreach ( $field['options'] as $k => $v ) : ?>
 					<label for="<?php echo esc_attr( $field_name . '-' . $k ) ?>">
 						<input type="radio" name="<?php echo esc_attr( $field_name ) ?>"
-					       id="<?php echo esc_attr( $field_name . '-' . $k ) ?>" class="siteorigin-widget-input"
+					       id="<?php echo esc_attr( $field_name . '-' . $k ) ?>"
 					       value="<?php echo esc_attr( $k ) ?>" <?php checked( $k, $current ) ?>> <?php echo esc_html( $v ) ?>
 					</label>
 					<?php
