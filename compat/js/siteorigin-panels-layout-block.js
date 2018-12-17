@@ -218,8 +218,8 @@
 	
 	$( function () {
 		setTimeout( function () {
-			var $addButton = $( '<div><button>Add SiteOrigin Layout Block</button></div>' );
-			$addButton.insertAfter( '.editor-writing-flow > div:first' );
+			var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
+			var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
 			$addButton.on( 'click', function () {
 				
 				var block = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
