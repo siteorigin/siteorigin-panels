@@ -374,6 +374,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		
 		$templates = array_unique( $templates );
 		$templates = apply_filters('siteorigin_panels_postloop_templates', $templates);
+		foreach ( $templates as $template_key => $template)  {
+			if ( validate_file( $template ) != 0 ) {
+				unset( $templates[ $template_key ] );
+			}
+		}
 		sort( $templates );
 		
 		return $templates;
