@@ -372,8 +372,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			}
 		}
 		
-		$templates = array_unique( $templates );
 		$templates = apply_filters('siteorigin_panels_postloop_templates', $templates);
+		templates = array_unique( $templates );
 		foreach ( $templates as $template_key => $template)  {
 			$invalid = false;
 
