@@ -375,10 +375,25 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$templates = array_unique( $templates );
 		$templates = apply_filters('siteorigin_panels_postloop_templates', $templates);
 		foreach ( $templates as $template_key => $template)  {
+			$invalid = false;
+
+			// Ensure the provided file has a valid name and path
 			if ( validate_file( $template ) != 0 ) {
+				$invalid = true;
+			}
+
+			// Don't expect non-PHP files
+			if ( substr( $template, -4 ) != '.php' ) {
+				$invalid = true;
+			}
+
+
+			if ( $invalid ) {
 				unset( $templates[ $template_key ] );
 			}
 		}
+		// Update array indexes to ensure logical indexing
+		sort( $templates );
 		sort( $templates );
 		
 		return $templates;
