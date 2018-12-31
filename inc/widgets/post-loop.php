@@ -387,8 +387,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				$invalid = true;
 			}
 
-
-			if ( $invalid ) {
+			$template = locate_template( $template );
+			if ( empty( $template ) || $invalid ) {
 				unset( $templates[ $template_key ] );
 			}
 		}
