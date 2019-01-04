@@ -1097,7 +1097,7 @@ class SiteOrigin_Panels_Admin {
 		
 		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
 		$builder_id = 'gbp' . uniqid();
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$sowb_active = class_exists( 'SiteOrigin_Widgets_Bundle' );
 		if ( $sowb_active ) {
