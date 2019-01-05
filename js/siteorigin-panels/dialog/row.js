@@ -48,6 +48,7 @@ module.exports = panels.view.dialog.extend({
 			}
 
 			this.regenerateRowPreview();
+			this.renderStyles();
 		}, this);
 
 		// This is the default row layout
@@ -110,32 +111,12 @@ module.exports = panels.view.dialog.extend({
 		}
 		this.$( '.so-edit-title' ).val( titleElt.text() );
 
-		// Now we need to attach the style window
-		this.styles = new panels.view.styles();
-		this.styles.model = this.model;
-		this.styles.render('row', this.builder.config.postId, {
-			builderType: this.builder.config.builderType,
-			dialog: this
-		});
-
 		if (!this.builder.supports('addRow')) {
 			this.$('.so-buttons .so-duplicate').remove();
 		}
 		if (!this.builder.supports('deleteRow')) {
 			this.$('.so-buttons .so-delete').remove();
 		}
-
-		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
-		this.styles.attach( $rightSidebar );
-
-		// Handle the loading class
-		this.styles.on('styles_loaded', function (hasStyles) {
-			// If we don't have styles remove the empty sidebar.
-			if ( ! hasStyles ) {
-				$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
-				$rightSidebar.remove();
-			}
-		}, this);
 
 		if (!_.isUndefined(this.model)) {
 			// Set the initial value of the
@@ -153,6 +134,33 @@ module.exports = panels.view.dialog.extend({
 		});
 
 		return this;
+	},
+	
+	renderStyles: function () {
+		if ( this.styles ) {
+			this.styles.off( 'styles_loaded' );
+			this.styles.remove();
+		}
+		
+		// Now we need to attach the style window
+		this.styles = new panels.view.styles();
+		this.styles.model = this.model;
+		this.styles.render('row', this.builder.config.postId, {
+			builderType: this.builder.config.builderType,
+			dialog: this
+		});
+		
+		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
+		this.styles.attach( $rightSidebar );
+		
+		// Handle the loading class
+		this.styles.on('styles_loaded', function (hasStyles) {
+			// If we don't have styles remove the empty sidebar.
+			if ( ! hasStyles ) {
+				$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
+				$rightSidebar.remove();
+			}
+		}, this);
 	},
 
 	/**

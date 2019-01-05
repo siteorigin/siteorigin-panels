@@ -43,11 +43,9 @@
 		} )( function ( props ) {
 			
 			function setupPreview() {
-				if ( ! props.editing ) {
+				if ( ! props.editing && ! props.previewInitialized ) {
 					$( document ).trigger( 'panels_setup_preview' );
-					if ( window.sowb ) {
-						$ ( window.sowb ).trigger( 'setup_widgets' );
-					}
+					props.setState( { previewInitialized: true } );
 				}
 			}
 			
