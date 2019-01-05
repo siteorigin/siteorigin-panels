@@ -221,7 +221,6 @@
 			var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
 			var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
 			$addButton.on( 'click', function () {
-				
 				var block = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
 				wp.data.dispatch( 'core/editor' ).insertBlock( block );
 			} );
