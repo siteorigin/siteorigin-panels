@@ -1895,9 +1895,13 @@
 	.siteorigin-panels-block-icon {
 		display: inline-block;
 		background-size: cover;
-		background-image: url('../compat/pb-icon.svg');
 		width: 20px;
 		height: 20px;
+		background-image: url('../compat/pb-icon.svg');
+		
+		&.white {
+			background-image: url('../compat/pb-icon_white.svg');
+		}
 	}
 
 	.so-panels-block-layout-preview-container {
@@ -1905,6 +1909,22 @@
 			text-align: center;
 			> span {
 				display: inline-block;
+			}
+		}
+	}
+	
+	.siteorigin-panels-add-layout-block {
+		text-align: center;
+		margin-left: auto;
+		margin-right: auto;
+		
+		> button {
+			height: 100%;
+			padding: 5px 10px;
+			font-size: 16px;
+			
+			.siteorigin-panels-block-icon {
+				margin: 3px 10px 0px 0px;
 			}
 		}
 	}
