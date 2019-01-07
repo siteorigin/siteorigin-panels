@@ -33,7 +33,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		if ( ! empty( $opt_matches ) && count( $opt_matches ) > 1 ) {
 			$opt_name = $opt_matches[1];
 			global $wp_widget_factory;
-			foreach ( $wp_widget_factory->widgets as $widget_class => $widget ) {
+			foreach ( $wp_widget_factory->widgets as $widget ) {
+				$widget_class = get_class( $widget );
 				if ( $widget->id_base != $opt_name ) {
 					continue;
 				}
@@ -138,8 +139,6 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 * @return array The widgets array containing updated widgets.
 	 */
 	public function generate_sidebar_widget_ids( $widgets, $post_id, $start = 1 ) {
-		global $wp_widget_factory;
-		
 		foreach ( $widgets as $i => &$widget_instance ) {
 			$id_val = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
 			$widget_class = $widget_instance['panels_info']['class'];
@@ -152,8 +151,9 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				}
 			}
 			
-			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
-				$widget = $wp_widget_factory->widgets[ $widget_class ];
+			/** @var WP_Widget $widget */
+			$widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
+			if ( ! empty( $widget ) ) {
 				$widget_instance['so_sidebar_emulator_id'] = $widget->id_base . '-' . $id_val;
 				$widget_instance['option_name'] = $widget->option_name;
 			}

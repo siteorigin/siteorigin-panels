@@ -1,5 +1,5 @@
 <?php
-global $wp_widget_factory, $post;
+global $post;
 $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 ?>
 

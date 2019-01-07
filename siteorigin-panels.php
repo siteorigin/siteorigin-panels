@@ -625,6 +625,28 @@ class SiteOrigin_Panels {
 		}
 		return $url;
 	}
+	
+	
+	/**
+	 * Get the registered widget instance by it's class name or the hash generated when it was registered.
+	 *
+	 * @param $class_or_hash
+	 *
+	 * @return array
+	 */
+	static function get_widget_instance( $class_or_hash ) {
+		global $wp_widget_factory;
+		if ( isset( $wp_widget_factory->widgets[ $class_or_hash ] ) ) {
+			return $wp_widget_factory->widgets[ $class_or_hash ];
+		} else {
+			foreach ( $wp_widget_factory->widgets as $widget_instance ) {
+				if ( $widget_instance instanceof $class_or_hash ) {
+					return $widget_instance;
+				}
+			}
+		}
+		return null;
+	}
 }
 
 SiteOrigin_Panels::single();
