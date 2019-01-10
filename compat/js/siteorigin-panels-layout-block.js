@@ -24,6 +24,8 @@
 		
 		category: 'layout',
 		
+		keywords: [ 'column', 'grid', 'panel' ],
+		
 		supports: {
 			html: false,
 		},
@@ -35,7 +37,7 @@
 		},
 		
 		edit: withState( {
-			editing: false,
+			editing: soPanelsBlockEditorAdmin.defaultMode === 'edit',
 			panelsInitialized: false,
 			loadingPreview: false,
 			previewInitialized: false,

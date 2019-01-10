@@ -63,6 +63,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				'soPanelsBlockEditorAdmin',
 				array(
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
+					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
 				)
 			);
 			// This is only available in WP5.

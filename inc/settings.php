@@ -122,6 +122,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
 		$defaults['sidebars-emulator']      = true;
+		$defaults['layout-block-default-mode'] = 'preview';
 
 		// Widgets fields
 		$defaults['title-html']           = '<h3 class="widget-title">{{title}}</h3>';
@@ -296,6 +297,16 @@ class SiteOrigin_Panels_Settings {
 				'<strong>',
 				'</strong>'
 			)
+		);
+
+		$fields['general']['fields']['layout-block-default-mode'] = array(
+			'label' => __( 'Layout Block Default Mode', 'siteorigin-panels' ),
+			'type'        => 'select',
+			'options'     => array(
+				'edit' => __( 'Edit', 'siteorigin-panels' ),
+				'preview' => __( 'Preview', 'siteorigin-panels' ),
+			),
+			'description' => __( 'Whether to display layout blocks in edit mode or preview mode in the block editor.', 'siteorigin-panels' ),
 		);
 
 		// The widgets fields
