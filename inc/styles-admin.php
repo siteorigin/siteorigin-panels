@@ -283,10 +283,12 @@ class SiteOrigin_Panels_Styles_Admin {
 				break;
 
 			case 'radio' :
-				foreach ( $field['options'] as $k => $v ) : ?>
-					<label for="<?php echo esc_attr( $field_name . '-' . $k ) ?>">
-						<input type="radio" name="<?php echo esc_attr( $field_name ) ?>"
-					       id="<?php echo esc_attr( $field_name . '-' . $k ) ?>"
+				$radio_id = $field_name . '-' . uniqid();
+				foreach ( $field['options'] as $k => $v ) :
+					?>
+					<label for="<?php echo esc_attr( $radio_id . '-' . $k ) ?>">
+						<input type="radio" name="<?php echo esc_attr( $radio_id ) ?>"
+					       id="<?php echo esc_attr( $radio_id . '-' . $k ) ?>"
 					       value="<?php echo esc_attr( $k ) ?>" <?php checked( $k, $current ) ?>> <?php echo esc_html( $v ) ?>
 					</label>
 					<?php
