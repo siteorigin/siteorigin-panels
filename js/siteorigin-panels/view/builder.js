@@ -236,7 +236,7 @@ module.exports = Backbone.View.extend( {
 			thisView.trigger( 'hide_builder' );
 		} ).end()
 		.append(
-			$( '<a id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</a>' )
+			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</button>' )
 			.click( function ( e ) {
 				if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
 					e.preventDefault();
