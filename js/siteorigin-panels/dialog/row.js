@@ -155,10 +155,15 @@ module.exports = panels.view.dialog.extend({
 		
 		// Handle the loading class
 		this.styles.on('styles_loaded', function (hasStyles) {
-			// If we don't have styles remove the empty sidebar.
 			if ( ! hasStyles ) {
-				$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
-				$rightSidebar.remove();
+				// If we don't have styles remove the view.
+				this.styles.remove();
+				
+				// If the sidebar is empty, hide it.
+				if ( $rightSidebar.children().length === 0 ) {
+					$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
+					$rightSidebar.hide();
+				}
 			}
 		}, this);
 	},
@@ -502,6 +507,12 @@ module.exports = panels.view.dialog.extend({
 		if ( this.cellStyles ) {
 			var $rightSidebar = this.$( '.so-sidebar.so-right-sidebar' );
 			this.cellStyles.attach( $rightSidebar );
+			this.cellStyles.on( 'styles_loaded', function ( hasStyles ) {
+				if ( hasStyles ) {
+					$rightSidebar.closest('.so-panels-dialog').addClass('so-panels-dialog-has-right-sidebar');
+					$rightSidebar.show();
+				}
+			} );
 		}
 	},
 

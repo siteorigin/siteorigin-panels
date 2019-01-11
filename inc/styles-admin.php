@@ -345,7 +345,7 @@ class SiteOrigin_Panels_Styles_Admin {
 	 * @param $section
 	 * @param $styles
 	 *
-	 * @return Sanitized styles
+	 * @return array Sanitized styles
 	 */
 	function sanitize_style_fields( $section, $styles ) {
 		// Use the filter to get the fields for this section.
@@ -357,6 +357,10 @@ class SiteOrigin_Panels_Styles_Admin {
 			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_general_style_fields', $fields_cache[ $section ], false, false );
 		}
 		$fields = $fields_cache[ $section ];
+		
+		if ( empty( $fields ) ) {
+			return array();
+		}
 
 		$return = array();
 		foreach ( $fields as $k => $field ) {
