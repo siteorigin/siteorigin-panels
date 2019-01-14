@@ -426,6 +426,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					}
 					break;
 				case 'select' :
+				case 'radio' :
 					if ( ! empty( $styles[ $k ] ) && in_array( $styles[ $k ], array_keys( $field['options'] ) ) ) {
 						$return[ $k ] = $styles[ $k ];
 					}
