@@ -24,7 +24,7 @@
 		
 		category: 'layout',
 		
-		keywords: [ 'column', 'grid', 'panel' ],
+		keywords: [ 'page builder', 'column,grid', 'panel' ],
 		
 		supports: {
 			html: false,
