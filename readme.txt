@@ -96,6 +96,20 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.0 - 15 January 2018 =
+* Prevent syntax warning in PHP7.3
+* Add radio Style field type.
+* Layout block: Add button in block editor to add a SiteOrigin Layout Block.
+* Rerender row styles form on initializing a new dialog.
+* Change sidebar emulator 'id' key to avoid conflicts with widgets which already use 'id' as a key.
+* Validate post loop templates.
+* Layout block: Force raw widget processing for block editor previews.
+* Layout block: Ensure scripts load when Gutenberg plugin is active.
+* Support widgets registered using instances instead of class names.
+* Layout block: Add setting for whether to default to edit mode or preview mode.
+* Ensure style fields filter work as expected and hide styles sidebar when no fields are present.
+* Layout Block: Add 'page builder' as a keyword.
+
 = 2.9.7 - 14 December 2018 =
 * Add setting to use Classic Editor for new posts of types selected in Page Builder settings.
 * Prevent showing the 'Add New' dropdown for SO custom post types.
