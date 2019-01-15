@@ -79,6 +79,12 @@
 			}
 		}
 	}
+	
+	@media (max-width: 782px) {
+		.so-tool-button.so-row-settings {
+			margin-right: 8px;
+		}
+	}
 
 	.so-builder-toolbar {
 		.box-sizing(border-box);
@@ -121,6 +127,22 @@
 			&:hover {
 				&, .so-panels-icon {
 					color: #444444;
+				}
+			}
+		}
+		
+		@media ( max-width: 782px ) {
+			.so-tool-button {
+				margin-right: 8px;
+				
+				.so-button-text {
+					margin: 7px 0px 2px 5px;
+					font-size: 14px;
+				}
+				
+				.so-panels-icon {
+					margin: 3px 0;
+					font-size: 21px;
 				}
 			}
 		}
@@ -205,7 +227,7 @@
 				.box-sizing(border-box);
 				padding: 4px;
 				float: right;
-
+				
 				.so-panels-icon {
 					color: #777;
 					font-size: 11px;
@@ -213,15 +235,29 @@
 					height: 11px;
 					display: block;
 				}
-
+				
 				&:hover {
 					.so-panels-icon {
 						color: #555;
 					}
 				}
-
+				
 				&.so-row-move {
 					cursor: move;
+				}
+			}
+			
+			
+			@media ( max-width: 782px ) {
+				
+				margin-bottom: 8px;
+				
+				.so-tool-button {
+					.so-panels-icon {
+						font-size: 21px;
+						width: 21px;
+						height: 21px;
+					}
 				}
 			}
 
@@ -585,10 +621,9 @@
 		.so-builder-toolbar {
 			padding: 10px;
 			> .so-tool-button {
-				padding-right: 2px;
 
 				.so-panels-icon {
-					font-size: 14px;
+					margin: 3px 0;
 				}
 
 				span.so-button-text {
@@ -604,11 +639,6 @@
 				display: none !important;
 			}
 		}
-
-		.widgets-container .so-widget .actions {
-			display: none !important;
-		}
-
 	}
 
 }
@@ -1897,10 +1927,10 @@
 		background-size: cover;
 		width: 20px;
 		height: 20px;
-		background-image: url('../compat/pb-icon.svg');
+		background-image: url('./images/pb-icon.svg');
 		
 		&.white {
-			background-image: url('../compat/pb-icon_white.svg');
+			background-image: url('./images/pb-icon_white.svg');
 		}
 	}
 
@@ -2577,4 +2607,17 @@
 
 #post-status-info.for-siteorigin-panels {
 	margin-top: -21px !important;
+}
+
+/* PB Icon for general use */
+.siteorigin-page-builder-icon {
+	display: inline-block;
+	background-size: cover;
+	width: 20px;
+	height: 20px;
+	background-image: url('./images/pb-icon.svg');
+	
+	&.white {
+		background-image: url('./images/pb-icon_white.svg');
+	}
 }

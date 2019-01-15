@@ -870,7 +870,7 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 		
-		if ( width < 480 ) {
+		if ( width < 575 ) {
 			this.$el.addClass( 'so-display-narrow' );
 		} else {
 			this.$el.removeClass( 'so-display-narrow' );
