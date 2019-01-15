@@ -282,6 +282,19 @@ class SiteOrigin_Panels_Styles_Admin {
 				<?php
 				break;
 
+			case 'radio' :
+				$radio_id = $field_name . '-' . uniqid();
+				foreach ( $field['options'] as $k => $v ) :
+					?>
+					<label for="<?php echo esc_attr( $radio_id . '-' . $k ) ?>">
+						<input type="radio" name="<?php echo esc_attr( $radio_id ) ?>"
+					       id="<?php echo esc_attr( $radio_id . '-' . $k ) ?>"
+					       value="<?php echo esc_attr( $k ) ?>" <?php checked( $k, $current ) ?>> <?php echo esc_html( $v ) ?>
+					</label>
+					<?php
+				endforeach;
+				break;
+
 			case 'textarea' :
 			case 'code' :
 				?><textarea type="text" name="<?php echo esc_attr( $field_name ) ?>"
@@ -417,6 +430,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					}
 					break;
 				case 'select' :
+				case 'radio' :
 					if ( ! empty( $styles[ $k ] ) && in_array( $styles[ $k ], array_keys( $field['options'] ) ) ) {
 						$return[ $k ] = $styles[ $k ];
 					}
