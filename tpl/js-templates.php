@@ -1,5 +1,5 @@
 <?php
-global $wp_widget_factory, $post;
+global $post;
 $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 ?>
 
@@ -597,5 +597,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<?php _e('No Results', 'siteorigin-panels') ?>
 		</div>
 		{{% } %}}
+	</div>
+</script>
+
+<script type="text/template" id="siteorigin-panels-add-layout-block-button">
+	<div class="siteorigin-panels-add-layout-block wp-block">
+		<button class="components-button is-button is-primary">
+			<span class="siteorigin-panels-block-icon white"/>
+			Add SiteOrigin Layout Block
+		</button>
 	</div>
 </script>

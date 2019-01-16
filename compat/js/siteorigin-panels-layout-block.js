@@ -24,6 +24,8 @@
 		
 		category: 'layout',
 		
+		keywords: [ 'page builder', 'column,grid', 'panel' ],
+		
 		supports: {
 			html: false,
 		},
@@ -35,7 +37,7 @@
 		},
 		
 		edit: withState( {
-			editing: false,
+			editing: soPanelsBlockEditorAdmin.defaultMode === 'edit',
 			panelsInitialized: false,
 			loadingPreview: false,
 			previewInitialized: false,
@@ -43,11 +45,9 @@
 		} )( function ( props ) {
 			
 			function setupPreview() {
-				if ( ! props.editing ) {
+				if ( ! props.editing && ! props.previewInitialized ) {
 					$( document ).trigger( 'panels_setup_preview' );
-					if ( window.sowb ) {
-						$ ( window.sowb ).trigger( 'setup_widgets' );
-					}
+					props.setState( { previewInitialized: true } );
 				}
 			}
 			
@@ -213,3 +213,18 @@
 		}
 	} );
 } )( window.wp.editor, window.wp.blocks, window.wp.i18n, window.wp.element, window.wp.components, window.wp.compose );
+
+( function ( $ ) {
+	
+	$( function () {
+		setTimeout( function () {
+			var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
+			var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
+			$addButton.on( 'click', function () {
+				var block = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
+				wp.data.dispatch( 'core/editor' ).insertBlock( block );
+			} );
+		}, 100 );
+	} );
+	
+} )( jQuery );

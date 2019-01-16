@@ -37,10 +37,9 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		
 		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
 		$attr[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $attr[ 'class' ] );
-
-		global $wp_widget_factory;
-		if( ! empty( $attr[ 'class' ] ) && isset( $wp_widget_factory->widgets[ $attr[ 'class' ] ] ) ) {
-			$the_widget = $wp_widget_factory->widgets[ $attr[ 'class' ] ];
+		
+		$the_widget = ! empty( $attr[ 'class' ] ) ? SiteOrigin_Panels::get_widget_instance( $attr['class'] ) : null;
+		if( ! empty( $the_widget ) ) {
 
 			$data = self::decode_data( $content );
 

@@ -470,7 +470,7 @@ class SiteOrigin_Panels_Admin {
 				// Render all the widget forms. A lot of widgets use this as a chance to enqueue their scripts
 				$original_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null; // Make sure widgets don't change the global post.
 				global $wp_widget_factory;
-				foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+				foreach ( $wp_widget_factory->widgets as $widget_obj ) {
 					ob_start();
 					$return = $widget_obj->form( array() );
 					// These are the new widgets in WP 4.8 which are largely JS based. They only enqueue their own
@@ -726,7 +726,8 @@ class SiteOrigin_Panels_Admin {
 	function get_widgets() {
 		global $wp_widget_factory;
 		$widgets = array();
-		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+		foreach ( $wp_widget_factory->widgets as $widget_obj ) {
+			$class = get_class( $widget_obj );
 			$widgets[ $class ] = array(
 				'class'       => $class,
 				'title'       => ! empty( $widget_obj->name ) ? $widget_obj->name : __( 'Untitled Widget', 'siteorigin-panels' ),
@@ -805,8 +806,6 @@ class SiteOrigin_Panels_Admin {
 			return array();
 		}
 
-		global $wp_widget_factory;
-
 		$old_widgets_by_id = array();
 		if( ! empty( $old_widgets ) ) {
 			foreach( $old_widgets as $widget ) {
@@ -832,7 +831,9 @@ class SiteOrigin_Panels_Admin {
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 
 			if ( ! empty( $info['raw'] ) || $force ) {
-				if ( isset( $wp_widget_factory->widgets[ $info['class'] ] ) && method_exists( $info['class'], 'update' ) ) {
+				$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
+				if ( ! empty( $the_widget ) &&
+					 method_exists( $the_widget, 'update' ) ) {
 
 					if(
 						! empty( $old_widgets_by_id ) &&
@@ -846,7 +847,7 @@ class SiteOrigin_Panels_Admin {
 					}
 
 					/** @var WP_Widget $the_widget */
-					$the_widget = $wp_widget_factory->widgets[ $info['class'] ];
+					$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
 					$instance   = $the_widget->update( $widget, $old_widget );
 					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
 
@@ -877,26 +878,25 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * Render a widget form with all the Page Builder specific fields
 	 *
-	 * @param string $widget The class of the widget
+	 * @param string $widget_class The class of the widget
 	 * @param array $instance Widget values
 	 * @param bool $raw
 	 * @param string $widget_number
 	 *
 	 * @return mixed|string The form
 	 */
-	function render_form( $widget, $instance = array(), $raw = false, $widget_number = '{$id}' ) {
-		global $wp_widget_factory;
-
+	function render_form( $widget_class, $instance = array(), $raw = false, $widget_number = '{$id}' ) {
+		
+		$the_widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
 		// This is a chance for plugins to replace missing widgets
-		$the_widget = ! empty( $wp_widget_factory->widgets[ $widget ] ) ? $wp_widget_factory->widgets[ $widget ] : false;
-		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget );
-
+		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class );
+		
 		if ( empty( $the_widget ) || ! is_a( $the_widget, 'WP_Widget' ) ) {
 			$widgets = $this->get_widgets();
 
-			if ( ! empty( $widgets[ $widget ] ) && ! empty( $widgets[ $widget ]['plugin'] ) ) {
+			if ( ! empty( $widgets[ $widget_class ] ) && ! empty( $widgets[ $widget_class ]['plugin'] ) ) {
 				// We know about this widget, show a form about installing it.
-				$install_url = siteorigin_panels_plugin_activation_install_url( $widgets[ $widget ]['plugin']['slug'], $widgets[ $widget ]['plugin']['name'] );
+				$install_url = siteorigin_panels_plugin_activation_install_url( $widgets[ $widget_class ]['plugin']['slug'], $widgets[ $widget_class ]['plugin']['name'] );
 				$form        =
 					'<div class="panels-missing-widget-form">' .
 					'<p>' .
@@ -911,8 +911,8 @@ class SiteOrigin_Panels_Admin {
 						),
 						sprintf(
 							__( 'You need to install 1{%1$s} to use the widget 2{%2$s}.', 'siteorigin-panels' ),
-							$widgets[ $widget ]['plugin']['name'],
-							$widget
+							$widgets[ $widget_class ]['plugin']['name'],
+							$widget_class
 						)
 					) .
 					'</p>' .
@@ -933,14 +933,14 @@ class SiteOrigin_Panels_Admin {
 						),
 						sprintf(
 							__( 'The widget 1{%1$s} is not available. Please try locate and install the missing plugin. Post on the 2{support forums} if you need help.', 'siteorigin-panels' ),
-							esc_html( $widget )
+							esc_html( $widget_class )
 						)
 					) .
 					'</p></div>';
 			}
 
 			// Allow other themes and plugins to change the missing widget form
-			return apply_filters( 'siteorigin_panels_missing_widget_form', $form, $widget, $instance );
+			return apply_filters( 'siteorigin_panels_missing_widget_form', $form, $widget_class, $instance );
 		}
 
 		if ( $raw ) {
@@ -969,7 +969,7 @@ class SiteOrigin_Panels_Admin {
 		$exp  = str_replace( '____', '(.*?)', $exp );
 		$form = preg_replace( '/' . $exp . '/', 'widgets[' . preg_replace( '/\$(\d)/', '\\\$$1', $widget_number ) . '][$1]', $form );
 
-		$form = apply_filters( 'siteorigin_panels_widget_form', $form, $widget, $instance );
+		$form = apply_filters( 'siteorigin_panels_widget_form', $form, $widget_class, $instance );
 
 		// Add all the information fields
 		return $form;
@@ -1097,7 +1097,7 @@ class SiteOrigin_Panels_Admin {
 		
 		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
 		$builder_id = 'gbp' . uniqid();
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$sowb_active = class_exists( 'SiteOrigin_Widgets_Bundle' );
 		if ( $sowb_active ) {

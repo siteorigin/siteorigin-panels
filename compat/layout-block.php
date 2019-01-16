@@ -7,7 +7,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	/**
 	 * Get the singleton instance
 	 *
-	 * @return SiteOrigin_Panels_Layout_Block
+	 * @return SiteOrigin_Panels_Compat_Layout_Block
 	 */
 	public static function single() {
 		static $single;
@@ -30,15 +30,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	
 	public function enqueue_layout_block_editor_assets() {
 		// This is for the Gutenberg plugin.
-		$is_block_editor = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
-		// This is for WP 5 with the integrated block editor. Let it override the Gutenberg plugin.
+		$is_gutenberg_page = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
+		// This is for WP 5 with the integrated block editor.
+		$is_block_editor = false;
 		$current_screen = get_current_screen();
 		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
 			$is_block_editor = $current_screen->is_block_editor();
 		}
 		
-		if ( $is_block_editor ) {
-			
+		if ( $is_gutenberg_page || $is_block_editor ) {
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();
@@ -63,6 +63,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				'soPanelsBlockEditorAdmin',
 				array(
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
+					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
 				)
 			);
 			// This is only available in WP5.

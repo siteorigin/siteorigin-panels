@@ -449,14 +449,12 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	function the_widget( $widget_info, $instance, $grid_index, $cell_index, $widget_index, $is_first, $is_last, $post_id = false, $style_wrapper = '' ) {
 
-		global $wp_widget_factory;
-
 		// Set widget class to $widget
 		$widget_class = $widget_info['class'];
 		$widget_class = apply_filters( 'siteorigin_panels_widget_class', $widget_class );
 
 		// Load the widget from the widget factory and give themes and plugins a chance to provide their own
-		$the_widget = ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ? $wp_widget_factory->widgets[ $widget_class ] : false;
+		$the_widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
 		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class, $instance );
 
 		if ( empty( $post_id ) ) {

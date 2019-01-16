@@ -7,12 +7,13 @@ module.exports = Backbone.View.extend( {
 	initialize: function () {
 
 	},
-
+	
 	/**
 	 * Render the visual styles object.
 	 *
-	 * @param type
+	 * @param stylesType
 	 * @param postId
+	 * @param args
 	 */
 	render: function ( stylesType, postId, args ) {
 		if ( _.isUndefined( stylesType ) ) {

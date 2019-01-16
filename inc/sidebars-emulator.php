@@ -33,7 +33,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		if ( ! empty( $opt_matches ) && count( $opt_matches ) > 1 ) {
 			$opt_name = $opt_matches[1];
 			global $wp_widget_factory;
-			foreach ( $wp_widget_factory->widgets as $widget_class => $widget ) {
+			foreach ( $wp_widget_factory->widgets as $widget ) {
+				$widget_class = get_class( $widget );
 				if ( $widget->id_base != $opt_name ) {
 					continue;
 				}
@@ -45,9 +46,10 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 						}
 
 						$instance_class = $widget_instance['panels_info']['class'];
-						if ( $instance_class == $widget_class ) {
+						$sidebar_id = $this->get_sidebar_id( $widget_instance );
+						if ( $instance_class == $widget_class && ! empty( $sidebar_id ) ) {
 							//The option value uses only the widget id number as keys
-							preg_match( '/-([0-9]+$)/', $widget_instance['id'], $num_match );
+							preg_match( '/-([0-9]+$)/', $sidebar_id, $num_match );
 							$args[0][ $num_match[1] ] = $widget_instance;
 						}
 					}
@@ -88,7 +90,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	}
 
 	/**
-	 * Recursivly get all widget option names from $panels_data and store widget instances in $this->all_posts_widgets.
+	 * Recursively get all widget option names from $panels_data and store widget instances in $this->all_posts_widgets.
 	 *
 	 * @param int|string $post_id
 	 * @param array $panels_data
@@ -115,8 +117,8 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				// Add the widget option names from the layout widget
 				$widget_option_names = array_merge( $widget_option_names, $this->get_widget_option_names( $post_id, $widget_instance[ 'panels_data' ] ) );
 			}
-			
-			if ( ! empty( $widget_instance['id'] ) ) {
+			$sidebar_id = $this->get_sidebar_id( $widget_instance );
+			if ( ! empty( $sidebar_id ) ) {
 				$widget_option_names[] = $widget_instance['option_name'];
 			}
 			$this->all_posts_widgets[ $post_id ][] = $widget_instance;
@@ -137,8 +139,6 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 * @return array The widgets array containing updated widgets.
 	 */
 	public function generate_sidebar_widget_ids( $widgets, $post_id, $start = 1 ) {
-		global $wp_widget_factory;
-		
 		foreach ( $widgets as $i => &$widget_instance ) {
 			$id_val = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
 			$widget_class = $widget_instance['panels_info']['class'];
@@ -151,9 +151,10 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				}
 			}
 			
-			if ( ! empty( $wp_widget_factory->widgets[ $widget_class ] ) ) {
-				$widget = $wp_widget_factory->widgets[ $widget_class ];
-				$widget_instance['id'] = $widget->id_base . '-' . $id_val;
+			/** @var WP_Widget $widget */
+			$widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
+			if ( ! empty( $widget ) ) {
+				$widget_instance['so_sidebar_emulator_id'] = $widget->id_base . '-' . $id_val;
 				$widget_instance['option_name'] = $widget->option_name;
 			}
 		}
@@ -176,11 +177,12 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		foreach ( array_keys( $this->all_posts_widgets ) as $post_id ) {
 			$post_widgets = $this->all_posts_widgets[ $post_id ];
 			foreach ( $post_widgets as $widget_instance ) {
-				if ( empty( $widget_instance['id'] ) ) {
+				$sidebar_id = $this->get_sidebar_id( $widget_instance );
+				if ( empty( $sidebar_id ) ) {
 					continue;
 				}
 				//Sidebars widgets and the global $wp_registered widgets use full widget ids as keys
-				$siteorigin_panels_widget_ids[] = $widget_instance['id'];
+				$siteorigin_panels_widget_ids[] = $sidebar_id;
 			}
 			if ( ! empty( $siteorigin_panels_widget_ids ) ) {
 				$sidebars_widgets[ 'sidebar-siteorigin_panels-post-' . $post_id ] = $siteorigin_panels_widget_ids;
@@ -188,6 +190,25 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 		}
 
 		return $sidebars_widgets;
+	}
+	
+	/**
+	 * The 'id' key was changed to 'so_sidebar_emulator_id' to try avoid conflicts with widgets that already had
+	 * an 'id' key.
+	 *
+	 * @param $instance
+	 *
+	 * @return null
+	 */
+	private function get_sidebar_id( $instance ) {
+		$sidebar_id = null;
+		if ( ! empty( $instance['id'] ) ) {
+			$sidebar_id = $instance['id'];
+		} else if ( ! empty( $instance['so_sidebar_emulator_id'] ) ) {
+			$sidebar_id = $instance['so_sidebar_emulator_id'];
+		}
+		
+		return $sidebar_id;
 	}
 }
 
