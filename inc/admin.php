@@ -831,8 +831,9 @@ class SiteOrigin_Panels_Admin {
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 
 			if ( ! empty( $info['raw'] ) || $force ) {
-				if ( ! empty( SiteOrigin_Panels::get_widget_instance( $info['class'] ) ) &&
-					 method_exists( $info['class'], 'update' ) ) {
+				$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
+				if ( ! empty( $the_widget ) &&
+					 method_exists( $the_widget, 'update' ) ) {
 
 					if(
 						! empty( $old_widgets_by_id ) &&
