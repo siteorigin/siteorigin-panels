@@ -604,7 +604,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="siteorigin-panels-add-layout-block wp-block">
 		<button class="components-button is-button is-primary">
 			<span class="siteorigin-panels-block-icon white"/>
-			Add SiteOrigin Layout Block
+			<?php _e( 'Add SiteOrigin Layout Block', 'siteorigin-panels' ) ?>
 		</button>
 	</div>
 </script>

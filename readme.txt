@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.10.0 - 15 January 2018 =
+= 2.10.0 - 16 January 2018 =
 * Prevent syntax warning in PHP7.3
 * Add radio Style field type.
 * Layout block: Add button in block editor to add a SiteOrigin Layout Block.
