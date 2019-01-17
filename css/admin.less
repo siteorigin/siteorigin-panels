@@ -812,83 +812,91 @@
 		}
 
 		/* These are the action buttons in the title bar */
-		a {
-			cursor: pointer;
+		.so-title-bar-buttons {
 			position: absolute;
-			box-sizing: border-box;
-			width: 50px;
-			height: 50px;
-			display: block;
-
-			top: 0;
 			right: 0;
-
-			.transition(0.2s);
-			background: #fafafa;
-			border-left: 1px solid #d8d8d8;
-			border-bottom: 1px solid #d8d8d8;
-
-			&:hover {
-				background: #e9e9e9;
+			top: 0;
+			
+			a {
+				cursor: pointer;
+				position: relative;
+				box-sizing: border-box;
+				width: 50px;
+				height: 50px;
+				display: inline-block;
+	
+				.transition(0.2s);
+				background: #fafafa;
+				border-left: 1px solid #d8d8d8;
+				border-bottom: 1px solid #d8d8d8;
+	
+				&:hover {
+					background: #e9e9e9;
+					.so-dialog-icon {
+						color: #333333;
+					}
+				}
+	
 				.so-dialog-icon {
-					color: #333333;
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					text-decoration: none;
+					width: 20px;
+					height: 20px;
+					margin-left: -10px;
+					margin-top: -10px;
+					color: #666666;
+					text-align: center;
+	
+					&:before {
+						font: 400 20px/1em dashicons;
+	
+						top: 7px;
+						left: 13px;
+					}
 				}
-			}
-
-			.so-dialog-icon {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				text-decoration: none;
-				width: 20px;
-				height: 20px;
-				margin-left: -10px;
-				margin-top: -10px;
-				color: #666666;
-				text-align: center;
-
-				&:before {
-					font: 400 20px/1em dashicons;
-
-					top: 7px;
-					left: 13px;
+	
+				&.so-close {
+					right: 0;
+	
+					.so-dialog-icon:before  {
+						content: "\f335";
+					}
 				}
-			}
-
-			&.so-close {
-				right: 0;
-
-				.so-dialog-icon:before  {
-					content: "\f335";
+				
+				&.so-show-right-sidebar {
+					
+					.so-dialog-icon:before  {
+						content: '\f100';
+					}
 				}
-			}
-
-			&.so-next {
-				right: 50px;
-
-				.so-dialog-icon:before  {
-					content: '\f345';
+	
+				&.so-next {
+	
+					.so-dialog-icon:before  {
+						content: '\f345';
+					}
 				}
-			}
-
-			&.so-previous {
-				right: 100px;
-
-				.so-dialog-icon:before  {
-					content: '\f341';
+	
+				&.so-previous {
+	
+					.so-dialog-icon:before  {
+						content: '\f341';
+					}
 				}
-			}
-
-			/* Disabled nav */
-			&.so-nav.so-disabled {
-				cursor: default;
-				pointer-events:none;
-
-				.so-dialog-icon {
-					color: #dddddd;
+	
+				/* Disabled nav */
+				&.so-nav.so-disabled {
+					cursor: default;
+					pointer-events:none;
+	
+					.so-dialog-icon {
+						color: #dddddd;
+					}
 				}
+	
 			}
-
 		}
 
 		// Icons in the dialog title
@@ -1058,6 +1066,12 @@
 			&:first-child {
 				margin-top: 0;
 			}
+		}
+		
+		@media only screen and (max-width:980px) {
+			z-index: 110000;
+			bottom: inherit;
+			max-height: calc(100% - 80px);
 		}
 	}
 

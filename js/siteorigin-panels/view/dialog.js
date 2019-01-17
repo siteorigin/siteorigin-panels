@@ -144,6 +144,12 @@ module.exports = Backbone.View.extend( {
 			// Added here because .so-edit-title is only available after the template has been rendered.
 			this.initEditableLabel();
 		}
+		
+		// Set up resize handling
+		$( window ).on( 'resize', this.onResize.bind( this ) );
+		
+		this.$( '.so-show-right-sidebar' ).on( 'click', this.toggleRightSideBar.bind( this ) );
+		this.$( '.so-show-left-sidebar' ).on( 'click', this.toggleLeftSideBar.bind( this ) );
 
 		return this;
 	},
@@ -317,6 +323,8 @@ module.exports = Backbone.View.extend( {
 
 		// Start listen for keyboard keypresses.
 		$( window ).on( 'keyup', this.keyboardListen );
+		
+		this.onResize();
 
 		this.$el.show();
 
@@ -541,5 +549,43 @@ module.exports = Backbone.View.extend( {
 			text: text,
 			dialog: dialog
 		};
-	}
+	},
+	
+	onResize: function () {
+		var mediaQuery = window.matchMedia( '(max-width: 980px)' );
+		var $rightSideBar = this.$( '.so-right-sidebar' );
+		var $showRightSideBarButton = this.$( '.so-show-right-sidebar' );
+		$showRightSideBarButton.hide();
+		if ( $rightSideBar.children().length > 0 ) {
+			if ( mediaQuery.matches ) {
+				$showRightSideBarButton.show();
+				$rightSideBar.hide();
+				$rightSideBar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
+				
+			} else {
+				$showRightSideBarButton.hide();
+				$rightSideBar.show();
+				$rightSideBar.closest( '.so-panels-dialog' ).addClass( 'so-panels-dialog-has-right-sidebar' );
+			}
+		}
+	},
+	
+	toggleLeftSideBar: function () {
+		this.toggleSidebar( 'left' );
+	},
+	
+	toggleRightSideBar: function () {
+		this.toggleSidebar( 'right' );
+	},
+	
+	toggleSidebar: function ( side ) {
+		var sidebar = this.$( '.so-' + side + '-sidebar' );
+		
+		if ( sidebar.is( ':visible' ) ) {
+			sidebar.hide();
+		} else {
+			sidebar.show();
+		}
+	},
+	
 } );
