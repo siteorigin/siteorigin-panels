@@ -33,6 +33,11 @@ module.exports = {
             '!{tmp,tmp/**}'               // Ignore tmp/ and contents
         ]
     },
+    babel: {
+        src: [
+            'compat/**/*.jsx',
+        ],
+    },
     browserify : {
         src: 'js/siteorigin-panels/main.js',
         dest: 'js/',
