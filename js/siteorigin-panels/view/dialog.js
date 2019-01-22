@@ -31,6 +31,8 @@ module.exports = Backbone.View.extend( {
 		if ( ! _.isUndefined( this.initializeDialog ) ) {
 			this.initializeDialog();
 		}
+		
+		_.bindAll( this, 'initSidebars', 'hasSidebar', 'onResize', 'toggleLeftSideBar', 'toggleRightSideBar' );
 	},
 
 	/**
@@ -145,13 +147,30 @@ module.exports = Backbone.View.extend( {
 			this.initEditableLabel();
 		}
 		
-		// Set up resize handling
-		$( window ).on( 'resize', this.onResize.bind( this ) );
-		
-		this.$( '.so-show-right-sidebar' ).on( 'click', this.toggleRightSideBar.bind( this ) );
-		this.$( '.so-show-left-sidebar' ).on( 'click', this.toggleLeftSideBar.bind( this ) );
+		setTimeout( this.initSidebars, 1 );
 
 		return this;
+	},
+	
+	initSidebars: function () {
+		var $leftButton = this.$( '.so-show-left-sidebar' ).hide();
+		var $rightButton = this.$( '.so-show-right-sidebar' ).hide();
+		var hasLeftSidebar = this.hasSidebar( 'left' );
+		var hasRightSidebar = this.hasSidebar( 'right' );
+		// Set up resize handling
+		if ( hasLeftSidebar || hasRightSidebar ) {
+			$( window ).on( 'resize', this.onResize );
+			if ( hasLeftSidebar ) {
+				$leftButton.show();
+				$leftButton.on( 'click', this.toggleLeftSideBar );
+			}
+			if ( hasRightSidebar ) {
+				$rightButton.show();
+				$rightButton.on( 'click', this.toggleRightSideBar );
+			}
+		}
+		
+		this.onResize();
 	},
 
 	/**
@@ -558,22 +577,28 @@ module.exports = Backbone.View.extend( {
 		sides.forEach( function ( side ) {
 			var $sideBar = this.$( '.so-' + side + '-sidebar' );
 			var $showSideBarButton = this.$( '.so-show-' + side + '-sidebar' );
-			$showSideBarButton.hide();
-			if ( $sideBar.children().length > 0 ) {
+			if ( this.hasSidebar( side ) ) {
+				$showSideBarButton.hide();
 				if ( mediaQuery.matches ) {
 					$showSideBarButton.show();
-					$showSideBarButton.closest( '.so-title-bar' ).addClass( 'so-has-left-button' );
+					$showSideBarButton.closest( '.so-title-bar' ).addClass( 'so-has-' + side + '-button' );
 					$sideBar.hide();
 					$sideBar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-' + side + '-sidebar' );
-					
 				} else {
 					$showSideBarButton.hide();
-					$showSideBarButton.closest( '.so-title-bar' ).removeClass( 'so-has-left-button' );
+					$showSideBarButton.closest( '.so-title-bar' ).removeClass( 'so-has-' + side + '-button' );
 					$sideBar.show();
 					$sideBar.closest( '.so-panels-dialog' ).addClass( 'so-panels-dialog-has-' + side + '-sidebar' );
 				}
+			} else {
+				$sideBar.hide();
+				$showSideBarButton.hide();
 			}
-		} );
+		}.bind( this ) );
+	},
+	
+	hasSidebar: function ( side ) {
+		return this.$( '.so-' + side + '-sidebar' ).children().length > 0;
 	},
 	
 	toggleLeftSideBar: function () {
