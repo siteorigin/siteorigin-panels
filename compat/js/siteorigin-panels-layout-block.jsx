@@ -1,4 +1,4 @@
-const { isEqual, debounce } = lodash;
+const { isEqual, debounce, isEmpty } = lodash;
 const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
@@ -9,13 +9,14 @@ const { __ } = wp.i18n;
 class SiteOriginPanelsLayoutBlock extends Component {
 	constructor( props ) {
 		super( props );
-		const editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit';
+		const editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit' || isEmpty( props.panelsData );
 		this.state = {
 			editing: editMode,
 			loadingPreview: ! editMode,
 			previewHtml: ''
 		};
 		this.panelsContainer = createRef();
+		this.previewContainer = createRef();
 		this.panelsInitialized = false;
 		this.previewInitialized = false;
 	}
@@ -44,7 +45,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
 			this.fetchPreview( this.props );
-		} else {
+		} else if ( ! this.previewInitialized && this.previewContainer.current){
 			$( document ).trigger( 'panels_setup_preview' );
 			this.previewInitialized = true;
 		}
@@ -152,7 +153,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			}
 		}
 		
-		if ( this.state.editing || ! panelsData ) {
+		if ( this.state.editing ) {
 			return (
 				<Fragment>
 					<BlockControls>
@@ -192,7 +193,9 @@ class SiteOriginPanelsLayoutBlock extends Component {
 								<span><Spinner/></span>
 							</div>
 						) : (
-							<RawHTML>{this.state.previewHtml}</RawHTML>
+							<div className="so-panels-raw-html-container" ref={this.previewContainer}>
+								<RawHTML>{this.state.previewHtml}</RawHTML>
+							</div>
 						) }
 					</div>
 				</Fragment>
@@ -244,3 +247,18 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 		return null;
 	}
 } );
+
+( ( $ ) => {
+	
+	$( () => {
+		setTimeout( () => {
+			var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
+			var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
+			$addButton.on( 'click', () => {
+				var block = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
+				wp.data.dispatch( 'core/editor' ).insertBlock( block );
+			} );
+		}, 100 );
+	} );
+	
+} )( jQuery );

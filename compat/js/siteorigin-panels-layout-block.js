@@ -20,7 +20,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var _lodash = lodash,
     isEqual = _lodash.isEqual,
-    debounce = _lodash.debounce;
+    debounce = _lodash.debounce,
+    isEmpty = _lodash.isEmpty;
 var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
     Component = _wp$element.Component,
@@ -45,13 +46,14 @@ function (_Component) {
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SiteOriginPanelsLayoutBlock).call(this, props));
-    var editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit';
+    var editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit' || isEmpty(props.panelsData);
     _this.state = {
       editing: editMode,
       loadingPreview: !editMode,
       previewHtml: ''
     };
     _this.panelsContainer = createRef();
+    _this.previewContainer = createRef();
     _this.panelsInitialized = false;
     _this.previewInitialized = false;
     return _this;
@@ -86,7 +88,7 @@ function (_Component) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         this.fetchPreview(this.props);
-      } else {
+      } else if (!this.previewInitialized && this.previewContainer.current) {
         $(document).trigger('panels_setup_preview');
         this.previewInitialized = true;
       }
@@ -205,7 +207,7 @@ function (_Component) {
         }
       };
 
-      if (this.state.editing || !panelsData) {
+      if (this.state.editing) {
         return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
@@ -228,7 +230,10 @@ function (_Component) {
           className: "so-panels-block-layout-preview-container"
         }, loadingPreview ? React.createElement("div", {
           className: "so-panels-spinner-container"
-        }, React.createElement("span", null, React.createElement(Spinner, null))) : React.createElement(RawHTML, null, this.state.previewHtml)));
+        }, React.createElement("span", null, React.createElement(Spinner, null))) : React.createElement("div", {
+          className: "so-panels-raw-html-container",
+          ref: this.previewContainer
+        }, React.createElement(RawHTML, null, this.state.previewHtml))));
       }
     }
   }]);
@@ -277,3 +282,16 @@ registerBlockType('siteorigin-panels/layout-block', {
     return null;
   }
 });
+
+(function ($) {
+  $(function () {
+    setTimeout(function () {
+      var tmpl = $('#siteorigin-panels-add-layout-block-button').html();
+      var $addButton = $(tmpl).insertAfter('.editor-writing-flow > div:first');
+      $addButton.on('click', function () {
+        var block = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
+        wp.data.dispatch('core/editor').insertBlock(block);
+      });
+    }, 100);
+  });
+})(jQuery);
