@@ -747,12 +747,13 @@
 		height: @title_bar_height;
 		background-color: #fafafa;
 		border-bottom: 1px solid @border_color;
+		padding: 0;
 
 		h3.so-title {
 			.box-sizing( border-box );
 			margin: -3px 150px 0 -3px;
 			padding: 5px 6px;
-			display: block;
+			display: inline-block;
 
 			&.so-title-editable {
 				&:hover,
@@ -812,95 +813,121 @@
 		}
 
 		/* These are the action buttons in the title bar */
+		a {
+			cursor: pointer;
+			position: relative;
+			box-sizing: border-box;
+			width: 50px;
+			height: 50px;
+			display: inline-block;
+
+			.transition(0.2s);
+			background: #fafafa;
+			border-left: 1px solid #d8d8d8;
+			border-bottom: 1px solid #d8d8d8;
+
+			&:hover {
+				background: #e9e9e9;
+				.so-dialog-icon {
+					color: #333333;
+				}
+			}
+
+			.so-dialog-icon {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				text-decoration: none;
+				width: 20px;
+				height: 20px;
+				margin-left: -10px;
+				margin-top: -10px;
+				color: #666666;
+				text-align: center;
+
+				&:before {
+					font: 400 20px/1em dashicons;
+
+					top: 7px;
+					left: 13px;
+				}
+			}
+
+			&.so-close {
+				right: 0;
+
+				.so-dialog-icon:before  {
+					content: "\f335";
+				}
+			}
+			
+			&.so-show-left-sidebar {
+				position: absolute;
+				top: 0;
+				left: 0;
+				display: inline;
+				padding: 16px 25px;
+				border-right: 1px solid #d8d8d8;
+				border-bottom: 1px solid #d8d8d8;
+				
+				.so-dialog-icon:before  {
+					content: '\f333';
+				}
+			}
+			
+			&.so-show-right-sidebar {
+				
+				.so-dialog-icon:before  {
+					content: '\f100';
+				}
+			}
+
+			&.so-next {
+
+				.so-dialog-icon:before  {
+					content: '\f345';
+				}
+			}
+
+			&.so-previous {
+
+				.so-dialog-icon:before  {
+					content: '\f341';
+				}
+			}
+
+			/* Disabled nav */
+			&.so-nav.so-disabled {
+				cursor: default;
+				pointer-events:none;
+
+				.so-dialog-icon {
+					color: #dddddd;
+				}
+			}
+
+		}
+		
 		.so-title-bar-buttons {
 			position: absolute;
 			right: 0;
 			top: 0;
+		}
+		
+		&.so-has-left-button {
 			
-			a {
-				cursor: pointer;
-				position: relative;
-				box-sizing: border-box;
-				width: 50px;
-				height: 50px;
-				display: inline-block;
-	
-				.transition(0.2s);
-				background: #fafafa;
-				border-left: 1px solid #d8d8d8;
-				border-bottom: 1px solid #d8d8d8;
-	
-				&:hover {
-					background: #e9e9e9;
-					.so-dialog-icon {
-						color: #333333;
-					}
-				}
-	
-				.so-dialog-icon {
-					position: absolute;
-					top: 50%;
-					left: 50%;
-					text-decoration: none;
-					width: 20px;
-					height: 20px;
-					margin-left: -10px;
-					margin-top: -10px;
-					color: #666666;
-					text-align: center;
-	
-					&:before {
-						font: 400 20px/1em dashicons;
-	
-						top: 7px;
-						left: 13px;
-					}
-				}
-	
-				&.so-close {
-					right: 0;
-	
-					.so-dialog-icon:before  {
-						content: "\f335";
-					}
+			&.so-has-icon {
+				.so-panels-icon {
+					left: 70px;
 				}
 				
-				&.so-show-right-sidebar {
-					
-					.so-dialog-icon:before  {
-						content: '\f100';
-					}
+				.so-title {
+					left: 100px;
 				}
-	
-				&.so-next {
-	
-					.so-dialog-icon:before  {
-						content: '\f345';
-					}
-				}
-	
-				&.so-previous {
-	
-					.so-dialog-icon:before  {
-						content: '\f341';
-					}
-				}
-	
-				/* Disabled nav */
-				&.so-nav.so-disabled {
-					cursor: default;
-					pointer-events:none;
-	
-					.so-dialog-icon {
-						color: #dddddd;
-					}
-				}
-	
 			}
 		}
 
 		// Icons in the dialog title
-
 		&.so-has-icon {
 			@icon_size: 22px;
 
@@ -913,12 +940,18 @@
 
 				font-size: @icon_size;
 				line-height: @icon_size;
-				display: block;
+				display: inline-block;
 				width: @icon_size;
 				height: @icon_size;
 				text-align: center;
 
 				color: #666;
+			}
+			
+			.so-title {
+				position: absolute;
+				top: 15px;
+				left: 45px;
 			}
 		}
 	}
@@ -1001,6 +1034,13 @@
 		left: @edge_spacing;
 		bottom: @edge_spacing;
 		width: @sidebar_width;
+		
+		@media only screen and (max-width:980px) {
+			top: @edge_spacing + @title_bar_height;
+			z-index: 110000;
+			bottom: inherit;
+			max-height: calc(100% - 80px);
+		}
 
 
 		border-right: 1px solid @border_color;

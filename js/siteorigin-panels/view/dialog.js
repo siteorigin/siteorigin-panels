@@ -553,21 +553,27 @@ module.exports = Backbone.View.extend( {
 	
 	onResize: function () {
 		var mediaQuery = window.matchMedia( '(max-width: 980px)' );
-		var $rightSideBar = this.$( '.so-right-sidebar' );
-		var $showRightSideBarButton = this.$( '.so-show-right-sidebar' );
-		$showRightSideBarButton.hide();
-		if ( $rightSideBar.children().length > 0 ) {
-			if ( mediaQuery.matches ) {
-				$showRightSideBarButton.show();
-				$rightSideBar.hide();
-				$rightSideBar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-right-sidebar' );
-				
-			} else {
-				$showRightSideBarButton.hide();
-				$rightSideBar.show();
-				$rightSideBar.closest( '.so-panels-dialog' ).addClass( 'so-panels-dialog-has-right-sidebar' );
+		var sides = [ 'left', 'right' ];
+		
+		sides.forEach( function ( side ) {
+			var $sideBar = this.$( '.so-' + side + '-sidebar' );
+			var $showSideBarButton = this.$( '.so-show-' + side + '-sidebar' );
+			$showSideBarButton.hide();
+			if ( $sideBar.children().length > 0 ) {
+				if ( mediaQuery.matches ) {
+					$showSideBarButton.show();
+					$showSideBarButton.closest( '.so-title-bar' ).addClass( 'so-has-left-button' );
+					$sideBar.hide();
+					$sideBar.closest( '.so-panels-dialog' ).removeClass( 'so-panels-dialog-has-' + side + '-sidebar' );
+					
+				} else {
+					$showSideBarButton.hide();
+					$showSideBarButton.closest( '.so-title-bar' ).removeClass( 'so-has-left-button' );
+					$sideBar.show();
+					$sideBar.closest( '.so-panels-dialog' ).addClass( 'so-panels-dialog-has-' + side + '-sidebar' );
+				}
 			}
-		}
+		} );
 	},
 	
 	toggleLeftSideBar: function () {
