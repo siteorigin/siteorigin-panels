@@ -21,7 +21,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var _lodash = lodash,
     isEqual = _lodash.isEqual,
     debounce = _lodash.debounce,
-    isEmpty = _lodash.isEmpty;
+    isEmpty = _lodash.isEmpty,
+    isFunction = _lodash.isFunction;
 var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
     Component = _wp$element.Component,
@@ -110,31 +111,35 @@ function (_Component) {
 
       var panelsData = JSON.parse(JSON.stringify($.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
 
-      var disableSelection = function disableSelection() {
-        _this2.props.toggleSelection(false);
+      var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
+        if (isFunction(_this2.props.onRowOrWidgetMouseDown)) {
+          _this2.props.onRowOrWidgetMouseDown();
+        }
 
-        var enableSelection = function enableSelection() {
-          _this2.props.toggleSelection(true);
+        var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
+          $(document).off('mouseup', rowOrWidgetMouseUp);
 
-          $(document).off('mouseup', enableSelection);
+          if (isFunction(_this2.props.onRowOrWidgetMouseUp)) {
+            _this2.props.onRowOrWidgetMouseUp();
+          }
         };
 
-        $(document).on('mouseup', enableSelection);
+        $(document).on('mouseup', rowOrWidgetMouseUp);
       };
 
       this.builderView.on('row_added', function () {
-        _this2.builderView.$('.so-row-move').off('mousedown', disableSelection);
+        _this2.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-row-move').on('mousedown', disableSelection);
+        _this2.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').off('mousedown', disableSelection);
+        _this2.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').on('mousedown', disableSelection);
+        _this2.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.on('widget_added', function () {
-        _this2.builderView.$('.so-widget').off('mousedown', disableSelection);
+        _this2.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').on('mousedown', disableSelection);
+        _this2.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.render().attach({
         container: $panelsContainer
@@ -146,7 +151,9 @@ function (_Component) {
         _this2.panelsDataChanged = !isEqual(panelsData, newPanelsData);
 
         if (_this2.panelsDataChanged) {
-          _this2.props.onContentChange(newPanelsData);
+          if (_this2.props.onContentChange && isFunction(_this2.props.onContentChange)) {
+            _this2.props.onContentChange(newPanelsData);
+          }
 
           _this2.setState({
             loadingPreview: true,
@@ -261,7 +268,6 @@ registerBlockType('siteorigin-panels/layout-block', {
   },
   edit: function edit(_ref) {
     var attributes = _ref.attributes,
-        className = _ref.className,
         setAttributes = _ref.setAttributes,
         toggleSelection = _ref.toggleSelection;
 
@@ -271,10 +277,19 @@ registerBlockType('siteorigin-panels/layout-block', {
       });
     };
 
+    var disableSelection = function disableSelection() {
+      toggleSelection(false);
+    };
+
+    var enableSelection = function enableSelection() {
+      toggleSelection(true);
+    };
+
     return React.createElement(SiteOriginPanelsLayoutBlock, {
       panelsData: attributes.panelsData,
       onContentChange: onLayoutBlockContentChange,
-      toggleSelection: toggleSelection
+      onRowOrWidgetMouseDown: disableSelection,
+      onRowOrWidgetMouseUp: enableSelection
     });
   },
   save: function save() {

@@ -1,4 +1,4 @@
-const { isEqual, debounce, isEmpty } = lodash;
+const { isEqual, debounce, isEmpty, isFunction } = lodash;
 const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
@@ -69,25 +69,29 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		var panelsData = JSON.parse( JSON.stringify( $.extend( {}, this.props.panelsData ) ) );
 		
 		// Disable block selection while dragging rows or widgets.
-		let disableSelection = () => {
-			this.props.toggleSelection( false );
-			let enableSelection = () => {
-				this.props.toggleSelection( true );
-				$( document ).off( 'mouseup', enableSelection );
+		let rowOrWidgetMouseDown = () => {
+			if ( isFunction( this.props.onRowOrWidgetMouseDown ) ) {
+				this.props.onRowOrWidgetMouseDown();
+			}
+			let rowOrWidgetMouseUp = () => {
+				$( document ).off( 'mouseup', rowOrWidgetMouseUp );
+				if ( isFunction( this.props.onRowOrWidgetMouseUp ) ) {
+					this.props.onRowOrWidgetMouseUp();
+				}
 			};
-			$( document ).on( 'mouseup', enableSelection );
+			$( document ).on( 'mouseup', rowOrWidgetMouseUp );
 		};
 		
 		this.builderView.on( 'row_added', () => {
-			this.builderView.$( '.so-row-move' ).off( 'mousedown', disableSelection );
-			this.builderView.$( '.so-row-move' ).on( 'mousedown', disableSelection );
-			this.builderView.$( '.so-widget' ).off( 'mousedown', disableSelection );
-			this.builderView.$( '.so-widget' ).on( 'mousedown', disableSelection );
+			this.builderView.$( '.so-row-move' ).off( 'mousedown', rowOrWidgetMouseDown );
+			this.builderView.$( '.so-row-move' ).on( 'mousedown', rowOrWidgetMouseDown );
+			this.builderView.$( '.so-widget' ).off( 'mousedown', rowOrWidgetMouseDown );
+			this.builderView.$( '.so-widget' ).on( 'mousedown', rowOrWidgetMouseDown );
 		} );
 		
 		this.builderView.on( 'widget_added', () => {
-			this.builderView.$( '.so-widget' ).off( 'mousedown', disableSelection );
-			this.builderView.$( '.so-widget' ).on( 'mousedown', disableSelection );
+			this.builderView.$( '.so-widget' ).off( 'mousedown', rowOrWidgetMouseDown );
+			this.builderView.$( '.so-widget' ).on( 'mousedown', rowOrWidgetMouseDown );
 		} );
 		
 		this.builderView
@@ -103,7 +107,9 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			const newPanelsData = this.builderView.getData();
 			this.panelsDataChanged = !isEqual( panelsData, newPanelsData );
 			if ( this.panelsDataChanged ) {
-				this.props.onContentChange( newPanelsData );
+				if ( this.props.onContentChange && isFunction( this.props.onContentChange ) ) {
+					this.props.onContentChange( newPanelsData );
+				}
 				this.setState( { loadingPreview: true, previewHtml: '' } );
 			}
 		} );
@@ -227,17 +233,26 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 		}
 	},
 	
-	edit( { attributes, className, setAttributes, toggleSelection } ) {
+	edit( { attributes, setAttributes, toggleSelection } ) {
 		
 		let onLayoutBlockContentChange = ( newContent ) => {
 			setAttributes( { panelsData: newContent } );
+		};
+		
+		let disableSelection = ( ) => {
+			toggleSelection( false );
+		};
+		
+		let enableSelection = ( ) => {
+			toggleSelection( true );
 		};
 		
 		return (
 			<SiteOriginPanelsLayoutBlock
 				panelsData={attributes.panelsData}
 				onContentChange={onLayoutBlockContentChange}
-				toggleSelection={toggleSelection}
+				onRowOrWidgetMouseDown={disableSelection}
+				onRowOrWidgetMouseUp={enableSelection}
 			/>
 		);
 	},
