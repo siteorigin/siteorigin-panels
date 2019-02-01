@@ -85,6 +85,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	public function render_layout_block( $attributes ) {
+		
 		if ( empty( $attributes['panelsData'] ) ) {
 			return '<div>'.
 				   __( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
@@ -98,7 +99,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	private function sanitize_panels_data( $panels_data ) {
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		// We force calling widgets' update functions here, but a better solution is to ensure these are called when
+		// the block is saved, but there is currently no simple method to do so.
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		return $panels_data;
 	}
