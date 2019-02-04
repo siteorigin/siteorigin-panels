@@ -115,7 +115,7 @@ class SiteOrigin_Panels_Admin {
 		$screen         = get_current_screen();
 		$is_panels_page = ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting( 'post-types' ) ) ) ||
 						  in_array( $screen->base, array( 'appearance_page_so_panels_home_page', 'widgets', 'customize' ) ) ||
-						  $screen->is_block_editor;
+						  ( ! method_exists( $screen, 'is_block_editor' ) || $screen->is_block_editor );
 
 		return apply_filters( 'siteorigin_panels_is_admin_page', $is_panels_page );
 	}
