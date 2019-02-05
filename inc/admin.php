@@ -115,10 +115,32 @@ class SiteOrigin_Panels_Admin {
 		$screen         = get_current_screen();
 		$is_panels_page = ( $screen->base == 'post' && in_array( $screen->id, siteorigin_panels_setting( 'post-types' ) ) ) ||
 						  in_array( $screen->base, array( 'appearance_page_so_panels_home_page', 'widgets', 'customize' ) ) ||
-						  $screen->is_block_editor;
+						  self::is_block_editor();
 
 		return apply_filters( 'siteorigin_panels_is_admin_page', $is_panels_page );
 	}
+
+	/**
+	 * Check if the current page is Gutenberg or the Block Ediotr
+	 *
+	 * @return bool
+	 */
+	static function is_block_editor() {
+		// This is for the Gutenberg plugin.
+		$is_gutenberg_page = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
+		// This is for WP 5 with the integrated block editor.
+		$is_block_editor = false;
+
+		if ( function_exists( 'get_current_screen' ) ) {
+			$current_screen = get_current_screen();
+			if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
+				$is_block_editor = $current_screen->is_block_editor();
+			}
+		}
+		
+		return $is_gutenberg_page || $is_block_editor;
+	}
+
 
 	/**
 	 * Add action links to the plugin list for Page Builder.
