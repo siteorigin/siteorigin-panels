@@ -130,9 +130,13 @@ class SiteOrigin_Panels_Admin {
 		$is_gutenberg_page = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
 		// This is for WP 5 with the integrated block editor.
 		$is_block_editor = false;
-		$current_screen = get_current_screen();
-		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
-			$is_block_editor = $current_screen->is_block_editor();
+
+		if ( function_exists( 'get_current_screen' ) ) {
+			$current_screen = get_current_screen();
+			if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
+				$is_block_editor = $current_screen->is_block_editor();
+			}
+		}
 		
 		return $is_gutenberg_page || $is_block_editor;
 	}
