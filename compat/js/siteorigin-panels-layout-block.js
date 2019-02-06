@@ -35,6 +35,7 @@ var _wp$components = wp.components,
     IconButton = _wp$components.IconButton,
     Spinner = _wp$components.Spinner;
 var __ = wp.i18n.__;
+var soPanelsBlockEditorAdmin = window.soPanelsBlockEditorAdmin;
 
 var SiteOriginPanelsLayoutBlock =
 /*#__PURE__*/
@@ -299,14 +300,43 @@ registerBlockType('siteorigin-panels/layout-block', {
 });
 
 (function ($) {
-  $(function () {
-    setTimeout(function () {
-      var tmpl = $('#siteorigin-panels-add-layout-block-button').html();
-      var $addButton = $(tmpl).insertAfter('.editor-writing-flow > div:first');
-      $addButton.on('click', function () {
-        var block = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
-        wp.data.dispatch('core/editor').insertBlock(block);
-      });
-    }, 100);
-  });
+  if (soPanelsBlockEditorAdmin.showAddButton) {
+    $(function () {
+      setTimeout(function () {
+        var editorDispatch = wp.data.dispatch('core/editor');
+        var editorSelect = wp.data.select('core/editor');
+        var tmpl = $('#siteorigin-panels-add-layout-block-button').html();
+        var $addButton = $(tmpl).insertAfter('.editor-writing-flow > div:first');
+        $addButton.on('click', function () {
+          var layoutBlock = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
+          var isEmpty = editorSelect.isEditedPostEmpty();
+
+          if (isEmpty) {
+            var blocks = editorSelect.getBlocks();
+
+            if (blocks.length) {
+              editorDispatch.replaceBlock(blocks[0].clientId, layoutBlock);
+            } else {
+              editorDispatch.insertBlock(layoutBlock);
+            }
+          } else {
+            editorDispatch.insertBlock(layoutBlock);
+          }
+        });
+
+        var hideButtonIfBlocks = function hideButtonIfBlocks() {
+          var isEmpty = wp.data.select('core/editor').isEditedPostEmpty();
+
+          if (isEmpty) {
+            $addButton.show();
+          } else {
+            $addButton.hide();
+          }
+        };
+
+        wp.data.subscribe(hideButtonIfBlocks);
+        hideButtonIfBlocks();
+      }, 100);
+    });
+  }
 })(jQuery);

@@ -4,7 +4,7 @@ const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
 const { Toolbar, IconButton, Spinner } = wp.components;
 const { __ } = wp.i18n;
-
+const soPanelsBlockEditorAdmin = window.soPanelsBlockEditorAdmin;
 
 class SiteOriginPanelsLayoutBlock extends Component {
 	constructor( props ) {
@@ -264,16 +264,39 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 } );
 
 ( ( $ ) => {
-	
-	$( () => {
-		setTimeout( () => {
-			var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
-			var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
-			$addButton.on( 'click', () => {
-				var block = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
-				wp.data.dispatch( 'core/editor' ).insertBlock( block );
-			} );
-		}, 100 );
-	} );
+	if ( soPanelsBlockEditorAdmin.showAddButton ) {
+		$( () => {
+			setTimeout( () => {
+				const editorDispatch = wp.data.dispatch( 'core/editor' );
+				const editorSelect = wp.data.select( 'core/editor' );
+				var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
+				var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
+				$addButton.on( 'click', () => {
+					var layoutBlock = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
+					const isEmpty = editorSelect.isEditedPostEmpty();
+					if ( isEmpty ) {
+						const blocks = editorSelect.getBlocks();
+						if ( blocks.length ) {
+							editorDispatch.replaceBlock( blocks[0].clientId, layoutBlock );
+						} else {
+							editorDispatch.insertBlock( layoutBlock );
+						}
+					} else {
+						editorDispatch.insertBlock( layoutBlock );
+					}
+				} );
+				let hideButtonIfBlocks = () => {
+					const isEmpty = wp.data.select( 'core/editor' ).isEditedPostEmpty();
+					if ( isEmpty ) {
+						$addButton.show();
+					} else {
+						$addButton.hide();
+					}
+				};
+				wp.data.subscribe( hideButtonIfBlocks );
+				hideButtonIfBlocks();
+			}, 100 );
+		} );
+	}
 	
 } )( jQuery );

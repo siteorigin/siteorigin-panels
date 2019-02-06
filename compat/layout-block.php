@@ -49,12 +49,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				),
 				SITEORIGIN_PANELS_VERSION
 			);
+			
+			$current_screen = get_current_screen();
+			$is_panels_post_type = in_array( $current_screen->id, siteorigin_panels_setting( 'post-types' ) );
 			wp_localize_script(
 				'siteorigin-panels-layout-block',
 				'soPanelsBlockEditorAdmin',
 				array(
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
+					'showAddButton' => $is_panels_post_type,
 				)
 			);
 			// This is only available in WP5.
