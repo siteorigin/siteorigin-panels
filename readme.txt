@@ -96,7 +96,15 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.10.0 - 15 January 2018 =
+= 2.10.1 - 7 February 2019 =
+* Layout block: Fix front end rendering not always updating widgets correctly.
+* Fix notice when using WP 4.9.9.
+* Hide layout block button when content has been added to a post.
+* General responsive improvements.
+* Layout block: Initialize previews correctly.
+* Layout block: Avoid use of `withState`.
+
+= 2.10.0 - 16 January 2019 =
 * Prevent syntax warning in PHP7.3
 * Add radio Style field type.
 * Layout block: Add button in block editor to add a SiteOrigin Layout Block.

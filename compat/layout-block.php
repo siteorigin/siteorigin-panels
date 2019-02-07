@@ -29,16 +29,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	public function enqueue_layout_block_editor_assets() {
-		// This is for the Gutenberg plugin.
-		$is_gutenberg_page = function_exists( 'is_gutenberg_page' ) && is_gutenberg_page();
-		// This is for WP 5 with the integrated block editor.
-		$is_block_editor = false;
-		$current_screen = get_current_screen();
-		if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) ) {
-			$is_block_editor = $current_screen->is_block_editor();
-		}
-		
-		if ( $is_gutenberg_page || $is_block_editor ) {
+		if (  SiteOrigin_Panels_Admin::is_block_editor() ) {
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();
@@ -58,12 +49,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				),
 				SITEORIGIN_PANELS_VERSION
 			);
+			
+			$current_screen = get_current_screen();
+			$is_panels_post_type = in_array( $current_screen->id, siteorigin_panels_setting( 'post-types' ) );
 			wp_localize_script(
 				'siteorigin-panels-layout-block',
 				'soPanelsBlockEditorAdmin',
 				array(
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
+					'showAddButton' => $is_panels_post_type,
 				)
 			);
 			// This is only available in WP5.
@@ -85,6 +80,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	public function render_layout_block( $attributes ) {
+		
 		if ( empty( $attributes['panelsData'] ) ) {
 			return '<div>'.
 				   __( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
@@ -98,7 +94,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	private function sanitize_panels_data( $panels_data ) {
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		// We force calling widgets' update functions here, but a better solution is to ensure these are called when
+		// the block is saved, but there is currently no simple method to do so.
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		return $panels_data;
 	}

@@ -79,6 +79,12 @@
 			}
 		}
 	}
+	
+	@media (max-width: 782px) {
+		.so-tool-button.so-row-settings {
+			margin-right: 8px;
+		}
+	}
 
 	.so-builder-toolbar {
 		.box-sizing(border-box);
@@ -121,6 +127,22 @@
 			&:hover {
 				&, .so-panels-icon {
 					color: #444444;
+				}
+			}
+		}
+		
+		@media ( max-width: 782px ) {
+			.so-tool-button {
+				margin-right: 8px;
+				
+				.so-button-text {
+					margin: 7px 0px 2px 5px;
+					font-size: 14px;
+				}
+				
+				.so-panels-icon {
+					margin: 3px 0;
+					font-size: 21px;
 				}
 			}
 		}
@@ -205,7 +227,7 @@
 				.box-sizing(border-box);
 				padding: 4px;
 				float: right;
-
+				
 				.so-panels-icon {
 					color: #777;
 					font-size: 11px;
@@ -213,15 +235,29 @@
 					height: 11px;
 					display: block;
 				}
-
+				
 				&:hover {
 					.so-panels-icon {
 						color: #555;
 					}
 				}
-
+				
 				&.so-row-move {
 					cursor: move;
+				}
+			}
+			
+			
+			@media ( max-width: 782px ) {
+				
+				margin-bottom: 8px;
+				
+				.so-tool-button {
+					.so-panels-icon {
+						font-size: 21px;
+						width: 21px;
+						height: 21px;
+					}
 				}
 			}
 
@@ -556,6 +592,10 @@
 			padding: 15px 10px;
 			background: #F8F8F8;
 			border: 1px solid #E0E0E0;
+			
+			@media only screen and (max-width:782px) {
+				font-size: 14px;
+			}
 		}
 
 		.so-tool-button {
@@ -565,6 +605,10 @@
 			color: #666;
 			padding: 5px 10px;
 			margin: 0 3px;
+			
+			@media only screen and (max-width:782px) {
+				padding: 9px 10px;
+			}
 
 			.so-panels-icon {
 				color: #777;
@@ -585,10 +629,9 @@
 		.so-builder-toolbar {
 			padding: 10px;
 			> .so-tool-button {
-				padding-right: 2px;
 
 				.so-panels-icon {
-					font-size: 14px;
+					margin: 3px 0;
 				}
 
 				span.so-button-text {
@@ -604,11 +647,6 @@
 				display: none !important;
 			}
 		}
-
-		.widgets-container .so-widget .actions {
-			display: none !important;
-		}
-
 	}
 
 }
@@ -709,12 +747,13 @@
 		height: @title_bar_height;
 		background-color: #fafafa;
 		border-bottom: 1px solid @border_color;
+		padding: 0;
 
 		h3.so-title {
 			.box-sizing( border-box );
-			margin: -3px 150px 0 -3px;
-			padding: 5px 6px;
-			display: block;
+			margin: 0 150px 0 -3px;
+			padding: @pane_padding;
+			display: inline-block;
 
 			&.so-title-editable {
 				&:hover,
@@ -724,8 +763,6 @@
 				}
 
 				&:focus {
-					margin-top: -4px;
-					margin-left: -4px;
 					border: 1px solid #E4E4E4;
 				}
 			}
@@ -749,12 +786,12 @@
 			cursor: pointer;
 			position: relative;
 			float: left;
-			margin: 0 @pane_padding 0 0 !important;
-			padding: 0 @pane_padding+12px 0 0 !important;
+			margin: 0 @pane_padding 0 0;
+			padding: @pane_padding 27px @pane_padding 3px;
 
 			.so-separator {
 				position: absolute;
-				top: -@pane_padding;
+				top: 0;
 				right: 0;
 				width: 12px;
 				height: @title_bar_height;
@@ -776,14 +813,11 @@
 		/* These are the action buttons in the title bar */
 		a {
 			cursor: pointer;
-			position: absolute;
+			position: relative;
 			box-sizing: border-box;
 			width: 50px;
 			height: 50px;
-			display: block;
-
-			top: 0;
-			right: 0;
+			display: inline-block;
 
 			.transition(0.2s);
 			background: #fafafa;
@@ -824,9 +858,27 @@
 					content: "\f335";
 				}
 			}
+			
+			&.so-show-left-sidebar {
+				float: left;
+				display: inline;
+				padding: 16px 25px;
+				border-right: 1px solid #d8d8d8;
+				border-bottom: 1px solid #d8d8d8;
+				
+				.so-dialog-icon:before  {
+					content: '\f333';
+				}
+			}
+			
+			&.so-show-right-sidebar {
+				display: inline-block;
+				.so-dialog-icon:before  {
+					content: '\f100';
+				}
+			}
 
 			&.so-next {
-				right: 50px;
 
 				.so-dialog-icon:before  {
 					content: '\f345';
@@ -834,7 +886,6 @@
 			}
 
 			&.so-previous {
-				right: 100px;
 
 				.so-dialog-icon:before  {
 					content: '\f341';
@@ -852,22 +903,33 @@
 			}
 
 		}
+		
+		.so-title-bar-buttons {
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+		
+		&.so-has-left-button {
+			
+			&.so-has-icon {
+				.so-panels-icon {
+					left: 70px;
+				}
+			}
+		}
 
 		// Icons in the dialog title
-
 		&.so-has-icon {
 			@icon_size: 22px;
 
-			padding-left: ( 15px * 2 ) + @icon_size - 6px - 1px;
-
 			.so-panels-icon {
-				position: absolute;
-				top: ( 50px - @icon_size + 1px ) / 2;
-				left: 14px;
+				float: left;
+				padding: 14px;
 
 				font-size: @icon_size;
 				line-height: @icon_size;
-				display: block;
+				display: inline-block;
 				width: @icon_size;
 				height: @icon_size;
 				text-align: center;
@@ -955,6 +1017,13 @@
 		left: @edge_spacing;
 		bottom: @edge_spacing;
 		width: @sidebar_width;
+		
+		@media only screen and (max-width:980px) {
+			top: @edge_spacing + @title_bar_height;
+			z-index: 110000;
+			bottom: inherit;
+			max-height: calc(100% - 80px);
+		}
 
 
 		border-right: 1px solid @border_color;
@@ -1020,6 +1089,12 @@
 			&:first-child {
 				margin-top: 0;
 			}
+		}
+		
+		@media only screen and (max-width:980px) {
+			z-index: 110000;
+			bottom: inherit;
+			max-height: calc(100% - 80px);
 		}
 	}
 
@@ -1901,10 +1976,10 @@
 		background-size: cover;
 		width: 20px;
 		height: 20px;
-		background-image: url('../compat/pb-icon.svg');
+		background-image: url('./images/pb-icon.svg');
 		
 		&.white {
-			background-image: url('../compat/pb-icon_white.svg');
+			background-image: url('./images/pb-icon_white.svg');
 		}
 	}
 
@@ -1958,10 +2033,10 @@
 
 /* Display the dialog with a proper z-index in the customizer */
 .wp-customizer .so-panels-dialog {
-	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
+	.so-overlay, .so-content, .so-title-bar, .so-toolbar {
 		z-index: 500001;
 	}
-	.so-toolbar {
+	.so-toolbar, .so-left-sidebar, .so-right-sidebar {
 		z-index: 500002;
 	}
 }
@@ -2581,4 +2656,17 @@
 
 #post-status-info.for-siteorigin-panels {
 	margin-top: -21px !important;
+}
+
+/* PB Icon for general use */
+.siteorigin-page-builder-icon {
+	display: inline-block;
+	background-size: cover;
+	width: 20px;
+	height: 20px;
+	background-image: url('./images/pb-icon.svg');
+	
+	&.white {
+		background-image: url('./images/pb-icon_white.svg');
+	}
 }
