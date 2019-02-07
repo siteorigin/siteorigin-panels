@@ -139,7 +139,7 @@ module.exports = Backbone.View.extend( {
 				thisDialog.closeDialog();
 				thisDialog.parentDialog.openDialog();
 			} );
-			this.$( '.so-title-bar' ).prepend( dialogParent );
+			this.$( '.so-title-bar .so-title' ).before( dialogParent );
 		}
 
 		if( this.$( '.so-title-bar .so-title-editable' ).length ) {

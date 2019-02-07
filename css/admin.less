@@ -751,8 +751,8 @@
 
 		h3.so-title {
 			.box-sizing( border-box );
-			margin: -3px 150px 0 -3px;
-			padding: 5px 6px;
+			margin: 0 150px 0 -3px;
+			padding: @pane_padding;
 			display: inline-block;
 
 			&.so-title-editable {
@@ -763,8 +763,6 @@
 				}
 
 				&:focus {
-					margin-top: -4px;
-					margin-left: -4px;
 					border: 1px solid #E4E4E4;
 				}
 			}
@@ -788,12 +786,12 @@
 			cursor: pointer;
 			position: relative;
 			float: left;
-			margin: 0 @pane_padding 0 0 !important;
-			padding: 0 @pane_padding+12px 0 0 !important;
+			margin: 0 @pane_padding 0 0;
+			padding: @pane_padding 27px @pane_padding 3px;
 
 			.so-separator {
 				position: absolute;
-				top: -@pane_padding;
+				top: 0;
 				right: 0;
 				width: 12px;
 				height: @title_bar_height;
@@ -862,9 +860,7 @@
 			}
 			
 			&.so-show-left-sidebar {
-				position: absolute;
-				top: 0;
-				left: 0;
+				float: left;
 				display: inline;
 				padding: 16px 25px;
 				border-right: 1px solid #d8d8d8;
@@ -920,10 +916,6 @@
 				.so-panels-icon {
 					left: 70px;
 				}
-				
-				.so-title {
-					left: 100px;
-				}
 			}
 		}
 
@@ -931,12 +923,9 @@
 		&.so-has-icon {
 			@icon_size: 22px;
 
-			padding-left: ( 15px * 2 ) + @icon_size - 6px - 1px;
-
 			.so-panels-icon {
-				position: absolute;
-				top: ( 50px - @icon_size + 1px ) / 2;
-				left: 14px;
+				float: left;
+				padding: 14px;
 
 				font-size: @icon_size;
 				line-height: @icon_size;
@@ -946,12 +935,6 @@
 				text-align: center;
 
 				color: #666;
-			}
-			
-			.so-title {
-				position: absolute;
-				top: 15px;
-				left: 45px;
 			}
 		}
 	}
@@ -2050,10 +2033,10 @@
 
 /* Display the dialog with a proper z-index in the customizer */
 .wp-customizer .so-panels-dialog {
-	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
+	.so-overlay, .so-content, .so-title-bar, .so-toolbar {
 		z-index: 500001;
 	}
-	.so-toolbar {
+	.so-toolbar, .so-left-sidebar, .so-right-sidebar {
 		z-index: 500002;
 	}
 }
