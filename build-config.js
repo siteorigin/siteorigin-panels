@@ -59,19 +59,19 @@ module.exports = {
 	},
     copy: {
         src: [
-            '**/!(*.js|*.less)',               // Everything except .js and .less files
+            '**/!(*.js|*.jsx|*.less)',          // Everything except .js/.jsx and .less files
             '!{build,build/**}',                // Ignore build/ and contents
             'widgets/less/*.less',              // LESS libraries used in runtime styles
             'widgets/**/styles/*.less',         // All the widgets' runtime .less files
             '!widgets/**/styles/*.css',         // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',  // Ignore node_modules/ and contents
             '!{tests,tests/**}',                // Ignore tests/ and contents
-            '!{tmp,tmp/**}',                  // Ignore dist/ and contents
+            '!{tmp,tmp/**}',                    // Ignore dist/ and contents
             '!phpunit.xml',                     // Not the unit tests configuration file.
             '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
             '!package.json',                    // Ignore the package.json file..
-            '!readme.txt',                       // Not the readme.txt file. It is copied by the 'version' task.
-            '!readme.md',                        // Ignore the readme.md file. It is for the github repo.
+            '!readme.txt',                      // Not the readme.txt file. It is copied by the 'version' task.
+            '!readme.md',                       // Ignore the readme.md file. It is for the github repo.
             '!{js/siteorigin-panels,js/siteorigin-panels/**}'
         ]
     },
