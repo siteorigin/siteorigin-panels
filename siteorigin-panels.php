@@ -38,11 +38,17 @@ class SiteOrigin_Panels {
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 
+		if (
+			is_admin() ||
+			( wp_doing_ajax() && isset($_REQUEST['action']) && $_REQUEST['action'] == 'inline-save' )
+		) {
+			SiteOrigin_Panels_Admin::single();
+		}
+
 		if ( is_admin() ) {
 			// Setup all the admin classes
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
-			SiteOrigin_Panels_Admin::single();
 		}
 
 		// Include the live editor file if we're in live editor mode.

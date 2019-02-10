@@ -19,7 +19,7 @@ class SiteOrigin_Panels_Admin {
 			'plugin_action_links'
 		) );
 
-		add_action( 'current_screen', array( $this, 'admin_init' ) );
+		add_action( 'plugins_loaded', array( $this, 'admin_init_widget_count' ) );
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_init', array( $this, 'save_home_page' ) );
@@ -92,7 +92,7 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * Do some general admin initialization
 	 */
-	public function admin_init(){
+	public function admin_init_widget_count(){
 		if( siteorigin_panels_setting( 'admin-widget-count' ) ) {
 
 			// Add the custom columns
