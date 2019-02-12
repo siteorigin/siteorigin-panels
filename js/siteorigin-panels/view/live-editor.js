@@ -12,6 +12,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .live-editor-close': 'close',
+		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
 		'click .live-editor-mode': 'mobileToggle',
 		'escape' : 'escapePress'
@@ -135,7 +136,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Close the live editor
+	 * Close the Live Editor
 	 */
 	close: function () {
 		if ( ! this.$el.is( ':visible' ) ) {
@@ -149,6 +150,14 @@ module.exports = Backbone.View.extend( {
 		this.builder.$el.appendTo( this.originalContainer );
 		this.builder.$( '.so-tool-button.so-live-editor' ).show();
 		this.builder.trigger( 'builder_resize' );
+	},
+
+	/**
+	 * Close the Live Editor and save the post.
+	 */
+	closeAndSave: function(){
+		this.close();
+		$('#save-post').click();
 	},
 
 	/**

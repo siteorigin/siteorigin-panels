@@ -551,7 +551,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="so-sidebar-tools">
-			<button class="live-editor-close button-primary"><?php esc_html_e('Done', 'siteorigin-panels') ?></button>
+			<button class="live-editor-save button-primary"><?php esc_html_e('Save', 'siteorigin-panels') ?></button>
+			<button class="live-editor-close button-secondary"><?php esc_html_e('Close', 'siteorigin-panels') ?></button>
 
 			<a class="live-editor-mode live-editor-desktop so-active" title="<?php esc_attr_e( 'Toggle desktop mode', 'siteorigin-panels' ) ?>" data-mode="desktop">
 				<span class="dashicons dashicons-desktop"></span>
