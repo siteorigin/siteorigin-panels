@@ -152,4 +152,15 @@ jQuery( function ( $ ) {
 			$( '.siteorigin-page-builder-widget' ).soPanelsSetupBuilderWidget();
 		} );
 	}
+
+	// A global escape handler
+	$(window).on('keyup', function(e){
+		console.log(e);
+		// [Esc] to close
+		if ( e.which === 27 ) {
+			// Trigger a click on the last visible Page Builder window
+			$( '.so-panels-dialog-wrapper, .so-panels-live-editor' ).filter(':visible')
+				.last().find('.so-title-bar .so-close, .live-editor-close').click();
+		}
+	});
 } );

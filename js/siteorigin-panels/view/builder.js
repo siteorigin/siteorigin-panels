@@ -108,8 +108,7 @@ module.exports = Backbone.View.extend( {
 				this.displayAttachedBuilder( { confirm: false } );
 			}, this );
 		}
-		
-		
+
 		return this;
 	},
 	

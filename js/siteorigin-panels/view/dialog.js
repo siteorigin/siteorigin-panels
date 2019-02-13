@@ -339,9 +339,6 @@ module.exports = Backbone.View.extend( {
 		// Stop scrolling for the main body
 		panels.helpers.pageScroll.lock();
 
-		// Start listen for keyboard keypresses.
-		$( window ).on( 'keyup', this.keyboardListen );
-		
 		this.onResize();
 
 		this.$el.show();
@@ -374,23 +371,10 @@ module.exports = Backbone.View.extend( {
 		this.$el.hide();
 		panels.helpers.pageScroll.unlock();
 
-		// Stop listen for keyboard keypresses.
-		$( window ).off( 'keyup', this.keyboardListen );
-
 		if ( ! options.silent ) {
 			// This triggers once everything is hidden
 			this.trigger( 'close_dialog_complete' );
 			this.builder.trigger( 'close_dialog', this );
-		}
-	},
-
-	/**
-	 * Keyboard events handler
-	 */
-	keyboardListen: function ( e ) {
-		// [Esc] to close
-		if ( e.which === 27 ) {
-			$( '.so-panels-dialog-wrapper .so-close' ).trigger( 'click' );
 		}
 	},
 

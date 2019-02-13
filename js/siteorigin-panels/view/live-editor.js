@@ -14,8 +14,7 @@ module.exports = Backbone.View.extend( {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
-		'click .live-editor-mode': 'mobileToggle',
-		'escape' : 'escapePress'
+		'click .live-editor-mode': 'mobileToggle'
 	},
 
 	initialize: function ( options ) {
@@ -33,12 +32,6 @@ module.exports = Backbone.View.extend( {
 
 		this.listenTo( this.builder.model, 'refresh_panels_data', this.handleRefreshData );
 		this.listenTo( this.builder.model, 'load_panels_data', this.handleLoadData );
-
-		$(window).keyup(function(e){
-			if(e.keyCode === 27){
-				this.$el.trigger('escape');
-			}
-		}.bind(this));
 	},
 
 	/**
@@ -158,18 +151,6 @@ module.exports = Backbone.View.extend( {
 	closeAndSave: function(){
 		this.close();
 		$('#save-post').click();
-	},
-
-	/**
-	 * Check if the live editor should be closed after pressing escape.
-	 *
-	 * @param e
-	 */
-	escapePress: function(e){
-		if( $('.so-panels-dialog-wrapper:visible').length === 0 ){
-			// Only close this dialog if
-			this.close();
-		}
 	},
 
 	/**
