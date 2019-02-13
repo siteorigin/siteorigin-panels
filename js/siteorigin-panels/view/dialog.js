@@ -132,13 +132,12 @@ module.exports = Backbone.View.extend( {
 
 		if ( this.parentDialog !== false ) {
 			// Add a link to the parent dialog as a sort of crumbtrail.
-			var thisDialog = this;
 			var dialogParent = $( '<h3 class="so-parent-link"></h3>' ).html( this.parentDialog.text + '<div class="so-separator"></div>' );
 			dialogParent.click( function ( e ) {
 				e.preventDefault();
-				thisDialog.closeDialog();
-				thisDialog.parentDialog.openDialog();
-			} );
+				this.closeDialog();
+				this.parentDialog.dialog.openDialog();
+			}.bind(this) );
 			this.$( '.so-title-bar .so-title' ).before( dialogParent );
 		}
 
