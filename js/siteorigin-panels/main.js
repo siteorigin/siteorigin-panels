@@ -155,7 +155,6 @@ jQuery( function ( $ ) {
 
 	// A global escape handler
 	$(window).on('keyup', function(e){
-		console.log(e);
 		// [Esc] to close
 		if ( e.which === 27 ) {
 			// Trigger a click on the last visible Page Builder window
