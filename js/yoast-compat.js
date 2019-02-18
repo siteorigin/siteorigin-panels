@@ -117,6 +117,12 @@ jQuery(function($){
 								}
 								newHTML = newHTML.prop( 'outerHTML' );
 								break;
+							case 'SiteOrigin_Widget_Button_Widget':
+								var hrefSeparator = widgetInstance.url.includes( '://' ) === true ? '' : '#';
+								newHTML = $( '<a>' + widgetInstance.text + '</a>' ).attr({
+									'href': hrefSeparator + widgetInstance.url,
+								}).prop('outerHTML');
+								break;
 						}
 					}
 
