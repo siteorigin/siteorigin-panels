@@ -84,6 +84,24 @@ jQuery(function($){
 								}).prop('outerHTML');
 								break;
 
+							case 'SiteOrigin_Widgets_ImageGrid_Widget':
+							case 'SiteOrigin_Widget_Simple_Masonry_Widget':
+								newHTML = $( '<div/>' );
+								var contentItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
+								for( var i = 0; i < contentItems.length; i++ ) {
+									var item = contentItems[ i ];
+									var itemHTML = $('<img/>').attr({
+									'src': '#' + item.image,
+									'srcset': '',
+									'alt': item.title,
+									'title': item.title,
+									});
+
+									newHTML.append( itemHTML )
+								}
+								newHTML = newHTML.prop( 'outerHTML' );
+								break;
+
 							case 'SiteOrigin_Widget_Accordion_Widget':
 							case 'SiteOrigin_Widget_Tabs_Widget':
 								var contentItems = widgetClass === 'SiteOrigin_Widget_Accordion_Widget' ? widgetInstance.panels : widgetInstance.tabs;
