@@ -88,13 +88,13 @@ jQuery(function($){
 							case 'SiteOrigin_Widget_Simple_Masonry_Widget':
 								newHTML = $( '<div/>' );
 								var contentItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
-								for( var i = 0; i < contentItems.length; i++ ) {
+								for ( var i = 0; i < contentItems.length; i++ ) {
 									var item = contentItems[ i ];
 									var itemHTML = $('<img/>').attr({
-									'src': '#' + item.image,
-									'srcset': '',
-									'alt': item.title,
-									'title': item.title,
+										'src': '#' + item.image,
+										'srcset': '',
+										'alt': item.title,
+										'title': item.title,
 									});
 
 									newHTML.append( itemHTML )
@@ -106,7 +106,7 @@ jQuery(function($){
 							case 'SiteOrigin_Widget_Tabs_Widget':
 								var contentItems = widgetClass === 'SiteOrigin_Widget_Accordion_Widget' ? widgetInstance.panels : widgetInstance.tabs;
 								newHTML = $( '<div/>' );
-								for( var i = 0; i < contentItems.length; i++ ) {
+								for ( var i = 0; i < contentItems.length; i++ ) {
 									var item = contentItems[ i ];
 									if ( item.content_type !== 'text' ) {
 										continue;
