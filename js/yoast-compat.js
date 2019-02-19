@@ -118,7 +118,7 @@ jQuery(function($){
 								newHTML = newHTML.prop( 'outerHTML' );
 								break;
 							case 'SiteOrigin_Widget_Button_Widget':
-								var hrefSeparator = widgetInstance.url.includes( '://' ) === true ? '' : '#';
+								var hrefSeparator = widgetInstance.url.includes( '://' ) ? '' : '#'
 								newHTML = $( '<a>' + widgetInstance.text + '</a>' ).attr({
 									'href': hrefSeparator + widgetInstance.url,
 								}).prop('outerHTML');
