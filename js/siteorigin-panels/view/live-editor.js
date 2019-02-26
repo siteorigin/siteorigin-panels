@@ -150,7 +150,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	closeAndSave: function(){
 		this.close();
-		$('#save-post').click();
+		$('#publish').click();
 	},
 
 	/**
@@ -209,7 +209,7 @@ module.exports = Backbone.View.extend( {
 		contentWindow.liveEditorScrollTo( over );
 	},
 
-	handleRefreshData: function ( newData, args ) {
+	handleRefreshData: function ( newData ) {
 		if ( ! this.$el.is( ':visible' ) ) {
 			return this;
 		}
@@ -284,7 +284,7 @@ module.exports = Backbone.View.extend( {
 				'id' : iframeId,
 				'name' : iframeId,
 			} )
-			.appendTo( target )
+			.appendTo( target );
 
 		this.setupPreviewFrame( this.previewIframe );
 
