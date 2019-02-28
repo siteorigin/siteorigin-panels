@@ -56,7 +56,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				'siteorigin-panels-layout-block',
 				'soPanelsBlockEditorAdmin',
 				array(
-					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'block-editor-preview', '_panelsnonce' ),
+					'sanitizeUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-sanitize', '_panelsnonce' ),
+					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-preview', '_panelsnonce' ),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
 					'showAddButton' => $is_panels_post_type,
 				)
@@ -96,7 +97,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private function sanitize_panels_data( $panels_data ) {
 		// We force calling widgets' update functions here, but a better solution is to ensure these are called when
 		// the block is saved, but there is currently no simple method to do so.
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		return $panels_data;
 	}

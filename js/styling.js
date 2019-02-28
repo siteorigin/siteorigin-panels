@@ -44,8 +44,8 @@ jQuery( function ( $ ) {
 			}
 
 			$$.css( {
-				'border-left': 0,
-				'border-right': 0
+				'border-left': defaultSidePadding,
+				'border-right': defaultSidePadding
 			} );
 		} );
 

@@ -1,12 +1,12 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.4
-Tested up to: 5.0
+Tested up to: 5.1
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
-Donate link: https://siteorigin.com/downloads/contribution/
+Donate link: https://siteorigin.com/downloads/premium/
 Contributors: gpriday, braam-genis
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
@@ -95,6 +95,16 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.10.2 - 28 February 2019 =
+* Don't remove left/right border when Full Width Stretch Padding is enabled on row.
+* Display widget count for inline-save.
+* Live editor: Press escape to close.
+* Live editor: Give the user an option to either close or close and save.
+* Added widget class to widgets in builder interface.
+* Dialog crumbtrail fix.
+* Only close topmost Page Builder window when escape key is pressed.
+* Layout Block: Retrieve sanitized panels data from server as changes are made.
 
 = 2.10.1 - 7 February 2019 =
 * Layout block: Fix front end rendering not always updating widgets correctly.

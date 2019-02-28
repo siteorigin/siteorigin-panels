@@ -166,6 +166,10 @@ module.exports = Backbone.Model.extend( {
 		var titleFields = ['title', 'text'];
 
 		for ( var k in values ) {
+			if(k.charAt(0) === '_' || k === 'so_sidebar_emulator_id'  || k === 'option_name'){
+				// Skip Widgets Bundle supporting fields
+				continue;
+			}
 			if ( values.hasOwnProperty( k ) ) {
 				titleFields.push( k );
 			}

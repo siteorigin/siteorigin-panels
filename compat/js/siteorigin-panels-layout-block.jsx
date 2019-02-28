@@ -4,7 +4,7 @@ const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
 const { Toolbar, IconButton, Spinner } = wp.components;
 const { __ } = wp.i18n;
-const soPanelsBlockEditorAdmin = window.soPanelsBlockEditorAdmin;
+const { soPanelsBlockEditorAdmin } = window;
 
 class SiteOriginPanelsLayoutBlock extends Component {
 	constructor( props ) {
@@ -126,11 +126,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		this.previewInitialized = false;
 		
-		// var loadingPreview = !props.editing && !props.previewHtml && props.attributes.panelsData;
 		const fetchRequest = this.currentFetchRequest = $.post( {
 			url: soPanelsBlockEditorAdmin.previewUrl,
 			data: {
-				action: 'so_panels_block_editor_preview',
+				action: 'so_panels_layout_block_preview',
 				panelsData: JSON.stringify( props.panelsData ),
 			}
 		} )
@@ -235,8 +234,23 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	
 	edit( { attributes, setAttributes, toggleSelection } ) {
 		
-		let onLayoutBlockContentChange = ( newContent ) => {
-			setAttributes( { panelsData: newContent } );
+		let onLayoutBlockContentChange = ( newPanelsData ) => {
+			
+			if ( !_.isEmpty( newPanelsData.widgets ) ) {
+				// Send panelsData to server for sanitization.
+				$.post(
+					soPanelsBlockEditorAdmin.sanitizeUrl,
+					{
+						action: 'so_panels_layout_block_sanitize',
+						panelsData: JSON.stringify( newPanelsData ),
+					},
+					function ( sanitizedPanelsData ) {
+						if ( sanitizedPanelsData !== '' ) {
+							setAttributes( { panelsData: sanitizedPanelsData } );
+						}
+					}
+				);
+			}
 		};
 		
 		let disableSelection = ( ) => {

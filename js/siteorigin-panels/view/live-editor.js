@@ -12,6 +12,7 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .live-editor-close': 'close',
+		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
 		'click .live-editor-mode': 'mobileToggle'
 	},
@@ -39,6 +40,11 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		this.setElement( this.template() );
 		this.$el.hide();
+		
+		if ( $( '#submitdiv #save-post' ).length > 0 ) {
+			var $saveButton = this.$el.find( '.live-editor-save' );
+			$saveButton.text( $saveButton.data( 'save' ) );
+		}
 
 		var isMouseDown = false;
 		$( document )
@@ -128,7 +134,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Close the live editor
+	 * Close the Live Editor
 	 */
 	close: function () {
 		if ( ! this.$el.is( ':visible' ) ) {
@@ -145,13 +151,19 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Close the Live Editor and save the post.
+	 */
+	closeAndSave: function(){
+		this.close();
+		// Finds the submit input for saving without publishing draft posts.
+		$('#submitdiv input[type="submit"][name="save"]').click();
+	},
+
+	/**
 	 * Collapse the live editor
 	 */
 	collapse: function () {
 		this.$el.toggleClass( 'so-collapsed' );
-
-		var text = this.$( '.live-editor-collapse span' );
-		text.html( text.data( this.$el.hasClass( 'so-collapsed' ) ? 'expand' : 'collapse' ) );
 	},
 
 	/**
@@ -200,7 +212,7 @@ module.exports = Backbone.View.extend( {
 		contentWindow.liveEditorScrollTo( over );
 	},
 
-	handleRefreshData: function ( newData, args ) {
+	handleRefreshData: function ( newData ) {
 		if ( ! this.$el.is( ':visible' ) ) {
 			return this;
 		}
@@ -275,7 +287,7 @@ module.exports = Backbone.View.extend( {
 				'id' : iframeId,
 				'name' : iframeId,
 			} )
-			.appendTo( target )
+			.appendTo( target );
 
 		this.setupPreviewFrame( this.previewIframe );
 

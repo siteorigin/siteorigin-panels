@@ -35,7 +35,8 @@ var _wp$components = wp.components,
     IconButton = _wp$components.IconButton,
     Spinner = _wp$components.Spinner;
 var __ = wp.i18n.__;
-var soPanelsBlockEditorAdmin = window.soPanelsBlockEditorAdmin;
+var _window = window,
+    soPanelsBlockEditorAdmin = _window.soPanelsBlockEditorAdmin;
 
 var SiteOriginPanelsLayoutBlock =
 /*#__PURE__*/
@@ -174,12 +175,11 @@ function (_Component) {
         return;
       }
 
-      this.previewInitialized = false; // var loadingPreview = !props.editing && !props.previewHtml && props.attributes.panelsData;
-
+      this.previewInitialized = false;
       var fetchRequest = this.currentFetchRequest = $.post({
         url: soPanelsBlockEditorAdmin.previewUrl,
         data: {
-          action: 'so_panels_block_editor_preview',
+          action: 'so_panels_layout_block_preview',
           panelsData: JSON.stringify(props.panelsData)
         }
       }).then(function (preview) {
@@ -272,10 +272,20 @@ registerBlockType('siteorigin-panels/layout-block', {
         setAttributes = _ref.setAttributes,
         toggleSelection = _ref.toggleSelection;
 
-    var onLayoutBlockContentChange = function onLayoutBlockContentChange(newContent) {
-      setAttributes({
-        panelsData: newContent
-      });
+    var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
+      if (!_.isEmpty(newPanelsData.widgets)) {
+        // Send panels data to server for sanitization.
+        $.post(soPanelsBlockEditorAdmin.sanitizeUrl, {
+          action: 'so_panels_layout_block_sanitize',
+          panelsData: JSON.stringify(newPanelsData)
+        }, function (sanitizedPanelsData) {
+          if (sanitizedPanelsData !== '') {
+            setAttributes({
+              panelsData: sanitizedPanelsData
+            });
+          }
+        });
+      }
     };
 
     var disableSelection = function disableSelection() {
