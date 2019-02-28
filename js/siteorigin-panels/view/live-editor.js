@@ -40,6 +40,11 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		this.setElement( this.template() );
 		this.$el.hide();
+		
+		if ( $( '#submitdiv #save-post' ).length > 0 ) {
+			var $saveButton = this.$el.find( '.live-editor-save' );
+			$saveButton.text( $saveButton.data( 'save' ) );
+		}
 
 		var isMouseDown = false;
 		$( document )
@@ -159,9 +164,6 @@ module.exports = Backbone.View.extend( {
 	 */
 	collapse: function () {
 		this.$el.toggleClass( 'so-collapsed' );
-
-		var text = this.$( '.live-editor-collapse span' );
-		text.html( text.data( this.$el.hasClass( 'so-collapsed' ) ? 'expand' : 'collapse' ) );
 	},
 
 	/**
