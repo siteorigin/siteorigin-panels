@@ -96,6 +96,16 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.2 - 28 February 2019 =
+* Don't remove left/right border when Full Width Stretch Padding is enabled on row.
+* Display widget count for inline-save.
+* Live editor: Press escape to close.
+* Live editor: Give the user an option to either close or close and save.
+* Added widget class to widgets in builder interface.
+* Dialog crumbtrail fix.
+* Only close topmost Page Builder window when escape key is pressed.
+* Layout Block: Retrieve sanitized panels data from server as changes are made.
+
 = 2.10.1 - 7 February 2019 =
 * Layout block: Fix front end rendering not always updating widgets correctly.
 * Fix notice when using WP 4.9.9.
