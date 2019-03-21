@@ -602,7 +602,19 @@ class SiteOrigin_Panels_Renderer {
 	 * @return array
 	 */
 	private function get_panels_data_for_post( $post_id ) {
-		if ( strpos( $post_id, 'prebuilt:' ) === 0 ) {
+		if ( SiteOrigin_Panels::is_live_editor() ) {
+			if (
+				current_user_can( 'edit_post', $post_id ) &&
+				! empty( $_POST['live_editor_panels_data'] ) &&
+				$_POST['live_editor_post_ID'] == $post_id
+			) {
+				$panels_data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
+				
+				if ( ! empty( $panels_data['widgets'] ) ) {
+					$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'] );
+				}
+			}
+		} else if ( strpos( $post_id, 'prebuilt:' ) === 0 ) {
 			list( $null, $prebuilt_id ) = explode( ':', $post_id, 2 );
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : array();
