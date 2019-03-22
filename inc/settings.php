@@ -119,6 +119,7 @@ class SiteOrigin_Panels_Settings {
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
+		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
 		$defaults['sidebars-emulator']      = true;
@@ -259,6 +260,16 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Live Editor Quick Link', 'siteorigin-panels' ),
 			'description' => __( 'Display a Live Editor button in the admin bar.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['admin-post-state'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Display Post State', 'siteorigin-panels' ),
+			'description' => sprintf(
+				__( "Display a %sSiteOrigin Page Builder%s post state in the admin lists of posts/pages to indicate Page Builder is active.", 'siteorigin-panels' ),
+				'<strong>',
+				'</strong>'
+			),
 		);
 
 		$fields['general']['fields']['admin-widget-count'] = array(
