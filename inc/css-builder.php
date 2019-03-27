@@ -109,7 +109,7 @@ class SiteOrigin_Panels_Css_Builder {
 				$selector[] = '#pl-' . $li;
 			}
 			$selector[] = is_string( $ri ) ? ( '#' . $ri ) : '#pg-' . $li . '-' . $ri;
-			$selector[] = '.panel-grid-cell';
+			$selector[] = '> .panel-grid-cell';
 		} elseif ( $ri !== false && $ci !== false ) {
 			// This applies to a specific cell
 			if ( $specify_layout ) {
