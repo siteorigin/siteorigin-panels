@@ -78,7 +78,9 @@ class SiteOrigin_Panels_Admin {
 			add_filter( 'gutenberg_can_edit_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
 			add_filter( 'use_block_editor_for_post_type', array( $this, 'show_classic_editor_for_panels' ), 10, 2 );
 			add_action( 'admin_print_scripts-edit.php', array( $this, 'add_panels_add_new_button' ) );
-			add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
+			if( siteorigin_panels_setting( 'admin-post-state' ) ) {
+				add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
+			}
 		}
 	}
 
