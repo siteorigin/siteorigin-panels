@@ -210,11 +210,12 @@ class SiteOrigin_Panels_Renderer {
 					$css->add_cell_css( $post_id, $ri, false, '', array(
 						'margin-right' => 0,
 					), $panels_mobile_width );
+					
+					$css->add_cell_css( $post_id, $ri, false, '', array(
+						'width' => '100%',
+					), $panels_mobile_width );
 				}
 
-				$css->add_cell_css( $post_id, $ri, false, '', array(
-					'width' => '100%',
-				), $panels_mobile_width );
 
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {

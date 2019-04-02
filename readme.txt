@@ -96,6 +96,13 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.3 - 2 April 2019 =
+* Layout builder widget: Call styles sanitization in update.
+* Live editor: Only call `process_raw_widgets` once for preview data.
+* Add a setting for whether to display SiteOrigin Page Builder post state.
+* Sidebars emulator: Cache the result of url_to_postid().
+* Prevent affecting child layouts with parent layouts' CSS.
+
 = 2.10.2 - 28 February 2019 =
 * Don't remove left/right border when Full Width Stretch Padding is enabled on row.
 * Display widget count for inline-save.
