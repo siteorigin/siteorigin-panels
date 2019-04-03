@@ -130,13 +130,13 @@ class SiteOrigin_Panels_Css_Builder {
 			$selector_parts[] = '#pgc-' . $li . '-' . $ri . '-' . $ci;
 		}
 
-		$selector_parts = implode( ' ', $selector_parts );
+		$selector = implode( ' ', $selector_parts );
 		if ( ! empty( $sub_selector ) ) {
-			$selector_parts = $this->add_sub_selector( $selector_parts, $sub_selector );
+			$selector = $this->add_sub_selector( $selector, $sub_selector );
 		}
 
 		// Add this to the CSS array
-		$this->add_css( $selector_parts, $attributes, $resolution );
+		$this->add_css( $selector, $attributes, $resolution );
 	}
 
 	/**
