@@ -37,6 +37,8 @@ class SiteOrigin_Panels {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
+		
+		add_action( 'activated_plugin', array($this, 'activation_redirect') );
 
 		if (
 			is_admin() ||
@@ -652,6 +654,17 @@ class SiteOrigin_Panels {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Redirect to a welcome page after activation.
+	 *
+	 * @param $plugin
+	 */
+	public function activation_redirect( $plugin ){
+		if( $plugin == plugin_basename( __FILE__ ) ) {
+			exit( wp_redirect( admin_url( 'options-general.php?page=siteorigin_panels#welcome' ) ) );
+		}
 	}
 }
 

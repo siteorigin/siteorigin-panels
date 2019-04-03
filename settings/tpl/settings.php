@@ -22,6 +22,7 @@
 			?><li><a href="#<?php echo esc_attr( $section_id ) ?>"><?php echo esc_html( $section['title'] ) ?></a></li><?php
 		}
 		?>
+		<li><a href="#welcome"><?php esc_html_e( 'Welcome', 'siteorigin-panels' ) ?></a></li>
 	</ul>
 
 	<?php if( $this->settings_saved ) : ?>
@@ -71,6 +72,11 @@
 				<?php
 			}
 			?>
+
+			<div id="panels-settings-section-welcome" class="panels-settings-section" data-section="welcome">
+				<?php include( plugin_dir_path(__FILE__) . 'welcome.php' ) ?>
+			</div>
+			
 		</div>
 
 		<div class="submit">
