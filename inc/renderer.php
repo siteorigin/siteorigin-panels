@@ -208,11 +208,8 @@ class SiteOrigin_Panels_Renderer {
 					), $panels_mobile_width );
 
 					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'margin-right' => 0,
-					), $panels_mobile_width );
-					
-					$css->add_cell_css( $post_id, $ri, false, '', array(
 						'width' => '100%',
+						'margin-right' => 0,
 					), $panels_mobile_width );
 				}
 
