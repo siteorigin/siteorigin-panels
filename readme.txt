@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.4 - 3 April 2019 =
+* New welcome page.
+* Include row style wrapper in cell CSS direct child selectors.
+
 = 2.10.3 - 2 April 2019 =
 * Layout builder widget: Call styles sanitization in update.
 * Live editor: Only call `process_raw_widgets` once for preview data.
