@@ -49,6 +49,7 @@ module.exports = panels.view.dialog.extend({
 
 			this.regenerateRowPreview();
 			this.renderStyles();
+			this.openSelectedCellStyles();
 		}, this);
 
 		// This is the default row layout
@@ -471,8 +472,6 @@ module.exports = panels.view.dialog.extend({
 
 		}, this);
 
-		this.openSelectedCellStyles();
-
 		this.trigger('form_loaded', this);
 	},
 
@@ -539,6 +538,7 @@ module.exports = panels.view.dialog.extend({
 		// Call remove() on all cell styles to remove data, event listeners etc.
 		this.cellStylesCache.forEach(function (cellStyles) {
 			cellStyles.remove();
+			cellStyles.off( 'styles_loaded' );
 		});
 		this.cellStylesCache = [];
 	},
