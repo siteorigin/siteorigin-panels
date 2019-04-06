@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.5 - 5 April 2019 =
+* Live Editor: Fix styles in live editor previews.
+* Render cell styles after row styles.
+
 = 2.10.4 - 3 April 2019 =
 * New welcome page.
 * Include row style wrapper in cell CSS direct child selectors.
