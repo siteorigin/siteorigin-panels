@@ -274,7 +274,7 @@ registerBlockType('siteorigin-panels/layout-block', {
 
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
       if (!_.isEmpty(newPanelsData.widgets)) {
-        // Send panels data to server for sanitization.
+        // Send panelsData to server for sanitization.
         $.post(soPanelsBlockEditorAdmin.sanitizeUrl, {
           action: 'so_panels_layout_block_sanitize',
           panelsData: JSON.stringify(newPanelsData)
