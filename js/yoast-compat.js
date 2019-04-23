@@ -52,9 +52,9 @@ jQuery(function($){
 
 			try{
 				if( ! _.isNull( match ) && $widget.html().replace( re, '' ).trim() === '' ) {
-					var classMatch = /class="(.*?)"/.exec( match[3] ),
-						dataInput = jQuery( match[5] ),
-						data = JSON.parse( decodeEntities( dataInput.val( ) ) ),
+					var classMatch = /class="(.*?)"/.exec(match[3]),
+						dataInput = jQuery(match[5]),
+						data = JSON.parse(decodeEntities(dataInput.val())),
 						widgetInstance = data.instance,
 						newHTML = '';
 
@@ -87,14 +87,14 @@ jQuery(function($){
 							case 'SiteOrigin_Widgets_ImageGrid_Widget':
 							case 'SiteOrigin_Widget_Simple_Masonry_Widget':
 								newHTML = $( '<div/>' );
-								var contentItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
-								for ( var i = 0; i < contentItems.length; i++ ) {
-									var item = contentItems[ i ];
+								var imgItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
+								for ( var i = 0; i < imgItems.length; i++ ) {
+									var imgItem = imgItems[ i ];
 									var itemHTML = $('<img/>').attr({
-										'src': '#' + item.image,
+										'src': '#' + imgItem.image,
 										'srcset': '',
-										'alt': item.title,
-										'title': item.title,
+										'alt': ( imgItem.hasOwnProperty( 'alt' ) ? imgItem.alt : imgItem.title ),
+										'title': imgItem.title,
 									});
 
 									newHTML.append( itemHTML )
@@ -118,7 +118,7 @@ jQuery(function($){
 								newHTML = newHTML.prop( 'outerHTML' );
 								break;
 							case 'SiteOrigin_Widget_Button_Widget':
-								var hrefSeparator = widgetInstance.url.includes( '://' ) ? '' : '#'
+								var hrefSeparator = widgetInstance.url.includes('://') ? '' : '#';
 								newHTML = $( '<a>' + widgetInstance.text + '</a>' ).attr({
 									'href': hrefSeparator + widgetInstance.url,
 								}).prop('outerHTML');
