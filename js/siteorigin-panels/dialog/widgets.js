@@ -57,8 +57,8 @@ module.exports = panels.view.dialog.extend( {
 
 		// Add the sidebar tabs
 		var tabs = this.$( '.so-sidebar-tabs' );
-		_.each( panelsOptions.widget_dialog_tabs, function ( tab ) {
-			$( this.dialogTabTemplate( {'title': tab.title} ) ).data( {
+		_.each( panelsOptions.widget_dialog_tabs, function ( tab, key ) {
+			$( this.dialogTabTemplate( {'title': tab.title, 'tab': key} ) ).data( {
 				'message': tab.message,
 				'filter': tab.filter
 			} ).appendTo( tabs );
