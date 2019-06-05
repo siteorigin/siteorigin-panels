@@ -153,6 +153,7 @@ class SiteOrigin_Panels_Styles {
 				'tile'              => __( 'Tiled Image', 'siteorigin-panels' ),
 				'cover'             => __( 'Cover', 'siteorigin-panels' ),
 				'center'            => __( 'Centered, with original size', 'siteorigin-panels' ),
+				'contain'           => __( 'Contain', 'siteorigin-panels' ),
 				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
 				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
 				'parallax-original' => __( 'Parallax (Original Size)', 'siteorigin-panels' ),
@@ -447,6 +448,9 @@ class SiteOrigin_Panels_Styles {
 					case 'cover':
 						$css[ 'background-position' ] = 'center center';
 						$css[ 'background-size' ] = 'cover';
+						break;
+					case 'contain':
+						$css[ 'background-size' ] = 'contain';
 						break;
 					case 'center':
 						$css[ 'background-position' ] = 'center center';
