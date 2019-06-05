@@ -93,7 +93,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 		// Support for custom CSS classes
 		$add_custom_class_name = function( $class_names ) use ($attributes) {
-			$class_names[] = $attributes['className'];
+			if ( ! empty( $attributes['className'] ) ) {
+				$class_names[] = $attributes['className'];
+			}
 			return $class_names;
 		};
 		add_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
