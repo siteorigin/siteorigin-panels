@@ -92,7 +92,7 @@ function (_Component) {
       } else if (this.state.loadingPreview) {
         this.fetchPreview(this.props);
       } else if (!this.previewInitialized && this.previewContainer.current) {
-        $(document).trigger('panels_setup_preview');
+        jQuery(document).trigger('panels_setup_preview');
         this.previewInitialized = true;
       }
     }
@@ -111,7 +111,7 @@ function (_Component) {
         config: config
       }); // Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
 
-      var panelsData = JSON.parse(JSON.stringify($.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
+      var panelsData = JSON.parse(JSON.stringify(jQuery.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
 
       var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
         if (isFunction(_this2.props.onRowOrWidgetMouseDown)) {
@@ -119,14 +119,14 @@ function (_Component) {
         }
 
         var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
-          $(document).off('mouseup', rowOrWidgetMouseUp);
+          jQuery(document).off('mouseup', rowOrWidgetMouseUp);
 
           if (isFunction(_this2.props.onRowOrWidgetMouseUp)) {
             _this2.props.onRowOrWidgetMouseUp();
           }
         };
 
-        $(document).on('mouseup', rowOrWidgetMouseUp);
+        jQuery(document).on('mouseup', rowOrWidgetMouseUp);
       };
 
       this.builderView.on('row_added', function () {
@@ -163,7 +163,7 @@ function (_Component) {
           });
         }
       });
-      $(document).trigger('panels_setup', this.builderView);
+      jQuery(document).trigger('panels_setup', this.builderView);
       this.panelsInitialized = true;
     }
   }, {
@@ -176,7 +176,7 @@ function (_Component) {
       }
 
       this.previewInitialized = false;
-      var fetchRequest = this.currentFetchRequest = $.post({
+      var fetchRequest = this.currentFetchRequest = jQuery.post({
         url: soPanelsBlockEditorAdmin.previewUrl,
         data: {
           action: 'so_panels_layout_block_preview',
@@ -275,7 +275,7 @@ registerBlockType('siteorigin-panels/layout-block', {
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
       if (!_.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
-        $.post(soPanelsBlockEditorAdmin.sanitizeUrl, {
+        jQuery.post(soPanelsBlockEditorAdmin.sanitizeUrl, {
           action: 'so_panels_layout_block_sanitize',
           panelsData: JSON.stringify(newPanelsData)
         }, function (sanitizedPanelsData) {
@@ -309,14 +309,14 @@ registerBlockType('siteorigin-panels/layout-block', {
   }
 });
 
-(function ($) {
+(function (jQuery) {
   if (soPanelsBlockEditorAdmin.showAddButton) {
-    $(function () {
+    jQuery(function () {
       setTimeout(function () {
         var editorDispatch = wp.data.dispatch('core/editor');
         var editorSelect = wp.data.select('core/editor');
-        var tmpl = $('#siteorigin-panels-add-layout-block-button').html();
-        var $addButton = $(tmpl).insertAfter('.editor-writing-flow > div:first');
+        var tmpl = jQuery('#siteorigin-panels-add-layout-block-button').html();
+        var $addButton = jQuery(tmpl).insertAfter('.editor-writing-flow > div:first');
         $addButton.on('click', function () {
           var layoutBlock = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
           var isEmpty = editorSelect.isEditedPostEmpty();
