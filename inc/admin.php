@@ -1288,9 +1288,10 @@ class SiteOrigin_Panels_Admin {
 			return false;
 		}
 		
-		// If the `$post_type` is set to be used by Page Builder.
 		$post_types = siteorigin_panels_setting( 'post-types' );
-		$is_panels_type = in_array( $post_type, $post_types );
+        global $pagenow;
+		// If the `$post_type` is set to be used by Page Builder for new posts.
+		$is_new_panels_type = $pagenow == 'post-new.php' && in_array( $post_type, $post_types );
 		$use_classic = siteorigin_panels_setting( 'use-classic' );
 		// For existing posts.
 		global $post;
@@ -1298,13 +1299,11 @@ class SiteOrigin_Panels_Admin {
 			// If the post has blocks just allow `$use_block_editor` to decide.
 			if ( ! has_blocks( $post ) ) {
 				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-				global $pagenow;
-				$is_new = $pagenow == 'post-new.php';
-				if ( ! empty( $panels_data ) || ( $use_classic && $is_new && $is_panels_type ) ) {
+				if ( ! empty( $panels_data ) || ( $use_classic && $is_new_panels_type ) ) {
 					$use_block_editor = false;
 				}
 			}
-		} else if ( $is_panels_type ) {
+		} else if ( $is_new_panels_type ) {
 			$use_block_editor = false;
 		}
 		
