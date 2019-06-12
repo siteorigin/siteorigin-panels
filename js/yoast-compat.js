@@ -52,9 +52,9 @@ jQuery(function($){
 
 			try{
 				if( ! _.isNull( match ) && $widget.html().replace( re, '' ).trim() === '' ) {
-					var classMatch = /class="(.*?)"/.exec( match[3] ),
-						dataInput = jQuery( match[5] ),
-						data = JSON.parse( decodeEntities( dataInput.val( ) ) ),
+					var classMatch = /class="(.*?)"/.exec(match[3]),
+						dataInput = jQuery(match[5]),
+						data = JSON.parse(decodeEntities(dataInput.val())),
 						widgetInstance = data.instance,
 						newHTML = '';
 
@@ -84,11 +84,29 @@ jQuery(function($){
 								}).prop('outerHTML');
 								break;
 
+							case 'SiteOrigin_Widgets_ImageGrid_Widget':
+							case 'SiteOrigin_Widget_Simple_Masonry_Widget':
+								newHTML = $( '<div/>' );
+								var imgItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
+								for ( var i = 0; i < imgItems.length; i++ ) {
+									var imgItem = imgItems[ i ];
+									var itemHTML = $('<img/>').attr({
+										'src': '#' + imgItem.image,
+										'srcset': '',
+										'alt': ( imgItem.hasOwnProperty( 'alt' ) ? imgItem.alt : imgItem.title ),
+										'title': imgItem.title,
+									});
+
+									newHTML.append( itemHTML )
+								}
+								newHTML = newHTML.prop( 'outerHTML' );
+								break;
+
 							case 'SiteOrigin_Widget_Accordion_Widget':
 							case 'SiteOrigin_Widget_Tabs_Widget':
 								var contentItems = widgetClass === 'SiteOrigin_Widget_Accordion_Widget' ? widgetInstance.panels : widgetInstance.tabs;
 								newHTML = $( '<div/>' );
-								for( var i = 0; i < contentItems.length; i++ ) {
+								for ( var i = 0; i < contentItems.length; i++ ) {
 									var item = contentItems[ i ];
 									if ( item.content_type !== 'text' ) {
 										continue;
@@ -98,6 +116,12 @@ jQuery(function($){
 									newHTML.append( '<div>' + item.content_text + '</div>')
 								}
 								newHTML = newHTML.prop( 'outerHTML' );
+								break;
+							case 'SiteOrigin_Widget_Button_Widget':
+								var hrefSeparator = widgetInstance.url.includes('://') ? '' : '#';
+								newHTML = $( '<a>' + widgetInstance.text + '</a>' ).attr({
+									'href': hrefSeparator + widgetInstance.url,
+								}).prop('outerHTML');
 								break;
 						}
 					}

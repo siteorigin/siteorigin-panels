@@ -37,16 +37,17 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if( empty( $instance['builder_id'] ) ) $instance['builder_id'] = uniqid();
 		
 		echo $args['before_widget'];
-		echo SiteOrigin_Panels::renderer()->render( 'w'.$instance['builder_id'], true, $instance['panels_data'], $layout_data );
-		if( ! empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) && siteorigin_panels_setting( 'copy-styles' ) ) {
-			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
-			$widget_css .= SiteOrigin_Panels::renderer()->generate_css( 'w'.$instance['builder_id'], $instance['panels_data'], $layout_data );
-			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
-			echo "\n\n" .
-				 '<style type="text/css" class="panels-style" data-panels-style-for-post="' . esc_attr( 'w'.$instance['builder_id'] ) . '">' .
-				 $widget_css .
-				 '</style>';
-		}
+		$is_content_render = ! empty( $GLOBALS['SITEORIGIN_PANELS_POST_CONTENT_RENDER'] ) &&
+                             siteorigin_panels_setting( 'copy-styles' );
+		$is_preview_render = ! empty( $GLOBALS['SITEORIGIN_PANELS_PREVIEW_RENDER'] );
+
+		echo SiteOrigin_Panels::renderer()->render(
+		        'w'.$instance['builder_id'],
+                true,
+                $instance['panels_data'],
+                $layout_data,
+                $is_content_render || $is_preview_render
+        );
 		echo $args['after_widget'];
 	}
 	

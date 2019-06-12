@@ -120,6 +120,10 @@ jQuery( function ( $ ) {
 			config: builderConfig
 		} );
 
+		// Trigger an event before the panels setup to allow adding listeners for various builder events which are
+		// triggered during initial setup.
+		$(document).trigger('before_panels_setup', builderView);
+
 		// Set up the builder view
 		builderView
 			.render()

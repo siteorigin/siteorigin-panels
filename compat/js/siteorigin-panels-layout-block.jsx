@@ -46,7 +46,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		} else if ( this.state.loadingPreview ) {
 			this.fetchPreview( this.props );
 		} else if ( ! this.previewInitialized && this.previewContainer.current){
-			$( document ).trigger( 'panels_setup_preview' );
+			jQuery( document ).trigger( 'panels_setup_preview' );
 			this.previewInitialized = true;
 		}
 	}
@@ -66,7 +66,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		} );
 		
 		// Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
-		var panelsData = JSON.parse( JSON.stringify( $.extend( {}, this.props.panelsData ) ) );
+		var panelsData = JSON.parse( JSON.stringify( jQuery.extend( {}, this.props.panelsData ) ) );
 		
 		// Disable block selection while dragging rows or widgets.
 		let rowOrWidgetMouseDown = () => {
@@ -74,12 +74,12 @@ class SiteOriginPanelsLayoutBlock extends Component {
 				this.props.onRowOrWidgetMouseDown();
 			}
 			let rowOrWidgetMouseUp = () => {
-				$( document ).off( 'mouseup', rowOrWidgetMouseUp );
+				jQuery( document ).off( 'mouseup', rowOrWidgetMouseUp );
 				if ( isFunction( this.props.onRowOrWidgetMouseUp ) ) {
 					this.props.onRowOrWidgetMouseUp();
 				}
 			};
-			$( document ).on( 'mouseup', rowOrWidgetMouseUp );
+			jQuery( document ).on( 'mouseup', rowOrWidgetMouseUp );
 		};
 		
 		this.builderView.on( 'row_added', () => {
@@ -114,7 +114,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			}
 		} );
 		
-		$( document ).trigger( 'panels_setup', this.builderView );
+		jQuery( document ).trigger( 'panels_setup', this.builderView );
 		
 		this.panelsInitialized = true;
 	}
@@ -126,7 +126,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		this.previewInitialized = false;
 		
-		const fetchRequest = this.currentFetchRequest = $.post( {
+		const fetchRequest = this.currentFetchRequest = jQuery.post( {
 			url: soPanelsBlockEditorAdmin.previewUrl,
 			data: {
 				action: 'so_panels_layout_block_preview',
@@ -238,7 +238,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 			
 			if ( !_.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
-				$.post(
+				jQuery.post(
 					soPanelsBlockEditorAdmin.sanitizeUrl,
 					{
 						action: 'so_panels_layout_block_sanitize',
@@ -277,14 +277,14 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	}
 } );
 
-( ( $ ) => {
+( ( jQuery ) => {
 	if ( soPanelsBlockEditorAdmin.showAddButton ) {
-		$( () => {
+		jQuery( () => {
 			setTimeout( () => {
 				const editorDispatch = wp.data.dispatch( 'core/editor' );
 				const editorSelect = wp.data.select( 'core/editor' );
-				var tmpl = $( '#siteorigin-panels-add-layout-block-button' ).html();
-				var $addButton = $(tmpl).insertAfter( '.editor-writing-flow > div:first' );
+				var tmpl = jQuery( '#siteorigin-panels-add-layout-block-button' ).html();
+				var $addButton = jQuery(tmpl).insertAfter( '.editor-writing-flow > div:first' );
 				$addButton.on( 'click', () => {
 					var layoutBlock = wp.blocks.createBlock( 'siteorigin-panels/layout-block', {} );
 					const isEmpty = editorSelect.isEditedPostEmpty();
