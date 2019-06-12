@@ -96,6 +96,17 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.6 - 12 June 2019 =
+* Add admin filter for whether to show the 'add new' dropdown and classic editor admin notice.
+* Trigger new event before initial panels setup.
+* Yoast compat.
+* Pass new widget view as parameter in 'widget_added' event.
+* Layout Builder widget: Use preview parameter and remove redundant style rendering for Post Content and Preview rendering.
+* Layout Block: Support for custom class names.
+* Layout styles: Add contain as option for background image display.
+* Block editor: Only go to PB interface for _new_ PB post types.
+* Layout block: Use `jQuery` instead of alias `$` for odd cases where `$` is undefined.
+
 = 2.10.5 - 5 April 2019 =
 * Live Editor: Fix styles in live editor previews.
 * Render cell styles after row styles.
