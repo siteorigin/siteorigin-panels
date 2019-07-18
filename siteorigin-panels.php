@@ -675,13 +675,11 @@ class SiteOrigin_Panels {
 		if ( get_transient( 'siteorigin_panels_activation_welcome' ) ) {
 
 			// Postpone redirect in certain situations
-			if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) ) {
-				return false;
+			if ( ! wp_doing_ajax() && ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
+				delete_transient( 'siteorigin_panels_activation_welcome' );
+				wp_safe_redirect( admin_url( 'options-general.php?page=siteorigin_panels#welcome' ) );
+				exit();
 			}
-
-			delete_transient( 'siteorigin_panels_activation_welcome' );
-			wp_safe_redirect( admin_url( 'options-general.php?page=siteorigin_panels#welcome' ) );
-			exit();
 		}
 	}
 }
