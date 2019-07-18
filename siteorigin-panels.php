@@ -38,7 +38,8 @@ class SiteOrigin_Panels {
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 		
-		add_action( 'activated_plugin', array($this, 'activation_redirect') );
+		add_action( 'activated_plugin', array($this, 'activation_flag_redirect') );
+		add_action( 'admin_init', array($this, 'activation_do_redirect') );
 
 		if (
 			is_admin() ||
@@ -657,13 +658,28 @@ class SiteOrigin_Panels {
 	}
 	
 	/**
-	 * Redirect to a welcome page after activation.
+	 *  Flag redirect to welcome page after activation
 	 *
 	 * @param $plugin
 	 */
-	public function activation_redirect( $plugin ){
-		if( $plugin == plugin_basename( __FILE__ ) ) {
-			exit( wp_redirect( admin_url( 'options-general.php?page=siteorigin_panels#welcome' ) ) );
+	public function activation_flag_redirect( $plugin ) {
+		if ( $plugin == plugin_basename( __FILE__ ) ) {
+			set_transient( 'siteorigin_panels_activation_welcome', true, 30 );
+		}
+	}
+
+	/**
+	 * Redirect to a welcome page after activation.
+	 */
+	public function activation_do_redirect() {
+		if ( get_transient( 'siteorigin_panels_activation_welcome' ) ) {
+
+			// Postpone redirect in certain situations
+			if ( ! wp_doing_ajax() && ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
+				delete_transient( 'siteorigin_panels_activation_welcome' );
+				wp_safe_redirect( admin_url( 'options-general.php?page=siteorigin_panels#welcome' ) );
+				exit();
+			}
 		}
 	}
 }
