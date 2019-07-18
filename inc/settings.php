@@ -295,7 +295,7 @@ class SiteOrigin_Panels_Settings {
 			'label' => __('Upgrade Teaser', 'siteorigin-panels'),
 			'description' => sprintf(
 				__('Display the %sSiteOrigin Premium%s upgrade teaser in the Page Builder toolbar.', 'siteorigin-panels'),
-				'<a href="siteorigin.com/downloads/premium/" target="_blank" rel="noopener noreferrer">',
+				'<a href="https://siteorigin.com/downloads/premium/" target="_blank" rel="noopener noreferrer">',
 				'</a>'
 			)
 		);
