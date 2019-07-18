@@ -673,6 +673,7 @@ class SiteOrigin_Panels {
 	 */
 	public function activation_do_redirect() {
 		if ( get_transient( 'siteorigin_panels_activation_welcome' ) ) {
+			delete_transient( 'siteorigin_panels_activation_welcome' );
 
 			// Postpone redirect in certain situations
 			if ( ! wp_doing_ajax() && ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
