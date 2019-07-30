@@ -65,6 +65,7 @@ class SiteOrigin_Panels_Renderer {
 		$panels_tablet_width = $settings['tablet-width'];
 		$panels_mobile_width = $settings['mobile-width'];
 		$panels_margin_bottom = $settings['margin-bottom'];
+		$panels_mobile_margin_bottom = $settings['margin-bottom'];
 		$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
 
 		$css = new SiteOrigin_Panels_Css_Builder();
@@ -179,8 +180,8 @@ class SiteOrigin_Panels_Renderer {
 						}
 
 						$css->add_cell_css( $post_id, $ri, false, $remove_bottom_margin, array(
-							'margin-bottom' => 0,
-						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 )
+								'margin-bottom' => 0,
+							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 )
 						);
 
 						if ( ! empty( $gutter_parts[1] ) ) {
@@ -217,7 +218,7 @@ class SiteOrigin_Panels_Renderer {
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
-							'margin-bottom' => $panels_margin_bottom . 'px',
+							'margin-bottom' => apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', $panels_margin_bottom . 'px', $row, $ri, $panels_data, $post_id )
 						), $panels_mobile_width );
 					}
 				}
