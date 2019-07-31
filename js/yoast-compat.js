@@ -1,4 +1,4 @@
-/* global jQuery, YoastSEO */
+/* global jQuery, YoastSEO, _, panelsOptions */
 
 jQuery(function($){
 
@@ -41,7 +41,7 @@ jQuery(function($){
 			return data;
 		}
 
-		$data.find('.so-panel.widget').each(function(i, el) {
+		$data.find('.so-panel.widget').each(function(eli, el) {
 			
 			var $widget = $(el);
 			// Style wrappers prevent us from matching the widget shortcode correctly.
@@ -64,41 +64,45 @@ jQuery(function($){
 
 					if( ! _.isNull( classMatch ) ) {
 						var widgetClass = classMatch[1];
+
 						switch( widgetClass ) {
 							case 'SiteOrigin_Widget_Image_Widget':
 								// We want a direct assignment for the SO Image Widget to get rid of the title
-								newHTML = $('<img/>').attr({
-									'src': '#' + widgetInstance.image,
-									'srcset': '',
-									'alt': widgetInstance.alt,
-									'title': widgetInstance.title,
-								}).prop('outerHTML');
+								newHTML = $('<img/>')
+									.attr({
+										'src': '#' + widgetInstance.image,
+										'srcset': '',
+										'alt': widgetInstance.alt,
+										'title': widgetInstance.title,
+									}).prop('outerHTML');
 								break;
 
 							case 'WP_Widget_Media_Image':
-								newHTML = $('<img/>').attr({
-									'src': '#' + widgetInstance.attachment_id,
-									'srcset': '',
-									'alt': widgetInstance.alt,
-									'title': widgetInstance.image_title,
-								}).prop('outerHTML');
+								newHTML = $('<img/>')
+									.attr({
+										'src': '#' + widgetInstance.attachment_id,
+										'srcset': '',
+										'alt': widgetInstance.alt,
+										'title': widgetInstance.image_title,
+									}).prop('outerHTML');
 								break;
 
 							case 'SiteOrigin_Widgets_ImageGrid_Widget':
 							case 'SiteOrigin_Widget_Simple_Masonry_Widget':
-								newHTML = $( '<div/>' );
 								var imgItems = widgetClass === 'SiteOrigin_Widgets_ImageGrid_Widget' ? widgetInstance.images : widgetInstance.items;
-								for ( var i = 0; i < imgItems.length; i++ ) {
-									var imgItem = imgItems[ i ];
-									var itemHTML = $('<img/>').attr({
-										'src': '#' + imgItem.image,
-										'srcset': '',
-										'alt': ( imgItem.hasOwnProperty( 'alt' ) ? imgItem.alt : imgItem.title ),
-										'title': imgItem.title,
-									});
+								newHTML = $( '<div/>' );
 
-									newHTML.append( itemHTML )
-								}
+								_.each(imgItems, function(imgItem){
+									var itemHTML = $('<img/>')
+										.attr({
+											'src': '#' + imgItem.image,
+											'srcset': '',
+											'alt': ( imgItem.hasOwnProperty( 'alt' ) ? imgItem.alt : imgItem.title ),
+											'title': imgItem.title
+										});
+
+									newHTML.append( itemHTML );
+								});
 								newHTML = newHTML.prop( 'outerHTML' );
 								break;
 
@@ -106,22 +110,25 @@ jQuery(function($){
 							case 'SiteOrigin_Widget_Tabs_Widget':
 								var contentItems = widgetClass === 'SiteOrigin_Widget_Accordion_Widget' ? widgetInstance.panels : widgetInstance.tabs;
 								newHTML = $( '<div/>' );
-								for ( var i = 0; i < contentItems.length; i++ ) {
-									var item = contentItems[ i ];
-									if ( item.content_type !== 'text' ) {
-										continue;
+
+								_.each(contentItems, function(item){
+									if ( item.content_type === 'text' ) {
+										newHTML.append( '<h3>' + item.title + '</h3>' );
+										newHTML.append( '<div>' + item.content_text + '</div>');
 									}
-									
-									newHTML.append( '<h3>' + item.title + '</h3>' );
-									newHTML.append( '<div>' + item.content_text + '</div>')
-								}
+								});
 								newHTML = newHTML.prop( 'outerHTML' );
 								break;
+
 							case 'SiteOrigin_Widget_Button_Widget':
 								var hrefSeparator = widgetInstance.url.includes('://') ? '' : '#';
 								newHTML = $( '<a>' + widgetInstance.text + '</a>' ).attr({
-									'href': hrefSeparator + widgetInstance.url,
+									'href': hrefSeparator + widgetInstance.url
 								}).prop('outerHTML');
+								break;
+
+							default:
+								// TODO find a good way to generate this widget's content
 								break;
 						}
 					}
