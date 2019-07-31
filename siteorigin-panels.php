@@ -328,7 +328,7 @@ class SiteOrigin_Panels {
 						$content = explode( $matches[0], $content, 2 );
 						$content = $content[0];
 						$content = force_balance_tags( $content );
-						if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) ) {
+						if ( ! empty( $matches[1] ) ) {
 							$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
 						} else {
 							$more_link_text = __( 'Read More', 'siteorigin-panels' );
