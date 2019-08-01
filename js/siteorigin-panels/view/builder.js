@@ -10,6 +10,7 @@ module.exports = Backbone.View.extend( {
 	rowsSortable: null,
 	dataField: false,
 	currentData: '',
+	contentPreview: '',
 	
 	attachedToEditor: false,
 	attachedVisible: false,
@@ -737,13 +738,16 @@ module.exports = Backbone.View.extend( {
 				$.post(
 					panelsOptions.ajaxurl,
 					{
-						action: 'so_panels_builder_content',
+						action: 'so_panels_builder_content_json',
 						panels_data: JSON.stringify( panelsData ),
 						post_id: this.config.postId
 					},
 					function ( content ) {
-						if ( content !== '' ) {
-							this.updateEditorContent( content );
+						if ( content.preview !== '' ) {
+							this.contentPreview = content.preview;
+						}
+						if ( content.post_content !== '' ) {
+							this.updateEditorContent( content.post_content );
 						}
 					}.bind( this )
 				);

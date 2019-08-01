@@ -52,6 +52,7 @@ class SiteOrigin_Panels_Admin {
 
 		// Register all the admin actions
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
+		add_action( 'wp_ajax_so_panels_builder_content_json', array( $this, 'action_builder_content_json' ) );
 		add_action( 'wp_ajax_so_panels_widget_form', array( $this, 'action_widget_form' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
 		add_action( 'wp_ajax_so_panels_layout_block_sanitize', array( $this, 'layout_block_sanitize' ) );
@@ -1055,14 +1056,56 @@ class SiteOrigin_Panels_Admin {
 			false
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-
+		
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		echo SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
-
+		
+		wp_die();
+	}
+	
+	/**
+	 * Get builder content based on the submitted panels_data.
+	 */
+	function action_builder_content_json() {
+		header( 'content-type: application/json' );
+		$return = array('post_content' => '', 'preview' => '');
+		
+		if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
+			wp_die();
+		}
+		
+		if ( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
+			echo json_encode($return);
+			wp_die();
+		}
+		
+		// echo the content
+		$old_panels_data        = get_post_meta( $_POST['post_id'], 'panels_data', true );
+		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
+		$panels_data['widgets'] = $this->process_raw_widgets(
+			$panels_data['widgets'],
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+			false
+		);
+		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		
+		// Create a version of the builder data for post content
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+		$return['post_content'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+		
+		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
+		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
+		
+		echo json_encode( $return );
+		
 		wp_die();
 	}
 
