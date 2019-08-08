@@ -144,7 +144,7 @@ class SiteOrigin_Panels_Renderer {
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
-			if ( $settings['responsive'] && ! empty( empty( $row['style']['collapse_behaviour'] ) ) ) {
+			if ( $settings['responsive'] && empty( $row['style']['collapse_behaviour'] ) ) {
 				// The default collapse behaviour
 				if (
 					$settings['tablet-layout'] &&
