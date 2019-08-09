@@ -229,6 +229,9 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	attributes: {
 		panelsData: {
 			type: 'object',
+		},
+		contentPreview: {
+			type: 'string',
 		}
 	},
 	
@@ -239,15 +242,22 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 			if ( !_.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
 				jQuery.post(
-					soPanelsBlockEditorAdmin.sanitizeUrl,
+					panelsOptions.ajaxurl,
 					{
-						action: 'so_panels_layout_block_sanitize',
-						panelsData: JSON.stringify( newPanelsData ),
-					},
-					function ( sanitizedPanelsData ) {
-						if ( sanitizedPanelsData !== '' ) {
-							setAttributes( { panelsData: sanitizedPanelsData } );
+						action: 'so_panels_builder_content_json',
+						panels_data: JSON.stringify( newPanelsData ),
+						post_id: wp.data.select("core/editor").getCurrentPostId()
+			},
+					function ( content ) {
+						let panelsAttributes = {};
+						if ( content.sanitized_panels_data !== '' ) {
+							panelsAttributes.panelsData = content.sanitized_panels_data;
 						}
+						if ( content.preview !== '' ) {
+							panelsAttributes.contentPreview = content.preview;
+						}
+						
+						setAttributes( panelsAttributes );
 					}
 				);
 			}
@@ -271,9 +281,10 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 		);
 	},
 	
-	save() {
-		// Render in PHP
-		return null;
+	save( { attributes } ) {
+		return attributes.hasOwnProperty('contentPreview') ?
+			<RawHTML>{attributes.contentPreview}</RawHTML> :
+			null;
 	}
 } );
 

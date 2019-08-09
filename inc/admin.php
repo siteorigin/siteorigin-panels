@@ -1072,7 +1072,7 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function action_builder_content_json() {
 		header( 'content-type: application/json' );
-		$return = array('post_content' => '', 'preview' => '');
+		$return = array('post_content' => '', 'preview' => '', 'sanitized_panels_data' => '');
 		
 		if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
 			wp_die();
@@ -1092,6 +1092,7 @@ class SiteOrigin_Panels_Admin {
 			false
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		$return['sanitized_panels_data'] = $panels_data;
 		
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
