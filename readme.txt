@@ -96,6 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.7 - 15 August 2019 =
+* Added setting for mobile specific margin.
+* Prevent Welcome Page Redirect During Bulk Install and TGMPA
+* Added support for password settings field.
+* Layout Block: Add filter to control whether Add Layout Block button is shown or not.
+* Fixed issue with widget duplication after moving a widget.
+* Fixed Read More Custom Text issue.
+
 = 2.10.6 - 12 June 2019 =
 * Add admin filter for whether to show the 'add new' dropdown and classic editor admin notice.
 * Trigger new event before initial panels setup.
