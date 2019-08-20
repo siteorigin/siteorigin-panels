@@ -88,6 +88,10 @@ class SiteOrigin_Panels_Styles_Admin {
 				'name'     => __( 'Layout', 'siteorigin-panels' ),
 				'priority' => 10
 			),
+			'mobile_layout'     => array(
+				'name'     => __( 'Mobile Layout', 'siteorigin-panels' ),
+				'priority' => 11
+			),
 			'design'     => array(
 				'name'     => __( 'Design', 'siteorigin-panels' ),
 				'priority' => 15
