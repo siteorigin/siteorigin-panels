@@ -453,7 +453,7 @@ module.exports = Backbone.View.extend( {
 					if ( $$.is( ':checked' ) ) {
 						fieldValue = $$.val() !== '' ? $$.val() : true;
 					} else {
-						fieldValue = null;
+						fieldValue = '';
 					}
 				}
 				else if ( fieldType === 'radio' ) {
