@@ -96,6 +96,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.9 - 23 August 2019 =
+* Use desktop margin between cells when collapsed and no mobile margin is given.
+
 = 2.10.8 - 22 August 2019 =
 * Made mobile bottom margin default to empty.
 * Fixed remove button appearing when no image was present in style field.
