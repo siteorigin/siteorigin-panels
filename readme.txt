@@ -1,6 +1,6 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
-Requires at least: 4.4
+Requires at least: 4.7
 Tested up to: 5.2.2
 Stable tag: trunk
 Build time: unbuilt
