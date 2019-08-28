@@ -216,7 +216,16 @@ class SiteOrigin_Panels_Renderer {
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
-							'margin-bottom' => ! empty( $panels_mobile_margin_bottom ) ? $panels_mobile_margin_bottom : $panels_margin_bottom
+							'margin-bottom' => apply_filters(
+								'siteorigin_panels_css_cell_mobile_margin_bottom',
+								$settings['margin-bottom'] . 'px',
+								$cell,
+								$ci,
+								$row,
+								$ri,
+								$panels_data,
+								$post_id
+							)
 						), $panels_mobile_width );
 					}
 				}

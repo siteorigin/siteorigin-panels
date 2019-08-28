@@ -1,6 +1,6 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
-Requires at least: 4.4
+Requires at least: 4.7
 Tested up to: 5.2.2
 Stable tag: trunk
 Build time: unbuilt
@@ -95,6 +95,11 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.10.10 - 28 August 2019 =
+* Added filter for cell bottom margin on mobile.
+* Make sure widget form checkbox values are unset when unchecked.
+* Added Widget Options plugin compatibility code.
 
 = 2.10.9 - 23 August 2019 =
 * Use desktop margin between cells when collapsed and no mobile margin is given.

@@ -83,7 +83,6 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
 		
-		
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
 
@@ -191,6 +190,11 @@ class SiteOrigin_Panels {
 		// Check if we need to initialize the admin class.
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
+		}
+		
+		// Compatibility with Widget Options plugin
+		if( class_exists('WP_Widget_Options') ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
 		}
 	}
 
