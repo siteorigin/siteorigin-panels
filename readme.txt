@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.10 - 28 August 2019 =
+* Added filter for cell bottom margin on mobile.
+* Make sure widget form checkbox values are unset when unchecked.
+* Added Widget Options plugin compatibility code.
+
 = 2.10.9 - 23 August 2019 =
 * Use desktop margin between cells when collapsed and no mobile margin is given.
 
