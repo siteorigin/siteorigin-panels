@@ -751,8 +751,8 @@ class SiteOrigin_Panels_Admin {
 	function get_widgets() {
 		global $wp_widget_factory;
 		$widgets = array();
-		foreach ( $wp_widget_factory->widgets as $widget_obj ) {
-			$class = get_class( $widget_obj );
+		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+			$class = preg_match( '/[0-9a-f]{32}/', $class ) ? get_class( $widget_obj ) : $class;
 			$widgets[ $class ] = array(
 				'class'       => $class,
 				'title'       => ! empty( $widget_obj->name ) ? $widget_obj->name : __( 'Untitled Widget', 'siteorigin-panels' ),
