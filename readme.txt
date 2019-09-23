@@ -96,6 +96,11 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.11 - 19 September 2019 =
+* Added setting for cell spacing in a collapsed row.
+* Fix support for widgets that share a single classname.
+* Fixed styling issues after Chrome update.
+
 = 2.10.10 - 28 August 2019 =
 * Added filter for cell bottom margin on mobile.
 * Make sure widget form checkbox values are unset when unchecked.
