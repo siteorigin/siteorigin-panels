@@ -751,8 +751,8 @@ class SiteOrigin_Panels_Admin {
 	function get_widgets() {
 		global $wp_widget_factory;
 		$widgets = array();
-		foreach ( $wp_widget_factory->widgets as $widget_obj ) {
-			$class = get_class( $widget_obj );
+		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
+			$class = preg_match( '/[0-9a-f]{32}/', $class ) ? get_class( $widget_obj ) : $class;
 			$widgets[ $class ] = array(
 				'class'       => $class,
 				'title'       => ! empty( $widget_obj->name ) ? $widget_obj->name : __( 'Untitled Widget', 'siteorigin-panels' ),
@@ -1374,16 +1374,12 @@ class SiteOrigin_Panels_Admin {
 				font: 400 20px/.5 dashicons;
 				speak: none;
 				top: 0px;
-			<?php if ( is_rtl() ) : ?>
-				right: -1px;
-			<?php else : ?>
-				left: -1px;
-			<?php endif; ?>
 				position: relative;
 				vertical-align: top;
 				text-decoration: none !important;
-				padding: 4px 5px 5px 4px;
+				padding: 4px 5px 4px 4px;
 				border-radius: 0px 2px 2px 0px;
+				<?php echo  is_rtl() ? 'right: -1px;' : 'left: -1px;' ?>
 			}
 			
 			.split-page-title-action .dropdown {
@@ -1401,15 +1397,13 @@ class SiteOrigin_Panels_Admin {
 				display: block;
 				top: 0;
 				margin: -1px 0;
-			<?php if ( is_rtl() ) : ?>
-				padding-left: 9px;
-			<?php else : ?>
-				padding-right: 9px;
-			<?php endif; ?>
+				<?php echo is_rtl() ? 'padding-left: 9px;' : 'padding-right: 9px;' ?>
 			}
 			
 			.split-page-title-action .expander {
 				outline: none;
+				float: right;
+				margin-top: 1px;
 			}
 		
 		</style>

@@ -36,6 +36,7 @@ class SiteOrigin_Panels_Styles {
 
 		// Filtering specific attributes
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
+		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
 		add_filter( 'siteorigin_panels_css_row_mobile_margin_bottom', array( $this, 'filter_row_mobile_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
@@ -271,6 +272,14 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'measurement',
 			'group'       => 'mobile_layout',
 			'description' => sprintf( __( 'Space below the row on mobile devices. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
+			'priority'    => 5,
+		);
+		
+		$fields['mobile_cell_margin'] = array(
+			'name'        => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'mobile_layout',
+			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority'    => 5,
 		);
 		
@@ -691,6 +700,22 @@ class SiteOrigin_Panels_Styles {
 			$margin = $grid['style']['bottom_margin'];
 		}
 
+		return $margin;
+	}
+	
+	/**
+	 * Add in custom styles for spacing between cells in a row.
+	 *
+	 * @param $margin
+	 * @param $cell
+	 *
+	 * @return mixed
+	 */
+	static function filter_row_cell_bottom_margin($margin, $cell, $ci, $row, $ri){
+		if ( ! empty( $row['style']['mobile_cell_margin'] ) ) {
+			$margin = $row['style']['mobile_cell_margin'];
+		}
+		
 		return $margin;
 	}
 	
