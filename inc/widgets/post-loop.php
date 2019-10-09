@@ -342,6 +342,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					?>
 				</small>
 			</p>
+			
+			<a href="https://siteorigin.com/page-builder/bundled-widgets/post-loop-widget/" class="siteorigin-widget-help-link siteorigin-panels-help-link" target="_blank" rel="noopener noreferrer"><?php _e('Help', 'so-widgets-bundle') ?></a>
 			<?php
 		}
 	}

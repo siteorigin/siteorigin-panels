@@ -29,6 +29,7 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 			__( 'Post Loop', 'siteorigin-panels' ),
 			array(
 				'description' => __( 'Displays a post loop.', 'siteorigin-panels' ),
+				'help' => 'https://siteorigin.com/page-builder/bundled-widgets/post-loop-widget/',
 				'has_preview' => false,
 			),
 			array(),
