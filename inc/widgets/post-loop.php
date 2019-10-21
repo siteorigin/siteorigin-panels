@@ -184,14 +184,19 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$rendering_loop = true;
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
-		if(strpos('/'.$instance['template'], '/content') !== false) {
+		// Is $file being added by a plugin?
+		$filename = locate_template( $instance['template'] );
+		if ( ! $filename ) {
+			// Template added by a plugin
+			$filename = WP_PLUGIN_DIR . '/' . $instance['template'];
+		}
+		if ( strpos( $filename, '/content' ) !== false ) {
 			while( have_posts() ) {
 				the_post();
-				locate_template($instance['template'], true, false);
+				include $filename;
 			}
-		}
-		else {
-			locate_template($instance['template'], true, false);
+		} else {
+			include $filename;
 		}
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
@@ -347,7 +352,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			<?php
 		}
 	}
-	
+
 	/**
 	 * Get all the existing files
 	 *
@@ -373,34 +378,38 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				}
 			}
 		}
-		
 		$templates = array_unique( apply_filters( 'siteorigin_panels_postloop_templates', $templates ) );
-		foreach ( $templates as $template_key => $template)  {
-			$invalid = false;
+		if ( ! empty( $templates ) ) {
 
-			// Ensure the provided file has a valid name and path
-			if ( validate_file( $template ) != 0 ) {
-				$invalid = true;
-			}
+			foreach ( $templates as $template_key => $template ) {
+				$invalid = false;
 
-			// Don't expect non-PHP files
-			if ( substr( $template, -4 ) != '.php' ) {
-				$invalid = true;
-			}
+				// Ensure the provided file has a valid name and path
+				if ( validate_file( $template ) != 0 ) {
+					$invalid = true;
+				}
 
-			$template = locate_template( $template );
-			if ( empty( $template ) || $invalid ) {
-				unset( $templates[ $template_key ] );
+				// Don't expect non-PHP files
+				if ( ! $invalid && substr( $template, -4 ) != '.php' ) {
+					$invalid = true;
+				}
+
+				// Confirm template exists
+				if ( ! $invalid && ! locate_template( $template ) && ! file_exists( WP_PLUGIN_DIR . "/$template" ) ) {
+					$invalid = true;
+				}
+
+				if ( $invalid ) {
+					unset( $templates[$template_key] );
+				}
 			}
 		}
 		// Update array indexes to ensure logical indexing
 		sort( $templates );
-		sort( $templates );
 		
 		return $templates;
 	}
-	
-	
+
 	/**
 	 * Get the helper widget based on the Widgets Bundle's classes.
 	 *
