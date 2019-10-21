@@ -17,7 +17,6 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 		$template_options = array();
 		if( ! empty( $templates ) ) {
 			foreach( $templates as $template ) {
-				$headers = get_file_data( locate_template( $template ), array(
 				// Is this template being added by a plugin?
 				$filename = locate_template( $template );
 				if ( ! $filename ) {
