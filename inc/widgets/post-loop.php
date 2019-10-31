@@ -180,24 +180,30 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 		
-		global $more; $old_more = $more; $more = empty($instance['more']);
+		global $more;
+		$old_more = $more;
+		$more = empty($instance['more']);
+		
 		self::$rendering_loop = true;
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
+		
 		// Is $file being added by a plugin?
 		$filename = locate_template( $instance['template'] );
 		if ( ! $filename ) {
 			// Template added by a plugin
 			$filename = WP_PLUGIN_DIR . '/' . $instance['template'];
 		}
+		
 		if ( strpos( $filename, '/content' ) !== false ) {
 			while( have_posts() ) {
 				the_post();
-				include $filename;
+				load_template($filename, false);
 			}
 		} else {
-			include $filename;
+			load_template($filename, false);
 		}
+		
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
 		self::$current_loop_template = null;
@@ -379,35 +385,31 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			}
 		}
 		$templates = array_unique( apply_filters( 'siteorigin_panels_postloop_templates', $templates ) );
-		if ( ! empty( $templates ) ) {
-
-			foreach ( $templates as $template_key => $template ) {
-				$invalid = false;
-
-				// Ensure the provided file has a valid name and path
-				if ( validate_file( $template ) != 0 ) {
-					$invalid = true;
-				}
-
-				// Don't expect non-PHP files
-				if ( ! $invalid && substr( $template, -4 ) != '.php' ) {
-					$invalid = true;
-				}
-
-				// Confirm template exists
-				if ( ! $invalid && ! locate_template( $template ) && ! file_exists( WP_PLUGIN_DIR . "/$template" ) ) {
-					$invalid = true;
-				}
-
-				if ( $invalid ) {
-					unset( $templates[$template_key] );
-				}
-			}
-		}
+		$templates = array_filter( $templates, array($this, 'validate_template_file') );
+		
 		// Update array indexes to ensure logical indexing
 		sort( $templates );
 		
 		return $templates;
+	}
+	
+	/**
+	 * Checks if a template file is valid
+	 *
+	 * @param $filename
+	 *
+	 * @return bool
+	 */
+	public function validate_template_file( $filename )
+	{
+		return (
+			// File is a valid PHP file
+			validate_file( $filename ) == 0 &&
+			substr( $filename, -4 ) == '.php' &&
+			
+			// And it exists
+			( locate_template( $filename ) != '' || file_exists( WP_PLUGIN_DIR . '/' . $filename ) )
+		);
 	}
 
 	/**
