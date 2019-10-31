@@ -228,6 +228,7 @@ module.exports = panels.view.dialog.extend( {
 				search: search,
 				page: page,
 				type: type,
+				builderType: this.builder.config.builderType,
 			},
 			function ( data ) {
 				// Skip this if we're no longer viewing the layout directory
