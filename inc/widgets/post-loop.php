@@ -189,19 +189,13 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$current_loop_template = $instance['template'];
 		
 		// Is $file being added by a plugin?
-		$filename = locate_template( $instance['template'] );
-		if ( ! $filename ) {
-			// Template added by a plugin
-			$filename = WP_PLUGIN_DIR . '/' . $instance['template'];
-		}
-		
-		if ( strpos( $filename, '/content' ) !== false ) {
+		if ( strpos( $instance['template'], '/content' ) !== false ) {
 			while( have_posts() ) {
 				the_post();
-				load_template($filename, false);
+				$this->locate_template($instance['template'], true, false);
 			}
 		} else {
-			load_template($filename, false);
+			$this->locate_template($instance['template'], true, false);
 		}
 		
 		self::$rendering_loop = false;
@@ -263,7 +257,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					<?php foreach($templates as $template) : ?>
 						<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
 							<?php
-							$headers = get_file_data( locate_template($template), array(
+							$headers = get_file_data( $this->locate_template($template), array(
 								'loop_name' => 'Loop Name',
 							) );
 							echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
@@ -410,6 +404,36 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			// And it exists
 			( locate_template( $filename ) != '' || file_exists( WP_PLUGIN_DIR . '/' . $filename ) )
 		);
+	}
+	
+	/**
+	 * Find the location of a given template. Either in the theme or in the plugin directory.
+	 *
+	 * @param $template_names
+	 * @param bool $load
+	 * @param bool $require_once
+	 *
+	 * @return string The template location.
+	 */
+	public function locate_template( $template_names, $load = false, $require_once = true )
+	{
+		$located = '';
+		
+		foreach ( (array) $template_names as $template_name ) {
+			
+			$located = locate_template($template_name, false);
+			
+			if ( ! $located && file_exists( WP_PLUGIN_DIR . '/' . $template_name ) ) {
+				// Template added by a plugin
+				$located = WP_PLUGIN_DIR . '/' . $template_name;
+			}
+		}
+		
+		if ( $load && '' != $located ) {
+			load_template( $located, $require_once );
+		}
+		
+		return $located;
 	}
 
 	/**
