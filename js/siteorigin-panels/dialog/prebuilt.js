@@ -351,7 +351,13 @@ module.exports = panels.view.dialog.extend( {
 	loadSelectedLayout: function () {
 		this.setStatusMessage( panelsOptions.loc.prebuilt_loading, true );
 
-		var args = _.extend( this.selectedLayoutItem, {action: 'so_panels_get_layout'} );
+		var args = _.extend(
+			this.selectedLayoutItem,
+			{
+				action: 'so_panels_get_layout',
+				builderType: this.builder.config.builderType
+			}
+		);
 		var deferredLayout = new $.Deferred();
 
 		$.get(
