@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
-Tested up to: 5.2.2
+Tested up to: 5.3
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,9 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.10.12 - 4 November 2019 =
+* Resolve issue caused by locate_template preventing plugins from adding Post Loop templates.
 
 = 2.10.11 - 23 September 2019 =
 * Added setting for cell spacing in a collapsed row.
