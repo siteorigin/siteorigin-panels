@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.13 - 9 November 2019 =
+* Fixed check for content.php post loop templates
+* Add `builderType` argument when fetching a selected prebuilt layout.
+
 = 2.10.12 - 4 November 2019 =
 * Resolve issue caused by locate_template preventing plugins from adding Post Loop templates.
 
