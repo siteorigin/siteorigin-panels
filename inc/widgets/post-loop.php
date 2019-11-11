@@ -188,14 +188,13 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
 		
-		// Is $file being added by a plugin?
-		if ( strpos( $instance['template'], '/content' ) !== false ) {
+		if ( preg_match( '/\/content*/', '/' . $instance['template'] ) ) {
 			while( have_posts() ) {
 				the_post();
-				$this->locate_template($instance['template'], true, false);
+				self::locate_template($instance['template'], true, false);
 			}
 		} else {
-			$this->locate_template($instance['template'], true, false);
+			self::locate_template($instance['template'], true, false);
 		}
 		
 		self::$rendering_loop = false;
@@ -257,7 +256,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					<?php foreach($templates as $template) : ?>
 						<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
 							<?php
-							$headers = get_file_data( $this->locate_template($template), array(
+							$headers = get_file_data( self::locate_template($template), array(
 								'loop_name' => 'Loop Name',
 							) );
 							echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
@@ -371,6 +370,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$template_dirs = array( get_template_directory(), get_stylesheet_directory() );
 		$template_dirs = apply_filters( 'siteorigin_panels_postloop_template_directory', $template_dirs );
 		$template_dirs = array_unique( $template_dirs );
+		
 		foreach( $template_dirs  as $dir ){
 			foreach( $template_files as $template_file ) {
 				foreach( (array) glob($dir.'/'.$template_file) as $file ) {
@@ -402,7 +402,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			substr( $filename, -4 ) == '.php' &&
 			
 			// And it exists
-			( locate_template( $filename ) != '' || file_exists( WP_PLUGIN_DIR . '/' . $filename ) )
+			self::locate_template( $filename ) != ''
 		);
 	}
 	
@@ -415,7 +415,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 *
 	 * @return string The template location.
 	 */
-	public function locate_template( $template_names, $load = false, $require_once = true )
+	public static function locate_template( $template_names, $load = false, $require_once = true )
 	{
 		$located = '';
 		
