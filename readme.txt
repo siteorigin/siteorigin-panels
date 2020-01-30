@@ -103,7 +103,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Prevented the admin font sizes adjusting for mobile WebKit browsers.
 * Removed the admin tool button underline present in certain themes.
 * Prevented Twenty Twenty from changing admin font families. 
-* Specified the admin action link and link hover colors to prevent certain themes changing them.
+* Specified the admin action link and link hover colors to prevent certain themes from changing them.
 
 = 2.10.13 - 9 November 2019 =
 * Fixed check for content.php post loop templates
