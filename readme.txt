@@ -97,13 +97,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 == Changelog ==
 
 = 2.10.14 - 31 January 2020 =
-* Ensured correct admin widget title font size.
-* Adjusted widget search form line-height.
-* Minor readme adjustments.
-* Prevented the admin font sizes adjusting for mobile WebKit browsers.
-* Removed the admin tool button underline present in certain themes.
-* Prevented Twenty Twenty from changing admin font families. 
-* Specified the admin action link and link hover colors to prevent certain themes from changing them.
+* Several Classic and Block Editor admin styling fixes.
 
 = 2.10.13 - 9 November 2019 =
 * Fixed check for content.php post loop templates
