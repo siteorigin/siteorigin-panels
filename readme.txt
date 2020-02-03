@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.10.14 - 31 January 2020 =
+= 2.10.14 - 04 February 2020 =
 * Several Classic and Block Editor admin styling fixes.
 
 = 2.10.13 - 9 November 2019 =
