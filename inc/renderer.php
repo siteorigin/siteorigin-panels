@@ -643,7 +643,9 @@ class SiteOrigin_Panels_Renderer {
 
 				$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : current( $layouts );
 			}
-		} else {
+		}
+
+		if ( ! empty( $post_id ) && empty( $panels_data ) ) {
 			if ( post_password_required( $post_id ) ) {
 				return false;
 			}
