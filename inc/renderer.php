@@ -178,11 +178,6 @@ class SiteOrigin_Panels_Renderer {
 						$remove_bottom_margin .= 'child(-n+2)';
 					}
 
-					$css->add_cell_css( $post_id, $ri, false, $remove_bottom_margin, array(
-							'margin-bottom' => 0,
-						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 )
-					);
-
 					if ( ! empty( $gutter_parts[1] ) ) {
 						// Tablet responsive css for cells
 
