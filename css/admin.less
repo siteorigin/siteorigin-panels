@@ -2175,7 +2175,6 @@
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: @live_editor_width;
 		background-color: #191e23;
 
 		form {
@@ -2183,11 +2182,15 @@
 		}
 
 		iframe{
-			float: left;
+			display: block;
 			width: 100%;
 			height: 100%;
 			margin: 0 auto;
 		}
+	}
+
+	.so-preview, .so-preview-overlay {
+		width: calc(100% - @live_editor_width);
 	}
 
 	.so-preview-overlay {
@@ -2196,7 +2199,6 @@
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: @live_editor_width;
 		background-color: #F4F4F4;
 		cursor: wait;
 
@@ -2238,57 +2240,11 @@
 			display: none;
 		}
 
-		.so-preview,
-		.so-preview-overlay {
-			left: 0;
+		.so-preview, .so-preview-overlay {
+			width: 100%;
 		}
 	}
 
-	&.live-editor-mobile-mode {
-		.so-preview iframe {
-			max-width: 480px;
-			max-height: 640px;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			margin-left: -240px;
-			margin-top: -320px;
-
-			@media (max-width: 840px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-
-			@media (max-height: 640px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-		}
-	}
-
-	&.live-editor-tablet-mode {
-		.so-preview iframe {
-			position: absolute;
-			max-width: 768px;
-			top: 0;
-			left: 50%;
-			margin-left: -384px;
-
-			@media (max-width: 1128px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-		}
-	}
 }
 
 .so-panels-loading {
