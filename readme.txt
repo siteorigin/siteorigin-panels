@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.10.15 - 03 April 2020 =
+= 2.10.15 - 07 April 2020 =
 * Minor styling fixes.
 * Resolved a Live Editor notice that can appear when using SiteOrigin Renderer outside the main loop.
 * Tablet Layout: Restored cell bottom margin.
