@@ -316,7 +316,7 @@ registerBlockType('siteorigin-panels/layout-block', {
         var editorDispatch = wp.data.dispatch('core/editor');
         var editorSelect = wp.data.select('core/editor');
         var tmpl = jQuery('#siteorigin-panels-add-layout-block-button').html();
-        var $addButton = jQuery(tmpl).insertAfter('.editor-writing-flow > div:first');
+        var $addButton = jQuery(tmpl).insertAfter('.editor-writing-flow > div:first, .block-editor-writing-flow > div:not([tabindex])');
         $addButton.on('click', function () {
           var layoutBlock = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
           var isEmpty = editorSelect.isEditedPostEmpty();
