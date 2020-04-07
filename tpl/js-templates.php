@@ -558,10 +558,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<a class="live-editor-mode live-editor-desktop so-active" title="<?php esc_attr_e( 'Toggle desktop mode', 'siteorigin-panels' ) ?>" data-mode="desktop" data-width="100%" >
 				<span class="dashicons dashicons-desktop"></span>
 			</a>
-			<a class="live-editor-mode live-editor-tablet" title="<?php esc_attr_e( 'Toggle tablet mode', 'siteorigin-panels' ) ?>" data-mode="tablet" data-width="<?php esc_attr_e( siteorigin_panels_setting( 'tablet-width' ) ); ?>px">
+			<a class="live-editor-mode live-editor-tablet" title="<?php esc_attr_e( 'Toggle tablet mode', 'siteorigin-panels' ) ?>" data-mode="tablet" data-width="720px">
 				<span class="dashicons dashicons-tablet"></span>
 			</a>
-			<a class="live-editor-mode live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ) ?>" data-mode="mobile" data-width="<?php esc_attr_e( siteorigin_panels_setting( 'mobile-width' ) ); ?>px">
+			<a class="live-editor-mode live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ) ?>" data-mode="mobile" data-width="320px">
 				<span class="dashicons dashicons-smartphone"></span>
 			</a>
 
