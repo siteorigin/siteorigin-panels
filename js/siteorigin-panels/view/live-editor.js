@@ -416,7 +416,7 @@ module.exports = Backbone.View.extend( {
 
 		this.$el
 			.removeClass( 'live-editor-desktop-mode live-editor-tablet-mode live-editor-mobile-mode' )
-			.addClass( 'live-editor-' + button.data( 'mode' ) + '-mode' );
-
+			.addClass( 'live-editor-' + button.data( 'mode' ) + '-mode' )
+			.find( 'iframe' ).css( 'width', button.data( 'width' ) );
 	}
 } );
