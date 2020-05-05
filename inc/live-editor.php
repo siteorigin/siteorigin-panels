@@ -33,6 +33,9 @@ class SiteOrigin_Panels_Live_Editor {
 			// Disable XSS protection when in the Live Editor
 			header( 'X-XSS-Protection: 0' );
 		} else {
+			// If this class has been loaded, we know we're in the Live Editor
+			// In the case that data or the nonce isn't valid, wp_die as a security precaution.
+			// This will happen on template_redirect.
 			wp_die();
 		}
 	}
