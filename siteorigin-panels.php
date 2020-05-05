@@ -244,10 +244,10 @@ class SiteOrigin_Panels {
 				'true',
 				admin_url( 'admin-ajax.php?action=so_panels_live_editor_preview' )
 			);
-			$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 		} else {
-			$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) );
+			$preview_url = esc_url( add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) );
 		}
+		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 
 		return $preview_url;
 	}
