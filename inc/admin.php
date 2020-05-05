@@ -1037,6 +1037,10 @@ class SiteOrigin_Panels_Admin {
 	function action_builder_content() {
 		header( 'content-type: text/html' );
 
+		if ( ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
+
 		if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
 			wp_die();
 		}
