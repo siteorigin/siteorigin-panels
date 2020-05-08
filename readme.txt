@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.16 - 05 May 2020 =
+* Security: Added nonce check to Live Editor.
+* Security: Added nonce check to builder_content action.
+
 = 2.10.15 - 07 April 2020 =
 * Minor styling fixes.
 * Resolved a Live Editor notice that can appear when using SiteOrigin Renderer outside the main loop.
