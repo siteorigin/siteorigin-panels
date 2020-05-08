@@ -97,7 +97,8 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 == Changelog ==
 
 = 2.10.16 - 05 May 2020 =
-* Security: Added nonce checks to Live Editor.
+* Security: Added nonce check to Live Editor.
+* Security: Added nonce check to builder_content action.
 
 = 2.10.15 - 07 April 2020 =
 * Minor styling fixes.
