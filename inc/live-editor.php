@@ -23,20 +23,21 @@ class SiteOrigin_Panels_Live_Editor {
 
 	public function xss_headers(){
 		global $post;
-		if(
-			! empty( $_POST['live_editor_panels_data'] ) &&
-			! empty( $post->ID ) &&
-			current_user_can( 'edit_post', $post->ID ) &&
-			isset( $_GET['_panelsnonce'] ) &&
-			! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' )
-		) {
-			// Disable XSS protection when in the Live Editor
-			header( 'X-XSS-Protection: 0' );
-		} else {
-			// If this class has been loaded, we know we're in the Live Editor
+
+		if ( ! isset( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'live-editor-preview' ) ) {
+			 // If this class has been loaded, we know we're in the Live Editor
 			// In the case that data or the nonce isn't valid, wp_die as a security precaution.
 			// This will happen on template_redirect.
 			wp_die();
+		}
+
+		if(
+			! empty( $_POST['live_editor_panels_data'] ) &&
+			! empty( $post->ID ) &&
+			current_user_can( 'edit_post', $post->ID )
+		) {
+			// Disable XSS protection when in the Live Editor
+			header( 'X-XSS-Protection: 0' );
 		}
 	}
 	
