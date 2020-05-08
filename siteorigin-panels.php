@@ -245,7 +245,7 @@ class SiteOrigin_Panels {
 				admin_url( 'admin-ajax.php?action=so_panels_live_editor_preview' )
 			);
 		} else {
-			$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ); 
+			$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) );
 		}
 		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 
