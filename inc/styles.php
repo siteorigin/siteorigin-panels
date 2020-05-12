@@ -94,18 +94,18 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields[ $id . '_css' ] = array(
-			'name'        => __( 'CSS Styles', 'siteorigin-panels' ),
+			'name'        => __( 'CSS Declarations', 'siteorigin-panels' ),
 			'type'        => 'code',
 			'group'       => 'attributes',
-			'description' => __( 'One style attribute per line.', 'siteorigin-panels' ),
+			'description' => __( 'One declaration per line.', 'siteorigin-panels' ),
 			'priority'    => 10,
 		);
 
 		$fields[ 'mobile_css' ] = array(
-			'name'        => __( 'Mobile CSS Styles', 'siteorigin-panels' ),
+			'name'        => __( 'Mobile CSS Declarations', 'siteorigin-panels' ),
 			'type'        => 'code',
 			'group'       => 'attributes',
-			'description' => __( 'CSS applied when in mobile view.', 'siteorigin-panels' ),
+			'description' => __( 'CSS declarations applied when in mobile view.', 'siteorigin-panels' ),
 			'priority'    => 11,
 		);
 
