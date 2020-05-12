@@ -97,6 +97,8 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 == Changelog ==
 
 = 2.10.17 - 13 May 2020 =
+* Live Editor: Improved mobile device previews.
+* Excluded Black Studio TinyMCE Widget title from excerpts.
 * Fixed Live Editor draft post functionality.
 
 = 2.10.16 - 05 May 2020 =
