@@ -7,7 +7,7 @@ module.exports = Backbone.View.extend( {
 	initialize: function () {
 
 	},
-	
+
 	/**
 	 * Render the visual styles object.
 	 *
@@ -35,7 +35,7 @@ module.exports = Backbone.View.extend( {
 		if ( stylesType === 'cell') {
 			postArgs.index = args.index;
 		}
-		
+
 		// Load the form
 		$.post(
 			panelsOptions.ajaxurl,
@@ -64,7 +64,7 @@ module.exports = Backbone.View.extend( {
 			} else {
 				html = panelsOptions.forms.loadingFailed;
 			}
-			
+
 			this.$el.html( html );
 		}.bind( this ) )
 		.always( function () {
@@ -159,7 +159,7 @@ module.exports = Backbone.View.extend( {
 
 						// Store the ID
 						$s.find( '.so-image-selector > input' ).val( attachment.id );
-						
+
 						$s.find( '.remove-image' ).removeClass( 'hidden' );
 					} );
 				}
