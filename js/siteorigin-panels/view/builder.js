@@ -93,6 +93,7 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model, 'change:data load_panels_data', this.toggleWelcomeDisplay );
 
 		// Handle a content change
+		this.on( 'builder_attached_to_editor', this.handleContentChange, this );
 		this.on( 'content_change', this.handleContentChange, this );
 		this.on( 'display_builder', this.handleDisplayBuilder, this );
 		this.on( 'hide_builder', this.handleHideBuilder, this );
@@ -781,24 +782,8 @@ module.exports = Backbone.View.extend( {
 	 * Trigger a change on Yoast SEO
 	 */
 	triggerYoastSeoChange: function () {
-		if ( $( '#yoast_wpseo_focuskw_text_input' ).length ) {
-			var element = document.getElementById( 'yoast_wpseo_focuskw_text_input' ), event;
-
-			if ( document.createEvent ) {
-				event = document.createEvent( "HTMLEvents" );
-				event.initEvent( "keyup", true, true );
-			} else {
-				event = document.createEventObject();
-				event.eventType = "keyup";
-			}
-
-			event.eventName = "keyup";
-
-			if ( document.createEvent ) {
-				element.dispatchEvent( event );
-			} else {
-				element.fireEvent( "on" + event.eventType, event );
-			}
+		if( ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
+			YoastSEO.app.refresh();
 		}
 	},
 
