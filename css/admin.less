@@ -376,7 +376,7 @@
 
 					.cell-wrapper{
 						background: #e4eff4;
-						padding: 7px 7px 0px 7px;
+						padding: 7px 7px 1px 7px;
 						height: 100%;
 						min-height: 63px;
 
@@ -406,7 +406,7 @@
 								cursor: auto;
 							}
 
-							margin-bottom: 7px;
+							margin-bottom: 6px;
 
 							background: #f9f9fb;
 
@@ -432,6 +432,7 @@
 								display: block;
 								cursor: pointer;
 								margin: 0 15px 3px 0;
+								font-size: 1em;
 								font-weight: 600;
 								line-height: 1.25em;
 								color: #474747;
@@ -474,9 +475,14 @@
 									}
 
 									a{
+										color: #0073aa;
 										display: none;
 										margin-right: 3px;
 										text-decoration: none;
+
+										&:hover {
+											color: #00a0d2;
+										}
 									}
 
 									a.widget-delete{
@@ -628,6 +634,8 @@
 
 		.so-builder-toolbar {
 			padding: 10px;
+			text-decoration: none;
+
 			> .so-tool-button {
 
 				.so-panels-icon {
@@ -695,6 +703,8 @@
 
 	@pane_padding: 15px;
 	@border_color: #D8D8D8;
+
+	-webkit-text-size-adjust: none;
 
 	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
 		z-index: 100001;
@@ -1037,6 +1047,7 @@
 			width: 100%;
 			padding: 6px;
 			margin-bottom: 20px;
+			line-height: normal;
 		}
 
 		.so-sidebar-tabs {
@@ -1795,6 +1806,11 @@
 			input {
 				max-width: 100%;
 			}
+
+			.wp-picker-clear {
+				margin-left: 6px;
+				min-height: 30px;
+			}
 		}
 
 		/* All the field types */
@@ -1966,6 +1982,7 @@
 		line-height: 1.4em;
 
 		ul {
+			font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
 			list-style: none;
 		}
 	}
@@ -2158,19 +2175,24 @@
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: @live_editor_width;
 		background-color: #191e23;
+		overflow: scroll;
 
 		form {
 			display: none;
 		}
 
 		iframe{
-			float: left;
+			display: block;
 			width: 100%;
 			height: 100%;
 			margin: 0 auto;
+			transition: all .2s ease;
 		}
+	}
+
+	.so-preview, .so-preview-overlay {
+		width: calc(100% - @live_editor_width);
 	}
 
 	.so-preview-overlay {
@@ -2179,7 +2201,6 @@
 		top: 0;
 		right: 0;
 		bottom: 0;
-		left: @live_editor_width;
 		background-color: #F4F4F4;
 		cursor: wait;
 
@@ -2221,57 +2242,11 @@
 			display: none;
 		}
 
-		.so-preview,
-		.so-preview-overlay {
-			left: 0;
+		.so-preview, .so-preview-overlay {
+			width: 100%;
 		}
 	}
 
-	&.live-editor-mobile-mode {
-		.so-preview iframe {
-			max-width: 480px;
-			max-height: 640px;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			margin-left: -240px;
-			margin-top: -320px;
-
-			@media (max-width: 840px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-
-			@media (max-height: 640px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-		}
-	}
-
-	&.live-editor-tablet-mode {
-		.so-preview iframe {
-			position: absolute;
-			max-width: 768px;
-			top: 0;
-			left: 50%;
-			margin-left: -384px;
-
-			@media (max-width: 1128px) {
-				& {
-					position: static;
-					margin-left: 0;
-					margin-top: 0;
-				}
-			}
-		}
-	}
 }
 
 .so-panels-loading {
@@ -2513,8 +2488,8 @@
 			li {
 				cursor: pointer;
 				margin: 0;
-				padding: 4px 10px;
-				line-height: 1em;
+				padding: 3px 10px;
+				line-height: 1.3em;
 
 				&:hover,
 				&.so-active {

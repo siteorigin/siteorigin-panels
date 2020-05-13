@@ -64,13 +64,17 @@ class SiteOrigin_Panels_Renderer {
 		$settings = siteorigin_panels_setting();
 		$panels_tablet_width = $settings['tablet-width'];
 		$panels_mobile_width = $settings['mobile-width'];
-		$panels_margin_bottom = $settings['margin-bottom'];
 		$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
 
 		$css = new SiteOrigin_Panels_Css_Builder();
 
 		$ci = 0;
 		foreach ( $layout_data as $ri => $row ) {
+			
+			// Filter the bottom margin for this row with the arguments
+			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
+			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', '', $row, $ri, $panels_data, $post_id );
+			
 			if ( empty( $row['cells'] ) ) {
 				continue;
 			}
@@ -133,101 +137,109 @@ class SiteOrigin_Panels_Renderer {
 				! empty( $row['style']['bottom_margin'] ) ||
 				! empty( $panels_margin_bottom_last_row )
 			) {
-				// Filter the bottom margin for this row with the arguments
 				$css->add_row_css( $post_id, $ri, '', array(
-					'margin-bottom' => apply_filters( 'siteorigin_panels_css_row_margin_bottom', $panels_margin_bottom . 'px', $row, $ri, $panels_data, $post_id )
+					'margin-bottom' => $panels_margin_bottom
 				) );
 			}
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
-			if ( $settings['responsive'] ) {
-
+			if ( $settings['responsive'] && empty( $row['style']['collapse_behaviour'] ) ) {
 				// The default collapse behaviour
-				if ( empty( $row['style']['collapse_behaviour'] ) ) {
+				if (
+					$settings['tablet-layout'] &&
+					$cell_count >= 3 &&
+					$panels_tablet_width > $panels_mobile_width
+				) {
+					// Tablet responsive css for the row
 
-					if (
-						$settings['tablet-layout'] &&
-						$cell_count >= 3 &&
-						$panels_tablet_width > $panels_mobile_width
-					) {
-						// Tablet responsive css for the row
-
-						$css->add_row_css( $post_id, $ri, array(
-							'.panel-no-style',
-							'.panel-has-style > .panel-row-style'
-						), array(
-							'-ms-flex-wrap'     => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
-							'-webkit-flex-wrap' => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
-							'flex-wrap'         => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
-						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
-
-						$css->add_cell_css( $post_id, $ri, false, '', array(
-							'-ms-flex'      => '0 1 50%',
-							'-webkit-flex'  => '0 1 50%',
-							'flex'          => '0 1 50%',
-							'margin-right'  => '0',
-							'margin-bottom' => $panels_margin_bottom . 'px',
-						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
-
-
-						$remove_bottom_margin = ':nth-';
-						if ( $collapse_order == 'left-top' ) {
-							$remove_bottom_margin .= 'last-child(' . ( count( $row['cells'] ) % 2 == 0 ? '-n+2' : '1' ) . ')';
-						} else {
-							$remove_bottom_margin .= 'child(-n+2)';
-						}
-
-						$css->add_cell_css( $post_id, $ri, false, $remove_bottom_margin, array(
-							'margin-bottom' => 0,
-						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 )
-						);
-
-						if ( ! empty( $gutter_parts[1] ) ) {
-							// Tablet responsive css for cells
-
-							$css->add_cell_css( $post_id, $ri, false, ':nth-child(even)', array(
-								'padding-left' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
-							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
-
-							$css->add_cell_css( $post_id, $ri, false, ':nth-child(odd)', array(
-								'padding-right' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
-							), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
-						}
-
-					}
-
-					// Mobile Responsive
 					$css->add_row_css( $post_id, $ri, array(
 						'.panel-no-style',
 						'.panel-has-style > .panel-row-style'
 					), array(
-						'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-						'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-						'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-					), $panels_mobile_width );
+						'-ms-flex-wrap'     => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
+						'-webkit-flex-wrap' => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
+						'flex-wrap'         => $collapse_order == 'left-top' ? 'wrap' : 'wrap-reverse',
+					), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
 
 					$css->add_cell_css( $post_id, $ri, false, '', array(
-						'width' => '100%',
-						'margin-right' => 0,
-					), $panels_mobile_width );
+						'-ms-flex'      => '0 1 50%',
+						'-webkit-flex'  => '0 1 50%',
+						'flex'          => '0 1 50%',
+						'margin-right'  => '0',
+						'margin-bottom' => $panels_margin_bottom,
+					), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+
+
+					$remove_bottom_margin = ':nth-';
+					if ( $collapse_order == 'left-top' ) {
+						$remove_bottom_margin .= 'last-child(' . ( count( $row['cells'] ) % 2 == 0 ? '-n+2' : '1' ) . ')';
+					} else {
+						$remove_bottom_margin .= 'child(-n+2)';
+					}
+
+					if ( ! empty( $gutter_parts[1] ) ) {
+						// Tablet responsive css for cells
+
+						$css->add_cell_css( $post_id, $ri, false, ':nth-child(even)', array(
+							'padding-left' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+
+						$css->add_cell_css( $post_id, $ri, false, ':nth-child(odd)', array(
+							'padding-right' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
+					}
+
 				}
 
+				// Mobile Responsive
+				$css->add_row_css( $post_id, $ri, array(
+					'.panel-no-style',
+					'.panel-has-style > .panel-row-style'
+				), array(
+					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
+				), $panels_mobile_width );
 
+				$css->add_cell_css( $post_id, $ri, false, '', array(
+					'width' => '100%',
+					'margin-right' => 0,
+				), $panels_mobile_width );
+				
+				
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
-							'margin-bottom' => $panels_margin_bottom . 'px',
+							'margin-bottom' => apply_filters(
+								'siteorigin_panels_css_cell_mobile_margin_bottom',
+								$settings['margin-bottom'] . 'px',
+								$cell,
+								$ci,
+								$row,
+								$ri,
+								$panels_data,
+								$post_id
+							)
 						), $panels_mobile_width );
 					}
 				}
-			}
+				
+				if( $panels_mobile_margin_bottom != $panels_margin_bottom && ! empty( $panels_mobile_margin_bottom ) ) {
+					// If we need a different bottom margin for
+					$css->add_row_css( $post_id, $ri, '', array(
+						'margin-bottom' => $panels_mobile_margin_bottom
+					), $panels_mobile_width );
+				}
+					
+				
+			} // End of responsive code
 
 		}
 
 		// Add the bottom margins
 		$css->add_widget_css( $post_id, false, false, false, '', array(
-			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $panels_margin_bottom . 'px', false, false, $panels_data, $post_id )
+			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id )
 		) );
 		$css->add_widget_css( $post_id, false, false, false, ':last-child', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id )
@@ -631,7 +643,9 @@ class SiteOrigin_Panels_Renderer {
 
 				$panels_data = ! empty( $layouts[ $prebuilt_id ] ) ? $layouts[ $prebuilt_id ] : current( $layouts );
 			}
-		} else {
+		}
+
+		if ( ! empty( $post_id ) && empty( $panels_data ) ) {
 			if ( post_password_required( $post_id ) ) {
 				return false;
 			}

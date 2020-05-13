@@ -88,6 +88,10 @@ class SiteOrigin_Panels_Styles_Admin {
 				'name'     => __( 'Layout', 'siteorigin-panels' ),
 				'priority' => 10
 			),
+			'mobile_layout'     => array(
+				'name'     => __( 'Mobile Layout', 'siteorigin-panels' ),
+				'priority' => 11
+			),
 			'design'     => array(
 				'name'     => __( 'Design', 'siteorigin-panels' ),
 				'priority' => 15
@@ -246,7 +250,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
 					       value="<?php echo intval( $current ) ?>"/>
 				</div>
-				<a href="#" class="remove-image<?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+				<a href="#" class="remove-image <?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				
 				<input type="text" value="<?php echo esc_url( $fallback_url ) ?>"
 					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ) ?>"

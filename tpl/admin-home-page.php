@@ -11,7 +11,7 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 		id="panels-home-page-form"
 		data-type="custom_home_page"
 		data-post-id="<?php echo get_the_ID() ?>"
-		data-preview-url="<?php echo esc_url( add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) ) ) ?>"
+		data-preview-url="<?php echo SiteOrigin_Panels::preview_url() ?>"
 		data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
 		>
 		<div id="icon-index" class="icon32"><br></div>

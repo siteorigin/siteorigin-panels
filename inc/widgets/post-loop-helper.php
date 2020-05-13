@@ -17,7 +17,9 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 		$template_options = array();
 		if( ! empty( $templates ) ) {
 			foreach( $templates as $template ) {
-				$headers = get_file_data( locate_template( $template ), array(
+				// Is this template being added by a plugin?
+				$filename = SiteOrigin_Panels_Widgets_PostLoop::locate_template( $template );
+				$headers = get_file_data( $filename, array(
 					'loop_name' => 'Loop Name',
 				) );
 				$template_options[ $template ] = esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
@@ -29,6 +31,7 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 			__( 'Post Loop', 'siteorigin-panels' ),
 			array(
 				'description' => __( 'Displays a post loop.', 'siteorigin-panels' ),
+				'help' => 'https://siteorigin.com/page-builder/bundled-widgets/post-loop-widget/',
 				'has_preview' => false,
 			),
 			array(),

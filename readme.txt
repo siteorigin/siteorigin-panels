@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
-Requires at least: 4.4
-Tested up to: 5.2
+Requires at least: 4.7
+Tested up to: 5.4
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +95,50 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.10.16 - 05 May 2020 =
+* Security: Added nonce check to Live Editor.
+* Security: Added nonce check to builder_content action.
+
+= 2.10.15 - 07 April 2020 =
+* Minor styling fixes.
+* Resolved a Live Editor notice that can appear when using SiteOrigin Renderer outside the main loop.
+* Tablet Layout: Restored cell bottom margin.
+
+= 2.10.14 - 04 February 2020 =
+* Several Classic and Block Editor admin styling fixes.
+
+= 2.10.13 - 9 November 2019 =
+* Fixed check for content.php post loop templates
+* Add `builderType` argument when fetching a selected prebuilt layout.
+
+= 2.10.12 - 4 November 2019 =
+* Resolve issue caused by locate_template preventing plugins from adding Post Loop templates.
+
+= 2.10.11 - 23 September 2019 =
+* Added setting for cell spacing in a collapsed row.
+* Fix support for widgets that share a single classname.
+* Fixed styling issues after Chrome update.
+
+= 2.10.10 - 28 August 2019 =
+* Added filter for cell bottom margin on mobile.
+* Make sure widget form checkbox values are unset when unchecked.
+* Added Widget Options plugin compatibility code.
+
+= 2.10.9 - 23 August 2019 =
+* Use desktop margin between cells when collapsed and no mobile margin is given.
+
+= 2.10.8 - 22 August 2019 =
+* Made mobile bottom margin default to empty.
+* Fixed remove button appearing when no image was present in style field.
+
+= 2.10.7 - 20 August 2019 =
+* Added setting for mobile specific margin.
+* Prevent Welcome Page Redirect During Bulk Install and TGMPA
+* Added support for password settings field.
+* Layout Block: Add filter to control whether Add Layout Block button is shown or not.
+* Fixed issue with widget duplication after moving a widget.
+* Fixed Read More Custom Text issue.
 
 = 2.10.6 - 12 June 2019 =
 * Add admin filter for whether to show the 'add new' dropdown and classic editor admin notice.

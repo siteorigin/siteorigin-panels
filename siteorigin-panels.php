@@ -83,7 +83,6 @@ class SiteOrigin_Panels {
 			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
 		
-		
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
 
@@ -192,6 +191,11 @@ class SiteOrigin_Panels {
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
 		}
+		
+		// Compatibility with Widget Options plugin
+		if( class_exists('WP_Widget_Options') ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
+		}
 	}
 
 	/**
@@ -240,10 +244,10 @@ class SiteOrigin_Panels {
 				'true',
 				admin_url( 'admin-ajax.php?action=so_panels_live_editor_preview' )
 			);
-			$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 		} else {
 			$preview_url = add_query_arg( 'siteorigin_panels_live_editor', 'true', set_url_scheme( get_permalink() ) );
 		}
+		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 
 		return $preview_url;
 	}
@@ -328,7 +332,7 @@ class SiteOrigin_Panels {
 						$content = explode( $matches[0], $content, 2 );
 						$content = $content[0];
 						$content = force_balance_tags( $content );
-						if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) ) {
+						if ( ! empty( $matches[1] ) ) {
 							$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
 						} else {
 							$more_link_text = __( 'Read More', 'siteorigin-panels' );
@@ -371,7 +375,7 @@ class SiteOrigin_Panels {
 					// that's very far down in a post.
 					break;
 				}
-				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' ) {
+				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' || $panels_info['class'] == 'WP_Widget_Black_Studio_TinyMCE' ) {
 					$raw_excerpt .= ' ' . $widget['text'];
 					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
 					// We're just applying it to text type widgets content in the first two rows.

@@ -180,19 +180,23 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 		
-		global $more; $old_more = $more; $more = empty($instance['more']);
+		global $more;
+		$old_more = $more;
+		$more = empty($instance['more']);
+		
 		self::$rendering_loop = true;
 		self::$current_loop_instance = $instance;
 		self::$current_loop_template = $instance['template'];
-		if(strpos('/'.$instance['template'], '/content') !== false) {
+		
+		if ( preg_match( '/\/content*/', '/' . $instance['template'] ) ) {
 			while( have_posts() ) {
 				the_post();
-				locate_template($instance['template'], true, false);
+				self::locate_template($instance['template'], true, false);
 			}
+		} else {
+			self::locate_template($instance['template'], true, false);
 		}
-		else {
-			locate_template($instance['template'], true, false);
-		}
+		
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
 		self::$current_loop_template = null;
@@ -252,7 +256,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					<?php foreach($templates as $template) : ?>
 						<option value="<?php echo esc_attr($template) ?>" <?php selected($instance['template'], $template) ?>>
 							<?php
-							$headers = get_file_data( locate_template($template), array(
+							$headers = get_file_data( self::locate_template($template), array(
 								'loop_name' => 'Loop Name',
 							) );
 							echo esc_html(!empty($headers['loop_name']) ? $headers['loop_name'] : $template);
@@ -342,10 +346,12 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 					?>
 				</small>
 			</p>
+			
+			<a href="https://siteorigin.com/page-builder/bundled-widgets/post-loop-widget/" class="siteorigin-widget-help-link siteorigin-panels-help-link" target="_blank" rel="noopener noreferrer"><?php _e('Help', 'so-widgets-bundle') ?></a>
 			<?php
 		}
 	}
-	
+
 	/**
 	 * Get all the existing files
 	 *
@@ -364,6 +370,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$template_dirs = array( get_template_directory(), get_stylesheet_directory() );
 		$template_dirs = apply_filters( 'siteorigin_panels_postloop_template_directory', $template_dirs );
 		$template_dirs = array_unique( $template_dirs );
+		
 		foreach( $template_dirs  as $dir ){
 			foreach( $template_files as $template_file ) {
 				foreach( (array) glob($dir.'/'.$template_file) as $file ) {
@@ -371,34 +378,64 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				}
 			}
 		}
-		
 		$templates = array_unique( apply_filters( 'siteorigin_panels_postloop_templates', $templates ) );
-		foreach ( $templates as $template_key => $template)  {
-			$invalid = false;
-
-			// Ensure the provided file has a valid name and path
-			if ( validate_file( $template ) != 0 ) {
-				$invalid = true;
-			}
-
-			// Don't expect non-PHP files
-			if ( substr( $template, -4 ) != '.php' ) {
-				$invalid = true;
-			}
-
-			$template = locate_template( $template );
-			if ( empty( $template ) || $invalid ) {
-				unset( $templates[ $template_key ] );
-			}
-		}
+		$templates = array_filter( $templates, array($this, 'validate_template_file') );
+		
 		// Update array indexes to ensure logical indexing
-		sort( $templates );
 		sort( $templates );
 		
 		return $templates;
 	}
 	
+	/**
+	 * Checks if a template file is valid
+	 *
+	 * @param $filename
+	 *
+	 * @return bool
+	 */
+	public function validate_template_file( $filename )
+	{
+		return (
+			// File is a valid PHP file
+			validate_file( $filename ) == 0 &&
+			substr( $filename, -4 ) == '.php' &&
+			
+			// And it exists
+			self::locate_template( $filename ) != ''
+		);
+	}
 	
+	/**
+	 * Find the location of a given template. Either in the theme or in the plugin directory.
+	 *
+	 * @param $template_names
+	 * @param bool $load
+	 * @param bool $require_once
+	 *
+	 * @return string The template location.
+	 */
+	public static function locate_template( $template_names, $load = false, $require_once = true )
+	{
+		$located = '';
+		
+		foreach ( (array) $template_names as $template_name ) {
+			
+			$located = locate_template($template_name, false);
+			
+			if ( ! $located && file_exists( WP_PLUGIN_DIR . '/' . $template_name ) ) {
+				// Template added by a plugin
+				$located = WP_PLUGIN_DIR . '/' . $template_name;
+			}
+		}
+		
+		if ( $load && '' != $located ) {
+			load_template( $located, $require_once );
+		}
+		
+		return $located;
+	}
+
 	/**
 	 * Get the helper widget based on the Widgets Bundle's classes.
 	 *

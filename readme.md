@@ -6,7 +6,7 @@ Changes here are pushed to our [plugin page](https://wordpress.org/plugins/siteo
 
 ## Support
 
-We handle support on the [SiteOrigin support forums](https://siteorigin.com/thread/). We won't be handling support questions on Github.
+If you have a support question, please, post on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 ## Documentation
 
