@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
-Tested up to: 5.4
+Tested up to: 5.5
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -96,9 +96,14 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.10.17 - 18 May 2020 =
+* Live Editor: Improved mobile device previews.
+* Excluded Black Studio TinyMCE Widget title from excerpts.
+* Fixed Live Editor draft post functionality.
+
 = 2.10.16 - 05 May 2020 =
 * Security: Added nonce check to Live Editor.
-* Security: Added nonce check to builder_content action.
+* Security: Added nonce check to `builder_content` action.
 
 = 2.10.15 - 07 April 2020 =
 * Minor styling fixes.
