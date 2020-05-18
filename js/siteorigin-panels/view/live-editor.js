@@ -345,6 +345,10 @@ module.exports = Backbone.View.extend( {
 					}
 				}
 
+				if ( $( '.live-editor-mode.so-active' ).length ) {
+					thisView.mobileToggle();
+				}
+
 				setTimeout( function(){
 					// Scroll to the correct position
 					$iframeContents.scrollTop( thisView.previewScrollTop );
