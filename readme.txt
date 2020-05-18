@@ -100,8 +100,6 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Live Editor: Improved mobile device previews.
 * Excluded Black Studio TinyMCE Widget title from excerpts.
 * Fixed Live Editor draft post functionality.
-* Yoast SEO: Improved Classic Editor compatibility.
-* Yoast SEO: Added Block Editor compatibility.
 
 = 2.10.16 - 05 May 2020 =
 * Security: Added nonce check to Live Editor.
