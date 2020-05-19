@@ -414,7 +414,7 @@ module.exports = Backbone.View.extend( {
 	 * @param e
 	 */
 	mobileToggle: function( e ){
-		var button = $( e.currentTarget );
+		var button = typeof e !== "undefined" ? $( e.currentTarget ) : $( '.live-editor-mode.so-active' );
 		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');
 		button.addClass( 'so-active' );
 
