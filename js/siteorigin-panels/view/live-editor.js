@@ -354,7 +354,7 @@ module.exports = Backbone.View.extend( {
 					// Scroll to the correct position
 					$iframeContents.scrollTop( thisView.previewScrollTop );
 					thisView.$( '.so-preview-overlay' ).hide();
-					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'all .2s ease');
+					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'all .2s ease' );
 				}, 100 );
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
