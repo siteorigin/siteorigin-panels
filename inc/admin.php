@@ -67,12 +67,12 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Admin_Dashboard::single();
 
 		$this->in_save_post = false;
-		
-		
+
+
 		// Enqueue Yoast compatibility
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-		
+
 		// Block editor specific actions
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -141,7 +141,7 @@ class SiteOrigin_Panels_Admin {
 				$is_block_editor = $current_screen->is_block_editor();
 			}
 		}
-		
+
 		return $is_gutenberg_page || $is_block_editor;
 	}
 
@@ -157,7 +157,7 @@ class SiteOrigin_Panels_Admin {
 		if( ! is_array( $links ) ) {
 			return $links;
 		}
-		
+
 		unset( $links['edit'] );
 		$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __( 'Support Forum', 'siteorigin-panels' ) . '</a>';
 
@@ -172,7 +172,7 @@ class SiteOrigin_Panels_Admin {
 	 * Callback to register the Page Builder Metaboxes
 	 */
 	function add_meta_boxes() {
-		
+
 		foreach ( siteorigin_panels_setting( 'post-types' ) as $type ) {
 			add_meta_box(
 				'so-panels-panels',
@@ -231,12 +231,12 @@ class SiteOrigin_Panels_Admin {
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
-		
+
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
 			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
 		}
-		
+
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
@@ -248,7 +248,7 @@ class SiteOrigin_Panels_Admin {
 				// Store a version of the HTML in post_content
 				$post_parent_id = wp_is_post_revision( $post_id );
 				$layout_id = ( ! empty( $post_parent_id ) ) ? $post_parent_id : $post_id;
-				
+
 				SiteOrigin_Panels_Post_Content_Filters::add_filters();
 				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 				$post_content = SiteOrigin_Panels::renderer()->render( $layout_id, false, $panels_data );
@@ -319,7 +319,7 @@ class SiteOrigin_Panels_Admin {
 			$text_widget = apply_filters( 'siteorigin_panels_text_widget_class', $text_widget );
 
 			$user = wp_get_current_user();
-			
+
 			$load_on_attach = siteorigin_panels_setting( 'load-on-attach' ) || isset( $_GET['siteorigin-page-builder'] );
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
@@ -490,7 +490,7 @@ class SiteOrigin_Panels_Admin {
 					'loadingFailed' => __( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
 				)
 			) );
-			
+
 			$js_widgets = array();
 			if ( $screen->base != 'widgets' ) {
 				// Render all the widget forms. A lot of widgets use this as a chance to enqueue their scripts
@@ -506,7 +506,7 @@ class SiteOrigin_Panels_Admin {
 					}
 					do_action_ref_array( 'in_widget_form', array( &$widget_obj, &$return, array() ) );
 					ob_end_clean();
-					
+
 					// Need to render templates for new WP 4.8 widgets when not on the 'widgets' screen or in the customizer.
 					if ( $this->is_core_js_widget( $widget_obj ) ) {
 						$js_widgets[] = $widget_obj;
@@ -684,12 +684,12 @@ class SiteOrigin_Panels_Admin {
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
-		
+
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
 			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $page_id );
 		}
-		
+
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data            = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
 
@@ -777,7 +777,7 @@ class SiteOrigin_Panels_Admin {
 
 		// Other plugins can manipulate the list of widgets. Possibly to add recommended widgets
 		$widgets = apply_filters( 'siteorigin_panels_widgets', $widgets );
-		
+
 		// Exclude these temporarily, as they won't work until we have a reliable way to enqueue their admin form scripts.
 		$to_exclude = array(
 			'Jetpack_Gallery_Widget',
@@ -785,7 +785,7 @@ class SiteOrigin_Panels_Admin {
 			'Jetpack_Widget_Social_Icons',
 			'Jetpack_Twitter_Timeline_Widget'
 		);
-		
+
 		foreach ( $to_exclude as $widget_class ) {
 			if ( in_array( $widget_class, $widgets ) ) {
 				unset( $widgets[ $widget_class ] );
@@ -878,7 +878,7 @@ class SiteOrigin_Panels_Admin {
 					$instance   = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
 
 					$widget = $instance;
-					
+
 					unset( $info['raw'] );
 				}
 			}
@@ -887,7 +887,7 @@ class SiteOrigin_Panels_Admin {
 				// Escaping for namespaced widgets
 				$info[ 'class' ] = preg_replace( '/\\\\+/', '\\\\\\\\', $info['class'] );
 			}
-			
+
 			$widget['panels_info'] = $info;
 		}
 
@@ -912,11 +912,11 @@ class SiteOrigin_Panels_Admin {
 	 * @return mixed|string The form
 	 */
 	function render_form( $widget_class, $instance = array(), $raw = false, $widget_number = '{$id}' ) {
-		
+
 		$the_widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
 		// This is a chance for plugins to replace missing widgets
 		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class );
-		
+
 		if ( empty( $the_widget ) || ! is_a( $the_widget, 'WP_Widget' ) ) {
 			$widgets = $this->get_widgets();
 
@@ -1000,7 +1000,7 @@ class SiteOrigin_Panels_Admin {
 		// Add all the information fields
 		return $form;
 	}
-	
+
 	/**
 	 * Checks whether a widget is considered to be a JS widget. I.e. it needs to have scripts and/or styles enqueued for
 	 * it's admin form to work.
@@ -1020,11 +1020,11 @@ class SiteOrigin_Panels_Admin {
 			'WP_Widget_Media_Video',
 			'WP_Widget_Text',
 		);
-		
+
 		$is_js_widget = in_array( get_class( $widget ), $js_widgets ) &&
 						// Need to check this for `WP_Widget_Text` which was not a JS widget before 4.8
 		                method_exists( $widget, 'render_control_template_scripts' );
-		
+
 		return $is_js_widget;
 	}
 
@@ -1060,33 +1060,37 @@ class SiteOrigin_Panels_Admin {
 			false
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-		
+
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		echo SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
-		
+
 		wp_die();
 	}
-	
+
 	/**
 	 * Get builder content based on the submitted panels_data.
 	 */
 	function action_builder_content_json() {
 		header( 'content-type: application/json' );
 		$return = array('post_content' => '', 'preview' => '', 'sanitized_panels_data' => '');
-		
+
+		if ( ! wp_verify_nonce( $_GET['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
+
 		if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
 			wp_die();
 		}
-		
+
 		if ( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
 			echo json_encode($return);
 			wp_die();
 		}
-		
+
 		// echo the content
 		$old_panels_data        = get_post_meta( $_POST['post_id'], 'panels_data', true );
 		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
@@ -1097,20 +1101,20 @@ class SiteOrigin_Panels_Admin {
 		);
 		$panels_data            = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$return['sanitized_panels_data'] = $panels_data;
-		
+
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		$return['post_content'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
-		
+
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
-		
+
 		echo json_encode( $return );
-		
+
 		wp_die();
 	}
 
@@ -1132,7 +1136,7 @@ class SiteOrigin_Panels_Admin {
 				400
 			);
 		}
-		
+
 		$request = array_map( 'stripslashes_deep', $_REQUEST );
 
 		$widget_class = $request['widget'];
@@ -1163,11 +1167,11 @@ class SiteOrigin_Panels_Admin {
 	 * Preview in the block editor.
 	 */
 	public function layout_block_preview() {
-		
+
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-preview' ) ) {
 			wp_die();
 		}
-		
+
 		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
 		$builder_id = 'gbp' . uniqid();
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
@@ -1178,7 +1182,7 @@ class SiteOrigin_Panels_Admin {
 			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
 		}
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
-		
+
 		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
 		// so neither the `wp_head` nor the `wp_footer` actions are called, which usually trigger `siteorigin_widget_print_styles`.
 		if ( $sowb_active ) {
@@ -1186,21 +1190,21 @@ class SiteOrigin_Panels_Admin {
 			siteorigin_widget_print_styles();
 			$rendered_layout .= ob_get_clean();
 		}
-		
+
 		echo $rendered_layout;
 		wp_die();
 	}
-	
+
 	public function layout_block_sanitize() {
-		
+
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-sanitize' ) ) {
 			wp_die();
 		}
-		
+
 		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-		
+
 		wp_send_json( $panels_data );
 	}
 
@@ -1298,7 +1302,7 @@ class SiteOrigin_Panels_Admin {
         </a>
 		<?php
 	}
-	
+
 	public function admin_notices() {
 		global $typenow, $pagenow;
 		$is_new = $pagenow == 'post-new.php';
@@ -1318,7 +1322,7 @@ class SiteOrigin_Panels_Admin {
 			<?php
 		}
 	}
-	
+
 	/**
 	 * Show Classic Editor for existing PB posts.
 	 *
@@ -1328,14 +1332,14 @@ class SiteOrigin_Panels_Admin {
 	 * @return bool
 	 */
 	public function show_classic_editor_for_panels( $use_block_editor, $post_type ) {
-		
+
 		// For new pages.
 		if ( isset( $_GET['block-editor'] ) ) {
 			return $use_block_editor;
 		} else if ( isset( $_GET['siteorigin-page-builder'] ) ) {
 			return false;
 		}
-		
+
 		$post_types = siteorigin_panels_setting( 'post-types' );
         global $pagenow;
 		// If the `$post_type` is set to be used by Page Builder for new posts.
@@ -1354,17 +1358,17 @@ class SiteOrigin_Panels_Admin {
 		} else if ( $is_new_panels_type ) {
 			$use_block_editor = false;
 		}
-		
+
 		return $use_block_editor;
 	}
-	
+
 	/**
 	 * This was copied from Gutenberg and slightly modified as a quick way to allow users to create new Page Builder pages
 	 * in the classic editor without requiring the classic editor plugin be installed.
 	 */
 	function add_panels_add_new_button() {
 		global $typenow;
-		
+
 		if ( 'wp_block' === $typenow ) {
 			?>
 			<style type="text/css">
@@ -1374,17 +1378,17 @@ class SiteOrigin_Panels_Admin {
 			</style>
 			<?php
 		}
-		
+
 		if ( ! $this->show_add_new_dropdown_for_type( $typenow ) ) {
 			return;
 		}
-		
+
 		?>
 		<style type="text/css">
 			.split-page-title-action {
 				display: inline-block;
 			}
-			
+
 			.split-page-title-action a,
 			.split-page-title-action a:active,
 			.split-page-title-action .expander:after {
@@ -1403,20 +1407,20 @@ class SiteOrigin_Panels_Admin {
 				cursor: pointer;
 				outline: 0;
 			}
-			
+
 			.split-page-title-action a:hover,
 			.split-page-title-action .expander:hover:after {
 				border-color: #008EC2;
 				background: #00a0d2;
 				color: #fff;
 			}
-			
+
 			.split-page-title-action a:focus,
 			.split-page-title-action .expander:focus:after {
 				border-color: #5b9dd9;
 				box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 			}
-			
+
 			.split-page-title-action .expander:after {
 				content: "\f140";
 				font: 400 20px/.5 dashicons;
@@ -1429,55 +1433,55 @@ class SiteOrigin_Panels_Admin {
 				border-radius: 0px 2px 2px 0px;
 				<?php echo  is_rtl() ? 'right: -1px;' : 'left: -1px;' ?>
 			}
-			
+
 			.split-page-title-action .dropdown {
 				display: none;
 			}
-			
+
 			.split-page-title-action .dropdown.visible {
 				display: block;
 				position: absolute;
 				margin-top: 3px;
 				z-index: 1;
 			}
-			
+
 			.split-page-title-action .dropdown.visible a {
 				display: block;
 				top: 0;
 				margin: -1px 0;
 				<?php echo is_rtl() ? 'padding-left: 9px;' : 'padding-right: 9px;' ?>
 			}
-			
+
 			.split-page-title-action .expander {
 				outline: none;
 				float: right;
 				margin-top: 1px;
 			}
-		
+
 		</style>
 		<script type="text/javascript">
 			document.addEventListener( 'DOMContentLoaded', function() {
 				var buttons = document.getElementsByClassName( 'page-title-action' ),
 					button = buttons.item( 0 );
-				
+
 				if ( ! button ) {
 					return;
 				}
-				
+
 				var url = button.href;
 				var urlHasParams = ( -1 !== url.indexOf( '?' ) );
 				var panelsUrl = url + ( urlHasParams ? '&' : '?' ) + 'siteorigin-page-builder';
 				var blockEditorUrl = url + ( urlHasParams ? '&' : '?' ) + 'block-editor';
-				
+
 				var newbutton = '<span id="split-page-title-action" class="split-page-title-action">';
 				newbutton += '<a href="' + url + '">' + button.innerText + '</a>';
 				newbutton += '<span class="expander" tabindex="0" role="button" aria-haspopup="true" aria-label="<?php echo esc_attr( __( 'Toggle editor selection menu', 'siteorigin-panels' ) ); ?>"></span>';
 				newbutton += '<span class="dropdown"><a href="' + panelsUrl + '"><?php echo esc_html( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ) ); ?></a>';
 				newbutton += '<a href="' + blockEditorUrl + '"><?php echo esc_html( __( 'Block Editor', 'siteorigin-panels' ) ); ?></a></span></span><span class="page-title-action" style="display:none;"></span>';
-				
+
 				button.insertAdjacentHTML( 'afterend', newbutton );
 				button.parentNode.removeChild( button );
-				
+
 				var expander = document.getElementById( 'split-page-title-action' ).getElementsByClassName( 'expander' ).item( 0 );
 				var dropdown = expander.parentNode.querySelector( '.dropdown' );
 				function toggleDropdown() {
@@ -1497,31 +1501,31 @@ class SiteOrigin_Panels_Admin {
 		</script>
 		<?php
 	}
-	
+
 	private function show_add_new_dropdown_for_type( $post_type ) {
-		
+
 		$show = in_array( $post_type, siteorigin_panels_setting( 'post-types' ) );
-		
+
 		// WooCommerce product type doesn't support block editor...
 		$show = $show && ! ( class_exists( 'WooCommerce' ) && $post_type == 'product' );
-		
+
 		if ( class_exists( 'SiteOrigin_Premium_Plugin_Cpt_Builder' ) ) {
 			$show = $show && $post_type != SiteOrigin_Premium_Plugin_Cpt_Builder::POST_TYPE;
 			$cpt_builder = SiteOrigin_Premium_Plugin_Cpt_Builder::single();
 			$so_custom_types = $cpt_builder->get_post_types();
 			$show = $show && ! isset( $so_custom_types[ $post_type ] );
 		}
-		
+
 		return apply_filters( 'so_panels_show_add_new_dropdown_for_type', $show, $post_type );
 	}
-	
+
 	public function add_panels_post_state( $post_states, $post ) {
 		$panels_data = get_post_meta( $post->ID, 'panels_data', true );
-		
+
 		if ( ! empty( $panels_data ) ) {
 			$post_states[] = __( 'SiteOrigin Page Builder', 'siteorigin-panels' );
 		}
-		
+
 		return $post_states;
 	}
 }
