@@ -282,7 +282,7 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $('<iframe src="javascript:false;" />')
+		this.previewIframe = $('<iframe src="' + url + '" />')
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
