@@ -125,8 +125,8 @@ class SiteOrigin_Panels {
 		if( empty( $agent ) ) return false;
 		
 		return
-			// IE lte 10
-			( preg_match('/MSIE\s(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 10 ) ||
+			// IE lte 11
+			( preg_match('/Trident\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 7 ) ||
 			// Chrome lte 25
 			( preg_match('/Chrome\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 25 ) ||
 			// Firefox lte 21
