@@ -6,7 +6,7 @@ module.exports = function ( config, force ) {
 
 	return this.each( function () {
 		var $$ = jQuery( this );
-		
+
 		if ( $$.data( 'soPanelsBuilderWidgetInitialized' ) && ! force ) {
 			return;
 		}
@@ -75,7 +75,7 @@ module.exports = function ( config, force ) {
 
 		// Trigger a global jQuery event after we've setup the builder view
 		$( document ).trigger( 'panels_setup', builderView );
-		
+
 		$$.data( 'soPanelsBuilderWidgetInitialized', true );
 	} );
 };

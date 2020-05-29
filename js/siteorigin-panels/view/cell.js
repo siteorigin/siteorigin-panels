@@ -52,7 +52,7 @@ module.exports = Backbone.View.extend( {
 
 		var cellView = this;
 		var builder = cellView.row.builder;
-		
+
 		// Go up the view hierarchy until we find the ID attribute
 		var builderID = builder.$el.attr( 'id' );
 		var builderModel = builder.model;
@@ -89,17 +89,17 @@ module.exports = Backbone.View.extend( {
 				var $$ =  $( ui.item ),
 					widget = $$.data( 'view' ),
 					targetCell = $$.closest( '.cell' ).data( 'view' );
-				
-				
+
+
 				// If this hasn't already been removed and added to a different builder.
 				if ( cellView.model.get( 'widgets' ).get( widget.model ) ) {
-					
+
 					cellView.row.builder.addHistoryEntry( 'widget_moved' );
-					
+
 					// Move the model and the view to the new cell
 					widget.model.moveToCell( targetCell.model, {}, $$.index() );
 					widget.cell = targetCell;
-					
+
 					builderModel.refreshPanelsData();
 				}
 			},
