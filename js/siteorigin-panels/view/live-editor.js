@@ -345,12 +345,17 @@ module.exports = Backbone.View.extend( {
 					}
 				}
 
+				if ( $( '.live-editor-mode.so-active' ).length ) {
+					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'none' );
+					thisView.mobileToggle();
+				}
+
 				setTimeout( function(){
 					// Scroll to the correct position
 					$iframeContents.scrollTop( thisView.previewScrollTop );
 					thisView.$( '.so-preview-overlay' ).hide();
+					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'all .2s ease' );
 				}, 100 );
-
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
@@ -410,7 +415,7 @@ module.exports = Backbone.View.extend( {
 	 * @param e
 	 */
 	mobileToggle: function( e ){
-		var button = $( e.currentTarget );
+		var button = typeof e !== "undefined" ? $( e.currentTarget ) : $( '.live-editor-mode.so-active' );
 		this.$('.live-editor-mode' ).not( button ).removeClass('so-active');
 		button.addClass( 'so-active' );
 
