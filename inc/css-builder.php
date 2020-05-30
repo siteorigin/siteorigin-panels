@@ -38,14 +38,17 @@ class SiteOrigin_Panels_Css_Builder {
 		}
 		$attribute_string = implode( ';', $attribute_string );
 
-		// Add everything we need to the CSS selector
-		if ( empty( $this->css[ $resolution ] ) ) {
-			$this->css[ $resolution ] = array();
+		if ( ! empty( $attribute_string ) ) {
+			// Add everything we need to the CSS selector
+			if ( empty( $this->css[ $resolution ] ) ) {
+				$this->css[ $resolution ] = array();
+			}
+			if ( empty( $this->css[ $resolution ][ $attribute_string ] ) ) {
+				$this->css[ $resolution ][ $attribute_string ] = array();
+			}
+			
+			$this->css[ $resolution ][ $attribute_string ][] = $selector;
 		}
-		if ( empty( $this->css[ $resolution ][ $attribute_string ] ) ) {
-			$this->css[ $resolution ][ $attribute_string ] = array();
-		}
-		$this->css[ $resolution ][ $attribute_string ][] = $selector;
 	}
 
 	/**
