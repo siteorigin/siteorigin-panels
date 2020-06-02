@@ -265,6 +265,9 @@ registerBlockType('siteorigin-panels/layout-block', {
   attributes: {
     panelsData: {
       type: 'object'
+    },
+    contentPreview: {
+      type: 'string'
     }
   },
   edit: function edit(_ref) {
@@ -275,15 +278,22 @@ registerBlockType('siteorigin-panels/layout-block', {
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
       if (!_.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
-        jQuery.post(soPanelsBlockEditorAdmin.sanitizeUrl, {
-          action: 'so_panels_layout_block_sanitize',
-          panelsData: JSON.stringify(newPanelsData)
-        }, function (sanitizedPanelsData) {
-          if (sanitizedPanelsData !== '') {
-            setAttributes({
-              panelsData: sanitizedPanelsData
-            });
+        jQuery.post(panelsOptions.ajaxurl, {
+          action: 'so_panels_builder_content_json',
+          panels_data: JSON.stringify(newPanelsData),
+          post_id: wp.data.select("core/editor").getCurrentPostId()
+        }, function (content) {
+          var panelsAttributes = {};
+
+          if (content.sanitized_panels_data !== '') {
+            panelsAttributes.panelsData = content.sanitized_panels_data;
           }
+
+          if (content.preview !== '') {
+            panelsAttributes.contentPreview = content.preview;
+          }
+
+          setAttributes(panelsAttributes);
         });
       }
     };
@@ -303,9 +313,9 @@ registerBlockType('siteorigin-panels/layout-block', {
       onRowOrWidgetMouseUp: enableSelection
     });
   },
-  save: function save() {
-    // Render in PHP
-    return null;
+  save: function save(_ref2) {
+    var attributes = _ref2.attributes;
+    return attributes.hasOwnProperty('contentPreview') ? React.createElement(RawHTML, null, attributes.contentPreview) : null;
   }
 });
 

@@ -96,6 +96,16 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.0 - 02 June 2020 =
+* Live Editor: Ensured device viewing mode retained after update.
+* Live Editor: Improved device preview transition.
+* Legacy Layout: Detect IE 11 as legacy browser.
+* Yoast SEO: Improved Classic Editor support.
+* Yoast SEO: Added Block Editor support for the SiteOrigin Layout block.
+* CSS Builder: Prevented rules without declarations from outputting.
+* Widget Previews: Prevented boolean values from being used as widget descriptions.
+* Live Editor: Resolved Chrome bug by setting preview url for iframe.
+
 = 2.10.17 - 18 May 2020 =
 * Live Editor: Improved mobile device previews.
 * Excluded Black Studio TinyMCE Widget title from excerpts.

@@ -183,6 +183,8 @@ module.exports = Backbone.Model.extend( {
 				_.isString( values[titleFields[i]] ) &&
 				values[titleFields[i]] !== '' &&
 				values[titleFields[i]] !== 'on' &&
+				values[titleFields[i]] !== 'true' &&
+				values[titleFields[i]] !== 'false' &&
 				titleFields[i][0] !== '_' && ! jQuery.isNumeric( values[titleFields[i]] )
 			) {
 				var title = values[titleFields[i]];

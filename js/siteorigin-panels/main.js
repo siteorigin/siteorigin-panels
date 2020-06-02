@@ -143,6 +143,9 @@ jQuery( function ( $ ) {
 
 		// Trigger a global jQuery event after we've setup the builder view. Everything is accessible form there
 		$( document ).trigger( 'panels_setup', builderView, window.panels );
+
+		// Make this globally available for things like Yoast compatibility.
+		window.soPanelsBuilderView = builderView;
 	}
 
 	// Setup new widgets when they're added in the standard widget interface
