@@ -96,7 +96,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.11.0 - 01 June 2020 =
+= 2.11.0 - 02 June 2020 =
 * Live Editor: Ensured device viewing mode retained after update.
 * Live Editor: Improved device preview transition.
 * Legacy Layout: Detect IE 11 as legacy browser.
