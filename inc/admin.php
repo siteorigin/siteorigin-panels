@@ -536,7 +536,7 @@ class SiteOrigin_Panels_Admin {
 					SITEORIGIN_PANELS_VERSION,
 					true
 				);
-			} else if ( defined( 'RANK_MATH_VERSION' ) && wp_script_is( 'rank-math-analyzer' ) ) {
+			} elseif ( defined( 'RANK_MATH_VERSION' ) && wp_script_is( 'rank-math-analyzer' ) ) {
 				wp_enqueue_script(
 					'so-panels-seo-compat',
 					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),

@@ -779,7 +779,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Trigger a change SEO plugins
+	 * Trigger a change in SEO plugins.
 	 */
 	triggerSeoChange: function () {
 		if ( typeof YoastSEO !== 'undefined' && ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
