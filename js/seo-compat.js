@@ -2,17 +2,21 @@
 
 jQuery(function($){
 
-	if( typeof YoastSEO.app === 'undefined' ){
-		// Skip all this if we don't have the yoast app
-		return;
-	}
 
-	var SiteOriginYoastCompat = function() {
-		YoastSEO.app.registerPlugin( 'siteOriginYoastCompat', { status: 'ready' } );
-		YoastSEO.app.registerModification( 'content', this.contentModification, 'siteOriginYoastCompat', 5 );
+	var SiteOriginSeoCompat = function() {
+
+		if ( typeof YoastSEO !== 'undefined' ) {
+			YoastSEO.app.registerPlugin( 'SiteOriginSeoCompat', { status: 'ready' } );
+			YoastSEO.app.registerModification( 'content', this.contentModification, 'SiteOriginSeoCompat', 5 );
+		}
+
+		if ( typeof rankMathEditor !== 'undefined' ) {
+			wp.hooks.addFilter( 'rank_math_content', 'SiteOriginSeoCompat', this.contentModification );
+		}
+
 	};
 
-	SiteOriginYoastCompat.prototype.contentModification = function(data) {
+	SiteOriginSeoCompat.prototype.contentModification = function(data) {
 		if(
 			typeof window.soPanelsBuilderView !== 'undefined' &&
 			window.soPanelsBuilderView.contentPreview
@@ -48,5 +52,5 @@ jQuery(function($){
 		return data;
 	};
 
-	new SiteOriginYoastCompat();
+	new SiteOriginSeoCompat();
 });

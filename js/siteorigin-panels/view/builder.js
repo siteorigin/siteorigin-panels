@@ -775,15 +775,18 @@ module.exports = Backbone.View.extend( {
 			contentEd.fire( 'keyup' );
 		}
 
-		this.triggerYoastSeoChange();
+		this.triggerSeoChange();
 	},
 
 	/**
-	 * Trigger a change on Yoast SEO
+	 * Trigger a change SEO plugins
 	 */
-	triggerYoastSeoChange: function () {
-		if( ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
+	triggerSeoChange: function () {
+		if ( typeof YoastSEO !== 'undefined' && ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
 			YoastSEO.app.refresh();
+		}
+		if ( typeof rankMathEditor !== 'undefined' && ! _.isNull( rankMathEditor ) && ! _.isNull( rankMathEditor.refresh ) ) {
+			rankMathEditor.refresh( 'content' );
 		}
 	},
 
