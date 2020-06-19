@@ -70,8 +70,8 @@ class SiteOrigin_Panels_Admin {
 
 
 		// Enqueue Yoast compatibility
-		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_yoast_compat' ), 100 );
-		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_yoast_compat' ), 100 );
+		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
+		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
 
 		// Block editor specific actions
 		if ( function_exists( 'register_block_type' ) ) {
@@ -526,16 +526,26 @@ class SiteOrigin_Panels_Admin {
 		}
 	}
 
-	public function enqueue_yoast_compat(){
-        if( self::is_admin() && defined( 'WPSEO_FILE' ) && wp_script_is( 'yoast-seo-metabox' ) ) {
-            wp_enqueue_script(
-                'so-panels-yoast-compat',
-                siteorigin_panels_url( 'js/yoast-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-                array('jquery', 'yoast-seo-metabox' ),
-                SITEORIGIN_PANELS_VERSION,
-                true
-            );
-        }
+	public function enqueue_seo_compat(){
+		if ( self::is_admin() ) {
+			if ( defined( 'WPSEO_FILE' ) && wp_script_is( 'yoast-seo-metabox' ) ) {
+				wp_enqueue_script(
+					'so-panels-seo-compat',
+					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+					array('jquery', 'yoast-seo-metabox' ),
+					SITEORIGIN_PANELS_VERSION,
+					true
+				);
+			} elseif ( defined( 'RANK_MATH_VERSION' ) && wp_script_is( 'rank-math-analyzer' ) ) {
+				wp_enqueue_script(
+					'so-panels-seo-compat',
+					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+					array('jquery', 'rank-math-analyzer' ),
+					SITEORIGIN_PANELS_VERSION,
+					true
+				);
+			}
+		}
 	}
 
 	/**
