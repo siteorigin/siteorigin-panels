@@ -105,7 +105,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 
 		$builder_supports = apply_filters( 'siteorigin_panels_layout_builder_supports', array(), $instance['panels_data'] );
 		?>
-		<div class="" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>"
+		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>"
 			data-builder-id="<?php echo esc_attr( $form_id ) ?>"
 			data-type="layout_widget"
 			data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
