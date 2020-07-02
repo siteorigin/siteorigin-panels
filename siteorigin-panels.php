@@ -196,6 +196,11 @@ class SiteOrigin_Panels {
 		if( class_exists('WP_Widget_Options') ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
 		}
+
+		// Compatibility with Yoast Sitemap.
+		if ( defined( 'WPSEO_FILE' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast-sitemap.php';
+		}
 	}
 
 	/**
