@@ -23,13 +23,11 @@ function siteorigin_yoast_sitemap_images_compat( $images, $post_id ) {
 		foreach ( $dom->getElementsByTagName( 'img' ) as $img ) {
 			$src = $img->getAttribute( 'src' );
 
-			if ( empty( $src ) || $src !== esc_url( $src ) ) {
-				continue;
+			if ( ! empty( $src ) && $src == esc_url( $src ) ) {
+				$images[] = array(
+					'src'   => $src,
+				);
 			}
-
-			$images[] = array(
-				'src'   => $src,
-			);
 		}
 	}
 
