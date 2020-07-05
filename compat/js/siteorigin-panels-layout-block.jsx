@@ -55,7 +55,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		var $panelsContainer = jQuery( this.panelsContainer.current );
 		
 		var config = {
-			editorType: 'standalone'
+			editorType: 'standalone',
+	        loadLiveEditor: false,
+	        postId: soPanelsBlockEditorAdmin.postId,
+	        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor,
 		};
 		
 		var builderModel = new panels.model.builder();
