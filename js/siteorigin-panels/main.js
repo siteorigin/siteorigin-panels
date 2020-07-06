@@ -19,6 +19,7 @@ panels.helpers.clipboard = require( './helpers/clipboard' );
 panels.helpers.utils = require( './helpers/utils' );
 panels.helpers.serialize = require( './helpers/serialize' );
 panels.helpers.pageScroll = require( './helpers/page-scroll' );
+panels.helpers.accessibility = require( './helpers/accessibility' );
 
 // The models
 panels.model = {};

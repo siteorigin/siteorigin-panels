@@ -71,6 +71,7 @@
 			text-align: center;
 		}
 
+		&:focus,
 		&:hover {
 			background: #FFFFFF;
 
@@ -416,10 +417,16 @@
 							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
 							.box-sizing(border-box);
 
+							&:focus,
 							&:hover {
 								border: 1px solid rgba( 255, 255, 255, 0.55 );
 								background: #fff;
 								.box-shadow(~"0 0 2px rgba(0,0,0,0.1)");
+							}
+
+							&:focus .title .actions a,
+							&:focus-within .title .actions a, {
+								display: inline-block;
 							}
 
 							.so-widget-wrapper {
@@ -1000,12 +1007,14 @@
 				.so-delete {
 					color: #a00;
 
+					&:focus,
 					&:hover {
 						background: #a00;
 						color: #FFFFFF;
 					}
 				}
 
+				.so-duplicate:focus,
 				.so-duplicate:hover {
 					text-decoration: underline;
 				}
@@ -1166,6 +1175,7 @@
 					.box-shadow(~"0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF");
 					margin-bottom: 15px;
 
+					&:focus,
 					&:hover {
 						border: 1px solid #BBBBBB;
 						background: #FFFFFF;
@@ -2491,6 +2501,7 @@
 				padding: 3px 10px;
 				line-height: 1.3em;
 
+				&:focus,
 				&:hover,
 				&.so-active {
 					background: #F0F0F0;

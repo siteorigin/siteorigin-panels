@@ -13,7 +13,10 @@ module.exports = Backbone.View.extend( {
 		'click .widget-edit': 'editHandler',
 		'click .title h4': 'editHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
-		'click .actions .widget-delete': 'deleteHandler'
+		'click .actions .widget-delete': 'deleteHandler',
+		'keyup .actions a': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	/**
