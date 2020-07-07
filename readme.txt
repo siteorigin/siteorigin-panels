@@ -96,6 +96,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.1 - 08 July 2020 =
+* Added Rank Math SEO plugin support.
+* Added [siteorigin_panels_layout_builder_supports](https://siteorigin.com/docs/page-builder/hooks/builder-features-actions/) filter.
+
 = 2.11.0 - 02 June 2020 =
 * Live Editor: Ensured device viewing mode retained after update.
 * Live Editor: Improved device preview transition.
