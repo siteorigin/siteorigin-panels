@@ -494,6 +494,18 @@
 										}
 									}
 
+									@media (max-width:782px) {
+										position: static;
+										opacity: 1;
+										padding-left: 0;
+										display: flex;
+										justify-content: space-between;
+
+										a {
+											display: inline-block;
+										}
+									}
+
 								}
 							}
 
@@ -513,6 +525,10 @@
 								height: 16px;
 								overflow: hidden;
 								color: #777;
+
+								@media (max-width:782px) {
+									display: none;
+								}
 							}
 
 							.form{
