@@ -278,6 +278,7 @@ registerBlockType('siteorigin-panels/layout-block', {
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
       if (!_.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
+        wp.data.dispatch('core/editor').lockPostSaving();
         jQuery.post(panelsOptions.ajaxurl, {
           action: 'so_panels_builder_content_json',
           panels_data: JSON.stringify(newPanelsData),
@@ -294,6 +295,7 @@ registerBlockType('siteorigin-panels/layout-block', {
           }
 
           setAttributes(panelsAttributes);
+          wp.data.dispatch('core/editor').unlockPostSaving();
         });
       }
     };
