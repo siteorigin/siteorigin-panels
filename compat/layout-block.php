@@ -58,6 +58,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				array(
 					'sanitizeUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-sanitize', '_panelsnonce' ),
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-preview', '_panelsnonce' ),
+					'postId' => get_the_ID(),
+					'liveEditor' => SiteOrigin_Panels::preview_url(),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
 					'showAddButton' => apply_filters( 'siteorigin_layout_block_show_add_button', $is_panels_post_type ),
 				)
