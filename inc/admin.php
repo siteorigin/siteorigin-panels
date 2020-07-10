@@ -83,11 +83,6 @@ class SiteOrigin_Panels_Admin {
 				add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
 			}
 		}
-
-		// Compatibility with AMP plugin
-		if ( function_exists( 'amp_bootstrap_plugin' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . '../compat/amp.php';
-		}
 	}
 
 	/**

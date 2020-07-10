@@ -30,6 +30,7 @@ class SiteOrigin_Panels {
 
 		add_action( 'plugins_loaded', array( $this, 'version_check' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
+		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 		
 		add_action('widgets_init', array( $this, 'widgets_init' ) );
@@ -191,10 +192,20 @@ class SiteOrigin_Panels {
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
 		}
-		
+	}
+
+	/**
+	 * Loads Page Builder compatibility to allow other plugins/themes
+	 */
+	public function init_compat() {
 		// Compatibility with Widget Options plugin
-		if( class_exists('WP_Widget_Options') ) {
+		if ( class_exists( 'WP_Widget_Options' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
+		}
+
+		// Compatibility with AMP plugin
+		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
 	}
 
