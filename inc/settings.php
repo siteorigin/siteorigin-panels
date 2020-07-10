@@ -122,6 +122,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
+		$defaults['parallax-mobile']        = false;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
