@@ -286,8 +286,8 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['general']['fields']['parallax-mobile'] = array(
 			'type'        => 'checkbox',
-			'label'       => __( 'Disable Background Parallax On Mobile', 'siteorigin-panels' ),
-			'description' => __( 'Disable row/widget background parallax when browser is smaller than the mobile width.', 'siteorigin-panels' ),
+			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
+			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(
