@@ -284,6 +284,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
 		);
 
+		$fields['general']['fields']['parallax-mobile'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Disable Background Parallax On Mobile', 'siteorigin-panels' ),
+			'description' => __( 'Disable row/widget background parallax when browser is smaller than the mobile width.', 'siteorigin-panels' ),
+		);
+
 		$fields['general']['fields']['sidebars-emulator'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Sidebars Emulator', 'siteorigin-panels' ),
