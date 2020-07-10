@@ -1024,14 +1024,14 @@ class SiteOrigin_Panels_Admin {
 	function is_core_js_widget( $widget ) {
 		$js_widgets = apply_filters(
 			'siteorigin_panels_core_js_widgets',
-				array(
-					'WP_Widget_Custom_HTML',
-					'WP_Widget_Media_Audio',
-					'WP_Widget_Media_Gallery',
-					'WP_Widget_Media_Image',
-					'WP_Widget_Media_Video',
-					'WP_Widget_Text',
-				),
+			array(
+				'WP_Widget_Custom_HTML',
+				'WP_Widget_Media_Audio',
+				'WP_Widget_Media_Gallery',
+				'WP_Widget_Media_Image',
+				'WP_Widget_Media_Video',
+				'WP_Widget_Text',
+			)
 		);
 
 		$is_js_widget = in_array( get_class( $widget ), $js_widgets ) &&
