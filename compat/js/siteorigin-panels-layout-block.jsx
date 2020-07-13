@@ -244,6 +244,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 			
 			if ( !_.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
+				wp.data.dispatch( 'core/editor' ).lockPostSaving();
 				jQuery.post(
 					panelsOptions.ajaxurl,
 					{
@@ -261,6 +262,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 						}
 						
 						setAttributes( panelsAttributes );
+						wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 					}
 				);
 			}
