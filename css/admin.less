@@ -746,14 +746,14 @@
 	}
 
 	.so-content {
-		@media(max-width: 980px) {
+		@media (max-width: 980px) {
 			top: @title_bar_height;
 			bottom: @toolbar_height;
 			// Prevent display issue if no widgets visible
 			width: 100%;
 		}
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			top: @edge_spacing + @title_bar_height;
 			left: @edge_spacing;
 			bottom: @edge_spacing + @toolbar_height;
@@ -781,11 +781,11 @@
 	.so-title-bar {
 		top: 0;
 
-		@media(max-width: 980px) {
+		@media (max-width: 980px) {
 			width: 100%;
 		}
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			left: @edge_spacing;
 			right: @edge_spacing;
 			top: @edge_spacing;
@@ -986,12 +986,12 @@
 	}
 
 	.so-toolbar {
-		@media(max-width: 980px) {
+		@media (max-width: 980px) {
 			bottom: 0;
 			width: 100%;
 		}
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			left: @edge_spacing;
 			right: @edge_spacing;
 			bottom: @edge_spacing;
@@ -1075,7 +1075,7 @@
 			height: calc(100% - @toolbar_height - @title_bar_height);
 		}
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			top: @edge_spacing;
 			left: @edge_spacing;
 			bottom: @edge_spacing;
@@ -1130,12 +1130,12 @@
 	.so-right-sidebar {
 		display: none;
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			top: @title_bar_height;
 			bottom: @toolbar_height;
 		}
 
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			top: @edge_spacing + @title_bar_height;
 			right: @edge_spacing;
 			bottom: @edge_spacing + @toolbar_height;
@@ -1182,7 +1182,7 @@
 		.so-content, .so-toolbar, .so-title-bar {
 			left: @edge_spacing + @sidebar_width;
 
-			@media(max-width: 980px) {
+			@media (max-width: 980px) {
 				left: @sidebar_width;
 			}
 		}
@@ -1197,7 +1197,7 @@
 	}
 
 	&.so-panels-dialog-has-right-sidebar {
-		@media(min-width: 980px) {
+		@media (min-width: 980px) {
 			.so-content {
 				right: @sidebar_width;
 			}
