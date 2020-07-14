@@ -746,10 +746,19 @@
 	}
 
 	.so-content {
-		top: @edge_spacing + @title_bar_height;
-		left: @edge_spacing;
-		right: @edge_spacing;
-		bottom: @edge_spacing + @toolbar_height;
+		@media(max-width: 980px) {
+			top: @title_bar_height;
+			bottom: @toolbar_height;
+			// Prevent display issue if no widgets visible
+			width: 100%;
+		}
+
+		@media(min-width: 980px) {
+			top: @edge_spacing + @title_bar_height;
+			left: @edge_spacing;
+			bottom: @edge_spacing + @toolbar_height;
+			right: @edge_spacing;
+		}
 		background-color: #fdfdfd;
 		overflow-x: hidden;
 
@@ -770,9 +779,17 @@
 	}
 
 	.so-title-bar {
-		left: @edge_spacing;
-		right: @edge_spacing;
-		top: @edge_spacing;
+		top: 0;
+
+		@media(max-width: 980px) {
+			width: 100%;
+		}
+
+		@media(min-width: 980px) {
+			left: @edge_spacing;
+			right: @edge_spacing;
+			top: @edge_spacing;
+		}
 		height: @title_bar_height;
 		background-color: #fafafa;
 		border-bottom: 1px solid @border_color;
@@ -969,9 +986,16 @@
 	}
 
 	.so-toolbar {
-		left: @edge_spacing;
-		right: @edge_spacing;
-		bottom: @edge_spacing;
+		@media(max-width: 980px) {
+			bottom: 0;
+			width: 100%;
+		}
+
+		@media(min-width: 980px) {
+			left: @edge_spacing;
+			right: @edge_spacing;
+			bottom: @edge_spacing;
+		}
 		height: @toolbar_height;
 		background-color: #fafafa;
 		border-top: 1px solid @border_color;
@@ -1040,22 +1064,22 @@
 	}
 
 	.so-left-sidebar {
+		border-right: 1px solid @border_color;
 		display: none;
-
-		top: @edge_spacing;
-		left: @edge_spacing;
-		bottom: @edge_spacing;
 		width: @sidebar_width;
-		
+
 		@media only screen and (max-width:980px) {
-			top: @edge_spacing + @title_bar_height;
+			top: @title_bar_height;
+			width: 100%;
 			z-index: 110000;
-			bottom: inherit;
-			max-height: calc(100% - 80px);
+			height: calc(100% - @toolbar_height - @title_bar_height);
 		}
 
-
-		border-right: 1px solid @border_color;
+		@media(min-width: 980px) {
+			top: @edge_spacing;
+			left: @edge_spacing;
+			bottom: @edge_spacing;
+		}
 
 		h4 {
 			margin: 0 0 20px 0;
@@ -1106,10 +1130,17 @@
 	.so-right-sidebar {
 		display: none;
 
-		top: @edge_spacing + @title_bar_height;
-		right: @edge_spacing;
-		bottom: @edge_spacing + @toolbar_height;
-		width: @sidebar_width;
+		@media(min-width: 980px) {
+			top: @title_bar_height;
+			bottom: @toolbar_height;
+		}
+
+		@media(min-width: 980px) {
+			top: @edge_spacing + @title_bar_height;
+			right: @edge_spacing;
+			bottom: @edge_spacing + @toolbar_height;
+			width: @sidebar_width;
+		}
 
 		border-left: 1px solid @border_color;
 
@@ -1123,8 +1154,10 @@
 		
 		@media only screen and (max-width:980px) {
 			z-index: 110000;
-			bottom: inherit;
-			max-height: calc(100% - 80px);
+			top: @title_bar_height;
+			bottom: @toolbar_height;
+			height: calc(100% - @toolbar_height - @title_bar_height);
+			width: 100%;
 		}
 	}
 
@@ -1148,6 +1181,10 @@
 	&.so-panels-dialog-has-left-sidebar {
 		.so-content, .so-toolbar, .so-title-bar {
 			left: @edge_spacing + @sidebar_width;
+
+			@media(max-width: 980px) {
+				left: @sidebar_width;
+			}
 		}
 
 		.so-content {
@@ -1160,8 +1197,10 @@
 	}
 
 	&.so-panels-dialog-has-right-sidebar {
-		.so-content {
-			right: @edge_spacing + @sidebar_width;
+		@media(min-width: 980px) {
+			.so-content {
+				right: @sidebar_width;
+			}
 		}
 
 		.so-right-sidebar {
