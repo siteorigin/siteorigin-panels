@@ -2174,6 +2174,9 @@
 		left: 0;
 		height: 46px;
 		width: @live_editor_width;
+		@media (max-width: 980px) {
+			width: 100%;
+		}
 
 		.live-editor-save{
 			margin: 9px 10px 0 5px;
@@ -2217,6 +2220,10 @@
 		width: @live_editor_width;
 		overflow-y: auto;
 
+		@media (max-width: 980px) {
+			width: 100%;
+		}
+
 		background: #f7f7f7;
 
 		border-right: 1px solid #D0D0D0;
@@ -2250,7 +2257,14 @@
 	}
 
 	.so-preview, .so-preview-overlay {
-		width: calc(100% - @live_editor_width);
+
+		@media (max-width: 980px) {
+			width: 100%;
+			display: none;
+		}
+		@media (min-width: 980px) {
+			width: calc(100% - @live_editor_width);
+		}
 	}
 
 	.so-preview-overlay {
@@ -2302,6 +2316,7 @@
 
 		.so-preview, .so-preview-overlay {
 			width: 100%;
+			display: block;
 		}
 	}
 
