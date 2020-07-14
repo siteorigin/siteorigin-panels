@@ -539,6 +539,10 @@ class SiteOrigin_Panels_Renderer {
 			$args['after_widget'] = '</div>' . $args['after_widget'];
 		}
 
+		// This allows other themes and plugins to add html inside of the cell before and after its output.
+		$args['before_widget'] .= apply_filters( 'siteorigin_panels_inside_widget_before', '', $widget_info );
+		$args['after_widget'] = apply_filters( 'siteorigin_panels_inside_widget_after', '', $widget_info ) . $args['after_widget'];
+
 		// This gives other plugins the chance to take over rendering of widgets
 		$widget_html = apply_filters( 'siteorigin_panels_the_widget_html', '', $the_widget, $args, $instance );
 
@@ -747,6 +751,9 @@ class SiteOrigin_Panels_Renderer {
 			echo $row_style_wrapper;
 		}
 
+		// This allows other themes and plugins to add html inside of the row before its output.
+		echo apply_filters( 'siteorigin_panels_inside_row_before', '', $row );
+
 		if( method_exists( $this, 'modify_row_cells' ) ) {
 			// This gives other renderers a chance to change the cell order
 			$row['cells'] = $cells = $this->modify_row_cells( $row['cells'], $row );
@@ -755,6 +762,9 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
+
+		// This allows other themes and plugins to add html inside of the row before its output.
+		echo apply_filters( 'siteorigin_panels_inside_row_after', '', $row );
 
 		// Close the style wrapper
 		if ( ! empty( $row_style_wrapper ) ) {
@@ -824,12 +834,16 @@ class SiteOrigin_Panels_Renderer {
 		if ( ! empty( $cell_style_wrapper ) ) {
 			echo $cell_style_wrapper;
 		}
+		// This allows other themes and plugins to add html inside of the cell before its output.
+		echo apply_filters( 'siteorigin_panels_inside_cell_before', '', $cell );
 
 		foreach ( $cell['widgets'] as $wi => & $widget ) {
 			$is_last = ( $wi == count( $cell['widgets'] ) - 1 );
 			$this->render_widget( $post_id, $ri, $ci, $wi, $widget, $is_last );
 		}
 
+		// This allows other themes and plugins to add html inside of the cell after its output.
+		echo apply_filters( 'siteorigin_panels_inside_cell_after', '', $cell );
 		if ( ! empty( $cell_style_wrapper ) ) {
 			echo '</div>';
 		}
