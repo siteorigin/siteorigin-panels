@@ -64,7 +64,7 @@ class SiteOrigin_Panels_Styles {
 			SITEORIGIN_PANELS_VERSION
 		);
 		wp_localize_script( 'siteorigin-parallax', 'parallaxStyles', array(
-			'parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ? siteorigin_panels_setting( 'parallax-mobile' ) : false,
+			'parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
 			'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
 		) );
 	}

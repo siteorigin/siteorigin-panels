@@ -35,7 +35,7 @@
 			// Check if we need to disable parallax on mobiles.
 			if (
 				typeof parallaxStyles != 'undefined' &&
-				parallaxStyles['parallax-mobile'] != false &&
+				parallaxStyles['parallax-mobile'] &&
 				window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
 			) {
 				$$.css( 'background-position', '50% 50%' );
