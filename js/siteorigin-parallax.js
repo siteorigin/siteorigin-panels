@@ -32,6 +32,16 @@
 		}
 
 		var setupParallax = function( ){
+			// Check if we need to disable parallax on mobiles.
+			if (
+				typeof parallaxStyles != 'undefined' &&
+				parallaxStyles['parallax-mobile'] &&
+				window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
+			) {
+				$$.css( 'background-position', '50% 50%' );
+				return;
+			}
+
 			try {
 				var wrapperSize = [
 					$$.outerWidth(),
