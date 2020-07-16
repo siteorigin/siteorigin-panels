@@ -6,7 +6,7 @@ module.exports = {
 	 */
 	triggerClickOnEnter: function( e ) {
 		if ( e.which == 13 ) {
-			$(e.target).trigger('click');
+			$( e.target ).trigger( 'click' );
 		}
 	},
 

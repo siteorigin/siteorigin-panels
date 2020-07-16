@@ -249,7 +249,7 @@ module.exports = Backbone.View.extend( {
 
 		// Switch back to the standard editor
 		if ( this.supports( 'revertToEditor' ) ) {
-			metabox.find( '.so-switch-to-standard' ).on( 'click keyup', function ( e ) {
+			metabox.find( '.so-switch-to-standard' ).on( 'click keyup', function( e ) {
 				e.preventDefault();
 
 				if ( e.type == "keyup" && e.which != 13 ) {
