@@ -122,6 +122,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
+		$defaults['parallax-mobile']        = false;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
@@ -282,6 +283,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'float',
 			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
 			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-mobile'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
+			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(

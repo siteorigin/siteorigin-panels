@@ -96,6 +96,18 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.1 - 17 July 2020 =
+* Added Rank Math SEO plugin support.
+* Added [siteorigin_panels_layout_builder_supports](https://siteorigin.com/docs/page-builder/hooks/builder-features-actions/) filter.
+* Block Editor: Added History and Live Editor functionality to the SiteOrigin Layout Block.
+* Resolved a plugin conflict between the AMP by AMP Project Contributors plugin and the Text widget.
+* Block Editor: Prevented the page saving until the SiteOrigin Layout Block is finished setting up widgets using AJAX.
+* Mobile: Several minor improvements to the Page Builder interface to improve usability while editing on mobile devices.
+* Fixed `undefined` Page Builder tab in WordPress 5.5.
+* Added a new "Disable Background Parallax On Mobile" global setting to `Settings > Page Builder > General`.
+* Post Loop: Added custom pagination format support to allow developers to use two Post Loop widgets with independent pagination on a page.
+* Removed all HTML from the CSS Declarations field and strip slashes from textarea/code fields. 
+
 = 2.11.0 - 02 June 2020 =
 * Live Editor: Ensured device viewing mode retained after update.
 * Live Editor: Improved device preview transition.

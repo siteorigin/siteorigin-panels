@@ -237,7 +237,7 @@ module.exports = Backbone.View.extend( {
 			thisView.trigger( 'hide_builder' );
 		} ).end()
 		.append(
-			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</button>' )
+			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h2.hndle' ).html() + '</button>' )
 			.click( function ( e ) {
 				if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
 					e.preventDefault();
@@ -775,15 +775,18 @@ module.exports = Backbone.View.extend( {
 			contentEd.fire( 'keyup' );
 		}
 
-		this.triggerYoastSeoChange();
+		this.triggerSeoChange();
 	},
 
 	/**
-	 * Trigger a change on Yoast SEO
+	 * Trigger a change in SEO plugins.
 	 */
-	triggerYoastSeoChange: function () {
-		if( ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
+	triggerSeoChange: function () {
+		if ( typeof YoastSEO !== 'undefined' && ! _.isNull( YoastSEO ) && ! _.isNull( YoastSEO.app.refresh ) ) {
 			YoastSEO.app.refresh();
+		}
+		if ( typeof rankMathEditor !== 'undefined' && ! _.isNull( rankMathEditor ) && ! _.isNull( rankMathEditor.refresh ) ) {
+			rankMathEditor.refresh( 'content' );
 		}
 	},
 

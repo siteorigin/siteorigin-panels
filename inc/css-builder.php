@@ -28,12 +28,12 @@ class SiteOrigin_Panels_Css_Builder {
 			if( is_array( $v ) ) {
 				for( $i = 0; $i < count( $v ); $i++ ) {
 					if ( ! strlen( (string) $v[ $i ] ) ) continue;
-					$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v[ $i ] );
+					$attribute_string[] = wp_strip_all_tags( $k ) . ':' . wp_strip_all_tags( $v[ $i ] );
 				}
 			}
 			else {
 				if ( ! strlen( (string) $v ) ) continue;
-				$attribute_string[] = esc_html( $k ) . ':' . esc_html( $v );
+				$attribute_string[] = wp_strip_all_tags( $k ) . ':' . wp_strip_all_tags( $v );
 			}
 		}
 		$attribute_string = implode( ';', $attribute_string );

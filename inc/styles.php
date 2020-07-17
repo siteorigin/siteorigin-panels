@@ -54,14 +54,18 @@ class SiteOrigin_Panels_Styles {
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
+		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
+			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) ),
+		) );
 		wp_register_script(
 			'siteorigin-parallax',
 			siteorigin_panels_url( 'js/siteorigin-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
-		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
-			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) )
+		wp_localize_script( 'siteorigin-parallax', 'parallaxStyles', array(
+			'parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
+			'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
 		) );
 	}
 
