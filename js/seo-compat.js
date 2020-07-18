@@ -17,19 +17,7 @@ jQuery(function($){
 	};
 
 	SiteOriginSeoCompat.prototype.contentModification = function(data) {
-		if(
-			typeof window.soPanelsBuilderView !== 'undefined' &&
-			window.soPanelsBuilderView.contentPreview
-		) {
-			var $data = $( window.soPanelsBuilderView.contentPreview );
-
-			if( $data.find('.so-panel.widget').length === 0 ) {
-				// Skip this for empty pages
-				return data;
-			}
-
-			// Remove style tags created by Widgets Bundle
-			$data.find('style').remove();
+		if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
 
 			var whitelist = [
 				'p', 'a', 'img', 'caption', 'br',
@@ -41,12 +29,34 @@ jQuery(function($){
 				'table', 'tr', 'th', 'td'
 			].join(',');
 
-			$data.find("*").not(whitelist).each(function() {
-				var content = $(this).contents();
-				$(this).replaceWith(content);
-			});
+			var extractContent = function( data ) {
+				var $data = $( data );
 
-			data = $data.html();
+				if( $data.find('.so-panel.widget').length === 0 ) {
+					// Skip this for empty pages
+					return data;
+				}
+
+				// Remove style tags created by Widgets Bundle
+				$data.find('style').remove();
+
+				$data.find("*").not(whitelist).each(function() {
+					var content = $(this).contents();
+					$(this).replaceWith(content);
+				});
+
+				return $data.html();
+			};
+
+			if ( ! Array.isArray( window.soPanelsBuilderView ) ) {
+				data = extractContent( window.soPanelsBuilderView.contentPreview );
+			} else {
+				$this = this;
+				data = null;
+				window.soPanelsBuilderView.forEach(function(panel){
+					data += extractContent( panel.contentPreview );
+				});
+			}
 		}
 
 		return data;
