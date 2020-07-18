@@ -731,8 +731,15 @@ module.exports = Backbone.View.extend( {
 	handleContentChange: function () {
 
 		// Make sure we actually need to copy content.
-		if ( panelsOptions.copy_content && this.attachedToEditor && this.$el.is( ':visible' ) ) {
-
+		if ( panelsOptions.copy_content	&&
+			(
+				typeof wp.blocks !== 'undefined' ||
+				(
+					this.attachedToEditor &&
+					this.$el.is( ':visible' )
+				)
+			)
+		) {
 			var panelsData = this.model.getPanelsData();
 			if ( !_.isEmpty( panelsData.widgets ) ) {
 				// We're going to create a copy of page builder content into the post content
