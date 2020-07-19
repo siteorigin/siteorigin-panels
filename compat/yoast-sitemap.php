@@ -9,7 +9,11 @@
  * @return array
  */
 function siteorigin_yoast_sitemap_images_compat( $images, $post_id ) {
-	if ( get_post_meta( $post_id, 'panels_data', true ) && class_exists( 'DOMDocument' ) ) {
+	if (
+		get_post_meta( $post_id, 'panels_data', true ) &&
+		extension_loaded( 'xml' ) &&
+		class_exists( 'DOMDocument' )
+	) {
 		$content = SiteOrigin_Panels::renderer()->render(
 			$post_id,
 			false
