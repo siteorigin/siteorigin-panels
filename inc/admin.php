@@ -293,7 +293,7 @@ class SiteOrigin_Panels_Admin {
 			wp_enqueue_media();
 			wp_enqueue_script(
 				'so-panels-admin',
-				siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
 				array(
 					'jquery',
 					'jquery-ui-resizable',
