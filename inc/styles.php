@@ -50,7 +50,7 @@ class SiteOrigin_Panels_Styles {
 	static function register_scripts() {
 		wp_register_script(
 			'siteorigin-panels-front-styles',
-			siteorigin_panels_url( 'js/styling' . SITEORIGIN_PANELS_VERSION_SUFFIX . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+			siteorigin_panels_url( 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
