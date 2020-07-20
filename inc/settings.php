@@ -123,6 +123,8 @@ class SiteOrigin_Panels_Settings {
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
 		$defaults['parallax-mobile']        = false;
+		$defaults['parallax-delay']         = 0.4;
+		$defaults['parallax-scale']         = 1.2;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
@@ -289,6 +291,18 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
 			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-delay'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Delay', 'siteorigin-panels' ),
+			'description' => __( 'The delay before the parallax effect finishes after the user stops scrolling.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-scale'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Scale', 'siteorigin-panels' ),
+			'description' => __( 'How much the image is scaled. The higher the scale is set, the more visible the parallax effect will be. Increasing the scale will result in a loss of image quality.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(

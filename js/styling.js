@@ -65,7 +65,10 @@ jQuery( function ( $ ) {
 				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
 			)
 		) {
-			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ) );
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ), {
+				delay: parallaxStyles['delay'],
+				scale: parallaxStyles['scale'],
+			} );
 		}
 	} );
 
