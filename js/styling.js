@@ -53,10 +53,21 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	$( window ).on( 'resize load', stretchFullWidthRows );
 	stretchFullWidthRows();
 
-	new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ) );
+	$( window ).on( 'resize load', function() {
+		stretchFullWidthRows();
+
+		if (
+			typeof parallaxStyles != 'undefined' &&
+			(
+				parallaxStyles['mobile'] &&
+				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
+			)
+		) {
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ) );
+		}
+	} );
 
 	// This should have been done in the footer, but run it here just incase.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
