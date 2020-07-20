@@ -11,6 +11,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 	static $current_loop_template;
 	static $current_loop_instance;
+	static $current_pagination_id;
 
 	/**
 	 * @var SiteOrigin_Panels_Widgets_PostLoop_Helper
@@ -55,6 +56,15 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 */
 	static function get_current_loop_instance() {
 		return self::$current_loop_instance;
+	}
+
+	/**
+	 * The pagination id used in custom format pagination links
+	 *
+	 * @return array
+	 */
+	static function get_current_pagination_id() {
+		return self::$current_pagination_id;
 	}
 
 	/**
@@ -134,16 +144,20 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			if( get_query_var('paged') ) {
 				// When the widget appears on a sub page.
 				$query_args['paged'] = get_query_var('paged');
-			}
-			elseif( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
+			} else if ( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
 				// When the widget appears on the home page.
 				preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
 				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
 				else $query_args['paged'] = 1;
+			} else {
+				self::$current_pagination_id = strstr( $instance['panels_info']['widget_id'], '-', true );
+				if ( isset( $_GET[ 'page-' . self::$current_pagination_id ] ) && is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] ) ) {
+					$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
+				} else {
+					$query_args['paged'] = 1;
+				}
 			}
-			else $query_args['paged'] = 1;
-		}
-		else {
+		} else {
 			// Get current page number when we're not using permalinks
 			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
 		}
@@ -200,6 +214,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
 		self::$current_loop_template = null;
+		self::$current_pagination_id = null;
 
 		echo $args['after_widget'];
 		
