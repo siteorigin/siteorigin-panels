@@ -398,8 +398,11 @@ class SiteOrigin_Panels_Styles {
 
 		if (
 			! empty( $style['background_display'] ) &&
-			! empty( $style['background_image_attachment'] ) &&
-			$style['background_display'] == 'parallax'
+			$style['background_display'] == 'parallax' &&
+			(
+				! empty( $style['background_image_attachment'] ) ||
+				! empty( $style['background_image_attachment_fallback'] )
+			)
 		) {
 			$attributes['class'][] = 'so-parallax';
 		}
@@ -432,15 +435,18 @@ class SiteOrigin_Panels_Styles {
 	function add_parallax( $output, $context ) {
 		if (
 			! empty( $context['style']['background_display'] ) &&
-			! empty( $context['style']['background_image_attachment'] ) &&
 			$context['style']['background_display'] == 'parallax'
-		) {			
-			$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' );
+		) {
+			$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' )[0];
+
+			if ( empty( $url ) && ! empty( $context['style']['background_image_attachment_fallback'] ) ) {
+				$url = $context['style']['background_image_attachment_fallback'];
+			}
 
 			if ( ! empty( $url ) ) {
 				wp_enqueue_script( 'simpleParallax' );
 				$parallax_args = array();
-				$output .= '<img src=' . esc_url( $url[0] ) . ' data-siteorigin-parallax=' . json_encode( $parallax_args ) .'>';
+				$output .= '<img src=' . esc_url( $url ) . ' data-siteorigin-parallax=' . json_encode( $parallax_args ) .'>';
 			}
 		}
 
