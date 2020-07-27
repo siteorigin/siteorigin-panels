@@ -150,7 +150,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
 				else $query_args['paged'] = 1;
 			} else {
-				self::$current_pagination_id = strstr( $instance['_sow_form_id'], '-', true );
+				self::$current_pagination_id = substr( $instance['_sow_form_id'], 0, 7 );
 				if ( isset( $_GET[ 'page-' . self::$current_pagination_id ] ) && is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] ) ) {
 					$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
 				} else {
