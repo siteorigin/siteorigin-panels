@@ -437,7 +437,9 @@ class SiteOrigin_Panels_Styles {
 			! empty( $context['style']['background_display'] ) &&
 			$context['style']['background_display'] == 'parallax'
 		) {
-			$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' )[0];
+			if ( ! empty( $context['style']['background_image_attachment'] ) ) {
+				$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' )[0];
+			}
 
 			if ( empty( $url ) && ! empty( $context['style']['background_image_attachment_fallback'] ) ) {
 				$url = $context['style']['background_image_attachment_fallback'];
