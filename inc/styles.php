@@ -72,7 +72,7 @@ class SiteOrigin_Panels_Styles {
 			'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
 			'mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
 			'delay' => ! empty( siteorigin_panels_setting( 'parallax-delay' ) ) ? siteorigin_panels_setting( 'parallax-delay' ) : 0.4,
-			'scale' => ! empty( siteorigin_panels_setting( 'parallax-scale' ) ) ? siteorigin_panels_setting( 'parallax-scale' ) : 1.2,
+			'scale' => ! empty( siteorigin_panels_setting( 'parallax-scale' ) ) ? siteorigin_panels_setting( 'parallax-scale' ) : 1.1,
 		) );
 	}
 

@@ -67,7 +67,7 @@ jQuery( function ( $ ) {
 		) {
 			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ), {
 				delay: parallaxStyles['delay'],
-				scale: parallaxStyles['scale'],
+				scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
 			} );
 		}
 	} );
