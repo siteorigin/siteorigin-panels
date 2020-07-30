@@ -471,8 +471,10 @@ class SiteOrigin_Panels_Styles {
 
 		if (
 			! empty( $style['background_display'] ) &&
-			! empty( $style['background_image_attachment'] ) &&
-			! empty( $style['background_image_attachment_fallback'] ) &&
+			! (
+				! empty( $style['background_image_attachment'] ) &&
+				! empty( $style['background_image_attachment_fallback'] )
+			) &&
 			$style['background_display'] != 'parallax'
 		) {
 			$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
