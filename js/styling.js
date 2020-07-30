@@ -61,7 +61,7 @@ jQuery( function ( $ ) {
 		if (
 			typeof parallaxStyles != 'undefined' &&
 			(
-				parallaxStyles['mobile'] &&
+				! parallaxStyles['mobile'] ||
 				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
 			)
 		) {
