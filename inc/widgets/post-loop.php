@@ -75,7 +75,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 * @return array
 	 */
 	function update( $new, $old ){
-		$new['pagination_id'] = md5( json_encode( $new ) );
+		$new['pagination_id'] = rand();
 		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
 			$helper = $this->get_helper_widget( $this->get_loop_templates() );
 			return $helper->update( $new, $old );
