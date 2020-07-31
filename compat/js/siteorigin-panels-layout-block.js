@@ -252,6 +252,9 @@ function (_Component) {
   return SiteOriginPanelsLayoutBlock;
 }(Component);
 
+var hasLayoutCategory = wp.blocks.getCategories().some(function (category) {
+  return category.slug === 'layout';
+});
 registerBlockType('siteorigin-panels/layout-block', {
   title: __('SiteOrigin Layout', 'siteorigin-panels'),
   description: __("Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels'),
@@ -260,7 +263,7 @@ registerBlockType('siteorigin-panels/layout-block', {
       className: "siteorigin-panels-block-icon"
     });
   },
-  category: 'layout',
+  category: hasLayoutCategory ? 'layout' : 'design',
   keywords: ['page builder', 'column,grid', 'panel'],
   supports: {
     html: false
