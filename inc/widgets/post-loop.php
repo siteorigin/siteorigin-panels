@@ -75,6 +75,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 * @return array
 	 */
 	function update( $new, $old ){
+		$new['pagination_id'] = md5( json_encode( $new ) );
 		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
 			$helper = $this->get_helper_widget( $this->get_loop_templates() );
 			return $helper->update( $new, $old );
@@ -150,10 +151,18 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
 				else $query_args['paged'] = 1;
 			} else {
-				self::$current_pagination_id = substr( $instance['_sow_form_id'], 0, 7 );
-				if ( isset( $_GET[ 'page-' . self::$current_pagination_id ] ) && is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] ) ) {
-					$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
-				} else {
+				if ( isset( $instance['pagination_id'] ) ) {
+					self::$current_pagination_id = $instance['pagination_id'];
+
+					if (
+						isset( $_GET[ 'page-' . self::$current_pagination_id ] ) &&
+						is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] )
+					) {
+						$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
+					}
+				}
+
+				if ( ! isset( $query_args['paged'] ) ) {
 					$query_args['paged'] = 1;
 				}
 			}
