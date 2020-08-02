@@ -398,7 +398,10 @@ class SiteOrigin_Panels_Styles {
 
 		if (
 			! empty( $style['background_display'] ) &&
-			$style['background_display'] == 'parallax' &&
+			(
+				$style['background_display'] == 'parallax' ||
+				$style['background_display'] == 'parallax-original'
+			) &&
 			(
 				! empty( $style['background_image_attachment'] ) ||
 				! empty( $style['background_image_attachment_fallback'] )
@@ -435,7 +438,10 @@ class SiteOrigin_Panels_Styles {
 	function add_parallax( $output, $context ) {
 		if (
 			! empty( $context['style']['background_display'] ) &&
-			$context['style']['background_display'] == 'parallax'
+			(
+				$context['style']['background_display'] == 'parallax' ||
+				$context['style']['background_display'] == 'parallax-original'
+			)
 		) {
 			if ( ! empty( $context['style']['background_image_attachment'] ) ) {
 				$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' )[0];
@@ -475,7 +481,10 @@ class SiteOrigin_Panels_Styles {
 				! empty( $style['background_image_attachment'] ) &&
 				! empty( $style['background_image_attachment_fallback'] )
 			) &&
-			$style['background_display'] != 'parallax'
+			(
+				$style['background_display'] != 'parallax' &&
+				$style['background_display'] != 'parallax-original'
+			)
 		) {
 			if ( ! empty( $style['background_image_attachment'] ) ) {
 				$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
