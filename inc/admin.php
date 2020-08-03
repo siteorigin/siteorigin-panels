@@ -1129,7 +1129,10 @@ class SiteOrigin_Panels_Admin {
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
-		$return['preview'] = wp_targeted_link_rel( SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data ) );
+		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		if ( function_exists( 'wp_targeted_link_rel' ) ) {
+			$return['preview'] = wp_targeted_link_rel( $return['preview'] );
+		}
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
 
 		echo json_encode( $return );
