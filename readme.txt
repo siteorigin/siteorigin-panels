@@ -2,6 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
 Tested up to: 5.5
+Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
