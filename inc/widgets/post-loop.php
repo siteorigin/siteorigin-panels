@@ -142,15 +142,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		
 		if( $wp_rewrite->using_permalinks() ) {
 			
-			if( get_query_var('paged') ) {
-				// When the widget appears on a sub page.
-				$query_args['paged'] = get_query_var('paged');
-			} else if ( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
-				// When the widget appears on the home page.
-				preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
-				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
-				else $query_args['paged'] = 1;
-			} else {
+			if ( apply_filters( 'siteorigin_panels_post_loop_custom_pagination', false  ) ) {
 				if ( isset( $instance['pagination_id'] ) ) {
 					self::$current_pagination_id = $instance['pagination_id'];
 
@@ -161,10 +153,20 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 						$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
 					}
 				}
-
-				if ( ! isset( $query_args['paged'] ) ) {
-					$query_args['paged'] = 1;
+			} else {
+				if ( get_query_var( 'paged' ) ) {
+					// When the widget appears on a sub page.
+					$query_args['paged'] = get_query_var('paged');
+				} else if ( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
+					// When the widget appears on the home page.
+					preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
+					if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
+					else $query_args['paged'] = 1;
 				}
+			}
+
+			if ( ! isset( $query_args['paged'] ) ) {
+				$query_args['paged'] = 1;
 			}
 		} else {
 			// Get current page number when we're not using permalinks
