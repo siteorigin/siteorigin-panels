@@ -55,7 +55,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		var $panelsContainer = jQuery( this.panelsContainer.current );
 		
 		var config = {
-			editorType: 'standalone'
+			editorType: 'standalone',
+	        loadLiveEditor: false,
+	        postId: soPanelsBlockEditorAdmin.postId,
+	        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor,
 		};
 		
 		var builderModel = new panels.model.builder();
@@ -209,6 +212,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 }
 
+var hasLayoutCategory = wp.blocks.getCategories().some( function( category ) {
+	return category.slug === 'layout';
+} );
+
 registerBlockType( 'siteorigin-panels/layout-block', {
 	title: __( 'SiteOrigin Layout', 'siteorigin-panels' ),
 	
@@ -218,7 +225,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 		return <span className="siteorigin-panels-block-icon"/>;
 	},
 	
-	category: 'layout',
+	category: hasLayoutCategory ? 'layout' : 'design',
 	
 	keywords: [ 'page builder', 'column,grid', 'panel' ],
 	
@@ -241,6 +248,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 			
 			if ( !_.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
+				wp.data.dispatch( 'core/editor' ).lockPostSaving();
 				jQuery.post(
 					panelsOptions.ajaxurl,
 					{
@@ -258,6 +266,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 						}
 						
 						setAttributes( panelsAttributes );
+						wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 					}
 				);
 			}

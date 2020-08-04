@@ -528,11 +528,17 @@ class SiteOrigin_Panels_Admin {
 
 	public function enqueue_seo_compat(){
 		if ( self::is_admin() ) {
-			if ( defined( 'WPSEO_FILE' ) && wp_script_is( 'yoast-seo-metabox' ) ) {
+			if (
+				defined( 'WPSEO_FILE' ) &&
+				(
+					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6
+					wp_script_is( 'yoast-seo-metabox' ) // <= 14.5
+				)
+			) {
 				wp_enqueue_script(
 					'so-panels-seo-compat',
 					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-					array('jquery', 'yoast-seo-metabox' ),
+					array( 'jquery' ),
 					SITEORIGIN_PANELS_VERSION,
 					true
 				);
@@ -1022,13 +1028,16 @@ class SiteOrigin_Panels_Admin {
 	 * @return bool Whether or not the widget is considered a JS widget.
 	 */
 	function is_core_js_widget( $widget ) {
-		$js_widgets = array(
-			'WP_Widget_Custom_HTML',
-			'WP_Widget_Media_Audio',
-			'WP_Widget_Media_Gallery',
-			'WP_Widget_Media_Image',
-			'WP_Widget_Media_Video',
-			'WP_Widget_Text',
+		$js_widgets = apply_filters(
+			'siteorigin_panels_core_js_widgets',
+			array(
+				'WP_Widget_Custom_HTML',
+				'WP_Widget_Media_Audio',
+				'WP_Widget_Media_Gallery',
+				'WP_Widget_Media_Image',
+				'WP_Widget_Media_Video',
+				'WP_Widget_Text',
+			)
 		);
 
 		$is_js_widget = in_array( get_class( $widget ), $js_widgets ) &&

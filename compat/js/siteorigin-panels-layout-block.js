@@ -1,6 +1,6 @@
 "use strict";
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -103,7 +103,10 @@ function (_Component) {
 
       var $panelsContainer = jQuery(this.panelsContainer.current);
       var config = {
-        editorType: 'standalone'
+        editorType: 'standalone',
+        loadLiveEditor: false,
+        postId: soPanelsBlockEditorAdmin.postId,
+        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor
       };
       var builderModel = new panels.model.builder();
       this.builderView = new panels.view.builder({
@@ -249,6 +252,9 @@ function (_Component) {
   return SiteOriginPanelsLayoutBlock;
 }(Component);
 
+var hasLayoutCategory = wp.blocks.getCategories().some(function (category) {
+  return category.slug === 'layout';
+});
 registerBlockType('siteorigin-panels/layout-block', {
   title: __('SiteOrigin Layout', 'siteorigin-panels'),
   description: __("Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels'),
@@ -257,7 +263,7 @@ registerBlockType('siteorigin-panels/layout-block', {
       className: "siteorigin-panels-block-icon"
     });
   },
-  category: 'layout',
+  category: hasLayoutCategory ? 'layout' : 'design',
   keywords: ['page builder', 'column,grid', 'panel'],
   supports: {
     html: false
@@ -278,6 +284,7 @@ registerBlockType('siteorigin-panels/layout-block', {
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
       if (!_.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
+        wp.data.dispatch('core/editor').lockPostSaving();
         jQuery.post(panelsOptions.ajaxurl, {
           action: 'so_panels_builder_content_json',
           panels_data: JSON.stringify(newPanelsData),
@@ -294,6 +301,7 @@ registerBlockType('siteorigin-panels/layout-block', {
           }
 
           setAttributes(panelsAttributes);
+          wp.data.dispatch('core/editor').unlockPostSaving();
         });
       }
     };
