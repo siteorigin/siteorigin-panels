@@ -744,11 +744,13 @@ module.exports = Backbone.View.extend( {
 						post_id: this.config.postId
 					},
 					function ( content ) {
+						// Post content doesn't need to be generated on load while contentPreview does.
+						if ( this.contentPreview && content.post_content !== '' ) {
+							this.updateEditorContent( content.post_content );
+						}
+
 						if ( content.preview !== '' ) {
 							this.contentPreview = content.preview;
-						}
-						if ( content.post_content !== '' ) {
-							this.updateEditorContent( content.post_content );
 						}
 					}.bind( this )
 				);
