@@ -1130,6 +1130,9 @@ class SiteOrigin_Panels_Admin {
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		if ( function_exists( 'wp_targeted_link_rel' ) ) {
+			$return['preview'] = wp_targeted_link_rel( $return['preview'] );
+		}
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
 
 		echo json_encode( $return );
