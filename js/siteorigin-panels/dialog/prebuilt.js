@@ -169,7 +169,7 @@ module.exports = panels.view.dialog.extend( {
 		c.find( '.so-export' ).submit( function ( e ) {
 			var $$ = $( this );
 			var panelsData = thisView.builder.model.getPanelsData();
-			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
+			var postName = $('input[name="post_title"]').val();
 			if ( ! postName ) {
 				postName = $('input[name="post_ID"]').val();
 			}
