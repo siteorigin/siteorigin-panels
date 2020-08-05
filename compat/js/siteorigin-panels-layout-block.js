@@ -368,3 +368,10 @@ registerBlockType('siteorigin-panels/layout-block', {
     });
   }
 })(jQuery);
+
+// Detect preview mode changes, and trigger resize.
+jQuery(document).on('click', '.block-editor-post-preview__button-resize', function (e) {
+  if (!jQuery(this).hasClass('has-icon')) {
+    jQuery(window).trigger('resize');
+  }
+});
