@@ -16,7 +16,6 @@ if ( ! defined( 'SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 	define( 'SITEORIGIN_PANELS_JS_SUFFIX', '' );
 }
 define( 'SITEORIGIN_PANELS_CSS_SUFFIX', '' );
-define( 'SITEORIGIN_PANELS_VERSION_SUFFIX', '' );
 
 require_once plugin_dir_path( __FILE__ ) . 'inc/functions.php';
 
