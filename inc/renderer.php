@@ -251,7 +251,7 @@ class SiteOrigin_Panels_Renderer {
 		if ( $settings['responsive'] ) {
 			$widget_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_widget_mobile_margin_bottom', $settings['widget-mobile-margin-bottom'] . 'px', false, false, $panels_data, $post_id );
 
-			if( $widget_mobile_margin_bottom != $widget_margin_bottom && ! empty( $widget_mobile_margin_bottom ) ) {
+			if ( $widget_mobile_margin_bottom != $widget_margin_bottom && ! empty( $widget_mobile_margin_bottom ) ) {
 				$css->add_widget_css( $post_id, false, false, false, '', array(
 					'margin-bottom' => $widget_mobile_margin_bottom
 				), $panels_mobile_width );
