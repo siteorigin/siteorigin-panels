@@ -74,7 +74,7 @@ class SiteOrigin_Panels_Renderer {
 			// Filter the bottom margin for this row with the arguments
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', '', $row, $ri, $panels_data, $post_id );
-			
+
 			if ( empty( $row['cells'] ) ) {
 				continue;
 			}
@@ -231,21 +231,32 @@ class SiteOrigin_Panels_Renderer {
 						'margin-bottom' => $panels_mobile_margin_bottom
 					), $panels_mobile_width );
 				}
-					
+
 				
 			} // End of responsive code
 
 		}
 
-		// Add the bottom margins
+		// Add widget bottom margins.
+		$widget_margin_bottom = apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id );
+
 		$css->add_widget_css( $post_id, false, false, false, '', array(
-			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id )
+			'margin-bottom' => $widget_margin_bottom,
 		) );
+
 		$css->add_widget_css( $post_id, false, false, false, ':last-child', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id )
 		) );
 
 		if ( $settings['responsive'] ) {
+			$widget_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_widget_mobile_margin_bottom', $settings['widget-mobile-margin-bottom'] . 'px', false, false, $panels_data, $post_id );
+
+			if( $widget_mobile_margin_bottom != $widget_margin_bottom && ! empty( $widget_mobile_margin_bottom ) ) {
+				$css->add_widget_css( $post_id, false, false, false, '', array(
+					'margin-bottom' => $widget_mobile_margin_bottom
+				), $panels_mobile_width );
+			}
+
 			$css->add_cell_css( $post_id, false, false, '', array(
 				'padding' => 0,
 			), $panels_mobile_width );
