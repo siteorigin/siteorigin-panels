@@ -175,7 +175,7 @@ module.exports = panels.view.dialog.extend( {
 			} else if ( typeof wp.data != 'undefined' ) {
 				var currentBlockPosition = thisView.getCurrentBlockPosition();
 				if ( currentBlockPosition >= 0 ) {
-					postName += '-block-editor-' + currentBlockPosition; 
+					postName += '-' + currentBlockPosition; 
 				}
 
 			}
