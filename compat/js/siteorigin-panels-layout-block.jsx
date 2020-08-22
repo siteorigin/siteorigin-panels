@@ -3,7 +3,6 @@ const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
 const { Toolbar, IconButton, Spinner } = wp.components;
-const { __ } = wp.i18n;
 const { soPanelsBlockEditorAdmin } = window;
 
 class SiteOriginPanelsLayoutBlock extends Component {
@@ -169,7 +168,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Preview layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
 								onClick={ switchToPreview }
 							/>
 						</Toolbar>
@@ -190,7 +189,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Edit layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
 								onClick={ switchToEditing }
 							/>
 						</Toolbar>
@@ -217,9 +216,9 @@ var hasLayoutCategory = wp.blocks.getCategories().some( function( category ) {
 } );
 
 registerBlockType( 'siteorigin-panels/layout-block', {
-	title: __( 'SiteOrigin Layout', 'siteorigin-panels' ),
+	title: wp.i18n.__( 'SiteOrigin Layout', 'siteorigin-panels' ),
 	
-	description: __( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
+	description: wp.i18n.__( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
 	
 	icon () {
 		return <span className="siteorigin-panels-block-icon"/>;
