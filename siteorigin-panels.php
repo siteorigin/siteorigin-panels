@@ -16,7 +16,6 @@ if ( ! defined( 'SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 	define( 'SITEORIGIN_PANELS_JS_SUFFIX', '' );
 }
 define( 'SITEORIGIN_PANELS_CSS_SUFFIX', '' );
-define( 'SITEORIGIN_PANELS_VERSION_SUFFIX', '' );
 
 require_once plugin_dir_path( __FILE__ ) . 'inc/functions.php';
 
@@ -32,13 +31,13 @@ class SiteOrigin_Panels {
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
-		
+
 		add_action('widgets_init', array( $this, 'widgets_init' ) );
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
-		
+
 		add_action( 'activated_plugin', array($this, 'activation_flag_redirect') );
 		add_action( 'admin_init', array($this, 'activation_do_redirect') );
 
@@ -59,7 +58,7 @@ class SiteOrigin_Panels {
 		if ( self::is_live_editor() ) {
 			SiteOrigin_Panels_Live_Editor::single();
 		}
-		
+
 		SiteOrigin_Panels::renderer();
 		SiteOrigin_Panels_Styles_Admin::single();
 
@@ -68,22 +67,22 @@ class SiteOrigin_Panels {
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
-		
+
 		// We need to generate fresh post content
 		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
 		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ) );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
-		
+
 		// Remove the default excerpt function
 		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 9 );
-		
+
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
 		SiteOrigin_Panels_Cache_Renderer::single();
-		
+
 		if ( function_exists( 'register_block_type' ) ) {
 			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
-		
+
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
 	}
 
@@ -92,7 +91,7 @@ class SiteOrigin_Panels {
 		static $single;
 		return empty( $single ) ? $single = new self() : $single;
 	}
-	
+
 	/**
 	 * Get an instance of the renderer
 	 *
@@ -105,11 +104,11 @@ class SiteOrigin_Panels {
 				case 'always':
 					$renderer = SiteOrigin_Panels_Renderer_Legacy::single();
 					break;
-					
+
 				case 'never':
 					$renderer = SiteOrigin_Panels_Renderer::single();
 					break;
-					
+
 				default :
 					$renderer = self::is_legacy_browser() ?
 						SiteOrigin_Panels_Renderer_Legacy::single() :
@@ -117,14 +116,14 @@ class SiteOrigin_Panels {
 					break;
 			}
 		}
-		
+
 		return $renderer;
 	}
-	
+
 	public static function is_legacy_browser(){
 		$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
 		if( empty( $agent ) ) return false;
-		
+
 		return
 			// IE lte 11
 			( preg_match('/Trident\/(?P<v>\d+)/i', $agent, $B) && $B['v'] <= 7 ) ||
@@ -157,7 +156,7 @@ class SiteOrigin_Panels {
 			$filename = str_replace( array( 'SiteOrigin_Panels_', '_' ), array( '', '-' ), $class );
 			$filename = plugin_dir_path( __FILE__ ) . 'inc/' . strtolower( $filename ) . '.php';
 		}
-		
+
 		if ( ! empty( $filename ) && file_exists( $filename ) ) {
 			include $filename;
 		}
@@ -201,6 +200,11 @@ class SiteOrigin_Panels {
 		// Compatibility with Widget Options plugin
 		if ( class_exists( 'WP_Widget_Options' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
+		}
+
+		// Compatibility with Yoast Sitemap.
+		if ( defined( 'WPSEO_FILE' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast-sitemap.php';
 		}
 
 		// Compatibility with AMP plugin
@@ -286,7 +290,7 @@ class SiteOrigin_Panels {
 
 		return $panels_data;
 	}
-	
+
 	/**
 	 * Generate post content for WooCommerce shop page if it's using a PB layout.
 	 *
@@ -300,7 +304,7 @@ class SiteOrigin_Panels {
 		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
 			return $this->generate_post_content( $content );
 		}
-		
+
 		return $content;
 	}
 
@@ -322,9 +326,9 @@ class SiteOrigin_Panels {
 		if ( ! apply_filters( 'siteorigin_panels_filter_content_enabled', true ) ) {
 			return $content;
 		}
-		
+
 		$post_id = $this->get_post_id();
-		
+
 		// Check if this post has panels_data
 		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
 			$panel_content = SiteOrigin_Panels::renderer()->render(
@@ -358,7 +362,7 @@ class SiteOrigin_Panels {
 
 		return $content;
 	}
-	
+
 	/**
 	 * Generate an excerpt for the current post, if possible.
 	 *
@@ -371,9 +375,9 @@ class SiteOrigin_Panels {
 		if ( ( empty( $post ) && ! in_the_loop() ) || $text !== '' ) {
 			return $text;
 		}
-		
+
 		$post_id = $this->get_post_id();
-		
+
 		// Check if this post has panels_data
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
 		if ( $panels_data && ! empty( $panels_data['widgets'] ) ) {
@@ -397,19 +401,19 @@ class SiteOrigin_Panels {
 					}
 				}
 			}
-			
+
 			$text = strip_shortcodes( $raw_excerpt );
 			$text = str_replace( ']]>', ']]&gt;', $text );
-			
+
 			$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
 			$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
 		}
-		
+
 		return $text;
 	}
-	
+
 	private function get_localized_word_count( $text ) {
-		
+
 		// From the core `wp_trim_words` function to get localized word count.
 		$text = wp_strip_all_tags( $text );
 		if ( strpos( _x( 'words', 'Word count type. Do not translate!' ), 'characters' ) === 0 && preg_match( '/^utf\-?8$/i', get_option( 'blog_charset' ) ) ) {
@@ -419,29 +423,29 @@ class SiteOrigin_Panels {
 		} else {
 			$words_array = preg_split( "/[\n\r\t ]+/", $text, -1, PREG_SPLIT_NO_EMPTY );
 		}
-		
+
 		return count( $words_array );
 	}
-	
+
 	/**
 	 * Generate CSS for the current post
 	 */
 	public function generate_post_css() {
 		$post_id = $this->get_post_id();
-		
+
 		if( is_singular() && get_post_meta( $post_id, 'panels_data', true ) ) {
 			$renderer = SiteOrigin_Panels::renderer();
 			$renderer->add_inline_css( $post_id, $renderer->generate_css( $post_id ) );
 		}
 	}
-	
+
 	/**
 	 * Get the post id for the current post.
 	 */
 	function get_post_id() {
-		
+
 		$post_id = get_the_ID();
-		
+
 		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
 			$post_id = wc_get_page_id( 'shop' );
 		}
@@ -453,7 +457,7 @@ class SiteOrigin_Panels {
 				$post_id = $preview_post->ID;
 			}
 		}
-		
+
 		return $post_id;
 	}
 
@@ -526,7 +530,7 @@ class SiteOrigin_Panels {
 
 		return $admin_bar;
 	}
-	
+
 	function widgets_init(){
 		register_widget( 'SiteOrigin_Panels_Widgets_PostContent' );
 		register_widget( 'SiteOrigin_Panels_Widgets_PostLoop' );
@@ -588,7 +592,7 @@ class SiteOrigin_Panels {
 
 		return $panels_data;
 	}
-	
+
 	/**
 	 * Fix class names that have been incorrectly escaped
 	 *
@@ -621,7 +625,7 @@ class SiteOrigin_Panels {
 	public function strip_before_js(){
 		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
-	
+
 	/**
 	 * Should we display premium addon messages
 	 *
@@ -649,8 +653,8 @@ class SiteOrigin_Panels {
 		}
 		return $url;
 	}
-	
-	
+
+
 	/**
 	 * Get the registered widget instance by it's class name or the hash generated when it was registered.
 	 *
@@ -671,7 +675,7 @@ class SiteOrigin_Panels {
 		}
 		return null;
 	}
-	
+
 	/**
 	 *  Flag redirect to welcome page after activation
 	 *

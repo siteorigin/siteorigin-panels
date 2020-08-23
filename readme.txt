@@ -2,6 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
 Tested up to: 5.5
+Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -96,6 +97,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.2 - 12 August 2020 =
+* Updated build scripts.
+
 = 2.11.1 - 17 July 2020 =
 * Added Rank Math SEO plugin support.
 * Added [siteorigin_panels_layout_builder_supports](https://siteorigin.com/docs/page-builder/hooks/builder-features-actions/) filter.
@@ -106,7 +110,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Fixed `undefined` Page Builder tab in WordPress 5.5.
 * Added a new "Disable Background Parallax On Mobile" global setting to `Settings > Page Builder > General`.
 * Post Loop: Added custom pagination format support to allow developers to use two Post Loop widgets with independent pagination on a page.
-* Removed all HTML from the CSS Declarations field and strip slashes from textarea/code fields. 
+* Removed all HTML from the CSS Declarations field and strip slashes from textarea/code fields.
 
 = 2.11.0 - 02 June 2020 =
 * Live Editor: Ensured device viewing mode retained after update.
