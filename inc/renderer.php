@@ -73,7 +73,7 @@ class SiteOrigin_Panels_Renderer {
 			
 			// Filter the bottom margin for this row with the arguments
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
-			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', '', $row, $ri, $panels_data, $post_id );
+			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', $settings['row-mobile-margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 			
 			if ( empty( $row['cells'] ) ) {
 				continue;
