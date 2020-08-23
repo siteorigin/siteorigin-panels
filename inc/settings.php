@@ -140,7 +140,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['tablet-width']                = 1024;
 		$defaults['mobile-width']                = 780;
 		$defaults['margin-bottom']               = 30;
-		$defaults['widget-mobile-margin-bottom'] = 30;
+		$defaults['widget-mobile-margin-bottom'] = '';
 		$defaults['margin-bottom-last-row']      = false;
 		$defaults['margin-sides']                = 30;
 		$defaults['full-width-container']        = 'body';
@@ -422,7 +422,7 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'number',
 			'unit'        => 'px',
 			'label'       => __( 'Widget Mobile Bottom Margin', 'siteorigin-panels' ),
-			'description' => __( 'The margin below widgets on mobile.', 'siteorigin-panels' ),
+			'description' => __( 'The default margin below widgets on mobile.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-bottom-last-row'] = array(
