@@ -211,6 +211,11 @@ class SiteOrigin_Panels {
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
+
+		// Compatibility with Gravity Forms.
+		if ( class_exists( 'GFCommon' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/gravity-forms.php';
+		}
 	}
 
 	/**
