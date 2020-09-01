@@ -198,6 +198,12 @@ function (_Component) {
         }
       });
       jQuery(document).trigger('panels_setup', this.builderView);
+
+      if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+        window.soPanelsBuilderView = [];
+      }
+      window.soPanelsBuilderView.push( this.builderView );
+
       this.panelsInitialized = true;
     }
   }, {
