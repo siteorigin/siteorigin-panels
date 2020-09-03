@@ -253,7 +253,7 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['general']['fields']['use-classic'] = array(
 			'type' => 'checkbox',
-			'label' => __( 'Use Classic Editor for new posts', 'siteorigin-panels' ),
+			'label' => __( 'Use Classic Editor for New Posts', 'siteorigin-panels' ),
 			'description' => __( 'New posts of the above Post Types will be created using the Classic Editor.', 'siteorigin-panels' )
 		);
 
