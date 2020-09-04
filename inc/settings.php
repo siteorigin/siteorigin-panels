@@ -121,7 +121,6 @@ class SiteOrigin_Panels_Settings {
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-motion']        = '';
 		$defaults['parallax-mobile']        = false;
 		$defaults['parallax-delay']         = 0.4;
 		$defaults['parallax-scale']         = 1.2;
@@ -279,12 +278,6 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
 			'description' => __( "Display a widget count in the admin lists of posts/pages where you're using Page Builder.", 'siteorigin-panels' ),
-		);
-
-		$fields['general']['fields']['parallax-motion'] = array(
-			'type'        => 'float',
-			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
-			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['parallax-mobile'] = array(
