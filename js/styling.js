@@ -2,13 +2,13 @@
 
 jQuery( function ( $ ) {
 
-	var fullContainer = $( panelsStyles.fullContainer );
-	if ( fullContainer.length === 0 ) {
-		fullContainer = $( 'body' );
-	}
-
 	// Stretch all the full width rows
 	var stretchFullWidthRows = function () {
+		var fullContainer = $( panelsStyles.fullContainer );
+		if ( fullContainer.length === 0 ) {
+			fullContainer = $( 'body' );
+		}
+
 		var $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
 		$panelsRow.each( function () {
 			var $$ = $( this );
