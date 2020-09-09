@@ -16,8 +16,7 @@ jQuery( function($){
                         .animate({'margin-top' : 0, 'opacity': opacity}, 280 + 40*(4 - v) );
                 }, 150 + 225 * (4 - v) );
             });
-        })
-        .each(function() { if(this.complete) { $(this).load(); } });
+        });
 
     // Settings page tabbing
 
