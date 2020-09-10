@@ -62,5 +62,14 @@ jQuery(function($){
 		return data;
 	};
 
-	new SiteOriginSeoCompat();
+	if ( typeof rankMathEditor !== 'undefined' ) {
+		new SiteOriginSeoCompat();
+	} else {
+		$( window ).on(
+			'YoastSEO:ready',
+			function () {
+				new SiteOriginSeoCompat();
+			}
+		);
+	}
 });
