@@ -528,11 +528,17 @@ class SiteOrigin_Panels_Admin {
 
 	public function enqueue_seo_compat(){
 		if ( self::is_admin() ) {
-			if ( defined( 'WPSEO_FILE' ) && wp_script_is( 'yoast-seo-metabox' ) ) {
+			if (
+				defined( 'WPSEO_FILE' ) &&
+				(
+					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6
+					wp_script_is( 'yoast-seo-metabox' ) // <= 14.5
+				)
+			) {
 				wp_enqueue_script(
 					'so-panels-seo-compat',
 					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-					array('jquery', 'yoast-seo-metabox' ),
+					array( 'jquery' ),
 					SITEORIGIN_PANELS_VERSION,
 					true
 				);
@@ -1124,6 +1130,9 @@ class SiteOrigin_Panels_Admin {
 
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		if ( function_exists( 'wp_targeted_link_rel' ) ) {
+			$return['preview'] = wp_targeted_link_rel( $return['preview'] );
+		}
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
 
 		echo json_encode( $return );

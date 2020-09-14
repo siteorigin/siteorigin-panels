@@ -2,6 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
 Tested up to: 5.5
+Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +96,23 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.11.3 - 14 September 2020 =
+* Block Editor: Added SEO support for multiple Layout Block instances.
+* Yoast SEO Sitemap: Added images added using Page Builder.
+* Prevented potential `Are you sure you want to navigate away?` notice.
+* Post Loop: Resolved `Undefined index` notice when used outside of Page Builder.
+* Android Chrome: Improved edit widget touch detection.
+* Yoast SEO: Resolved version `14.6` integration issue.
+* Block Editor: Used new categories for the Layout Block for WP 5.5+.
+* Block Editor: Resolved potential Layout Block data validation issue by running `wp_targeted_link_rel` on the generated preview content.
+* Block Editor: Added preview support for the Layout Block.
+* Block Editor: Updated translation functions to avoid potential conflicts.
+* Block Editor: Added the page name and block number to Layout Block JSON export files.
+* Block Editor: Improved SEO plugin support.
+* Added a global `Row Mobile Bottom Margin` setting at `Settings > Page Builder > Layout`.
+* Ensured Yoast SEO is ready before running compatibility functionality.
+* Global Settings: Resolved a jQuery Migrate Helper warning.
 
 = 2.11.2 - 12 August 2020 =
 * Updated build scripts.

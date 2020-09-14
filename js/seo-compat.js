@@ -16,20 +16,8 @@ jQuery(function($){
 
 	};
 
-	SiteOriginSeoCompat.prototype.contentModification = function(data) {
-		if(
-			typeof window.soPanelsBuilderView !== 'undefined' &&
-			window.soPanelsBuilderView.contentPreview
-		) {
-			var $data = $( window.soPanelsBuilderView.contentPreview );
-
-			if( $data.find('.so-panel.widget').length === 0 ) {
-				// Skip this for empty pages
-				return data;
-			}
-
-			// Remove style tags created by Widgets Bundle
-			$data.find('style').remove();
+	SiteOriginSeoCompat.prototype.contentModification = function( data ) {
+		if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
 
 			var whitelist = [
 				'p', 'a', 'img', 'caption', 'br',
@@ -39,18 +27,49 @@ jQuery(function($){
 				'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
 				'ul', 'ol', 'li',
 				'table', 'tr', 'th', 'td'
-			].join(',');
+			].join( ',' );
 
-			$data.find("*").not(whitelist).each(function() {
-				var content = $(this).contents();
-				$(this).replaceWith(content);
-			});
+			var extractContent = function( data ) {
+				var $data = $( data );
 
-			data = $data.html();
+				if( $data.find( '.so-panel.widget' ).length === 0 ) {
+					// Skip this for empty pages
+					return data;
+				}
+
+				// Remove style tags created by Widgets Bundle
+				$data.find( 'style' ).remove();
+
+				$data.find( "*") .not( whitelist ).each( function() {
+					var content = $( this ).contents();
+					$( this ).replaceWith( content );
+				} );
+
+				return $data.html();
+			};
+
+			if ( ! Array.isArray( window.soPanelsBuilderView ) ) {
+				data = extractContent( window.soPanelsBuilderView.contentPreview );
+			} else {
+				var $this = this;
+				data = null;
+				window.soPanelsBuilderView.forEach( function( panel ) {
+					data += extractContent( panel.contentPreview );
+				} );
+			}
 		}
 
 		return data;
 	};
 
-	new SiteOriginSeoCompat();
+	if ( typeof rankMathEditor !== 'undefined' ) {
+		new SiteOriginSeoCompat();
+	} else {
+		$( window ).on(
+			'YoastSEO:ready',
+			function () {
+				new SiteOriginSeoCompat();
+			}
+		);
+	}
 });

@@ -3,7 +3,6 @@ const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
 const { Toolbar, IconButton, Spinner } = wp.components;
-const { __ } = wp.i18n;
 const { soPanelsBlockEditorAdmin } = window;
 
 class SiteOriginPanelsLayoutBlock extends Component {
@@ -118,6 +117,12 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		} );
 		
 		jQuery( document ).trigger( 'panels_setup', this.builderView );
+
+		if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+			window.soPanelsBuilderView = [];
+		}
+			window.soPanelsBuilderView.push( this.builderView );
+		}
 		
 		this.panelsInitialized = true;
 	}
@@ -169,7 +174,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Preview layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
 								onClick={ switchToPreview }
 							/>
 						</Toolbar>
@@ -190,7 +195,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Edit layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
 								onClick={ switchToEditing }
 							/>
 						</Toolbar>
@@ -212,16 +217,20 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 }
 
+var hasLayoutCategory = wp.blocks.getCategories().some( function( category ) {
+	return category.slug === 'layout';
+} );
+
 registerBlockType( 'siteorigin-panels/layout-block', {
-	title: __( 'SiteOrigin Layout', 'siteorigin-panels' ),
+	title: wp.i18n.__( 'SiteOrigin Layout', 'siteorigin-panels' ),
 	
-	description: __( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
+	description: wp.i18n.__( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
 	
 	icon () {
 		return <span className="siteorigin-panels-block-icon"/>;
 	},
 	
-	category: 'layout',
+	category: hasLayoutCategory ? 'layout' : 'design',
 	
 	keywords: [ 'page builder', 'column,grid', 'panel' ],
 	
@@ -330,3 +339,10 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	}
 	
 } )( jQuery );
+
+// Detect preview mode changes, and trigger resize.
+jQuery( document ).on( 'click', '.block-editor-post-preview__button-resize', function( e ) {
+	if ( ! jQuery( this ).hasClass('has-icon') ) {
+		jQuery( window ).trigger( 'resize' ); 
+	}
+} );

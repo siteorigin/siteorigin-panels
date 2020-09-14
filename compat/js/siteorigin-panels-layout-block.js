@@ -8,15 +8,45 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) {
+  function isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  return function () {
+    var Super = _getPrototypeOf(Derived),
+        result;
+
+    if (isNativeReflectConstruct()) {
+      var NewTarget = _getPrototypeOf(this).constructor;
+
+      result = Reflect.construct(Super, arguments, NewTarget);
+    } else {
+      result = Super.apply(this, arguments);
+    }
+
+    return _possibleConstructorReturn(this, result);
+  };
+}
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var _lodash = lodash,
     isEqual = _lodash.isEqual,
@@ -34,7 +64,6 @@ var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     IconButton = _wp$components.IconButton,
     Spinner = _wp$components.Spinner;
-var __ = wp.i18n.__;
 var _window = window,
     soPanelsBlockEditorAdmin = _window.soPanelsBlockEditorAdmin;
 
@@ -43,12 +72,14 @@ var SiteOriginPanelsLayoutBlock =
 function (_Component) {
   _inherits(SiteOriginPanelsLayoutBlock, _Component);
 
+  var _super = _createSuper(SiteOriginPanelsLayoutBlock);
+
   function SiteOriginPanelsLayoutBlock(props) {
     var _this;
 
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(SiteOriginPanelsLayoutBlock).call(this, props));
+    _this = _super.call(this, props);
     var editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit' || isEmpty(props.panelsData);
     _this.state = {
       editing: editMode,
@@ -167,6 +198,12 @@ function (_Component) {
         }
       });
       jQuery(document).trigger('panels_setup', this.builderView);
+
+      if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+        window.soPanelsBuilderView = [];
+      }
+      window.soPanelsBuilderView.push( this.builderView );
+
       this.panelsInitialized = true;
     }
   }, {
@@ -222,7 +259,7 @@ function (_Component) {
         return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
-          label: __('Preview layout.', 'siteorigin-panels'),
+          label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
           onClick: switchToPreview
         }))), React.createElement("div", {
           key: "layout-block",
@@ -234,7 +271,7 @@ function (_Component) {
         return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
           icon: "edit",
           className: "components-icon-button components-toolbar__control",
-          label: __('Edit layout.', 'siteorigin-panels'),
+          label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
           onClick: switchToEditing
         }))), React.createElement("div", {
           key: "preview",
@@ -252,15 +289,18 @@ function (_Component) {
   return SiteOriginPanelsLayoutBlock;
 }(Component);
 
+var hasLayoutCategory = wp.blocks.getCategories().some(function (category) {
+  return category.slug === 'layout';
+});
 registerBlockType('siteorigin-panels/layout-block', {
-  title: __('SiteOrigin Layout', 'siteorigin-panels'),
-  description: __("Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels'),
+  title: wp.i18n.__('SiteOrigin Layout', 'siteorigin-panels'),
+  description: wp.i18n.__("Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels'),
   icon: function icon() {
     return React.createElement("span", {
       className: "siteorigin-panels-block-icon"
     });
   },
-  category: 'layout',
+  category: hasLayoutCategory ? 'layout' : 'design',
   keywords: ['page builder', 'column,grid', 'panel'],
   supports: {
     html: false
@@ -365,3 +405,10 @@ registerBlockType('siteorigin-panels/layout-block', {
     });
   }
 })(jQuery);
+
+// Detect preview mode changes, and trigger resize.
+jQuery(document).on('click', '.block-editor-post-preview__button-resize', function (e) {
+  if (!jQuery(this).hasClass('has-icon')) {
+    jQuery(window).trigger('resize');
+  }
+});
