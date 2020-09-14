@@ -97,7 +97,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.11.3 - 10 September 2020 =
+= 2.11.3 - 14 September 2020 =
 * Block Editor: Added SEO support for multiple Layout Block instances.
 * Yoast SEO Sitemap: Added images added using Page Builder.
 * Prevented potential `Are you sure you want to navigate away?` notice.
@@ -111,6 +111,8 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 * Block Editor: Added the page name and block number to Layout Block JSON export files.
 * Block Editor: Improved SEO plugin support.
 * Added a global `Row Mobile Bottom Margin` setting at `Settings > Page Builder > Layout`.
+* Ensured Yoast SEO is ready before running compatibility functionality.
+* Global Settings: Resolved a jQuery Migrate Helper warning.
 
 = 2.11.2 - 12 August 2020 =
 * Updated build scripts.
