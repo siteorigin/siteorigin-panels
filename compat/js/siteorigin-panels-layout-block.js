@@ -84,12 +84,12 @@ function (_Component) {
     _this.state = {
       editing: editMode,
       loadingPreview: !editMode,
-      previewHtml: ''
+      previewHtml: '',
+      previewInitialized: !editMode
     };
     _this.panelsContainer = createRef();
     _this.previewContainer = createRef();
     _this.panelsInitialized = false;
-    _this.previewInitialized = false;
     return _this;
   }
 
@@ -117,14 +117,16 @@ function (_Component) {
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      // let propsChanged = !isEqual( prevProps.panelsData, this.props.panelsData );
       if (this.state.editing && !this.panelsInitialized) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         this.fetchPreview(this.props);
-      } else if (!this.previewInitialized && this.previewContainer.current) {
+        this.fetchPreview = debounce(this.fetchPreview, 500);
+      } else if (!this.state.previewInitialized) {
         jQuery(document).trigger('panels_setup_preview');
-        this.previewInitialized = true;
+        this.setState({
+          previewInitialized: true
+        });
       }
     }
   }, {
@@ -199,10 +201,11 @@ function (_Component) {
       });
       jQuery(document).trigger('panels_setup', this.builderView);
 
-      if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+      if (typeof window.soPanelsBuilderView == 'undefined') {
         window.soPanelsBuilderView = [];
+      } else {
+        window.soPanelsBuilderView.push(this.builderView);
       }
-      window.soPanelsBuilderView.push( this.builderView );
 
       this.panelsInitialized = true;
     }
@@ -215,7 +218,9 @@ function (_Component) {
         return;
       }
 
-      this.previewInitialized = false;
+      this.setState({
+        previewInitialized: false
+      });
       var fetchRequest = this.currentFetchRequest = jQuery.post({
         url: soPanelsBlockEditorAdmin.previewUrl,
         data: {
@@ -226,7 +231,8 @@ function (_Component) {
         if (_this3.isStillMounted && fetchRequest === _this3.currentFetchRequest && preview) {
           _this3.setState({
             previewHtml: preview,
-            loadingPreview: false
+            loadingPreview: false,
+            previewInitialized: false
           });
         }
       });
@@ -250,7 +256,9 @@ function (_Component) {
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
           _this4.setState({
-            editing: false
+            editing: false,
+            loadingPreview: !_this4.state.previewHtml,
+            previewInitialized: false
           });
         }
       };
