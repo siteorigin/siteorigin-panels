@@ -203,10 +203,9 @@ function (_Component) {
 
       if (typeof window.soPanelsBuilderView == 'undefined') {
         window.soPanelsBuilderView = [];
-      } else {
-        window.soPanelsBuilderView.push(this.builderView);
       }
 
+      window.soPanelsBuilderView.push(this.builderView);
       this.panelsInitialized = true;
     }
   }, {
