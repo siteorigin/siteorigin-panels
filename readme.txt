@@ -97,6 +97,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.4 - 23 September 2020 =
+* Block Editor: Fixed SiteOrigin Widgets Bundle block preview.
+* Yoast SEO: Fixed word count in the Classic Editor when Page Builder is not in use.
+* Yoast SEO: Resolved a console error in the Block Editor.
+* Block Editor: Enhanced the Layout Block to allow for Post Loop widget previews.
+
 = 2.11.3 - 14 September 2020 =
 * Block Editor: Added SEO support for multiple Layout Block instances.
 * Yoast SEO Sitemap: Added images added using Page Builder.
