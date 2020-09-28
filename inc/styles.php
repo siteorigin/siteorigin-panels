@@ -453,8 +453,7 @@ class SiteOrigin_Panels_Styles {
 
 			if ( ! empty( $url ) ) {
 				wp_enqueue_script( 'simpleParallax' );
-				$parallax_args = array();
-				$output .= '<img src=' . esc_url( $url ) . ' data-siteorigin-parallax=' . json_encode( $parallax_args ) .'>';
+				$output .= '<img src=' . esc_url( $url ) . ' data-siteorigin-parallax="true">';
 			}
 		}
 
