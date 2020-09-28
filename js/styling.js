@@ -65,7 +65,7 @@ jQuery( function ( $ ) {
 				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
 			)
 		) {
-			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax]' ), {
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
 				delay: parallaxStyles['delay'],
 				scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
 			} );
