@@ -17,7 +17,12 @@ jQuery(function($){
 	};
 
 	SiteOriginSeoCompat.prototype.contentModification = function( data ) {
-		if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
+
+		var isBlockEditorPanelsEnabled =  $( '.block-editor-page' ).length && typeof window.soPanelsBuilderView !== 'undefined';
+		var isClassicEditorPanelsEnabled = $( '#so-panels-panels.attached-to-editor' ).is( ':visible' );
+
+		// Check if the editor has Page Builder Enabled before proceeding.
+		if ( isClassicEditorPanelsEnabled || isBlockEditorPanelsEnabled ) {
 
 			var whitelist = [
 				'p', 'a', 'img', 'caption', 'br',

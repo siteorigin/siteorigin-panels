@@ -172,7 +172,7 @@ module.exports = panels.view.dialog.extend( {
 			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
 			if ( ! postName ) {
 				postName = $('input[name="post_ID"]').val();
-			} else if ( typeof wp.data != 'undefined' ) {
+			} else if ( $( '.block-editor-page' ).length ) {
 				var currentBlockPosition = thisView.getCurrentBlockPosition();
 				if ( currentBlockPosition >= 0 ) {
 					postName += '-' + currentBlockPosition; 

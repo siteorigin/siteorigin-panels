@@ -12,12 +12,12 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		this.state = {
 			editing: editMode,
 			loadingPreview: ! editMode,
-			previewHtml: ''
+			previewHtml: '',
+			previewInitialized: ! editMode,
 		};
 		this.panelsContainer = createRef();
 		this.previewContainer = createRef();
 		this.panelsInitialized = false;
-		this.previewInitialized = false;
 	}
 	
 	componentDidMount() {
@@ -39,14 +39,16 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 	
 	componentDidUpdate( prevProps ) {
-		// let propsChanged = !isEqual( prevProps.panelsData, this.props.panelsData );
 		if ( this.state.editing && ! this.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
 			this.fetchPreview( this.props );
-		} else if ( ! this.previewInitialized && this.previewContainer.current){
+			this.fetchPreview = debounce( this.fetchPreview, 500 );
+		} else if ( ! this.state.previewInitialized ) {
 			jQuery( document ).trigger( 'panels_setup_preview' );
-			this.previewInitialized = true;
+			this.setState( {
+				previewInitialized: true,
+			} );
 		}
 	}
 	
@@ -121,8 +123,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		if ( typeof window.soPanelsBuilderView == 'undefined' ) {
 			window.soPanelsBuilderView = [];
 		}
-			window.soPanelsBuilderView.push( this.builderView );
-		}
+		window.soPanelsBuilderView.push( this.builderView );
 		
 		this.panelsInitialized = true;
 	}
@@ -131,8 +132,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		if ( ! this.isStillMounted ) {
 			return;
 		}
-		
-		this.previewInitialized = false;
+
+		this.setState( {
+			previewInitialized: false,
+		} );
 		
 		const fetchRequest = this.currentFetchRequest = jQuery.post( {
 			url: soPanelsBlockEditorAdmin.previewUrl,
@@ -146,6 +149,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 				this.setState( {
 					previewHtml: preview,
 					loadingPreview: false,
+            		previewInitialized: false,
 				} );
 			}
 		} );
@@ -162,7 +166,11 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		let switchToPreview = () => {
 			if ( panelsData ) {
-				this.setState( { editing: false } );
+				this.setState({
+					editing: false,
+					loadingPreview: ! this.state.previewHtml,
+					previewInitialized: false,
+				});
 			}
 		}
 		
