@@ -144,6 +144,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['margin-bottom-last-row']   = false;
 		$defaults['margin-sides']             = 30;
 		$defaults['full-width-container']     = 'body';
+		$defaults['output-css-header']        = 'auto';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -444,6 +445,17 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Full Width Container', 'siteorigin-panels' ),
 			'description' => __( 'The container used for the full width layout.', 'siteorigin-panels' ),
 			'keywords'    => 'full width, container, stretch',
+		);
+
+		$fields['layout']['fields']['output-css-header'] = array(
+			'type'        => 'select',
+			'options'     => array(
+				'auto'   => __( 'Automatic', 'siteorigin-panels' ),
+				'header' => __( 'Header', 'siteorigin-panels' ),
+				'footer' => __( 'Footer', 'siteorigin-panels' ),
+			),
+			'label'       => __( 'Output Page Builder Layout CSS', 'siteorigin-panels' ),
+			'description' => __( 'Depending on your setup, outputting panels CSS to either the header or footer may improve improve performance.', 'siteorigin-panels' ),
 		);
 
 		// The content fields
