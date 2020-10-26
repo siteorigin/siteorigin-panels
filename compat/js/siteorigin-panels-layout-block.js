@@ -307,7 +307,7 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
         toggleSelection = _ref.toggleSelection;
 
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
-      if (!_.lodash.isEmpty(newPanelsData.widgets)) {
+      if (!lodash.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
         wp.data.dispatch('core/editor').lockPostSaving();
         jQuery.post(panelsOptions.ajaxurl, {
