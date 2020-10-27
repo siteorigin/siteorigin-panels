@@ -454,8 +454,7 @@ class SiteOrigin_Panels_Settings {
 				'header' => __( 'Header', 'siteorigin-panels' ),
 				'footer' => __( 'Footer', 'siteorigin-panels' ),
 			),
-			'label'       => __( 'Output Page Builder Layout CSS', 'siteorigin-panels' ),
-			'description' => __( 'Depending on your setup, outputting panels CSS to either the header or footer may improve improve performance.', 'siteorigin-panels' ),
+			'label'       => __( 'Page Builder Layout CSS Output Location', 'siteorigin-panels' ),
 		);
 
 		// The content fields
