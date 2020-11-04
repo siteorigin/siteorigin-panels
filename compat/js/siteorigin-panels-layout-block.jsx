@@ -3,7 +3,6 @@ const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
 const { BlockControls } = wp.editor;
 const { Toolbar, IconButton, Spinner } = wp.components;
-const { __ } = wp.i18n;
 const { soPanelsBlockEditorAdmin } = window;
 
 class SiteOriginPanelsLayoutBlock extends Component {
@@ -13,12 +12,12 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		this.state = {
 			editing: editMode,
 			loadingPreview: ! editMode,
-			previewHtml: ''
+			previewHtml: '',
+			previewInitialized: ! editMode,
 		};
 		this.panelsContainer = createRef();
 		this.previewContainer = createRef();
 		this.panelsInitialized = false;
-		this.previewInitialized = false;
 	}
 	
 	componentDidMount() {
@@ -40,14 +39,16 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 	
 	componentDidUpdate( prevProps ) {
-		// let propsChanged = !isEqual( prevProps.panelsData, this.props.panelsData );
 		if ( this.state.editing && ! this.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
 			this.fetchPreview( this.props );
-		} else if ( ! this.previewInitialized && this.previewContainer.current){
+			this.fetchPreview = debounce( this.fetchPreview, 500 );
+		} else if ( ! this.state.previewInitialized ) {
 			jQuery( document ).trigger( 'panels_setup_preview' );
-			this.previewInitialized = true;
+			this.setState( {
+				previewInitialized: true,
+			} );
 		}
 	}
 	
@@ -55,7 +56,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		var $panelsContainer = jQuery( this.panelsContainer.current );
 		
 		var config = {
-			editorType: 'standalone'
+			editorType: 'standalone',
+	        loadLiveEditor: false,
+	        postId: soPanelsBlockEditorAdmin.postId,
+	        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor,
 		};
 		
 		var builderModel = new panels.model.builder();
@@ -115,6 +119,11 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		} );
 		
 		jQuery( document ).trigger( 'panels_setup', this.builderView );
+
+		if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+			window.soPanelsBuilderView = [];
+		}
+		window.soPanelsBuilderView.push( this.builderView );
 		
 		this.panelsInitialized = true;
 	}
@@ -123,8 +132,10 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		if ( ! this.isStillMounted ) {
 			return;
 		}
-		
-		this.previewInitialized = false;
+
+		this.setState( {
+			previewInitialized: false,
+		} );
 		
 		const fetchRequest = this.currentFetchRequest = jQuery.post( {
 			url: soPanelsBlockEditorAdmin.previewUrl,
@@ -138,6 +149,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 				this.setState( {
 					previewHtml: preview,
 					loadingPreview: false,
+            		previewInitialized: false,
 				} );
 			}
 		} );
@@ -154,7 +166,11 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		let switchToPreview = () => {
 			if ( panelsData ) {
-				this.setState( { editing: false } );
+				this.setState({
+					editing: false,
+					loadingPreview: ! this.state.previewHtml,
+					previewInitialized: false,
+				});
 			}
 		}
 		
@@ -166,7 +182,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Preview layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
 								onClick={ switchToPreview }
 							/>
 						</Toolbar>
@@ -187,7 +203,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 							<IconButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
-								label={ __( 'Edit layout.', 'siteorigin-panels' ) }
+								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
 								onClick={ switchToEditing }
 							/>
 						</Toolbar>
@@ -209,16 +225,20 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 }
 
+var hasLayoutCategory = wp.blocks.getCategories().some( function( category ) {
+	return category.slug === 'layout';
+} );
+
 registerBlockType( 'siteorigin-panels/layout-block', {
-	title: __( 'SiteOrigin Layout', 'siteorigin-panels' ),
+	title: wp.i18n.__( 'SiteOrigin Layout', 'siteorigin-panels' ),
 	
-	description: __( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
+	description: wp.i18n.__( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
 	
 	icon () {
 		return <span className="siteorigin-panels-block-icon"/>;
 	},
 	
-	category: 'layout',
+	category: hasLayoutCategory ? 'layout' : 'design',
 	
 	keywords: [ 'page builder', 'column,grid', 'panel' ],
 	
@@ -241,6 +261,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 			
 			if ( !_.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
+				wp.data.dispatch( 'core/editor' ).lockPostSaving();
 				jQuery.post(
 					panelsOptions.ajaxurl,
 					{
@@ -258,6 +279,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 						}
 						
 						setAttributes( panelsAttributes );
+						wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 					}
 				);
 			}
@@ -325,3 +347,10 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	}
 	
 } )( jQuery );
+
+// Detect preview mode changes, and trigger resize.
+jQuery( document ).on( 'click', '.block-editor-post-preview__button-resize', function( e ) {
+	if ( ! jQuery( this ).hasClass('has-icon') ) {
+		jQuery( window ).trigger( 'resize' ); 
+	}
+} );

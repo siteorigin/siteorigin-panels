@@ -239,7 +239,7 @@ module.exports = Backbone.View.extend( {
 			thisView.trigger( 'hide_builder' );
 		} ).end()
 		.append(
-			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( '.hndle span' ).html() + '</button>' )
+			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h2.hndle' ).html() + '</button>' )
 			.click( function ( e ) {
 				if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
 					e.preventDefault();
@@ -737,8 +737,7 @@ module.exports = Backbone.View.extend( {
 	handleContentChange: function () {
 
 		// Make sure we actually need to copy content.
-		if ( panelsOptions.copy_content && this.attachedToEditor && this.$el.is( ':visible' ) ) {
-
+		if ( panelsOptions.copy_content	&& ( panels.helpers.editor.isBlockEditor() || panels.helpers.editor.isClassicEditor( this ) ) ) {
 			var panelsData = this.model.getPanelsData();
 			if ( !_.isEmpty( panelsData.widgets ) ) {
 				// We're going to create a copy of page builder content into the post content
@@ -750,11 +749,13 @@ module.exports = Backbone.View.extend( {
 						post_id: this.config.postId
 					},
 					function ( content ) {
+						// Post content doesn't need to be generated on load while contentPreview does.
+						if ( this.contentPreview && content.post_content !== '' ) {
+							this.updateEditorContent( content.post_content );
+						}
+
 						if ( content.preview !== '' ) {
 							this.contentPreview = content.preview;
-						}
-						if ( content.post_content !== '' ) {
-							this.updateEditorContent( content.post_content );
 						}
 					}.bind( this )
 				);

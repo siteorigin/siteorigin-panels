@@ -20,6 +20,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// This action is slightly later than `enqueue_block_editor_assets`,
 		// which we need to use to ensure our templates are loaded at the right time.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_layout_block_editor_assets' ) );
+
+		// We need to override the container when using the Block Editor to allow for resizing.
+		add_filter( 'siteorigin_panels_full_width_container', array( $this, 'override_container' ) );
 	}
 	
 	public function register_layout_block() {
@@ -58,6 +61,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				array(
 					'sanitizeUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-sanitize', '_panelsnonce' ),
 					'previewUrl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'layout-block-preview', '_panelsnonce' ),
+					'postId' => get_the_ID(),
+					'liveEditor' => SiteOrigin_Panels::preview_url(),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
 					'showAddButton' => apply_filters( 'siteorigin_layout_block_show_add_button', $is_panels_post_type ),
 				)
@@ -110,5 +115,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		return $panels_data;
+	}
+
+	function override_container( $container ) {
+		return SiteOrigin_Panels_Admin::is_block_editor() ? '.editor-styles-wrapper' : $container;
 	}
 }

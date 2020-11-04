@@ -11,6 +11,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 	static $current_loop_template;
 	static $current_loop_instance;
+	static $current_pagination_id;
 
 	/**
 	 * @var SiteOrigin_Panels_Widgets_PostLoop_Helper
@@ -58,6 +59,15 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	}
 
 	/**
+	 * The pagination id used in custom format pagination links
+	 *
+	 * @return array
+	 */
+	static function get_current_pagination_id() {
+		return self::$current_pagination_id;
+	}
+
+	/**
 	 * Update the widget
 	 *
 	 * @param array $new
@@ -65,6 +75,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 * @return array
 	 */
 	function update( $new, $old ){
+		$new['pagination_id'] = rand();
 		if( class_exists( 'SiteOrigin_Widget' ) && class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
 			$helper = $this->get_helper_widget( $this->get_loop_templates() );
 			return $helper->update( $new, $old );
@@ -81,8 +92,10 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 */
 	function widget( $args, $instance ) {
 		if( empty( $instance['template'] ) ) return;
-		if( is_admin() ) return;
-		
+		// The Post Loop widget should only preview in WP Admin if it's Layout Block preview.
+		if ( is_admin() && ! ( isset( $_POST['action'] ) && $_POST['action'] == 'so_panels_layout_block_preview' ) ) {
+			 return;
+		}
 		static $depth = 0;
 		$depth++;
 		if( $depth > 1 ) {
@@ -131,19 +144,33 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		
 		if( $wp_rewrite->using_permalinks() ) {
 			
-			if( get_query_var('paged') ) {
-				// When the widget appears on a sub page.
-				$query_args['paged'] = get_query_var('paged');
+			if ( apply_filters( 'siteorigin_panels_post_loop_custom_pagination', false  ) ) {
+				if ( isset( $instance['pagination_id'] ) ) {
+					self::$current_pagination_id = $instance['pagination_id'];
+
+					if (
+						isset( $_GET[ 'page-' . self::$current_pagination_id ] ) &&
+						is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] )
+					) {
+						$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
+					}
+				}
+			} else {
+				if ( get_query_var( 'paged' ) ) {
+					// When the widget appears on a sub page.
+					$query_args['paged'] = get_query_var('paged');
+				} else if ( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
+					// When the widget appears on the home page.
+					preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
+					if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
+					else $query_args['paged'] = 1;
+				}
 			}
-			elseif( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
-				// When the widget appears on the home page.
-				preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
-				if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
-				else $query_args['paged'] = 1;
+
+			if ( ! isset( $query_args['paged'] ) ) {
+				$query_args['paged'] = 1;
 			}
-			else $query_args['paged'] = 1;
-		}
-		else {
+		} else {
 			// Get current page number when we're not using permalinks
 			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
 		}
@@ -200,6 +227,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		self::$rendering_loop = false;
 		self::$current_loop_instance = null;
 		self::$current_loop_template = null;
+		self::$current_pagination_id = null;
 
 		echo $args['after_widget'];
 		

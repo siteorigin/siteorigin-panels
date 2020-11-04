@@ -308,7 +308,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$return['title'] .= __( ' - Results For:', 'siteorigin-panels' ) . ' <em>' . esc_html( $search ) . '</em>';
 		}
 		
-		echo json_encode( $return );
+		echo json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
 		
 		wp_die();
 	}

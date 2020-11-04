@@ -11,7 +11,9 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .widget-edit': 'editHandler',
+		'touchend .widget-edit': 'editHandler',
 		'click .title h4': 'editHandler',
+		'touchend .title h4': 'editHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
 		'click .actions .widget-delete': 'deleteHandler',
 		'keyup .actions a': function( e ) {

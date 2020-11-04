@@ -122,6 +122,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
 		$defaults['parallax-motion']        = '';
+		$defaults['parallax-mobile']        = false;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
@@ -133,15 +134,16 @@ class SiteOrigin_Panels_Settings {
 		$defaults['instant-open-widgets'] = false;
 
 		// The layout fields
-		$defaults['responsive']             = true;
-		$defaults['tablet-layout']          = false;
-		$defaults['legacy-layout']          = 'auto';
-		$defaults['tablet-width']           = 1024;
-		$defaults['mobile-width']           = 780;
-		$defaults['margin-bottom']          = 30;
-		$defaults['margin-bottom-last-row'] = false;
-		$defaults['margin-sides']           = 30;
-		$defaults['full-width-container']   = 'body';
+		$defaults['responsive']               = true;
+		$defaults['tablet-layout']            = false;
+		$defaults['legacy-layout']            = 'auto';
+		$defaults['tablet-width']             = 1024;
+		$defaults['mobile-width']             = 780;
+		$defaults['margin-bottom']            = 30;
+		$defaults['row-mobile-margin-bottom'] = '';
+		$defaults['margin-bottom-last-row']   = false;
+		$defaults['margin-sides']             = 30;
+		$defaults['full-width-container']     = 'body';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -252,7 +254,7 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['general']['fields']['use-classic'] = array(
 			'type' => 'checkbox',
-			'label' => __( 'Use Classic Editor for new posts', 'siteorigin-panels' ),
+			'label' => __( 'Use Classic Editor for New Posts', 'siteorigin-panels' ),
 			'description' => __( 'New posts of the above Post Types will be created using the Classic Editor.', 'siteorigin-panels' )
 		);
 
@@ -282,6 +284,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'float',
 			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
 			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-mobile'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
+			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(
@@ -408,6 +416,13 @@ class SiteOrigin_Panels_Settings {
 			'unit'        => 'px',
 			'label'       => __( 'Row/Widget Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'Default margin below rows and widgets.', 'siteorigin-panels' ),
+		);
+
+		$fields['layout']['fields']['row-mobile-margin-bottom'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Row Mobile Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'The default margin below rows on mobile.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-bottom-last-row'] = array(

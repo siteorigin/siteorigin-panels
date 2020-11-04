@@ -169,14 +169,30 @@ module.exports = panels.view.dialog.extend( {
 		c.find( '.so-export' ).submit( function ( e ) {
 			var $$ = $( this );
 			var panelsData = thisView.builder.model.getPanelsData();
-			var postName = $('input[name="post_title"]').val();
+			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
 			if ( ! postName ) {
 				postName = $('input[name="post_ID"]').val();
+			} else if ( $( '.block-editor-page' ).length ) {
+				var currentBlockPosition = thisView.getCurrentBlockPosition();
+				if ( currentBlockPosition >= 0 ) {
+					postName += '-' + currentBlockPosition; 
+				}
+
 			}
 			panelsData.name = postName;
 			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( panelsData ) );
 		} );
 
+	},
+
+	/**
+	 * Return current block index.
+	 */
+	getCurrentBlockPosition: function() {
+		var selectedBlockClientId = wp.data.select( 'core/block-editor' ).getSelectedBlockClientId();
+		return wp.data.select( 'core/block-editor' ).getBlocks().findIndex( function ( block ) {
+		  return block.clientId === selectedBlockClientId;
+		} );
 	},
 
 	/**

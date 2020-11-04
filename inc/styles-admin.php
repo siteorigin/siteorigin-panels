@@ -304,7 +304,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				?><textarea type="text" name="<?php echo esc_attr( $field_name ) ?>"
 				            class="widefat <?php if ( $field['type'] == 'code' ) {
 					            echo 'so-field-code';
-				            } ?>" rows="4"><?php echo esc_textarea( $current ) ?></textarea><?php
+				            } ?>" rows="4"><?php echo esc_textarea( stripslashes( $current ) ) ?></textarea><?php
 				break;
 		}
 

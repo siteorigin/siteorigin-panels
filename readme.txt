@@ -2,6 +2,7 @@
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
 Tested up to: 5.5
+Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
@@ -95,6 +96,48 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.11.5 - 30 September 2020 =
+* Updated build scripts.
+
+= 2.11.4 - 28 September 2020 =
+* Block Editor: Fixed SiteOrigin Widgets Bundle block preview.
+* Yoast SEO: Fixed word count in the Classic Editor when Page Builder is not in use.
+* Yoast SEO: Resolved a console error in the Block Editor.
+* Block Editor: Enhanced the Layout Block to allow for Post Loop widget previews.
+* Layout Export: Resolved JSON files exported without contents.
+
+= 2.11.3 - 14 September 2020 =
+* Block Editor: Added SEO support for multiple Layout Block instances.
+* Yoast SEO Sitemap: Added images added using Page Builder.
+* Prevented potential `Are you sure you want to navigate away?` notice.
+* Post Loop: Resolved `Undefined index` notice when used outside of Page Builder.
+* Android Chrome: Improved edit widget touch detection.
+* Yoast SEO: Resolved version `14.6` integration issue.
+* Block Editor: Used new categories for the Layout Block for WP 5.5+.
+* Block Editor: Resolved potential Layout Block data validation issue by running `wp_targeted_link_rel` on the generated preview content.
+* Block Editor: Added preview support for the Layout Block.
+* Block Editor: Updated translation functions to avoid potential conflicts.
+* Block Editor: Added the page name and block number to Layout Block JSON export files.
+* Block Editor: Improved SEO plugin support.
+* Added a global `Row Mobile Bottom Margin` setting at `Settings > Page Builder > Layout`.
+* Ensured Yoast SEO is ready before running compatibility functionality.
+* Global Settings: Resolved a jQuery Migrate Helper warning.
+
+= 2.11.2 - 12 August 2020 =
+* Updated build scripts.
+
+= 2.11.1 - 17 July 2020 =
+* Added Rank Math SEO plugin support.
+* Added [siteorigin_panels_layout_builder_supports](https://siteorigin.com/docs/page-builder/hooks/builder-features-actions/) filter.
+* Block Editor: Added History and Live Editor functionality to the SiteOrigin Layout Block.
+* Resolved a plugin conflict between the AMP by AMP Project Contributors plugin and the Text widget.
+* Block Editor: Prevented the page saving until the SiteOrigin Layout Block is finished setting up widgets using AJAX.
+* Mobile: Several minor improvements to the Page Builder interface to improve usability while editing on mobile devices.
+* Fixed `undefined` Page Builder tab in WordPress 5.5.
+* Added a new "Disable Background Parallax On Mobile" global setting to `Settings > Page Builder > General`.
+* Post Loop: Added custom pagination format support to allow developers to use two Post Loop widgets with independent pagination on a page.
+* Removed all HTML from the CSS Declarations field and strip slashes from textarea/code fields.
 
 = 2.11.0 - 02 June 2020 =
 * Live Editor: Ensured device viewing mode retained after update.
