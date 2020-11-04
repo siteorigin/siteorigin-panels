@@ -12,7 +12,11 @@ module.exports = panels.view.dialog.extend( {
 	events: {
 		'click .so-close': 'closeDialog',
 		'click .widget-type': 'widgetClickHandler',
-		'keyup .so-sidebar-search': 'searchHandler'
+		'keyup .so-sidebar-search': 'searchHandler',
+		'keyup .widget-type-wrapper': 'searchHandler',
+		'keyup .widget-type-wrapper': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	/**
@@ -24,6 +28,7 @@ module.exports = panels.view.dialog.extend( {
 			this.filter.search = '';
 			this.filterWidgets( this.filter );
 		}, this );
+
 
 		this.on( 'open_dialog_complete', function () {
 			// Clear the search and re-filter the widgets when we open the dialog

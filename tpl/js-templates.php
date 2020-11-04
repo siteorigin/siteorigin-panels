@@ -169,13 +169,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			</div>
 		</div>
 
-		<div class="so-toolbar">
-			<div class="so-status">{{% if(typeof status != 'undefined') print(status); %}}</div>
-			<div class="so-buttons">
-				{{%= buttons %}}
-			</div>
-		</div>
-
 		<div class="so-sidebar so-left-sidebar">
 			{{% if(typeof left_sidebar  != 'undefined') print(left_sidebar ); %}}
 		</div>
@@ -186,6 +179,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-content panel-dialog">
 			{{%= content %}}
+		</div>
+
+		<div class="so-toolbar">
+			<div class="so-status">{{% if(typeof status != 'undefined') print(status); %}}</div>
+			<div class="so-buttons">
+				{{%= buttons %}}
+			</div>
 		</div>
 
 	</div>
@@ -241,7 +241,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-dialog-widgets-widget">
 	<li class="widget-type">
-		<div class="widget-type-wrapper">
+		<div class="widget-type-wrapper" tabindex="0">
 			<h3>{{%= title %}}</h3>
 			<small class="description">{{%= description %}}</small>
 		</div>
@@ -417,9 +417,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 				<div class="so-dropdown-links-wrapper hidden">
 					<ul class="so-layout-position">
-						<li><a class="so-toolbar-button" data-value="after"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-toolbar-button" data-value="before"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></a></li>
+						<li><a class="so-toolbar-button" data-value="after" tabindex="0"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></a></li>
+						<li><a class="so-toolbar-button" data-value="before" tabindex="0"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></a></li>
+						<li><a class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>" tabindex="0"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></a></li>
 					</ul>
 				</div>
 			</span>
@@ -449,7 +449,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% } else { %}}
 				{{% _.each(items, function(item) { %}}
 					<div class="so-directory-item" data-layout-id="{{%- item.id %}}" data-layout-type="{{%- item.type %}}">
-						<div class="so-directory-item-wrapper">
+						<div class="so-directory-item-wrapper" tabindex="0">
 							<div class="so-screenshot" data-src="{{%- item.screenshot %}}">
 								<div class="so-panels-loading so-screenshot-wrapper"></div>
 							</div>
@@ -534,7 +534,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 </script>
 
 <script type="text/template" id="siteorigin-panels-dialog-history-entry">
-	<div class="history-entry">
+	<div class="history-entry" tabindex="0">
 		<h3>{{%= title %}}{{% if( count > 1 ) { %}} <span class="count">({{%= count %}})</span>{{% } %}}</h3>
 		<div class="timesince"></div>
 	</div>

@@ -1359,7 +1359,8 @@
 				background: #F8F8F8;
 				.box-shadow(~"0 1px 2px rgba(0,0,0,0.075)");
 
-				&:hover {
+				&:hover,
+				&:focus {
 					border: 1px solid #BBBBBB;
 					background: #FFFFFF;
 					.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
@@ -1521,7 +1522,8 @@
 
 				border-bottom: 1px solid #ccc;
 
-				&:hover {
+				&:hover,
+				&:focus {
 					background: #F0F0F0;
 				}
 
@@ -1657,6 +1659,13 @@
 						background: #F7F7F7;
 						border: 1px solid #d0d0d0;
 						.box-shadow(~"0 1px 1px rgba(0,0,0,0.1)");
+
+						&:hover,
+						&:focus {
+							border: 1px solid #BBBBBB;
+							background: #FFFFFF;
+							box-shadow: 0 2px 2px rgba(0,0,0,0.075);
+						}
 					}
 
 					.so-title {
@@ -1739,9 +1748,14 @@
 						border-top: 1px solid #d0d0d0;
 					}
 
-					&:hover .so-buttons {
-						visibility: visible;
+					&:hover, 
+					&:focus	{
+						.so-buttons {
+							visibility: visible;
+						}
 					}
+
+
 
 					&.selected {
 
@@ -2645,7 +2659,8 @@
 					outline: 0 !important;
 					.box-shadow(none);
 
-					&:hover {
+					&:hover,
+					&:focus {
 						background: #F0F0F0;
 						color: #444;
 					}

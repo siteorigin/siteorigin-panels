@@ -212,8 +212,12 @@ module.exports = Backbone.View.extend( {
 	initToolbar: function () {
 		// Trigger simplified click event for elements marked as toolbar buttons.
 		var buttons = this.$( '.so-toolbar .so-buttons .so-toolbar-button' );
-		buttons.click( function ( e ) {
+		buttons.on( 'click keyup', function ( e ) {
 			e.preventDefault();
+
+			if ( e.type == 'keyup' && e.which != 13 ) {
+				return;
+			}
 
 			this.trigger( 'button_click', $( e.currentTarget ) );
 		}.bind( this ) );
