@@ -4,6 +4,14 @@ module.exports = Backbone.View.extend( {
 
 	stylesLoaded: false,
 
+	events: {
+		'keyup .so-image-selector': function( e ) {
+			if ( e.which == 13 ) {
+				this.$el.find( '.select-image' ).trigger( 'click' );
+			}
+		},
+	},
+
 	initialize: function () {
 
 	},
@@ -99,7 +107,7 @@ module.exports = Backbone.View.extend( {
 		this.$( '.style-section-wrapper' ).each( function () {
 			var $s = $( this );
 
-			$s.find( '.style-section-head' ).click( function ( e ) {
+			$s.find( '.style-section-head' ).on( 'click keypress', function ( e ) {
 				e.preventDefault();
 				$s.find( '.style-section-fields' ).slideToggle( 'fast' );
 			} );
@@ -164,8 +172,10 @@ module.exports = Backbone.View.extend( {
 					} );
 				}
 
-				frame.open();
+				// Prevent loop that occurs if you close the frame using the close button while focused on the trigger.
+				$( this ).next().focus();
 
+				frame.open();
 			} );
 
 			// Handle clicking on remove

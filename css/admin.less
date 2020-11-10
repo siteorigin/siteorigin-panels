@@ -877,6 +877,7 @@
 			border-left: 1px solid #d8d8d8;
 			border-bottom: 1px solid #d8d8d8;
 
+			&:focus,
 			&:hover {
 				background: #e9e9e9;
 				.so-dialog-icon {
@@ -1849,6 +1850,10 @@
 
 			.user-select(none);
 
+			&:focus {
+				background: #eee;
+			}
+
 			h4 {
 				margin: 0;
 			}
@@ -1962,6 +1967,11 @@
 				cursor: pointer;
 
 				.box-shadow(~"inset 0 1px #FFFFFF");
+
+				&:focus {
+					border: 1px solid #007cba;
+					box-shadow: 0 0 0 1px #007cba;
+				}
 
 				.current-image {
 					height: @image_field_height;

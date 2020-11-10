@@ -203,7 +203,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<input type="button" class="button-primary so-close" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
 		</div>
 
 	</div>
@@ -233,7 +233,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<input type="button" class="button-primary so-close" value="<?php esc_attr_e('Close', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Close', 'siteorigin-panels') ?>" />
 		</div>
 
 	</div>
@@ -264,11 +264,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<div class="action-buttons">
-				<a class="so-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
-				<a class="so-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+				<a class="so-delete" tabindex="0"><?php _e('Delete', 'siteorigin-panels') ?></a>
+				<a class="so-duplicate" tabindex="0"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
 			</div>
 
-			<input type="button" class="button-primary so-close" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
 		</div>
 
 	</div>
@@ -349,15 +349,15 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="buttons">
 			{{% if( dialogType == 'edit' ) { %}}
 				<div class="action-buttons">
-					<a class="so-delete"><?php _e('Delete', 'siteorigin-panels') ?></a>
-					<a class="so-duplicate"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+					<a class="so-delete" tabindex="0"><?php _e('Delete', 'siteorigin-panels') ?></a>
+					<a class="so-duplicate" tabindex="0"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
 				</div>
 			{{% } %}}
 
 			{{% if( dialogType == 'create' ) { %}}
-				<input type="button" class="button-primary so-insert" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" />
+				<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" />
 			{{% } else { %}}
-				<input type="button" class="button-primary so-save" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+				<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
 			{{% } %}}
 		</div>
 
@@ -367,7 +367,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-row-cell-preview">
 	<div class="preview-cell" style="width: {{%- weight*100 %}}%">
 		<div class="preview-cell-in">
-			<div class="preview-cell-weight">{{% print(Math.round(weight * 1000) / 10) %}}</div>
+			<div class="preview-cell-weight" tabIndex="0">{{% print(Math.round(weight * 1000) / 10) %}}</div>
 		</div>
 	</div>
 </script>

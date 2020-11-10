@@ -135,7 +135,7 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			?>
 			<div class="style-section-wrapper">
-				<div class="style-section-head">
+				<div class="style-section-head" tabindex="0">
 					<h4><?php echo esc_html( $group['name'] ) ?></h4>
 				</div>
 				<div class="style-section-fields" style="display: none">
@@ -238,7 +238,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				$fallback_field_name = 'style[' . $field_id . '_fallback]';
 
 				?>
-				<div class="so-image-selector">
+				<div class="so-image-selector" tabindex="0">
 					<div class="current-image" <?php if ( ! empty( $image ) ) {
 						echo 'style="background-image: url(' . esc_url( $image[0] ) . ');"';
 					} ?>>
