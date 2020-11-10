@@ -165,7 +165,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
 				<a class="so-next so-nav"><span class="so-dialog-icon"></span></a>
 				<a class="so-show-right-sidebar"><span class="so-dialog-icon"></span></a>
-				<a class="so-close"><span class="so-dialog-icon"></span></a>
+				<a class="so-close" tabindex="0"><span class="so-dialog-icon"></span></a>
 			</div>
 		</div>
 
