@@ -14,7 +14,10 @@ module.exports = Backbone.View.extend( {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
-		'click .live-editor-mode': 'mobileToggle'
+		'click .live-editor-mode': 'mobileToggle',
+		'keyup .live-editor-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initialize: function ( options ) {
@@ -57,7 +60,8 @@ module.exports = Backbone.View.extend( {
 
 		// Handle highlighting the relevant widget in the live editor preview
 		var liveEditorView = this;
-		this.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
+
+		this.$el.on( 'mouseenter focusin', '.so-widget', function () {
 			var $$ = $( this ),
 				previewWidget = $$.data( 'live-editor-preview-widget' );
 
@@ -67,7 +71,7 @@ module.exports = Backbone.View.extend( {
 			}
 		} );
 
-		this.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
+		this.$el.on( 'mouseleave focusout', '.so-widget', function () {
 			this.resetHighlights();
 		}.bind(this) );
 
@@ -106,6 +110,8 @@ module.exports = Backbone.View.extend( {
 		// Refresh the preview display
 		this.$el.show();
 		this.refreshPreview( this.builder.model.getPanelsData() );
+
+		$( '.live-editor-close' ).focus();
 
 		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
@@ -366,7 +372,7 @@ module.exports = Backbone.View.extend( {
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
+						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) );
 						widgetEdit.data( 'live-editor-preview-widget', $$ );
 
 						$$
