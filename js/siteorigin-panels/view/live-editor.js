@@ -282,7 +282,7 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $('<iframe src="' + url + '" />')
+		this.previewIframe = $( '<iframe src="' + url + '"></iframe>' )
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
@@ -292,7 +292,7 @@ module.exports = Backbone.View.extend( {
 		this.setupPreviewFrame( this.previewIframe );
 
 		// We can use a normal POST form submit
-		var tempForm = $('<form id="soPostToPreviewFrame" method="post" />')
+		var tempForm = $( '<form id="soPostToPreviewFrame" method="post"></form>' )
 			.attr( {
 				id: iframeId,
 				target: this.previewIframe.attr('id'),

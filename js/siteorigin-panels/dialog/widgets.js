@@ -50,7 +50,7 @@ module.exports = panels.view.dialog.extend( {
 				widget.icon = 'dashicons dashicons-admin-generic';
 			}
 
-			$( '<span class="widget-icon" />' ).addClass( widget.icon ).prependTo( $w.find( '.widget-type-wrapper' ) );
+			$( '<span class="widget-icon"></span>' ).addClass( widget.icon ).prependTo( $w.find( '.widget-type-wrapper' ) );
 
 			$w.data( 'class', widget.class ).appendTo( this.$( '.widget-type-list' ) );
 		}, this );
