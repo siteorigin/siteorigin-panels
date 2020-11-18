@@ -27,7 +27,7 @@ module.exports = panels.view.dialog.extend( {
 
 		this.on( 'open_dialog_complete', function () {
 			// Clear the search and re-filter the widgets when we open the dialog
-			this.$( '.so-sidebar-search' ).val( '' ).focus();
+			this.$( '.so-sidebar-search' ).val( '' ).trigger( 'focus' );
 			this.balanceWidgetHeights();
 		} );
 
@@ -68,7 +68,7 @@ module.exports = panels.view.dialog.extend( {
 		this.initTabs();
 
 		var thisDialog = this;
-		$( window ).resize( function () {
+		$( window ).on( 'resize', function() {
 			thisDialog.balanceWidgetHeights();
 		} );
 	},
@@ -100,7 +100,7 @@ module.exports = panels.view.dialog.extend( {
 		if( e.which === 13 ) {
 			var visibleWidgets = this.$( '.widget-type-list .widget-type:visible' );
 			if( visibleWidgets.length === 1 ) {
-				visibleWidgets.click();
+				visibleWidgets.trigger( 'click' );
 			}
 		}
 		else {

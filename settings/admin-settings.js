@@ -16,11 +16,11 @@ jQuery( function($){
                         .animate({'margin-top' : 0, 'opacity': opacity}, 280 + 40*(4 - v) );
                 }, 150 + 225 * (4 - v) );
             });
-        });
+        }).each(function() { if(this.complete) { $(this).trigger( 'load' ); } });
 
     // Settings page tabbing
 
-    $('.settings-nav li a').click(function(e){
+    $( '.settings-nav li a' ).on( 'click', function( e ) {
         e.preventDefault();
         var $$ = $(this);
         $('.settings-nav li a').not($$).closest('li').removeClass('active');
@@ -40,7 +40,7 @@ jQuery( function($){
     });
 
 	if( window.location.hash ) {
-		$('.settings-nav li a[href="' + window.location.hash + '"]').click();
+		$( '.settings-nav li a[href="' + window.location.hash + '"]' ).trigger( 'click' );
 	}
 
     $('#panels-settings-section-welcome').fitVids();
@@ -48,8 +48,11 @@ jQuery( function($){
     // Save the tab the user last clicked
 
     var tabClicked = getUserSetting('siteorigin_panels_setting_tab');
-    if(tabClicked === '') { $('.settings-nav li a').first().click(); }
-    else { $('.settings-nav li a[href="#' + tabClicked + '"]').first().click(); }
+    if ( tabClicked === '' ) {
+        $( '.settings-nav li a' ).first().trigger( 'click' );
+    } else {
+        $( '.settings-nav li a[href="#' + tabClicked + '"]' ).first().trigger( 'click' );
+    }
 
     // Search settings
 
@@ -69,7 +72,7 @@ jQuery( function($){
                 $s.removeClass('highlighted');
             });
 
-        $s.find('input,textarea').focus();
+        $s.find( 'input, textarea' ).trigger( 'focus' );
     };
 
     var doSettingsSearch = function(){
@@ -127,7 +130,7 @@ jQuery( function($){
                         .click(function(){
                             highlightSetting( el );
                             $r.fadeOut('fast');
-                            $('#panels-settings-search input').blur();
+                            $('#panels-settings-search input').trigger( 'blur' );
                         })
                 );
             });
@@ -138,9 +141,8 @@ jQuery( function($){
     };
 
     $('#panels-settings-search input')
-        .keyup(doSettingsSearch)
-        .click(doSettingsSearch)
-        .blur( function(){
+        .on( 'keyup click', doSettingsSearch )
+        .on( 'blur', function(){
             $('#panels-settings-search .results').fadeOut('fast');
         } );
 

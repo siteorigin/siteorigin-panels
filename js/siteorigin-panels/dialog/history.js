@@ -101,7 +101,7 @@ module.exports = panels.view.dialog.extend( {
 			.prependTo( c );
 
 		// Handle loading and selecting
-		c.find( '.history-entry' ).click( function () {
+		c.find( '.history-entry' ).on( 'click', function() {
 			var $$ = jQuery( this );
 			c.find( '.history-entry' ).not( $$ ).removeClass( 'so-selected' );
 			$$.addClass( 'so-selected' );
@@ -134,7 +134,7 @@ module.exports = panels.view.dialog.extend( {
 
 		this.$( 'form.history-form input[name="live_editor_panels_data"]' ).val( entry.get( 'data' ) );
 		this.$( 'form.history-form input[name="live_editor_post_ID"]' ).val( this.builder.config.postId );
-		this.$( 'form.history-form' ).submit();
+		this.$( 'form.history-form' ).trigger( 'submit' );
 	},
 
 	/**

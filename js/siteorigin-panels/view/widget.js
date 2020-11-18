@@ -183,7 +183,7 @@ module.exports = Backbone.View.extend( {
 		this.cell.row.builder.addHistoryEntry( 'widget_deleted' );
 
 		this.$el.fadeOut( 'fast', function () {
-			this.cell.row.resize();
+			this.cell.row.resizeRow();
 			this.model.destroy();
 			this.cell.row.builder.model.refreshPanelsData();
 			this.remove();

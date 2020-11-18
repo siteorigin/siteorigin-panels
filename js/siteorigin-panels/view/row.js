@@ -92,7 +92,7 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.builder, 'widget_sortable_move', this.resize );
 		this.listenTo( this.builder, 'builder_resize', this.resize );
 
-		this.resize();
+		this.resizeRow();
 
 		return this;
 	},
@@ -109,7 +109,7 @@ module.exports = Backbone.View.extend( {
 	 *
 	 * @param e
 	 */
-	resize: function ( e ) {
+	resizeRow: function( e ) {
 		// Don't resize this
 		if ( ! this.$el.is( ':visible' ) ) {
 			return;

@@ -230,7 +230,7 @@ module.exports = Backbone.View.extend( {
 					cellView.row.builder.addHistoryEntry( 'cell_resized' );
 					cellView.model.set( 'weight', ncw );
 					previousCell.model.set( 'weight', pcw );
-					cellView.row.resize();
+					cellView.row.resizeRow();
 				}
 
 				ui.helper.css( 'left', - handle.outerWidth() / 2 );
@@ -282,7 +282,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.refreshSortable();
-		this.row.resize();
+		this.row.resizeRow();
 		this.row.builder.trigger( 'widget_added', view );
 	},
 

@@ -82,7 +82,7 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model.get( 'rows' ), 'add', this.onAddRow );
 
 		// Reflow the entire builder when ever the
-		$( window ).resize( function ( e ) {
+		$( window ).on( 'resize', function( e ) {
 			if ( e.target === window ) {
 				builder.trigger( 'builder_resize' );
 			}
@@ -225,7 +225,7 @@ module.exports = Backbone.View.extend( {
 		// Handle switching between the page builder and other tabs
 		$( '#wp-content-wrap .wp-editor-tabs' )
 		.find( '.wp-switch-editor' )
-		.click( function ( e ) {
+		.on( 'click', function( e ) {
 			e.preventDefault();
 			$( '#wp-content-editor-container' ).show();
 
@@ -238,7 +238,7 @@ module.exports = Backbone.View.extend( {
 		} ).end()
 		.append(
 			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h2.hndle' ).html() + '</button>' )
-			.click( function ( e ) {
+			.on( 'click', function( e ) {
 				if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
 					e.preventDefault();
 				}
@@ -247,7 +247,7 @@ module.exports = Backbone.View.extend( {
 
 		// Switch back to the standard editor
 		if ( this.supports( 'revertToEditor' ) ) {
-			metabox.find( '.so-switch-to-standard' ).click( function ( e ) {
+			metabox.find( '.so-switch-to-standard' ).on( 'click', function( e ) {
 				e.preventDefault();
 
 				if ( !confirm( panelsOptions.loc.confirm_stop_builder ) ) {
@@ -263,7 +263,7 @@ module.exports = Backbone.View.extend( {
 				metabox.hide();
 
 				// Resize to trigger reflow of WordPress editor stuff
-				$( window ).resize();
+				$( window ).trigger( 'resize');
 
 				thisView.attachedVisible = false;
 				thisView.trigger( 'hide_builder' );
@@ -331,7 +331,7 @@ module.exports = Backbone.View.extend( {
 		};
 
 		this.on( 'builder_resize', stickToolbar, this );
-		$( document ).scroll( stickToolbar );
+		$( document ).on( 'scroll', stickToolbar );
 		stickToolbar();
 
 		this.trigger( 'builder_attached_to_editor' );
@@ -372,8 +372,8 @@ module.exports = Backbone.View.extend( {
 		this.metabox.show().find( '> .inside' ).show();
 
 		// Triggers full refresh
-		$( window ).resize();
-		$( document ).scroll();
+		$( window ).trigger( 'resize' );
+		$( document ).trigger( 'scroll' );
 
 		// Make sure the word count is visible
 		this.attachedVisible = true;
@@ -548,7 +548,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.refreshSortable();
-		rowView.resize();
+		rowView.resizeRow();
 		this.trigger( 'row_added' );
 	},
 
@@ -835,7 +835,7 @@ module.exports = Backbone.View.extend( {
 
 					// Wrap the call
 					$( window ).unbind( 'scroll', event.handler );
-					$( window ).bind( 'scroll', function ( e ) {
+					$( window ).bind( 'scroll', function( e ) {
 						if ( !this.attachedVisible ) {
 							event.handler( e );
 						}
