@@ -57,7 +57,8 @@ module.exports = Backbone.View.extend( {
 		if( ! this.cell.row.builder.supports( 'moveWidget' ) ) {
 			this.$el.addClass('so-widget-no-move');
 		}
-		if( !$.trim( this.$('.actions').html() ).length ) {
+
+		if ( ! this.$('.actions').html().trim().length ) {
 			this.$( '.actions' ).remove();
 		}
 

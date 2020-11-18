@@ -83,7 +83,8 @@ module.exports = Backbone.View.extend( {
 			this.$('.so-row-toolbar .so-row-move' ).remove();
 			this.$el.addClass('so-row-no-move');
 		}
-		if( !$.trim( this.$('.so-row-toolbar').html() ).length ) {
+
+		if ( ! this.$('.so-row-toolbar').html().trim().length ) {
 			this.$('.so-row-toolbar' ).remove();
 		}
 
