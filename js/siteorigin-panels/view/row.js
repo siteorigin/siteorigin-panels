@@ -89,8 +89,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Resize the rows when ever the widget sortable moves
-		this.listenTo( this.builder, 'widget_sortable_move', this.resize );
-		this.listenTo( this.builder, 'builder_resize', this.resize );
+		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
+		this.listenTo( this.builder, 'builder_resize', this.resizeRow );
 
 		this.resizeRow();
 
