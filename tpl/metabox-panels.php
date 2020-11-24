@@ -3,11 +3,13 @@ global $post;
 $builder_id = uniqid();
 $builder_type = apply_filters( 'siteorigin_panels_post_builder_type', 'editor_attached', $post, $panels_data );
 $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array(), $post, $panels_data );
+$preview = SiteOrigin_Panels_Admin::single()->generate_panels_preview( $post->ID, $panels_data );
 ?>
 
 <div id="siteorigin-panels-metabox"
 	data-builder-type="<?php echo esc_attr( $builder_type ) ?>"
 	data-preview-url="<?php echo SiteOrigin_Panels::preview_url() ?>"
+	data-preview-markup="<?php echo esc_attr( json_encode( $preview ) ); ?>"
 	data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
 	<?php if( !empty( $_GET['so_live_editor'] ) ) echo 'data-live-editor="1"' ?>
 	>
