@@ -283,7 +283,7 @@ module.exports = panels.view.dialog.extend( {
 
 					if ( $$.data( 'src' ) !== '' ) {
 						// Set the initial height
-						var $img = $( '<img/>' ).attr( 'src', $$.data( 'src' ) ).load( function () {
+						var $img = $( '<img/>' ).attr( 'src', $$.data( 'src' ) ).on( 'load', function () {
 							$a.removeClass( 'so-loading' ).css( 'height', 'auto' );
 							$img.appendTo( $a ).hide().fadeIn( 'fast' );
 						} );
