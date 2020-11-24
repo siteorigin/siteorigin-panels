@@ -1,8 +1,8 @@
 const { isEqual, debounce, isEmpty, isFunction } = lodash;
 const { registerBlockType } = wp.blocks;
 const { Component, Fragment, RawHTML, createRef } = wp.element;
-const { BlockControls } = wp.editor;
-const { Toolbar, IconButton, Spinner } = wp.components;
+const { BlockControls } = wp.blockEditor;
+const { Toolbar, ToolbarButton, Spinner } = wp.components;
 const { soPanelsBlockEditorAdmin } = window;
 
 class SiteOriginPanelsLayoutBlock extends Component {
@@ -178,8 +178,8 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			return (
 				<Fragment>
 					<BlockControls>
-						<Toolbar>
-							<IconButton
+						<Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<ToolbarButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
@@ -199,8 +199,8 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			return (
 				<Fragment>
 					<BlockControls>
-						<Toolbar>
-							<IconButton
+						<Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<ToolbarButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }

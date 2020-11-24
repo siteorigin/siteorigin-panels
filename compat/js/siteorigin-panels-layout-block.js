@@ -59,10 +59,10 @@ var _wp$element = wp.element,
     Fragment = _wp$element.Fragment,
     RawHTML = _wp$element.RawHTML,
     createRef = _wp$element.createRef;
-var BlockControls = wp.editor.BlockControls;
+var BlockControls = wp.blockEditor.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    IconButton = _wp$components.IconButton,
+    ToolbarButton = _wp$components.ToolbarButton,
     Spinner = _wp$components.Spinner;
 var _window = window,
     soPanelsBlockEditorAdmin = _window.soPanelsBlockEditorAdmin;
@@ -263,7 +263,9 @@ function (_Component) {
       };
 
       if (this.state.editing) {
-        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
+        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(ToolbarButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
@@ -275,7 +277,9 @@ function (_Component) {
         }));
       } else {
         var loadingPreview = this.state.loadingPreview;
-        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
+        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(ToolbarButton, {
           icon: "edit",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
