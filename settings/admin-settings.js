@@ -12,7 +12,12 @@ jQuery( function($){
 
                 setTimeout( function(){
                     $$.show()
-                        .css({'margin-top' : -5, 'opacity': 0})
+                        .css(
+                            {
+                                'margin-top': '-5px',
+                                'opacity': 0,
+                            }
+                        )
                         .animate({'margin-top' : 0, 'opacity': opacity}, 280 + 40*(4 - v) );
                 }, 150 + 225 * (4 - v) );
             });

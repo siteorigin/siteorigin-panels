@@ -292,7 +292,7 @@ module.exports = Backbone.View.extend( {
 					width: '100%',
 					position: 'absolute'
 				} );
-				thisView.$el.css( 'padding-top', toolbar.outerHeight() );
+				thisView.$el.css( 'padding-top', toolbar.outerHeight() + 'px' );
 				return;
 			}
 
@@ -312,22 +312,22 @@ module.exports = Backbone.View.extend( {
 					// The toolbar needs to stick to the top, over the interface
 					toolbar.css( {
 						top: $( '#wpadminbar' ).outerHeight(),
-						left: thisView.$el.offset().left,
-						width: thisView.$el.outerWidth(),
+						left: thisView.$el.offset().left + 'px',
+						width: thisView.$el.outerWidth() + 'px',
 						position: 'fixed'
 					} );
 				}
 			} else {
 				// The toolbar needs to be at the top or bottom of the interface
 				toolbar.css( {
-					top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+					top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 )  + 'px',
 					left: 0,
 					width: '100%',
 					position: 'absolute'
 				} );
 			}
 
-			thisView.$el.css( 'padding-top', toolbar.outerHeight() );
+			thisView.$el.css( 'padding-top', toolbar.outerHeight() + 'px' );
 		};
 
 		this.on( 'builder_resize', stickToolbar, this );
