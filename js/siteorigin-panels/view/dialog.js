@@ -279,7 +279,6 @@ module.exports = Backbone.View.extend( {
 
 			}.bind( this ) )
 			.on( 'focus', function() {
-				// console.log(123);
 				$editElt.data( 'original-value', $editElt.text() );
 				panels.helpers.utils.selectElementContents( this );
 			} );
