@@ -42,7 +42,7 @@ module.exports = panels.view.dialog.extend( {
 
 		this.on( 'open_dialog_complete', function () {
 			// Clear the search and re-filter the widgets when we open the dialog
-			this.$( '.so-sidebar-search' ).val( '' ).focus();
+			this.$( '.so-sidebar-search' ).val( '' ).trigger( 'focus' );
 		} );
 	},
 

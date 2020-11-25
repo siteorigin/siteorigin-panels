@@ -111,7 +111,7 @@ module.exports = Backbone.View.extend( {
 		this.$el.show();
 		this.refreshPreview( this.builder.model.getPanelsData() );
 
-		$( '.live-editor-close' ).focus();
+		$( '.live-editor-close' ).trigger( 'focus' );
 
 		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();

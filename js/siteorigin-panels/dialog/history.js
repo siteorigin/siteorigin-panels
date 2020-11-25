@@ -32,7 +32,7 @@ module.exports = panels.view.dialog.extend( {
 		this.on( 'open_dialog', this.renderHistoryEntries, this );
 
 		this.on( 'open_dialog_complete', function () {
-			this.$( '.history-entry' ).focus();
+			this.$( '.history-entry' ).trigger( 'focus' );
 		} );
 	},
 
