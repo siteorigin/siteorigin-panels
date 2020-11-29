@@ -61,6 +61,10 @@ module.exports = panels.view.dialog.extend({
 			this.openSelectedCellStyles();
 		}, this);
 
+		this.on( 'open_dialog_complete', function() {
+			$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
+		} );
+
 		// This is the default row layout
 		this.row = {
 			cells: new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]),

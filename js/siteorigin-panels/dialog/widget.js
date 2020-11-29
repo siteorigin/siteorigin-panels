@@ -66,6 +66,18 @@ module.exports = panels.view.dialog.extend( {
 				this.$( '.so-title' ).text( this.model.getWidgetField( 'title' ) );
 			}
 		}.bind( this ) );
+
+		this.on( 'open_dialog_complete', function() {
+			// The form isn't always ready when this event fires.
+			setTimeout( function() {
+				var focusTarget = $( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first();
+				if ( focusTarget.length ) {
+					focusTarget.trigger( 'focus' );
+				} else {
+					$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
+				}
+			}, 1250 )
+		} );
 	},
 
 	/**
