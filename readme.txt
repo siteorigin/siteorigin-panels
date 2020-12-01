@@ -97,7 +97,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.11.6 - 30 November 2020 =
+= 2.11.6 - 01 December 2020 =
 * New: "Page Builder Layout CSS Output Location" setting that controls where PB outputs its CSS. Located at `Settings > Page Builder > Layout`.
 * SEO: Improved content analysis process for slower servers and connections.
 * SEO: Excluded <iframe>, <script>, <link>, <style> from content analysis due to word count inflation.
