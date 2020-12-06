@@ -999,6 +999,8 @@ class SiteOrigin_Panels_Admin {
 		$the_widget->id     = 'temp';
 		$the_widget->number = $widget_number;
 
+		do_action( 'siteorigin_panels_before_widget_form', $the_widget, $instance );
+
 		ob_start();
 		if ( $this->is_core_js_widget( $the_widget ) ) {
 			?><div class="widget-content"><?php
