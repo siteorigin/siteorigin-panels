@@ -97,10 +97,13 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.7 - 07 December 2020 =
+* SEO: Generated `preview_url` before `preview_content`. Resolves Live Editor preview issue when a post loop is present in the page.
+
 = 2.11.6 - 01 December 2020 =
-* New: "Page Builder Layout CSS Output Location" setting that controls where PB outputs its CSS. Located at `Settings > Page Builder > Layout`.
+* New: `Page Builder Layout CSS Output Location` setting that controls where PB outputs its CSS. Located at `Settings > Page Builder > Layout`.
 * SEO: Improved content analysis process for slower servers and connections.
-* SEO: Excluded <iframe>, <script>, <link>, <style> from content analysis due to word count inflation.
+* SEO: Excluded `<iframe>, <script>, <link>, <style>` from content analysis due to word count inflation.
 * Developer: Added `wp-color-picker` as an editor dependency.
 * Developer: Introduced a new Ajax Response filter `siteorigin_panels_layouts_result`.
 * Developer: Standardized SO Layout Block variables to avoid conflicts with other blocks.
