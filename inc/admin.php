@@ -198,6 +198,8 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
+		$preview_url = SiteOrigin_Panels::preview_url();
+		$preview_content = $this->generate_panels_preview( $post->ID, $panels_data );
 		include plugin_dir_path( __FILE__ ) . '../tpl/metabox-panels.php';
 	}
 
