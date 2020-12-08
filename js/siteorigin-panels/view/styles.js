@@ -99,7 +99,7 @@ module.exports = Backbone.View.extend( {
 		this.$( '.style-section-wrapper' ).each( function () {
 			var $s = $( this );
 
-			$s.find( '.style-section-head' ).click( function ( e ) {
+			$s.find( '.style-section-head' ).on( 'click', function( e ) {
 				e.preventDefault();
 				$s.find( '.style-section-fields' ).slideToggle( 'fast' );
 			} );
@@ -120,7 +120,7 @@ module.exports = Backbone.View.extend( {
 			var frame = null;
 			var $s = $( this );
 
-			$s.find( '.so-image-selector' ).click( function ( e ) {
+			$s.find( '.so-image-selector' ).on( 'click', function( e ) {
 				e.preventDefault();
 
 				if ( frame === null ) {
@@ -169,7 +169,7 @@ module.exports = Backbone.View.extend( {
 			} );
 
 			// Handle clicking on remove
-			$s.find( '.remove-image' ).click( function ( e ) {
+			$s.find( '.remove-image' ).on( 'click', function( e ) {
 				e.preventDefault();
 				$s.find( '.current-image' ).css( 'background-image', 'none' );
 				$s.find( '.so-image-selector > input' ).val( '' );
@@ -185,8 +185,8 @@ module.exports = Backbone.View.extend( {
 			var unit = $$.find( 'select' );
 			var hidden = $$.find( 'input[type="hidden"]' );
 
-			text.focus( function(){
-				$(this).select();
+			text.on( 'focus', function(){
+				$( this ).trigger( 'select' );
 			} );
 
 			/**
@@ -288,8 +288,8 @@ module.exports = Backbone.View.extend( {
 			};
 
 			// Set the value when ever anything changes
-			text.change( setValue );
-			unit.change( setValue );
+			text.on( 'change', setValue );
+			unit.on( 'change', setValue );
 		} );
 	}
 

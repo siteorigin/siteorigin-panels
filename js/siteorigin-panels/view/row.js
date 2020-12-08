@@ -83,15 +83,16 @@ module.exports = Backbone.View.extend( {
 			this.$('.so-row-toolbar .so-row-move' ).remove();
 			this.$el.addClass('so-row-no-move');
 		}
-		if( !$.trim( this.$('.so-row-toolbar').html() ).length ) {
+
+		if ( ! this.$('.so-row-toolbar').html().trim().length ) {
 			this.$('.so-row-toolbar' ).remove();
 		}
 
 		// Resize the rows when ever the widget sortable moves
-		this.listenTo( this.builder, 'widget_sortable_move', this.resize );
-		this.listenTo( this.builder, 'builder_resize', this.resize );
+		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
+		this.listenTo( this.builder, 'builder_resize', this.resizeRow );
 
-		this.resize();
+		this.resizeRow();
 
 		return this;
 	},
@@ -108,7 +109,7 @@ module.exports = Backbone.View.extend( {
 	 *
 	 * @param e
 	 */
-	resize: function ( e ) {
+	resizeRow: function( e ) {
 		// Don't resize this
 		if ( ! this.$el.is( ':visible' ) ) {
 			return;
@@ -133,8 +134,8 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		// Resize all the grids and cell wrappers
-		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', Math.max( height, 63 ) );
-		this.$( '.so-cells .resize-handle' ).css( 'height', this.$( '.so-cells .cell-wrapper' ).outerHeight() );
+		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', Math.max( height, 63 ) + 'px' );
+		this.$( '.so-cells .resize-handle' ).css( 'height', this.$( '.so-cells .cell-wrapper' ).outerHeight() + 'px' );
 	},
 
 	/**

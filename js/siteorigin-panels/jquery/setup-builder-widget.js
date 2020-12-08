@@ -70,7 +70,7 @@ module.exports = function ( config, force ) {
 		if ( isWidget || $$.data('mode') === 'dialog' ) {
 			// Set up the dialog opening
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, builderView.dialog );
-			$$.find( '.siteorigin-panels-display-builder' ).click( function ( e ) {
+			$$.find( '.siteorigin-panels-display-builder' ).on( 'click', function( e ) {
 				e.preventDefault();
 				builderView.dialog.openDialog();
 			} );
