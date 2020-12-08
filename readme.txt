@@ -97,6 +97,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.11.8 - 08 December 2020 =
+* Developer: jQuery updates for WordPress 5.6.
+
 = 2.11.7 - 07 December 2020 =
 * SEO: Generated `preview_url` before `preview_content`. Resolves Live Editor preview issue when a post loop is present in the page.
 
