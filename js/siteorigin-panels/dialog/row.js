@@ -233,7 +233,7 @@ module.exports = panels.view.dialog.extend({
 				handle = $('<div class="resize-handle"></div>');
 				handle
 					.appendTo(newCell)
-					.dblclick(function () {
+					.on( 'dblclick', function () {
 						var prevCellModel = thisDialog.row.cells.at(i - 1);
 						var t = cellModel.get('weight') + prevCellModel.get('weight');
 						cellModel.set('weight', t / 2);
@@ -292,10 +292,10 @@ module.exports = panels.view.dialog.extend({
 
 						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
 
-						$(this).data('newCellClone').css('width', rowPreview.width() * ncw)
+						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
-						$(this).data('prevCellClone').css('width', rowPreview.width() * pcw)
+						$( this ).data( 'prevCellClone' ).css( 'width', rowPreview.width() * pcw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(pcw * 1000) / 10);
 					},
 					stop: function (e, ui) {
