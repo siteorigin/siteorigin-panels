@@ -1,14 +1,14 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
-Tested up to: 5.5
+Tested up to: 5.6
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: https://siteorigin.com/downloads/premium/
-Contributors: gpriday, braam-genis
+Contributors: gpriday, braam-genis, alexgso
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
 
