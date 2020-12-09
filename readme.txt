@@ -97,7 +97,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.11.8 - 08 December 2020 =
+= 2.11.8 - 09 December 2020 =
 * Developer: jQuery updates for WordPress 5.6.
 
 = 2.11.7 - 07 December 2020 =
