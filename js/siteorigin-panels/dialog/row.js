@@ -233,7 +233,7 @@ module.exports = panels.view.dialog.extend({
 				handle = $('<div class="resize-handle"></div>');
 				handle
 					.appendTo(newCell)
-					.dblclick(function () {
+					.on( 'dblclick', function () {
 						var prevCellModel = thisDialog.row.cells.at(i - 1);
 						var t = cellModel.get('weight') + prevCellModel.get('weight');
 						cellModel.set('weight', t / 2);
