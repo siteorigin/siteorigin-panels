@@ -292,10 +292,10 @@ module.exports = panels.view.dialog.extend({
 
 						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
 
-						$(this).data('newCellClone').css('width', rowPreview.width() * ncw)
+						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
-						$(this).data('prevCellClone').css('width', rowPreview.width() * pcw)
+						$( this ).data( 'prevCellClone' ).css( 'width', rowPreview.width() * pcw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(pcw * 1000) / 10);
 					},
 					stop: function (e, ui) {
@@ -755,6 +755,8 @@ module.exports = panels.view.dialog.extend({
 		this.closeDialog();
 
 		this.builder.model.refreshPanelsData();
+		console.log(this.builder);
+		// this.rowView.resizeRow();
 
 		return false;
 	},
