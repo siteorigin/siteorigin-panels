@@ -755,8 +755,6 @@ module.exports = panels.view.dialog.extend({
 		this.closeDialog();
 
 		this.builder.model.refreshPanelsData();
-		console.log(this.builder);
-		// this.rowView.resizeRow();
 
 		return false;
 	},
