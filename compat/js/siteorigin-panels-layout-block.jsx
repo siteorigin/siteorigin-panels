@@ -170,16 +170,16 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		if ( this.state.editing ) {
 			return (
 				<wp.element.Fragment>
-					<wp.editor.BlockControls>
-						<wp.components.Toolbar>
-							<wp.components.IconButton
+					<wp.blockEditor.BlockControls>
+						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<wp.components.ToolbarButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
 								onClick={ switchToPreview }
 							/>
 						</wp.components.Toolbar>
-					</wp.editor.BlockControls>
+					</wp.blockEditor.BlockControls>
 					<div
 						key="layout-block"
 						className="siteorigin-panels-layout-block-container"
@@ -191,16 +191,16 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			const loadingPreview = this.state.loadingPreview;
 			return (
 				<wp.element.Fragment>
-					<wp.editor.BlockControls>
-						<wp.components.Toolbar>
-							<wp.components.IconButton
+					<wp.blockEditor.BlockControls>
+						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<wp.components.ToolbarButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
 								onClick={ switchToEditing }
 							/>
 						</wp.components.Toolbar>
-					</wp.editor.BlockControls>
+					</wp.blockEditor.BlockControls>
 					<div key="preview" className="so-panels-block-layout-preview-container">
 						{ loadingPreview ? (
 							<div className="so-panels-spinner-container">
