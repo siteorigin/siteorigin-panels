@@ -842,7 +842,7 @@ module.exports = Backbone.View.extend( {
 
 					// Wrap the call
 					$( window ).off( 'scroll', event.handler );
-					$( window ).bind( 'scroll', function( e ) {
+					$( window ).on( 'scroll', function( e ) {
 						if ( !this.attachedVisible ) {
 							event.handler( e );
 						}
