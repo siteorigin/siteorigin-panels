@@ -143,7 +143,7 @@ module.exports = panels.view.dialog.extend({
 			}
 		}
 
-		this.$('input.so-row-field').keyup(function () {
+		this.$( 'input.so-row-field' ).on( 'keyup', function() {
 			$(this).trigger('change');
 		});
 
@@ -246,7 +246,7 @@ module.exports = panels.view.dialog.extend({
 				handle = $('<div class="resize-handle"></div>');
 				handle
 					.appendTo(newCell)
-					.dblclick(function () {
+					.on( 'dblclick', function () {
 						var prevCellModel = thisDialog.row.cells.at(i - 1);
 						var t = cellModel.get('weight') + prevCellModel.get('weight');
 						cellModel.set('weight', t / 2);
@@ -305,10 +305,10 @@ module.exports = panels.view.dialog.extend({
 
 						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
 
-						$(this).data('newCellClone').css('width', rowPreview.width() * ncw)
+						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
-						$(this).data('prevCellClone').css('width', rowPreview.width() * pcw)
+						$( this ).data( 'prevCellClone' ).css( 'width', rowPreview.width() * pcw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(pcw * 1000) / 10);
 					},
 					stop: function (e, ui) {
@@ -338,7 +338,7 @@ module.exports = panels.view.dialog.extend({
 				});
 			}
 
-			newCell.click(function (event) {
+			newCell.on( 'click', function( event ) {
 
 				if ( ! ( $(event.target).is('.preview-cell') || $(event.target).is('.preview-cell-in') ) ) {
 					return;
@@ -353,7 +353,7 @@ module.exports = panels.view.dialog.extend({
 			}.bind(this));
 
 			// Make this row weight click editable
-			newCell.find('.preview-cell-weight').click(function (ci) {
+			newCell.find( '.preview-cell-weight' ).on( 'click', function( ci ) {
 
 				// Disable the draggable while entering values
 				thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
@@ -362,10 +362,10 @@ module.exports = panels.view.dialog.extend({
 					var $$ = jQuery(this).hide();
 					$('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
 						.val(parseFloat($$.html())).insertAfter($$)
-						.focus(function () {
+						.on( 'focus', function() {
 							clearTimeout(timeout);
 						})
-						.keyup(function (e) {
+						.on( 'keyup', function( e ) {
 							if (e.keyCode !== 9) {
 								// Only register the interaction if the user didn't press tab
 								$(this).removeClass('no-user-interacted');
@@ -374,10 +374,10 @@ module.exports = panels.view.dialog.extend({
 							// Enter is clicked
 							if (e.keyCode === 13) {
 								e.preventDefault();
-								$(this).blur();
+								$( this ).trigger( 'blur' );
 							}
 						})
-						.keydown(function (e) {
+						.on( 'keydown', function( e ) {
 							if (e.keyCode === 9) {
 								e.preventDefault();
 
@@ -385,13 +385,13 @@ module.exports = panels.view.dialog.extend({
 								var inputs = rowPreview.find('.preview-cell-weight-input');
 								var i = inputs.index($(this));
 								if (i === inputs.length - 1) {
-									inputs.eq(0).focus().select();
+									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
 								} else {
-									inputs.eq(i + 1).focus().select();
+									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
 								}
 							}
 						})
-						.blur(function () {
+						.on( 'blur', function() {
 							rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
 								if (isNaN(parseFloat($(el).val()))) {
 									$(el).val(Math.floor(thisDialog.row.cells.at(i).get('weight') * 1000) / 10);
@@ -474,12 +474,12 @@ module.exports = panels.view.dialog.extend({
 
 							}, 100);
 						})
-						.click(function () {
-							$(this).select();
+						.on( 'click', function () {
+							$( this ).trigger( 'select' );
 						});
 				});
 
-				$(this).siblings('.preview-cell-weight-input').select();
+				$(this).siblings( '.preview-cell-weight-input' ).trigger( 'select');
 
 			});
 

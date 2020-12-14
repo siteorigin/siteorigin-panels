@@ -28,10 +28,10 @@ jQuery( function ( $ ) {
 				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
 			$$.css( {
-				'margin-left': - leftSpace,
-				'margin-right': - rightSpace,
-				'padding-left': stretchType === 'full' ? leftSpace : defaultSidePadding,
-				'padding-right': stretchType === 'full' ? rightSpace : defaultSidePadding
+				'margin-left': - leftSpace + 'px',
+				'margin-right': - rightSpace + 'px',
+				'padding-left': stretchType === 'full' ? leftSpace + 'px' : defaultSidePadding,
+				'padding-right': stretchType === 'full' ? rightSpace + 'px': defaultSidePadding
 			} );
 
 			var cells = $$.find( '> .panel-grid-cell' );

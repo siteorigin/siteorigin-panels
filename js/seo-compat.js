@@ -42,8 +42,8 @@ jQuery(function($){
 					return data;
 				}
 
-				// Remove style tags created by Widgets Bundle
-				$data.find( 'style' ).remove();
+				// Remove elements that have no content analysis value.
+				$data.find( 'iframe, script, style, link' ).remove();
 
 				$data.find( "*") .not( whitelist ).each( function() {
 					var content = $( this ).contents();

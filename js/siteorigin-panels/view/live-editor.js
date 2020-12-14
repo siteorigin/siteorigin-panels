@@ -51,10 +51,10 @@ module.exports = Backbone.View.extend( {
 
 		var isMouseDown = false;
 		$( document )
-			.mousedown( function () {
+			.on( 'mousedown', function() {
 				isMouseDown = true;
 			} )
-			.mouseup( function () {
+			.on( 'mouseup', function() {
 				isMouseDown = false;
 			} );
 
@@ -162,7 +162,7 @@ module.exports = Backbone.View.extend( {
 	closeAndSave: function(){
 		this.close();
 		// Finds the submit input for saving without publishing draft posts.
-		$('#submitdiv input[type="submit"][name="save"]').click();
+		$( '#submitdiv input[type="submit"][name="save"]' ).trigger( 'click' );
 	},
 
 	/**
@@ -288,7 +288,7 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $('<iframe src="' + url + '" />')
+		this.previewIframe = $( '<iframe src="' + url + '"></iframe>' )
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
@@ -298,7 +298,7 @@ module.exports = Backbone.View.extend( {
 		this.setupPreviewFrame( this.previewIframe );
 
 		// We can use a normal POST form submit
-		var tempForm = $('<form id="soPostToPreviewFrame" method="post" />')
+		var tempForm = $( '<form id="soPostToPreviewFrame" method="post"></form>' )
 			.attr( {
 				id: iframeId,
 				target: this.previewIframe.attr('id'),
@@ -316,7 +316,7 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		tempForm
-			.submit()
+			.trigger( 'submit' )
 			.remove();
 
 		this.previewFrameId++;
@@ -379,23 +379,23 @@ module.exports = Backbone.View.extend( {
 							.css( {
 								'cursor': 'pointer'
 							} )
-							.mouseenter( function () {
+							.on( 'mouseenter', function() {
 								widgetEdit.parent().addClass( 'so-hovered' );
 								thisView.highlightElement( $$ );
 							} )
-							.mouseleave( function () {
+							.on( 'mouseleave', function() {
 								widgetEdit.parent().removeClass( 'so-hovered' );
 								thisView.resetHighlights();
 							} )
-							.click( function ( e ) {
+							.on( 'click', function( e ) {
 								e.preventDefault();
 								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).click();
+								widgetEdit.find( '.title h4' ).trigger( 'click' );
 							} );
 					} );
 
 				// Prevent default clicks inside the preview iframe
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
+				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).on( 'click', function( e ) {
 					e.preventDefault();
 				} );
 

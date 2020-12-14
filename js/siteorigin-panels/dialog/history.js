@@ -42,7 +42,7 @@ module.exports = panels.view.dialog.extend( {
 		// Render the dialog and attach it to the builder interface
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-history' ).html(), {} ) );
 
-		this.$( 'iframe.siteorigin-panels-history-iframe' ).load( function () {
+		this.$( 'iframe.siteorigin-panels-history-iframe' ).on( 'load', function () {
 			var $$ = $( this );
 			$$.show();
 
@@ -111,7 +111,7 @@ module.exports = panels.view.dialog.extend( {
 			.prependTo( c );
 
 		// Handle loading and selecting
-		c.find( '.history-entry' ).on( 'click', function (e) {
+		c.find( '.history-entry' ).on( 'click', function(e) {
 			if ( e.type == 'keyup' && e.which != 13 ) {
 				return;
 			}
@@ -148,7 +148,7 @@ module.exports = panels.view.dialog.extend( {
 
 		this.$( 'form.history-form input[name="live_editor_panels_data"]' ).val( entry.get( 'data' ) );
 		this.$( 'form.history-form input[name="live_editor_post_ID"]' ).val( this.builder.config.postId );
-		this.$( 'form.history-form' ).submit();
+		this.$( 'form.history-form' ).trigger( 'submit' );
 	},
 
 	/**

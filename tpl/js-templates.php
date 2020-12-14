@@ -156,7 +156,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-title-bar {{% if ( dialogIcon ) print( 'so-has-icon' ) %}}">
 			<a class="so-show-left-sidebar"><span class="so-dialog-icon"></span></a>
 			{{% if ( ! _.isEmpty( dialogIcon ) ) { %}}
-				<div class="so-panels-icon so-panels-icon-{{%- dialogIcon %}}" />
+				<div class="so-panels-icon so-panels-icon-{{%- dialogIcon %}}"></div>
 			{{% } %}}
 			<h3 class="so-title{{% if ( editableLabel ) print(' so-title-editable')%}}"
 			    {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false" tabIndex="1"')%}}
@@ -609,7 +609,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-add-layout-block-button">
 	<div class="siteorigin-panels-add-layout-block wp-block">
 		<button class="components-button is-button is-primary">
-			<span class="siteorigin-panels-block-icon white"/>
+			<span class="siteorigin-panels-block-icon white"></span>
 			<?php _e( 'Add SiteOrigin Layout Block', 'siteorigin-panels' ) ?>
 		</button>
 	</div>
