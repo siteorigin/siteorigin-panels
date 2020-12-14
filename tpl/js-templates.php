@@ -159,7 +159,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<div class="so-panels-icon so-panels-icon-{{%- dialogIcon %}}"></div>
 			{{% } %}}
 			<h3 class="so-title{{% if ( editableLabel ) print(' so-title-editable')%}}"
-			    {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false" tabIndex="1"')%}}
+			    {{% if ( editableLabel ) print('contenteditable="true" spellcheck="false" tabIndex="0"')%}}
 				>{{%= title %}}</h3>
 			<div class="so-title-bar-buttons">
 				<a class="so-previous so-nav"><span class="so-dialog-icon"></span></a>
