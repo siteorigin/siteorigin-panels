@@ -518,7 +518,7 @@ class SiteOrigin_Panels_Settings {
 			case 'html':
 				?><textarea name="<?php echo esc_attr( $field_name ) ?>"
 				            class="panels-setting-<?php echo esc_attr( $field['type'] ) ?> widefat"
-				            rows="<?php echo ! empty( $field['rows'] ) ? intval( $field['rows'] ) : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
+				            rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
 				break;
 
 			case 'checkbox':
@@ -598,7 +598,7 @@ class SiteOrigin_Panels_Settings {
 
 					case 'number':
 						if ( $post[ $field_id ] != '' ) {
-							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? intval( $post[ $field_id ] ) : 0;
+							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? (int) $post[ $field_id ] : 0;
 						} else {
 							$values[ $field_id ] = '';
 						}
@@ -606,7 +606,7 @@ class SiteOrigin_Panels_Settings {
 
 					case 'float':
 						if ( $post[ $field_id ] != '' ) {
-							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? floatval( $post[ $field_id ] ) : 0;
+							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? (float) $post[ $field_id ] : 0;
 						} else {
 							$values[ $field_id ] = '';
 						}
