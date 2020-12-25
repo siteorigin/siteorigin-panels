@@ -279,6 +279,11 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 						wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 					}
 				);
+			} else {
+				setAttributes( {
+					panelsData: null,
+					contentPreview: null,
+				} );
 			}
 		};
 		
