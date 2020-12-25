@@ -244,14 +244,14 @@ function (_wp$element$Component) {
       };
 
       if (this.state.editing) {
-        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+        return React.createElement(wp.element.Fragment, null, panelsData ? React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
           label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
         }, React.createElement(wp.components.ToolbarButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
           onClick: switchToPreview
-        }))), React.createElement("div", {
+        }))) : null, React.createElement("div", {
           key: "layout-block",
           className: "siteorigin-panels-layout-block-container",
           ref: this.panelsContainer
