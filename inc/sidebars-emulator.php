@@ -77,7 +77,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 		if ( empty( $post_id ) ) {
 			// Maybe this is the home page
-			$current_url_path = parse_url( $current_url, PHP_URL_PATH );
+			$current_url_path = parse_url( add_query_arg( false, false ), PHP_URL_PATH );
 			$home_url_path    = parse_url( trailingslashit( home_url() ), PHP_URL_PATH );
 
 			if ( $current_url_path === $home_url_path && get_option( 'page_on_front' ) != 0 ) {
