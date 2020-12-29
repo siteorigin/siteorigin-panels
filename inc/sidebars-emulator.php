@@ -67,8 +67,15 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	function register_widgets() {
 		$current_url = wp_parse_url( add_query_arg( false, false ) );
 
-		// Detect current page id.
+		// Detect current page id using path.
 		if ( ! empty( $current_url['path'] ) ) {
+
+			// Check if WPML is running.
+			if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+				// Remove the current language code from path to avoid 404.
+				$current_url['path'] = ltrim( $current_url['path'], '/' . ICL_LANGUAGE_CODE . '/' );
+			}
+
 			$page = get_page_by_path( $current_url['path'], OBJECT, siteorigin_panels_setting( 'post-types' ) );
 			if ( ! empty( $page ) ) {
 				$post_id = $page->ID;
