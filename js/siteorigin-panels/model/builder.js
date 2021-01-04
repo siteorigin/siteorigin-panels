@@ -367,9 +367,8 @@ module.exports = Backbone.Model.extend({
 					return $el.html();
 				}
 
-				var i;
-				for( i = 0; i < $divs.length - 1; i++ ) {
-					if( jQuery.trim( $divs.eq(i).text() ) != jQuery.trim( $divs.eq(i+1).text() ) ) {
+				for ( var i = 0; i < $divs.length - 1; i++ ) {
+					if ( $divs.eq( i ).text().trim() != $divs.eq( i + 1 ).text().trim() ) {
 						break;
 					}
 				}

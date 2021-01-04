@@ -244,7 +244,9 @@ function (_wp$element$Component) {
       };
 
       if (this.state.editing) {
-        return React.createElement(wp.element.Fragment, null, React.createElement(wp.editor.BlockControls, null, React.createElement(wp.components.Toolbar, null, React.createElement(wp.components.IconButton, {
+        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(wp.components.ToolbarButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
@@ -256,7 +258,9 @@ function (_wp$element$Component) {
         }));
       } else {
         var loadingPreview = this.state.loadingPreview;
-        return React.createElement(wp.element.Fragment, null, React.createElement(wp.editor.BlockControls, null, React.createElement(wp.components.Toolbar, null, React.createElement(wp.components.IconButton, {
+        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(wp.components.ToolbarButton, {
           icon: "edit",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),

@@ -1,14 +1,14 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
-Tested up to: 5.5
+Tested up to: 5.6
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: https://siteorigin.com/downloads/premium/
-Contributors: gpriday, braam-genis
+Contributors: gpriday, braam-genis, alexgso
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
 
@@ -96,6 +96,12 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.11.8 - 09 December 2020 =
+* Developer: jQuery updates for WordPress 5.6.
+
+= 2.11.7 - 07 December 2020 =
+* SEO: Generated `preview_url` before `preview_content`. Resolves Live Editor preview issue when a post loop is present in the page.
 
 = 2.11.6 - 01 December 2020 =
 * New: `Page Builder Layout CSS Output Location` setting that controls where PB outputs its CSS. Located at `Settings > Page Builder > Layout`.

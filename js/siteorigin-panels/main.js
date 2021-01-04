@@ -135,7 +135,7 @@ jQuery( function ( $ ) {
 			.attachToEditor();
 
 		// When the form is submitted, update the panels data
-		form.submit( function () {
+		form.on( 'submit', function() {
 			// Refresh the data
 			builderModel.refreshPanelsData();
 		} );
@@ -167,7 +167,7 @@ jQuery( function ( $ ) {
 		if ( e.which === 27 ) {
 			// Trigger a click on the last visible Page Builder window
 			$( '.so-panels-dialog-wrapper, .so-panels-live-editor' ).filter(':visible')
-				.last().find('.so-title-bar .so-close, .live-editor-close').click();
+				.last().find('.so-title-bar .so-close, .live-editor-close').trigger( 'click' );
 		}
 	});
 } );
