@@ -4,6 +4,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_assets' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_assets' ), 100 );
 
+		// Widget Form Rendering.
 		add_action( 'siteorigin_panels_before_widget_form', array( $this, 'store_acf_widget_fields_instance' ), 10, 3 );
 		add_filter( 'acf/pre_load_value', array( $this, 'load_panels_widget_field_data' ), 10, 3 );
 
@@ -35,8 +36,8 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	/**
 	 * Extracts the widgets ACF fields, and ACF stores them and the instance.
 	 *
-	 * @param $the_widget The WP Widget Object
-	 * @param $instance The Panels widget instance
+	 * @param $the_widget The WP Widget Object.
+	 * @param $instance The Panels widget instance.
 	 */
 	public function store_acf_widget_fields_instance( $the_widget, $instance ) {
 		$field_groups = acf_get_field_groups( array(
@@ -60,7 +61,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	 *
 	 * @param $value
 	 * @param $post_id
-	 * @param $post_id The ACF object for the field being processed
+	 * @param $widget_field The ACF object for the field being processed.
 	 *
 	 * @return string if set, the user defined field value.
 	 */
