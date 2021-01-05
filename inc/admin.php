@@ -1199,7 +1199,7 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function layout_block_preview() {
 
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-preview' ) ) {
+		if ( empty( $_POST['panelsData'] ) || empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-preview' ) ) {
 			wp_die();
 		}
 
