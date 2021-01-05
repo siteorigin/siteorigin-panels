@@ -154,7 +154,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector, $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
 		if ( $ri === false && $ci === false && $wi === false ) {
