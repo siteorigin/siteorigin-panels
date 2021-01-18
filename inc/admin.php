@@ -198,6 +198,8 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
+		$preview_url = SiteOrigin_Panels::preview_url();
+		$preview_content = $this->generate_panels_preview( $post->ID, $panels_data );
 		include plugin_dir_path( __FILE__ ) . '../tpl/metabox-panels.php';
 	}
 
@@ -299,6 +301,7 @@ class SiteOrigin_Panels_Admin {
 					'jquery-ui-resizable',
 					'jquery-ui-sortable',
 					'jquery-ui-draggable',
+					'wp-color-picker',
 					'underscore',
 					'backbone',
 					'plupload',
@@ -1047,6 +1050,17 @@ class SiteOrigin_Panels_Admin {
 		return $is_js_widget;
 	}
 
+	function generate_panels_preview( $post_id, $panels_data ) {
+		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
+		$return = SiteOrigin_Panels::renderer()->render( intval( $post_id ), false, $panels_data );
+		if ( function_exists( 'wp_targeted_link_rel' ) ) {
+			$return = wp_targeted_link_rel( $return );
+		}
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
+
+		return $return;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  ADMIN AJAX ACTIONS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1128,12 +1142,7 @@ class SiteOrigin_Panels_Admin {
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
-		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
-		$return['preview'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
-		if ( function_exists( 'wp_targeted_link_rel' ) ) {
-			$return['preview'] = wp_targeted_link_rel( $return['preview'] );
-		}
-		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
+		$return['preview'] = $this->generate_panels_preview( intval( $_POST['post_id'] ), $panels_data );
 
 		echo json_encode( $return );
 

@@ -135,15 +135,17 @@ class SiteOrigin_Panels_Settings {
 		$defaults['instant-open-widgets'] = false;
 
 		// The layout fields
-		$defaults['responsive']             = true;
-		$defaults['tablet-layout']          = false;
-		$defaults['legacy-layout']          = 'auto';
-		$defaults['tablet-width']           = 1024;
-		$defaults['mobile-width']           = 780;
-		$defaults['margin-bottom']          = 30;
-		$defaults['margin-bottom-last-row'] = false;
-		$defaults['margin-sides']           = 30;
-		$defaults['full-width-container']   = 'body';
+		$defaults['responsive']               = true;
+		$defaults['tablet-layout']            = false;
+		$defaults['legacy-layout']            = 'auto';
+		$defaults['tablet-width']             = 1024;
+		$defaults['mobile-width']             = 780;
+		$defaults['margin-bottom']            = 30;
+		$defaults['row-mobile-margin-bottom'] = '';
+		$defaults['margin-bottom-last-row']   = false;
+		$defaults['margin-sides']             = 30;
+		$defaults['full-width-container']     = 'body';
+		$defaults['output-css-header']        = 'auto';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -424,6 +426,13 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Default margin below rows and widgets.', 'siteorigin-panels' ),
 		);
 
+		$fields['layout']['fields']['row-mobile-margin-bottom'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Row Mobile Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'The default margin below rows on mobile.', 'siteorigin-panels' ),
+		);
+
 		$fields['layout']['fields']['margin-bottom-last-row'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Last Row With Margin', 'siteorigin-panels' ),
@@ -443,6 +452,16 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Full Width Container', 'siteorigin-panels' ),
 			'description' => __( 'The container used for the full width layout.', 'siteorigin-panels' ),
 			'keywords'    => 'full width, container, stretch',
+		);
+
+		$fields['layout']['fields']['output-css-header'] = array(
+			'type'        => 'select',
+			'options'     => array(
+				'auto'   => __( 'Automatic', 'siteorigin-panels' ),
+				'header' => __( 'Header', 'siteorigin-panels' ),
+				'footer' => __( 'Footer', 'siteorigin-panels' ),
+			),
+			'label'       => __( 'Page Builder Layout CSS Output Location', 'siteorigin-panels' ),
 		);
 
 		// The content fields

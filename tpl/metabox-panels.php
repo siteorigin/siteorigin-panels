@@ -7,7 +7,8 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 
 <div id="siteorigin-panels-metabox"
 	data-builder-type="<?php echo esc_attr( $builder_type ) ?>"
-	data-preview-url="<?php echo SiteOrigin_Panels::preview_url() ?>"
+	data-preview-url="<?php echo $preview_url; ?>"
+	data-preview-markup="<?php echo esc_attr( json_encode( $preview_content ) ); ?>"
 	data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
 	<?php if( !empty( $_GET['so_live_editor'] ) ) echo 'data-live-editor="1"' ?>
 	>

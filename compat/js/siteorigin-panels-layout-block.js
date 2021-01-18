@@ -48,29 +48,10 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var _lodash = lodash,
-    isEqual = _lodash.isEqual,
-    debounce = _lodash.debounce,
-    isEmpty = _lodash.isEmpty,
-    isFunction = _lodash.isFunction;
-var registerBlockType = wp.blocks.registerBlockType;
-var _wp$element = wp.element,
-    Component = _wp$element.Component,
-    Fragment = _wp$element.Fragment,
-    RawHTML = _wp$element.RawHTML,
-    createRef = _wp$element.createRef;
-var BlockControls = wp.editor.BlockControls;
-var _wp$components = wp.components,
-    Toolbar = _wp$components.Toolbar,
-    IconButton = _wp$components.IconButton,
-    Spinner = _wp$components.Spinner;
-var _window = window,
-    soPanelsBlockEditorAdmin = _window.soPanelsBlockEditorAdmin;
-
 var SiteOriginPanelsLayoutBlock =
 /*#__PURE__*/
-function (_Component) {
-  _inherits(SiteOriginPanelsLayoutBlock, _Component);
+function (_wp$element$Component) {
+  _inherits(SiteOriginPanelsLayoutBlock, _wp$element$Component);
 
   var _super = _createSuper(SiteOriginPanelsLayoutBlock);
 
@@ -80,16 +61,16 @@ function (_Component) {
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
     _this = _super.call(this, props);
-    var editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit' || isEmpty(props.panelsData);
+    var editMode = window.soPanelsBlockEditorAdmin.defaultMode === 'edit' || lodash.isEmpty(props.panelsData);
     _this.state = {
       editing: editMode,
       loadingPreview: !editMode,
-      previewHtml: ''
+      previewHtml: '',
+      previewInitialized: !editMode
     };
-    _this.panelsContainer = createRef();
-    _this.previewContainer = createRef();
+    _this.panelsContainer = wp.element.createRef();
+    _this.previewContainer = wp.element.createRef();
     _this.panelsInitialized = false;
-    _this.previewInitialized = false;
     return _this;
   }
 
@@ -102,7 +83,7 @@ function (_Component) {
         this.setupPanels();
       } else if (!this.state.editing && !this.previewInitialized) {
         this.fetchPreview(this.props);
-        this.fetchPreview = debounce(this.fetchPreview, 500);
+        this.fetchPreview = lodash.debounce(this.fetchPreview, 500);
       }
     }
   }, {
@@ -117,14 +98,16 @@ function (_Component) {
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      // let propsChanged = !isEqual( prevProps.panelsData, this.props.panelsData );
       if (this.state.editing && !this.panelsInitialized) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         this.fetchPreview(this.props);
-      } else if (!this.previewInitialized && this.previewContainer.current) {
+        this.fetchPreview = lodash.debounce(this.fetchPreview, 500);
+      } else if (!this.state.previewInitialized) {
         jQuery(document).trigger('panels_setup_preview');
-        this.previewInitialized = true;
+        this.setState({
+          previewInitialized: true
+        });
       }
     }
   }, {
@@ -136,8 +119,8 @@ function (_Component) {
       var config = {
         editorType: 'standalone',
         loadLiveEditor: false,
-        postId: soPanelsBlockEditorAdmin.postId,
-        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor
+        postId: window.soPanelsBlockEditorAdmin.postId,
+        liveEditorPreview: window.soPanelsBlockEditorAdmin.liveEditor
       };
       var builderModel = new panels.model.builder();
       this.builderView = new panels.view.builder({
@@ -148,14 +131,14 @@ function (_Component) {
       var panelsData = JSON.parse(JSON.stringify(jQuery.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
 
       var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
-        if (isFunction(_this2.props.onRowOrWidgetMouseDown)) {
+        if (lodash.isFunction(_this2.props.onRowOrWidgetMouseDown)) {
           _this2.props.onRowOrWidgetMouseDown();
         }
 
         var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
           jQuery(document).off('mouseup', rowOrWidgetMouseUp);
 
-          if (isFunction(_this2.props.onRowOrWidgetMouseUp)) {
+          if (lodash.isFunction(_this2.props.onRowOrWidgetMouseUp)) {
             _this2.props.onRowOrWidgetMouseUp();
           }
         };
@@ -184,10 +167,10 @@ function (_Component) {
       this.builderView.on('content_change', function () {
         var newPanelsData = _this2.builderView.getData();
 
-        _this2.panelsDataChanged = !isEqual(panelsData, newPanelsData);
+        _this2.panelsDataChanged = !lodash.isEqual(panelsData, newPanelsData);
 
         if (_this2.panelsDataChanged) {
-          if (_this2.props.onContentChange && isFunction(_this2.props.onContentChange)) {
+          if (_this2.props.onContentChange && lodash.isFunction(_this2.props.onContentChange)) {
             _this2.props.onContentChange(newPanelsData);
           }
 
@@ -199,11 +182,11 @@ function (_Component) {
       });
       jQuery(document).trigger('panels_setup', this.builderView);
 
-      if ( typeof window.soPanelsBuilderView == 'undefined' ) {
+      if (typeof window.soPanelsBuilderView == 'undefined') {
         window.soPanelsBuilderView = [];
       }
-      window.soPanelsBuilderView.push( this.builderView );
 
+      window.soPanelsBuilderView.push(this.builderView);
       this.panelsInitialized = true;
     }
   }, {
@@ -215,9 +198,11 @@ function (_Component) {
         return;
       }
 
-      this.previewInitialized = false;
+      this.setState({
+        previewInitialized: false
+      });
       var fetchRequest = this.currentFetchRequest = jQuery.post({
-        url: soPanelsBlockEditorAdmin.previewUrl,
+        url: window.soPanelsBlockEditorAdmin.previewUrl,
         data: {
           action: 'so_panels_layout_block_preview',
           panelsData: JSON.stringify(props.panelsData)
@@ -226,7 +211,8 @@ function (_Component) {
         if (_this3.isStillMounted && fetchRequest === _this3.currentFetchRequest && preview) {
           _this3.setState({
             previewHtml: preview,
-            loadingPreview: false
+            loadingPreview: false,
+            previewInitialized: false
           });
         }
       });
@@ -250,13 +236,17 @@ function (_Component) {
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
           _this4.setState({
-            editing: false
+            editing: false,
+            loadingPreview: !_this4.state.previewHtml,
+            previewInitialized: false
           });
         }
       };
 
       if (this.state.editing) {
-        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
+        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(wp.components.ToolbarButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
@@ -268,7 +258,9 @@ function (_Component) {
         }));
       } else {
         var loadingPreview = this.state.loadingPreview;
-        return React.createElement(Fragment, null, React.createElement(BlockControls, null, React.createElement(Toolbar, null, React.createElement(IconButton, {
+        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+        }, React.createElement(wp.components.ToolbarButton, {
           icon: "edit",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
@@ -278,21 +270,21 @@ function (_Component) {
           className: "so-panels-block-layout-preview-container"
         }, loadingPreview ? React.createElement("div", {
           className: "so-panels-spinner-container"
-        }, React.createElement("span", null, React.createElement(Spinner, null))) : React.createElement("div", {
+        }, React.createElement("span", null, React.createElement(wp.components.Spinner, null))) : React.createElement("div", {
           className: "so-panels-raw-html-container",
           ref: this.previewContainer
-        }, React.createElement(RawHTML, null, this.state.previewHtml))));
+        }, React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
       }
     }
   }]);
 
   return SiteOriginPanelsLayoutBlock;
-}(Component);
+}(wp.element.Component);
 
 var hasLayoutCategory = wp.blocks.getCategories().some(function (category) {
   return category.slug === 'layout';
 });
-registerBlockType('siteorigin-panels/layout-block', {
+wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
   title: wp.i18n.__('SiteOrigin Layout', 'siteorigin-panels'),
   description: wp.i18n.__("Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels'),
   icon: function icon() {
@@ -319,7 +311,7 @@ registerBlockType('siteorigin-panels/layout-block', {
         toggleSelection = _ref.toggleSelection;
 
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
-      if (!_.isEmpty(newPanelsData.widgets)) {
+      if (!lodash.isEmpty(newPanelsData.widgets)) {
         // Send panelsData to server for sanitization.
         wp.data.dispatch('core/editor').lockPostSaving();
         jQuery.post(panelsOptions.ajaxurl, {
@@ -360,12 +352,12 @@ registerBlockType('siteorigin-panels/layout-block', {
   },
   save: function save(_ref2) {
     var attributes = _ref2.attributes;
-    return attributes.hasOwnProperty('contentPreview') ? React.createElement(RawHTML, null, attributes.contentPreview) : null;
+    return attributes.hasOwnProperty('contentPreview') ? React.createElement(wp.element.RawHTML, null, attributes.contentPreview) : null;
   }
 });
 
 (function (jQuery) {
-  if (soPanelsBlockEditorAdmin.showAddButton) {
+  if (window.soPanelsBlockEditorAdmin.showAddButton) {
     jQuery(function () {
       setTimeout(function () {
         var editorDispatch = wp.data.dispatch('core/editor');
@@ -404,9 +396,9 @@ registerBlockType('siteorigin-panels/layout-block', {
       }, 100);
     });
   }
-})(jQuery);
+})(jQuery); // Detect preview mode changes, and trigger resize.
 
-// Detect preview mode changes, and trigger resize.
+
 jQuery(document).on('click', '.block-editor-post-preview__button-resize', function (e) {
   if (!jQuery(this).hasClass('has-icon')) {
     jQuery(window).trigger('resize');

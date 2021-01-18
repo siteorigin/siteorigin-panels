@@ -1,23 +1,16 @@
-const { isEqual, debounce, isEmpty, isFunction } = lodash;
-const { registerBlockType } = wp.blocks;
-const { Component, Fragment, RawHTML, createRef } = wp.element;
-const { BlockControls } = wp.editor;
-const { Toolbar, IconButton, Spinner } = wp.components;
-const { soPanelsBlockEditorAdmin } = window;
-
-class SiteOriginPanelsLayoutBlock extends Component {
+class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	constructor( props ) {
 		super( props );
-		const editMode = soPanelsBlockEditorAdmin.defaultMode === 'edit' || isEmpty( props.panelsData );
+		const editMode = window.soPanelsBlockEditorAdmin.defaultMode === 'edit' || lodash.isEmpty( props.panelsData );
 		this.state = {
 			editing: editMode,
 			loadingPreview: ! editMode,
-			previewHtml: ''
+			previewHtml: '',
+			previewInitialized: ! editMode,
 		};
-		this.panelsContainer = createRef();
-		this.previewContainer = createRef();
+		this.panelsContainer = wp.element.createRef();
+		this.previewContainer = wp.element.createRef();
 		this.panelsInitialized = false;
-		this.previewInitialized = false;
 	}
 	
 	componentDidMount() {
@@ -27,7 +20,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 			this.setupPanels();
 		} else if ( ! this.state.editing && ! this.previewInitialized ) {
 			this.fetchPreview( this.props );
-			this.fetchPreview = debounce( this.fetchPreview, 500 );
+			this.fetchPreview = lodash.debounce( this.fetchPreview, 500 );
 		}
 	}
 	
@@ -39,14 +32,16 @@ class SiteOriginPanelsLayoutBlock extends Component {
 	}
 	
 	componentDidUpdate( prevProps ) {
-		// let propsChanged = !isEqual( prevProps.panelsData, this.props.panelsData );
 		if ( this.state.editing && ! this.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
 			this.fetchPreview( this.props );
-		} else if ( ! this.previewInitialized && this.previewContainer.current){
+			this.fetchPreview = lodash.debounce( this.fetchPreview, 500 );
+		} else if ( ! this.state.previewInitialized ) {
 			jQuery( document ).trigger( 'panels_setup_preview' );
-			this.previewInitialized = true;
+			this.setState( {
+				previewInitialized: true,
+			} );
 		}
 	}
 	
@@ -56,8 +51,8 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		var config = {
 			editorType: 'standalone',
 	        loadLiveEditor: false,
-	        postId: soPanelsBlockEditorAdmin.postId,
-	        liveEditorPreview: soPanelsBlockEditorAdmin.liveEditor,
+	        postId: window.soPanelsBlockEditorAdmin.postId,
+	        liveEditorPreview: window.soPanelsBlockEditorAdmin.liveEditor,
 		};
 		
 		var builderModel = new panels.model.builder();
@@ -72,12 +67,12 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		// Disable block selection while dragging rows or widgets.
 		let rowOrWidgetMouseDown = () => {
-			if ( isFunction( this.props.onRowOrWidgetMouseDown ) ) {
+			if ( lodash.isFunction( this.props.onRowOrWidgetMouseDown ) ) {
 				this.props.onRowOrWidgetMouseDown();
 			}
 			let rowOrWidgetMouseUp = () => {
 				jQuery( document ).off( 'mouseup', rowOrWidgetMouseUp );
-				if ( isFunction( this.props.onRowOrWidgetMouseUp ) ) {
+				if ( lodash.isFunction( this.props.onRowOrWidgetMouseUp ) ) {
 					this.props.onRowOrWidgetMouseUp();
 				}
 			};
@@ -107,9 +102,9 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		this.builderView.on( 'content_change', () => {
 			const newPanelsData = this.builderView.getData();
-			this.panelsDataChanged = !isEqual( panelsData, newPanelsData );
+			this.panelsDataChanged = !lodash.isEqual( panelsData, newPanelsData );
 			if ( this.panelsDataChanged ) {
-				if ( this.props.onContentChange && isFunction( this.props.onContentChange ) ) {
+				if ( this.props.onContentChange && lodash.isFunction( this.props.onContentChange ) ) {
 					this.props.onContentChange( newPanelsData );
 				}
 				this.setState( { loadingPreview: true, previewHtml: '' } );
@@ -121,8 +116,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		if ( typeof window.soPanelsBuilderView == 'undefined' ) {
 			window.soPanelsBuilderView = [];
 		}
-			window.soPanelsBuilderView.push( this.builderView );
-		}
+		window.soPanelsBuilderView.push( this.builderView );
 		
 		this.panelsInitialized = true;
 	}
@@ -131,11 +125,13 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		if ( ! this.isStillMounted ) {
 			return;
 		}
-		
-		this.previewInitialized = false;
+
+		this.setState( {
+			previewInitialized: false,
+		} );
 		
 		const fetchRequest = this.currentFetchRequest = jQuery.post( {
-			url: soPanelsBlockEditorAdmin.previewUrl,
+			url: window.soPanelsBlockEditorAdmin.previewUrl,
 			data: {
 				action: 'so_panels_layout_block_preview',
 				panelsData: JSON.stringify( props.panelsData ),
@@ -146,6 +142,7 @@ class SiteOriginPanelsLayoutBlock extends Component {
 				this.setState( {
 					previewHtml: preview,
 					loadingPreview: false,
+            		previewInitialized: false,
 				} );
 			}
 		} );
@@ -162,56 +159,60 @@ class SiteOriginPanelsLayoutBlock extends Component {
 		
 		let switchToPreview = () => {
 			if ( panelsData ) {
-				this.setState( { editing: false } );
+				this.setState({
+					editing: false,
+					loadingPreview: ! this.state.previewHtml,
+					previewInitialized: false,
+				});
 			}
 		}
 		
 		if ( this.state.editing ) {
 			return (
-				<Fragment>
-					<BlockControls>
-						<Toolbar>
-							<IconButton
+				<wp.element.Fragment>
+					<wp.blockEditor.BlockControls>
+						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<wp.components.ToolbarButton
 								icon="visibility"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
 								onClick={ switchToPreview }
 							/>
-						</Toolbar>
-					</BlockControls>
+						</wp.components.Toolbar>
+					</wp.blockEditor.BlockControls>
 					<div
 						key="layout-block"
 						className="siteorigin-panels-layout-block-container"
 						ref={this.panelsContainer}
 					/>
-				</Fragment>
+				</wp.element.Fragment>
 			);
 		} else {
 			const loadingPreview = this.state.loadingPreview;
 			return (
-				<Fragment>
-					<BlockControls>
-						<Toolbar>
-							<IconButton
+				<wp.element.Fragment>
+					<wp.blockEditor.BlockControls>
+						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+							<wp.components.ToolbarButton
 								icon="edit"
 								className="components-icon-button components-toolbar__control"
 								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
 								onClick={ switchToEditing }
 							/>
-						</Toolbar>
-					</BlockControls>
+						</wp.components.Toolbar>
+					</wp.blockEditor.BlockControls>
 					<div key="preview" className="so-panels-block-layout-preview-container">
 						{ loadingPreview ? (
 							<div className="so-panels-spinner-container">
-								<span><Spinner/></span>
+								<span><wp.components.Spinner/></span>
 							</div>
 						) : (
 							<div className="so-panels-raw-html-container" ref={this.previewContainer}>
-								<RawHTML>{this.state.previewHtml}</RawHTML>
+								<wp.element.RawHTML>{this.state.previewHtml}</wp.element.RawHTML>
 							</div>
 						) }
 					</div>
-				</Fragment>
+				</wp.element.Fragment>
 			);
 		}
 	}
@@ -221,7 +222,7 @@ var hasLayoutCategory = wp.blocks.getCategories().some( function( category ) {
 	return category.slug === 'layout';
 } );
 
-registerBlockType( 'siteorigin-panels/layout-block', {
+wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 	title: wp.i18n.__( 'SiteOrigin Layout', 'siteorigin-panels' ),
 	
 	description: wp.i18n.__( "Build a layout using SiteOrigin's Page Builder.", 'siteorigin-panels' ),
@@ -251,7 +252,7 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 		
 		let onLayoutBlockContentChange = ( newPanelsData ) => {
 			
-			if ( !_.isEmpty( newPanelsData.widgets ) ) {
+			if ( ! lodash.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
 				wp.data.dispatch( 'core/editor' ).lockPostSaving();
 				jQuery.post(
@@ -297,13 +298,13 @@ registerBlockType( 'siteorigin-panels/layout-block', {
 	
 	save( { attributes } ) {
 		return attributes.hasOwnProperty('contentPreview') ?
-			<RawHTML>{attributes.contentPreview}</RawHTML> :
+			<wp.element.RawHTML>{attributes.contentPreview}</wp.element.RawHTML> :
 			null;
 	}
 } );
 
 ( ( jQuery ) => {
-	if ( soPanelsBlockEditorAdmin.showAddButton ) {
+	if ( window.soPanelsBlockEditorAdmin.showAddButton ) {
 		jQuery( () => {
 			setTimeout( () => {
 				const editorDispatch = wp.data.dispatch( 'core/editor' );

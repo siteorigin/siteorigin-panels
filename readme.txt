@@ -1,14 +1,14 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, widget, widgets, builder, page, admin, gallery, content, cms, pages, post, css, layout, grid
 Requires at least: 4.7
-Tested up to: 5.5
+Tested up to: 5.6
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Donate link: https://siteorigin.com/downloads/premium/
-Contributors: gpriday, braam-genis
+Contributors: gpriday, braam-genis, alexgso
 
 Build responsive page layouts using the widgets you know and love using this simple drag and drop page builder.
 
@@ -96,6 +96,47 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
 == Changelog ==
+
+= 2.11.8 - 09 December 2020 =
+* Developer: jQuery updates for WordPress 5.6.
+
+= 2.11.7 - 07 December 2020 =
+* SEO: Generated `preview_url` before `preview_content`. Resolves Live Editor preview issue when a post loop is present in the page.
+
+= 2.11.6 - 01 December 2020 =
+* New: `Page Builder Layout CSS Output Location` setting that controls where PB outputs its CSS. Located at `Settings > Page Builder > Layout`.
+* SEO: Improved content analysis process for slower servers and connections.
+* SEO: Excluded `<iframe>, <script>, <link>, <style>` from content analysis due to word count inflation.
+* Developer: Added `wp-color-picker` as an editor dependency.
+* Developer: Introduced a new Ajax Response filter `siteorigin_panels_layouts_result`.
+* Developer: Standardized SO Layout Block variables to avoid conflicts with other blocks.
+
+= 2.11.5 - 30 September 2020 =
+* Updated build scripts.
+
+= 2.11.4 - 28 September 2020 =
+* Block Editor: Fixed SiteOrigin Widgets Bundle block preview.
+* Yoast SEO: Fixed word count in the Classic Editor when Page Builder is not in use.
+* Yoast SEO: Resolved a console error in the Block Editor.
+* Block Editor: Enhanced the Layout Block to allow for Post Loop widget previews.
+* Layout Export: Resolved JSON files exported without contents.
+
+= 2.11.3 - 14 September 2020 =
+* Block Editor: Added SEO support for multiple Layout Block instances.
+* Yoast SEO Sitemap: Added images added using Page Builder.
+* Prevented potential `Are you sure you want to navigate away?` notice.
+* Post Loop: Resolved `Undefined index` notice when used outside of Page Builder.
+* Android Chrome: Improved edit widget touch detection.
+* Yoast SEO: Resolved version `14.6` integration issue.
+* Block Editor: Used new categories for the Layout Block for WP 5.5+.
+* Block Editor: Resolved potential Layout Block data validation issue by running `wp_targeted_link_rel` on the generated preview content.
+* Block Editor: Added preview support for the Layout Block.
+* Block Editor: Updated translation functions to avoid potential conflicts.
+* Block Editor: Added the page name and block number to Layout Block JSON export files.
+* Block Editor: Improved SEO plugin support.
+* Added a global `Row Mobile Bottom Margin` setting at `Settings > Page Builder > Layout`.
+* Ensured Yoast SEO is ready before running compatibility functionality.
+* Global Settings: Resolved a jQuery Migrate Helper warning.
 
 = 2.11.2 - 12 August 2020 =
 * Updated build scripts.

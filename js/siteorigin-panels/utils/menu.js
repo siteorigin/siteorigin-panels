@@ -99,7 +99,7 @@ module.exports = Backbone.View.extend( {
 			left: position.left + 1,
 			top: position.top + 1
 		} ).show();
-		this.$( '.so-search-wrapper input' ).focus();
+		this.$( '.so-search-wrapper input' ).trigger( 'focus' );
 	},
 
 	closeMenu: function () {
@@ -166,13 +166,13 @@ module.exports = Backbone.View.extend( {
 		} ) ).attr( 'id', 'panels-menu-section-' + id );
 		this.$el.append( section );
 
-		section.find( '.so-item:not(.so-confirm)' ).click( function () {
+		section.find( '.so-item:not(.so-confirm)' ).on( 'click', function() {
 			var $$ = $( this );
 			callback( $$.data( 'key' ) );
 			thisView.closeMenu();
 		} );
 
-		section.find( '.so-item.so-confirm' ).click( function () {
+		section.find( '.so-item.so-confirm' ).on( 'click', function() {
 			var $$ = $( this );
 
 			if ( $$.hasClass( 'so-confirming' ) ) {

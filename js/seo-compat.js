@@ -17,7 +17,12 @@ jQuery(function($){
 	};
 
 	SiteOriginSeoCompat.prototype.contentModification = function( data ) {
-		if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
+
+		var isBlockEditorPanelsEnabled =  $( '.block-editor-page' ).length && typeof window.soPanelsBuilderView !== 'undefined';
+		var isClassicEditorPanelsEnabled = $( '#so-panels-panels.attached-to-editor' ).is( ':visible' );
+
+		// Check if the editor has Page Builder Enabled before proceeding.
+		if ( isClassicEditorPanelsEnabled || isBlockEditorPanelsEnabled ) {
 
 			var whitelist = [
 				'p', 'a', 'img', 'caption', 'br',
@@ -37,8 +42,8 @@ jQuery(function($){
 					return data;
 				}
 
-				// Remove style tags created by Widgets Bundle
-				$data.find( 'style' ).remove();
+				// Remove elements that have no content analysis value.
+				$data.find( 'iframe, script, style, link' ).remove();
 
 				$data.find( "*") .not( whitelist ).each( function() {
 					var content = $( this ).contents();
@@ -62,5 +67,14 @@ jQuery(function($){
 		return data;
 	};
 
-	new SiteOriginSeoCompat();
+	if ( typeof rankMathEditor !== 'undefined' ) {
+		new SiteOriginSeoCompat();
+	} else {
+		$( window ).on(
+			'YoastSEO:ready',
+			function () {
+				new SiteOriginSeoCompat();
+			}
+		);
+	}
 });

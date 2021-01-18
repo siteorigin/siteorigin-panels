@@ -185,7 +185,7 @@ module.exports = Backbone.Model.extend( {
 				values[titleFields[i]] !== 'on' &&
 				values[titleFields[i]] !== 'true' &&
 				values[titleFields[i]] !== 'false' &&
-				titleFields[i][0] !== '_' && ! jQuery.isNumeric( values[titleFields[i]] )
+				titleFields[i][0] !== '_' && ! _.isFinite( values[titleFields[i]] )
 			) {
 				var title = values[titleFields[i]];
 				title = title.replace( /<\/?[^>]+(>|$)/g, "" );
