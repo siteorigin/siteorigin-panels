@@ -151,6 +151,17 @@ jQuery( function($){
             $('#panels-settings-search .results').fadeOut('fast');
         } );
 
+    var handleParallaxVisibility = function() {
+        if ( $( 'select[name="panels_setting[parallax-type]"]' ).val() == 'new' ) {
+            $( 'input[name="panels_setting[parallax-motion]"]' ).parent().parent().hide();
+            $( 'input[name="panels_setting[parallax-delay]"], input[name="panels_setting[parallax-scale]"]' ).parent().parent().show();
+        } else {
+            $( 'input[name="panels_setting[parallax-delay]"], input[name="panels_setting[parallax-scale]"]' ).parent().parent().hide();
+            $( 'input[name="panels_setting[parallax-motion]"]' ).parent().parent().show();
+        }
+    }
+    handleParallaxVisibility();
+    $( 'select[name="panels_setting[parallax-type]"]' ).on( 'change', handleParallaxVisibility );
 } );
 
 // Fitvids

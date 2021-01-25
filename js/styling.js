@@ -60,6 +60,7 @@ jQuery( function ( $ ) {
 
 		if (
 			typeof parallaxStyles != 'undefined' &&
+			typeof simpleParallax != 'undefined' &&
 			(
 				! parallaxStyles['disable-parallax-mobile'] ||
 				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches

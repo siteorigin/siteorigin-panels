@@ -41,10 +41,12 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
 
-		// Parallax
-		add_filter( 'siteorigin_panels_inside_row_before', array( $this, 'add_parallax' ), 10, 2 );
-		add_filter( 'siteorigin_panels_inside_cell_before', array( $this, 'add_parallax' ), 10, 2 );
-		add_filter( 'siteorigin_panels_inside_widget_before', array( $this, 'add_parallax' ), 10, 2 );
+		// New Parallax.
+		if ( siteorigin_panels_setting( 'parallax-type' ) == 'new' ) {
+			add_filter( 'siteorigin_panels_inside_row_before', array( $this, 'add_parallax' ), 10, 2 );
+			add_filter( 'siteorigin_panels_inside_cell_before', array( $this, 'add_parallax' ), 10, 2 );
+			add_filter( 'siteorigin_panels_inside_widget_before', array( $this, 'add_parallax' ), 10, 2 );
+		}
 	}
 
 	public static function single() {
@@ -62,18 +64,33 @@ class SiteOrigin_Panels_Styles {
 		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) ),
 		) );
-		wp_register_script(
-			'simpleParallax',
-			siteorigin_panels_url( 'js/lib/simpleparallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-			array( 'siteorigin-panels-front-styles' ),
-			'5.5.1'
-		);
-		wp_localize_script( 'simpleParallax', 'parallaxStyles', array(
-			'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
-			'disable-parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
-			'delay' => ! empty( siteorigin_panels_setting( 'parallax-delay' ) ) ? siteorigin_panels_setting( 'parallax-delay' ) : 0.4,
-			'scale' => ! empty( siteorigin_panels_setting( 'parallax-scale' ) ) ? siteorigin_panels_setting( 'parallax-scale' ) : 1.1,
-		) );
+
+		if ( siteorigin_panels_setting( 'parallax-type' ) == 'new' ) {
+			wp_register_script(
+				'simpleParallax',
+				siteorigin_panels_url( 'js/lib/simpleparallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'siteorigin-panels-front-styles' ),
+				'5.5.1'
+			);
+
+			wp_localize_script( 'simpleParallax', 'parallaxStyles', array(
+				'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
+				'disable-parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
+				'delay' => ! empty( siteorigin_panels_setting( 'parallax-delay' ) ) ? siteorigin_panels_setting( 'parallax-delay' ) : 0.4,
+				'scale' => ! empty( siteorigin_panels_setting( 'parallax-scale' ) ) ? siteorigin_panels_setting( 'parallax-scale' ) : 1.1,
+			) );
+		} else {
+			wp_register_script(
+				'siteorigin-parallax',
+				siteorigin_panels_url( 'js/siteorigin-legacy-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION
+			);
+			wp_localize_script( 'siteorigin-parallax', 'parallaxStyles', array(
+				'parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
+				'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
+			) );
+		}
 	}
 
 	/**
@@ -380,6 +397,10 @@ class SiteOrigin_Panels_Styles {
 		return $fields;
 	}
 
+	static function is_background_parallax( $type ) {
+		return $type == 'parallax' || $type == 'parallax-original';
+	}
+
 	/**
 	 * Style attributes that apply to rows, cells and widgets
 	 *
@@ -398,16 +419,27 @@ class SiteOrigin_Panels_Styles {
 
 		if (
 			! empty( $style['background_display'] ) &&
-			(
-				$style['background_display'] == 'parallax' ||
-				$style['background_display'] == 'parallax-original'
-			) &&
+			self::is_background_parallax( $style['background_display'] ) &&
 			(
 				! empty( $style['background_image_attachment'] ) ||
 				! empty( $style['background_image_attachment_fallback'] )
 			)
 		) {
-			$attributes['class'][] = 'so-parallax';
+			if ( siteorigin_panels_setting( 'parallax-type' ) == 'legacy' ) {
+				$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
+				if ( ! empty( $url ) ) {
+					wp_enqueue_script( 'siteorigin-parallax' );
+					$parallax_args = array(
+						'backgroundUrl'    => $url[0],
+						'backgroundSize'   => array( $url[1], $url[2] ),
+						'backgroundSizing' => 'scaled',
+						'limitMotion'      => siteorigin_panels_setting( 'parallax-motion' ) ? floatval( siteorigin_panels_setting( 'parallax-motion' ) ) : 'auto',
+					);
+					$attributes['data-siteorigin-parallax'] = json_encode( $parallax_args );
+				}
+			} else {
+				$attributes['class'][] = 'so-parallax';
+			}
 		}
 
 		if ( ! empty( $style['id'] ) ) {
@@ -438,10 +470,7 @@ class SiteOrigin_Panels_Styles {
 	function add_parallax( $output, $context ) {
 		if (
 			! empty( $context['style']['background_display'] ) &&
-			(
-				$context['style']['background_display'] == 'parallax' ||
-				$context['style']['background_display'] == 'parallax-original'
-			)
+			self::is_background_parallax( $context['style']['background_display'] )
 		) {
 			if ( ! empty( $context['style']['background_image_attachment'] ) ) {
 				$url = self::get_attachment_image_src( $context['style']['background_image_attachment'], 'full' )[0];
@@ -475,16 +504,17 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if (
-			! empty( $style['background_display'] ) &&
 			! (
 				! empty( $style['background_image_attachment'] ) &&
 				! empty( $style['background_image_attachment_fallback'] )
 			) &&
+			! empty( $style['background_display'] ) &&
 			(
-				$style['background_display'] != 'parallax' &&
-				$style['background_display'] != 'parallax-original'
+				! self::is_background_parallax( $style['background_display'] ) ||
+				siteorigin_panels_setting( 'parallax-type' ) == 'legacy'
 			)
 		) {
+
 			if ( ! empty( $style['background_image_attachment'] ) ) {
 				$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 			}
@@ -497,6 +527,12 @@ class SiteOrigin_Panels_Styles {
 				$css['background-image'] = 'url(' .( is_array( $url ) ? $url[0] : $url ) . ')';
 
 				switch ( $style['background_display'] ) {
+					case 'parallax':
+					case 'parallax-original':
+						// Only used by Legacy Parallax.
+						$css[ 'background-position' ] = 'center center';
+						$css[ 'background-repeat' ] = 'no-repeat';
+						break;
 					case 'tile':
 						$css[ 'background-repeat' ] = 'repeat';
 						break;
