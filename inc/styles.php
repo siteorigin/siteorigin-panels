@@ -42,7 +42,7 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
 
 		// New Parallax.
-		if ( siteorigin_panels_setting( 'parallax-type' ) == 'new' ) {
+		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
 			add_filter( 'siteorigin_panels_inside_row_before', array( $this, 'add_parallax' ), 10, 2 );
 			add_filter( 'siteorigin_panels_inside_cell_before', array( $this, 'add_parallax' ), 10, 2 );
 			add_filter( 'siteorigin_panels_inside_widget_before', array( $this, 'add_parallax' ), 10, 2 );
@@ -65,7 +65,7 @@ class SiteOrigin_Panels_Styles {
 			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) ),
 		) );
 
-		if ( siteorigin_panels_setting( 'parallax-type' ) == 'new' ) {
+		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
 			wp_register_script(
 				'simpleParallax',
 				siteorigin_panels_url( 'js/lib/simpleparallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),

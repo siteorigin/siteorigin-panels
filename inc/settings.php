@@ -126,7 +126,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-type']          = ! empty( $so_settings ) && ! isset( $so_settings['parallax-delay'] ) ? 'legacy' : 'new';
+		$defaults['parallax-type']          = ! empty( $so_settings ) && ! isset( $so_settings['parallax-delay'] ) ? 'legacy' : 'modern';
 		$defaults['parallax-mobile']        = false;
 		$defaults['parallax-motion']        = ''; // legacy parallax
 		$defaults['parallax-delay']         = 0.4;
@@ -293,7 +293,7 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'select',
 			'label'       => __( 'Parallax Type', 'siteorigin-panels' ),
 			'options'     => array(
-				'new'    => __( 'New', 'siteorigin-panels' ),
+				'modern' => __( 'Modern', 'siteorigin-panels' ),
 				'legacy' => __( 'Legacy', 'siteorigin-panels' ),
 			),
 			'description' => __( 'Which Parallax library will be used. The New is the recommended Parallax Type as it uses modern techniques.', 'siteorigin-panels' ),

@@ -152,7 +152,7 @@ jQuery( function($){
         } );
 
     var handleParallaxVisibility = function() {
-        if ( $( 'select[name="panels_setting[parallax-type]"]' ).val() == 'new' ) {
+        if ( $( 'select[name="panels_setting[parallax-type]"]' ).val() == 'modern' ) {
             $( 'input[name="panels_setting[parallax-motion]"]' ).parent().parent().hide();
             $( 'input[name="panels_setting[parallax-delay]"], input[name="panels_setting[parallax-scale]"]' ).parent().parent().show();
         } else {
