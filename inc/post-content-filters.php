@@ -38,13 +38,13 @@ class SiteOrigin_Panels_Post_Content_Filters {
 			$attributes[ 'data-style' ] = json_encode( $row['style'] );
 		}
 		if( ! empty( $row['ratio'] ) ) {
-			$attributes[ 'data-ratio' ] = floatval( $row['ratio'] );
+			$attributes[ 'data-ratio' ] = (float) $row['ratio'];
 		}
 		if( ! empty( $row['ratio_direction'] ) ) {
 			$attributes[ 'data-ratio-direction' ] = $row['ratio_direction'];
 		}
 		if( ! empty( $row['color_label'] ) ) {
-			$attributes[ 'data-color-label' ] = intval( $row['color_label'] );
+			$attributes[ 'data-color-label' ] = (int) $row['color_label'];
 		}
 		if( ! empty( $row['label'] ) ) {
 			$attributes[ 'data-label' ] = $row['label'];

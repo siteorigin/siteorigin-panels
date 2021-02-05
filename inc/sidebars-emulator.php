@@ -149,10 +149,9 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 */
 	public function generate_sidebar_widget_ids( $widgets, $post_id, $start = 1 ) {
 		foreach ( $widgets as $i => &$widget_instance ) {
-			$id_val = $post_id . strval( ( 10000 * $start ) + intval( $i ) );
+			$id_val = $post_id . ( (string) ( 10000 * $start ) + (int) $i );
 			$widget_class = $widget_instance['panels_info']['class'];
-			
-			
+
 			if( $widget_instance['panels_info']['class'] === 'SiteOrigin_Panels_Widgets_Layout' ) {
 				if ( ! empty( $widget_instance['panels_data']['widgets'] ) ) {
 					// Recursively set widget ids in layout widgets.

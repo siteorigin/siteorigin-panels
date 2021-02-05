@@ -235,11 +235,11 @@ class SiteOrigin_Panels_Css_Builder {
 			}
 
 			if ( $max_res === '' && $min_res > 0 ) {
-				$css_text .= '@media (min-width:' . intval( $min_res ) . 'px) {';
+				$css_text .= '@media (min-width:' . (int) $min_res . 'px) {';
 			} elseif ( $max_res < 1920 ) {
-				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
+				$css_text .= '@media (max-width:' . (int) $max_res . 'px)';
 				if ( ! empty( $min_res ) ) {
-					$css_text .= ' and (min-width:' . intval( $min_res ) . 'px) ';
+					$css_text .= ' and (min-width:' . (int) $min_res . 'px) ';
 				}
 				$css_text .= '{ ';
 			}

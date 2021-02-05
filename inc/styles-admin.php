@@ -47,7 +47,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				break;
 
 			case 'cell':
-				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
+				$cell_number = isset( $args['index'] ) ? ' ' . ( (int) $args['index'] + 1 ) : '';
 				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
 				break;
 
@@ -248,7 +248,7 @@ class SiteOrigin_Panels_Styles_Admin {
 						<?php _e( 'Select Image', 'siteorigin-panels' ) ?>
 					</div>
 					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-					       value="<?php echo intval( $current ) ?>"/>
+					       value="<?php echo (int) $current; ?>"/>
 				</div>
 				<a href="#" class="remove-image <?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				

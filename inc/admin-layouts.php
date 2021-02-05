@@ -189,7 +189,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		$type   = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory-siteorigin';
 		$search = ! empty( $_REQUEST['search'] ) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
-		$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
+		$page_num = ! empty( $_REQUEST['page'] ) ? (int) $_REQUEST['page'] : 1;
 		
 		$return = array(
 			'title' => '',
@@ -284,7 +284,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 					" . ( ! empty( $search ) ? 'AND posts.post_title LIKE "%' . esc_sql( $search ) . '%"' : '' ) . "
 					AND ( posts.post_status = 'publish' OR posts.post_status = 'draft' " . $include_private . ")
 				ORDER BY post_date DESC
-				LIMIT 16 OFFSET " . intval( ( $page_num - 1 ) * 16 ) );
+				LIMIT 16 OFFSET " . (int) ( $page_num - 1 ) * 16 );
 			$total_posts = $wpdb->get_var( "SELECT FOUND_ROWS();" );
 			
 			foreach ( $results as $result ) {

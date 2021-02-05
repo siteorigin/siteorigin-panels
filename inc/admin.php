@@ -262,7 +262,7 @@ class SiteOrigin_Panels_Admin {
 				$post->post_content = $post_content;
 				if( siteorigin_panels_setting( 'copy-styles' ) ) {
 					$post->post_content .= "\n\n";
-					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $layout_id ) . '">';
+					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
 					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
@@ -1052,7 +1052,7 @@ class SiteOrigin_Panels_Admin {
 
 	function generate_panels_preview( $post_id, $panels_data ) {
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
-		$return = SiteOrigin_Panels::renderer()->render( intval( $post_id ), false, $panels_data );
+		$return = SiteOrigin_Panels::renderer()->render( (int) $post_id, false, $panels_data );
 		if ( function_exists( 'wp_targeted_link_rel' ) ) {
 			$return = wp_targeted_link_rel( $return );
 		}
@@ -1097,7 +1097,7 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		echo SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		echo SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
@@ -1138,11 +1138,11 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		$return['post_content'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		$return['post_content'] = SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
-		$return['preview'] = $this->generate_panels_preview( intval( $_POST['post_id'] ), $panels_data );
+		$return['preview'] = $this->generate_panels_preview( (int) $_POST['post_id'], $panels_data );
 
 		echo json_encode( $return );
 
