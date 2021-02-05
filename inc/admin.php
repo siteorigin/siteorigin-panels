@@ -73,6 +73,10 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
 
+		if ( class_exists( 'ACF' ) ) {
+			SiteOrigin_Panels_Compat_ACF_Widgets::single();
+		}
+
 		// Block editor specific actions
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -994,6 +998,8 @@ class SiteOrigin_Panels_Admin {
 
 		$the_widget->id     = 'temp';
 		$the_widget->number = $widget_number;
+
+		do_action( 'siteorigin_panels_before_widget_form', $the_widget, $instance );
 
 		ob_start();
 		if ( $this->is_core_js_widget( $the_widget ) ) {
