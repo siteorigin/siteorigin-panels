@@ -75,7 +75,7 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 				) );
 			}
 
-			$margin_half = ( floatval( $gutter_parts[1] ) / 2 ) . $gutter_parts[2];
+			$margin_half = ( (float) $gutter_parts[1] / 2 ) . $gutter_parts[2];
 			$css->add_row_css($post_id, $ri, '', array(
 				'margin-left' => '-' . $margin_half,
 				'margin-right' => '-' . $margin_half,

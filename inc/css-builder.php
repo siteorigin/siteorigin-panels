@@ -154,7 +154,7 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param int $resolution The pixel resolution that this applies to
 	 * @param bool $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
-	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector, $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
 		$selector = array();
 
 		if ( $ri === false && $ci === false && $wi === false ) {
@@ -235,11 +235,11 @@ class SiteOrigin_Panels_Css_Builder {
 			}
 
 			if ( $max_res === '' && $min_res > 0 ) {
-				$css_text .= '@media (min-width:' . intval( $min_res ) . 'px) {';
+				$css_text .= '@media (min-width:' . (int) $min_res . 'px) {';
 			} elseif ( $max_res < 1920 ) {
-				$css_text .= '@media (max-width:' . intval( $max_res ) . 'px)';
+				$css_text .= '@media (max-width:' . (int) $max_res . 'px)';
 				if ( ! empty( $min_res ) ) {
-					$css_text .= ' and (min-width:' . intval( $min_res ) . 'px) ';
+					$css_text .= ' and (min-width:' . (int) $min_res . 'px) ';
 				}
 				$css_text .= '{ ';
 			}

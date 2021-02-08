@@ -170,16 +170,20 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		if ( this.state.editing ) {
 			return (
 				<wp.element.Fragment>
-					<wp.blockEditor.BlockControls>
-						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
-							<wp.components.ToolbarButton
-								icon="visibility"
-								className="components-icon-button components-toolbar__control"
-								label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
-								onClick={ switchToPreview }
-							/>
-						</wp.components.Toolbar>
-					</wp.blockEditor.BlockControls>
+					{ panelsData ? (
+						<wp.blockEditor.BlockControls>
+							<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+								<wp.components.ToolbarButton
+									icon="visibility"
+									className="components-icon-button components-toolbar__control"
+									label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
+									onClick={ switchToPreview }
+								/>
+							</wp.components.Toolbar>
+						</wp.blockEditor.BlockControls>
+					) : (
+						null
+					) }
 					<div
 						key="layout-block"
 						className="siteorigin-panels-layout-block-container"
@@ -275,6 +279,11 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 						wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 					}
 				);
+			} else {
+				setAttributes( {
+					panelsData: null,
+					contentPreview: null,
+				} );
 			}
 		};
 		
