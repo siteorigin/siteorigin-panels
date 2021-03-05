@@ -7,6 +7,8 @@ class SiteOrigin_Panels_Styles_Admin {
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'convert_data' ) );
 		add_filter( 'siteorigin_panels_prebuilt_layout', array( $this, 'convert_data' ) );
+
+		add_filter( 'siteorigin_panels_general_current_styles', array( $this, 'style_migration' ), 10, 4 );
 	}
 
 	public static function single() {
@@ -36,10 +38,23 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
 		$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
-
 		$args = ! empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true ) : array();
+
+		$current = apply_filters(
+			'siteorigin_panels_general_current_styles', 
+			isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array(),
+			$post_id,
+			$type,
+			$args
+		);
+
+		$current = apply_filters(
+			'siteorigin_panels_general_current_styles_' . $type, 
+			$current,
+			$post_id,
+			$args
+		);
 
 		switch ( $type ) {
 			case 'row':
@@ -475,6 +490,23 @@ class SiteOrigin_Panels_Styles_Admin {
 		}
 
 		return $panels_data;
+	}
+
+	/**
+	 * Migrate deprecated styles.
+	 *
+	 * @param $style array The currently selected styles.
+	 * @param $post_id int The id of the current post.
+	 * @param $args array An array containing builder Arguments.
+	 *
+	 * @return array
+	 */
+	function style_migration( $style, $post_id, $type, $args ) {
+		if ( isset( $style['background_display'] ) && $style['background_display'] == 'parallax-original' ) {
+			$style['background_display'] = 'parallax';
+		}
+
+		return $style;
 	}
 
 	/**

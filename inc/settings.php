@@ -116,13 +116,21 @@ class SiteOrigin_Panels_Settings {
 		$defaults['load-on-attach']    = false;
 		$defaults['use-classic']       = true;
 
+		// The Parallax Type default depends on whether a different setting settings is set.
+		// This is done here rather than using `siteorigin_panels_version_changed` as
+		// that hook is triggered after the settings are loaded.
+		$so_settings = get_option( 'siteorigin_panels_settings' );
+
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-motion']        = '';
+		$defaults['parallax-type']          = ! empty( $so_settings ) && ! isset( $so_settings['parallax-delay'] ) ? 'legacy' : 'modern';
 		$defaults['parallax-mobile']        = false;
+		$defaults['parallax-motion']        = ''; // legacy parallax
+		$defaults['parallax-delay']         = 0.4;
+		$defaults['parallax-scale']         = 1.2;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
@@ -280,17 +288,41 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
 			'description' => __( "Display a widget count in the admin lists of posts/pages where you're using Page Builder.", 'siteorigin-panels' ),
 		);
-
-		$fields['general']['fields']['parallax-motion'] = array(
-			'type'        => 'float',
-			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
-			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		
+		$fields['general']['fields']['parallax-type'] = array(
+			'type'        => 'select',
+			'label'       => __( 'Parallax Type', 'siteorigin-panels' ),
+			'options'     => array(
+				'modern' => __( 'Modern', 'siteorigin-panels' ),
+				'legacy' => __( 'Legacy', 'siteorigin-panels' ),
+			),
+			'description' => __( 'Which Parallax library will be used. The New is the recommended Parallax Type as it uses modern techniques.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['parallax-mobile'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
 			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
+		);
+
+		// Legacy Parallax settings.
+		$fields['general']['fields']['parallax-motion'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
+			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		);
+
+		// New Parallax settings.
+		$fields['general']['fields']['parallax-delay'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Delay', 'siteorigin-panels' ),
+			'description' => __( 'The delay before the parallax effect finishes after the user stops scrolling.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-scale'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Scale', 'siteorigin-panels' ),
+			'description' => __( 'How much the image is scaled. The higher the scale is set, the more visible the parallax effect will be. Increasing the scale will result in a loss of image quality.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(
