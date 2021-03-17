@@ -211,6 +211,10 @@ class SiteOrigin_Panels {
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
+
+		if ( defined( 'ROCKET_LL_VERSION' ) || apply_filters( 'siteorigin_lazyload_compat', false ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/lazyload-backgrounds.php';
+		}
 	}
 
 	/**
