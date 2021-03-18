@@ -65,19 +65,26 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 	 * Register all the current widgets so we can filter the get_option('widget_...') values to add instances
 	 */
 	function register_widgets() {
-		$current_url = add_query_arg( false, false );
-		$cache_key   = md5( $current_url );
+		$current_url = wp_parse_url( add_query_arg( false, false ) );
 
-		// Get the ID of the current post
-		$post_id = wp_cache_get( $cache_key, 'siteorigin_url_to_postid' );
-		if ( false === $post_id ) {
-			$post_id = url_to_postid( $current_url );
-			wp_cache_set( $cache_key, $post_id, 'siteorigin_url_to_postid', 3 * HOUR_IN_SECONDS );
+		// Detect current page id using path.
+		if ( ! empty( $current_url['path'] ) ) {
+
+			// Check if WPML is running.
+			if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+				// Remove the current language code from path to avoid 404.
+				$current_url['path'] = ltrim( $current_url['path'], '/' . ICL_LANGUAGE_CODE . '/' );
+			}
+
+			$page = get_page_by_path( $current_url['path'], OBJECT, siteorigin_panels_setting( 'post-types' ) );
+			if ( ! empty( $page ) ) {
+				$post_id = $page->ID;
+			}
 		}
 
 		if ( empty( $post_id ) ) {
 			// Maybe this is the home page
-			$current_url_path = parse_url( $current_url, PHP_URL_PATH );
+			$current_url_path = parse_url( add_query_arg( false, false ), PHP_URL_PATH );
 			$home_url_path    = parse_url( trailingslashit( home_url() ), PHP_URL_PATH );
 
 			if ( $current_url_path === $home_url_path && get_option( 'page_on_front' ) != 0 ) {
