@@ -368,7 +368,16 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
         var editorDispatch = wp.data.dispatch('core/editor');
         var editorSelect = wp.data.select('core/editor');
         var tmpl = jQuery('#siteorigin-panels-add-layout-block-button').html();
-        var $addButton = jQuery(tmpl).insertAfter('.editor-writing-flow > div:first, .block-editor-writing-flow > div:not([tabindex])');
+
+        if (jQuery('.block-editor-writing-flow > .block-editor-block-list__layout').length) {
+          // > WP 5.7
+          var buttonSelector = '.block-editor-writing-flow > .block-editor-block-list__layout';
+        } else {
+          // < WP 5.7
+          var buttonSelector = '.editor-writing-flow > div:first, .block-editor-writing-flow > div:not([tabindex])';
+        }
+
+        var $addButton = jQuery(tmpl).appendTo(buttonSelector);
         $addButton.on('click', function () {
           var layoutBlock = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
           var isEmpty = editorSelect.isEditedPostEmpty();
