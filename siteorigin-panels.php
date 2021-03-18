@@ -212,7 +212,10 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
 
-		if ( defined( 'ROCKET_LL_VERSION' ) || apply_filters( 'siteorigin_lazy_load_compat', false ) ) {
+		$lazy_load_settings = get_option( 'rocket_lazyload_options' );
+		$load_lazy_load_compat = defined( 'ROCKET_LL_VERSION' ) && ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
+		
+		if ( $load_lazy_load_compat || apply_filters( 'siteorigin_lazyload_compat', false ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
 	}
