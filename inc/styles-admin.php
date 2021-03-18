@@ -265,7 +265,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
 					       value="<?php echo (int) $current; ?>"/>
 				</div>
-				<a href="#" class="remove-image <?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+				<a href="#" class="remove-image <?php if ( empty( (int) $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				
 				<input type="text" value="<?php echo esc_url( $fallback_url ) ?>"
 					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ) ?>"
