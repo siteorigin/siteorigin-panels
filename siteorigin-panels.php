@@ -212,8 +212,8 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
 
-		if ( defined( 'ROCKET_LL_VERSION' ) || apply_filters( 'siteorigin_lazyload_compat', false ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/lazyload-backgrounds.php';
+		if ( defined( 'ROCKET_LL_VERSION' ) || apply_filters( 'siteorigin_lazy_load_compat', false ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy_load-backgrounds.php';
 		}
 	}
 
