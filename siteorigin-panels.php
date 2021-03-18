@@ -213,7 +213,7 @@ class SiteOrigin_Panels {
 		}
 
 		if ( defined( 'ROCKET_LL_VERSION' ) || apply_filters( 'siteorigin_lazy_load_compat', false ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy_load-backgrounds.php';
+			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
 	}
 
