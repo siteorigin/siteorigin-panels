@@ -16,7 +16,13 @@ module.exports = panels.view.dialog.extend( {
 
 	events: {
 		'click .so-close': 'closeDialog',
-		'click .so-restore': 'restoreSelectedEntry'
+		'keyup .so-close': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-restore': 'restoreSelectedEntry',
+		'keyup .history-entry': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initializeDialog: function () {
@@ -24,6 +30,10 @@ module.exports = panels.view.dialog.extend( {
 
 		this.on( 'open_dialog', this.setCurrentEntry, this );
 		this.on( 'open_dialog', this.renderHistoryEntries, this );
+
+		this.on( 'open_dialog_complete', function () {
+			this.$( '.history-entry' ).trigger( 'focus' );
+		} );
 	},
 
 	render: function () {
@@ -101,7 +111,11 @@ module.exports = panels.view.dialog.extend( {
 			.prependTo( c );
 
 		// Handle loading and selecting
-		c.find( '.history-entry' ).on( 'click', function() {
+		c.find( '.history-entry' ).on( 'click', function(e) {
+			if ( e.type == 'keyup' && e.which != 13 ) {
+				return;
+			}
+
 			var $$ = jQuery( this );
 			c.find( '.history-entry' ).not( $$ ).removeClass( 'so-selected' );
 			$$.addClass( 'so-selected' );

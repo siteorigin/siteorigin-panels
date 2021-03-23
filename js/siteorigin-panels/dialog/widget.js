@@ -15,12 +15,27 @@ module.exports = panels.view.dialog.extend( {
 
 	events: {
 		'click .so-close': 'saveHandler',
+		'keyup .so-close': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-previous': 'navToPrevious',
+		'keyup .so-nav.so-previous': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-next': 'navToNext',
+		'keyup .so-nav.so-next': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 
 		// Action handlers
 		'click .so-toolbar .so-delete': 'deleteHandler',
-		'click .so-toolbar .so-duplicate': 'duplicateHandler'
+		'keyup .so-toolbar .so-delete': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-toolbar .so-duplicate': 'duplicateHandler',
+		'keyup .so-toolbar .so-duplicate': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initializeDialog: function () {
@@ -51,6 +66,18 @@ module.exports = panels.view.dialog.extend( {
 				this.$( '.so-title' ).text( this.model.getWidgetField( 'title' ) );
 			}
 		}.bind( this ) );
+
+		this.on( 'open_dialog_complete', function() {
+			// The form isn't always ready when this event fires.
+			setTimeout( function() {
+				var focusTarget = $( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first();
+				if ( focusTarget.length ) {
+					focusTarget.trigger( 'focus' );
+				} else {
+					$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
+				}
+			}, 1250 )
+		} );
 	},
 
 	/**

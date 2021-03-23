@@ -16,8 +16,17 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .so-close': 'closeDialog',
+		'keyup .so-close': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-previous': 'navToPrevious',
+		'keyup .so-nav.so-previous': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-next': 'navToNext',
+		'keyup .so-nav.so-next': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initialize: function () {
@@ -212,8 +221,12 @@ module.exports = Backbone.View.extend( {
 	initToolbar: function () {
 		// Trigger simplified click event for elements marked as toolbar buttons.
 		var buttons = this.$( '.so-toolbar .so-buttons .so-toolbar-button' );
-		buttons.on( 'click', function( e ) {
+		buttons.on( 'click keyup', function( e ) {
 			e.preventDefault();
+
+			if ( e.type == 'keyup' && e.which != 13 ) {
+				return;
+			}
 
 			this.trigger( 'button_click', $( e.currentTarget ) );
 		}.bind( this ) );
@@ -307,16 +320,20 @@ module.exports = Backbone.View.extend( {
 
 		if ( nextDialog === null ) {
 			nextButton.hide();
-		}
-		else if ( nextDialog === false ) {
+		} else if ( nextDialog === false ) {
 			nextButton.addClass( 'so-disabled' );
+			nextButton.attr( 'tabindex', -1 );
+		} else {
+			nextButton.attr( 'tabindex', 0 );
 		}
 
 		if ( prevDialog === null ) {
 			prevButton.hide();
-		}
-		else if ( prevDialog === false ) {
+		} else if ( prevDialog === false ) {
 			prevButton.addClass( 'so-disabled' );
+			prevButton.attr( 'tabindex', -1 );
+		} else {
+			prevButton.attr( 'tabindex', 0 );
 		}
 	},
 

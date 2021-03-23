@@ -8,12 +8,21 @@ module.exports = panels.view.dialog.extend({
 
 	events: {
 		'click .so-close': 'closeDialog',
+		'keyup .so-close': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 
 		// Toolbar buttons
 		'click .so-toolbar .so-save': 'saveHandler',
 		'click .so-toolbar .so-insert': 'insertHandler',
 		'click .so-toolbar .so-delete': 'deleteHandler',
+		'keyup .so-toolbar .so-delete': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-toolbar .so-duplicate': 'duplicateHandler',
+		'keyup .so-toolbar .so-duplicate': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 
 		// Changing the row
 		'change .row-set-form > *': 'setCellsFromForm',
@@ -51,6 +60,10 @@ module.exports = panels.view.dialog.extend({
 			this.renderStyles();
 			this.openSelectedCellStyles();
 		}, this);
+
+		this.on( 'open_dialog_complete', function() {
+			$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
+		} );
 
 		// This is the default row layout
 		this.row = {
