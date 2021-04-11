@@ -406,6 +406,14 @@ class SiteOrigin_Panels {
 					if ( $this->get_localized_word_count( $text ) >= $excerpt_length ) {
 						break;
 					}
+
+					// Check for more quicktag.
+					if ( strpos( $text, '<!--more' ) !== false ) {
+						// Only return everything prior to more quicktag.
+						$raw_excerpt = explode( '<!--more', $text )[0];
+						$excerpt_length = $this->get_localized_word_count( $raw_excerpt );
+						break;
+					}
 				}
 			}
 
