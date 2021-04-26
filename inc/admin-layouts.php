@@ -97,7 +97,9 @@ class SiteOrigin_Panels_Admin_Layouts {
 						$mime_type = mime_content_type( $file );
 						
 						// Valid if text files.
-						$valid_file_type = strpos( $mime_type, 'text/' ) === 0;
+
+						// Valid if text or json file.
+						$valid_file_type = strpos( $mime_type, '/json' ) || strpos( $mime_type, 'text/' ) > -1;
 					} else {
 						// If `mime_content_type` isn't available, just check file extension.
 						$ext = pathinfo( $file, PATHINFO_EXTENSION );
