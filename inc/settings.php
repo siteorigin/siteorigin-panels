@@ -139,7 +139,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['add-widget-class']     = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
 		$defaults['bundled-widgets']      = get_option( 'siteorigin_panels_is_using_bundled', false );
 		$defaults['recommended-widgets']  = true;
-		$defaults['instant-open-widgets'] = false;
+		$defaults['instant-open-widgets'] = true;
 
 		// The layout fields
 		$defaults['responsive']               = true;
