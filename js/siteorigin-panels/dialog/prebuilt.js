@@ -19,7 +19,14 @@ module.exports = panels.view.dialog.extend( {
 		'keyup .so-sidebar-search': 'searchHandler',
 
 		// The directory items
-		'click .so-screenshot, .so-title': 'directoryItemClickHandler'
+		'click .so-screenshot, .so-title': 'directoryItemClickHandler',
+		'keyup .so-directory-item': 'clickTitleOnEnter',
+	},
+
+	clickTitleOnEnter: function( e ) {
+		if ( e.which == 13 ) {
+			$( e.target ).find( '.so-title' ).trigger( 'click' );
+		}
 	},
 
 	/**
@@ -33,7 +40,10 @@ module.exports = panels.view.dialog.extend( {
 			thisView.$( '.so-status' ).removeClass( 'so-panels-loading' );
 		} );
 
-		this.on( 'button_click', this.toolbarButtonClick, this );
+		this.on( 'open_dialog_complete', function () {
+			// Clear the search and re-filter the widgets when we open the dialog
+			this.$( '.so-sidebar-search' ).val( '' ).trigger( 'focus' );
+		} );
 	},
 
 	/**
@@ -41,7 +51,7 @@ module.exports = panels.view.dialog.extend( {
 	 */
 	render: function () {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-prebuilt' ).html(), {} ) );
-
+		this.on( 'button_click', this.toolbarButtonClick, this );
 		this.initToolbar();
 	},
 

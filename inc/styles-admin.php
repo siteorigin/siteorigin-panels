@@ -7,6 +7,8 @@ class SiteOrigin_Panels_Styles_Admin {
 
 		add_filter( 'siteorigin_panels_data', array( $this, 'convert_data' ) );
 		add_filter( 'siteorigin_panels_prebuilt_layout', array( $this, 'convert_data' ) );
+
+		add_filter( 'siteorigin_panels_general_current_styles', array( $this, 'style_migration' ), 10, 4 );
 	}
 
 	public static function single() {
@@ -36,10 +38,23 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$current = isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array();
 		$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
-
 		$args = ! empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true ) : array();
+
+		$current = apply_filters(
+			'siteorigin_panels_general_current_styles', 
+			isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array(),
+			$post_id,
+			$type,
+			$args
+		);
+
+		$current = apply_filters(
+			'siteorigin_panels_general_current_styles_' . $type, 
+			$current,
+			$post_id,
+			$args
+		);
 
 		switch ( $type ) {
 			case 'row':
@@ -47,7 +62,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				break;
 
 			case 'cell':
-				$cell_number = isset( $args['index'] ) ? ' ' . ( intval( $args['index'] ) + 1 ) : '';
+				$cell_number = isset( $args['index'] ) ? ' ' . ( (int) $args['index'] + 1 ) : '';
 				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
 				break;
 
@@ -135,7 +150,7 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			?>
 			<div class="style-section-wrapper">
-				<div class="style-section-head">
+				<div class="style-section-head" tabindex="0">
 					<h4><?php echo esc_html( $group['name'] ) ?></h4>
 				</div>
 				<div class="style-section-fields" style="display: none">
@@ -238,7 +253,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				$fallback_field_name = 'style[' . $field_id . '_fallback]';
 
 				?>
-				<div class="so-image-selector">
+				<div class="so-image-selector" tabindex="0">
 					<div class="current-image" <?php if ( ! empty( $image ) ) {
 						echo 'style="background-image: url(' . esc_url( $image[0] ) . ');"';
 					} ?>>
@@ -248,9 +263,9 @@ class SiteOrigin_Panels_Styles_Admin {
 						<?php _e( 'Select Image', 'siteorigin-panels' ) ?>
 					</div>
 					<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>"
-					       value="<?php echo intval( $current ) ?>"/>
+					       value="<?php echo (int) $current; ?>"/>
 				</div>
-				<a href="#" class="remove-image <?php if ( empty( $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
+				<a href="#" class="remove-image <?php if ( empty( (int) $current ) ) echo ' hidden' ?>"><?php _e( 'Remove', 'siteorigin-panels' ) ?></a>
 				
 				<input type="text" value="<?php echo esc_url( $fallback_url ) ?>"
 					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ) ?>"
@@ -475,6 +490,23 @@ class SiteOrigin_Panels_Styles_Admin {
 		}
 
 		return $panels_data;
+	}
+
+	/**
+	 * Migrate deprecated styles.
+	 *
+	 * @param $style array The currently selected styles.
+	 * @param $post_id int The id of the current post.
+	 * @param $args array An array containing builder Arguments.
+	 *
+	 * @return array
+	 */
+	function style_migration( $style, $post_id, $type, $args ) {
+		if ( isset( $style['background_display'] ) && $style['background_display'] == 'parallax-original' ) {
+			$style['background_display'] = 'parallax';
+		}
+
+		return $style;
 	}
 
 	/**

@@ -162,8 +162,11 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				} else if ( strpos( $_SERVER['REQUEST_URI'], '/page/' ) !== false ) {
 					// When the widget appears on the home page.
 					preg_match('/\/page\/([0-9]+)\//', $_SERVER['REQUEST_URI'], $matches);
-					if(!empty($matches[1])) $query_args['paged'] = intval($matches[1]);
-					else $query_args['paged'] = 1;
+					if ( ! empty( $matches[1] ) ) {
+						$query_args['paged'] = (int) $matches[1];
+					} else {
+						$query_args['paged'] = 1;
+					}
 				}
 			}
 
@@ -172,7 +175,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			}
 		} else {
 			// Get current page number when we're not using permalinks
-			$query_args['paged'] = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+			$query_args['paged'] = isset( $_GET['paged'] ) ? (int) $_GET['paged'] : 1;
 		}
 		
 		// Exclude the current post to prevent possible infinite loop

@@ -73,6 +73,10 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
 
+		if ( class_exists( 'ACF' ) ) {
+			SiteOrigin_Panels_Compat_ACF_Widgets::single();
+		}
+
 		// Block editor specific actions
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -262,7 +266,7 @@ class SiteOrigin_Panels_Admin {
 				$post->post_content = $post_content;
 				if( siteorigin_panels_setting( 'copy-styles' ) ) {
 					$post->post_content .= "\n\n";
-					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . intval( $layout_id ) . '">';
+					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
 					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
@@ -995,6 +999,8 @@ class SiteOrigin_Panels_Admin {
 		$the_widget->id     = 'temp';
 		$the_widget->number = $widget_number;
 
+		do_action( 'siteorigin_panels_before_widget_form', $the_widget, $instance );
+
 		ob_start();
 		if ( $this->is_core_js_widget( $the_widget ) ) {
 			?><div class="widget-content"><?php
@@ -1052,7 +1058,7 @@ class SiteOrigin_Panels_Admin {
 
 	function generate_panels_preview( $post_id, $panels_data ) {
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
-		$return = SiteOrigin_Panels::renderer()->render( intval( $post_id ), false, $panels_data );
+		$return = SiteOrigin_Panels::renderer()->render( (int) $post_id, false, $panels_data );
 		if ( function_exists( 'wp_targeted_link_rel' ) ) {
 			$return = wp_targeted_link_rel( $return );
 		}
@@ -1097,7 +1103,7 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		echo SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		echo SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
@@ -1138,11 +1144,11 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		$return['post_content'] = SiteOrigin_Panels::renderer()->render( intval( $_POST['post_id'] ), false, $panels_data );
+		$return['post_content'] = SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
-		$return['preview'] = $this->generate_panels_preview( intval( $_POST['post_id'] ), $panels_data );
+		$return['preview'] = $this->generate_panels_preview( (int) $_POST['post_id'], $panels_data );
 
 		echo json_encode( $return );
 
@@ -1199,7 +1205,7 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function layout_block_preview() {
 
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-preview' ) ) {
+		if ( empty( $_POST['panelsData'] ) || empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-preview' ) ) {
 			wp_die();
 		}
 

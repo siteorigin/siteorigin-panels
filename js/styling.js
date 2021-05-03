@@ -53,8 +53,25 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	$( window ).on( 'resize load', stretchFullWidthRows );
 	stretchFullWidthRows();
+
+	$( window ).on( 'resize load', function() {
+		stretchFullWidthRows();
+
+		if (
+			typeof parallaxStyles != 'undefined' &&
+			typeof simpleParallax != 'undefined' &&
+			(
+				! parallaxStyles['disable-parallax-mobile'] ||
+				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
+			)
+		) {
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
+				delay: parallaxStyles['delay'],
+				scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
+			} );
+		}
+	} );
 
 	// This should have been done in the footer, but run it here just incase.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );

@@ -211,6 +211,13 @@ class SiteOrigin_Panels {
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
+
+		$lazy_load_settings = get_option( 'rocket_lazyload_options' );
+		$load_lazy_load_compat = defined( 'ROCKET_LL_VERSION' ) && ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
+		
+		if ( $load_lazy_load_compat || apply_filters( 'siteorigin_lazyload_compat', false ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
+		}
 	}
 
 	/**
@@ -377,9 +384,23 @@ class SiteOrigin_Panels {
 		}
 
 		$post_id = $this->get_post_id();
-
-		// Check if this post has panels_data
 		$panels_data = get_post_meta( $post_id, 'panels_data', true );
+
+		// If no panels_data is detected, check if the post has blocks.
+		if ( empty( $panels_data ) ) {
+			if ( has_blocks( get_the_content() ) ) {
+				$parsed_content = parse_blocks( get_the_content() );
+				// Check if the first block is an SO Layout Block, and extract panels_data if it is.
+				if (
+					$parsed_content[0]['blockName'] == 'siteorigin-panels/layout-block' &&
+					isset( $parsed_content[0]['attrs'] ) &&
+					! empty( $parsed_content[0]['attrs']['panelsData'] )
+				) {
+					$panels_data = $parsed_content[0]['attrs']['panelsData'];
+				}
+			}
+		}
+
 		if ( $panels_data && ! empty( $panels_data['widgets'] ) ) {
 			$raw_excerpt = '';
 			$excerpt_length = apply_filters( 'excerpt_length', 55 );
@@ -397,6 +418,14 @@ class SiteOrigin_Panels {
 					$text = strip_shortcodes( $raw_excerpt );
 					$text = str_replace( ']]>', ']]&gt;', $text );
 					if ( $this->get_localized_word_count( $text ) >= $excerpt_length ) {
+						break;
+					}
+
+					// Check for more quicktag.
+					if ( strpos( $text, '<!--more' ) !== false ) {
+						// Only return everything prior to more quicktag.
+						$raw_excerpt = explode( '<!--more', $text )[0];
+						$excerpt_length = $this->get_localized_word_count( $raw_excerpt );
 						break;
 					}
 				}

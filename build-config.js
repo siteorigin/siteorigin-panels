@@ -65,9 +65,7 @@ module.exports = {
             'widgets/**/styles/*.less',         // All the widgets' runtime .less files
             '!widgets/**/styles/*.css',         // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',  // Ignore node_modules/ and contents
-            '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{tmp,tmp/**}',                    // Ignore dist/ and contents
-            '!phpunit.xml',                     // Not the unit tests configuration file.
             '!siteorigin-panels.php',           // Not the base plugin file. It is copied by the 'version' task.
             '!package.json',                    // Ignore the package.json file..
             '!readme.txt',                      // Not the readme.txt file. It is copied by the 'version' task.

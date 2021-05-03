@@ -3,6 +3,26 @@
 .panel-grid {
 	zoom: 1;
 	.clearfix();
+
+	.so-parallax {
+		position: relative;
+
+		& > div:not(.simpleParallax) {
+			position: relative;
+			z-index: 1;
+		}
+
+		.simpleParallax,
+		img[data-siteorigin-parallax] {
+			bottom: 0;
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 100%;
+			z-index: 0;
+		}
+	}
 }
 .panel-grid-cell {
 	.box-sizing(border-box);

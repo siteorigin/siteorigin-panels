@@ -25,14 +25,23 @@ class SiteOrigin_Panels_Renderer {
 		if ( is_null( $this->inline_css ) ) {
 			// Initialize the inline CSS array and add actions to handle printing.
 			$this->inline_css = array();
-
+			$css_output_set = false;
 			$output_css = siteorigin_panels_setting( 'output-css-header');
+
 			if ( is_admin() || SiteOrigin_Panels_Admin::is_block_editor() || $output_css == 'auto' ) {
 				add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
 				add_action( 'wp_footer', array( $this, 'print_inline_css' ) );
-			} else if ( $output_css == 'header' ) {
+				$css_output_set = true;
+			}
+
+			// The CSS can only be output in the header if the page is powered by the Classic Editor.
+			// $post_id won't be a number if the current page is powered by the Block Editor.
+			if ( ! $css_output_set && $output_css == 'header' && is_numeric( $post_id ) ) {
 				add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
-			} else {
+				$css_output_set = true;
+			}
+
+			if ( ! $css_output_set ) {
 				add_action( 'wp_footer', array( $this, 'print_inline_css' ) );
 			}
 		}
@@ -106,7 +115,7 @@ class SiteOrigin_Panels_Renderer {
 						// This seems to happen when a plugin calls `setlocale(LC_ALL, 'de_DE');` or `setlocale(LC_NUMERIC, 'de_DE');`
 						// This should prevent issues with column sizes in these cases.
 						str_replace( ',', '.', $rounded_width ),
-						str_replace( ',', '.', intval($gutter) ? $calc_width : '' ), // Exclude if there's a zero gutter
+						str_replace( ',', '.', (int) $gutter ? $calc_width : '' ), // Exclude if there's a zero gutter
 					)
 				) );
 				
@@ -190,11 +199,11 @@ class SiteOrigin_Panels_Renderer {
 						// Tablet responsive css for cells
 
 						$css->add_cell_css( $post_id, $ri, false, ':nth-child(even)', array(
-							'padding-left' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+							'padding-left' => ( (float) $gutter_parts[1] / 2 . $gutter_parts[2] ),
 						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
 
 						$css->add_cell_css( $post_id, $ri, false, ':nth-child(odd)', array(
-							'padding-right' => ( floatval( $gutter_parts[1] / 2 ) . $gutter_parts[2] ),
+							'padding-right' => ( (float) $gutter_parts[1] / 2 . $gutter_parts[2] ),
 						), $panels_tablet_width . ':' . ( $panels_mobile_width + 1 ) );
 					}
 
@@ -547,6 +556,10 @@ class SiteOrigin_Panels_Renderer {
 			$args['after_widget'] = '</div>' . $args['after_widget'];
 		}
 
+		// This allows other themes and plugins to add HTML inside of the widget before and after the contents.
+		$args['before_widget'] .= apply_filters( 'siteorigin_panels_inside_widget_before', '', $widget_info );
+		$args['after_widget'] = apply_filters( 'siteorigin_panels_inside_widget_after', '', $widget_info ) . $args['after_widget'];
+
 		// This gives other plugins the chance to take over rendering of widgets
 		$widget_html = apply_filters( 'siteorigin_panels_the_widget_html', '', $the_widget, $args, $instance );
 
@@ -688,14 +701,14 @@ class SiteOrigin_Panels_Renderer {
 			$layout_data[ $cell['grid'] ]['cells'][] = array(
 				'widgets' => array(),
 				'style'   => ! empty( $cell['style'] ) ? $cell['style'] : array(),
-				'weight'  => floatval( $cell['weight'] ),
+				'weight'  => (float) $cell['weight'],
 			);
 		}
 
 		foreach ( $panels_data['widgets'] as $i => $widget ) {
 			$widget['panels_info']['widget_index'] = $i;
-			$row_index = intval( $widget['panels_info']['grid'] );
-			$cell_index = intval( $widget['panels_info']['cell'] );
+			$row_index = (int) $widget['panels_info']['grid'];
+			$cell_index = (int) $widget['panels_info']['cell'];
 			$layout_data[ $row_index ]['cells'][ $cell_index ]['widgets'][] = $widget;
 		}
 
@@ -755,6 +768,9 @@ class SiteOrigin_Panels_Renderer {
 			echo $row_style_wrapper;
 		}
 
+		// This allows other themes and plugins to add HTML inside of the row before the row contents.
+		echo apply_filters( 'siteorigin_panels_inside_row_before', '', $row );
+
 		if( method_exists( $this, 'modify_row_cells' ) ) {
 			// This gives other renderers a chance to change the cell order
 			$row['cells'] = $cells = $this->modify_row_cells( $row['cells'], $row );
@@ -763,6 +779,9 @@ class SiteOrigin_Panels_Renderer {
 		foreach ( $row['cells'] as $ci => & $cell ) {
 			$this->render_cell( $post_id, $ri, $ci, $cell, $row['cells'], $panels_data );
 		}
+
+		// This allows other themes and plugins to add HTML inside of the row after the row contents.
+		echo apply_filters( 'siteorigin_panels_inside_row_after', '', $row );
 
 		// Close the style wrapper
 		if ( ! empty( $row_style_wrapper ) ) {
@@ -832,12 +851,16 @@ class SiteOrigin_Panels_Renderer {
 		if ( ! empty( $cell_style_wrapper ) ) {
 			echo $cell_style_wrapper;
 		}
+		// This allows other themes and plugins to add HTML inside of the cell before its contents.
+		echo apply_filters( 'siteorigin_panels_inside_cell_before', '', $cell );
 
 		foreach ( $cell['widgets'] as $wi => & $widget ) {
 			$is_last = ( $wi == count( $cell['widgets'] ) - 1 );
 			$this->render_widget( $post_id, $ri, $ci, $wi, $widget, $is_last );
 		}
 
+		// This allows other themes and plugins to add HTML inside of the cell after its contents.
+		echo apply_filters( 'siteorigin_panels_inside_cell_after', '', $cell );
 		if ( ! empty( $cell_style_wrapper ) ) {
 			echo '</div>';
 		}

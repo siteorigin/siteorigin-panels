@@ -116,13 +116,21 @@ class SiteOrigin_Panels_Settings {
 		$defaults['load-on-attach']    = false;
 		$defaults['use-classic']       = true;
 
+		// The Parallax Type default depends on whether a different setting settings is set.
+		// This is done here rather than using `siteorigin_panels_version_changed` as
+		// that hook is triggered after the settings are loaded.
+		$so_settings = get_option( 'siteorigin_panels_settings' );
+
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-motion']        = '';
+		$defaults['parallax-type']          = ! empty( $so_settings ) && ! isset( $so_settings['parallax-delay'] ) ? 'legacy' : 'modern';
 		$defaults['parallax-mobile']        = false;
+		$defaults['parallax-motion']        = ''; // legacy parallax
+		$defaults['parallax-delay']         = 0.4;
+		$defaults['parallax-scale']         = 1.2;
 		$defaults['sidebars-emulator']      = true;
 		$defaults['layout-block-default-mode'] = 'preview';
 
@@ -131,7 +139,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['add-widget-class']     = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
 		$defaults['bundled-widgets']      = get_option( 'siteorigin_panels_is_using_bundled', false );
 		$defaults['recommended-widgets']  = true;
-		$defaults['instant-open-widgets'] = false;
+		$defaults['instant-open-widgets'] = true;
 
 		// The layout fields
 		$defaults['responsive']               = true;
@@ -280,17 +288,41 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
 			'description' => __( "Display a widget count in the admin lists of posts/pages where you're using Page Builder.", 'siteorigin-panels' ),
 		);
-
-		$fields['general']['fields']['parallax-motion'] = array(
-			'type'        => 'float',
-			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
-			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		
+		$fields['general']['fields']['parallax-type'] = array(
+			'type'        => 'select',
+			'label'       => __( 'Parallax Type', 'siteorigin-panels' ),
+			'options'     => array(
+				'modern' => __( 'Modern', 'siteorigin-panels' ),
+				'legacy' => __( 'Legacy', 'siteorigin-panels' ),
+			),
+			'description' => __( 'Modern is recommended as it can use smaller images and offers better performance.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['parallax-mobile'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Disable Parallax On Mobile', 'siteorigin-panels' ),
 			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
+		);
+
+		// Legacy Parallax settings.
+		$fields['general']['fields']['parallax-motion'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
+			'description' => __( 'How many pixels of scrolling result in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+		);
+
+		// New Parallax settings.
+		$fields['general']['fields']['parallax-delay'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Delay', 'siteorigin-panels' ),
+			'description' => __( 'The delay before the parallax effect finishes after the user stops scrolling.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['parallax-scale'] = array(
+			'type'        => 'float',
+			'label'       => __( 'Parallax Scale', 'siteorigin-panels' ),
+			'description' => __( 'How much the image is scaled. The higher the scale is set, the more visible the parallax effect will be. Increasing the scale will result in a loss of image quality.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['sidebars-emulator'] = array(
@@ -455,6 +487,7 @@ class SiteOrigin_Panels_Settings {
 				'footer' => __( 'Footer', 'siteorigin-panels' ),
 			),
 			'label'       => __( 'Page Builder Layout CSS Output Location', 'siteorigin-panels' ),
+			'description' => __( 'This setting is only applicable in the Classic Editor.', 'siteorigin-panels' ),
 		);
 
 		// The content fields
@@ -518,7 +551,7 @@ class SiteOrigin_Panels_Settings {
 			case 'html':
 				?><textarea name="<?php echo esc_attr( $field_name ) ?>"
 				            class="panels-setting-<?php echo esc_attr( $field['type'] ) ?> widefat"
-				            rows="<?php echo ! empty( $field['rows'] ) ? intval( $field['rows'] ) : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
+				            rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
 				break;
 
 			case 'checkbox':
@@ -598,7 +631,7 @@ class SiteOrigin_Panels_Settings {
 
 					case 'number':
 						if ( $post[ $field_id ] != '' ) {
-							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? intval( $post[ $field_id ] ) : 0;
+							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? (int) $post[ $field_id ] : 0;
 						} else {
 							$values[ $field_id ] = '';
 						}
@@ -606,7 +639,7 @@ class SiteOrigin_Panels_Settings {
 
 					case 'float':
 						if ( $post[ $field_id ] != '' ) {
-							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? floatval( $post[ $field_id ] ) : 0;
+							$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? (float) $post[ $field_id ] : 0;
 						} else {
 							$values[ $field_id ] = '';
 						}

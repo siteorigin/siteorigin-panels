@@ -244,14 +244,14 @@ function (_wp$element$Component) {
       };
 
       if (this.state.editing) {
-        return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+        return React.createElement(wp.element.Fragment, null, panelsData ? React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
           label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
         }, React.createElement(wp.components.ToolbarButton, {
           icon: "visibility",
           className: "components-icon-button components-toolbar__control",
           label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
           onClick: switchToPreview
-        }))), React.createElement("div", {
+        }))) : null, React.createElement("div", {
           key: "layout-block",
           className: "siteorigin-panels-layout-block-container",
           ref: this.panelsContainer
@@ -332,6 +332,11 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
           setAttributes(panelsAttributes);
           wp.data.dispatch('core/editor').unlockPostSaving();
         });
+      } else {
+        setAttributes({
+          panelsData: null,
+          contentPreview: null
+        });
       }
     };
 
@@ -363,7 +368,16 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
         var editorDispatch = wp.data.dispatch('core/editor');
         var editorSelect = wp.data.select('core/editor');
         var tmpl = jQuery('#siteorigin-panels-add-layout-block-button').html();
-        var $addButton = jQuery(tmpl).insertAfter('.editor-writing-flow > div:first, .block-editor-writing-flow > div:not([tabindex])');
+
+        if (jQuery('.block-editor-writing-flow > .block-editor-block-list__layout').length) {
+          // > WP 5.7
+          var buttonSelector = '.block-editor-writing-flow > .block-editor-block-list__layout';
+        } else {
+          // < WP 5.7
+          var buttonSelector = '.editor-writing-flow > div:first, .block-editor-writing-flow > div:not([tabindex])';
+        }
+
+        var $addButton = jQuery(tmpl).appendTo(buttonSelector);
         $addButton.on('click', function () {
           var layoutBlock = wp.blocks.createBlock('siteorigin-panels/layout-block', {});
           var isEmpty = editorSelect.isEditedPostEmpty();

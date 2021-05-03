@@ -73,6 +73,7 @@
 			text-align: center;
 		}
 
+		&:focus,
 		&:hover {
 			background: #FFFFFF;
 
@@ -418,10 +419,16 @@
 							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
 							.box-sizing(border-box);
 
+							&:focus,
 							&:hover {
 								border: 1px solid rgba( 255, 255, 255, 0.55 );
 								background: #fff;
 								.box-shadow(~"0 0 2px rgba(0,0,0,0.1)");
+							}
+
+							&:focus .title .actions a,
+							&:focus-within .title .actions a, {
+								display: inline-block;
 							}
 
 							.so-widget-wrapper {
@@ -870,6 +877,7 @@
 			border-left: 1px solid #d8d8d8;
 			border-bottom: 1px solid #d8d8d8;
 
+			&:focus,
 			&:hover {
 				background: #e9e9e9;
 				.so-dialog-icon {
@@ -1043,12 +1051,14 @@
 				.so-delete {
 					color: #a00;
 
+					&:focus,
 					&:hover {
 						background: #a00;
 						color: #FFFFFF;
 					}
 				}
 
+				.so-duplicate:focus,
 				.so-duplicate:hover {
 					text-decoration: underline;
 				}
@@ -1224,6 +1234,7 @@
 					.box-shadow(~"0 1px 2px rgba(0,0,0,0.075), inset 0 1px 0 #FFFFFF");
 					margin-bottom: 15px;
 
+					&:focus,
 					&:hover {
 						border: 1px solid #BBBBBB;
 						background: #FFFFFF;
@@ -1349,7 +1360,8 @@
 				background: #F8F8F8;
 				.box-shadow(~"0 1px 2px rgba(0,0,0,0.075)");
 
-				&:hover {
+				&:hover,
+				&:focus {
 					border: 1px solid #BBBBBB;
 					background: #FFFFFF;
 					.box-shadow(~"0 2px 2px rgba(0,0,0,0.075)");
@@ -1511,7 +1523,8 @@
 
 				border-bottom: 1px solid #ccc;
 
-				&:hover {
+				&:hover,
+				&:focus {
 					background: #F0F0F0;
 				}
 
@@ -1647,6 +1660,13 @@
 						background: #F7F7F7;
 						border: 1px solid #d0d0d0;
 						.box-shadow(~"0 1px 1px rgba(0,0,0,0.1)");
+
+						&:hover,
+						&:focus {
+							border: 1px solid #BBBBBB;
+							background: #FFFFFF;
+							box-shadow: 0 2px 2px rgba(0,0,0,0.075);
+						}
 					}
 
 					.so-title {
@@ -1655,7 +1675,6 @@
 					}
 
 					.so-screenshot {
-						flex: 3 auto;
 						margin-bottom: 10px;
 						cursor: pointer;
 
@@ -1687,7 +1706,6 @@
 					}
 
 					.so-description {
-						flex: 1 auto;
 						font-size: 0.9em;
 						color: #666;
 						margin-bottom: 10px;
@@ -1698,14 +1716,11 @@
 					.so-bottom {
 						flex: 1 auto;
 						position: relative;
-						max-height: 50px;
 
 						.so-title {
 							margin: 0;
 							padding: 16px 10px;
 							cursor: pointer;
-							overflow: hidden;
-							white-space: nowrap;
 						}
 
 						.so-buttons {
@@ -1729,9 +1744,14 @@
 						border-top: 1px solid #d0d0d0;
 					}
 
-					&:hover .so-buttons {
-						visibility: visible;
+					&:hover, 
+					&:focus	{
+						.so-buttons {
+							visibility: visible;
+						}
 					}
+
+
 
 					&.selected {
 
@@ -1824,6 +1844,10 @@
 			cursor: pointer;
 
 			.user-select(none);
+
+			&:focus {
+				background: #eee;
+			}
 
 			h4 {
 				margin: 0;
@@ -1938,6 +1962,11 @@
 				cursor: pointer;
 
 				.box-shadow(~"inset 0 1px #FFFFFF");
+
+				&:focus {
+					border: 1px solid #007cba;
+					box-shadow: 0 0 0 1px #007cba;
+				}
 
 				.current-image {
 					height: @image_field_height;
@@ -2073,7 +2102,6 @@
 		margin-right: auto;
 		
 		> button {
-			height: 100%;
 			padding: 5px 10px;
 			font-size: 16px;
 			
@@ -2199,6 +2227,7 @@
 				cursor: pointer;
 				color: #999;
 
+				&:focus,
 				&:hover {
 					color: #666;
 				}
@@ -2564,6 +2593,7 @@
 				padding: 3px 10px;
 				line-height: 1.3em;
 
+				&:focus,
 				&:hover,
 				&.so-active {
 					background: #F0F0F0;
@@ -2634,7 +2664,8 @@
 					outline: 0 !important;
 					.box-shadow(none);
 
-					&:hover {
+					&:hover,
+					&:focus {
 						background: #F0F0F0;
 						color: #444;
 					}
