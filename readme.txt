@@ -97,7 +97,7 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
-= 2.12.0 - 01 May 2021 =
+= 2.12.0 - 03 May 2021 =
 * **New Parallax Scrolling!** Existing users can optionally switch to `Modern` at `Settings > Page Builder > General`.
 * ACF: Added widget fields compatibility. `siteorigin_panels_before_widget_form` action is triggered before the widget form is output.
 * Improved Add/Edit row responsive behavior.
