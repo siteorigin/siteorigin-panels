@@ -296,7 +296,7 @@ class SiteOrigin_Panels_Settings {
 				'modern' => __( 'Modern', 'siteorigin-panels' ),
 				'legacy' => __( 'Legacy', 'siteorigin-panels' ),
 			),
-			'description' => __( 'Which Parallax library will be used. The New is the recommended Parallax Type as it uses modern techniques.', 'siteorigin-panels' ),
+			'description' => __( 'Modern is recommended as it can use smaller images and offers better performance.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['parallax-mobile'] = array(

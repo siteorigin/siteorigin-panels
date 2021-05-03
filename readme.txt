@@ -97,6 +97,28 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.12.0 - 03 May 2021 =
+* **New Parallax Scrolling!** Existing users can optionally switch to `Modern` at `Settings > Page Builder > General`.
+* ACF: Added widget fields compatibility. `siteorigin_panels_before_widget_form` action is triggered before the widget form is output.
+* Improved Add/Edit row responsive behavior.
+* Updated sidebar emulator to detect current page ID by path. Resolves WPML compatibility issue.
+* Added WP Rocket Lazy Loading compatibility for row, cell, and, widget background images.
+* Automatic Excerpt: Added support for the `<!-- more -->` quicktag.
+* Improved indexing of text containing multibyte Unicode such as Greek.
+* Instant Open Widgets: Updated the setting to default enabled for new installs.
+* Limited the `Page Builder Layout CSS Output Location` setting to the Classic Editor.
+* Add Layout: Improved responsive behavior for long post titles.
+* Ensured background image remove URL only displays when an image is present.
+* SiteOrigin Layout Block: Removed the preview button when a preview isn't available.
+* SiteOrigin Layout Block: Prevent an empty layout from being rendered.
+* Block Editor: Added support for automatic excerpt generation if the first post block is a SiteOrigin Layout Block.
+* Block Editor: Resolved duplicate Add SiteOrigin Layout button.
+* Developer: Ensured prebuilt layout compatibility with JSON MIME type.
+* Developer: Updated depreciated jQuery `bind` usage.
+* Developer: Replaced older-style PHP type conversion functions with type casts.
+* Developer: Resolved a PHP 8 notice relating to the CSS builder.
+* Developer: Improved WordPress indexing of languages that use multibyte Unicode
+
 = 2.11.8 - 09 December 2020 =
 * Developer: jQuery updates for WordPress 5.6.
 
