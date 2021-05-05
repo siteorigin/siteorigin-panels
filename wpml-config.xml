@@ -27,6 +27,74 @@
             </key>
           </key>
         </key>
+        <key name="panels">
+          <key name="*">
+            <key name="title" />
+            <key name="content_text" />
+            <key name="content_layout" />
+          </key>
+        </key>
+        <key name="items">
+          <key name="*">
+            <key name="title" />
+            <key name="content_text" />
+            <key name="content_layout" />
+            <key name="url" />
+          </key>
+        </key>
+        <key name="tabs">
+          <key name="*">
+            <key name="title" />
+            <key name="content_text" />
+            <key name="content_layout" />
+            <key name="url" />
+          </key>
+        </key>
+        <key name="features">
+          <key name="*">
+            <key name="title" />
+            <key name="text" />
+            <key name="icon_title" />
+            <key name="more_text" />
+            <key name="more_url" />
+          </key>
+        </key>
+        <key name="frames">
+          <key name="*">
+            <key name="content" />
+            <key name="url" />
+          </key>
+        </key>
+        <key name="images">
+          <key name="*">
+            <key name="title" />
+            <key name="alt" />
+            <key name="url" />
+          </key>
+        </key>
+        <key name="columns">
+          <key name="*">
+            <key name="title" />
+            <key name="subtitle" />
+            <key name="image_title" />
+            <key name="image_alt" />
+            <key name="per" />
+            <key name="button_text" />
+            <key name="url" />
+          </key>
+        </key>
+        <key name="networks">
+          <key name="*">
+            <key name="url" />
+            <key name="icon_title" />
+          </key>
+        </key>
+        <key name="testimonials">
+          <key name="*">
+            <key name="title" />
+            <key name="url" />
+          </key>
+        </key>
         <key name="headline">
           <key name="text" />
           <key name="destination_url" />
@@ -53,6 +121,20 @@
             <key name="icon_title" />
             <key name="more_text" />
             <key name="more_url" />
+          </key>
+        </key>
+        <key name="cta">
+            <key name="*">
+              <key name="title" />
+              <key name="sub_title" />
+              <key name="button>text" />
+              <key name="button>destination_url" />
+              <key name="attributes>title" />
+            </key>
+        </key>
+        <key name="taxonomy">
+          <key name="*">
+            <key name="label" />
           </key>
         </key>
       </key>
@@ -85,6 +167,74 @@
                 </key>
               </key>
             </key>
+            <key name="panels">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+              </key>
+            </key>
+            <key name="items">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="tabs">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="features">
+              <key name="*">
+                <key name="title" />
+                <key name="text" />
+                <key name="icon_title" />
+                <key name="more_text" />
+                <key name="more_url" />
+              </key>
+            </key>
+            <key name="frames">
+              <key name="*">
+                <key name="content" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="images">
+              <key name="*">
+                <key name="title" />
+                <key name="alt" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="columns">
+              <key name="*">
+                <key name="title" />
+                <key name="subtitle" />
+                <key name="image_title" />
+                <key name="image_alt" />
+                <key name="per" />
+                <key name="button_text" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="networks">
+              <key name="*">
+                <key name="url" />
+                <key name="icon_title" />
+              </key>
+            </key>
+            <key name="testimonials">
+              <key name="*">
+                <key name="title" />
+                <key name="url" />
+              </key>
+            </key>
             <key name="headline">
               <key name="text" />
               <key name="destination_url" />
@@ -111,6 +261,20 @@
                 <key name="icon_title" />
                 <key name="more_text" />
                 <key name="more_url" />
+              </key>
+            </key>
+            <key name="cta">
+              <key name="*">
+                <key name="title" />
+                <key name="sub_title" />
+                <key name="button>text" />
+                <key name="button>destination_url" />
+                <key name="attributes>title" />
+              </key>
+            </key>
+            <key name="taxonomy">
+              <key name="*">
+                <key name="label" />
               </key>
             </key>
           </key>
@@ -211,6 +375,26 @@
         <field type="Text" editor_type="AREA">text</field>
       </fields>
     </widget>
+    <widget name="SiteOrigin_Widget_Accordion_Widget">
+      <fields>
+        <field type="Accordion title">title</field>
+      </fields>
+      <fields-in-item items_of="panels">
+        <field type="Accordion panel title">title</field>
+        <field type="Accordion panel content_text" editor_type="VISUAL">content_text</field>
+        <field type="Accordion panel content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Anything_Carousel_Widget">
+      <fields>
+        <field type="Anything carousel title">title</field>
+      </fields>
+      <fields-in-item items_of="items">
+        <field type="Anything carousel panel title">title</field>
+        <field type="Anything carousel panel content_text" editor_type="VISUAL">content_text</field>
+        <field type="Anything carousel panel content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
     <widget name="SiteOrigin_Widget_Button_Widget">
       <fields>
         <field type="Button text">text</field>
@@ -232,11 +416,29 @@
         <field type="Contact form field missing">required>missing_message</field>
       </fields-in-item>
     </widget>
+    <widget name="SiteOrigin_Widget_Cta_Widget">
+      <fields>
+        <field type="CTA title">title</field>
+        <field type="CTA sub title">sub_title</field>
+        <field type="CTA button text">button>text</field>
+        <field type="CTA button URL" editor_type="LINK">button>destination_url</field>
+        <field type="CTA button title">attributes>title</field>
+      </fields>
+    </widget>
     <widget name="SiteOrigin_Widget_Editor_Widget">
       <fields>
         <field type="Editor title">title</field>
         <field type="Editor content" editor_type="VISUAL">text</field>
       </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Features_Widget">
+      <fields-in-item items_of="features">
+        <field type="Feature title">title</field>
+        <field type="Feature text" editor_type="VISUAL">text</field>
+        <field type="Feature icon title">icon_title</field>
+        <field type="Feature more text">more_text</field>
+        <field type="Feature more URL" editor_type="LINK">more_url</field>
+      </fields-in-item>
     </widget>
     <widget name="SiteOrigin_Widget_Headline_Widget">
       <fields>
@@ -251,6 +453,12 @@
         <field type="Hero content" editor_type="VISUAL">content</field>
       </fields-in-item>
     </widget>
+    <widget name="SiteOrigin_Widget_Icon_Widget">
+      <fields>
+        <field type="Icon title">title</field>
+        <field type="Icon URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
     <widget name="SiteOrigin_Widget_Image_Widget">
       <fields>
         <field type="Image title">title</field>
@@ -258,18 +466,69 @@
         <field type="Image URL" editor_type="LINK">url</field>
       </fields>
     </widget>
-    <widget name="SiteOrigin_Widget_Features_Widget">
-      <fields-in-item items_of="features">
-        <field type="Feature title">title</field>
-        <field type="Feature text" editor_type="VISUAL">text</field>
-        <field type="Feature icon title">icon_title</field>
-        <field type="Feature more text">more_text</field>
-        <field type="Feature more URL" editor_type="LINK">more_url</field>
+    <widget name="SiteOrigin_Widgets_ImageGrid_Widget">
+      <fields-in-item items_of="images">
+        <field type="Image title">title</field>
+        <field type="Image alt">alt</field>
+        <field type="Image URL" editor_type="LINK">url</field>
       </fields-in-item>
     </widget>
     <widget name="SiteOrigin_Widget_PostCarousel_Widget">
       <fields>
-        <field type="Carousel title">title</field>
+        <field type="Post carousel title">title</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_PriceTable_Widget">
+      <fields>
+        <field type="Price table title">title</field>
+      </fields>
+      <fields-in-item items_of="columns">
+        <field type="Price title">title</field>
+        <field type="Price subtitle">subtitle</field>
+        <field type="Price image title">image_title</field>
+        <field type="Price image alt">image_alt</field>
+        <field type="Price per">per</field>
+        <field type="Price button text">button_text</field>
+        <field type="Price button URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Simple_Masonry_Widget">
+      <fields>
+        <field type="Simple masonry title">title</field>
+      </fields>
+      <fields-in-item items_of="items">
+        <field type="Simple masonry item title">title</field>
+        <field type="Simple masonry item URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Slider_Widget">
+      <fields-in-item items_of="frames">
+        <field type="Slide URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_SocialMediaButtons_Widget">
+      <fields>
+        <field type="Social media buttons title">title</field>
+      </fields>
+      <fields-in-item items_of="networks">
+        <field type="Social Network URL" editor_type="LINK">url</field>
+        <field type="Social Network icon title">icon_title</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Tabs_Widget">
+      <fields>
+        <field type="Tab title">title</field>
+      </fields>
+      <fields-in-item items_of="tabs">
+        <field type="Tabs title">title</field>
+        <field type="Tab content_text" editor_type="VISUAL">content_text</field>
+        <field type="Tab content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Taxonomy_Widget">
+      <fields>
+        <field type="Taxonomy title">title</field>
+        <field type="Taxonomy label">label</field>
       </fields>
     </widget>
     <widget name="SiteOrigin_Widgets_Testimonials_Widget">
@@ -280,6 +539,11 @@
         <field type="Testimonial text" editor_type="VISUAL">text</field>
         <field type="Testimonial URL" editor_type="LINK">url</field>
       </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Video_Widget">
+      <fields>
+        <field type="Video title">title</field>
+      </fields>
     </widget>
   </siteorigin-widgets>
 </wpml-config>
