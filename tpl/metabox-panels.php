@@ -1,10 +1,3 @@
-<?php
-global $post;
-$builder_id = uniqid();
-$builder_type = apply_filters( 'siteorigin_panels_post_builder_type', 'editor_attached', $post, $panels_data );
-$builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array(), $post, $panels_data );
-?>
-
 <div id="siteorigin-panels-metabox"
 	data-builder-type="<?php echo esc_attr( $builder_type ) ?>"
 	data-preview-url="<?php echo $preview_url; ?>"
