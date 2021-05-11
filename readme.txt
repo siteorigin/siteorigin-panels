@@ -97,6 +97,12 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == Changelog ==
 
+= 2.12.1 - 11 May 2021 =
+* Prevented potential repeated rendering of layouts.
+* Moved the Page Builder metabox PHP outside of the metabox template.
+* Added a check for `has_blocks()` before using the function.
+* Resolved potential background display issue when a local and external background is used.
+
 = 2.12.0 - 03 May 2021 =
 * **New Parallax Scrolling!** Existing users can optionally switch to `Modern` at `Settings > Page Builder > General`.
 * ACF: Added widget fields compatibility. `siteorigin_panels_before_widget_form` action is triggered before the widget form is output.
