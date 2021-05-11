@@ -305,6 +305,16 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		global $siteorigin_panels_current_post;
+		// If the post being processed is the same as the last one, don't process it.
+		if (
+			! empty( $siteorigin_panels_current_post ) &&
+			apply_filters( 'siteorigin_panels_renderer_current_post_check', true ) &&
+			$siteorigin_panels_current_post == $post_id
+		) {
+			trigger_error( __( 'Prevented SiteOrigin layout from repeated rendering.', 'siteorigin-panels' ) );
+			return;
+		}
+
 		$old_current_post = $siteorigin_panels_current_post;
 		$siteorigin_panels_current_post = $post_id;
 

@@ -204,6 +204,9 @@ class SiteOrigin_Panels_Admin {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
 		$preview_content = $this->generate_panels_preview( $post->ID, $panels_data );
+		$builder_id = uniqid();
+		$builder_type = apply_filters( 'siteorigin_panels_post_builder_type', 'editor_attached', $post, $panels_data );
+		$builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array(), $post, $panels_data );
 		include plugin_dir_path( __FILE__ ) . '../tpl/metabox-panels.php';
 	}
 
@@ -1378,13 +1381,13 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$post_types = siteorigin_panels_setting( 'post-types' );
-        global $pagenow;
+		global $pagenow;
 		// If the `$post_type` is set to be used by Page Builder for new posts.
 		$is_new_panels_type = $pagenow == 'post-new.php' && in_array( $post_type, $post_types );
 		$use_classic = siteorigin_panels_setting( 'use-classic' );
 		// For existing posts.
 		global $post;
-		if ( ! empty( $post ) ) {
+		if ( function_exists( 'has_blocks' ) && ! empty( $post ) ) {
 			// If the post has blocks just allow `$use_block_editor` to decide.
 			if ( ! has_blocks( $post ) ) {
 				$panels_data = get_post_meta( $post->ID, 'panels_data', true );
