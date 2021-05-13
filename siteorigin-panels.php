@@ -212,10 +212,17 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
 
-		$lazy_load_settings = get_option( 'rocket_lazyload_options' );
-		$load_lazy_load_compat = defined( 'ROCKET_LL_VERSION' ) && ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
+		$load_lazy_load_compat = false;
+		// LazyLoad by WP Rocket.
+		if ( defined( 'ROCKET_LL_VERSION' ) ) {
+			$lazy_load_settings = get_option( 'rocket_lazyload_options' );
+			$load_lazy_load_compat = ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
+		// WP Rocket
+		} elseif ( function_exists( 'get_rocket_option' ) && ! defined( 'DONOTROCKETOPTIMIZE' ) ) {
+			$load_lazy_load_compat = get_rocket_option( 'lazyload' ) && apply_filters( 'do_rocket_lazyload', true );
+		}
 		
-		if ( $load_lazy_load_compat || apply_filters( 'siteorigin_lazyload_compat', false ) ) {
+		if ( apply_filters( 'siteorigin_lazyload_compat', $load_lazy_load_compat ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
 	}
