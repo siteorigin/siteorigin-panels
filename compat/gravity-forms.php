@@ -2,15 +2,20 @@
 /**
  * Disable Gravity Disable Print Form Scirpts.
  *
- * @param $widget
+ * @param $instance
+ * @param $the_widget
+ * @param $widget_class
  *
- * @return $widget
+ * @return $instance
  */
-function siteorigin_gravity_forms_disable_print_scripts( $widget ) {
-	if ( $widget->id_base == 'gform_widget' ) {
+function siteorigin_gravity_forms_disable_print_scripts( $instance, $the_widget, $widget_class ) {
+	if ( $the_widget->id_base == 'gform_widget' ) {
+		$instance['disable_scripts'] = true;
+
+		// Disable print scripts for older versions of Gravity Forms.
 		add_filter( 'gform_disable_print_form_scripts', '__return_true' );
 	}
 
-	return $widget;
+	return $instance;
 }
-add_filter( 'siteorigin_panels_widget_object', 'siteorigin_gravity_forms_disable_print_scripts' );
+add_filter( 'siteorigin_panels_widget_instance', 'siteorigin_gravity_forms_disable_print_scripts', 10, 3 );
