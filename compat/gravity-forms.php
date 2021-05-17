@@ -1,6 +1,6 @@
 <?php
 /**
- * Disable Gravity Disable Print Form Scirpts.
+ * Override Gravity Forms "Disable Print Scripts" setting to prevent missing jQuery error.
  *
  * @param $instance
  * @param $the_widget
@@ -8,7 +8,7 @@
  *
  * @return $instance
  */
-function siteorigin_gravity_forms_disable_print_scripts( $instance, $the_widget, $widget_class ) {
+function siteorigin_gravity_forms_override_disable_print_scripts( $instance, $the_widget, $widget_class ) {
 	if ( $the_widget->id_base == 'gform_widget' ) {
 		$instance['disable_scripts'] = true;
 
@@ -18,4 +18,4 @@ function siteorigin_gravity_forms_disable_print_scripts( $instance, $the_widget,
 
 	return $instance;
 }
-add_filter( 'siteorigin_panels_widget_instance', 'siteorigin_gravity_forms_disable_print_scripts', 10, 3 );
+add_filter( 'siteorigin_panels_widget_instance', 'siteorigin_gravity_forms_override_disable_print_scripts', 10, 3 );
