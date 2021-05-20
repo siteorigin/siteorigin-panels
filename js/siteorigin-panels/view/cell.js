@@ -106,7 +106,7 @@ module.exports = Backbone.View.extend( {
 			helper: function ( e, el ) {
 				var helper = el.clone()
 					.css( {
-						'width': el.outerWidth(),
+						'width': el.outerWidth() + 'px',
 						'z-index': 10000,
 						'position': 'fixed'
 					} )
@@ -178,9 +178,9 @@ module.exports = Backbone.View.extend( {
 				var prevCellClone = previousCell.$el.clone().appendTo( ui.helper ).css( {
 					position: 'absolute',
 					top: '0',
-					width: previousCell.$el.outerWidth(),
+					width: previousCell.$el.outerWidth() + 'px',
 					right: 5,
-					height: previousCell.$el.outerHeight()
+					height: previousCell.$el.outerHeight() + 'px',
 				} );
 				prevCellClone.find( '.resize-handle' ).remove();
 
@@ -203,10 +203,10 @@ module.exports = Backbone.View.extend( {
 					) / containerWidth
 					);
 
-				$( this ).data( 'newCellClone' ).css( 'width', containerWidth * ncw )
+				$( this ).data( 'newCellClone' ).css( 'width', containerWidth * ncw + 'px'  )
 					.find( '.preview-cell-weight' ).html( Math.round( ncw * 1000 ) / 10 );
 
-				$( this ).data( 'prevCellClone' ).css( 'width', containerWidth * pcw )
+				$( this ).data( 'prevCellClone' ).css( 'width', containerWidth * pcw + 'px' )
 					.find( '.preview-cell-weight' ).html( Math.round( pcw * 1000 ) / 10 );
 			},
 			stop: function ( e, ui ) {
@@ -230,10 +230,10 @@ module.exports = Backbone.View.extend( {
 					cellView.row.builder.addHistoryEntry( 'cell_resized' );
 					cellView.model.set( 'weight', ncw );
 					previousCell.model.set( 'weight', pcw );
-					cellView.row.resize();
+					cellView.row.resizeRow();
 				}
 
-				ui.helper.css( 'left', - handle.outerWidth() / 2 );
+				ui.helper.css( 'left', - handle.outerWidth() / 2  + 'px' );
 
 				// Refresh the panels data
 				cellView.row.builder.model.refreshPanelsData();
@@ -282,7 +282,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.refreshSortable();
-		this.row.resize();
+		this.row.resizeRow();
 		this.row.builder.trigger( 'widget_added', view );
 	},
 

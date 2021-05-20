@@ -15,7 +15,10 @@ module.exports = Backbone.View.extend( {
 		'click .title h4': 'editHandler',
 		'touchend .title h4': 'editHandler',
 		'click .actions .widget-duplicate': 'duplicateHandler',
-		'click .actions .widget-delete': 'deleteHandler'
+		'click .actions .widget-delete': 'deleteHandler',
+		'keyup .actions a': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	/**
@@ -57,7 +60,8 @@ module.exports = Backbone.View.extend( {
 		if( ! this.cell.row.builder.supports( 'moveWidget' ) ) {
 			this.$el.addClass('so-widget-no-move');
 		}
-		if( !$.trim( this.$('.actions').html() ).length ) {
+
+		if ( ! this.$('.actions').html().trim().length ) {
 			this.$( '.actions' ).remove();
 		}
 
@@ -182,7 +186,7 @@ module.exports = Backbone.View.extend( {
 		this.cell.row.builder.addHistoryEntry( 'widget_deleted' );
 
 		this.$el.fadeOut( 'fast', function () {
-			this.cell.row.resize();
+			this.cell.row.resizeRow();
 			this.model.destroy();
 			this.cell.row.builder.model.refreshPanelsData();
 			this.remove();

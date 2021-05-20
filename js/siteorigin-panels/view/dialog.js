@@ -16,8 +16,17 @@ module.exports = Backbone.View.extend( {
 
 	events: {
 		'click .so-close': 'closeDialog',
+		'keyup .so-close': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-previous': 'navToPrevious',
+		'keyup .so-nav.so-previous': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-nav.so-next': 'navToNext',
+		'keyup .so-nav.so-next': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initialize: function () {
@@ -133,7 +142,7 @@ module.exports = Backbone.View.extend( {
 		if ( this.parentDialog !== false ) {
 			// Add a link to the parent dialog as a sort of crumbtrail.
 			var dialogParent = $( '<h3 class="so-parent-link"></h3>' ).html( this.parentDialog.text + '<div class="so-separator"></div>' );
-			dialogParent.click( function ( e ) {
+			dialogParent.on( 'click', function( e ) {
 				e.preventDefault();
 				this.closeDialog();
 				this.parentDialog.dialog.openDialog();
@@ -183,7 +192,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var thisDialog = this;
-		tabs.click( function ( e ) {
+		tabs.on( 'click', function( e ) {
 			e.preventDefault();
 			var $$ = $( this );
 
@@ -205,22 +214,26 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		// Trigger a click on the first tab
-		this.$( '.so-sidebar-tabs li a' ).first().click();
+		this.$( '.so-sidebar-tabs li a' ).first().trigger( 'click' );
 		return this;
 	},
 
 	initToolbar: function () {
 		// Trigger simplified click event for elements marked as toolbar buttons.
 		var buttons = this.$( '.so-toolbar .so-buttons .so-toolbar-button' );
-		buttons.click( function ( e ) {
+		buttons.on( 'click keyup', function( e ) {
 			e.preventDefault();
+
+			if ( e.type == 'keyup' && e.which != 13 ) {
+				return;
+			}
 
 			this.trigger( 'button_click', $( e.currentTarget ) );
 		}.bind( this ) );
 
 		// Handle showing and hiding the dropdown list items
 		var $dropdowns = this.$( '.so-toolbar .so-buttons .so-dropdown-button' );
-		$dropdowns.click( function ( e ) {
+		$dropdowns.on( 'click', function( e ) {
 			e.preventDefault();
 			var $dropdownButton = $( e.currentTarget );
 			var $dropdownList = $dropdownButton.siblings( '.so-dropdown-links-wrapper' );
@@ -234,7 +247,7 @@ module.exports = Backbone.View.extend( {
 
 		// Hide dropdown list on click anywhere, unless it's a dropdown option which requires confirmation in it's
 		// unconfirmed state.
-		$( 'html' ).click( function ( e ) {
+		$( 'html' ).on( 'click', function( e ) {
 			this.$( '.so-dropdown-links-wrapper' ).not( '.hidden' ).each( function ( index, el ) {
 				var $dropdownList = $( el );
 				var $trgt = $( e.target );
@@ -255,33 +268,33 @@ module.exports = Backbone.View.extend( {
 	initEditableLabel: function(){
 		var $editElt = this.$( '.so-title-bar .so-title-editable' );
 
-		$editElt.keypress( function ( event ) {
-			var enterPressed = event.type === 'keypress' && event.keyCode === 13;
-			if ( enterPressed ) {
-				// Need to make sure tab focus is on another element, otherwise pressing enter multiple times refocuses
-				// the element and allows newlines.
-				var tabbables = $( ':tabbable' );
-				var curTabIndex = tabbables.index( $editElt );
-				tabbables.eq( curTabIndex + 1 ).focus();
-				// After the above, we're somehow left with the first letter of text selected,
-				// so this removes the selection.
-				window.getSelection().removeAllRanges();
-			}
-			return !enterPressed;
-		} ).blur( function () {
-			var newValue = $editElt.text().replace( /^\s+|\s+$/gm, '' );
-			var oldValue = $editElt.data( 'original-value' ).replace( /^\s+|\s+$/gm, '' );
-			if ( newValue !== oldValue ) {
-				$editElt.text( newValue );
-				this.trigger( 'edit_label', newValue );
-			}
+		$editElt.on( 'keypress', function ( event ) {
+				var enterPressed = event.type === 'keypress' && event.keyCode === 13;
+				if ( enterPressed ) {
+					// Need to make sure tab focus is on another element, otherwise pressing enter multiple times refocuses
+					// the element and allows newlines.
+					var tabbables = $( ':tabbable' );
+					var curTabIndex = tabbables.index( $editElt );
+					tabbables.eq( curTabIndex + 1 ).trigger( 'focus' );
+					// After the above, we're somehow left with the first letter of text selected,
+					// so this removes the selection.
+					window.getSelection().removeAllRanges();
+				}
+				return ! enterPressed;
+			} )
+			.on( 'blur', function () {
+				var newValue = $editElt.text().replace( /^\s+|\s+$/gm, '' );
+				var oldValue = $editElt.data( 'original-value' ).replace( /^\s+|\s+$/gm, '' );
+				if ( newValue !== oldValue ) {
+					$editElt.text( newValue );
+					this.trigger( 'edit_label', newValue );
+				}
 
-		}.bind( this ) );
-
-		$editElt.focus( function() {
-			$editElt.data( 'original-value', $editElt.text() );
-			panels.helpers.utils.selectElementContents( this );
-		} );
+			}.bind( this ) )
+			.on( 'focus', function() {
+				$editElt.data( 'original-value', $editElt.text() );
+				panels.helpers.utils.selectElementContents( this );
+			} );
 	},
 
 	/**
@@ -307,16 +320,20 @@ module.exports = Backbone.View.extend( {
 
 		if ( nextDialog === null ) {
 			nextButton.hide();
-		}
-		else if ( nextDialog === false ) {
+		} else if ( nextDialog === false ) {
 			nextButton.addClass( 'so-disabled' );
+			nextButton.attr( 'tabindex', -1 );
+		} else {
+			nextButton.attr( 'tabindex', 0 );
 		}
 
 		if ( prevDialog === null ) {
 			prevButton.hide();
-		}
-		else if ( prevDialog === false ) {
+		} else if ( prevDialog === false ) {
 			prevButton.addClass( 'so-disabled' );
+			prevButton.attr( 'tabindex', -1 );
+		} else {
+			prevButton.attr( 'tabindex', 0 );
 		}
 	},
 

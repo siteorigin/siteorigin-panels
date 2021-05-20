@@ -14,7 +14,10 @@ module.exports = Backbone.View.extend( {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
-		'click .live-editor-mode': 'mobileToggle'
+		'click .live-editor-mode': 'mobileToggle',
+		'keyup .live-editor-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	initialize: function ( options ) {
@@ -48,16 +51,17 @@ module.exports = Backbone.View.extend( {
 
 		var isMouseDown = false;
 		$( document )
-			.mousedown( function () {
+			.on( 'mousedown', function() {
 				isMouseDown = true;
 			} )
-			.mouseup( function () {
+			.on( 'mouseup', function() {
 				isMouseDown = false;
 			} );
 
 		// Handle highlighting the relevant widget in the live editor preview
 		var liveEditorView = this;
-		this.$el.on( 'mouseenter', '.so-widget-wrapper', function () {
+
+		this.$el.on( 'mouseenter focusin', '.so-widget', function () {
 			var $$ = $( this ),
 				previewWidget = $$.data( 'live-editor-preview-widget' );
 
@@ -67,7 +71,7 @@ module.exports = Backbone.View.extend( {
 			}
 		} );
 
-		this.$el.on( 'mouseleave', '.so-widget-wrapper', function () {
+		this.$el.on( 'mouseleave focusout', '.so-widget', function () {
 			this.resetHighlights();
 		}.bind(this) );
 
@@ -106,6 +110,8 @@ module.exports = Backbone.View.extend( {
 		// Refresh the preview display
 		this.$el.show();
 		this.refreshPreview( this.builder.model.getPanelsData() );
+
+		$( '.live-editor-close' ).trigger( 'focus' );
 
 		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
@@ -156,7 +162,7 @@ module.exports = Backbone.View.extend( {
 	closeAndSave: function(){
 		this.close();
 		// Finds the submit input for saving without publishing draft posts.
-		$('#submitdiv input[type="submit"][name="save"]').click();
+		$( '#submitdiv input[type="submit"][name="save"]' ).trigger( 'click' );
 	},
 
 	/**
@@ -282,7 +288,7 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $('<iframe src="' + url + '" />')
+		this.previewIframe = $( '<iframe src="' + url + '"></iframe>' )
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
@@ -292,7 +298,7 @@ module.exports = Backbone.View.extend( {
 		this.setupPreviewFrame( this.previewIframe );
 
 		// We can use a normal POST form submit
-		var tempForm = $('<form id="soPostToPreviewFrame" method="post" />')
+		var tempForm = $( '<form id="soPostToPreviewFrame" method="post"></form>' )
 			.attr( {
 				id: iframeId,
 				target: this.previewIframe.attr('id'),
@@ -310,7 +316,7 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		tempForm
-			.submit()
+			.trigger( 'submit' )
 			.remove();
 
 		this.previewFrameId++;
@@ -366,30 +372,30 @@ module.exports = Backbone.View.extend( {
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget-wrapper' ).eq( $$.data( 'index' ) );
+						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) );
 						widgetEdit.data( 'live-editor-preview-widget', $$ );
 
 						$$
 							.css( {
 								'cursor': 'pointer'
 							} )
-							.mouseenter( function () {
+							.on( 'mouseenter', function() {
 								widgetEdit.parent().addClass( 'so-hovered' );
 								thisView.highlightElement( $$ );
 							} )
-							.mouseleave( function () {
+							.on( 'mouseleave', function() {
 								widgetEdit.parent().removeClass( 'so-hovered' );
 								thisView.resetHighlights();
 							} )
-							.click( function ( e ) {
+							.on( 'click', function( e ) {
 								e.preventDefault();
 								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).click();
+								widgetEdit.find( '.title h4' ).trigger( 'click' );
 							} );
 					} );
 
 				// Prevent default clicks inside the preview iframe
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).click( function ( e ) {
+				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).on( 'click', function( e ) {
 					e.preventDefault();
 				} );
 

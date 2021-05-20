@@ -24,7 +24,10 @@ module.exports = Backbone.View.extend( {
 		'click .so-tool-button.so-row-add': 'displayAddRowDialog',
 		'click .so-tool-button.so-prebuilt-add': 'displayAddPrebuiltDialog',
 		'click .so-tool-button.so-history': 'displayHistoryDialog',
-		'click .so-tool-button.so-live-editor': 'displayLiveEditor'
+		'click .so-tool-button.so-live-editor': 'displayLiveEditor',
+		'keyup .so-tool-button': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	/* A row collection */
@@ -71,6 +74,13 @@ module.exports = Backbone.View.extend( {
 			prebuilt: new panels.dialog.prebuilt()
 		};
 
+		
+		// Check if we have preview markup available.
+		$panelsMetabox = $( '#siteorigin-panels-metabox' );
+		if ( $panelsMetabox.length ) {
+			this.contentPreview = $.parseHTML( $panelsMetabox.data( 'preview-markup' ) );
+		}
+
 		// Set the builder for each dialog and render it.
 		_.each( this.dialogs, function ( p, i, d ) {
 			d[ i ].setBuilder( builder );
@@ -82,7 +92,7 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model.get( 'rows' ), 'add', this.onAddRow );
 
 		// Reflow the entire builder when ever the
-		$( window ).resize( function ( e ) {
+		$( window ).on( 'resize', function( e ) {
 			if ( e.target === window ) {
 				builder.trigger( 'builder_resize' );
 			}
@@ -110,7 +120,6 @@ module.exports = Backbone.View.extend( {
 				this.displayAttachedBuilder( { confirm: false } );
 			}, this );
 		}
-
 		return this;
 	},
 
@@ -225,7 +234,7 @@ module.exports = Backbone.View.extend( {
 		// Handle switching between the page builder and other tabs
 		$( '#wp-content-wrap .wp-editor-tabs' )
 		.find( '.wp-switch-editor' )
-		.click( function ( e ) {
+		.on( 'click', function( e ) {
 			e.preventDefault();
 			$( '#wp-content-editor-container' ).show();
 
@@ -238,7 +247,7 @@ module.exports = Backbone.View.extend( {
 		} ).end()
 		.append(
 			$( '<button type="button" id="content-panels" class="hide-if-no-js wp-switch-editor switch-panels">' + metabox.find( 'h2.hndle' ).html() + '</button>' )
-			.click( function ( e ) {
+			.on( 'click', function( e ) {
 				if ( thisView.displayAttachedBuilder( { confirm: true } ) ) {
 					e.preventDefault();
 				}
@@ -247,8 +256,12 @@ module.exports = Backbone.View.extend( {
 
 		// Switch back to the standard editor
 		if ( this.supports( 'revertToEditor' ) ) {
-			metabox.find( '.so-switch-to-standard' ).click( function ( e ) {
+			metabox.find( '.so-switch-to-standard' ).on( 'click keyup', function( e ) {
 				e.preventDefault();
+
+				if ( e.type == "keyup" && e.which != 13 ) {
+					return
+				}
 
 				if ( !confirm( panelsOptions.loc.confirm_stop_builder ) ) {
 					return;
@@ -263,7 +276,7 @@ module.exports = Backbone.View.extend( {
 				metabox.hide();
 
 				// Resize to trigger reflow of WordPress editor stuff
-				$( window ).resize();
+				$( window ).trigger( 'resize');
 
 				thisView.attachedVisible = false;
 				thisView.trigger( 'hide_builder' );
@@ -292,7 +305,7 @@ module.exports = Backbone.View.extend( {
 					width: '100%',
 					position: 'absolute'
 				} );
-				thisView.$el.css( 'padding-top', toolbar.outerHeight() );
+				thisView.$el.css( 'padding-top', toolbar.outerHeight() + 'px' );
 				return;
 			}
 
@@ -312,26 +325,26 @@ module.exports = Backbone.View.extend( {
 					// The toolbar needs to stick to the top, over the interface
 					toolbar.css( {
 						top: $( '#wpadminbar' ).outerHeight(),
-						left: thisView.$el.offset().left,
-						width: thisView.$el.outerWidth(),
+						left: thisView.$el.offset().left + 'px',
+						width: thisView.$el.outerWidth() + 'px',
 						position: 'fixed'
 					} );
 				}
 			} else {
 				// The toolbar needs to be at the top or bottom of the interface
 				toolbar.css( {
-					top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 ),
+					top: Math.min( Math.max( newTop, 0 ), thisView.$el.outerHeight() - toolbar.outerHeight() + 20 )  + 'px',
 					left: 0,
 					width: '100%',
 					position: 'absolute'
 				} );
 			}
 
-			thisView.$el.css( 'padding-top', toolbar.outerHeight() );
+			thisView.$el.css( 'padding-top', toolbar.outerHeight() + 'px' );
 		};
 
 		this.on( 'builder_resize', stickToolbar, this );
-		$( document ).scroll( stickToolbar );
+		$( document ).on( 'scroll', stickToolbar );
 		stickToolbar();
 
 		this.trigger( 'builder_attached_to_editor' );
@@ -372,8 +385,8 @@ module.exports = Backbone.View.extend( {
 		this.metabox.show().find( '> .inside' ).show();
 
 		// Triggers full refresh
-		$( window ).resize();
-		$( document ).scroll();
+		$( window ).trigger( 'resize' );
+		$( document ).trigger( 'scroll' );
 
 		// Make sure the word count is visible
 		this.attachedVisible = true;
@@ -548,7 +561,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.refreshSortable();
-		rowView.resize();
+		rowView.resizeRow();
 		this.trigger( 'row_added' );
 	},
 
@@ -731,8 +744,7 @@ module.exports = Backbone.View.extend( {
 	handleContentChange: function () {
 
 		// Make sure we actually need to copy content.
-		if ( panelsOptions.copy_content && this.attachedToEditor && this.$el.is( ':visible' ) ) {
-
+		if ( panelsOptions.copy_content	&& ( panels.helpers.editor.isBlockEditor() || panels.helpers.editor.isClassicEditor( this ) ) ) {
 			var panelsData = this.model.getPanelsData();
 			if ( !_.isEmpty( panelsData.widgets ) ) {
 				// We're going to create a copy of page builder content into the post content
@@ -835,8 +847,8 @@ module.exports = Backbone.View.extend( {
 					event = events[ i ];
 
 					// Wrap the call
-					$( window ).unbind( 'scroll', event.handler );
-					$( window ).bind( 'scroll', function ( e ) {
+					$( window ).off( 'scroll', event.handler );
+					$( window ).on( 'scroll', function( e ) {
 						if ( !this.attachedVisible ) {
 							event.handler( e );
 						}

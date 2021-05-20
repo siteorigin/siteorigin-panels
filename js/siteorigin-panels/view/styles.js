@@ -4,6 +4,14 @@ module.exports = Backbone.View.extend( {
 
 	stylesLoaded: false,
 
+	events: {
+		'keyup .so-image-selector': function( e ) {
+			if ( e.which == 13 ) {
+				this.$el.find( '.select-image' ).trigger( 'click' );
+			}
+		},
+	},
+
 	initialize: function () {
 
 	},
@@ -99,7 +107,7 @@ module.exports = Backbone.View.extend( {
 		this.$( '.style-section-wrapper' ).each( function () {
 			var $s = $( this );
 
-			$s.find( '.style-section-head' ).click( function ( e ) {
+			$s.find( '.style-section-head' ).on( 'click keypress', function( e ) {
 				e.preventDefault();
 				$s.find( '.style-section-fields' ).slideToggle( 'fast' );
 			} );
@@ -120,7 +128,7 @@ module.exports = Backbone.View.extend( {
 			var frame = null;
 			var $s = $( this );
 
-			$s.find( '.so-image-selector' ).click( function ( e ) {
+			$s.find( '.so-image-selector' ).on( 'click', function( e ) {
 				e.preventDefault();
 
 				if ( frame === null ) {
@@ -164,12 +172,14 @@ module.exports = Backbone.View.extend( {
 					} );
 				}
 
-				frame.open();
+				// Prevent loop that occurs if you close the frame using the close button while focused on the trigger.
+				$( this ).next().focus();
 
+				frame.open();
 			} );
 
 			// Handle clicking on remove
-			$s.find( '.remove-image' ).click( function ( e ) {
+			$s.find( '.remove-image' ).on( 'click', function( e ) {
 				e.preventDefault();
 				$s.find( '.current-image' ).css( 'background-image', 'none' );
 				$s.find( '.so-image-selector > input' ).val( '' );
@@ -185,8 +195,8 @@ module.exports = Backbone.View.extend( {
 			var unit = $$.find( 'select' );
 			var hidden = $$.find( 'input[type="hidden"]' );
 
-			text.focus( function(){
-				$(this).select();
+			text.on( 'focus', function(){
+				$( this ).trigger( 'select' );
 			} );
 
 			/**
@@ -288,8 +298,8 @@ module.exports = Backbone.View.extend( {
 			};
 
 			// Set the value when ever anything changes
-			text.change( setValue );
-			unit.change( setValue );
+			text.on( 'change', setValue );
+			unit.on( 'change', setValue );
 		} );
 	}
 

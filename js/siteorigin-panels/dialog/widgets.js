@@ -12,7 +12,11 @@ module.exports = panels.view.dialog.extend( {
 	events: {
 		'click .so-close': 'closeDialog',
 		'click .widget-type': 'widgetClickHandler',
-		'keyup .so-sidebar-search': 'searchHandler'
+		'keyup .so-sidebar-search': 'searchHandler',
+		'keyup .widget-type-wrapper': 'searchHandler',
+		'keyup .widget-type-wrapper': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 	},
 
 	/**
@@ -25,9 +29,10 @@ module.exports = panels.view.dialog.extend( {
 			this.filterWidgets( this.filter );
 		}, this );
 
+
 		this.on( 'open_dialog_complete', function () {
 			// Clear the search and re-filter the widgets when we open the dialog
-			this.$( '.so-sidebar-search' ).val( '' ).focus();
+			this.$( '.so-sidebar-search' ).val( '' ).trigger( 'focus' );
 			this.balanceWidgetHeights();
 		} );
 
@@ -50,7 +55,7 @@ module.exports = panels.view.dialog.extend( {
 				widget.icon = 'dashicons dashicons-admin-generic';
 			}
 
-			$( '<span class="widget-icon" />' ).addClass( widget.icon ).prependTo( $w.find( '.widget-type-wrapper' ) );
+			$( '<span class="widget-icon"></span>' ).addClass( widget.icon ).prependTo( $w.find( '.widget-type-wrapper' ) );
 
 			$w.data( 'class', widget.class ).appendTo( this.$( '.widget-type-list' ) );
 		}, this );
@@ -68,7 +73,7 @@ module.exports = panels.view.dialog.extend( {
 		this.initTabs();
 
 		var thisDialog = this;
-		$( window ).resize( function () {
+		$( window ).on( 'resize', function() {
 			thisDialog.balanceWidgetHeights();
 		} );
 	},
@@ -100,7 +105,7 @@ module.exports = panels.view.dialog.extend( {
 		if( e.which === 13 ) {
 			var visibleWidgets = this.$( '.widget-type-list .widget-type:visible' );
 			if( visibleWidgets.length === 1 ) {
-				visibleWidgets.click();
+				visibleWidgets.trigger( 'click' );
 			}
 		}
 		else {

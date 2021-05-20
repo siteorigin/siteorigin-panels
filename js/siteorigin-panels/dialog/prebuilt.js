@@ -19,7 +19,14 @@ module.exports = panels.view.dialog.extend( {
 		'keyup .so-sidebar-search': 'searchHandler',
 
 		// The directory items
-		'click .so-screenshot, .so-title': 'directoryItemClickHandler'
+		'click .so-screenshot, .so-title': 'directoryItemClickHandler',
+		'keyup .so-directory-item': 'clickTitleOnEnter',
+	},
+
+	clickTitleOnEnter: function( e ) {
+		if ( e.which == 13 ) {
+			$( e.target ).find( '.so-title' ).trigger( 'click' );
+		}
 	},
 
 	/**
@@ -29,11 +36,14 @@ module.exports = panels.view.dialog.extend( {
 		var thisView = this;
 
 		this.on( 'open_dialog', function () {
-			thisView.$( '.so-sidebar-tabs li a' ).first().click();
+			thisView.$( '.so-sidebar-tabs li a' ).first().trigger( 'click' );
 			thisView.$( '.so-status' ).removeClass( 'so-panels-loading' );
 		} );
 
-		this.on( 'button_click', this.toolbarButtonClick, this );
+		this.on( 'open_dialog_complete', function () {
+			// Clear the search and re-filter the widgets when we open the dialog
+			this.$( '.so-sidebar-search' ).val( '' ).trigger( 'focus' );
+		} );
 	},
 
 	/**
@@ -41,7 +51,7 @@ module.exports = panels.view.dialog.extend( {
 	 */
 	render: function () {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-prebuilt' ).html(), {} ) );
-
+		this.on( 'button_click', this.toolbarButtonClick, this );
 		this.initToolbar();
 	},
 
@@ -118,7 +128,7 @@ module.exports = panels.view.dialog.extend( {
 					uploadUi.find( '.progress-precent' ).css( 'width', '0%' );
 				},
 				FilesAdded: function ( uploader ) {
-					uploadUi.find( '.file-browse-button' ).blur();
+					uploadUi.find( '.file-browse-button' ).trigger( 'blur' );
 					uploadUi.find( '.drag-upload-area' ).removeClass( 'file-dragover' );
 					uploadUi.find( '.progress-bar' ).fadeIn( 'fast' );
 					thisView.$( '.js-so-selected-file' ).text( panelsOptions.loc.prebuilt_loading );
@@ -166,13 +176,13 @@ module.exports = panels.view.dialog.extend( {
 			} );
 
 		// Handle exporting the file
-		c.find( '.so-export' ).submit( function ( e ) {
+		c.find( '.so-export' ).on( 'submit', function( e ) {
 			var $$ = $( this );
 			var panelsData = thisView.builder.model.getPanelsData();
 			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
 			if ( ! postName ) {
 				postName = $('input[name="post_ID"]').val();
-			} else if ( typeof wp.data != 'undefined' ) {
+			} else if ( $( '.block-editor-page' ).length ) {
 				var currentBlockPosition = thisView.getCurrentBlockPosition();
 				if ( currentBlockPosition >= 0 ) {
 					postName += '-' + currentBlockPosition; 
@@ -217,7 +227,7 @@ module.exports = panels.view.dialog.extend( {
 		if ( type.match('^directory-') && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
-			c.find( '.so-panels-enable-directory' ).click( function ( e ) {
+			c.find( '.so-panels-enable-directory' ).on( 'click', function( e ) {
 				e.preventDefault();
 				// Sent the query to enable the directory, then enable the directory
 				$.get(
@@ -261,7 +271,7 @@ module.exports = panels.view.dialog.extend( {
 				if ( page <= 1 ) {
 					prev.addClass( 'button-disabled' );
 				} else {
-					prev.click( function ( e ) {
+					prev.on( 'click', function( e ) {
 						e.preventDefault();
 						thisView.displayLayoutDirectory( search, page - 1, thisView.currentTab );
 					} );
@@ -270,7 +280,7 @@ module.exports = panels.view.dialog.extend( {
 				if ( page === data.max_num_pages || data.max_num_pages === 0 ) {
 					next.addClass( 'button-disabled' );
 				} else {
-					next.click( function ( e ) {
+					next.on( 'click', function( e ) {
 						e.preventDefault();
 						thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
 					} );
@@ -283,7 +293,7 @@ module.exports = panels.view.dialog.extend( {
 
 					if ( $$.data( 'src' ) !== '' ) {
 						// Set the initial height
-						var $img = $( '<img/>' ).attr( 'src', $$.data( 'src' ) ).load( function () {
+						var $img = $( '<img/>' ).attr( 'src', $$.data( 'src' ) ).on( 'load', function () {
 							$a.removeClass( 'so-loading' ).css( 'height', 'auto' );
 							$img.appendTo( $a ).hide().fadeIn( 'fast' );
 						} );

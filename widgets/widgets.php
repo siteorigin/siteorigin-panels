@@ -183,10 +183,10 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 					break;
 				case 'textarea' :
 					if(empty($field_args['height'])) $field_args['height'] = 6;
-					?><textarea class="widefat" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" rows="<?php echo intval($field_args['height']) ?>"><?php echo esc_textarea($instance[$field_id]) ?></textarea><?php
+					?><textarea class="widefat" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" rows="<?php echo (int) $field_args['height']; ?>"><?php echo esc_textarea($instance[$field_id]) ?></textarea><?php
 					break;
 				case 'number' :
-					?><input type="number" class="small-text" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" value="<?php echo floatval($instance[$field_id]) ?>" /><?php
+					?><input type="number" class="small-text" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" value="<?php echo (float) $instance[$field_id]; ?>" /><?php
 					break;
 				case 'checkbox' :
 					?><input type="checkbox" class="small-text" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" <?php checked(!empty($instance[$field_id])) ?>/><?php
