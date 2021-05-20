@@ -212,6 +212,12 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
 
+
+		// Compatibility with Gravity Forms.
+		if ( class_exists( 'GFCommon' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/gravity-forms.php';
+		}
+
 		$load_lazy_load_compat = false;
 		// LazyLoad by WP Rocket.
 		if ( defined( 'ROCKET_LL_VERSION' ) ) {

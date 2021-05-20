@@ -496,6 +496,9 @@ class SiteOrigin_Panels_Renderer {
 		$the_widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
 		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class, $instance );
 
+		// Allow other themes/plugins to override the instance.
+		$instance = apply_filters( 'siteorigin_panels_widget_instance', $instance, $the_widget, $widget_class );
+
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 			
