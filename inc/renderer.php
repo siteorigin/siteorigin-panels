@@ -305,8 +305,9 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		global $siteorigin_panels_current_post;
-		// If the post being processed is the same as the last one, don't process it.
+		// If $panels_data is empty, and the current post being processed is the same as the last one, don't process it.
 		if (
+			empty( $panels_data ) &&
 			! empty( $siteorigin_panels_current_post ) &&
 			apply_filters( 'siteorigin_panels_renderer_current_post_check', true ) &&
 			$siteorigin_panels_current_post == $post_id
