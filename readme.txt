@@ -103,6 +103,12 @@ SiteOrigin Premium also includes access to our next-level email support service,
 
 == Changelog ==
 
+= 2.12.2 - 21 May 2021 =
+* ACF: Added a check to ensure 5.7.10+ is active before loading Page Builder compatibility.
+* Lazy Load: Added support for the Lazy Load by WP Rocket plugin.
+* Gravity Forms: Added compatibility to ensure conditional forms function normally when added via the Form widget.
+* Developer: Stopped checking for repeated rendering if `$panels_data` was supplied.
+
 = 2.12.1 - 11 May 2021 =
 * Prevented potential repeated rendering of layouts.
 * Moved the Page Builder metabox PHP outside of the metabox template.
