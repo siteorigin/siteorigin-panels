@@ -95,6 +95,12 @@ Page Builder is actively developed and updated, so generally I'd recommend that 
 
 We've tried to ensure that Page Builder is compatible with most plugin widgets. It's best to just download Page Builder and test for yourself.
 
+== SiteOrigin Premium ==
+
+[SiteOrigin Premium](https://siteorigin.com/downloads/premium/) enhances Page Builder with a vast array of additional features and settings. Take your layouts to the next level.
+
+SiteOrigin Premium also includes access to our next-level email support service, perfect for those times when you need fast and effective technical support.
+
 == Changelog ==
 
 = 2.12.1 - 11 May 2021 =
