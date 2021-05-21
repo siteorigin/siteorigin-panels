@@ -305,8 +305,9 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		global $siteorigin_panels_current_post;
-		// If the post being processed is the same as the last one, don't process it.
+		// If $panels_data is empty, and the current post being processed is the same as the last one, don't process it.
 		if (
+			empty( $panels_data ) &&
 			! empty( $siteorigin_panels_current_post ) &&
 			apply_filters( 'siteorigin_panels_renderer_current_post_check', true ) &&
 			$siteorigin_panels_current_post == $post_id
@@ -494,6 +495,9 @@ class SiteOrigin_Panels_Renderer {
 		// Load the widget from the widget factory and give themes and plugins a chance to provide their own
 		$the_widget = SiteOrigin_Panels::get_widget_instance( $widget_class );
 		$the_widget = apply_filters( 'siteorigin_panels_widget_object', $the_widget, $widget_class, $instance );
+
+		// Allow other themes/plugins to override the instance.
+		$instance = apply_filters( 'siteorigin_panels_widget_instance', $instance, $the_widget, $widget_class );
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();

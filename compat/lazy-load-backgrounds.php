@@ -22,7 +22,7 @@ function siteorigin_apply_lazy_load_attributes( $attributes, $style ) {
 			$attributes['data-bg'] = $url[0];
 
 			// WP Rocket uses a different lazy load class.
-			if ( defined( 'ROCKET_LL_VERSION' ) ) {
+			if ( defined( 'ROCKET_LL_VERSION' ) || function_exists( 'get_rocket_option' ) ) {
 				$attributes['class'][] = 'rocket-lazyload';
 			}
 
