@@ -279,10 +279,10 @@ class SiteOrigin_Panels_Styles_Admin {
 				?><input type="text" name="<?php echo esc_attr( $field_name ) ?>"
 				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
 				break;
-			// Adds a number finput field
+
 			case 'number' :
-				?><input type="number" name="<?php echo esc_attr( $field_name ) ?>"
-				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
+				?><input type="number" name="<?php echo esc_attr( $field_name ); ?>"
+				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
 				break;
 
 			case 'checkbox' :

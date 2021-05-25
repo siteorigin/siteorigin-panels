@@ -161,8 +161,6 @@ class SiteOrigin_Panels_Renderer {
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
-			
-			// Gets rows set collapse point
 			// Let other themes and plugins change the row collapse point.
 			$collapse_point = apply_filters( 'siteorigin_panels_css_row_collapse_point', '', $row, $ri, $panels_data );
 
@@ -216,7 +214,7 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				// Mobile Responsive
-				// Uses rows custom collapse point or sets mobile collapse point set on settings page
+				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-no-style',
 					'.panel-has-style > .panel-row-style'
@@ -224,16 +222,14 @@ class SiteOrigin_Panels_Renderer {
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-				), (($collapse_point != '') ? $collapse_point : $panels_mobile_width));
+				), $collapse_point != '' ? $collapse_point : $panels_mobile_width );
 
-				// Uses rows custom collapse point or sets mobile collapse point set on settings page
+				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_cell_css( $post_id, $ri, false, '', array(
 					'width' => '100%',
 					'margin-right' => 0,
-				), (($collapse_point != '') ? $collapse_point : $panels_mobile_width));
+				), $collapse_point != '' ? $collapse_point : $panels_mobile_width );
 
-							
-				
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
