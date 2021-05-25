@@ -41,9 +41,6 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
 
-		// Add in collapse point filter
-		add_filter( 'siteorigin_panels_css_row_collapse_point', array( $this, 'filter_row_collapse_point' ), 10, 2 );
-
 		// New Parallax.
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
 			add_filter( 'siteorigin_panels_inside_row_before', array( $this, 'add_parallax' ), 10, 2 );
@@ -255,15 +252,6 @@ class SiteOrigin_Panels_Styles {
 				'full-stretched-padded' => __( 'Full Width Stretched Padded', 'siteorigin-panels' ),
 			),
 			'priority' => 10,
-		);
-
-		// Add in collapse point input field
-		$fields['collapse_point'] = array(
-			'name'        => __( 'Row Collapse Point', 'siteorigin-panels' ),
-			'type'        => 'number',	
-			'group'       => 'layout',
-			'description' => sprintf( __( 'Row Collapse point. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'mobile-width' )),
-			'priority'    => 11,
 		);
 
 		$fields['collapse_behaviour'] = array(
@@ -822,22 +810,6 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		return $gutter;
-	}
-
-	/**
-	 * Add in custom styles for a row's collapse point
-	 *
-	 * @param $point
-	 * @param $grid
-	 *
-	 * @return mixed
-	 */
-	static function filter_row_collapse_point( $collapse_point, $grid ) {
-		if ( ! empty( $grid['style']['collapse_point'] ) ) {
-			$collapse_point = $grid['style']['collapse_point'];
-		}
-
-		return $collapse_point;
 	}
 	
 	/**
