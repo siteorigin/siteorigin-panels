@@ -355,8 +355,12 @@
         <field type="Price image title">image_title</field>
         <field type="Price image alt">image_alt</field>
         <field type="Price per">per</field>
-        <field type="Price button text">button_text</field>
+        <field type="Price button text">button</field>
         <field type="Price button URL" editor_type="LINK">url</field>
+      </fields-in-item>
+      <fields-in-item items_of="columns>features">
+        <field type="Feature text">text</field>
+        <field type="Feature hover text">hover</field>
       </fields-in-item>
     </widget>
     <widget name="SiteOrigin_Widget_Simple_Masonry_Widget">
