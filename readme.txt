@@ -131,6 +131,7 @@ SiteOrigin Premium also includes access to our next-level email support service,
 * SiteOrigin Layout Block: Prevent an empty layout from being rendered.
 * Block Editor: Added support for automatic excerpt generation if the first post block is a SiteOrigin Layout Block.
 * Block Editor: Resolved duplicate Add SiteOrigin Layout button.
+* Accessibility: Implemented keyboard navigation for the Widgets Bundle admin interface. You can now tab through all fields and settings, and make changes without a mouse.
 * Developer: Ensured prebuilt layout compatibility with JSON MIME type.
 * Developer: Updated depreciated jQuery `bind` usage.
 * Developer: Replaced older-style PHP type conversion functions with type casts.
