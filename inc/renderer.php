@@ -214,6 +214,7 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				// Mobile Responsive
+				$collapse_point = ! empty( $collapse_point ) ? $collapse_point : $panels_mobile_width;
 				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-no-style',
@@ -222,13 +223,13 @@ class SiteOrigin_Panels_Renderer {
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-				), $collapse_point != '' ? $collapse_point : $panels_mobile_width );
+				), $collapse_point );
 
 				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_cell_css( $post_id, $ri, false, '', array(
 					'width' => '100%',
 					'margin-right' => 0,
-				), $collapse_point != '' ? $collapse_point : $panels_mobile_width );
+				), $collapse_point );
 
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
@@ -243,7 +244,7 @@ class SiteOrigin_Panels_Renderer {
 								$panels_data,
 								$post_id
 							)
-						), $panels_mobile_width );
+						), $collapse_point );
 					}
 				}
 				
@@ -251,7 +252,7 @@ class SiteOrigin_Panels_Renderer {
 					// If we need a different bottom margin for
 					$css->add_row_css( $post_id, $ri, '', array(
 						'margin-bottom' => $panels_mobile_margin_bottom
-					), $panels_mobile_width );
+					), $collapse_point );
 				}
 					
 				
