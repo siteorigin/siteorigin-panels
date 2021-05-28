@@ -40,6 +40,10 @@ module.exports = Backbone.View.extend( {
 			builderType: args.builderType
 		};
 
+		if ( stylesType === 'widget' ) {
+			postArgs.widget = this.model.get( 'class' );
+		}
+
 		if ( stylesType === 'cell') {
 			postArgs.index = args.index;
 		}
