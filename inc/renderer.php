@@ -161,12 +161,16 @@ class SiteOrigin_Panels_Renderer {
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
 
+			// Let other themes and plugins change the row collapse point.
+			$collapse_point = apply_filters( 'siteorigin_panels_css_row_collapse_point', '', $row, $ri, $panels_data );
+
 			if ( $settings['responsive'] && empty( $row['style']['collapse_behaviour'] ) ) {
 				// The default collapse behaviour
 				if (
 					$settings['tablet-layout'] &&
 					$cell_count >= 3 &&
-					$panels_tablet_width > $panels_mobile_width
+					$panels_tablet_width > $panels_mobile_width &&
+					$collapse_point != ''
 				) {
 					// Tablet responsive css for the row
 
@@ -210,6 +214,8 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				// Mobile Responsive
+				$collapse_point = ! empty( $collapse_point ) ? $collapse_point : $panels_mobile_width;
+				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-no-style',
 					'.panel-has-style > .panel-row-style'
@@ -217,14 +223,14 @@ class SiteOrigin_Panels_Renderer {
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'flex-direction'         => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
-				), $panels_mobile_width );
+				), $collapse_point );
 
+				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_cell_css( $post_id, $ri, false, '', array(
 					'width' => '100%',
 					'margin-right' => 0,
-				), $panels_mobile_width );
-				
-				
+				), $collapse_point );
+
 				foreach ( $row['cells'] as $ci => $cell ) {
 					if ( ( $collapse_order == 'left-top' && $ci != $cell_count - 1 ) || ( $collapse_order == 'right-top' && $ci !== 0 ) ) {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
@@ -238,7 +244,7 @@ class SiteOrigin_Panels_Renderer {
 								$panels_data,
 								$post_id
 							)
-						), $panels_mobile_width );
+						), $collapse_point );
 					}
 				}
 				
@@ -246,7 +252,7 @@ class SiteOrigin_Panels_Renderer {
 					// If we need a different bottom margin for
 					$css->add_row_css( $post_id, $ri, '', array(
 						'margin-bottom' => $panels_mobile_margin_bottom
-					), $panels_mobile_width );
+					), $collapse_point );
 				}
 					
 				
