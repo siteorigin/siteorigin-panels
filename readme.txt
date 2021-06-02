@@ -107,6 +107,10 @@ SiteOrigin Premium also includes access to our next-level email support service,
 
 == Changelog ==
 
+= 2.12.3 - 03 June 2021 =
+* Developer: Added the ability to filter fields based on the widget the user is editing using the `siteorigin_panels_widget_style_fields` filter.
+* Developer: Added the ability to create individual row collapse points using the `siteorigin_panels_css_row_collapse_point` filter.
+
 = 2.12.2 - 21 May 2021 =
 * ACF: Added a check to ensure 5.7.10+ is active before loading Page Builder compatibility.
 * Lazy Load: Added support for WP Rocket Lazy Load.
