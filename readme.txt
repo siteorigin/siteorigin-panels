@@ -22,31 +22,31 @@ We've created an intuitive interface that looks just like WordPress itself. It's
 
 Page Builder works with standard WordPress widgets, so you'll always find the widget you need. We've created the [SiteOrigin Widgets Bundle](https://wordpress.org/plugins/so-widgets-bundle/) to give you all the most common widgets, and with a world of plugins out there, you'll always find the widget you need.
 
-= It Works With Your Theme. =
+= It Works With Your Theme =
 
 Page Builder gives you complete freedom to choose any WordPress theme you like. It's not a commitment to a single theme or theme developer. The advantage is that you're free to change themes as often as you like. Your content will always come along with you.
 
 We've also made some fantastic [free themes](https://siteorigin.com/theme/) that work well with Page Builder.
 
-= No Coding Required. =
+= No Coding Required =
 
 Page Builder's simple drag and drop interface means you'll never need to write a single line of code. Page Builder generates all the highly efficient code for you.
 
 We don't limit you with a set of pre-defined row layouts. Page Builder gives you complete flexibility. You can choose the exact number of columns for each row and the precise weight of each column - down to the decimal point. This flexibility is all possible using our convenient row builder. And, if you're not sure what you like, the Row Builder will guide you towards beautifully proportioned content using advanced ratios.
 
-= Live Editing. =
+= Live Editing =
 
 Page Builder supports live editing. This tool lets you see your content and edit widgets in real-time. It's the fastest way to adjust your content quickly and easily.
 
-= History Browser. =
+= History Browser =
 
 This tool lets you roll forward and back through your changes. It gives you the freedom to experiment with different layouts and content without the fear of breaking your content.
 
-= Row and Widget Styles. =
+= Row and Widget Styles =
 
 Row and widget styles give you all the control you need to make your content uniquely your own. Change attributes like paddings, background colors, and column spacing. You can also enter custom CSS and CSS classes if you need even finer-grained control.
 
-= It's Free, and Always Will Be. =
+= It's Free, and Always Will Be =
 
 Page Builder is our commitment to the democratization of content creation. Like WordPress, Page Builder is, and always will be free. We'll continue supporting and developing it for many years to come. It'll only get better from here.
 
@@ -61,6 +61,10 @@ Read the [Page Builder developer docs](https://siteorigin.com/docs/page-builder/
 = Available In 32 Languages =
 
 Through the efforts of both professional translators and our community, Page Builder is available in the following languages: Afrikaans, Bulgarian, Chinese (China), Chinese (Taiwan), Croatian, Czech, Danish, Dutch, Dutch (Belgium), English (Australia), English (Canada), English (New Zealand), English (UK), English (US), Finnish, French (France), Galician, Georgian, German, Hebrew, Italian, Japanese, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, Spanish (Colombia), Spanish (Spain), Spanish (Venezuela), Swedish, Turkish, and Ukrainian.
+
+= Accessibility Ready =
+
+Page Builder is accessibility ready. Tab through all form fields and settings, make changes without using a mouse.
 
 == Installation ==
 
