@@ -280,6 +280,11 @@ class SiteOrigin_Panels_Styles_Admin {
 				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
 				break;
 
+			case 'number' :
+				?><input type="number" name="<?php echo esc_attr( $field_name ); ?>"
+				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
+				break;
+
 			case 'checkbox' :
 				$current = (bool) $current;
 				?>
