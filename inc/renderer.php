@@ -170,7 +170,7 @@ class SiteOrigin_Panels_Renderer {
 					$settings['tablet-layout'] &&
 					$cell_count >= 3 &&
 					$panels_tablet_width > $panels_mobile_width &&
-					$collapse_point != ''
+					empty( $collapse_point )
 				) {
 					// Tablet responsive css for the row
 
