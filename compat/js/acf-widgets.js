@@ -1,5 +1,5 @@
 ( function( $ ) {
-	$( document ).on( 'panelsopen', function(e) {
+	$( document ).on( 'panelsopen', function() {
 		setTimeout( function() {
 			acf.doAction( 'append', $( '.so-content' ) );
 		}, 1250 )
