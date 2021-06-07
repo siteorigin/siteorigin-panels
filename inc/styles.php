@@ -481,7 +481,7 @@ class SiteOrigin_Panels_Styles {
 					array(
 						'data-siteorigin-parallax' => 'true',
 						'loading' => 'eager',
-					),
+					)
 				);
 
 				if ( ! empty( $image_html ) ) {
