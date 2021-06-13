@@ -76,9 +76,8 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		return $new;
 	}
 	
-	function form( $instance ){
-		
-		if ( ! is_admin() ) {
+	function form( $instance ){		
+		if ( ! is_admin() && ! defined( 'REST_REQUEST' ) ) {
 			?>
 			<p>
 				<?php _e( 'This widget can currently only be used in the WordPress admin interface.', 'siteorigin-panels' ) ?>
