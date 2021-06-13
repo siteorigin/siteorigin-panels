@@ -85,6 +85,14 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			return $new;
 		}
 	}
+
+	private static function is_legacy_widget_block_preview() {
+		return isset( $_GET['legacy-widget-preview'] ) && $_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-postloop';
+	}
+
+	private static function is_layout_block_preview() {
+		return isset( $_POST['action'] ) && $_POST['action'] == 'so_panels_layout_block_preview';
+	}
 	
 	/**
 	 * @param array $args
@@ -92,10 +100,12 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 */
 	function widget( $args, $instance ) {
 		if( empty( $instance['template'] ) ) return;
-		// The Post Loop widget should only preview in WP Admin if it's Layout Block preview.
-		if ( is_admin() && ! ( isset( $_POST['action'] ) && $_POST['action'] == 'so_panels_layout_block_preview' ) ) {
+
+		// The Post Loop widget should only preview in WP Admin if it's a Layout Block preview, or a legacy Widget Block preview.
+		if ( is_admin() && ! self::is_legacy_widget_block_preview() && ! self::is_layout_block_preview() ) {
 			 return;
 		}
+
 		static $depth = 0;
 		$depth++;
 		if( $depth > 1 ) {
