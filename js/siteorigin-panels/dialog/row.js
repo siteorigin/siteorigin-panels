@@ -132,7 +132,7 @@ module.exports = panels.view.dialog.extend({
 			this.$('.so-buttons .so-delete').remove();
 		}
 
-		if (!_.isUndefined(this.model)) {
+		if ( ! _.isUndefined( this.model ) && this.dialogType == 'edit' ) {
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
 			if ( this.model.has( 'ratio' ) ) {
@@ -203,12 +203,14 @@ module.exports = panels.view.dialog.extend({
 		};
 
 		// Set the initial value of the cell field.
-		this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
-		if ( this.model.has( 'ratio' ) ) {
-			this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
-		}
-		if ( this.model.has( 'ratio_direction' ) ) {
-			this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
+		if ( this.dialogType == 'edit' ) {
+			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
+			if ( this.model.has( 'ratio' ) ) {
+				this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
+			}
+			if ( this.model.has( 'ratio_direction' ) ) {
+				this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
+			}
 		}
 
 		this.clearCellStylesCache();
