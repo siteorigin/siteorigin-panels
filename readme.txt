@@ -107,6 +107,14 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.12.5 - 15 June 2021 =
+* Modern Parallax: Use the image attachment if available.
+* Modern Parallax: Prevent possible container overflow using CSS.
+* Live Editor: Minor button alignment improvements.
+* Developer: ACF compatibility - use `panelsopen` for more consistent loading.
+* Developer: ACF compatibility - added a check to ensure instance ACF data exists.
+* Developer: Fixed `siteorigin_panels_row_column_count_input` filter.
+
 = 2.12.4 - 04 June 2021 =
 * Restored Tablet Layout row collapse.
 
