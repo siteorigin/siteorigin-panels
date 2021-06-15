@@ -101,9 +101,9 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 
 == SiteOrigin Premium ==
 
-[SiteOrigin Premium](https://siteorigin.com/downloads/premium/) enhances Page Builder with a vast array of additional features and settings. Take your layouts to the next level.
+[SiteOrigin Premium](https://siteorigin.com/downloads/premium/) enhances Page Builder with a vast array of additional features and settings. Take your layouts to the next level with SiteOrigin Premium addons.
 
-SiteOrigin Premium also includes access to our next-level email support service, perfect for those times when you need fast and effective technical support.
+SiteOrigin Premium includes access to our professional email support service, perfect for those times when you need fast and effective technical support. We're standing by to assist you in any way we can.
 
 == Changelog ==
 
