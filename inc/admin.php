@@ -353,6 +353,14 @@ class SiteOrigin_Panels_Admin {
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'						=> array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
+				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
+					array(
+						'weight' => 0.5,
+					),
+					array(
+						'weight' => 0.5,
+					),
+				) ),
 
 				// Settings for the contextual menu
 				'contextual'                => array(
