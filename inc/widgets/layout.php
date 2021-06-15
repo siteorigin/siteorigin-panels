@@ -103,6 +103,11 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		$builder_supports = apply_filters( 'siteorigin_panels_layout_builder_supports', array(), $instance['panels_data'] );
+
+		// Prep panels_data for output.
+		$panels_data = wp_check_invalid_utf8( $instance['panels_data'] );
+		$panels_data = _wp_specialchars( $panels_data, ENT_QUOTES, null, true );
+		$panels_data = apply_filters( 'attribute_escape', $panels_data, $instance['panels_data'] );
 		?>
 		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>"
 			data-builder-id="<?php echo esc_attr( $form_id ) ?>"
@@ -117,7 +122,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 				type="hidden"
 				data-panels-filter="json_parse"
 				class="panels-data"
-				value="<?php echo esc_js( $instance['panels_data'] ); ?>"
+				value="<?php echo $panels_data; ?>"
 				name="<?php echo $this->get_field_name('panels_data') ?>"
 				id="<?php echo $this->get_field_id('panels_data') ?>"
 			/>
