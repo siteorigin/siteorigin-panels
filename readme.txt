@@ -107,7 +107,7 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
-= 2.12.5 - 15 June 2021 =
+= 2.12.5 - 17 June 2021 =
 * Modern Parallax: Use the image attachment if available.
 * Modern Parallax: Prevent possible container overflow using CSS.
 * Live Editor: Minor button alignment improvements.
