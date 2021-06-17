@@ -579,7 +579,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	displayAddRowDialog: function () {
 		var row = new panels.model.row();
-		var cells = new panels.collection.cells( [ { weight: 0.5 }, { weight: 0.5 } ] );
+		var cells = new panels.collection.cells( panelsOptions.default_columns );
 		cells.each( function ( cell ) {
 			cell.row = row;
 		} );

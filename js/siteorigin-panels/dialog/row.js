@@ -67,7 +67,7 @@ module.exports = panels.view.dialog.extend({
 
 		// This is the default row layout
 		this.row = {
-			cells: new panels.collection.cells([{weight: 0.5}, {weight: 0.5}]),
+			cells: new panels.collection.cells( panelsOptions.default_columns ),
 			style: {}
 		};
 
