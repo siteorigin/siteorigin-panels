@@ -40,19 +40,21 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	 * @param $instance The Panels widget instance.
 	 */
 	public function store_acf_widget_fields_instance( $the_widget, $instance ) {
-		$field_groups = acf_get_field_groups( array(
-			'widget' => $the_widget->id_base,
-		) );
+		if ( ! empty( $instance['acf'] ) ) {
+			$field_groups = acf_get_field_groups( array(
+				'widget' => $the_widget->id_base,
+			) );
 
-		if ( ! empty( $field_groups ) ) {
-			// Get all fields, and merge them into a single array.
-			foreach( $field_groups as $field_group ) {
-				$fields[] = acf_get_fields( $field_group );
+			if ( ! empty( $field_groups ) ) {
+				// Get all fields, and merge them into a single array.
+				foreach( $field_groups as $field_group ) {
+					$fields[] = acf_get_fields( $field_group );
+				}
+				$fields = call_user_func_array('array_merge', $fields );
+
+				acf_register_store( 'so_fields', $fields );
+				acf_register_store( 'so_widget_instance', $instance['acf'] );
 			}
-			$fields = call_user_func_array('array_merge', $fields );
-
-			acf_register_store( 'so_fields', $fields );
-			acf_register_store( 'so_widget_instance', $instance['acf'] );
 		}
 	}
 
