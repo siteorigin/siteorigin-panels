@@ -120,17 +120,26 @@ module.exports = Backbone.View.extend( {
 		this.$( '.so-cells .resize-handle' ).css( 'height', 0 );
 
 		// We'll tie the values to the row view, to prevent issue with values going to different rows
-		var height = 0;
+		var height = 0,
+			cell;
 		this.$( '.so-cells .cell' ).each( function () {
+			cell = $( this );
 			height = Math.max(
 				height,
-				$( this ).height()
+				cell.height()
 			);
 
 			$( this ).css(
 				'width',
-				( $( this ).data( 'view' ).model.get( 'weight' ) * 100) + "%"
+				( cell.data( 'view' ).model.get( 'weight' ) * 100) + "%"
 			);
+
+			// Ensure this widget is large enough to allow for actions to appear.
+			if ( cell.width() < 182 ) {
+				cell.addClass( 'so-show-icon' );
+			} else {
+				cell.removeClass( 'so-show-icon' );
+			}
 		} );
 
 		// Resize all the grids and cell wrappers

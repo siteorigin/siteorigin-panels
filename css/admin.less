@@ -1,14 +1,15 @@
 @import "mixins";
 
 @font-face {
-	font-family: 'siteorigin-panels-icons';
-	src:url('icons/panels-icons.eot');
-	src:url('icons/panels-icons.eot') format('embedded-opentype'),
-	url('icons/panels-icons.woff') format('woff'),
-	url('icons/panels-icons.ttf') format('truetype'),
-	url('icons/panels-icons.svg') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'siteorigin-panels-icons';
+  src: url('icons/panels-icons.eot?');
+  src: url('icons/panels-icons.eot?#iefix') format('embedded-opentype'),
+       url('icons/panels-icons.woff2?') format('woff2'),
+       url('icons/panels-icons.woff?') format('woff'),
+       url('icons/panels-icons.ttf?') format('truetype'),
+       url('icons/panels-icons.svg?#siteorigin') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* This is for the metabox */
@@ -384,6 +385,15 @@
 						min-height: 63px;
 
 						.transition(0.25s, background, ease-in-out);
+					}
+
+					.so-panels-icon,
+					&.so-show-icon .so-button-text {
+						display: none;
+					}
+
+					&.so-show-icon .so-panels-icon {
+						display: inline-block;
 					}
 
 					&.cell-selected .cell-wrapper{
@@ -2739,6 +2749,15 @@
 	}
 	&.so-panels-icon-settings:before {
 		content: "\e908";
+	}
+	&.so-panels-icon-duplicate-widget:before {
+	  content: "\e909";
+	}
+	&.so-panels-icon-edit-widget:before {
+	  content: "\e910";
+	}
+	&.so-panels-icon-delete-widget:before {
+	  content: "\e912";
 	}
 }
 
