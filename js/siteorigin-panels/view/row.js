@@ -118,32 +118,49 @@ module.exports = Backbone.View.extend( {
 		// Reset everything to have an automatic height
 		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', 0 );
 		this.$( '.so-cells .resize-handle' ).css( 'height', 0 );
+		this.$( '.so-cells' ).removeClass( 'so-action-icons' );
 
 		// We'll tie the values to the row view, to prevent issue with values going to different rows
 		var height = 0,
+			cellWidth = 0,
+			iconsShown = false,
 			cell;
+
 		this.$( '.so-cells .cell' ).each( function () {
 			cell = $( this );
-			height = Math.max(
-				height,
-				cell.height()
-			);
 
 			$( this ).css(
 				'width',
 				( cell.data( 'view' ).model.get( 'weight' ) * 100) + "%"
 			);
 
+			cellWidth = cell.width();
 			// Ensure this widget is large enough to allow for actions to appear.
-			if ( cell.width() < 182 ) {
+			if ( cellWidth < 182 ) {
 				cell.addClass( 'so-show-icon' );
+				iconsShown = true;
+				if ( cellWidth < 95 ) {
+					cell.addClass( 'so-small-actions' );
+				} else {
+					cell.removeClass( 'so-small-actions' );
+				}
 			} else {
-				cell.removeClass( 'so-show-icon' );
+				cell.removeClass( 'so-show-icon so-small-actions' );
 			}
+
+			// Store cell height. This is used to determine the max height of cells.
+			height = Math.max(
+				height,
+				cell.height()
+			);
 		} );
 
 		// Resize all the grids and cell wrappers
 		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', Math.max( height, 63 ) + 'px' );
+		// If action icons are visible in any cell, give the container a special class.
+		if ( iconsShown ) {
+			this.$( '.so-cells' ).addClass( 'so-action-icons' );
+		}
 		this.$( '.so-cells .resize-handle' ).css( 'height', this.$( '.so-cells .cell-wrapper' ).outerHeight() + 'px' );
 	},
 

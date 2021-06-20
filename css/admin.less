@@ -364,6 +364,10 @@
 					}
 				}
 
+				&.so-action-icons .so-widget {
+					height: 100%;
+				}
+
 				.cell {
 
 					.box-sizing(border-box);
@@ -385,6 +389,31 @@
 						min-height: 63px;
 
 						.transition(0.25s, background, ease-in-out);
+					}
+
+					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover {
+						.so-widget-wrapper {
+							padding: 0;
+						}
+						.title .actions {
+							font-size: 11px;
+							display: flex;
+							flex-direction: column;
+							justify-content: space-between;
+
+							background: #feffff;
+							bottom: 0;
+							left: 0;
+							padding: 0;
+							right: 0;
+							text-align: center;
+							top: 0;
+
+							a {
+								display: block;
+								margin-right: 0;
+							}
+						}
 					}
 
 					.so-panels-icon,
@@ -445,6 +474,7 @@
 								padding: 7px 8px;
 								overflow: hidden;
 								position: relative;
+								height: 100%;
 							}
 
 							h4{
@@ -2275,6 +2305,10 @@
 
 			.so-rows-container {
 				padding: 10px 10px 0 10px !important;
+
+				.so-cells.so-action-icons .so-widget {
+					min-height: 60px;
+				}
 			}
 		}
 	}
