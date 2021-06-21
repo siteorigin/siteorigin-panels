@@ -136,10 +136,10 @@ module.exports = Backbone.View.extend( {
 
 			cellWidth = cell.width();
 			// Ensure this widget is large enough to allow for actions to appear.
-			if ( cellWidth < 182 ) {
+			if ( cellWidth < 215 ) {
 				cell.addClass( 'so-show-icon' );
 				iconsShown = true;
-				if ( cellWidth < 95 ) {
+				if ( cellWidth < 125 ) {
 					cell.addClass( 'so-small-actions' );
 				} else {
 					cell.removeClass( 'so-small-actions' );
