@@ -391,6 +391,7 @@
 						.transition(0.25s, background, ease-in-out);
 					}
 
+					.so-live-editor-builder &.so-show-icon .widgets-container .so-widget:hover,
 					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover {
 						.so-widget-wrapper {
 							padding: 0;
@@ -398,15 +399,11 @@
 						.title .actions {
 							font-size: 11px;
 							display: flex;
-							flex-direction: column;
-							justify-content: space-between;
-
 							background: #feffff;
 							bottom: 0;
 							left: 0;
 							padding: 0;
 							right: 0;
-							text-align: center;
 							top: 0;
 
 							a {
@@ -414,6 +411,17 @@
 								margin-right: 0;
 							}
 						}
+					}
+					.so-live-editor-builder &.so-show-icon .widgets-container .so-widget:hover .title .actions {
+						flex-direction: row;
+						justify-content: space-around;
+						justify-content: space-evenly;
+						align-items: center;
+					}
+					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover	.title .actions {
+						flex-direction: column;
+						justify-content: space-between;
+						text-align: center;
 					}
 
 					.so-panels-icon,
