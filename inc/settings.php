@@ -121,12 +121,26 @@ class SiteOrigin_Panels_Settings {
 		// that hook is triggered after the settings are loaded.
 		$so_settings = get_option( 'siteorigin_panels_settings' );
 
+		if ( empty( $so_settings ) ) {
+			// New install.
+			$parallax_type = 'modern';
+		} elseif ( isset( $so_settings['parallax-type'] ) ) {
+			// If parallax-type already exists, use the existing value to prevent a potential override.
+			$parallax_type = $so_settings['parallax-type'];
+		} elseif ( isset( $so_settings['parallax-delay'] ) ) {
+			// User is upgrading.
+			$parallax_type = 'legacy';
+		} else {
+			// If all else fails, fallback to modern.
+			$parallax_type = 'modern';
+		}
+
 		// The general fields
 		$defaults['post-types']             = array( 'page', 'post' );
 		$defaults['live-editor-quick-link'] = true;
 		$defaults['admin-post-state']       = true;
 		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-type']          = ! empty( $so_settings ) && ! isset( $so_settings['parallax-delay'] ) ? 'legacy' : 'modern';
+		$defaults['parallax-type']          = $parallax_type;
 		$defaults['parallax-mobile']        = false;
 		$defaults['parallax-motion']        = ''; // legacy parallax
 		$defaults['parallax-delay']         = 0.4;
