@@ -145,6 +145,67 @@ module.exports = Backbone.Model.extend( {
 	},
 
 	/**
+	 * Ensure the title is valid.
+	 *
+	 * @param title The text we're testing.
+	 * @returns boolean
+	 */
+	isValidTitle: function( title ) {
+		return ! _.isUndefined( title ) &&
+			_.isString( title ) &&
+			title !== '' &&
+			title !== 'on' &&
+			title !== 'true' &&
+			title !== 'false' &&
+			title[0] !== '_' &&
+			! _.isFinite( title );
+	},
+
+	/**
+	 * Remove HTML from the title, and limit its length.
+	 *
+	 * @param title The title we're cleaning.
+	 * @returns string The "cleaned" title.
+	 */
+	cleanTitle: function( title ) {
+		title = title.replace( /<\/?[^>]+(>|$)/g, "" );
+		var parts = title.split( " " );
+		parts = parts.slice( 0, 20 );
+		console.log(parts);
+		return parts.join( ' ' );
+	},
+
+	/**
+	 * Iterate an array and find a valid field we can use for a title. Supports multidimensional arrays.
+	 *
+	 * @param values An array containing field values.
+	 * @returns string The title we found. If we weren't able to find one, it returns false.
+	 */
+	getTitleFromValues: function( values, thisView ) {
+		var widgetTitle = false;
+		for ( const k in values ) {
+			if ( typeof values[ k ] == 'object' ) {
+				// Field is an array, check child for valid titles..
+				widgetTitle = thisView.getTitleFromValues( values[ k ], thisView );
+				if ( widgetTitle ) {
+					break;
+				}
+			// Ensure field isn't a required WB field, and if its not, confirm it's valid.
+			} else if (
+				k.charAt(0) !== '_' &&
+				k !== 'so_sidebar_emulator_id' &&
+				k !== 'option_name' &&
+				thisView.isValidTitle( values[ k ] )
+			) {
+				widgetTitle = thisView.cleanTitle( values[ k ] )
+				break;
+			}
+		};
+
+		return widgetTitle;
+	},
+
+	/**
 	 * Gets the value that makes most sense as the title.
 	 */
 	getTitle: function () {
@@ -152,51 +213,31 @@ module.exports = Backbone.Model.extend( {
 
 		if ( _.isUndefined( widgetData ) ) {
 			return this.get( 'class' ).replace( /_/g, ' ' );
-		}
-		else if ( ! _.isUndefined( widgetData.panels_title ) ) {
+		} else if ( ! _.isUndefined( widgetData.panels_title ) ) {
 			// This means that the widget has told us which field it wants us to use as a title
 			if ( widgetData.panels_title === false ) {
 				return panelsOptions.widgets[this.get( 'class' )].description;
 			}
 		}
-
 		var values = this.get( 'values' );
-
-		// Create a list of fields to check for a title
+		var thisView = this;
+		var widgetTitle = false;
 		var titleFields = ['title', 'text'];
 
-		for ( var k in values ) {
-			if(k.charAt(0) === '_' || k === 'so_sidebar_emulator_id'  || k === 'option_name'){
-				// Skip Widgets Bundle supporting fields
-				continue;
+		// Check titleFields for valid titles.
+		_.each( titleFields, function( title ) {
+			if ( thisView.isValidTitle( values[ title ] ) ) {
+				widgetTitle = thisView.cleanTitle( values[ title ] );
+				return false;
 			}
-			if ( values.hasOwnProperty( k ) ) {
-				titleFields.push( k );
-			}
+		} );
+
+		if ( ! widgetTitle ) {
+			// No titles were found. Let's check the rest of the fields for a valid title..
+			widgetTitle = this.getTitleFromValues( values, thisView );
 		}
 
-		titleFields = _.uniq( titleFields );
-
-		for ( var i in titleFields ) {
-			if (
-				! _.isUndefined( values[titleFields[i]] ) &&
-				_.isString( values[titleFields[i]] ) &&
-				values[titleFields[i]] !== '' &&
-				values[titleFields[i]] !== 'on' &&
-				values[titleFields[i]] !== 'true' &&
-				values[titleFields[i]] !== 'false' &&
-				titleFields[i][0] !== '_' && ! _.isFinite( values[titleFields[i]] )
-			) {
-				var title = values[titleFields[i]];
-				title = title.replace( /<\/?[^>]+(>|$)/g, "" );
-				var parts = title.split( " " );
-				parts = parts.slice( 0, 20 );
-				return parts.join( ' ' );
-			}
-		}
-
-		// If we still have nothing, then just return the widget description
-		return this.getWidgetField( 'description' );
+		return widgetTitle ? widgetTitle : this.getWidgetField( 'description' );
 	}
 
 } );
