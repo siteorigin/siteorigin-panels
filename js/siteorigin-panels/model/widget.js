@@ -210,6 +210,8 @@ module.exports = Backbone.Model.extend( {
 	 */
 	getTitle: function () {
 		var widgetData = panelsOptions.widgets[this.get( 'class' )];
+		var titleFields = [];
+		var titleFieldOnly = false;
 
 		if ( _.isUndefined( widgetData ) ) {
 			return this.get( 'class' ).replace( /_/g, ' ' );
@@ -217,12 +219,16 @@ module.exports = Backbone.Model.extend( {
 			// This means that the widget has told us which field it wants us to use as a title
 			if ( widgetData.panels_title === false ) {
 				return panelsOptions.widgets[this.get( 'class' )].description;
+			} else{
+				titleFields.push( widgetData.panels_title );
+				titleFieldOnly = true;
 			}
+		} else {
+			titleFields = ['title', 'text'];
 		}
 		var values = this.get( 'values' );
 		var thisView = this;
 		var widgetTitle = false;
-		var titleFields = ['title', 'text'];
 
 		// Check titleFields for valid titles.
 		_.each( titleFields, function( title ) {
@@ -232,7 +238,7 @@ module.exports = Backbone.Model.extend( {
 			}
 		} );
 
-		if ( ! widgetTitle ) {
+		if ( ! widgetTitle && ! titleFieldOnly ) {
 			// No titles were found. Let's check the rest of the fields for a valid title..
 			widgetTitle = this.getTitleFromValues( values, thisView );
 		}
