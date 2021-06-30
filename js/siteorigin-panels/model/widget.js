@@ -185,7 +185,7 @@ module.exports = Backbone.Model.extend( {
 		var widgetTitle = false;
 		for ( const k in values ) {
 			if ( typeof values[ k ] == 'object' ) {
-				// Field is an array, check child for valid titles..
+				// Field is an array, check child for valid titles.
 				widgetTitle = thisView.getTitleFromValues( values[ k ], thisView );
 				if ( widgetTitle ) {
 					break;
@@ -219,7 +219,7 @@ module.exports = Backbone.Model.extend( {
 			// This means that the widget has told us which field it wants us to use as a title
 			if ( widgetData.panels_title === false ) {
 				return panelsOptions.widgets[this.get( 'class' )].description;
-			} else{
+			} else {
 				titleFields.push( widgetData.panels_title );
 				titleFieldOnly = true;
 			}
