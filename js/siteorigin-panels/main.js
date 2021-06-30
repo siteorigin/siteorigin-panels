@@ -172,3 +172,26 @@ jQuery( function ( $ ) {
 		}
 	});
 } );
+
+// WP 5.7+: Prevent undesired "restore content" notice.
+if ( typeof window.wp.autosave !== 'undefined' && jQuery( '#siteorigin-panels-metabox' ).length ) {
+	jQuery( document ).on( 'ready', function( e ) {
+		var blog_id = typeof window.autosaveL10n !== 'undefined' && window.autosaveL10n.blog_id;
+		
+		// Ensure sessionStorage is working, and we were able to find a blog id.
+		if ( typeof window.sessionStorage != 'object' && ! blog_id ) {
+			return;
+		}
+
+		stored_obj = window.sessionStorage.getItem( 'wp-autosave-' + blog_id );
+		if ( stored_obj ) {
+			stored_obj = JSON.parse( stored_obj );
+			var storedPostData = stored_obj[ 'post_' + jQuery( '#post_ID' ).val() ]
+
+			if ( typeof storedPostData == 'object' ) {
+				// Override existing store with stored session data. The content is exactly the same.
+				jQuery( '#content' ).val( storedPostData.content );
+			}
+		}
+	} );
+}
