@@ -1,14 +1,15 @@
 @import "mixins";
 
 @font-face {
-	font-family: 'siteorigin-panels-icons';
-	src:url('icons/panels-icons.eot');
-	src:url('icons/panels-icons.eot') format('embedded-opentype'),
-	url('icons/panels-icons.woff') format('woff'),
-	url('icons/panels-icons.ttf') format('truetype'),
-	url('icons/panels-icons.svg') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'siteorigin-panels-icons';
+  src: url('icons/panels-icons.eot?');
+  src: url('icons/panels-icons.eot?#iefix') format('embedded-opentype'),
+       url('icons/panels-icons.woff2?') format('woff2'),
+       url('icons/panels-icons.woff?') format('woff'),
+       url('icons/panels-icons.ttf?') format('truetype'),
+       url('icons/panels-icons.svg?#siteorigin') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* This is for the metabox */
@@ -363,6 +364,10 @@
 					}
 				}
 
+				&.so-action-icons .so-widget {
+					height: 100%;
+				}
+
 				.cell {
 
 					.box-sizing(border-box);
@@ -384,6 +389,48 @@
 						min-height: 63px;
 
 						.transition(0.25s, background, ease-in-out);
+					}
+
+					.so-live-editor-builder &.so-show-icon .widgets-container .so-widget:hover,
+					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover {
+						.so-widget-wrapper {
+							padding: 0;
+						}
+						.title .actions {
+							font-size: 11px;
+							display: flex;
+							background: #feffff;
+							bottom: 0;
+							left: 0;
+							padding: 0;
+							right: 0;
+							top: 0;
+
+							a {
+								display: block;
+								margin-right: 0;
+							}
+						}
+					}
+					.so-live-editor-builder &.so-show-icon .widgets-container .so-widget:hover .title .actions {
+						flex-direction: row;
+						justify-content: space-around;
+						justify-content: space-evenly;
+						align-items: center;
+					}
+					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover	.title .actions {
+						flex-direction: column;
+						justify-content: space-between;
+						text-align: center;
+					}
+
+					.so-panels-icon,
+					&.so-show-icon .so-button-text {
+						display: none;
+					}
+
+					&.so-show-icon .so-panels-icon {
+						display: inline-block;
 					}
 
 					&.cell-selected .cell-wrapper{
@@ -435,6 +482,7 @@
 								padding: 7px 8px;
 								overflow: hidden;
 								position: relative;
+								height: 100%;
 							}
 
 							h4{
@@ -2265,6 +2313,10 @@
 
 			.so-rows-container {
 				padding: 10px 10px 0 10px !important;
+
+				.so-cells.so-action-icons .so-widget {
+					min-height: 60px;
+				}
 			}
 		}
 	}
@@ -2739,6 +2791,15 @@
 	}
 	&.so-panels-icon-settings:before {
 		content: "\e908";
+	}
+	&.so-panels-icon-duplicate-widget:before {
+	  content: "\e909";
+	}
+	&.so-panels-icon-edit-widget:before {
+	  content: "\e910";
+	}
+	&.so-panels-icon-delete-widget:before {
+	  content: "\e912";
 	}
 }
 

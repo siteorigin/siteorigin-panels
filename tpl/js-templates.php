@@ -138,9 +138,24 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="title">
 				<h4>{{%= title %}}</h4>
 				<span class="actions">
-					<a class="widget-edit" tabindex="0"><?php _e('Edit', 'siteorigin-panels') ?></a>
-					<a class="widget-duplicate" tabindex="0"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
-					<a class="widget-delete" tabindex="0"><?php _e('Delete', 'siteorigin-panels') ?></a>
+					<a class="widget-edit" tabindex="0">
+						<span class="so-panels-icon so-panels-icon-edit-widget" aria-label="<?php echo esc_attr( 'Edit widget', 'siteorigin-panels' ); ?>"></span>
+						<span class="so-button-text">
+							<?php _e( 'Edit', 'siteorigin-panels' ); ?>
+						</span>
+					</a>
+					<a class="widget-duplicate" tabindex="0">
+						<span class="so-panels-icon so-panels-icon-duplicate-widget" aria-label="<?php echo esc_attr( 'Duplicate widget', 'siteorigin-panels' ); ?>"></span>
+						<span class="so-button-text">
+							<?php _e( 'Duplicate', 'siteorigin-panels' ); ?>
+						</span>
+					</a>
+					<a class="widget-delete" tabindex="0">
+						<span class="so-panels-icon so-panels-icon-delete-widget" aria-label="<?php echo esc_attr( 'Delete widget', 'siteorigin-panels' ); ?>"></span>
+						<span class="so-button-text">
+							<?php _e( 'Delete', 'siteorigin-panels' ); ?>
+						</span>
+					</a>
 				</span>
 			</div>
 			<small class="description">{{%= description %}}</small>
