@@ -264,7 +264,7 @@ class SiteOrigin_Panels_Renderer {
 		$css->add_widget_css( $post_id, false, false, false, '', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id )
 		) );
-		$css->add_widget_css( $post_id, false, false, false, ':last-child', array(
+		$css->add_widget_css( $post_id, false, false, false, ':last-of-type', array(
 			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id )
 		) );
 
