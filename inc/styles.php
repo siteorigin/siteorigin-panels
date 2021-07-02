@@ -117,7 +117,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => sprintf( __( '%s Class', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
 			'group'       => 'attributes',
-			'description' => __( 'A CSS class', 'siteorigin-panels' ),
+			'description' => __( 'A CSS class name.', 'siteorigin-panels' ),
 			'priority'    => 5,
 		);
 
