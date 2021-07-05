@@ -107,6 +107,14 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.12.6 - 5 July 2021 =
+* Added cell editing icons to replace text action links when space isn't sufficient.
+* Live Editor: Resolved bottom margin not being removed from the last widget in a given row.
+* Parallax: Improved type detection to ensure legacy is always set when appropriate.
+* Resolved a potential restore content prompt in the Classic Editor.
+* Developer: Expanded widget title detection to include Widgets Bundle repeaters and sections.
+* Developer: Expanded `panels_title` to fetch the first valid widget description.
+
 = 2.12.5 - 17 June 2021 =
 * Modern Parallax: Use the image attachment if available.
 * Modern Parallax: Prevent possible container overflow using CSS.
