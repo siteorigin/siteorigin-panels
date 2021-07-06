@@ -87,7 +87,10 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	}
 
 	private static function is_legacy_widget_block_preview() {
-		return isset( $_GET['legacy-widget-preview'] ) && $_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-postloop';
+		return isset( $_GET['legacy-widget-preview'] ) && (
+			$_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-postloop' ||
+			$_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-builder'
+		);
 	}
 
 	private static function is_layout_block_preview() {
