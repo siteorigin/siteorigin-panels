@@ -1127,17 +1127,24 @@ class SiteOrigin_Panels_Admin {
 			wp_die();
 		}
 
-		if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
-			wp_die();
+		if ( ! empty( $_POST['post_id'] ) ) {
+			// This is a post so ensure the user is able to edit it.
+			if ( ! current_user_can( 'edit_post', $_POST['post_id'] ) ) {
+				wp_die();
+			}
+			$old_panels_data = get_post_meta( $_POST['post_id'], 'panels_data', true );
+		} else {
+			// This isn't a post, add default data to skip post speciifc checks.
+			$old_panels_data = array();
+			 $_POST['post_id'] = 0;
 		}
-
-		if ( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
+		
+		if ( empty( $_POST['panels_data'] ) ) {
 			echo json_encode($return);
 			wp_die();
 		}
 
 		// echo the content
-		$old_panels_data        = get_post_meta( $_POST['post_id'], 'panels_data', true );
 		$panels_data            = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			$panels_data['widgets'],
