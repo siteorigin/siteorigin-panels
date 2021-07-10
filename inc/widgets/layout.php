@@ -31,6 +31,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if( ! empty( $instance['panels_data']['widgets'] ) ) {
 			foreach( $instance['panels_data']['widgets'] as & $widget ) {
 				$widget['panels_info']['class'] = str_replace( '&#92;', '\\', $widget['panels_info']['class'] );
+				$widget['panels_info']['builder'] = true;
 			}
 		}
 		
