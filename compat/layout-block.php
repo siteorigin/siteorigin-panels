@@ -32,7 +32,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	public function enqueue_layout_block_editor_assets() {
-		if (  SiteOrigin_Panels_Admin::is_block_editor() ) {
+		if ( SiteOrigin_Panels_Admin::is_block_editor() || is_customize_preview() ) {
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();

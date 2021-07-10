@@ -63,14 +63,16 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 		));
 		
 		?>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'type' ) ?>"><?php _e( 'Display Content', 'siteorigin-panels' ) ?></label>
-			<select id="<?php echo $this->get_field_id( 'type' ) ?>" name="<?php echo $this->get_field_name( 'type' ) ?>">
-				<?php foreach ($types as $type_id => $title) : ?>
-					<option value="<?php echo esc_attr($type_id) ?>" <?php selected($type_id, $instance['type']) ?>><?php echo esc_html($title) ?></option>
-				<?php endforeach ?>
-			</select>
-		</p>
+		<div class="siteorigin-widget-content">
+			<p>
+				<label for="<?php echo $this->get_field_id( 'type' ) ?>"><?php _e( 'Display Content', 'siteorigin-panels' ) ?></label>
+				<select id="<?php echo $this->get_field_id( 'type' ) ?>" name="<?php echo $this->get_field_name( 'type' ) ?>" class="siteorigin-widget-field">
+					<?php foreach ($types as $type_id => $title) : ?>
+						<option value="<?php echo esc_attr($type_id) ?>" <?php selected($type_id, $instance['type']) ?>><?php echo esc_html($title) ?></option>
+					<?php endforeach ?>
+				</select>
+			</p>
+		</div>
 		<?php
 	}
 }
