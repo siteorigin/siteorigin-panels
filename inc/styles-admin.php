@@ -160,7 +160,7 @@ class SiteOrigin_Panels_Styles_Admin {
 
 						if ( $field['group'] == $group_id ) {
 							?>
-							<div class="style-field-wrapper">
+							<div class="style-field-wrapper <?php echo $field_id ?>">
 								<?php if ( ! empty( $field['name'] ) ) : ?>
 									<label><?php echo $field['name'] ?></label>
 								<?php endif; ?>
