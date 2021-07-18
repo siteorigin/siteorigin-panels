@@ -467,6 +467,13 @@ class SiteOrigin_Panels_Styles {
 		return $attributes;
 	}
 
+	function jetpack_photon_exclude_modern_parallax( $skip, $src, $tag) {
+		if ( strpos( $tag, 'data-siteorigin-parallax') !== false ) {
+			$skip = true;
+		}
+		return $skip;
+	}
+
 	function add_parallax( $output, $context ) {
 		if (
 			! empty( $context['style']['background_display'] ) &&
@@ -474,6 +481,11 @@ class SiteOrigin_Panels_Styles {
 		) {
 			$parallax = false;
 			if ( ! empty( $context['style']['background_image_attachment'] ) ) {
+				// Jetpack Image Accelerator (Photon) can result in the parallax being incorrectly sized so we need to exclude it.
+				$photon_exclude = class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' );
+				if ( $photon_exclude ) {
+					add_filter( 'jetpack_photon_skip_image', '__return_true' );
+				}
 				$image_html = wp_get_attachment_image(
 					$context['style']['background_image_attachment'],
 					'full',
@@ -483,6 +495,11 @@ class SiteOrigin_Panels_Styles {
 						'loading' => 'eager',
 					)
 				);
+
+				if ( $photon_exclude ) {
+					// Restore Photon and prevent it from overriding the image URL later.
+					add_filter( 'jetpack_photon_skip_image', array( $this, 'jetpack_photon_exclude_modern_parallax' ), 10, 3 );
+				}
 
 				if ( ! empty( $image_html ) ) {
 					$parallax = true;
