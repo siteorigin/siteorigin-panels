@@ -55,9 +55,7 @@ jQuery( function ( $ ) {
 	}
 	stretchFullWidthRows();
 
-	$( window ).on( 'resize load', function() {
-		stretchFullWidthRows();
-
+	var modernParallax = function() {
 		if (
 			typeof parallaxStyles != 'undefined' &&
 			typeof simpleParallax != 'undefined' &&
@@ -71,6 +69,12 @@ jQuery( function ( $ ) {
 				scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
 			} );
 		}
+	}
+	modernParallax();
+
+	$( window ).on( 'resize load', function() {
+		stretchFullWidthRows();
+		modernParallax();
 	} );
 
 	// This should have been done in the footer, but run it here just incase.
