@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.13.0 - 20 July 2021 =
+* Compatibility enhancements for WordPress 5.8.
+* Developer: Added a style field wrapper ID.
+
 = 2.12.6 - 5 July 2021 =
 * Added cell editing icons to replace text action links when space isn't sufficient.
 * Live Editor: Resolved bottom margin not being removed from the last widget in a given row.
