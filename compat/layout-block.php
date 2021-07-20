@@ -32,17 +32,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 	
 	public function enqueue_layout_block_editor_assets() {
-		if (  SiteOrigin_Panels_Admin::is_block_editor() ) {
+		if ( SiteOrigin_Panels_Admin::is_block_editor() || is_customize_preview() ) {
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();
 			$panels_admin->js_templates();
-			
+
+			$current_screen = get_current_screen();
 			wp_enqueue_script(
 				'siteorigin-panels-layout-block',
 				plugins_url( 'js/siteorigin-panels-layout-block' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', __FILE__ ),
 				array(
-					'wp-editor',
+					// The WP 5.8 Widget Area requires a speciic editor script to be used.
+					$current_screen->base == 'widgets' ? 'wp-edit-widgets' : 'wp-editor',
 					'wp-blocks',
 					'wp-i18n',
 					'wp-element',
@@ -52,8 +54,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				),
 				SITEORIGIN_PANELS_VERSION
 			);
-			
-			$current_screen = get_current_screen();
+
 			$is_panels_post_type = in_array( $current_screen->id, siteorigin_panels_setting( 'post-types' ) );
 			wp_localize_script(
 				'siteorigin-panels-layout-block',

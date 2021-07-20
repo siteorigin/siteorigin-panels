@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
 Requires at least: 4.7
-Tested up to: 5.7
+Tested up to: 5.8
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
@@ -106,6 +106,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 SiteOrigin Premium includes access to our professional email support service, perfect for those times when you need fast and effective technical support. We're standing by to assist you in any way we can.
 
 == Changelog ==
+
+= 2.13.0 - 20 July 2021 =
+* Compatibility enhancements for WordPress 5.8.
+* Developer: Added a style field wrapper ID.
 
 = 2.12.6 - 5 July 2021 =
 * Added cell editing icons to replace text action links when space isn't sufficient.

@@ -77,9 +77,8 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		return $new;
 	}
 	
-	function form( $instance ){
-		
-		if ( ! is_admin() ) {
+	function form( $instance ){		
+		if ( ! is_admin() && ! defined( 'REST_REQUEST' ) ) {
 			?>
 			<p>
 				<?php _e( 'This widget can currently only be used in the WordPress admin interface.', 'siteorigin-panels' ) ?>
@@ -105,6 +104,11 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		$builder_supports = apply_filters( 'siteorigin_panels_layout_builder_supports', array(), $instance['panels_data'] );
+
+		// Prep panels_data for output.
+		$panels_data = wp_check_invalid_utf8( $instance['panels_data'] );
+		$panels_data = _wp_specialchars( $panels_data, ENT_QUOTES, null, true );
+		$panels_data = apply_filters( 'attribute_escape', $panels_data, $instance['panels_data'] );
 		?>
 		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ) ?>"
 			data-builder-id="<?php echo esc_attr( $form_id ) ?>"
@@ -115,15 +119,15 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e('Open Builder', 'siteorigin-panels') ?></button>
 			</p>
 			
-			<input type="hidden" data-panels-filter="json_parse" value="" class="panels-data" name="<?php echo $this->get_field_name('panels_data') ?>" id="<?php echo $this->get_field_id('panels_data') ?>" />
-			
-			<script type="text/javascript">
-				( function( panelsData ){
-					// Create the panels_data input
-					document.getElementById('<?php echo $this->get_field_id('panels_data') ?>').value = JSON.stringify( panelsData );
-				} )( <?php echo $instance['panels_data']; ?> );
-			</script>
-			
+			<input
+				type="hidden"
+				data-panels-filter="json_parse"
+				class="panels-data"
+				value="<?php echo $panels_data; ?>"
+				name="<?php echo $this->get_field_name('panels_data') ?>"
+				id="<?php echo $this->get_field_id('panels_data') ?>"
+			/>
+
 			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ) ?>" name="<?php echo $this->get_field_name('builder_id') ?>" />
 		</div>
 		<script type="text/javascript">
