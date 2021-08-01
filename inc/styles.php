@@ -61,8 +61,11 @@ class SiteOrigin_Panels_Styles {
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
+
+		$container_settings = SiteOrigin_Panels::container_settings();
 		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) ),
+			'stretchRows' => ! $container_settings['css_override'],
 		) );
 
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
