@@ -1,4 +1,23 @@
 <?php
+/**
+ * If Yoast OpenGraph is enabled, we'll need disable PB when it gets the excerpt 
+ * to avoid conflicts with other plugins.
+ *
+ */
+function siteorigin_yoast_opengraph_panels_disable( $content ) {
+	global $wp_current_filter;
+	if ( count( $wp_current_filter ) > 2 && $wp_current_filter[1] == 'wpseo_head' ) {
+		// Temporarily disable Page Builder for this instance of the_content.
+		add_filter( 'siteorigin_panels_filter_content_enabled', '__return_false' );
+	} else {
+		add_filter( 'siteorigin_panels_filter_content_enabled', '__return_true' );
+	}
+	return $content;
+}
+// If Yoast OpenGraph is enabled, disable Page Builder as needed.
+if ( class_exists( 'WPSEO_Options' ) && WPSEO_Options::get( 'opengraph' ) ) {
+	add_filter( 'the_content', 'siteorigin_yoast_opengraph_panels_disable', 1 );
+}
 
 /**
  * Returns a list of all images added using Page Builder.

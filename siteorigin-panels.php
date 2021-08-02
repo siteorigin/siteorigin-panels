@@ -204,7 +204,7 @@ class SiteOrigin_Panels {
 
 		// Compatibility with Yoast Sitemap.
 		if ( defined( 'WPSEO_FILE' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast-sitemap.php';
+			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
 		}
 
 		// Compatibility with AMP plugin
