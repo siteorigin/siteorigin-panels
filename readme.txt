@@ -107,7 +107,7 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
-= 2.13.1 - 02 August 2021 =
+= 2.13.1 - 03 August 2021 =
 * Modern Parallax: Exclude images from Jetpack Image Accelerator.
 * Modern Parallax: Resolved sizing issue when the browser back button was used.
 * Yoast: Selectively disabled Page Builder when Yoast is generating the OpenGraph meta description. Resolves potential Forminator and Ninja Forms errors.
