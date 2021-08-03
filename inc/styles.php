@@ -467,6 +467,35 @@ class SiteOrigin_Panels_Styles {
 		return $attributes;
 	}
 
+	/**
+	 * Prevent Photon from overriding image URL.
+	 * This is done using a method to prevent conflicting with other usage of this filter.
+	 *
+	 * @param $skip
+	 * @param $args
+	 *
+	 * @return true
+	 */
+	function jetpack_photon_exclude_modern_parallax_downsize( $skip, $args ) {
+		return true;
+	}
+
+	/**
+	 * Prevent Photon from overriding parallax images when it calculates srcset and filters the_content.
+	 *
+	 * @param $skip
+	 * @param $src
+	 * @param $tag
+	 *
+	 * @return bool
+	 */
+	function jetpack_photon_exclude_modern_parallax_content( $skip, $src, $tag ) {
+		if ( strpos( $tag, 'data-siteorigin-parallax' ) !== false ) {
+			$skip = true;
+		}
+		return $skip;
+	}
+
 	function add_parallax( $output, $context ) {
 		if (
 			! empty( $context['style']['background_display'] ) &&
@@ -474,6 +503,14 @@ class SiteOrigin_Panels_Styles {
 		) {
 			$parallax = false;
 			if ( ! empty( $context['style']['background_image_attachment'] ) ) {
+				// Jetpack Image Accelerator (Photon) can result in the parallax being incorrectly sized so we need to exclude it.
+				$photon_exclude = class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' );
+				if ( $photon_exclude ) {
+					add_filter( 'jetpack_photon_override_image_downsize', array( $this, 'jetpack_photon_exclude_modern_parallax_downsize' ), 10, 2 );
+					// Prevent Photon from overriding the image URL later.
+					add_filter( 'jetpack_photon_skip_image', array( $this, 'jetpack_photon_exclude_modern_parallax_content' ), 10, 3 );
+				}
+
 				$image_html = wp_get_attachment_image(
 					$context['style']['background_image_attachment'],
 					'full',
@@ -483,6 +520,11 @@ class SiteOrigin_Panels_Styles {
 						'loading' => 'eager',
 					)
 				);
+
+				if ( $photon_exclude ) {
+					// Restore photon.
+					remove_filter( 'jetpack_photon_override_image_downsize', array( $this, 'jetpack_photon_exclude_modern_parallax_downsize' ), 10 );
+				}
 
 				if ( ! empty( $image_html ) ) {
 					$parallax = true;
