@@ -48,7 +48,7 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'load-post-new.php', array( $this, 'add_help_tab' ), 12 );
 		add_action( 'load-appearance_page_so_panels_home_page', array( $this, 'add_help_tab' ), 12 );
 
-		add_action( 'customize_controls_print_footer_scripts', array( $this, 'js_templates' ) );
+		add_action( 'customize_controls_print_scripts', array( $this, 'js_templates' ) );
 
 		// Register all the admin actions
 		add_action( 'wp_ajax_so_panels_builder_content', array( $this, 'action_builder_content' ) );
