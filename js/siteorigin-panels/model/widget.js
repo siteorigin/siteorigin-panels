@@ -171,7 +171,6 @@ module.exports = Backbone.Model.extend( {
 		title = title.replace( /<\/?[^>]+(>|$)/g, "" );
 		var parts = title.split( " " );
 		parts = parts.slice( 0, 20 );
-		console.log(parts);
 		return parts.join( ' ' );
 	},
 
