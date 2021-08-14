@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.13.2 - 14 August 2021 =
+* Modern Parallax: Resolved potential Jetpack Image Accelerator notice.
+* Customizer: Resolved new widget area notice.
+
 = 2.13.1 - 03 August 2021 =
 * Modern Parallax: Exclude images from Jetpack Image Accelerator.
 * Modern Parallax: Resolved sizing issue when the browser back button was used.

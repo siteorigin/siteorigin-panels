@@ -36,7 +36,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();
-			$panels_admin->js_templates();
+			if ( ! is_customize_preview() ) {
+				$panels_admin->js_templates();
+			}
 
 			$current_screen = get_current_screen();
 			wp_enqueue_script(
