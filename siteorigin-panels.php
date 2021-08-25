@@ -289,8 +289,8 @@ class SiteOrigin_Panels {
 
 	public static function container_settings() {
 		$container = array(
-			'selector' => ! empty( siteorigin_panels_setting( 'container-selector' ) ) ? siteorigin_panels_setting( 'container-selector' ) : apply_filters( 'siteorigin_panels_theme_container_selector', '' ),
-			'width' => ! empty( siteorigin_panels_setting( 'container-width' ) ) ? siteorigin_panels_setting( 'container-width' ) : apply_filters( 'siteorigin_panels_theme_container_width', '' ),
+			'selector' => apply_filters( 'siteorigin_panels_theme_container_selector', '' ),
+			'width' => apply_filters( 'siteorigin_panels_theme_container_width', '' ),
 		);
 		$container['css_override'] = ! empty( $container['selector'] ) && ! empty( $container['width'] );
 

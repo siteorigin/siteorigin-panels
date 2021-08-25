@@ -166,8 +166,6 @@ class SiteOrigin_Panels_Settings {
 		$defaults['margin-bottom-last-row']   = false;
 		$defaults['margin-sides']             = 30;
 		$defaults['full-width-container']     = 'body';
-		$defaults['container-selector']       = '';
-		$defaults['container-width']          = '';
 		$defaults['output-css-header']        = 'auto';
 
 		// Content fields
@@ -493,21 +491,6 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Full Width Container', 'siteorigin-panels' ),
 			'description' => __( 'The container used for the full width layout.', 'siteorigin-panels' ),
 			'keywords'    => 'full width, container, stretch',
-		);
-
-		$fields['layout']['fields']['container-selector'] = array(
-			'type'        => 'text',
-			'label'       => __( 'Theme Container Selector', 'siteorigin-panels' ),
-			'description' => __( 'Used to override theme container on the fly.', 'siteorigin-panels' ),
-			'keywords'    => 'full width, cls, performance, container, stretch',
-		);
-
-		$fields['layout']['fields']['container-width'] = array(
-			'type'        => 'number',
-			'unit'        => 'px',
-			'label'       => __( 'Theme Container Width', 'siteorigin-panels' ),
-			'description' => __( 'This width is used with a custom container applied for standard and full width rows.', 'siteorigin-panels' ),
-			'keywords'    => 'full width, cls, performance, container, stretch',
 		);
 
 		$fields['layout']['fields']['output-css-header'] = array(
