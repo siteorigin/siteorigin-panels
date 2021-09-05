@@ -865,7 +865,7 @@ class SiteOrigin_Panels_Renderer {
 		if (
 			$this->container['css_override'] &&
 			isset( $row['style']['row_stretch'] ) &&
-			$row['style']['row_stretch'] != 'full'
+			$row['style']['row_stretch'] == 'full'
 		) {
 			echo '</div>';
 		}
