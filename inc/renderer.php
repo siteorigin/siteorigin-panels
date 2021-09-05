@@ -308,7 +308,7 @@ class SiteOrigin_Panels_Renderer {
 			$css->add_css(
 				'.so-panels-full-wrapper, .panel-grid.panel-no-style, .panel-row-style:not([data-stretch-type])',
 				array(
-					'max-width' => (int) $this->container['width'] . 'px',
+					'max-width' => esc_attr( $this->container['width'] ),
 					'margin' => '0 auto',
 				),
 				1920
