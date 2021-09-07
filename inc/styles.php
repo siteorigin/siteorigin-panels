@@ -347,7 +347,7 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color'] = array(
-			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
@@ -355,7 +355,7 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color_hover'] = array(
-			'name'        => __( 'Links Hover Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
@@ -395,7 +395,7 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color'] = array(
-			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this widget.', 'siteorigin-panels' ),
@@ -403,7 +403,7 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color_hover'] = array(
-			'name'        => __( 'Links Hover Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
