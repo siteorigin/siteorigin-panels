@@ -531,7 +531,7 @@ class SiteOrigin_Panels {
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
 
 		$this->container = SiteOrigin_Panels::container_settings();
-		if ( ! empty( $this->container ) && $this->container['override'] ) {
+		if ( ! empty( $this->container ) && $this->container['css_override'] ) {
 			$classes[] = 'siteorigin-panels-css-container';
 		}
 
