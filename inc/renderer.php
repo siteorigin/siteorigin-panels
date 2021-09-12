@@ -107,6 +107,10 @@ class SiteOrigin_Panels_Renderer {
 
 			$cell_count = count( $row['cells'] );
 
+			// If the CSS Container Breaker is enabled, and this row is using it,
+			// we need to remove the cell widths on mobile.
+			$css_container_cutoff = $this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ":$panels_mobile_width" : '';
+
 			// Add the cell sizing
 			foreach ( $row['cells'] as $ci => $cell ) {
 				$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $row, $ri, $cell, $ci - 1, $panels_data, $post_id );
@@ -122,7 +126,7 @@ class SiteOrigin_Panels_Renderer {
 						str_replace( ',', '.', $rounded_width ),
 						str_replace( ',', '.', (int) $gutter ? $calc_width : '' ), // Exclude if there's a zero gutter
 					)
-				) );
+				), $css_container_cutoff );
 				
 				// Add in any widget specific CSS
 				foreach ( $cell['widgets'] as $wi => $widget ) {
@@ -325,6 +329,15 @@ class SiteOrigin_Panels_Renderer {
 					'width' => '100%',
 				),
 				1920
+			);
+
+			// Ensure cells inside of .so-panels-full-wrapper are full width when collapsed.
+			$css->add_css(
+				'.so-panels-full-wrapper .panel-grid-cell',
+				array(
+					'width' => '100%',
+				),
+				siteorigin_panels_setting( 'mobile-width' )				
 			);
 		}
 
