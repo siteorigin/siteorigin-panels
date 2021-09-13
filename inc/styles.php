@@ -718,10 +718,26 @@ class SiteOrigin_Panels_Styles {
 
 			// Add in flexbox alignment to the main row element
 			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
+
+				$selector = array();
+				$container_settings = SiteOrigin_Panels::container_settings();
+				// What selector we use is dependent on their row setup.
+				if ( empty( $row['style'] ) ) {
+					$selector[] = '.panel-no-style';
+				} elseif ( // Is CSS Container Breaker is enabled, and is the row full width?
+					$container_settings['css_override'] &&
+					isset( $row['style']['row_stretch'] ) &&
+					$row['style']['row_stretch'] == 'full'
+				) {
+					$selector[] = '.panel-has-style > .panel-row-style > .so-panels-full-wrapper';
+				} else {
+					$selector[] = '.panel-has-style > .panel-row-style';
+				}
+
 				$css->add_row_css(
 					$post_id,
 					$ri,
-					array( '.panel-no-style', '.panel-has-style > .panel-row-style' ),
+					$selector,
 					array(
 						'-webkit-align-items' => $row['style']['cell_alignment'],
 						'align-items'         => $row['style']['cell_alignment'],
@@ -806,6 +822,11 @@ class SiteOrigin_Panels_Styles {
 					if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
 						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a', array(
 							'color' => $widget['panels_info']['style']['link_color']
+						) );
+					}
+					if ( ! empty( $widget['panels_info']['style']['link_color_hover'] ) ) {
+						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a:hover', array(
+							'color' => $widget['panels_info']['style']['link_color_hover']
 						) );
 					}
 				}
