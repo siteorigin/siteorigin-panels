@@ -109,7 +109,7 @@ class SiteOrigin_Panels_Renderer {
 
 			// If the CSS Container Breaker is enabled, and this row is using it,
 			// we need to remove the cell widths on mobile.
-			$css_container_cutoff = $this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ":$panels_mobile_width" : '';
+			$css_container_cutoff = $this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ":$panels_mobile_width" : 1920;
 
 			// Add the cell sizing
 			foreach ( $row['cells'] as $ci => $cell ) {
