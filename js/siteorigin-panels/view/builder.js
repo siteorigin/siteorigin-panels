@@ -41,6 +41,7 @@ module.exports = Backbone.View.extend( {
 
 		this.config = _.extend( {
 			loadLiveEditor: false,
+			liveEditorCloseAfter: false,
 			builderSupports: {}
 		}, options.config );
 
