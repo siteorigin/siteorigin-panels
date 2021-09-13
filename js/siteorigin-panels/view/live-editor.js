@@ -142,8 +142,16 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Close the Live Editor
 	 */
-	close: function () {
+	close: function ( closeAfter = true ) {
 		if ( ! this.$el.is( ':visible' ) ) {
+			return this;
+		}
+
+		if ( closeAfter && this.builder.config.liveEditorCloseAfter ) {
+			// Live Editor is set to be closed upon saving the page.
+			// This is done using a trigger rather than a redirect to confirm if
+			// the user wants to save.
+			$( '#wp-admin-bar-view a' )[0].click(); // JS click.
 			return this;
 		}
 
@@ -160,7 +168,7 @@ module.exports = Backbone.View.extend( {
 	 * Close the Live Editor and save the post.
 	 */
 	closeAndSave: function(){
-		this.close();
+		this.close( false );
 		// Finds the submit input for saving without publishing draft posts.
 		$( '#submitdiv input[type="submit"][name="save"]' ).trigger( 'click' );
 	},
