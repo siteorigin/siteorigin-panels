@@ -295,12 +295,12 @@ class SiteOrigin_Panels_Settings {
 		$fields['general']['fields']['live-editor-quick-link'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Live Editor Quick Link', 'siteorigin-panels' ),
-			'description' => __( 'Display a Live Editor button in the WordPress admin bar.', 'siteorigin-panels' ),
+			'description' => __( 'Display a Live Editor link in the toolbar when viewing site.', 'siteorigin-panels' ),
 		);
 		$fields['general']['fields']['live-editor-quick-link-close-after'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Live Editor Quick Link: Close After Editing', 'siteorigin-panels' ),
-			'description' => __( 'After clicking the Live Editor Quick Link, saving or closing the live editor will result in being redirected back to the page.', 'siteorigin-panels' ),
+			'description' => __( 'When accessing the Live Editor via the toolbar link, return to the site after saving.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['admin-post-state'] = array(
