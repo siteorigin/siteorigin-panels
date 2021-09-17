@@ -103,15 +103,23 @@ class SiteOrigin_Panels_Styles_Admin {
 				'name'     => __( 'Layout', 'siteorigin-panels' ),
 				'priority' => 10
 			),
+			'tablet_layout'     => array(
+				'name'     => __( 'Tablet Layout', 'siteorigin-panels' ),
+				'priority' => 11
+			),
 			'mobile_layout'     => array(
 				'name'     => __( 'Mobile Layout', 'siteorigin-panels' ),
-				'priority' => 11
+				'priority' => 12
 			),
 			'design'     => array(
 				'name'     => __( 'Design', 'siteorigin-panels' ),
 				'priority' => 15
 			),
 		);
+
+		if ( ! siteorigin_panels_setting( 'tablet-layout' ) ) {
+			unset( $groups['tablet_layout'] );
+		}
 
 		// Check if we need a default group
 		foreach ( $fields as $field_id => $field ) {
