@@ -219,7 +219,6 @@ class SiteOrigin_Panels_Renderer {
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-no-style',
 					'.panel-has-style > .panel-row-style'
-					$this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ' .so-panels-full-wrapper' : '',
 				), array(
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
