@@ -235,6 +235,10 @@ class SiteOrigin_Panels {
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' && class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
 		}
+
+		if ( class_exists( 'Polylang' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/polylang.php';
+		}
 	}
 
 	/**
