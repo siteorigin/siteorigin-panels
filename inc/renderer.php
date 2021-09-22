@@ -3,6 +3,7 @@
 class SiteOrigin_Panels_Renderer {
 
 	private $inline_css;
+	private $container;
 
 	function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
@@ -77,6 +78,10 @@ class SiteOrigin_Panels_Renderer {
 			$layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
 		}
 
+		if ( empty( $this->container ) ) {
+			$this->container = SiteOrigin_Panels::container_settings();
+		}
+
 		// Get some of the default settings
 		$settings = siteorigin_panels_setting();
 		$panels_tablet_width = $settings['tablet-width'];
@@ -102,6 +107,10 @@ class SiteOrigin_Panels_Renderer {
 
 			$cell_count = count( $row['cells'] );
 
+			// If the CSS Container Breaker is enabled, and this row is using it,
+			// we need to remove the cell widths on mobile.
+			$css_container_cutoff = $this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ":$panels_mobile_width" : 1920;
+
 			// Add the cell sizing
 			foreach ( $row['cells'] as $ci => $cell ) {
 				$weight = apply_filters( 'siteorigin_panels_css_cell_weight', $cell['weight'], $row, $ri, $cell, $ci - 1, $panels_data, $post_id );
@@ -117,7 +126,7 @@ class SiteOrigin_Panels_Renderer {
 						str_replace( ',', '.', $rounded_width ),
 						str_replace( ',', '.', (int) $gutter ? $calc_width : '' ), // Exclude if there's a zero gutter
 					)
-				) );
+				), $css_container_cutoff );
 				
 				// Add in any widget specific CSS
 				foreach ( $cell['widgets'] as $wi => $widget ) {
@@ -218,7 +227,9 @@ class SiteOrigin_Panels_Renderer {
 				// Uses rows custom collapse point or sets mobile collapse point set on settings page.
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-no-style',
-					'.panel-has-style > .panel-row-style'
+					'.panel-has-style > .panel-row-style',
+					// When CSS override is enabled, a full width row has a special wrapper so need to account for that.
+					$this->container['css_override'] && isset( $row['style']['row_stretch'] ) && $row['style']['row_stretch'] == 'full' ? ' .so-panels-full-wrapper' : '',
 				), array(
 					'-webkit-flex-direction' => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
 					'-ms-flex-direction'     => $collapse_order == 'left-top' ? 'column' : 'column-reverse',
@@ -293,6 +304,52 @@ class SiteOrigin_Panels_Renderer {
 			), $panels_mobile_width );
 		}
 
+		if ( $this->container['css_override'] ) {
+			$css->add_css(
+				esc_html( $this->container['selector'] ),
+				array(
+					'max-width' => 'none',
+					// Clear horizontal spacing from container to prevent any indents.
+					'padding-right' => '0',
+					'padding-left' => '0',
+					'margin-right' => '0',
+					'margin-left' => '0',
+				),
+				1920
+			);
+
+			$css->add_css(
+				'.so-panels-full-wrapper, .panel-grid.panel-no-style, .panel-row-style:not([data-stretch-type])',
+				array(
+					'max-width' => esc_attr( $this->container['width'] ),
+					'margin' => '0 auto',
+				),
+				1920
+			);
+
+			// Allow .so-panels-full-wrapper to handle columns correctly.
+			$css->add_css(
+				'.so-panels-full-wrapper',
+				array(
+					'display' => 'flex',
+					'flex-wrap' => 'nowrap',
+					'justify-content' => 'space-between',
+					'align-items' => 'flex-start',
+					'width' => '100%',
+				),
+				1920
+			);
+
+			// Ensure cells inside of .so-panels-full-wrapper are full width when collapsed.
+			$css->add_css(
+				'.so-panels-full-wrapper .panel-grid-cell',
+				array(
+					'width' => '100%',
+				),
+				siteorigin_panels_setting( 'mobile-width' )				
+			);
+		}
+
 		// Let other plugins and components filter the CSS object.
 		$css = apply_filters( 'siteorigin_panels_css_object', $css, $panels_data, $post_id, $layout_data );
 
@@ -352,6 +409,9 @@ class SiteOrigin_Panels_Renderer {
 			return '';
 		}
 
+		if ( empty( $this->container ) ) {
+			$this->container = SiteOrigin_Panels::container_settings();
+		}
 		
 		if ( $is_preview ) {
 			$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
@@ -802,6 +862,16 @@ class SiteOrigin_Panels_Renderer {
 			echo $row_style_wrapper;
 		}
 
+		if (
+			$this->container['css_override'] &&
+			isset( $row['style']['row_stretch'] ) &&
+			$row['style']['row_stretch'] == 'full'
+		) {
+			$this->render_element( 'div', array(
+				'class' => 'so-panels-full-wrapper',
+			) );
+		}
+
 		// This allows other themes and plugins to add HTML inside of the row before the row contents.
 		echo apply_filters( 'siteorigin_panels_inside_row_before', '', $row );
 
@@ -816,6 +886,14 @@ class SiteOrigin_Panels_Renderer {
 
 		// This allows other themes and plugins to add HTML inside of the row after the row contents.
 		echo apply_filters( 'siteorigin_panels_inside_row_after', '', $row );
+
+		if (
+			$this->container['css_override'] &&
+			isset( $row['style']['row_stretch'] ) &&
+			$row['style']['row_stretch'] == 'full'
+		) {
+			echo '</div>';
+		}
 
 		// Close the style wrapper
 		if ( ! empty( $row_style_wrapper ) ) {

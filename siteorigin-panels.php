@@ -235,6 +235,10 @@ class SiteOrigin_Panels {
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' && class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
 		}
+
+		if ( class_exists( 'Polylang' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/polylang.php';
+		}
 	}
 
 	/**
@@ -289,6 +293,16 @@ class SiteOrigin_Panels {
 		$preview_url = wp_nonce_url( $preview_url, 'live-editor-preview', '_panelsnonce' );
 
 		return $preview_url;
+	}
+
+	public static function container_settings() {
+		$container = array(
+			'selector' => apply_filters( 'siteorigin_panels_theme_container_selector', '' ),
+			'width' => apply_filters( 'siteorigin_panels_theme_container_width', '' ),
+		);
+		$container['css_override'] = ! empty( $container['selector'] ) && ! empty( $container['width'] );
+
+		return $container;
 	}
 
 	/**
@@ -523,6 +537,11 @@ class SiteOrigin_Panels {
 		}
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
+
+		$this->container = SiteOrigin_Panels::container_settings();
+		if ( ! empty( $this->container ) && $this->container['css_override'] ) {
+			$classes[] = 'siteorigin-panels-css-container';
+		}
 
 		return $classes;
 	}

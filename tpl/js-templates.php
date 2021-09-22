@@ -534,7 +534,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="content">
-			<form method="post" action="<?php echo SiteOrigin_Panels::preview_url() ?>" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
+			<form method="post" action="" target="siteorigin-panels-history-iframe-{{%= cid %}}" class="history-form">
 				<input type="hidden" name="live_editor_panels_data" value="">
 				<input type="hidden" name="live_editor_post_ID" value="">
 			</form>

@@ -3,7 +3,10 @@
 	data-preview-url="<?php echo $preview_url; ?>"
 	data-preview-markup="<?php echo esc_attr( json_encode( $preview_content ) ); ?>"
 	data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ) ?>"
-	<?php if( !empty( $_GET['so_live_editor'] ) ) echo 'data-live-editor="1"' ?>
+	<?php if ( ! empty( $_GET['so_live_editor'] ) ) : ?>
+	data-live-editor="1"
+	data-live-editor-close="<?php echo siteorigin_panels_setting( 'live-editor-quick-link' ); ?>"
+	<?php endif; ?>
 	>
 	<?php do_action('siteorigin_panels_before_interface') ?>
 	<?php wp_nonce_field('save', '_sopanels_nonce') ?>

@@ -1,0 +1,454 @@
+<wpml-config>
+  <built-with-page-builder>/\[siteorigin_widget.*\]/</built-with-page-builder>
+  <admin-texts>
+    <key name="so_widget_settings[SiteOrigin_Widget_GoogleMap_Widget]">
+      <key name="map_consent_btn_text" />
+      <key name="map_consent_notice" />
+    </key>
+  </admin-texts>
+  <gutenberg-blocks>
+    <gutenberg-block type="siteorigin-panels/layout-block" translate="1">
+      <key name="panelsData">
+        <key name="widgets">
+          <key name="*">
+            <key name="title" />
+            <key name="text" />
+            <key name="alt" />
+            <key name="url" />
+            <key name="content" />
+            <key name="caption" />
+            <key name="attributes">
+              <key name="title" />
+            </key>
+            <key name="settings">
+              <key name="default_subject" />
+              <key name="subject_prefix" />
+              <key name="success_message" />
+              <key name="submit_text" />
+            </key>
+            <key name="fields">
+              <key name="*">
+                <key name="label" />
+                <key name="description" />
+                <key name="required">
+                  <key name="missing_message" />
+                </key>
+              </key>
+            </key>
+            <key name="panels">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+              </key>
+            </key>
+            <key name="items">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="tabs">
+              <key name="*">
+                <key name="title" />
+                <key name="content_text" />
+                <key name="content_layout" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="features">
+              <key name="*">
+                <key name="title" />
+                <key name="text" />
+                <key name="icon_title" />
+                <key name="more_text" />
+                <key name="more_url" />
+              </key>
+            </key>
+            <key name="frames">
+              <key name="*">
+                <key name="content" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="images">
+              <key name="*">
+                <key name="title" />
+                <key name="alt" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="columns">
+              <key name="*">
+                <key name="title" />
+                <key name="subtitle" />
+                <key name="image_title" />
+                <key name="image_alt" />
+                <key name="per" />
+                <key name="button_text" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="networks">
+              <key name="*">
+                <key name="url" />
+                <key name="icon_title" />
+              </key>
+            </key>
+            <key name="testimonials">
+              <key name="*">
+                <key name="title" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="headline">
+              <key name="text" />
+              <key name="destination_url" />
+            </key>
+            <key name="sub_headline">
+              <key name="text" />
+              <key name="destination_url" />
+            </key>
+            <key name="testimonials">
+              <key name="*">
+                <key name="text" />
+                <key name="url" />
+              </key>
+            </key>
+            <key name="frames">
+              <key name="*">
+                <key name="content" />
+              </key>
+            </key>
+            <key name="features">
+              <key name="*">
+                <key name="title" />
+                <key name="text" />
+                <key name="icon_title" />
+                <key name="more_text" />
+                <key name="more_url" />
+              </key>
+            </key>
+            <key name="cta">
+              <key name="*">
+                <key name="title" />
+                <key name="sub_title" />
+                <key name="button>text" />
+                <key name="button>destination_url" />
+                <key name="attributes>title" />
+              </key>
+            </key>
+            <key name="taxonomy">
+              <key name="*">
+                <key name="label" />
+              </key>
+            </key>
+          </key>
+        </key>
+      </key>
+    </gutenberg-block>
+  </gutenberg-blocks>
+  <siteorigin-widgets>
+    <widget name="WP_Widget_Archives">
+      <fields>
+        <field type="Archive title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Media_Audio">
+      <fields>
+        <field type="Audio title">title</field>
+        <field type="Audio URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Calendar">
+      <fields>
+        <field type="Calendar title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Categories">
+      <fields>
+        <field type="Categories title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Custom_HTML">
+      <fields>
+        <field type="Custom HTML title">title</field>
+        <field type="Custom HTML content" editor_type="AREA">content</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Media_Gallery">
+      <fields>
+        <field type="Gallery title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Media_Image">
+      <fields>
+        <field type="Image title">title</field>
+        <field type="Image caption">caption</field>
+        <field type="Image URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Meta">
+      <fields>
+        <field type="Meta title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Text_Icl">
+      <fields>
+        <field type="Title">title</field>
+        <field type="Text" editor_type="AREA">text</field>
+      </fields>
+    </widget>
+    <widget name="WP_Nav_Menu_Widget">
+      <fields>
+        <field type="Menu title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Pages">
+      <fields>
+        <field type="Pages title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_RSS">
+      <fields>
+        <field type="RSS title">title</field>
+        <field type="RSS URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Recent_Comments">
+      <fields>
+        <field type="Comments title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Recent_Posts">
+      <fields>
+        <field type="Posts title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Search">
+      <fields>
+        <field type="Search title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Tag_Cloud">
+      <fields>
+        <field type="Tag cloud title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Text">
+      <fields>
+        <field type="Title">title</field>
+        <field type="Text" editor_type="AREA">text</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Accordion_Widget">
+      <fields>
+        <field type="Accordion title">title</field>
+      </fields>
+      <fields-in-item items_of="panels">
+        <field type="Accordion panel title">title</field>
+        <field type="Accordion panel content_text" editor_type="VISUAL">content_text</field>
+        <field type="Accordion panel content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Anything_Carousel_Widget">
+      <fields>
+        <field type="Anything carousel title">title</field>
+      </fields>
+      <fields-in-item items_of="items">
+        <field type="Anything carousel panel title">title</field>
+        <field type="Anything carousel panel content_text" editor_type="VISUAL">content_text</field>
+        <field type="Anything carousel panel content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Button_Widget">
+      <fields>
+        <field type="Button text">text</field>
+        <field type="Button URL" editor_type="LINK">url</field>
+        <field type="Button title">attributes>title</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widgets_ContactForm_Widget">
+      <fields>
+        <field type="Contact form title">title</field>
+        <field type="Contact form default subject">settings>default_subject</field>
+        <field type="Contact form subject prefix">settings>subject_prefix</field>
+        <field type="Contact form success message">settings>success_message</field>
+        <field type="Contact form submit text">settings>submit_text</field>
+      </fields>
+      <fields-in-item items_of="fields">
+        <field type="Contact form field label">label</field>
+        <field type="Contact form field description">description</field>
+        <field type="Contact form field missing">required>missing_message</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Cta_Widget">
+      <fields>
+        <field type="CTA title">title</field>
+        <field type="CTA sub title">sub_title</field>
+        <field type="CTA button text">button>text</field>
+        <field type="CTA button URL" editor_type="LINK">button>destination_url</field>
+        <field type="CTA button title">attributes>title</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Editor_Widget">
+      <fields>
+        <field type="Editor title">title</field>
+        <field type="Editor content" editor_type="VISUAL">text</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Features_Widget">
+      <fields-in-item items_of="features">
+        <field type="Feature title">title</field>
+        <field type="Feature text" editor_type="VISUAL">text</field>
+        <field type="Feature icon title">icon_title</field>
+        <field type="Feature more text">more_text</field>
+        <field type="Feature more URL" editor_type="LINK">more_url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_GoogleMap_Widget">
+      <fields-in-item items_of="markers>marker_positions">
+        <field type="Map marker info" editor_type="VISUAL">info</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Headline_Widget">
+      <fields>
+        <field type="Headline text">headline>text</field>
+        <field type="Headline URL" editor_type="LINK">headline>destination_url</field>
+        <field type="Sub headline text">sub_headline>text</field>
+        <field type="Sub headline URL" editor_type="LINK">sub_headline>destination_url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Hero_Widget">
+      <fields-in-item items_of="frames">
+        <field type="Hero content" editor_type="VISUAL">content</field>
+      </fields-in-item>
+      <fields-in-item items_of="frames>buttons">
+        <field type="Hero button text">button>text</field>
+        <field type="Hero button link" editor_type="LINK">button>url</field>
+        <field type="Hero button link title">button>attributes>title</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Icon_Widget">
+      <fields>
+        <field type="Icon title">title</field>
+        <field type="Icon URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Image_Widget">
+      <fields>
+        <field type="Image title">title</field>
+        <field type="Image alt">alt</field>
+        <field type="Image URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widgets_ImageGrid_Widget">
+      <fields-in-item items_of="images">
+        <field type="Image title">title</field>
+        <field type="Image alt">alt</field>
+        <field type="Image URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_PostCarousel_Widget">
+      <fields>
+        <field type="Post carousel title">title</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_PriceTable_Widget">
+      <fields>
+        <field type="Price table title">title</field>
+      </fields>
+      <fields-in-item items_of="columns">
+        <field type="Price title">title</field>
+        <field type="Price subtitle">subtitle</field>
+        <field type="Price image title">image_title</field>
+        <field type="Price image alt">image_alt</field>
+        <field type="Price per">per</field>
+        <field type="Price button text">button_text</field>
+        <field type="Price button URL" editor_type="LINK">url</field>
+      </fields-in-item>
+      <fields-in-item items_of="columns>features">
+        <field type="Feature text">features>text</field>
+        <field type="Feature hover text">features>hover_text</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Simple_Masonry_Widget">
+      <fields>
+        <field type="Simple masonry title">title</field>
+      </fields>
+      <fields-in-item items_of="items">
+        <field type="Simple masonry item title">title</field>
+        <field type="Simple masonry item URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Slider_Widget">
+      <fields-in-item items_of="frames">
+        <field type="Slide URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_SocialMediaButtons_Widget">
+      <fields>
+        <field type="Social media buttons title">title</field>
+      </fields>
+      <fields-in-item items_of="networks">
+        <field type="Social Network URL" editor_type="LINK">url</field>
+        <field type="Social Network icon title">icon_title</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Tabs_Widget">
+      <fields>
+        <field type="Tab title">title</field>
+      </fields>
+      <fields-in-item items_of="tabs">
+        <field type="Tabs title">title</field>
+        <field type="Tab content_text" editor_type="VISUAL">content_text</field>
+        <field type="Tab content_layout">content_layout</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Taxonomy_Widget">
+      <fields>
+        <field type="Taxonomy title">title</field>
+        <field type="Taxonomy label">label</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widgets_Testimonials_Widget">
+      <fields>
+        <field type="Testimonials title">title</field>
+      </fields>
+      <fields-in-item items_of="testimonials">
+        <field type="Testimonial text" editor_type="VISUAL">text</field>
+        <field type="Testimonial URL" editor_type="LINK">url</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_Video_Widget">
+      <fields>
+        <field type="Video title">title</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_PriceTable_Widget">
+      <fields>
+        <field type="Price table title">title</field>
+      </fields>
+      <fields-in-item items_of="columns">
+        <field type="Price title">title</field>
+        <field type="Price subtitle">subtitle</field>
+        <field type="Price image title">image_title</field>
+        <field type="Price image alt">image_alt</field>
+        <field type="Price per">per</field>
+        <field type="Price button text">button</field>
+        <field type="Price button URL" editor_type="LINK">url</field>
+      </fields-in-item>
+      <fields-in-item items_of="columns>features">
+        <field type="Feature text">text</field>
+        <field type="Feature hover text">hover</field>
+      </fields-in-item>
+    </widget>
+    <widget name="SiteOrigin_Widget_GoogleMap_Widget">
+      <fields-in-item items_of="markers>marker_positions">
+        <field type="Map marker info" editor_type="VISUAL">info</field>
+      </fields-in-item>
+    </widget>
+  </siteorigin-widgets>
+</wpml-config>
