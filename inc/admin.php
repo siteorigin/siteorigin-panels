@@ -286,7 +286,22 @@ class SiteOrigin_Panels_Admin {
 			delete_post_meta( $post_id, 'panels_data' );
 		}
 
+		// If this is a Live Editor Quick Edit, setup redirection.
+		if (
+			siteorigin_panels_setting( 'live-editor-quick-link-close-after' ) &&
+			strpos( $_POST['_wp_http_referer'], 'so_live_editor' ) !== false
+		) {
+			add_filter( 'redirect_post_location', array( $this, 'live_editor_redirect_after' ), 10, 2 );
+		}
+
 		$this->in_save_post = false;
+	}
+
+	/*
+	 * Handles Live Editor Quick Link redirection after editing.
+	 */
+	public function live_editor_redirect_after( $location, $post_id ) {
+		return get_permalink( $post_id );
 	}
 
 	/**
