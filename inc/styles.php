@@ -347,11 +347,19 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color'] = array(
-			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
 			'priority'    => 16,
+		);
+
+		$fields['link_color_hover'] = array(
+			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
+			'priority'    => 17,
 		);
 
 		return $fields;
@@ -387,11 +395,19 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['link_color'] = array(
-			'name'        => __( 'Links Color', 'siteorigin-panels' ),
+			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
 			'description' => __( 'Color of links inside this widget.', 'siteorigin-panels' ),
 			'priority'    => 16,
+		);
+
+		$fields['link_color_hover'] = array(
+			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
+			'type'        => 'color',
+			'group'       => 'design',
+			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
+			'priority'    => 17,
 		);
 
 		return $fields;
@@ -774,6 +790,11 @@ class SiteOrigin_Panels_Styles {
 					if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
 						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a', array(
 							'color' => $widget['panels_info']['style']['link_color']
+						) );
+					}
+					if ( ! empty( $widget['panels_info']['style']['link_color_hover'] ) ) {
+						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a:hover', array(
+							'color' => $widget['panels_info']['style']['link_color_hover']
 						) );
 					}
 				}
