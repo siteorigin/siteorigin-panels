@@ -8,7 +8,7 @@
  */
 class SiteOrigin_Panels_Css_Builder {
 
-	private $css;
+	public $css;
 
 	function __construct() {
 		$this->css = array();
