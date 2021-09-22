@@ -295,6 +295,16 @@ class SiteOrigin_Panels {
 		return $preview_url;
 	}
 
+	public static function container_settings() {
+		$container = array(
+			'selector' => apply_filters( 'siteorigin_panels_theme_container_selector', '' ),
+			'width' => apply_filters( 'siteorigin_panels_theme_container_width', '' ),
+		);
+		$container['css_override'] = ! empty( $container['selector'] ) && ! empty( $container['width'] );
+
+		return $container;
+	}
+
 	/**
 	 * Get the Page Builder data for the home page.
 	 *
@@ -527,6 +537,11 @@ class SiteOrigin_Panels {
 		}
 		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
 		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
+
+		$this->container = SiteOrigin_Panels::container_settings();
+		if ( ! empty( $this->container ) && $this->container['css_override'] ) {
+			$classes[] = 'siteorigin-panels-css-container';
+		}
 
 		return $classes;
 	}

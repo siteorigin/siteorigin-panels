@@ -61,8 +61,11 @@ class SiteOrigin_Panels_Styles {
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
+
+		$container_settings = SiteOrigin_Panels::container_settings();
 		wp_localize_script( 'siteorigin-panels-front-styles', 'panelsStyles', array(
 			'fullContainer' => apply_filters( 'siteorigin_panels_full_width_container', siteorigin_panels_setting( 'full-width-container' ) ),
+			'stretchRows' => ! $container_settings['css_override'],
 		) );
 
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
@@ -702,10 +705,26 @@ class SiteOrigin_Panels_Styles {
 
 			// Add in flexbox alignment to the main row element
 			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
+
+				$selector = array();
+				$container_settings = SiteOrigin_Panels::container_settings();
+				// What selector we use is dependent on their row setup.
+				if ( empty( $row['style'] ) ) {
+					$selector[] = '.panel-no-style';
+				} elseif ( // Is CSS Container Breaker is enabled, and is the row full width?
+					$container_settings['css_override'] &&
+					isset( $row['style']['row_stretch'] ) &&
+					$row['style']['row_stretch'] == 'full'
+				) {
+					$selector[] = '.panel-has-style > .panel-row-style > .so-panels-full-wrapper';
+				} else {
+					$selector[] = '.panel-has-style > .panel-row-style';
+				}
+
 				$css->add_row_css(
 					$post_id,
 					$ri,
-					array( '.panel-no-style', '.panel-has-style > .panel-row-style' ),
+					$selector,
 					array(
 						'-webkit-align-items' => $row['style']['cell_alignment'],
 						'align-items'         => $row['style']['cell_alignment'],
