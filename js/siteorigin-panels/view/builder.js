@@ -657,14 +657,14 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.builder}
 	 */
 	addLiveEditor: function () {
-		if ( _.isEmpty( this.config.liveEditorPreview ) ) {
+		if ( _.isEmpty( this.config.editorPreview ) ) {
 			return this;
 		}
 
 		// Create the live editor and set the builder to this.
 		this.liveEditor = new panels.view.liveEditor( {
 			builder: this,
-			previewUrl: this.config.liveEditorPreview
+			previewUrl: this.config.editorPreview
 		} );
 
 		// Display the live editor button in the toolbar
@@ -694,7 +694,7 @@ module.exports = Backbone.View.extend( {
 	 * @return {panels.view.builder}
 	 */
 	addHistoryBrowser: function () {
-		if ( _.isEmpty( this.config.liveEditorPreview ) ) {
+		if ( _.isEmpty( this.config.editorPreview ) ) {
 			return this;
 		}
 

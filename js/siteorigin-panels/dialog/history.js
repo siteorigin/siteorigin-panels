@@ -42,6 +42,9 @@ module.exports = panels.view.dialog.extend( {
 		// Render the dialog and attach it to the builder interface
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-history' ).html(), {} ) );
 
+		// Set the history URL.
+		this.$( 'form.history-form' ).attr( 'action', this.builder.config.editorPreview );
+
 		this.$( 'iframe.siteorigin-panels-history-iframe' ).on( 'load', function () {
 			var $$ = $( this );
 			$$.show();
