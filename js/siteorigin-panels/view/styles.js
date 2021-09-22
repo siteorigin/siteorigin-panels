@@ -305,6 +305,9 @@ module.exports = Backbone.View.extend( {
 			text.on( 'change', setValue );
 			unit.on( 'change', setValue );
 		} );
+		
+		// Allow other plugins to setup custom fields.
+		$( document ).trigger( 'setup_style_fields', this );
 	}
 
 } );
