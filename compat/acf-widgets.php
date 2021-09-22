@@ -50,7 +50,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 				foreach( $field_groups as $field_group ) {
 					$fields[] = acf_get_fields( $field_group );
 				}
-				$fields = call_user_func_array('array_merge', $fields );
+				$fields = call_user_func_array( 'array_merge', $fields );
 
 				acf_register_store( 'so_fields', $fields );
 				acf_register_store( 'so_widget_instance', $instance['acf'] );
@@ -73,7 +73,14 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 
 		if ( ! empty( $fields ) ) {
 			foreach ( $fields->data as $field ) {
-				if ( $field['key'] == $widget_field['key'] && ! empty( $instance->data[ $field['key'] ] ) ) {
+				if ( $widget_field['type'] != 'repeater' ) {
+					if (
+						$field['key'] == $widget_field['key'] &&
+						! empty( $instance->data[ $field['key'] ] )
+					) {
+						return $instance->data[ $field['key'] ];
+					}
+				} elseif ( $field['key'] == $widget_field['key'] ) {
 					return $instance->data[ $field['key'] ];
 				}
 			}
@@ -81,18 +88,42 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	}
 
 	/**
+	 * Generates and filters out invalid fields and indexes from the ACF Widget fields array.
+	 *
+	 * @param $fields A possible array containing fields, or a string containing a field value.
+	 *
+	 */
+	private function generate_fields_array( $fields ) {
+		if ( is_array( $fields ) ) {
+			foreach ( $fields as $field_id => $field ) {
+				// If it's a cloneindex, or empty, don't keep it.
+				if ( $field_id == 'acfcloneindex' || empty( $field ) ) {
+					unset( $fields[ $field_id ] );
+					continue;
+				}
+				$fields[ $field_id ] = $this->generate_fields_array( $field );
+			}
+		}
+
+		if ( $fields != '' ) {
+			return $fields;
+		}
+	}
+
+	/**
 	 * Restores initial ACF form data to prevent saving issue in non SOWB widgets.
+	 * Supports arrays to account for field types like the repeater.
 	 *
 	 * @param $instance The updated widget settings.
 	 * @param $new_instance An array of new settings.
 	 * @param $old_instance An array of old settings.
-	 * @param $this The current widget instance.
+	 * @param $the_widget The current widget instance.
 	 *
 	 */
 	public function acf_override_instance( $instance, $widget, $old_widget, $the_widget ) {
 		// Ensure widget update is from Page Builder and there's ACF data present.
-		if ( ! empty( $widget['panels_info'] ) && ! empty( $instance['acf'] ) ) {
-			$instance['acf'] = $widget['acf'];
+		if ( ! empty( $widget['panels_info'] ) && ! empty( $widget['acf'] ) ) {
+			$instance['acf'] = $this->generate_fields_array( $widget['acf'] );
 		}
 
 		return $instance;
