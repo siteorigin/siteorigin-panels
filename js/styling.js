@@ -1,9 +1,11 @@
 /* global _, jQuery */
 
 jQuery( function ( $ ) {
-
 	// Stretch all the full width rows
 	var stretchFullWidthRows = function () {
+		if ( ! panelsStyles.stretchRows ) {
+			return;
+		}
 		var fullContainer = $( panelsStyles.fullContainer );
 		if ( fullContainer.length === 0 ) {
 			fullContainer = $( 'body' );

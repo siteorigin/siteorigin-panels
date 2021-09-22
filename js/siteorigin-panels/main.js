@@ -88,7 +88,7 @@ jQuery( function ( $ ) {
 			loadOnAttach: panelsOptions.loadOnAttach && $( '#auto_draft' ).val() == 1,
 			loadLiveEditor: $panelsMetabox.data( 'live-editor' ) == 1,
 			liveEditorCloseAfter: $panelsMetabox.data( 'live-editor-close' ) == 1,
-			liveEditorPreview: container.data( 'preview-url' )
+			editorPreview: container.data( 'preview-url' )
 		};
 	}
 	else if ( $( '.siteorigin-panels-builder-form' ).length ) {
@@ -107,7 +107,7 @@ jQuery( function ( $ ) {
 			builderSupports: $$.data( 'builder-supports' ),
 			loadLiveEditor: false,
 			liveEditorCloseAfter: false,
-			liveEditorPreview: $$.data( 'preview-url' )
+			editorPreview: $$.data( 'preview-url' )
 		};
 	}
 
