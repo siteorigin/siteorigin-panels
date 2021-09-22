@@ -258,9 +258,18 @@ class SiteOrigin_Panels_Renderer {
 						), $collapse_point );
 					}
 				}
+
+				if (
+					$settings['tablet-layout'] &&
+					$panels_tablet_width > $collapse_point &&
+					! empty( $row['style']['tablet_bottom_margin'] )
+				) {
+					$css->add_row_css( $post_id, $ri, '', array(
+						'margin-bottom' => $row['style']['tablet_bottom_margin']
+					), "$panels_tablet_width:$collapse_point" );
+				}
 				
 				if( $panels_mobile_margin_bottom != $panels_margin_bottom && ! empty( $panels_mobile_margin_bottom ) ) {
-					// If we need a different bottom margin for
 					$css->add_row_css( $post_id, $ri, '', array(
 						'margin-bottom' => $panels_mobile_margin_bottom
 					), $collapse_point );
@@ -403,7 +412,6 @@ class SiteOrigin_Panels_Renderer {
 		if ( empty( $this->container ) ) {
 			$this->container = SiteOrigin_Panels::container_settings();
 		}
-
 		
 		if ( $is_preview ) {
 			$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
@@ -491,6 +499,10 @@ class SiteOrigin_Panels_Renderer {
 		$standard_css = array();
 		$standard_css = apply_filters( 'siteorigin_panels_' . $name . '_style_css', $standard_css, $style );
 		$standard_css = apply_filters( 'siteorigin_panels_general_style_css', $standard_css, $style );
+
+		$tablet_css = array();
+		$tablet_css = siteorigin_panels_setting( 'tablet-layout' ) ? apply_filters( 'siteorigin_panels_' . $name . '_style_tablet_css', $tablet_css, $style ) : '';
+		$tablet_css = apply_filters( 'siteorigin_panels_general_style_tablet_css', $tablet_css, $style );
 
 		$mobile_css = array();
 		$mobile_css = apply_filters( 'siteorigin_panels_' . $name . '_style_mobile_css', $mobile_css, $style );

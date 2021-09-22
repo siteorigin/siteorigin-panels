@@ -27,6 +27,10 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_css', array( $this, 'general_style_css' ), 10, 2 );
 
+		add_filter( 'siteorigin_panels_row_style_tablet_css', array( $this, 'general_style_tablet_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_cell_style_tablet_css', array( $this, 'general_style_tablet_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_widget_style_tablet_css', array( $this, 'general_style_tablet_css' ), 10, 2 );
+
 		add_filter( 'siteorigin_panels_row_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_cell_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_mobile_css', array( $this, 'general_style_mobile_css' ), 10, 2 );
@@ -150,15 +154,26 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 7,
 			'multiple'    => true
 		);
-		
-		// Mobile layout fields
 
+		// Tablet layout fields
+		if ( siteorigin_panels_setting( 'tablet-layout' ) ) {
+			$fields['tablet_padding'] = array(
+				'name'        => __( 'Tablet Padding', 'siteorigin-panels' ),
+				'type'        => 'measurement',
+				'group'       => 'tablet_layout',
+				'description' => __( 'Padding when on tablet devices.', 'siteorigin-panels' ),
+				'priority'    => 8,
+				'multiple'    => true
+			);
+		}
+
+		// Mobile layout fields
 		$fields['mobile_padding'] = array(
 			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'mobile_layout',
 			'description' => __( 'Padding when on mobile devices.', 'siteorigin-panels' ),
-			'priority'    => 8,
+			'priority'    => 9,
 			'multiple'    => true
 		);
 
@@ -295,8 +310,18 @@ class SiteOrigin_Panels_Styles {
 			);
 		}
 		
-		// Add the mobile layout fields
-		
+		if ( siteorigin_panels_setting( 'tablet-layout' ) ) {
+			// Add the tablet layout fields
+			$fields['tablet_bottom_margin'] = array(
+				'name'        => __( 'Tablet Bottom Margin', 'siteorigin-panels' ),
+				'type'        => 'measurement',
+				'group'       => 'tablet_layout',
+				'description' => sprintf( __( 'Space below the row on tablet devices. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
+				'priority'    => 5,
+			);
+		}
+
+		// Add the mobile layout fields		
 		$fields['mobile_bottom_margin'] = array(
 			'name'        => __( 'Mobile Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -634,6 +659,22 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
+	 * Get the tablet styling for rows, cells and widgets
+	 *
+	 * @param $css
+	 * @param $style
+	 *
+	 * @return mixed
+	 */
+	static function general_style_tablet_css( $css, $style ){
+		if( ! empty( $style['tablet_padding'] ) ) {
+			$css['padding'] = $style[ 'tablet_padding' ];
+		}
+
+		return $css;
+	}
+
+	/**
 	 * Get the mobile styling for rows, cells and widgets
 	 *
 	 * @param $css
@@ -674,6 +715,8 @@ class SiteOrigin_Panels_Styles {
 	 * @return mixed
 	 */
 	static function filter_css_object( $css, $panels_data, $post_id, $layout ) {
+		$tablet_width = siteorigin_panels_setting( 'tablet-width' );
+		$tablet_layout = siteorigin_panels_setting( 'tablet-layout' );
 		$mobile_width = siteorigin_panels_setting( 'mobile-width' );
 		if( empty( $layout ) ) {
 			return $css;
@@ -683,6 +726,7 @@ class SiteOrigin_Panels_Styles {
 			if( empty( $row[ 'style' ] ) ) $row[ 'style' ] = array();
 
 			$standard_css = apply_filters( 'siteorigin_panels_row_style_css', array(), $row['style'] );
+			$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_row_style_tablet_css', array(), $row['style'] ) : '';
 			$mobile_css = apply_filters( 'siteorigin_panels_row_style_mobile_css', array(), $row['style'] );
 
 			if ( ! empty( $standard_css ) ) {
@@ -693,6 +737,17 @@ class SiteOrigin_Panels_Styles {
 					$standard_css
 				);
 			}
+
+			if ( ! empty( $tablet_css ) ) {
+				$css->add_row_css(
+					$post_id,
+					$ri,
+					'> .panel-row-style',
+					$tablet_css,
+					"$tablet_width:$mobile_width"
+				);
+			}
+
 			if ( ! empty( $mobile_css ) ) {
 				$css->add_row_css(
 					$post_id,
@@ -739,6 +794,7 @@ class SiteOrigin_Panels_Styles {
 				if( empty( $cell[ 'style' ] ) ) $cell[ 'style' ] = array();
 
 				$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
+				$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_cell_style_tablet_css', array(), $row['style'] ) : '';
 				$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
 
 				if ( ! empty( $standard_css ) ) {
@@ -748,6 +804,16 @@ class SiteOrigin_Panels_Styles {
 						$ci,
 						'> .panel-cell-style',
 						$standard_css
+					);
+				}
+				if ( ! empty( $tablet_css ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'> .panel-cell-style',
+						$tablet_css,
+						"$tablet_width:$mobile_width"
 					);
 				}
 				if ( ! empty( $mobile_css ) ) {
@@ -781,6 +847,7 @@ class SiteOrigin_Panels_Styles {
 					if ( empty( $widget['panels_info']['style'] ) ) $widget['panels_info']['style'] = array();
 
 					$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
+					$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_row_style_widget_css', array(), $row['style'] ) : '';
 					$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
 
 					if( ! empty( $standard_css ) ) {
@@ -794,6 +861,17 @@ class SiteOrigin_Panels_Styles {
 						);
 					}
 
+					if ( ! empty( $tablet_css ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'> .panel-widget-style',
+							$tablet_css,
+							"$tablet_width:$mobile_width"
+						);
+					}
 					if( ! empty( $mobile_css ) ) {
 						$css->add_widget_css(
 							$post_id,
