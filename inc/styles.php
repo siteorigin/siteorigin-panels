@@ -794,7 +794,7 @@ class SiteOrigin_Panels_Styles {
 				if( empty( $cell[ 'style' ] ) ) $cell[ 'style' ] = array();
 
 				$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
-				$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_cell_style_tablet_css', array(), $row['style'] ) : '';
+				$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_cell_style_tablet_css', array(), $cell['style'] ) : '';
 				$mobile_css = apply_filters( 'siteorigin_panels_cell_style_mobile_css', array(), $cell['style'] );
 
 				if ( ! empty( $standard_css ) ) {
@@ -847,7 +847,7 @@ class SiteOrigin_Panels_Styles {
 					if ( empty( $widget['panels_info']['style'] ) ) $widget['panels_info']['style'] = array();
 
 					$standard_css = apply_filters( 'siteorigin_panels_widget_style_css', array(), $widget['panels_info']['style'] );
-					$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_row_style_widget_css', array(), $row['style'] ) : '';
+					$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_widget_style_tablet_css', array(), $widget['panels_info']['style'] ) : '';
 					$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
 
 					if( ! empty( $standard_css ) ) {
