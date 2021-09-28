@@ -107,6 +107,18 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.14.0 - 28 September 2021 =
+* Tablet Styles: Added a new Tablet Styles section to row, cell, and widget styles.
+* Widget Design Settings: Added a Link Hover Color setting.
+* History Browser: Resolved incorrect preview URL.
+* Live Editor: When accessing the Live Editor via the toolbar link, return to the site after saving. Setting available at Settings > Page Builder > General.
+* Polylang: Ensured Page Builder data is copied during page duplication in the Classic Editor.
+* Yoast SEO: Added additional Open Graph compatibility check.
+* Developer: Advanced Custom Fields: Improved repeater support.
+* Developer: Changed CSS Builder `$css` to public to allow more extensive filtering.
+* Developer: Added `setup_style_fields` JavaScript event to allow the setup of custom style fields.
+* Developer: Added an optional CSS method for full width containers using `siteorigin_panels_theme_container_width` and `siteorigin_panels_theme_container_selector`.
+
 = 2.13.2 - 14 August 2021 =
 * Modern Parallax: Resolved potential Jetpack Image Accelerator notice.
 * Customizer: Resolved new widget area notice.
