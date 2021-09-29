@@ -52,7 +52,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			editorType: 'standalone',
 	        loadLiveEditor: false,
 	        postId: window.soPanelsBlockEditorAdmin.postId,
-	        liveEditorPreview: window.soPanelsBlockEditorAdmin.liveEditor,
+	        editorPreview: window.soPanelsBlockEditorAdmin.liveEditor,
 		};
 		
 		var builderModel = new panels.model.builder();
