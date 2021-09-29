@@ -14,8 +14,13 @@ function siteorigin_yoast_opengraph_panels_disable( $content ) {
 	}
 	return $content;
 }
+
 // If Yoast OpenGraph is enabled, disable Page Builder as needed.
-if ( class_exists( 'WPSEO_Options' ) && WPSEO_Options::get( 'opengraph' ) ) {
+if (
+	class_exists( 'WPSEO_Options' ) &&
+	method_exists( 'WPSEO_Options', 'get' ) &&
+	WPSEO_Options::get( 'opengraph' )
+) {
 	add_filter( 'the_content', 'siteorigin_yoast_opengraph_panels_disable', 1 );
 }
 

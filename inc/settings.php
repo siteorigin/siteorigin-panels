@@ -116,37 +116,48 @@ class SiteOrigin_Panels_Settings {
 		$defaults['load-on-attach']    = false;
 		$defaults['use-classic']       = true;
 
-		// The Parallax Type default depends on whether a different setting settings is set.
-		// This is done here rather than using `siteorigin_panels_version_changed` as
-		// that hook is triggered after the settings are loaded.
+		/**
+		 * Certain settings have different defaults depending on if this is a new
+		 * install, or not. 
+		 *
+		 * This is done here rather than using `siteorigin_panels_version_changed` as
+		 * that hook is triggered after the settings are loaded.
+		 */
 		$so_settings = get_option( 'siteorigin_panels_settings' );
 
 		if ( empty( $so_settings ) ) {
 			// New install.
 			$parallax_type = 'modern';
-		} elseif ( isset( $so_settings['parallax-type'] ) ) {
-			// If parallax-type already exists, use the existing value to prevent a potential override.
-			$parallax_type = $so_settings['parallax-type'];
-		} elseif ( isset( $so_settings['parallax-delay'] ) ) {
-			// User is upgrading.
-			$parallax_type = 'legacy';
+			$live_editor_close_after = true;
 		} else {
-			// If all else fails, fallback to modern.
-			$parallax_type = 'modern';
+			$live_editor_close_after = false;
+			// Parallax Type.
+			if ( isset( $so_settings['parallax-type'] ) ) {
+				// If parallax-type already exists, use the existing value to prevent a potential override.
+				$parallax_type = $so_settings['parallax-type'];
+			} elseif ( isset( $so_settings['parallax-delay'] ) ) {
+				// User is upgrading.
+				$parallax_type = 'legacy';
+			} else {
+				// If all else fails, fallback to modern.
+				$parallax_type = 'modern';
+			}
 		}
 
+
 		// The general fields
-		$defaults['post-types']             = array( 'page', 'post' );
-		$defaults['live-editor-quick-link'] = true;
-		$defaults['admin-post-state']       = true;
-		$defaults['admin-widget-count']     = false;
-		$defaults['parallax-type']          = $parallax_type;
-		$defaults['parallax-mobile']        = false;
-		$defaults['parallax-motion']        = ''; // legacy parallax
-		$defaults['parallax-delay']         = 0.4;
-		$defaults['parallax-scale']         = 1.2;
-		$defaults['sidebars-emulator']      = true;
-		$defaults['layout-block-default-mode'] = 'preview';
+		$defaults['post-types']                         = array( 'page', 'post' );
+		$defaults['live-editor-quick-link']             = true;
+		$defaults['live-editor-quick-link-close-after'] = $live_editor_close_after;
+		$defaults['admin-post-state']                   = true;
+		$defaults['admin-widget-count']                 = false;
+		$defaults['parallax-type']                      = $parallax_type;
+		$defaults['parallax-mobile']                    = false;
+		$defaults['parallax-motion']                    = ''; // legacy parallax
+		$defaults['parallax-delay']                     = 0.4;
+		$defaults['parallax-scale']                     = 1.2;
+		$defaults['sidebars-emulator']                  = true;
+		$defaults['layout-block-default-mode']          = 'preview';
 
 		// Widgets fields
 		$defaults['title-html']           = '<h3 class="widget-title">{{title}}</h3>';
@@ -283,8 +294,13 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['general']['fields']['live-editor-quick-link'] = array(
 			'type'        => 'checkbox',
-			'label'       => __( 'Live Editor Quick Link', 'siteorigin-panels' ),
-			'description' => __( 'Display a Live Editor button in the WordPress admin bar.', 'siteorigin-panels' ),
+			'label'       => __( 'Live Editor Toolbar Link', 'siteorigin-panels' ),
+			'description' => __( 'Display a Live Editor link in the toolbar when viewing site.', 'siteorigin-panels' ),
+		);
+		$fields['general']['fields']['live-editor-quick-link-close-after'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Live Editor Toolbar Link: Close After Editing', 'siteorigin-panels' ),
+			'description' => __( 'When accessing the Live Editor via the toolbar link, return to the site after saving.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['admin-post-state'] = array(

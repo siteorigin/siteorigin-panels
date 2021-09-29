@@ -151,7 +151,7 @@ jQuery( function($){
             $('#panels-settings-search .results').fadeOut('fast');
         } );
 
-    var handleParallaxVisibility = function() {
+    var handleSettingVisibility = function() {
         if ( $( 'select[name="panels_setting[parallax-type]"]' ).val() == 'modern' ) {
             $( 'input[name="panels_setting[parallax-motion]"]' ).parent().parent().hide();
             $( 'input[name="panels_setting[parallax-delay]"], input[name="panels_setting[parallax-scale]"]' ).parent().parent().show();
@@ -159,9 +159,15 @@ jQuery( function($){
             $( 'input[name="panels_setting[parallax-delay]"], input[name="panels_setting[parallax-scale]"]' ).parent().parent().hide();
             $( 'input[name="panels_setting[parallax-motion]"]' ).parent().parent().show();
         }
+
+        if ( $( 'input[name="panels_setting[live-editor-quick-link]' ).prop( 'checked' ) ) {
+            $( 'input[name="panels_setting[live-editor-quick-link-close-after]"]' ).parents( '.panels-setting' ).show();
+        } else {
+            $( 'input[name="panels_setting[live-editor-quick-link-close-after]"]' ).parents( '.panels-setting' ).hide();
+        }
     }
-    handleParallaxVisibility();
-    $( 'select[name="panels_setting[parallax-type]"]' ).on( 'change', handleParallaxVisibility );
+    handleSettingVisibility();
+    $( '.panels-setting select, .panels-setting input' ).on( 'change', handleSettingVisibility );
 } );
 
 // Fitvids
