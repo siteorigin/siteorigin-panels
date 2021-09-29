@@ -107,7 +107,7 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
-= 2.14.0 - 28 September 2021 =
+= 2.14.0 - 29 September 2021 =
 * Tablet Styles: Added a new Tablet Styles section to row, cell, and widget styles.
 * Widget Design Settings: Added a Link Hover Color setting.
 * History Browser: Resolved incorrect preview URL.
