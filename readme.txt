@@ -107,6 +107,11 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.14.1 - 01 October 2021 =
+* Layout Block: Restored Live Editor and History functionality.
+* Ensured Cell Vertical Alignment doesn't stretch independently of the setting chosen.
+* Developer: Prevented a potential small jump on load when CSS full width containers in use.
+
 = 2.14.0 - 29 September 2021 =
 * Tablet Styles: Added a new Tablet Styles section to row, cell, and widget styles.
 * Widget Design Settings: Added a Link Hover Color setting.

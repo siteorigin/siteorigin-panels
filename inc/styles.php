@@ -764,16 +764,14 @@ class SiteOrigin_Panels_Styles {
 				$selector = array();
 				$container_settings = SiteOrigin_Panels::container_settings();
 				// What selector we use is dependent on their row setup.
-				if ( empty( $row['style'] ) ) {
-					$selector[] = '.panel-no-style';
-				} elseif ( // Is CSS Container Breaker is enabled, and is the row full width?
+				if ( // Is CSS Container Breaker is enabled, and is the row full width?
 					$container_settings['css_override'] &&
 					isset( $row['style']['row_stretch'] ) &&
 					$row['style']['row_stretch'] == 'full'
 				) {
 					$selector[] = '.panel-has-style > .panel-row-style > .so-panels-full-wrapper';
 				} else {
-					$selector[] = '.panel-has-style > .panel-row-style';
+					$selector[] = '.panel-has-style > .panel-row-style, .panel-no-style';
 				}
 
 				$css->add_row_css(
