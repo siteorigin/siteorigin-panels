@@ -120,7 +120,7 @@ function (_wp$element$Component) {
         editorType: 'standalone',
         loadLiveEditor: false,
         postId: window.soPanelsBlockEditorAdmin.postId,
-        liveEditorPreview: window.soPanelsBlockEditorAdmin.liveEditor
+        editorPreview: window.soPanelsBlockEditorAdmin.liveEditor
       };
       var builderModel = new panels.model.builder();
       this.builderView = new panels.view.builder({
