@@ -670,7 +670,29 @@ module.exports = Backbone.View.extend( {
 
 		// Display the live editor button in the toolbar
 		if ( this.liveEditor.hasPreviewUrl() ) {
-			this.$( '.so-builder-toolbar .so-live-editor' ).show();
+			var addLEButton = false;
+			if ( ! panels.helpers.editor.isBlockEditor() ) {
+				addLEButton = true;
+			} else if ( wp.data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) != 'auto-draft' ) {
+				addLEButton = true;
+			} else {
+				// Block Editor powered page that's an auto draft. To avoid a 404, we need to save the draft.
+				$( '.editor-post-save-draft' ).trigger( 'click' );
+				var openLiveEditorAfterSave = setInterval( function() {
+					if (
+						! wp.data.select('core/editor').isSavingPost() &&
+						! wp.data.select('core/editor').isAutosavingPost() &&
+						wp.data.select('core/editor').didPostSaveRequestSucceed()
+					) {
+						clearInterval( openLiveEditorAfterSave );
+						this.$( '.so-builder-toolbar .so-live-editor' ).show();
+					}
+				}.bind( this ), 250 );
+			}
+
+			if ( addLEButton ) {
+				this.$( '.so-builder-toolbar .so-live-editor' ).show();
+			}
 		}
 
 		this.trigger( 'builder_live_editor_added' );

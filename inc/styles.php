@@ -771,7 +771,8 @@ class SiteOrigin_Panels_Styles {
 				) {
 					$selector[] = '.panel-has-style > .panel-row-style > .so-panels-full-wrapper';
 				} else {
-					$selector[] = '.panel-has-style > .panel-row-style, .panel-no-style';
+					$selector[] = '.panel-has-style > .panel-row-style';
+					$selector[] = '.panel-no-style';
 				}
 
 				$css->add_row_css(

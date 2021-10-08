@@ -106,7 +106,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	}
 
 	static function encode_data( $data ){
-		return '<input type="hidden" value="' . esc_attr( json_encode( $data, JSON_UNESCAPED_UNICODE ) ) . '" />';
+		return '<input type="hidden" value="' . esc_textarea( json_encode( $data, JSON_UNESCAPED_UNICODE ) ) . '" />';
 	}
 
 	static function decode_data( $string ){
