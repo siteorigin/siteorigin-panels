@@ -107,6 +107,11 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.14.2 - 08 October 2021 =
+* Layout Block: Force a draft before displaying the Live Editor button.
+* Fixed `Cell Vertical Alignment` setting.
+* Developer: Prevented potential notice when processing Page Builder fallback shortcode.
+
 = 2.14.1 - 01 October 2021 =
 * Layout Block: Restored Live Editor and History functionality.
 * Ensured Cell Vertical Alignment doesn't stretch independently of the setting chosen.
