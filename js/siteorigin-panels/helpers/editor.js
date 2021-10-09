@@ -1,6 +1,6 @@
 module.exports = {
 	isBlockEditor: function() {
-		return typeof wp.blocks !== 'undefined';
+		return typeof wp.blocks !== 'undefined' && jQuery( '.block-editor-page' ).length
 	},
 
 	isClassicEditor: function( builder ) {
