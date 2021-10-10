@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.14.3 - 10 October 2021 =
+* Resolved conflict caused by Block Editor JavaScript loaded in the Classic Editor.
+
 = 2.14.2 - 08 October 2021 =
 * Layout Block: Force a draft before displaying the Live Editor button.
 * Fixed `Cell Vertical Alignment` setting.
