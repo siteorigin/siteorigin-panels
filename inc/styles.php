@@ -40,8 +40,10 @@ class SiteOrigin_Panels_Styles {
 
 		// Filtering specific attributes
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
-		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
 		add_filter( 'siteorigin_panels_css_row_mobile_margin_bottom', array( $this, 'filter_row_mobile_bottom_margin' ), 10, 2 );
+		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
+		add_filter( 'siteorigin_panels_css_widget_mobile_margin', array( $this, 'filter_widget_mobile_margin' ), 10, 5 );
+
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_widget_css', array( $this, 'filter_widget_style_css' ), 10, 2 );
 
@@ -168,6 +170,17 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		// Mobile layout fields
+		if ( $label == 'Widget' ) {
+			$fields['mobile_margin'] = array(
+				'name'        => __( 'Mobile Margin', 'siteorigin-panels' ),
+				'type'        => 'measurement',
+				'group'       => 'mobile_layout',
+				'description' => __( 'Margins around the widget when on mobile devices.', 'siteorigin-panels' ),
+				'priority'    => 8,
+				'multiple'    => true
+			);
+		}
+
 		$fields['mobile_padding'] = array(
 			'name'        => __( 'Mobile Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -929,6 +942,15 @@ class SiteOrigin_Panels_Styles {
 			$margin = $row['style']['mobile_cell_margin'];
 		}
 		
+		return $margin;
+	}
+
+
+	static function filter_widget_mobile_margin( $margin, $widget, $wi, $panels_data, $post_id ) {
+		if ( ! empty( $widget['style']['mobile_margin'] ) ) {
+			$margin = $widget['style']['mobile_margin'];
+		}
+
 		return $margin;
 	}
 	

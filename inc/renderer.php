@@ -155,6 +155,30 @@ class SiteOrigin_Panels_Renderer {
 						1920,
 						true
 					);
+
+					$panels_mobile_widget_mobile_margin = apply_filters(
+						'siteorigin_panels_css_widget_mobile_margin',
+						 ! empty( $widget['panels_info']['style']['mobile_margin'] ) ? $widget['panels_info']['style']['mobile_margin'] : false,
+						$widget,
+						$wi,
+						$panels_data,
+						$post_id 
+					);
+
+					if ( ! empty( $panels_mobile_widget_mobile_margin ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'',
+							array(
+								'margin' => $panels_mobile_widget_mobile_margin
+							),
+							$panels_mobile_width,
+							true
+						);
+					}
 				}
 			}
 
