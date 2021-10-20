@@ -231,7 +231,7 @@ module.exports = Backbone.Model.extend( {
 
 		// Check titleFields for valid titles.
 		_.each( titleFields, function( title ) {
-			if ( thisView.isValidTitle( values[ title ] ) ) {
+			if ( ! widgetTitle && thisView.isValidTitle( values[ title ] ) ) {
 				widgetTitle = thisView.cleanTitle( values[ title ] );
 				return false;
 			}
