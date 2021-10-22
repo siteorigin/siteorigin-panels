@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.15.0 - 22 October 2021 =
+* Added a "Mobile Margin" setting to `Widget Styles > Mobile Layout`.
+* Ensured the Widget Title is used as the widget description if present.
+
 = 2.14.3 - 10 October 2021 =
 * Resolved conflict caused by Block Editor JavaScript loaded in the Classic Editor.
 
