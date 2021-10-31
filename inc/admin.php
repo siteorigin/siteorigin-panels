@@ -1351,29 +1351,57 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	/**
-	 * Display links for various SiteOrigin addons
+	 * Display links for various SiteOrigin Premium Addons.
 	 */
-	public static function display_footer_premium_link(){
+	public static function display_footer_premium_link() {
 		$links = array(
 			array(
-				'text' => __('Get a lightbox addon for SiteOrigin widgets', 'siteorigin-panels'),
-				'url' => SiteOrigin_Panels::premium_url('plugin/lightbox')
+				'text' => __( 'Get an Accordion Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/accordion' )
+			),			
+			array(
+				'text' => __( 'Get the row, cell, and widget Animations Addon', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/animations' )
 			),
 			array(
-				'text' => __('Get the row, cell and widget animations addon', 'siteorigin-panels'),
-				'url' => SiteOrigin_Panels::premium_url('plugin/lightbox')
+				'text' => __( 'Get a Carousel Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/carousel' )
 			),
 			array(
-				'text' => __('Get premium email support for SiteOrigin Page Builder', 'siteorigin-panels'),
+				'text' => __( 'Get a Call to Action Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/cta' )
+			),						
+			array(
+				'text' => __( 'Get a Lightbox Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' )
+			),
+			array(
+				'text' => __( 'Hide rows and widgets on specific devices with the Toggle Visibility Addon', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' )
+			),
+			array(
+				'text' => __( 'Get a Testimonials Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/testimonials' )
+			),			
+			array(
+				'text' => __( 'Get a Tooltip Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' )
+			),
+			array(
+				'text' => __( 'Get a Webfont Selector Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/web-font-selector' )
+			),					
+			array(
+				'text' => __( 'Get fast email support for Page Builder with SiteOrigin Premium', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url()
 			),
 		);
-		$link = $links[array_rand($links)];
+		$link = $links[ array_rand( $links ) ];
 
 		?>
-        <a href="<?php echo esc_url( $link['url'] ) ?>" target="_blank" rel='noopener noreferrer'>
+		<a href="<?php echo esc_url( $link['url'] ) ?>" target="_blank" rel='noopener noreferrer'>
 			<?php echo esc_html( $link['text'] ) ?>.
-        </a>
+		</a>
 		<?php
 	}
 
