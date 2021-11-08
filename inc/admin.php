@@ -1398,11 +1398,20 @@ class SiteOrigin_Panels_Admin {
 		);
 		$link = $links[ array_rand( $links ) ];
 
-		?>
-		<a href="<?php echo esc_url( $link['url'] ) ?>" target="_blank" rel='noopener noreferrer'>
-			<?php echo esc_html( $link['text'] ) ?>.
-		</a>
-		<?php
+		// If this link has an anchor, it has a custom link location.
+		if ( isset( $link['anchor'] ) ) {
+			echo str_replace(
+				'%link%',
+				'<a href="' . esc_url( $link['url'] ) .'" target="_blank" rel="noopener noreferrer">' . esc_html( $link['anchor'] ) . '</a>',
+				esc_html( $link['text'] )
+			);
+		} else {
+			?>
+			<a href="<?php echo esc_url( $link['url'] ) ?>" target="_blank" rel='noopener noreferrer'>
+				<?php echo esc_html( $link['text'] ) ?>.
+			</a>
+			<?php
+		}
 	}
 
 	public function admin_notices() {
