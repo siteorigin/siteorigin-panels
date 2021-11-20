@@ -1356,46 +1356,67 @@ class SiteOrigin_Panels_Admin {
 	public static function display_footer_premium_link() {
 		$links = array(
 			array(
-				'text' => __( 'Get an Accordion Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/accordion' )
-			),			
-			array(
-				'text' => __( 'Get the row, cell, and widget Animations Addon', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/animations' )
+				'text' => __( 'Get the row, cell, and widget %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/animations' ),
+				'anchor' => __( 'Animations Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a Carousel Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/carousel' )
+				'text' => __( 'Get the %link%. Build custom post types with reusable Page Builder layouts.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/cpt-builder' ),
+				'anchor' => __( 'CPT Builder Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a Call to Action Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/cta' )
-			),						
-			array(
-				'text' => __( 'Get a Lightbox Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' )
+				'text' => __( 'Get the %link%. Add beautiful and customizable text overlays with animations to your images.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/image-overlay' ),
+				'anchor' => __( 'Image Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Hide rows and widgets on specific devices with the Toggle Visibility Addon', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' )
+				'text' => __( 'Get a %link% for SiteOrigin Image, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' ),
+				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a Testimonials Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/testimonials' )
-			),			
-			array(
-				'text' => __( 'Get a Tooltip Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' )
+				'text' => __( 'Link an entire Page Builder row, cell, or widget with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/link-overlay' ),
+				'anchor' => __( 'Link Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a Webfont Selector Addon for SiteOrigin Widgets', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/web-font-selector' )
-			),					
+				'text' => __( 'Get the %link%. Create a widget once, use it everywhere. Update it and the changes reflect in all instances of the widget.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/mirror-widgets' ),
+				'anchor' => __( 'Mirror Widgets Addon', 'siteorigin-panels' ),
+			),
 			array(
-				'text' => __( 'Get fast email support for Page Builder with SiteOrigin Premium', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url()
+				'text' => __( 'Upload multiple image frames at once to Widgets Bundle Slider and Image Grid type widgets with %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/multiple-media' ),
+				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Add parallax background images to your slider type widgets with %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/parallax-sliders' ),
+				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Hide rows and widgets on specific devices with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' ),
+				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Get a %link% with SiteOrigin Premium.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' ),
+				'anchor' => __( 'Tooltip Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Use Google Fonts in SiteOrigin Widgets with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/web-font-selector' ),
+				'anchor' => __( 'Webfont Selector Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Get fast email support for Page Builder with %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url(),
+				'anchor' => __( 'SiteOrigin Preimum', 'siteorigin-panels' ),
 			),
 		);
+
 		$link = $links[ array_rand( $links ) ];
 
 		// If this link has an anchor, it has a custom link location.
