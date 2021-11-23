@@ -1416,7 +1416,13 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Preimum', 'siteorigin-panels' ),
 			),
 		);
-
+		if ( class_exists( 'woocommerce' ) ) {
+			$links[] = array(
+				'text' => __( 'Get the %link%. Create custom templates for the Product, Archives, Shop, Cart, and Checkout pages.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/woocommerce-templates' ),
+				'anchor' => __( 'WooCommerce Templates Addon', 'siteorigin-panels' ),
+			);
+		}
 		$link = $links[ array_rand( $links ) ];
 
 		// If this link has an anchor, it has a custom link location.
