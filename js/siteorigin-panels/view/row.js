@@ -88,6 +88,23 @@ module.exports = Backbone.View.extend( {
 			this.$('.so-row-toolbar' ).remove();
 		}
 
+		// Toggle Visibility: Check if row is hidden and apply fade as needed..
+		var currentRowStyle = this.model.attributes.style;
+		if (
+			typeof currentRowStyle.disable_desktop !== 'undefined' &&
+			(
+				currentRowStyle.disable_desktop ||
+				currentRowStyle.disable_logged_in ||
+				currentRowStyle.disable_logged_out ||
+				currentRowStyle.disable_mobile ||
+				currentRowStyle.disable_tablet ||
+				currentRowStyle.disable_widget
+			)
+		) {
+			this.$el.addClass( 'so-hidden-row' );
+		}
+
+
 		// Resize the rows when ever the widget sortable moves
 		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
 		this.listenTo( this.builder, 'builder_resize', this.resizeRow );

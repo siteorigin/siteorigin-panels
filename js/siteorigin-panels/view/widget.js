@@ -80,6 +80,22 @@ module.exports = Backbone.View.extend( {
 			dialog.setupDialog();
 		}
 
+		// Toggle Visibility: Check if Widget is hidden and apply fade as needed..
+		var currentWidgetStyle = this.model.attributes.style;
+		if (
+			typeof currentWidgetStyle.disable_desktop !== 'undefined' &&
+			(
+				currentWidgetStyle.disable_desktop ||
+				currentWidgetStyle.disable_logged_in ||
+				currentWidgetStyle.disable_logged_out ||
+				currentWidgetStyle.disable_mobile ||
+				currentWidgetStyle.disable_tablet ||
+				currentWidgetStyle.disable_widget
+			)
+		) {
+			this.$el.addClass( 'so-widget-hidden-widget' );
+		}
+
 		// Add the global builder listeners
 		this.listenTo(this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler);
 
