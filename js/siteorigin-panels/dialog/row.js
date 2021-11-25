@@ -703,29 +703,59 @@ module.exports = panels.view.dialog.extend({
 		// Update the row styles if they've loaded
 		if (!_.isUndefined(this.styles) && this.styles.stylesLoaded) {
 			// This is an edit dialog, so there are styles
-			var style = {};
+			var newStyles = {};
 			try {
-				style = this.getFormValues('.so-sidebar .so-visual-styles.so-row-styles').style;
+				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch (err) {
 				console.log('Error retrieving row styles - ' + err.message);
 			}
 
-			this.model.set('style', style);
+			// Has there been any Style changes?
+			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
+				this.model.set( 'style', newStyles );
+				this.model.trigger( 'change:styles' );
+				this.model.trigger( 'change:styles-row' );
+			}
 		}
+
+
+		if ( this.styles.stylesLoaded ) {
+			// If the styles view has loaded
+			var newStyles = {};
+			try {
+				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
+			}
+			catch ( e ) {
+			}
+
+			// Has there been any Style changes?
+			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
+				this.model.set( 'style', newStyles );
+				this.model.trigger( 'change:styles' );
+				this.model.trigger( 'change:styles-row' );
+			}
+		}
+
 
 		// Update the cell styles if any are showing.
 		if (!_.isUndefined(this.cellStyles) && this.cellStyles.stylesLoaded) {
 
-			var style = {};
+			var newStyles = {};
 			try {
-				style = this.getFormValues('.so-sidebar .so-visual-styles.so-cell-styles').style;
+				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles.so-cell-styles' ).style;
 			}
 			catch (err) {
 				console.log('Error retrieving cell styles - ' + err.message);
 			}
 
 			this.cellStyles.model.set('style', style);
+			// Has there been any Style changes?
+			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
+				this.model.set( 'style', newStyles );
+				this.model.trigger( 'change:styles' );
+				this.model.trigger( 'change:styles-cell' );
+			}
 		}
 
 		if (args.refresh) {

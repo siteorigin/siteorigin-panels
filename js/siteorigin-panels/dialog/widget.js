@@ -263,13 +263,18 @@ module.exports = panels.view.dialog.extend( {
 
 		if ( this.styles.stylesLoaded ) {
 			// If the styles view has loaded
-			var style = {};
+			var newStyles = {};
 			try {
-				style = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
+				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
 			}
 			catch ( e ) {
 			}
-			this.model.set( 'style', style );
+
+			// Has there been any Style changes?
+			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
+				this.model.set( 'style', newStyles );
+				this.model.trigger( 'change:styles' );
+			}
 		}
 
 		this.savingWidget = false;
