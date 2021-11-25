@@ -27,6 +27,7 @@ module.exports = Backbone.View.extend( {
 	initialize: function () {
 		this.listenTo(this.model, 'destroy', this.onModelDestroy);
 		this.listenTo(this.model, 'change:values', this.onModelChange);
+		this.listenTo( this.model, 'change:styles ', this.toggleVisibilityFade );
 		this.listenTo(this.model, 'change:label', this.onLabelChange);
 	},
 
@@ -80,7 +81,18 @@ module.exports = Backbone.View.extend( {
 			dialog.setupDialog();
 		}
 
-		// Toggle Visibility: Check if Widget is hidden and apply fade as needed..
+		this.toggleVisibilityFade();
+
+		// Add the global builder listeners
+		this.listenTo( this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler );
+
+		return this;
+	},
+
+	/**
+	 * Toggle Visibility: Check if Widget is hidden and apply fade as needed.
+	 */
+	toggleVisibilityFade: function() {
 		var currentWidgetStyle = this.model.attributes.style;
 		if (
 			typeof currentWidgetStyle.disable_desktop !== 'undefined' &&
@@ -93,13 +105,10 @@ module.exports = Backbone.View.extend( {
 				currentWidgetStyle.disable_widget
 			)
 		) {
-			this.$el.addClass( 'so-widget-hidden-widget' );
+			this.$el.addClass( 'so-hidden-widget' );
+		} else {
+			this.$el.removeClass( 'so-hidden-widget' );
 		}
-
-		// Add the global builder listeners
-		this.listenTo(this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler);
-
-		return this;
 	},
 
 	/**

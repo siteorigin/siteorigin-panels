@@ -36,6 +36,7 @@ module.exports = Backbone.View.extend( {
 		}, this );
 
 		this.listenTo( this.model, 'change:label', this.onLabelChange );
+		this.listenTo( this.model, 'change:styles-row ', this.toggleVisibilityFade );
 	},
 
 	/**
@@ -88,7 +89,21 @@ module.exports = Backbone.View.extend( {
 			this.$('.so-row-toolbar' ).remove();
 		}
 
-		// Toggle Visibility: Check if row is hidden and apply fade as needed..
+		this.toggleVisibilityFade();
+
+		// Resize the rows when ever the widget sortable moves
+		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
+		this.listenTo( this.builder, 'builder_resize', this.resizeRow );
+
+		this.resizeRow();
+
+		return this;
+	},
+
+	/**
+	 * Toggle Visibility: Check if row is hidden and apply fade as needed
+	 */
+	toggleVisibilityFade: function() {
 		var currentRowStyle = this.model.attributes.style;
 		if (
 			typeof currentRowStyle.disable_desktop !== 'undefined' &&
@@ -102,16 +117,9 @@ module.exports = Backbone.View.extend( {
 			)
 		) {
 			this.$el.addClass( 'so-hidden-row' );
+		} else {
+			this.$el.removeClass( 'so-hidden-row' );
 		}
-
-
-		// Resize the rows when ever the widget sortable moves
-		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
-		this.listenTo( this.builder, 'builder_resize', this.resizeRow );
-
-		this.resizeRow();
-
-		return this;
 	},
 
 	/**
