@@ -98,7 +98,7 @@ module.exports = Backbone.View.extend( {
 				currentRowStyle.disable_logged_out ||
 				currentRowStyle.disable_mobile ||
 				currentRowStyle.disable_tablet ||
-				currentRowStyle.disable_widget
+				currentRowStyle.disable_row
 			)
 		) {
 			this.$el.addClass( 'so-hidden-row' );
