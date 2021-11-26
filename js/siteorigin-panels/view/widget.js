@@ -89,21 +89,22 @@ module.exports = Backbone.View.extend( {
 		return this;
 	},
 
+	checkIfStyleExists: function( styles, setting ) {
+		return typeof styles[ setting ] !== 'undefined' && styles[ setting ] == 'on';
+	},
+
 	/**
-	 * Toggle Visibility: Check if Widget is hidden and apply fade as needed.
+	 * Toggle Visibility: Check if row is hidden and apply fade as needed
 	 */
 	toggleVisibilityFade: function() {
-		var currentWidgetStyle = this.model.attributes.style;
+		var currentRowStyle = this.model.attributes.style;
 		if (
-			typeof currentWidgetStyle.disable_desktop !== 'undefined' &&
-			(
-				currentWidgetStyle.disable_desktop ||
-				currentWidgetStyle.disable_logged_in ||
-				currentWidgetStyle.disable_logged_out ||
-				currentWidgetStyle.disable_mobile ||
-				currentWidgetStyle.disable_tablet ||
-				currentWidgetStyle.disable_widget
-			)
+			this.checkIfStyleExists( currentRowStyle, 'disable_widget' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_desktop' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_tablet' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_mobile' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_in' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_out' )
 		) {
 			this.$el.addClass( 'so-hidden-widget' );
 		} else {
