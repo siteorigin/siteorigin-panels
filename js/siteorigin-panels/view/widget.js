@@ -94,7 +94,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Toggle Visibility: Check if row is hidden and apply fade as needed
+	 * Toggle Visibility: Check if row is hidden and apply fade as needed.
 	 */
 	toggleVisibilityFade: function() {
 		var currentRowStyle = this.model.attributes.style;

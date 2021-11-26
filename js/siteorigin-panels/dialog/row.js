@@ -711,7 +711,7 @@ module.exports = panels.view.dialog.extend({
 				console.log('Error retrieving row styles - ' + err.message);
 			}
 
-			// Has there been any Style changes?
+			// Have there been any Style changes?
 			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
 				this.model.set( 'style', newStyles );
 				this.model.trigger( 'change:styles' );
@@ -721,7 +721,7 @@ module.exports = panels.view.dialog.extend({
 
 
 		if ( this.styles.stylesLoaded ) {
-			// If the styles view has loaded
+			// If the styles view has loaded.
 			var newStyles = {};
 			try {
 				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
@@ -729,7 +729,7 @@ module.exports = panels.view.dialog.extend({
 			catch ( e ) {
 			}
 
-			// Has there been any Style changes?
+			// Have there been any Style changes?
 			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
 				this.model.set( 'style', newStyles );
 				this.model.trigger( 'change:styles' );
