@@ -1371,7 +1371,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Image Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% for SiteOrigin Image, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
+				'text' => __( 'Get a %link% for the SiteOrigin Image, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' ),
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
@@ -1394,6 +1394,16 @@ class SiteOrigin_Panels_Admin {
 				'text' => __( 'Add parallax background images to your slider type widgets with %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/parallax-sliders' ),
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Hide rows and widgets based for logged-in or logged-out users with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' ),
+				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Show or hide rows and widgets between a selected date range with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' ),
+				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
 			array(
 				'text' => __( 'Hide rows and widgets on specific devices with the %link%.', 'siteorigin-panels' ),
