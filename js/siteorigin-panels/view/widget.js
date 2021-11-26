@@ -27,6 +27,7 @@ module.exports = Backbone.View.extend( {
 	initialize: function () {
 		this.listenTo(this.model, 'destroy', this.onModelDestroy);
 		this.listenTo(this.model, 'change:values', this.onModelChange);
+		this.listenTo( this.model, 'change:styles ', this.toggleVisibilityFade );
 		this.listenTo(this.model, 'change:label', this.onLabelChange);
 	},
 
@@ -80,10 +81,35 @@ module.exports = Backbone.View.extend( {
 			dialog.setupDialog();
 		}
 
+		this.toggleVisibilityFade();
+
 		// Add the global builder listeners
-		this.listenTo(this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler);
+		this.listenTo( this.cell.row.builder, 'after_user_adds_widget', this.afterUserAddsWidgetHandler );
 
 		return this;
+	},
+
+	checkIfStyleExists: function( styles, setting ) {
+		return typeof styles[ setting ] !== 'undefined' && styles[ setting ] == 'on';
+	},
+
+	/**
+	 * Toggle Visibility: Check if row is hidden and apply fade as needed.
+	 */
+	toggleVisibilityFade: function() {
+		var currentRowStyle = this.model.attributes.style;
+		if (
+			this.checkIfStyleExists( currentRowStyle, 'disable_widget' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_desktop' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_tablet' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_mobile' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_in' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_out' )
+		) {
+			this.$el.addClass( 'so-hidden-widget' );
+		} else {
+			this.$el.removeClass( 'so-hidden-widget' );
+		}
 	},
 
 	/**
