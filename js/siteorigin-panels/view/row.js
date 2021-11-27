@@ -36,6 +36,7 @@ module.exports = Backbone.View.extend( {
 		}, this );
 
 		this.listenTo( this.model, 'change:label', this.onLabelChange );
+		this.listenTo( this.model, 'change:styles-row ', this.toggleVisibilityFade );
 	},
 
 	/**
@@ -88,6 +89,8 @@ module.exports = Backbone.View.extend( {
 			this.$('.so-row-toolbar' ).remove();
 		}
 
+		this.toggleVisibilityFade();
+
 		// Resize the rows when ever the widget sortable moves
 		this.listenTo( this.builder, 'widget_sortable_move', this.resizeRow );
 		this.listenTo( this.builder, 'builder_resize', this.resizeRow );
@@ -95,6 +98,29 @@ module.exports = Backbone.View.extend( {
 		this.resizeRow();
 
 		return this;
+	},
+
+	checkIfStyleExists: function( styles, setting ) {
+		return typeof styles[ setting ] !== 'undefined' && styles[ setting ] == 'on';
+	},
+
+	/**
+	 * Toggle Visibility: Check if row is hidden and apply fade as needed.
+	 */
+	toggleVisibilityFade: function() {
+		var currentRowStyle = this.model.attributes.style;
+		if (
+			this.checkIfStyleExists( currentRowStyle, 'disable_row' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_desktop' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_tablet' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_mobile' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_in' ) ||
+			this.checkIfStyleExists( currentRowStyle, 'disable_logged_out' )
+		) {
+			this.$el.addClass( 'so-hidden-row' );
+		} else {
+			this.$el.removeClass( 'so-hidden-row' );
+		}
 	},
 
 	/**

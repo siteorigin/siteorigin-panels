@@ -342,6 +342,15 @@
 				opacity: 0.9;
 			}
 
+			&.so-hidden-row {
+				opacity: 0.7;
+
+				&:focus,
+				&:hover {
+					opacity: 1;
+				}
+			}
+
 			.so-cells {
 				.clearfix();
 				margin: 0 -5px;
@@ -617,6 +626,15 @@
 
 								small {
 									color: #eee;
+								}
+							}
+
+							&.so-hidden-widget {
+								opacity: 0.7;
+
+								&:focus,
+								&:hover {
+									opacity: 1;
 								}
 							}
 						}
