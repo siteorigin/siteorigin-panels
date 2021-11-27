@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.15.1 - 27 November 2021 =
+* Updated Page Builder `Pro Tips`.
+* SiteOrigin Premium: Added row and widget fade styling when hidden by the Toggle Visibility Addon.
+
 = 2.15.0 - 22 October 2021 =
 * Added a "Mobile Margin" setting to `Widget Styles > Mobile Layout`.
 * Ensured the Widget Title is used as the widget description if present.
