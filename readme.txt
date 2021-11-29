@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.15.2 - 29 November 2021 =
+* Cells: Resolved undefined `style` error.
+
 = 2.15.1 - 27 November 2021 =
 * Updated Page Builder `Pro Tips`.
 * SiteOrigin Premium: Added row and widget fade styling when hidden by the Toggle Visibility Addon.
