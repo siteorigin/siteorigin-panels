@@ -749,7 +749,7 @@ module.exports = panels.view.dialog.extend({
 				console.log('Error retrieving cell styles - ' + err.message);
 			}
 
-			this.cellStyles.model.set('style', style);
+			this.cellStyles.model.set( 'style', newStyles );
 			// Has there been any Style changes?
 			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
 				this.model.set( 'style', newStyles );
