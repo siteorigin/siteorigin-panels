@@ -701,14 +701,14 @@ module.exports = panels.view.dialog.extend({
 		}
 
 		// Update the row styles if they've loaded
-		if (!_.isUndefined(this.styles) && this.styles.stylesLoaded) {
+		if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
 			// This is an edit dialog, so there are styles
 			var newStyles = {};
 			try {
 				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch (err) {
-				console.log('Error retrieving row styles - ' + err.message);
+				console.log( 'Error retrieving row styles - ' + err.message );
 			}
 
 			// Have there been any Style changes?
