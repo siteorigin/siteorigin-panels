@@ -719,27 +719,8 @@ module.exports = panels.view.dialog.extend({
 			}
 		}
 
-
-		if ( this.styles.stylesLoaded ) {
-			// If the styles view has loaded.
-			var newStyles = {};
-			try {
-				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
-			}
-			catch ( e ) {
-			}
-
-			// Have there been any Style changes?
-			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
-				this.model.set( 'style', newStyles );
-				this.model.trigger( 'change:styles' );
-				this.model.trigger( 'change:styles-row' );
-			}
-		}
-
-
 		// Update the cell styles if any are showing.
-		if (!_.isUndefined(this.cellStyles) && this.cellStyles.stylesLoaded) {
+		if ( !_.isUndefined( this.cellStyles ) && this.cellStyles.stylesLoaded ) {
 
 			var newStyles = {};
 			try {
@@ -749,10 +730,9 @@ module.exports = panels.view.dialog.extend({
 				console.log('Error retrieving cell styles - ' + err.message);
 			}
 
-			this.cellStyles.model.set( 'style', newStyles );
 			// Has there been any Style changes?
 			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
-				this.model.set( 'style', newStyles );
+				this.cellStyles.model.set( 'style', newStyles );
 				this.model.trigger( 'change:styles' );
 				this.model.trigger( 'change:styles-cell' );
 			}
