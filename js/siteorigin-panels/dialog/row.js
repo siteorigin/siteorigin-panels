@@ -701,14 +701,14 @@ module.exports = panels.view.dialog.extend({
 		}
 
 		// Update the row styles if they've loaded
-		if (!_.isUndefined(this.styles) && this.styles.stylesLoaded) {
+		if ( ! _.isUndefined( this.styles ) && this.styles.stylesLoaded ) {
 			// This is an edit dialog, so there are styles
 			var newStyles = {};
 			try {
 				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles.so-row-styles' ).style;
 			}
 			catch (err) {
-				console.log('Error retrieving row styles - ' + err.message);
+				console.log( 'Error retrieving row styles - ' + err.message );
 			}
 
 			// Have there been any Style changes?
@@ -718,28 +718,9 @@ module.exports = panels.view.dialog.extend({
 				this.model.trigger( 'change:styles-row' );
 			}
 		}
-
-
-		if ( this.styles.stylesLoaded ) {
-			// If the styles view has loaded.
-			var newStyles = {};
-			try {
-				newStyles = this.getFormValues( '.so-sidebar .so-visual-styles' ).style;
-			}
-			catch ( e ) {
-			}
-
-			// Have there been any Style changes?
-			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
-				this.model.set( 'style', newStyles );
-				this.model.trigger( 'change:styles' );
-				this.model.trigger( 'change:styles-row' );
-			}
-		}
-
 
 		// Update the cell styles if any are showing.
-		if (!_.isUndefined(this.cellStyles) && this.cellStyles.stylesLoaded) {
+		if ( !_.isUndefined( this.cellStyles ) && this.cellStyles.stylesLoaded ) {
 
 			var newStyles = {};
 			try {
@@ -749,10 +730,9 @@ module.exports = panels.view.dialog.extend({
 				console.log('Error retrieving cell styles - ' + err.message);
 			}
 
-			this.cellStyles.model.set( 'style', newStyles );
 			// Has there been any Style changes?
 			if ( JSON.stringify( this.model.attributes.style ) !== JSON.stringify( newStyles ) ) {
-				this.model.set( 'style', newStyles );
+				this.cellStyles.model.set( 'style', newStyles );
 				this.model.trigger( 'change:styles' );
 				this.model.trigger( 'change:styles-cell' );
 			}
