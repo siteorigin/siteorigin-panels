@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.15.3 - 01 December 2021 =
+* Rows/Cells: Prevented possible data mismatch.
+
 = 2.15.2 - 29 November 2021 =
 * Cells: Resolved undefined `style` error.
 
