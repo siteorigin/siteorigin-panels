@@ -98,6 +98,9 @@ module.exports = Backbone.View.extend( {
 	 */
 	toggleVisibilityFade: function() {
 		var currentRowStyle = this.model.attributes.style;
+		if ( typeof currentRowStyle == 'undefined' ) {
+			return;
+		}
 		if (
 			this.checkIfStyleExists( currentRowStyle, 'disable_widget' ) ||
 			this.checkIfStyleExists( currentRowStyle, 'disable_desktop' ) ||
