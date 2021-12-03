@@ -97,14 +97,17 @@ module.exports = Backbone.View.extend( {
 	 * Toggle Visibility: Check if row is hidden and apply fade as needed.
 	 */
 	toggleVisibilityFade: function() {
-		var currentRowStyle = this.model.attributes.style;
+		var styles = this.model.attributes.style;
+		if ( typeof styles == 'undefined' ) {
+			return;
+		}
 		if (
-			this.checkIfStyleExists( currentRowStyle, 'disable_widget' ) ||
-			this.checkIfStyleExists( currentRowStyle, 'disable_desktop' ) ||
-			this.checkIfStyleExists( currentRowStyle, 'disable_tablet' ) ||
-			this.checkIfStyleExists( currentRowStyle, 'disable_mobile' ) ||
-			this.checkIfStyleExists( currentRowStyle, 'disable_logged_in' ) ||
-			this.checkIfStyleExists( currentRowStyle, 'disable_logged_out' )
+			this.checkIfStyleExists( styles, 'disable_widget' ) ||
+			this.checkIfStyleExists( styles, 'disable_desktop' ) ||
+			this.checkIfStyleExists( styles, 'disable_tablet' ) ||
+			this.checkIfStyleExists( styles, 'disable_mobile' ) ||
+			this.checkIfStyleExists( styles, 'disable_logged_in' ) ||
+			this.checkIfStyleExists( styles, 'disable_logged_out' )
 		) {
 			this.$el.addClass( 'so-hidden-widget' );
 		} else {
