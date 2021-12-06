@@ -819,6 +819,10 @@ class SiteOrigin_Panels_Admin {
 			if ( isset( $widget_obj->widget_options['panels_title'] ) ) {
 				$widgets[ $class ]['panels_title'] = $widget_obj->widget_options['panels_title'];
 			}
+			if ( isset( $widget_obj->widget_options['panels_title_check_sub_fields'] ) ) {
+				$widgets[ $class ]['panels_title_check_sub_fields'] = $widget_obj->widget_options['panels_title_check_sub_fields'];
+			}
+
 			if ( isset( $widget_obj->widget_options['panels_groups'] ) ) {
 				$widgets[ $class ]['groups'] = $widget_obj->widget_options['panels_groups'];
 			}
