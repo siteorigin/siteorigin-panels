@@ -165,8 +165,8 @@ class SiteOrigin_Panels_Renderer {
 						$post_id 
 					);
 
-					if ( empty( $panels_mobile_widget_mobile_margin ) && ! empty( $settings['cell-mobile-margin-bottom'] ) ) {
-						$panels_mobile_widget_mobile_margin = '0 0 ' . $settings[ 'cell-mobile-margin-bottom'] . 'px';
+					if ( empty( $panels_mobile_widget_mobile_margin ) && ! empty( $settings['widget-mobile-margin-bottom'] ) ) {
+						$panels_mobile_widget_mobile_margin = '0 0 ' . $settings[ 'widget-mobile-margin-bottom'] . 'px';
 					}
 
 					if ( ! empty( $panels_mobile_widget_mobile_margin ) ) {
