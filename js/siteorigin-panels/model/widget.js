@@ -178,20 +178,39 @@ module.exports = Backbone.Model.extend( {
 	 * Iterate an array and find a valid field we can use for a title. Supports multidimensional arrays.
 	 *
 	 * @param values An array containing field values.
+	 * @returns object thisView The current widget instance.
+	 * @returns object fields The fields we're specifically check for.
+	 * @param object check_sub_fields Whether we should check sub fields.
+	 *
 	 * @returns string The title we found. If we weren't able to find one, it returns false.
 	 */
-	getTitleFromValues: function( values, thisView ) {
+	getTitleFromValues: function( values, thisView, fields = false, check_sub_fields = true ) {
 		var widgetTitle = false;
 		for ( const k in values ) {
 			if ( typeof values[ k ] == 'object' ) {
-				// Field is an array, check child for valid titles.
-				widgetTitle = thisView.getTitleFromValues( values[ k ], thisView );
+				if ( check_sub_fields ) {
+					// Field is an object, check child for valid titles.
+					widgetTitle = thisView.getTitleFromValues( values[ k ], thisView, fields );
+					if ( widgetTitle ) {
+						break;
+					}
+				}
+			// Check for predefined title fields.
+			} else if ( typeof fields == 'object' ) {
+				for ( var i = 0; i < fields.length; i++ ) {
+					if ( k == fields[i] ) {
+						console.log( values[ k ] );
+						widgetTitle = thisView.cleanTitle( values[ k ] )
+						break;
+					}
+				}
 				if ( widgetTitle ) {
 					break;
 				}
 			// Ensure field isn't a required WB field, and if its not, confirm it's valid.
 			} else if (
-				k.charAt(0) !== '_' &&
+				typeof fields != 'object' &&
+				k.charAt( 0 ) !== '_' &&
 				k !== 'so_sidebar_emulator_id' &&
 				k !== 'option_name' &&
 				thisView.isValidTitle( values[ k ] )
@@ -230,15 +249,15 @@ module.exports = Backbone.Model.extend( {
 		var widgetTitle = false;
 
 		// Check titleFields for valid titles.
-		_.each( titleFields, function( title ) {
-			if ( ! widgetTitle && thisView.isValidTitle( values[ title ] ) ) {
-				widgetTitle = thisView.cleanTitle( values[ title ] );
-				return false;
-			}
-		} );
+		widgetTitle = this.getTitleFromValues(
+			values,
+			thisView,
+			titleFields,
+			typeof widgetData.panels_title_check_sub_fields != 'undefined' ? widgetData.panels_title_check_sub_fields : false
+		);
 
 		if ( ! widgetTitle && ! titleFieldOnly ) {
-			// No titles were found. Let's check the rest of the fields for a valid title..
+			// No titles were found. Let's check the rest of the fields for a valid title.
 			widgetTitle = this.getTitleFromValues( values, thisView );
 		}
 
