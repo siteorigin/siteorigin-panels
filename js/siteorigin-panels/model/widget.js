@@ -195,7 +195,7 @@ module.exports = Backbone.Model.extend( {
 						break;
 					}
 				}
-			// Check for any 
+			// Check for predefined title fields.
 			} else if ( typeof fields == 'object' ) {
 				for ( var i = 0; i < fields.length; i++ ) {
 					if ( k == fields[i] ) {
