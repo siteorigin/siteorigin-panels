@@ -129,6 +129,7 @@ class SiteOrigin_Panels_Settings {
 			// New install.
 			$parallax_type = 'modern';
 			$live_editor_close_after = true;
+			$mobile_cell_margin = 30;
 		} else {
 			$live_editor_close_after = false;
 			// Parallax Type.
@@ -142,8 +143,8 @@ class SiteOrigin_Panels_Settings {
 				// If all else fails, fallback to modern.
 				$parallax_type = 'modern';
 			}
+			$mobile_cell_margin = isset( $so_settings['margin-bottom'] ) ? $so_settings['margin-bottom'] : 30;
 		}
-
 
 		// The general fields
 		$defaults['post-types']                         = array( 'page', 'post' );
@@ -167,17 +168,18 @@ class SiteOrigin_Panels_Settings {
 		$defaults['instant-open-widgets'] = true;
 
 		// The layout fields
-		$defaults['responsive']               = true;
-		$defaults['tablet-layout']            = false;
-		$defaults['legacy-layout']            = 'auto';
-		$defaults['tablet-width']             = 1024;
-		$defaults['mobile-width']             = 780;
-		$defaults['margin-bottom']            = 30;
-		$defaults['row-mobile-margin-bottom'] = '';
-		$defaults['margin-bottom-last-row']   = false;
-		$defaults['margin-sides']             = 30;
-		$defaults['full-width-container']     = 'body';
-		$defaults['output-css-header']        = 'auto';
+		$defaults['responsive']                 = true;
+		$defaults['tablet-layout']               = false;
+		$defaults['legacy-layout']               = 'auto';
+		$defaults['tablet-width']                = 1024;
+		$defaults['mobile-width']                = 780;
+		$defaults['margin-bottom']               = 30;
+		$defaults['row-mobile-margin-bottom']    = '';
+		$defaults['mobile-cell-margin']          = $mobile_cell_margin;
+		$defaults['margin-bottom-last-row']      = false;
+		$defaults['margin-sides']                = 30;
+		$defaults['full-width-container']        = 'body';
+		$defaults['output-css-header']           = 'auto';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -492,6 +494,13 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Last Row With Margin', 'siteorigin-panels' ),
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
+		);
+
+		$fields['layout']['fields']['mobile-cell-margin'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
+			'description' => __( 'The default vertical space between cells in a collapsed mobile row.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-sides'] = array(
