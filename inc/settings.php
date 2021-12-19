@@ -167,17 +167,18 @@ class SiteOrigin_Panels_Settings {
 		$defaults['instant-open-widgets'] = true;
 
 		// The layout fields
-		$defaults['responsive']               = true;
-		$defaults['tablet-layout']            = false;
-		$defaults['legacy-layout']            = 'auto';
-		$defaults['tablet-width']             = 1024;
-		$defaults['mobile-width']             = 780;
-		$defaults['margin-bottom']            = 30;
-		$defaults['row-mobile-margin-bottom'] = '';
-		$defaults['margin-bottom-last-row']   = false;
-		$defaults['margin-sides']             = 30;
-		$defaults['full-width-container']     = 'body';
-		$defaults['output-css-header']        = 'auto';
+		$defaults['responsive']                 = true;
+		$defaults['tablet-layout']               = false;
+		$defaults['legacy-layout']               = 'auto';
+		$defaults['tablet-width']                = 1024;
+		$defaults['mobile-width']                = 780;
+		$defaults['margin-bottom']               = 30;
+		$defaults['row-mobile-margin-bottom']    = '';
+		$defaults['widget-mobile-margin-bottom'] = '';
+		$defaults['margin-bottom-last-row']      = false;
+		$defaults['margin-sides']                = 30;
+		$defaults['full-width-container']        = 'body';
+		$defaults['output-css-header']           = 'auto';
 
 		// Content fields
 		$defaults['copy-content'] = true;
@@ -492,6 +493,13 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Last Row With Margin', 'siteorigin-panels' ),
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
+		);
+
+		$fields['layout']['fields']['widget-mobile-margin-bottom'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Widget Mobile Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'The default widget bottom mobile margin on mobile.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-sides'] = array(
