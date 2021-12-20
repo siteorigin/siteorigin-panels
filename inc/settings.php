@@ -487,7 +487,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['layout']['fields']['row-mobile-margin-bottom'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Row Mobile Bottom Margin', 'siteorigin-panels' ),
+			'label'       => __( 'Mobile Row Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'The default margin below rows on mobile.', 'siteorigin-panels' ),
 		);
 
@@ -501,7 +501,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['layout']['fields']['mobile-cell-margin'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
+			'label'       => __( 'Mobile Cell Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'The default vertical space between cells in a collapsed mobile row.', 'siteorigin-panels' ),
 		);
 
