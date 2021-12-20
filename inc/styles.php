@@ -347,7 +347,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'mobile_layout',
-			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
+			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), ! empty( siteorigin_panels_setting( 'mobile-cell-margin' ) ) ? siteorigin_panels_setting( 'mobile-cell-margin' ) : siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority'    => 5,
 		);
 		
