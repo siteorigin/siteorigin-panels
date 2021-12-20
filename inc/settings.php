@@ -176,6 +176,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['margin-bottom']               = 30;
 		$defaults['row-mobile-margin-bottom']    = '';
 		$defaults['mobile-cell-margin']          = $mobile_cell_margin;
+		$defaults['widget-mobile-margin-bottom'] = '';
 		$defaults['margin-bottom-last-row']      = false;
 		$defaults['margin-sides']                = 30;
 		$defaults['full-width-container']        = 'body';
@@ -496,11 +497,18 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
 		);
 
+
 		$fields['layout']['fields']['mobile-cell-margin'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
 			'label'       => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
 			'description' => __( 'The default vertical space between cells in a collapsed mobile row.', 'siteorigin-panels' ),
+
+		$fields['layout']['fields']['widget-mobile-margin-bottom'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Widget Mobile Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'The default widget bottom mobile margin on mobile.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['margin-sides'] = array(
