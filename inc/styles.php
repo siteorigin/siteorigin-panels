@@ -344,10 +344,10 @@ class SiteOrigin_Panels_Styles {
 		);
 		
 		$fields['mobile_cell_margin'] = array(
-			'name'        => __( 'Mobile Cell Margins', 'siteorigin-panels' ),
+			'name'        => __( 'Mobile Cell Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'mobile_layout',
-			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-bottom' ) ),
+			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), ! empty( siteorigin_panels_setting( 'mobile-cell-margin' ) ) ? siteorigin_panels_setting( 'mobile-cell-margin' ) : siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority'    => 5,
 		);
 		
