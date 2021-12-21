@@ -498,7 +498,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['layout']['fields']['widget-mobile-margin-bottom'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Widget Mobile Bottom Margin', 'siteorigin-panels' ),
+			'label'       => __( 'Mobile Widget Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'The default widget bottom mobile margin on mobile.', 'siteorigin-panels' ),
 		);
 
