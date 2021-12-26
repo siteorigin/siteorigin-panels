@@ -129,6 +129,7 @@ class SiteOrigin_Panels_Settings {
 			// New install.
 			$parallax_type = 'modern';
 			$live_editor_close_after = true;
+			$mobile_cell_margin = 30;
 		} else {
 			$live_editor_close_after = false;
 			// Parallax Type.
@@ -142,8 +143,8 @@ class SiteOrigin_Panels_Settings {
 				// If all else fails, fallback to modern.
 				$parallax_type = 'modern';
 			}
+			$mobile_cell_margin = isset( $so_settings['margin-bottom'] ) ? $so_settings['margin-bottom'] : 30;
 		}
-
 
 		// The general fields
 		$defaults['post-types']                         = array( 'page', 'post' );
@@ -174,6 +175,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['mobile-width']                = 780;
 		$defaults['margin-bottom']               = 30;
 		$defaults['row-mobile-margin-bottom']    = '';
+		$defaults['mobile-cell-margin']          = $mobile_cell_margin;
 		$defaults['widget-mobile-margin-bottom'] = '';
 		$defaults['margin-bottom-last-row']      = false;
 		$defaults['margin-sides']                = 30;
@@ -485,7 +487,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['layout']['fields']['row-mobile-margin-bottom'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Row Mobile Bottom Margin', 'siteorigin-panels' ),
+			'label'       => __( 'Mobile Row Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'The default margin below rows on mobile.', 'siteorigin-panels' ),
 		);
 
@@ -495,10 +497,18 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
 		);
 
+
+		$fields['layout']['fields']['mobile-cell-margin'] = array(
+			'type'        => 'number',
+			'unit'        => 'px',
+			'label'       => __( 'Mobile Cell Bottom Margin', 'siteorigin-panels' ),
+			'description' => __( 'The default vertical space between cells in a collapsed mobile row.', 'siteorigin-panels' ),
+		);
+
 		$fields['layout']['fields']['widget-mobile-margin-bottom'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
-			'label'       => __( 'Widget Mobile Bottom Margin', 'siteorigin-panels' ),
+			'label'       => __( 'Mobile Widget Bottom Margin', 'siteorigin-panels' ),
 			'description' => __( 'The default widget bottom margin on mobile.', 'siteorigin-panels' ),
 		);
 

@@ -177,7 +177,7 @@ jQuery( function ( $ ) {
 
 // WP 5.7+: Prevent undesired "restore content" notice.
 if ( typeof window.wp.autosave !== 'undefined' && jQuery( '#siteorigin-panels-metabox' ).length ) {
-	jQuery( document ).on( 'ready', function( e ) {
+	jQuery( function( e ) {
 		var blog_id = typeof window.autosaveL10n !== 'undefined' && window.autosaveL10n.blog_id;
 		
 		// Ensure sessionStorage is working, and we were able to find a blog id.

@@ -275,7 +275,7 @@ class SiteOrigin_Panels_Renderer {
 						$css->add_cell_css( $post_id, $ri, $ci, '', array(
 							'margin-bottom' => apply_filters(
 								'siteorigin_panels_css_cell_mobile_margin_bottom',
-								$settings['margin-bottom'] . 'px',
+								$settings['mobile-cell-margin'] . 'px',
 								$cell,
 								$ci,
 								$row,

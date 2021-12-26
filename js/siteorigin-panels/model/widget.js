@@ -199,7 +199,6 @@ module.exports = Backbone.Model.extend( {
 			} else if ( typeof fields == 'object' ) {
 				for ( var i = 0; i < fields.length; i++ ) {
 					if ( k == fields[i] ) {
-						console.log( values[ k ] );
 						widgetTitle = thisView.cleanTitle( values[ k ] )
 						break;
 					}

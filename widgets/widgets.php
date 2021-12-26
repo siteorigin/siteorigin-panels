@@ -158,10 +158,11 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget{
 		<div style="margin-bottom: 20px;">
 			<strong>
 				<?php
-				_e( 'This is a legacy widget. ', 'siteorigin-panels' );
-				_e( 'Ideally you should move to using widgets from the SiteOrigin Widgets Bundle instead. ', 'siteorigin-panels' );
-				_e( "It'll be moved to a separate plugin after Page Builder 2.6 is released. ", 'siteorigin-panels' );
-				echo '<a href="https://siteorigin.com/widgets-bundle/" target="_blank" rel="noopener noreferrer">' . __( 'Widgets Bundle', 'siteorigin-panels' ) . '</a>';
+				printf(
+					__( 'This is a legacy Page Builder widget. Please move to use widgets from the %sSiteOrigin Widgets Bundle%s plugin when able.', 'siteorigin-panels' ),
+					'<a href="https://wordpress.org/plugins/so-widgets-bundle" target="_blank" rel="noopener noreferrer">',
+					'</a>'
+				);
 				?>
 			</strong>
 		</div>
