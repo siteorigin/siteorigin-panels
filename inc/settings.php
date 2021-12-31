@@ -40,7 +40,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Get a settings value
+	 * Get a settings value.
 	 *
 	 * @param string $key
 	 *
@@ -54,18 +54,18 @@ class SiteOrigin_Panels_Settings {
 			$current_settings = get_option( 'siteorigin_panels_settings', false );
 
 			if ( $current_settings === false ) {
-				// We can't find the settings, so try access old settings
+				// We can't find the settings, so try access old settings.
 				$current_settings = get_option( 'siteorigin_panels_display', array() );
 				$post_types       = get_option( 'siteorigin_panels_post_types' );
 				if ( ! empty( $post_types ) ) {
 					$current_settings['post-types'] = $post_types;
 				}
 
-				// Store the old settings in the new field
+				// Store the old settings in the new field.
 				update_option( 'siteorigin_panels_settings', $current_settings );
 			}
 
-			// Get the settings provided by the theme
+			// Get the settings provided by the theme.
 			$theme_settings = get_theme_support( 'siteorigin-panels' );
 			if ( ! empty( $theme_settings ) ) {
 				$theme_settings = $theme_settings[0];
@@ -146,7 +146,7 @@ class SiteOrigin_Panels_Settings {
 			$mobile_cell_margin = isset( $so_settings['margin-bottom'] ) ? $so_settings['margin-bottom'] : 30;
 		}
 
-		// The general fields
+		// General fields.
 		$defaults['post-types']                         = array( 'page', 'post' );
 		$defaults['live-editor-quick-link']             = true;
 		$defaults['live-editor-quick-link-close-after'] = $live_editor_close_after;
@@ -160,14 +160,14 @@ class SiteOrigin_Panels_Settings {
 		$defaults['sidebars-emulator']                  = true;
 		$defaults['layout-block-default-mode']          = 'preview';
 
-		// Widgets fields
+		// Widgets fields.
 		$defaults['title-html']           = '<h3 class="widget-title">{{title}}</h3>';
 		$defaults['add-widget-class']     = apply_filters( 'siteorigin_panels_default_add_widget_class', true );
 		$defaults['bundled-widgets']      = get_option( 'siteorigin_panels_is_using_bundled', false );
 		$defaults['recommended-widgets']  = true;
 		$defaults['instant-open-widgets'] = true;
 
-		// The layout fields
+		// Layout fields.
 		$defaults['responsive']                 = true;
 		$defaults['tablet-layout']               = false;
 		$defaults['legacy-layout']               = 'auto';
@@ -182,7 +182,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
 
-		// Content fields
+		// Content fields.
 		$defaults['copy-content'] = true;
 		$defaults['copy-styles'] = false;
 
@@ -190,7 +190,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Set the option on whether to add widget classes for known themes
+	 * Set the option on whether to add widget classes for known themes.
 	 *
 	 * @param $add_class
 	 *
@@ -203,7 +203,6 @@ class SiteOrigin_Panels_Settings {
 				$add_class = false;
 				break;
 		}
-
 
 		return $add_class;
 	}
@@ -244,7 +243,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Display the Page Builder settings page
+	 * Display the Page Builder settings page.
 	 */
 	function display_settings_page() {
 		$settings_fields = $this->fields = apply_filters( 'siteorigin_panels_settings_fields', array() );
@@ -252,7 +251,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Add a settings help tab
+	 * Add a settings help tab.
 	 */
 	function add_help_tab() {
 		$screen = get_current_screen();
@@ -275,7 +274,8 @@ class SiteOrigin_Panels_Settings {
 	 * @return mixed
 	 */
 	function settings_fields( $fields ) {
-		// The post types fields
+
+		// General settings.
 
 		$fields['general'] = array(
 			'title'  => __( 'General', 'siteorigin-panels' ),
@@ -338,14 +338,14 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Disable row/widget background parallax when the browser is smaller than the mobile width.', 'siteorigin-panels' ),
 		);
 
-		// Legacy Parallax settings.
+		// Legacy Parallax.
 		$fields['general']['fields']['parallax-motion'] = array(
 			'type'        => 'float',
 			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
 			'description' => __( 'How many pixels of scrolling results in a single pixel of parallax motion. 0 means automatic. Lower values give a more noticeable effect.', 'siteorigin-panels' ),
 		);
 
-		// New Parallax settings.
+		// Modern Parallax.
 		$fields['general']['fields']['parallax-delay'] = array(
 			'type'        => 'float',
 			'label'       => __( 'Parallax Delay', 'siteorigin-panels' ),
@@ -394,7 +394,7 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Whether to display SiteOrigin Layout Blocks in edit mode or preview mode in the Block Editor.', 'siteorigin-panels' ),
 		);
 
-		// The widgets fields
+		// Widgets settings.
 
 		$fields['widgets'] = array(
 			'title'  => __( 'Widgets', 'siteorigin-panels' ),
@@ -431,14 +431,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Open a widget form as soon as it\'s added to a page.', 'siteorigin-panels' ),
 		);
 
-		// The layout fields
+		// Layout settings.
 
 		$fields['layout'] = array(
 			'title'  => __( 'Layout', 'siteorigin-panels' ),
 			'fields' => array(),
 		);
-
-		// The layout fields
 
 		$fields['layout']['fields']['responsive'] = array(
 			'type'        => 'checkbox',
@@ -497,7 +495,6 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
 		);
 
-
 		$fields['layout']['fields']['mobile-cell-margin'] = array(
 			'type'        => 'number',
 			'unit'        => 'px',
@@ -538,7 +535,7 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'This setting is only applicable in the Classic Editor.', 'siteorigin-panels' ),
 		);
 
-		// The content fields
+		// Content settings.
 
 		$fields['content'] = array(
 			'title'  => __( 'Content', 'siteorigin-panels' ),
@@ -561,7 +558,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Display a settings field
+	 * Display a settings field.
 	 *
 	 * @param $field_id
 	 * @param $field
@@ -575,21 +572,21 @@ class SiteOrigin_Panels_Settings {
 			case 'text':
 			case 'float':
 				?><input name="<?php echo esc_attr( $field_name ) ?>"
-				         class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="text"
-				         value="<?php echo esc_attr( $value ) ?>" /> <?php
+					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="text"
+					value="<?php echo esc_attr( $value ) ?>" /> <?php
 				break;
 
 			case 'password':
 				?><input name="<?php echo esc_attr( $field_name ) ?>"
-				         class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="password"
-				         value="<?php echo esc_attr( $value ) ?>" /> <?php
+					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="password"
+					value="<?php echo esc_attr( $value ) ?>" /> <?php
 				break;
 
 			case 'number':
 				?>
 				<input name="<?php echo esc_attr( $field_name ) ?>" type="number"
-				       class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>"
-				       value="<?php echo esc_attr( $value ) ?>"/>
+					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>"
+					value="<?php echo esc_attr( $value ) ?>"/>
 				<?php
 				if ( ! empty( $field['unit'] ) ) {
 					echo esc_html( $field['unit'] );
@@ -598,15 +595,15 @@ class SiteOrigin_Panels_Settings {
 
 			case 'html':
 				?><textarea name="<?php echo esc_attr( $field_name ) ?>"
-				            class="panels-setting-<?php echo esc_attr( $field['type'] ) ?> widefat"
-				            rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
+					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?> widefat"
+					rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
 				break;
 
 			case 'checkbox':
 				?>
 				<label class="widefat">
 					<input name="<?php echo esc_attr( $field_name ) ?>"
-					       type="checkbox" <?php checked( ! empty( $value ) ) ?> />
+						type="checkbox" <?php checked( ! empty( $value ) ) ?> />
 					<?php echo ! empty( $field['checkbox_text'] ) ? esc_html( $field['checkbox_text'] ) : __( 'Enabled', 'siteorigin-panels' ) ?>
 				</label>
 				<?php
@@ -628,7 +625,7 @@ class SiteOrigin_Panels_Settings {
 					?>
 					<label class="widefat">
 						<input name="<?php echo esc_attr( $field_name ) ?>[<?php echo esc_attr( $option_id ) ?>]"
-						       type="checkbox" <?php checked( in_array( $option_id, $value ) ) ?> />
+							type="checkbox" <?php checked( in_array( $option_id, $value ) ) ?> />
 						<?php echo esc_html( $option ) ?>
 					</label>
 					<?php
@@ -727,10 +724,10 @@ class SiteOrigin_Panels_Settings {
 			}
 		}
 
-		// Don't let mobile width go below 320
+		// Don't let mobile width go below 320.
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
 
-		// Save the values to the database
+		// Save the values to the database.
 		update_option( 'siteorigin_panels_settings', $values );
 		do_action( 'siteorigin_panels_save_settings', $values );
 		$this->settings       = wp_parse_args( $values, $this->settings );
@@ -738,7 +735,7 @@ class SiteOrigin_Panels_Settings {
 	}
 
 	/**
-	 * Get a post type array
+	 * Get a post type array.
 	 *
 	 * @return array
 	 */
@@ -755,7 +752,7 @@ class SiteOrigin_Panels_Settings {
 			$types[ $key ] = $value;
 		}
 
-		// These are post types we know we don't want to show Page Builder on
+		// These are post types we know we don't want to show Page Builder on.
 		unset( $types['ml-slider'] );
 
 		foreach ( $types as $type_id => $type ) {
