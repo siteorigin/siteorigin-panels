@@ -299,6 +299,7 @@ class SiteOrigin_Panels {
 		$container = array(
 			'selector' => apply_filters( 'siteorigin_panels_theme_container_selector', '' ),
 			'width' => apply_filters( 'siteorigin_panels_theme_container_width', '' ),
+			'full_width' => false,
 		);
 		$container['css_override'] = ! empty( $container['selector'] ) && ! empty( $container['width'] );
 
