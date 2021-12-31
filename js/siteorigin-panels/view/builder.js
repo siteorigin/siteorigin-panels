@@ -408,8 +408,9 @@ module.exports = Backbone.View.extend( {
 		var builderID = builderView.$el.attr( 'id' );
 
 		// Create the sortable for the rows
-		this.rowsSortable = this.$( '.so-rows-container' ).sortable( {
-			appendTo: '#wpwrap',
+		var wpVersion = $( 'body' ).attr( 'class' ).match( /branch-([0-9-]+)/ )[0].replace( /\D/g,'' );
+		this.rowsSortable = this.$( '.so-rows-container:not(.sow-row-color)' ).sortable( {
+			appendTo: wpVersion >= 59 ? 'parent' : '#wpwrap',
 			items: '.so-row-container',
 			handle: '.so-row-move',
 			// For the block editor, where it's possible to have multiple Page Builder blocks on a page.
