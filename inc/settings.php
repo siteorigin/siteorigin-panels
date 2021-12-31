@@ -342,7 +342,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['general']['fields']['parallax-motion'] = array(
 			'type'        => 'float',
 			'label'       => __( 'Limit Parallax Motion', 'siteorigin-panels' ),
-			'description' => __( 'How many pixels of scrolling results in a single pixel of parallax motion. 0 means automatic. Lower values give more noticeable effect.', 'siteorigin-panels' ),
+			'description' => __( 'How many pixels of scrolling results in a single pixel of parallax motion. 0 means automatic. Lower values give a more noticeable effect.', 'siteorigin-panels' ),
 		);
 
 		// New Parallax settings.
