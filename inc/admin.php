@@ -1465,7 +1465,7 @@ class SiteOrigin_Panels_Admin {
 		if ( $show_classic_admin_notice ) {
 			$settings_url = self_admin_url( 'options-general.php?page=siteorigin_panels' );
 			$notice = sprintf(
-				__( 'This post type is set to use the Classic Editor by default for new posts. If you\'d like to change this to the Block Editor, please go to <a href="%s" class="components-notice__action is-link">Page Builder Settings</a> and disable <strong>Use Classic Editor for New Posts</strong>.' ),
+				__( "This post type is set to use the Classic Editor by default for new posts. If you'd like to change this to the Block Editor, please go to <a href='%s' class='components-notice__action is-link'>Page Builder Settings</a> and disable <strong>Use Classic Editor for New Posts</strong>." ),
 				$settings_url
 			);
 			?>
