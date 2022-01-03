@@ -1646,6 +1646,9 @@ class lessc {
 	public function compile($string, $name = null) {
 		$locale = setlocale(LC_NUMERIC, 0);
 		setlocale(LC_NUMERIC, "C");
+		
+		// Account for import increasing the buffer length.
+		$this->count = strlen( $this->buffer );
 
 		$this->parser = $this->makeParser($name);
 		$root = $this->parser->parse($string);
