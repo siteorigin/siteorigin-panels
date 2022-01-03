@@ -1646,6 +1646,9 @@ class lessc {
 	public function compile($string, $name = null) {
 		$locale = setlocale(LC_NUMERIC, 0);
 		setlocale(LC_NUMERIC, "C");
+		
+		// Account for import increasing the buffer length.
+		$this->count = strlen( $this->buffer );
 
 		$this->parser = $this->makeParser($name);
 		$root = $this->parser->parse($string);
@@ -3060,9 +3063,13 @@ class lessc_parser {
 
 	// consume an end of statement delimiter
 	protected function end() {
+		$adjustedEndCount = $this->count++;
 		if ($this->literal(';')) {
 			return true;
-		} elseif ($this->count == strlen($this->buffer) || $this->buffer($this->count) == '}') {
+		} elseif (
+			$this->count == strlen( $this->buffer ) ||
+			substr( $this->buffer, $adjustedEndCount, 1 ) == '}'
+		) {
 			// if there is end of file or a closing block next then we don't need a ;
 			return true;
 		}
