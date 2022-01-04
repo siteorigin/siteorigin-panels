@@ -3063,7 +3063,7 @@ class lessc_parser {
 
 	// consume an end of statement delimiter
 	protected function end() {
-		$adjustedEndCount = $this->count++;
+		$adjustedEndCount = strlen( $this->buffer );
 		if ($this->literal(';')) {
 			return true;
 		} elseif (

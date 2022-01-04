@@ -107,6 +107,16 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.0 - 04 January 2022 =
+* Added a new global `Mobile Widget Bottom Margin` setting.
+* Added a new global `Mobile Cell Bottom Margin` setting.
+* Legacy Widgets: Updated for PHP 8 compatibility.
+* WordPress 5.9 Compatibility: Resolved row ordering issue.
+* jQuery: Resolved jQuery Migrate notice. Updated `ready` function.
+* Full-Width Containers Using CSS: Theme container no longer removed on pages without full-width rows.
+* Developer: Resolved JavaScript error when all style fields removed.
+* Developer: Added `panels_title_check_sub_fields` to allow for sub-field detection.
+
 = 2.15.3 - 01 December 2021 =
 * Rows/Cells: Prevented possible data mismatch.
 
