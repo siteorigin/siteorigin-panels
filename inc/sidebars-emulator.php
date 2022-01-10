@@ -50,7 +50,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 						if ( $instance_class == $widget_class && ! empty( $sidebar_id ) ) {
 							//The option value uses only the widget id number as keys
 							preg_match( '/-([0-9]+$)/', $sidebar_id, $num_match );
-							if ( ! empty( $num_match ) && count( $num_match ) > 1  ) {
+							if ( ! empty( $num_match ) ) {
 								$args[0][ $num_match[1] ] = $widget_instance;
 							}
 						}
