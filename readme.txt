@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
 Requires at least: 4.7
-Tested up to: 5.8
+Tested up to: 5.9
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
@@ -106,6 +106,10 @@ We've tried to ensure that Page Builder is compatible with most plugin widgets. 
 SiteOrigin Premium includes access to our professional email support service, perfect for those times when you need fast and effective technical support. We're standing by to assist you in any way we can.
 
 == Changelog ==
+
+= 2.16.1 - 26 January 2022 =
+* Sidebar Emulator: Accounted for a potential notice when setting widget ID.
+* Updated the `Tested up to tag` to `5.9`.
 
 = 2.16.0 - 04 January 2022 =
 * Added a new global `Mobile Widget Bottom Margin` setting.
