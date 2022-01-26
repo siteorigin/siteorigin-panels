@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.1 - 26 January 2022 =
+* Sidebar Emulator: Accounted for a potential notice when setting widget ID.
+* Updated the `Tested up to tag` to `5.9`.
+
 = 2.16.0 - 04 January 2022 =
 * Added a new global `Mobile Widget Bottom Margin` setting.
 * Added a new global `Mobile Cell Bottom Margin` setting.
