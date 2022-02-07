@@ -567,8 +567,9 @@ class SiteOrigin_Panels_Admin {
 			if (
 				defined( 'WPSEO_FILE' ) &&
 				(
-					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6
-					wp_script_is( 'yoast-seo-metabox' ) // <= 14.5
+					wp_script_is( 'yoast-seo-metabox' ) || // <= 14.5.
+					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6 <= 17.9.
+					wp_script_is( 'yoast-seo-post-edit-classic' ) // => 18
 				)
 			) {
 				wp_enqueue_script(
