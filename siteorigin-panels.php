@@ -202,8 +202,11 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
 		}
 
-		// Compatibility with Yoast Sitemap.
-		if ( defined( 'WPSEO_FILE' ) ) {
+		// Compatibility with Yoast plugins.
+		if (
+			defined( 'WPSEO_FILE' ) ||
+			function_exists( 'yoast_wpseo_video_seo_init' )
+		) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
 		}
 
