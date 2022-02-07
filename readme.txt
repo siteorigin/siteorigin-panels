@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.2 - 07 February 2022 =
+* Added Yoast Video SEO plugin integration.
+* Restored content analysis functionality for newer Yoast SEO versions.
+
 = 2.16.1 - 26 January 2022 =
 * Sidebar Emulator: Accounted for a potential notice when setting widget ID.
 * Updated the `Tested up to tag` to `5.9`.
