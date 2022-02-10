@@ -562,7 +562,7 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		$style_wrapper = '';
-		if ( ! empty( $attributes ) || ! empty( $standard_css ) || ! empty( $mobile_css ) ) {
+		if ( ! empty( $attributes ) || ! empty( $standard_css )  || ! empty( $tablet_css )|| ! empty( $mobile_css ) ) {
 			if ( empty( $attributes['class'] ) ) {
 				$attributes['class'] = array();
 			}
