@@ -684,6 +684,14 @@ class SiteOrigin_Panels_Styles {
 			$css['padding'] = $style[ 'tablet_padding' ];
 		}
 
+		if (
+			! empty( $style['background_display'] ) &&
+			 $style['background_display'] == 'fixed'  &&
+			 ! ( empty( $style['background_image_attachment'] ) && empty( $style['background_image_attachment_fallback'] ) )
+		) {
+			$css[ 'background-attachment' ] = 'scroll';
+		}
+
 		return $css;
 	}
 
