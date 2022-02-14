@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.3 - 14 February 2022 =
+* Fixed Background Images: Change to `scroll` on mobile devices. Resolves iOS bug.
+
 = 2.16.2 - 07 February 2022 =
 * Added Yoast Video SEO plugin integration.
 * Restored content analysis functionality for newer Yoast SEO versions.
