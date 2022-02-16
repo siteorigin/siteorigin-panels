@@ -118,7 +118,8 @@ class SiteOrigin_Panels_Renderer {
 				! empty( $row['style']['row_stretch'] ) &&
 				 (
 				 	$row['style']['row_stretch'] == 'full' ||
-				 	$row['style']['row_stretch'] == 'stretch'
+				 	$row['style']['row_stretch'] == 'full-stretched' ||
+				 	$row['style']['row_stretch'] == 'full-stretched-padded'
 				 )
 			) {
 				$this->container['full_width'] = true;
