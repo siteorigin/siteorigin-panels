@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.4 - 19 February 2022 =
+* Full-Width Containers Using CSS: Restored normal functionality when Standard or Full-Width rows not present.
+* Full-Width Containers Using CSS: Resolved a collapse issue when the browser resolution equals the collapse value.
+
 = 2.16.3 - 14 February 2022 =
 * Fixed Background Images: Change to `scroll` on mobile devices. Resolves iOS bug.
 
