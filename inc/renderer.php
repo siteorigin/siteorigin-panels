@@ -349,8 +349,12 @@ class SiteOrigin_Panels_Renderer {
 		// Do we need to remove the theme container on this page?
 		if (
 			$this->container['css_override'] &&
-			$this->container['full_width'] // Does this layout have full width layouts?
-		 ) {
+			$this->container['full_width'] && // Does this layout have full width layouts?
+			! defined( 'siteorigin_css_override' )
+		) {
+			// Prevent this CSS from being added again.
+			define( 'siteorigin_css_override', true );
+
 			$css->add_css(
 				esc_html( $this->container['selector'] ),
 				array(
