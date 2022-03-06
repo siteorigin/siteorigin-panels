@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.5 - 06 March 2022 =
+* Full-Width Containers Using CSS: Ensured full-width global CSS is only output once.
+
 = 2.16.4 - 19 February 2022 =
 * Full-Width Containers Using CSS: Restored normal functionality when Standard or Full-Width rows not present.
 * Full-Width Containers Using CSS: Resolved a collapse issue when the browser resolution equals the collapse value.
