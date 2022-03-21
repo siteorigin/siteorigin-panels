@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.6 - 21 March 2022 =
+* Prevented CSS properties outputting with only `px` set as the value.
+* WPML: Refined sidebar emulator language path removal.
+
 = 2.16.5 - 06 March 2022 =
 * Full-Width Containers Using CSS: Ensured full-width global CSS is only output once.
 
