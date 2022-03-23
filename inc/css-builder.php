@@ -30,7 +30,7 @@ class SiteOrigin_Panels_Css_Builder {
 					if ( ! strlen( (string) $v[ $i ] ) ) continue;
 					$attribute_string[] = wp_strip_all_tags( $k ) . ':' . wp_strip_all_tags( $v[ $i ] );
 				}
-			} elseif ( ! strlen( (string) $v ) || $v == 'px' ) {
+			} elseif ( ! strlen( (string) $v ) || $v === 'px' ) {
 				continue;
 			} else {
 				$attribute_string[] = wp_strip_all_tags( $k ) . ':' . wp_strip_all_tags( $v );
