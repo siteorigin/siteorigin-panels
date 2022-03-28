@@ -487,7 +487,9 @@ class SiteOrigin_Panels_Renderer {
 		echo apply_filters( 'siteorigin_panels_before_content', '', $panels_data, $post_id );
 
 		foreach ( $layout_data as $ri => & $row ) {
-			$this->render_row( $post_id, $ri, $row, $panels_data );
+			if ( apply_filters( 'siteorigin_panels_output_row', true, $row, $ri, $panels_data, $post_id ) ) {
+				$this->render_row( $post_id, $ri, $row, $panels_data );
+			}
 		}
 
 		echo apply_filters( 'siteorigin_panels_after_content', '', $panels_data, $post_id );
@@ -1018,7 +1020,9 @@ class SiteOrigin_Panels_Renderer {
 
 		foreach ( $cell['widgets'] as $wi => & $widget ) {
 			$is_last = ( $wi == count( $cell['widgets'] ) - 1 );
-			$this->render_widget( $post_id, $ri, $ci, $wi, $widget, $is_last );
+			if ( apply_filters( 'siteorigin_panels_output_widget', true, $widget, $ri, $ci, $wi, $panels_data, $post_id ) ) {
+				$this->render_widget( $post_id, $ri, $ci, $wi, $widget, $is_last );
+			}
 		}
 
 		// This allows other themes and plugins to add HTML inside of the cell after its contents.
