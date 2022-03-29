@@ -158,12 +158,27 @@ class SiteOrigin_Panels_Admin_Layouts {
 			return $fallback;
 		}
 	}
+
+	static private function get_files( $folder_path, $file_name ) {
+		$paths = array();
+		$types = array (
+			'jpg',
+			'jpeg',
+			'gif',
+			'png',
+		);
+		foreach ( $types as $ext ) {
+			$paths = array_merge( glob( $folder_path . "/$file_name.$ext" ), $paths );
+		}
+
+		return $paths;
+	}
 	
 	private function get_layout_file_screenshot( $panels_data, $folder_path, $file_name ) {
 		if ( ! empty( $panels_data['screenshot'] ) ) {
 			return $panels_data['screenshot'];
 		} else {
-			$paths = glob( $folder_path . "/$file_name.{jpg,jpeg,gif,png}", GLOB_BRACE );
+			$paths = self::get_files( $folder_path, $file_name );
 			// Highlander Condition. There can be only one.
 			$screenshot_path = empty( $paths ) ? '' : wp_normalize_path( $paths[0] );
 			$wp_content_dir = wp_normalize_path( WP_CONTENT_DIR );
