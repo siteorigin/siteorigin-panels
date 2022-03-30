@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.8 - 30 March 2022 =
+* Improved PHP 8 Compatibility: Replaced `GLOB_BRACE` flag in favor of multiple `glob` functions.
+* Developer: Added `siteorigin_panels_output_row` and `siteorigin_panels_output_widget` filters.
+
 = 2.16.7 - 23 March 2022 =
 * Improved empty CSS rule check to avoid potential edge cases.
 
