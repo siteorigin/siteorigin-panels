@@ -180,8 +180,8 @@ module.exports = panels.view.dialog.extend( {
 			var $$ = $( this );
 			var panelsData = thisView.builder.model.getPanelsData();
 			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
-			if ( ! postName ) {
-				postName = $('input[name="post_ID"]').val();
+			if ( postName !== '' && $( 'body' ).hasClass( 'block-editor-page' ) ) {
+				postName = $( '.wp-block-post-title' ).text();
 			} else if ( $( '.block-editor-page' ).length ) {
 				var currentBlockPosition = thisView.getCurrentBlockPosition();
 				if ( currentBlockPosition >= 0 ) {
@@ -189,7 +189,7 @@ module.exports = panels.view.dialog.extend( {
 				}
 
 			}
-			panelsData.name = postName;
+			panelsData.name = postName !== '' ? postName : $( 'input[name="post_ID"]' ).val();
 			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( panelsData ) );
 		} );
 
