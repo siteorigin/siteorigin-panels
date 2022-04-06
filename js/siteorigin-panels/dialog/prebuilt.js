@@ -180,16 +180,18 @@ module.exports = panels.view.dialog.extend( {
 			var $$ = $( this );
 			var panelsData = thisView.builder.model.getPanelsData();
 			var postName = $( 'input[name="post_title"], .editor-post-title__input' ).val();
-			if ( postName !== '' && $( 'body' ).hasClass( 'block-editor-page' ) ) {
+			if ( ( ! postName || postName === '' ) && $( '.block-editor-page' ).length ) {
 				postName = $( '.wp-block-post-title' ).text();
-			} else if ( $( '.block-editor-page' ).length ) {
-				var currentBlockPosition = thisView.getCurrentBlockPosition();
-				if ( currentBlockPosition >= 0 ) {
-					postName += '-' + currentBlockPosition; 
-				}
-
 			}
 			panelsData.name = postName !== '' ? postName : $( 'input[name="post_ID"]' ).val();
+
+			// Append block position id to filename.
+			if ( $( '.block-editor-page' ).length ) {
+				var currentBlockPosition = thisView.getCurrentBlockPosition();
+				if ( currentBlockPosition >= 0 ) {
+					panelsData.name += '-' + currentBlockPosition; 
+				}
+			}
 			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( panelsData ) );
 		} );
 
