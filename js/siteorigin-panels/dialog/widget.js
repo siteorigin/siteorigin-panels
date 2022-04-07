@@ -189,7 +189,8 @@ module.exports = panels.view.dialog.extend( {
 			'action': 'so_panels_widget_form',
 			'widget': this.model.get( 'class' ),
 			'instance': JSON.stringify( this.model.get( 'values' ) ),
-			'raw': this.model.get( 'raw' )
+			'raw': this.model.get( 'raw' ),
+			'postId': this.builder.config.postId
 		};
 
 		var $soContent = this.$( '.so-content' );
