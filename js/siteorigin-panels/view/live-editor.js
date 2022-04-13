@@ -170,11 +170,7 @@ module.exports = Backbone.View.extend( {
 	closeAndSave: function(){
 		this.close( false );
 		// Finds the submit input for saving without publishing draft posts.
-		if ( $( '.block-editor-page' ).length ) {
-			$( '.editor-post-publish-button' )[0].click();
-		} else {
-			$( '#submitdiv input[type="submit"][name="save"]' )[0].click();
-		}
+		$( '#submitdiv input[type="submit"][name="save"], .editor-post-publish-button, .edit-widgets-header__actions .is-primary' )[0].click();
 	},
 
 	/**

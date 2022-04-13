@@ -52,7 +52,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					'wp-element',
 					'wp-components',
 					'wp-compose',
-					'so-panels-admin'
+					'wp-data',
+					'so-panels-admin',
 				),
 				SITEORIGIN_PANELS_VERSION
 			);
