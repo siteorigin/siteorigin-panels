@@ -260,14 +260,14 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 				// Send panelsData to server for sanitization.
 				var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
 				if ( ! isNewWPBlockEditor ) {
-					wp.data.dispatch( 'core/block-editor' ).lockPostSaving();
+					wp.data.dispatch( 'core/editor' ).lockPostSaving();
 				}
 				jQuery.post(
 					panelsOptions.ajaxurl,
 					{
 						action: 'so_panels_builder_content_json',
 						panels_data: JSON.stringify( newPanelsData ),
-						post_id: ! isNewWPBlockEditor ? wp.data.select("core/block-editor").getCurrentPostId() : ''
+						post_id: ! isNewWPBlockEditor ? wp.data.select("core/editor").getCurrentPostId() : ''
 			},
 					function ( content ) {
 						let panelsAttributes = {};
@@ -281,7 +281,7 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 						setAttributes( panelsAttributes );
 
 						if ( ! isNewWPBlockEditor ) {
-							wp.data.dispatch( 'core/block-editor' ).unlockPostSaving(); 
+							wp.data.dispatch( 'core/editor' ).unlockPostSaving(); 
 						}
 					}
 				);
@@ -322,8 +322,8 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 	if ( window.soPanelsBlockEditorAdmin.showAddButton ) {
 		jQuery( () => {
 			setTimeout( () => {
-				const editorDispatch = wp.data.dispatch( 'core/block-editor' );
-				const editorSelect = wp.data.select( 'core/block-editor' );
+				const editorDispatch = wp.data.dispatch( 'core/editor' );
+				const editorSelect = wp.data.select( 'core/editor' );
 				var tmpl = jQuery( '#siteorigin-panels-add-layout-block-button' ).html();
 				if ( jQuery( '.block-editor-writing-flow > .block-editor-block-list__layout' ).length ) {
 					// > WP 5.7
@@ -348,7 +348,7 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 					}
 				} );
 				let hideButtonIfBlocks = () => {
-					const isEmpty = wp.data.select( 'core/block-editor' ).isEditedPostEmpty();
+					const isEmpty = wp.data.select( 'core/editor' ).isEditedPostEmpty();
 					if ( isEmpty ) {
 						$addButton.show();
 					} else {
