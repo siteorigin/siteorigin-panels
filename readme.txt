@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.10 - 13 April 2022 =
+* Block-Based Widgets Editor: Restored SiteOrigin Layout Block compatibility and other improvements.
+
 = 2.16.9 - 07 April 2022 =
 * Layout Block: Fixed JSON layout export file name.
 * Developer: Passed `postId` to server when rendering widget form.

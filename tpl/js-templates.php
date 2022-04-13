@@ -24,7 +24,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<span class="so-button-text"><?php esc_html_e('Layouts', 'siteorigin-panels') ?></span>
 			</a>
 
-			<?php if( !empty($post) ) : ?>
+			<?php
+			if (
+				! empty( $post ) ||
+				( function_exists( 'get_current_screen' ) && get_current_screen()->base == 'widgets' &&  get_current_screen()->is_block_editor )
+
+			) :
+			?>
 
 				<a class="so-tool-button so-history" style="display: none" title="<?php esc_attr_e( 'Edit History', 'siteorigin-panels' ) ?>" tabindex="0">
 					<span class="so-panels-icon so-panels-icon-history"></span>

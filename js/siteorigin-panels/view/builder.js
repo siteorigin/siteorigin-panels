@@ -672,7 +672,7 @@ module.exports = Backbone.View.extend( {
 		// Display the live editor button in the toolbar
 		if ( this.liveEditor.hasPreviewUrl() ) {
 			var addLEButton = false;
-			if ( ! panels.helpers.editor.isBlockEditor() ) {
+			if ( ! panels.helpers.editor.isBlockEditor() || $( '.widgets-php' ).length ) {
 				addLEButton = true;
 			} else if ( wp.data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) != 'auto-draft' ) {
 				addLEButton = true;
