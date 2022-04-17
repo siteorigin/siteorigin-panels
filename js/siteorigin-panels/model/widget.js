@@ -168,6 +168,10 @@ module.exports = Backbone.Model.extend( {
 	 * @returns string The "cleaned" title.
 	 */
 	cleanTitle: function( title ) {
+		// Prevent situation where invalid titles are processed for cleaning.
+		if ( typeof title !== 'string' ) {
+			return false;
+		}
 		title = title.replace( /<\/?[^>]+(>|$)/g, "" );
 		var parts = title.split( " " );
 		parts = parts.slice( 0, 20 );
@@ -200,7 +204,9 @@ module.exports = Backbone.Model.extend( {
 				for ( var i = 0; i < fields.length; i++ ) {
 					if ( k == fields[i] ) {
 						widgetTitle = thisView.cleanTitle( values[ k ] )
-						break;
+						if ( widgetTitle ) {
+							break;
+						}
 					}
 				}
 				if ( widgetTitle ) {
@@ -215,7 +221,9 @@ module.exports = Backbone.Model.extend( {
 				thisView.isValidTitle( values[ k ] )
 			) {
 				widgetTitle = thisView.cleanTitle( values[ k ] )
-				break;
+				if ( widgetTitle ) {
+					break;
+				}
 			}
 		};
 
