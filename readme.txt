@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.11 - 18 April 2022 =
+* Widget Descriptions: Resolved a potential error with old SiteOrigin Image Widgets title value set to `false` rather than `null`.
+
 = 2.16.10 - 13 April 2022 =
 * Block-Based Widgets Editor: Restored SiteOrigin Layout Block compatibility and other improvements.
 
