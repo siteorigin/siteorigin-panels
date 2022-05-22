@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.12 - 22 May 2022 =
+* Layout Block: Resolved WP 6.0 styling conflict.
+* WP Version Check: Update to check for version body class instead of branch.
+
 = 2.16.11 - 18 April 2022 =
 * Widget Descriptions: Resolved a potential error with old SiteOrigin Image Widgets title value set to `false` rather than `null`.
 
