@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.13 - 25 May 2022 =
+* Updated WordPress `Tested up to` tag.
+* Minor PHP formatting improvements.
+
 = 2.16.12 - 22 May 2022 =
 * Layout Block: Resolved WP 6.0 styling conflict.
 * WP Version Check: Update to check for version body class instead of branch.
