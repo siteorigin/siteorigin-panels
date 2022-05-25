@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
 Requires at least: 4.7
-Tested up to: 5.9
+Tested up to: 6.0
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
