@@ -24,7 +24,7 @@ class SiteOrigin_Panels {
 	function __construct() {
 		register_activation_hook( __FILE__, array( 'SiteOrigin_Panels', 'activate' ) );
 
-		// Register the autoloader
+		// Register the autoloader.
 		spl_autoload_register( array( $this, 'autoloader' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'version_check' ) );
@@ -32,7 +32,7 @@ class SiteOrigin_Panels {
 		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 
-		add_action('widgets_init', array( $this, 'widgets_init' ) );
+		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
@@ -49,7 +49,7 @@ class SiteOrigin_Panels {
 		}
 
 		if ( is_admin() ) {
-			// Setup all the admin classes
+			// Setup all the admin classes.
 			SiteOrigin_Panels_Settings::single();
 			SiteOrigin_Panels_Revisions::single();
 		}
@@ -62,18 +62,18 @@ class SiteOrigin_Panels {
 		SiteOrigin_Panels::renderer();
 		SiteOrigin_Panels_Styles_Admin::single();
 
-		if( siteorigin_panels_setting( 'bundled-widgets' ) && ! function_exists( 'origin_widgets_init' ) ) {
+		if ( siteorigin_panels_setting( 'bundled-widgets' ) && ! function_exists( 'origin_widgets_init' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'widgets/widgets.php';
 		}
 
 		SiteOrigin_Panels_Widget_Shortcode::init();
 
-		// We need to generate fresh post content
+		// We need to generate fresh post content.
 		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
 		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ) );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 
-		// Remove the default excerpt function
+		// Remove the default excerpt function.
 		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 9 );
 
 		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
@@ -97,9 +97,9 @@ class SiteOrigin_Panels {
 	 *
 	 * @return SiteOrigin_Panels_Renderer
 	 */
-	public static function renderer(){
+	public static function renderer() {
 		static $renderer;
-		if( empty( $renderer ) ) {
+		if ( empty( $renderer ) ) {
 			switch( siteorigin_panels_setting( 'legacy-layout' ) ) {
 				case 'always':
 					$renderer = SiteOrigin_Panels_Renderer_Legacy::single();
@@ -109,7 +109,7 @@ class SiteOrigin_Panels {
 					$renderer = SiteOrigin_Panels_Renderer::single();
 					break;
 
-				default :
+				default:
 					$renderer = self::is_legacy_browser() ?
 						SiteOrigin_Panels_Renderer_Legacy::single() :
 						SiteOrigin_Panels_Renderer::single();
@@ -120,9 +120,9 @@ class SiteOrigin_Panels {
 		return $renderer;
 	}
 
-	public static function is_legacy_browser(){
+	public static function is_legacy_browser() {
 		$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
-		if( empty( $agent ) ) return false;
+		if ( empty( $agent ) ) return false;
 
 		return
 			// IE lte 11
@@ -148,11 +148,11 @@ class SiteOrigin_Panels {
 			$filename = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $filename ) );
 			$filename = plugin_dir_path( __FILE__ ) . 'inc/widgets/' . $filename . '.php';
 		}
-		else if ( strpos( $class, 'SiteOrigin_Panels_Compat_' ) === 0 ) {
+		elseif ( strpos( $class, 'SiteOrigin_Panels_Compat_' ) === 0 ) {
 			$filename = str_replace( array( 'SiteOrigin_Panels_Compat_', '_' ), array( '', '-' ), $class );
 			$filename = plugin_dir_path( __FILE__ ) . 'compat/' . strtolower( $filename ) . '.php';
 		}
-		else if ( strpos( $class, 'SiteOrigin_Panels_' ) === 0 ) {
+		elseif ( strpos( $class, 'SiteOrigin_Panels_' ) === 0 ) {
 			$filename = str_replace( array( 'SiteOrigin_Panels_', '_' ), array( '', '-' ), $class );
 			$filename = plugin_dir_path( __FILE__ ) . 'inc/' . strtolower( $filename ) . '.php';
 		}
@@ -177,14 +177,14 @@ class SiteOrigin_Panels {
 			siteorigin_panels_setting( 'sidebars-emulator' ) &&
 			( ! get_option( 'permalink_structure' ) || get_option( 'rewrite_rules' ) )
 		) {
-			// Initialize the sidebars emulator
+			// Initialize the sidebars emulator.
 			SiteOrigin_Panels_Sidebars_Emulator::single();
 		}
 
-		// Initialize the language
+		// Initialize the language.
 		load_plugin_textdomain( 'siteorigin-panels', false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
 
-		// Initialize all the extra classes
+		// Initialize all the extra classes.
 		SiteOrigin_Panels_Home::single();
 
 		// Check if we need to initialize the admin class.
@@ -197,7 +197,7 @@ class SiteOrigin_Panels {
 	 * Loads Page Builder compatibility to allow other plugins/themes
 	 */
 	public function init_compat() {
-		// Compatibility with Widget Options plugin
+		// Compatibility with Widget Options plugin.
 		if ( class_exists( 'WP_Widget_Options' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
 		}
@@ -210,11 +210,10 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
 		}
 
-		// Compatibility with AMP plugin
+		// Compatibility with AMP plugin.
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
 		}
-
 
 		// Compatibility with Gravity Forms.
 		if ( class_exists( 'GFCommon' ) ) {
@@ -226,11 +225,11 @@ class SiteOrigin_Panels {
 		if ( defined( 'ROCKET_LL_VERSION' ) ) {
 			$lazy_load_settings = get_option( 'rocket_lazyload_options' );
 			$load_lazy_load_compat = ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
-		// WP Rocket
+		// WP Rocket.
 		} elseif ( function_exists( 'get_rocket_option' ) && ! defined( 'DONOTROCKETOPTIMIZE' ) ) {
 			$load_lazy_load_compat = get_rocket_option( 'lazyload' ) && apply_filters( 'do_rocket_lazyload', true );
 		}
-		
+
 		if ( apply_filters( 'siteorigin_lazyload_compat', $load_lazy_load_compat ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
@@ -245,7 +244,7 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 * @return mixed|void Are we currently viewing the home page
+	 * @return mixed|void Are we currently viewing the home page.
 	 */
 	public static function is_home() {
 		$home = ( is_front_page() && is_page() && get_option( 'show_on_front' ) == 'page' && get_option( 'page_on_front' ) == get_the_ID() && get_post_meta( get_the_ID(), 'panels_data' ) );
@@ -272,7 +271,7 @@ class SiteOrigin_Panels {
 	 *
 	 * @return bool
 	 */
-	static function is_live_editor(){
+	static function is_live_editor() {
 		return ! empty( $_GET['siteorigin_panels_live_editor'] );
 	}
 
@@ -371,11 +370,11 @@ class SiteOrigin_Panels {
 
 		$post_id = $this->get_post_id();
 
-		// Check if this post has panels_data
+		// Check if this post has panels_data.
 		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
 			$panel_content = SiteOrigin_Panels::renderer()->render(
 				$post_id,
-				// Add CSS if this is not the main single post, this is handled by add_single_css
+				// Add CSS if this is not the main single post, this is handled by add_single_css.
 				$preview || $post_id !== get_queried_object_id()
 			);
 
@@ -383,7 +382,7 @@ class SiteOrigin_Panels {
 				$content = $panel_content;
 
 				if ( ! is_singular() ) {
-					// This is an archive page, so try strip out anything after the more text
+					// This is an archive page, so try strip out anything after the more text.
 
 					if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
 						$content = explode( $matches[0], $content, 2 );
@@ -497,7 +496,7 @@ class SiteOrigin_Panels {
 	public function generate_post_css() {
 		$post_id = $this->get_post_id();
 
-		if( is_singular() && get_post_meta( $post_id, 'panels_data', true ) ) {
+		if ( is_singular() && get_post_meta( $post_id, 'panels_data', true ) ) {
 			$renderer = SiteOrigin_Panels::renderer();
 			$renderer->add_inline_css( $post_id, $renderer->generate_css( $post_id ) );
 		}
@@ -533,14 +532,14 @@ class SiteOrigin_Panels {
 	 * @return array
 	 */
 	function body_class( $classes ) {
-		if( self::is_panel() ) {
+		if ( self::is_panel() ) {
 			$classes[] = 'siteorigin-panels';
 			$classes[] = 'siteorigin-panels-before-js';
 
 			add_action( 'wp_footer', array( $this, 'strip_before_js' ), 99 );
 		}
-		if( self::is_home() ) $classes[] = 'siteorigin-panels-home';
-		if( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
+		if ( self::is_home() ) $classes[] = 'siteorigin-panels-home';
+		if ( self::is_live_editor() ) $classes[] = 'siteorigin-panels-live-editor';
 
 		$this->container = SiteOrigin_Panels::container_settings();
 		if ( ! empty( $this->container ) && $this->container['css_override'] ) {
@@ -578,7 +577,7 @@ class SiteOrigin_Panels {
 			}
 		}
 
-		// Add a Live Edit link if this is a Page Builder page that the user can edit
+		// Add a Live Edit link if this is a Page Builder page that the user can edit.
 		if (
 			siteorigin_panels_setting( 'live-editor-quick-link' ) &&
 			is_singular() &&
@@ -600,7 +599,7 @@ class SiteOrigin_Panels {
 		return $admin_bar;
 	}
 
-	function widgets_init(){
+	function widgets_init() {
 		register_widget( 'SiteOrigin_Panels_Widgets_PostContent' );
 		register_widget( 'SiteOrigin_Panels_Widgets_PostLoop' );
 		register_widget( 'SiteOrigin_Panels_Widgets_Layout' );
@@ -608,7 +607,7 @@ class SiteOrigin_Panels {
 
 	function live_edit_link_style() {
 		if ( is_singular() && current_user_can( 'edit_post', get_the_ID() ) && get_post_meta( get_the_ID(), 'panels_data', true ) ) {
-			// Add the style for the eye icon before the Live Editor link
+			// Add the style for the eye icon before the Live Editor link.
 			$css = '#wpadminbar #wp-admin-bar-so_live_editor > .ab-item:before {
 			    content: "\f177";
 			    top: 2px;
@@ -618,7 +617,7 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 * Process panels data to make sure everything is properly formatted
+	 * Process panels data to make sure everything is properly formatted.
 	 *
 	 * @param array $panels_data
 	 *
@@ -626,7 +625,7 @@ class SiteOrigin_Panels {
 	 */
 	function process_panels_data( $panels_data ) {
 
-		// Process all widgets to make sure that panels_info is properly represented
+		// Process all widgets to make sure that panels_info is properly represented.
 		if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
 
 			$last_gi = 0;
@@ -640,7 +639,7 @@ class SiteOrigin_Panels {
 					unset( $widget['info'] );
 				}
 
-				// Filter the widgets to add indexes
+				// Filter the widgets to add indexes.
 				if ( $widget['panels_info']['grid'] != $last_gi ) {
 					$last_gi = $widget['panels_info']['grid'];
 					$last_ci = $widget['panels_info']['cell'];
@@ -663,7 +662,7 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 * Fix class names that have been incorrectly escaped
+	 * Fix class names that have been incorrectly escaped.
 	 *
 	 * @param $class
 	 *
@@ -673,16 +672,16 @@ class SiteOrigin_Panels {
 		return preg_replace( '/\\\\+/', '\\', $class );
 	}
 
-	public static function front_css_url(){
+	public static function front_css_url() {
 		return self::renderer()->front_css_url();
 	}
 
 	/**
-	 * Trigger a siteorigin_panels_version_changed action if the version has changed
+	 * Trigger a siteorigin_panels_version_changed action if the version has changed.
 	 */
-	public function version_check(){
+	public function version_check() {
 		$active_version = get_option( 'siteorigin_panels_active_version', false );
-		if( empty( $active_version ) || $active_version !== SITEORIGIN_PANELS_VERSION ) {
+		if ( empty( $active_version ) || $active_version !== SITEORIGIN_PANELS_VERSION ) {
 			do_action( 'siteorigin_panels_version_changed' );
 			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
 		}
@@ -691,38 +690,37 @@ class SiteOrigin_Panels {
 	/**
 	 * Script that removes the siteorigin-panels-before-js class from the body.
 	 */
-	public function strip_before_js(){
+	public function strip_before_js() {
 		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 
 	/**
-	 * Should we display premium addon messages
+	 * Should we display premium addon messages.
 	 *
 	 * @return bool
 	 */
-	public static function display_premium_teaser(){
+	public static function display_premium_teaser() {
 		return siteorigin_panels_setting( 'display-teaser' ) &&
 			   apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
 			   ! defined( 'SITEORIGIN_PREMIUM_VERSION' );
 	}
 
 	/**
-	 * Get the premium upgrade URL
+	 * Get the premium upgrade URL.
 	 *
 	 * @return string
 	 */
 	public static function premium_url( $featured_addon = false ) {
 		$ref = apply_filters( 'siteorigin_premium_affiliate_id', '' );
 		$url = 'https://siteorigin.com/downloads/premium/?featured_plugin=siteorigin-panels';
-		if( ! empty( $featured_addon ) ) {
+		if ( ! empty( $featured_addon ) ) {
 			$url = add_query_arg( 'featured_addon', urlencode( $featured_addon ), $url );
 		}
-		if( ! empty( $ref ) ) {
+		if ( ! empty( $ref ) ) {
 			$url = add_query_arg( 'ref', urlencode( $ref ), $url );
 		}
 		return $url;
 	}
-
 
 	/**
 	 * Get the registered widget instance by it's class name or the hash generated when it was registered.
@@ -746,7 +744,7 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 *  Flag redirect to welcome page after activation
+	 * Flag redirect to welcome page after activation.
 	 *
 	 * @param $plugin
 	 */
