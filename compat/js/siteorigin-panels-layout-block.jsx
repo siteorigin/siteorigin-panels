@@ -7,6 +7,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			loadingPreview: ! editMode,
 			previewHtml: '',
 			previewInitialized: ! editMode,
+			pendingPreviewRequest: false,
 		};
 		this.panelsContainer = wp.element.createRef();
 		this.previewContainer = wp.element.createRef();
@@ -20,7 +21,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			this.setupPanels();
 		} else if ( ! this.state.editing && ! this.previewInitialized ) {
 			this.fetchPreview( this.props );
-			this.fetchPreview = lodash.debounce( this.fetchPreview, 500 );
+			this.fetchPreview = lodash.debounce( this.fetchPreview, 1000 );
 		}
 	}
 	
@@ -35,8 +36,13 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		if ( this.state.editing && ! this.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
-			this.fetchPreview( this.props );
-			this.fetchPreview = lodash.debounce( this.fetchPreview, 500 );
+        	if ( ! this.state.pendingPreviewRequest ) {
+				this.setState({
+					pendingPreviewRequest: true,
+				} );
+				this.fetchPreview( this.props );
+				this.fetchPreview = lodash.debounce( this.fetchPreview, 1000 );
+        	}
 		} else if ( ! this.state.previewInitialized ) {
 			jQuery( document ).trigger( 'panels_setup_preview' );
 			this.setState( {
@@ -143,6 +149,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 					previewHtml: preview,
 					loadingPreview: false,
             		previewInitialized: false,
+            		pendingPreviewRequest: false,
 				} );
 			}
 		} );
@@ -252,10 +259,8 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 		}
 	},
 	
-	edit( { attributes, setAttributes, toggleSelection } ) {
-		
-		let onLayoutBlockContentChange = ( newPanelsData ) => {
-			
+	edit( { attributes, setAttributes, toggleSelection } ) {	
+		let onLayoutBlockContentChange = ( newPanelsData ) => {			
 			if ( ! lodash.isEmpty( newPanelsData.widgets ) ) {
 				// Send panelsData to server for sanitization.
 				var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
