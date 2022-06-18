@@ -57,26 +57,22 @@ jQuery( function ( $ ) {
 	}
 	stretchFullWidthRows();
 
-	var modernParallax = function() {
-		if (
-			typeof parallaxStyles != 'undefined' &&
-			typeof simpleParallax != 'undefined' &&
-			(
-				! parallaxStyles['disable-parallax-mobile'] ||
-				! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
-			)
-		) {
-			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
-				delay: parallaxStyles['delay'],
-				scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
-			} );
-		}
+	if (
+		typeof parallaxStyles != 'undefined' &&
+		typeof simpleParallax != 'undefined' &&
+		(
+			! parallaxStyles['disable-parallax-mobile'] ||
+			! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
+		)
+	) {
+		new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
+			delay: parallaxStyles['delay'],
+			scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
+		} );
 	}
-	modernParallax();
 
 	$( window ).on( 'resize load', function() {
 		stretchFullWidthRows();
-		modernParallax();
 	} );
 
 	// This should have been done in the footer, but run it here just incase.
