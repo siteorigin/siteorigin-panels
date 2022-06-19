@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.14 - 19 June 2022 =
+* Layout Block: Limited block preview attempts.
+* Modern Parallax: Resolved potential choppy scrolling.
+
 = 2.16.13 - 25 May 2022 =
 * Updated WordPress `Tested up to` tag.
 * Minor PHP formatting improvements.
