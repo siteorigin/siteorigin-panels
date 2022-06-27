@@ -239,7 +239,7 @@ class SiteOrigin_Panels_Admin {
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 
 		$panels_data['widgets'] = $this->process_raw_widgets(
-			$panels_data['widgets'],
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
