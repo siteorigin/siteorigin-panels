@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.15 - 27 June 2022 =
+* Resolved edge case empty widgets warning.
+
 = 2.16.14 - 19 June 2022 =
 * Layout Block: Limited block preview attempts.
 * Modern Parallax: Resolved potential choppy scrolling.
