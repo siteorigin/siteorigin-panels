@@ -232,6 +232,84 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 10,
 		);
 
+		$fields['box_shadow'] = array(
+			'name'        => __( 'Box shadow', 'siteorigin-panels' ),
+			'type'        => 'toggle',
+			'group'       => 'design',
+			'priority'    => 20,
+			'fields' => array(
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 1,
+				),
+				'offset_vertical' => array(
+					'name'        => __( 'Vertical offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 2,
+				),
+				'blur' => array(
+					'name'        => __( 'Blur', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 3,
+				),
+				'spread' => array(
+					'name'        => __( 'Spread', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 4,
+				),
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 5,
+				),
+			),
+		);
+
+		$fields['box_shadow_hover'] = array(
+			'name'        => __( 'Box shadow', 'siteorigin-panels' ),
+			'type'        => 'toggle',
+			'group'       => 'design',
+			'priority'    => 25,
+			'fields' => array(
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 1,
+				),
+				'offset_vertical' => array(
+					'name'        => __( 'Vertical offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 2,
+				),
+				'blur' => array(
+					'name'        => __( 'Blur', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 3,
+				),
+				'spread' => array(
+					'name'        => __( 'Spread', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 4,
+				),
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
+					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+					'priority'    => 5,
+				),
+			),
+		);
+
 		return $fields;
 	}
 
@@ -573,6 +651,25 @@ class SiteOrigin_Panels_Styles {
 		return $output;
 	}
 
+	static function generate_box_shadow_css( $prefix, $style ) {
+		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
+
+		$box_shadow_offset_horizontal = ! empty( $style[ $prefix . '_offset_horizontal' ] ) ? $style[ $prefix . '_offset_horizontal' ] : 0;
+		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '3px';
+		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '10px';
+		$box_shadow_spread = ! empty( $style[ $prefix . '_spread' ] ) ? $style[ $prefix . '_spread' ] : '';
+
+		if ( ! empty( $style[ $prefix . '_color' ] ) ) {
+			$box_shadow_color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
+			$box_shadow_color = $box_shadow_color->__get( 'rgb' );
+			$box_shadow_color = "$box_shadow_color[0] $box_shadow_color[1] $box_shadow_color[2]";
+		} else {
+			$box_shadow_color = '0 0 0';
+		}
+
+		return array( 'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgb($box_shadow_color / 0.2)" );
+	}
+
 	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets
 	 *
@@ -666,6 +763,10 @@ class SiteOrigin_Panels_Styles {
 					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
 				}
 			}
+		}
+
+		if ( ! empty( $style['box_shadow_hover'] ) ) {
+			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
 		}
 
 		return $css;
@@ -779,6 +880,18 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
+			if ( ! empty( $row['style']['box_shadow_hover'] ) ) {
+				$css->add_row_css(
+					$post_id,
+					$ri,
+					'> .panel-row-style:hover',
+					self::generate_box_shadow_css(
+						'box_shadow_hover',
+						$row['style']
+					)
+				);
+			}
+
 			// Add in flexbox alignment to the main row element
 			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
 
@@ -859,6 +972,19 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
+				if ( ! empty( $cell['style']['box_shadow_hover'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'> .panel-cell-style:hover',
+						self::generate_box_shadow_css(
+							'box_shadow_hover',
+							$cell['style']
+						)
+					);
+				}
+
 				// Process the widgets if there are any
 				if( empty( $cell[ 'widgets' ] ) ) continue;
 
@@ -909,10 +1035,25 @@ class SiteOrigin_Panels_Styles {
 							'color' => $widget['panels_info']['style']['link_color']
 						) );
 					}
+
 					if ( ! empty( $widget['panels_info']['style']['link_color_hover'] ) ) {
 						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a:hover', array(
 							'color' => $widget['panels_info']['style']['link_color_hover']
 						) );
+					}
+
+					if ( ! empty( $widget['panels_info']['style']['box_shadow_hover'] ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'> .panel-widget-style:hover',
+							self::generate_box_shadow_css(
+								'box_shadow_hover',
+								$widget['panels_info']['style']
+							)
+						);
 					}
 				}
 			}
