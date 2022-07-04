@@ -233,78 +233,68 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['box_shadow'] = array(
-			'name'        => __( 'Box shadow', 'siteorigin-panels' ),
+			'name'        => __( 'Box Shadow', 'siteorigin-panels' ),
 			'type'        => 'toggle',
 			'group'       => 'design',
 			'priority'    => 20,
 			'fields' => array(
-				'offset_horizontal' => array(
-					'name'        => __( 'Horizontal offset', 'siteorigin-panels' ),
-					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
 					'priority'    => 1,
+				),				
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 2,
 				),
 				'offset_vertical' => array(
-					'name'        => __( 'Vertical offset', 'siteorigin-panels' ),
+					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
-					'priority'    => 2,
+					'priority'    => 3,
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
-					'priority'    => 3,
+					'priority'    => 4,
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
-					'priority'    => 4,
-				),
-				'color' => array(
-					'name'        => __( 'Color', 'siteorigin-panels' ),
-					'type'        => 'color',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
 					'priority'    => 5,
 				),
 			),
 		);
 
 		$fields['box_shadow_hover'] = array(
-			'name'        => __( 'Box shadow', 'siteorigin-panels' ),
+			'name'        => __( 'Box Shadow Hover', 'siteorigin-panels' ),
 			'type'        => 'toggle',
 			'group'       => 'design',
 			'priority'    => 25,
 			'fields' => array(
-				'offset_horizontal' => array(
-					'name'        => __( 'Horizontal offset', 'siteorigin-panels' ),
-					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
 					'priority'    => 1,
 				),
-				'offset_vertical' => array(
-					'name'        => __( 'Vertical offset', 'siteorigin-panels' ),
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
 					'priority'    => 2,
+				),
+				'offset_vertical' => array(
+					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 3,
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
-					'priority'    => 3,
+					'priority'    => 4,
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
-					'priority'    => 4,
-				),
-				'color' => array(
-					'name'        => __( 'Color', 'siteorigin-panels' ),
-					'type'        => 'color',
-					'description' => __( 'Placeholder.', 'siteorigin-panels' ),
 					'priority'    => 5,
 				),
 			),
