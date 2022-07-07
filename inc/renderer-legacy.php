@@ -133,9 +133,17 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 
 		foreach ( $panels_data['widgets'] as $widget_id => $widget ) {
 			if ( ! empty( $widget['panels_info']['style']['link_color'] ) ) {
-				$css->add_widget_css( $post_id, $widget['panels_info']['grid'], $widget['panels_info']['cell'], $widget['panels_info']['cell_index'], ' a', array(
-					'color' => $widget['panels_info']['style']['link_color']
-				) );
+				var_dump( $widget['panels_info'] );
+				$css->add_widget_css(
+					$post_id,
+					$widget['panels_info']['grid'],
+					$widget['panels_info']['cell'],
+					$widget['panels_info']['id'],
+					' a',
+					array(
+						'color' => $widget['panels_info']['style']['link_color']
+					)
+				);
 			}
 		}
 
