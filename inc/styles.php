@@ -859,6 +859,29 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
+				if ( ! empty( $cell['style']['link_color'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						' a',
+						array(
+							'color' => $cell['style']['link_color']
+						)
+					);
+				}
+				if ( ! empty( $cell['style']['link_color_hover'] ) ) {
+				var_dump( $cell['style']['link_color_hover'] );
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						' a:hover', array(
+							'color' => $cell['style']['link_color_hover']
+						)
+					);
+				}
+
 				// Process the widgets if there are any
 				if( empty( $cell[ 'widgets' ] ) ) continue;
 
