@@ -28,3 +28,17 @@ function siteorigin_panels_photon_exclude_parallax( $skip, $src, $tag ) {
 	}
 	return $skip;
 }
+
+/**
+ * When a post is copied using Jetpack, copy Page Builder data.
+ *
+ * @param WP_Post $source_post Post object that was copied.
+ * @param int     $target_post_id Target post ID.
+ */
+function siteorigin_panels_jetpack_copy_post( $source_post, $target_post_id ) {
+	$panels_data = get_post_meta( $source_post, 'panels_data', true );
+	if ( ! empty( $panels_data ) ) {
+		add_post_meta( $target_post_id, 'panels_data', $panels_data );
+	}
+}
+add_action( 'jetpack_copy_post', 'siteorigin_panels_jetpack_copy_post', 10, 2 );
