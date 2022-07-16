@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.16 - 09 July 2022 =
+* Legacy Layout Engine: Resolved `Undefined index: cell_index` notice.
+
 = 2.16.15 - 27 June 2022 =
 * Resolved edge case empty widgets warning.
 
