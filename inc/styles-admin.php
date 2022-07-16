@@ -340,7 +340,6 @@ class SiteOrigin_Panels_Styles_Admin {
 
 				<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : '' ); ?>
 				<label class="so-toggle-label">
-					<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ) ?>
 					<?php echo esc_html( __( 'Disabled', 'siteorigin-panels' ) ); ?>
 					<input type="checkbox" name="<?php echo esc_attr( $field_name ); ?>" <?php checked( $current ); ?> />
 					<span class="so-toggle-slide"></span>
