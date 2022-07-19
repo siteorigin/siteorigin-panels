@@ -360,7 +360,7 @@ class SiteOrigin_Panels_Styles_Admin {
 									$default = isset( $sub_field[ 'default' ] ) ? $sub_field[ 'default' ] : false;
 									$this->render_style_field(
 										$sub_field,
-										isset( $current[ $sub_field_id ] ) ? $current[ $sub_field_id ] : $default,
+										isset( $current_styles[ $sub_field_id ] ) ? $current_styles[ $sub_field_id ] : $default,
 										$sub_field_id,
 										$current_styles
 									);
