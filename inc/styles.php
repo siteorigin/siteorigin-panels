@@ -754,7 +754,7 @@ class SiteOrigin_Panels_Styles {
 			}
 		}
 
-		if ( ! empty( $style['box_shadow_hover'] ) ) {
+		if ( ! empty( $style['box_shadow'] ) ) {
 			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
 		}
 
