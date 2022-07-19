@@ -870,7 +870,6 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 				if ( ! empty( $cell['style']['link_color_hover'] ) ) {
-				var_dump( $cell['style']['link_color_hover'] );
 					$css->add_cell_css(
 						$post_id,
 						$ri,
