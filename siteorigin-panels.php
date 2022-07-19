@@ -234,7 +234,7 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
 
-		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' && class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( class_exists( 'Jetpack' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
 		}
 

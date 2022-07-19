@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class for handling all the default styling.
  *
@@ -10,19 +9,19 @@ class SiteOrigin_Panels_Styles {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
 
-		// Adding all the fields
+		// Adding all the fields.
 		add_filter( 'siteorigin_panels_row_style_fields', array( $this, 'row_style_fields' ) );
 		add_filter( 'siteorigin_panels_cell_style_fields', array( $this, 'cell_style_fields' ) );
 		add_filter( 'siteorigin_panels_widget_style_fields', array( $this, 'widget_style_fields' ) );
 
-		// Style wrapper attributes
+		// Style wrapper attributes.
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'row_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_row_style_attributes', array( $this, 'vantage_row_style_attributes' ), 11, 2 );
 		add_filter( 'siteorigin_panels_cell_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 
-		// Style wrapper CSS
+		// Style wrapper CSS.
 		add_filter( 'siteorigin_panels_row_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_css', array( $this, 'general_style_css' ), 10, 2 );
@@ -38,7 +37,7 @@ class SiteOrigin_Panels_Styles {
 		// Main filter to add any custom CSS.
 		add_filter( 'siteorigin_panels_css_object', array( $this, 'filter_css_object' ), 10, 4 );
 
-		// Filtering specific attributes
+		// Filtering specific attributes.
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_row_mobile_margin_bottom', array( $this, 'filter_row_mobile_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
@@ -103,7 +102,7 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * These are general styles that apply to all elements
+	 * These are general styles that apply to all elements.
 	 *
 	 * @param $label
 	 *
@@ -112,7 +111,7 @@ class SiteOrigin_Panels_Styles {
 	static function get_general_style_fields( $id, $label ) {
 		$fields = array();
 
-		// All the attribute fields
+		// All the attribute fields.
 
 		$fields['id'] = array(
 			'name'        => sprintf( __( '%s ID', 'siteorigin-panels' ), $label ),
@@ -146,7 +145,7 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 11,
 		);
 
-		// The layout fields
+		// The layout fields.
 
 		$fields['padding'] = array(
 			'name'        => __( 'Padding', 'siteorigin-panels' ),
@@ -157,7 +156,7 @@ class SiteOrigin_Panels_Styles {
 			'multiple'    => true
 		);
 
-		// Tablet layout fields
+		// Tablet layout fields.
 		if ( siteorigin_panels_setting( 'tablet-layout' ) ) {
 			$fields['tablet_padding'] = array(
 				'name'        => __( 'Tablet Padding', 'siteorigin-panels' ),
@@ -169,7 +168,7 @@ class SiteOrigin_Panels_Styles {
 			);
 		}
 
-		// Mobile layout fields
+		// Mobile layout fields.
 		if ( $label == 'Widget' ) {
 			$fields['mobile_margin'] = array(
 				'name'        => __( 'Mobile Margin', 'siteorigin-panels' ),
@@ -190,7 +189,7 @@ class SiteOrigin_Panels_Styles {
 			'multiple'    => true
 		);
 
-		// The general design fields
+		// The general design fields.
 
 		$fields['background'] = array(
 			'name'        => __( 'Background Color', 'siteorigin-panels' ),
@@ -236,14 +235,14 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * All the row styling fields
+	 * All the row styling fields.
 	 *
 	 * @param $fields
 	 *
 	 * @return array
 	 */
 	static function row_style_fields( $fields ) {
-		// Add the general fields
+		// Add the general fields.
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'row', __( 'Row', 'siteorigin-panels' ) ) );
 
 		$fields['cell_class'] = array(
@@ -254,7 +253,7 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 6,
 		);
 
-		// Add the layout fields
+		// Add the layout fields.
 
 		$fields['bottom_margin'] = array(
 			'name'        => __( 'Bottom Margin', 'siteorigin-panels' ),
@@ -324,7 +323,7 @@ class SiteOrigin_Panels_Styles {
 		}
 		
 		if ( siteorigin_panels_setting( 'tablet-layout' ) ) {
-			// Add the tablet layout fields
+			// Add the tablet layout fields.
 			$fields['tablet_bottom_margin'] = array(
 				'name'        => __( 'Tablet Bottom Margin', 'siteorigin-panels' ),
 				'type'        => 'measurement',
@@ -334,7 +333,7 @@ class SiteOrigin_Panels_Styles {
 			);
 		}
 
-		// Add the mobile layout fields		
+		// Add the mobile layout fields.	
 		$fields['mobile_bottom_margin'] = array(
 			'name'        => __( 'Mobile Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -355,14 +354,14 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * All the cell styling fields
+	 * All the cell styling fields.
 	 *
 	 * @param $fields
 	 *
 	 * @return array
 	 */
 	static function cell_style_fields( $fields ) {
-		// Add the general fields
+		// Add the general fields.
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
 
 		$fields['vertical_alignment'] = array(
@@ -413,7 +412,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	static function widget_style_fields( $fields ) {
 
-		// Add the general fields
+		// Add the general fields.
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'widget', __( 'Widget', 'siteorigin-panels' ) ) );
 		
 		$fields['margin'] = array(
@@ -425,7 +424,7 @@ class SiteOrigin_Panels_Styles {
 			'multiple'    => true
 		);
 
-		// How lets add the design fields
+		// How lets add the design fields.
 
 		$fields['font_color'] = array(
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
@@ -459,16 +458,16 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * Style attributes that apply to rows, cells and widgets
+	 * Style attributes that apply to rows, cells and widgets.
 	 *
 	 * @param $attributes
 	 * @param $style
 	 *
 	 * @return array $attributes
 	 */
-	static function general_style_attributes( $attributes, $style ){
+	static function general_style_attributes( $attributes, $style ) {
 		if ( ! empty( $style['class'] ) ) {
-			if( ! is_array( $style['class'] ) ) {
+			if ( ! is_array( $style['class'] ) ) {
 				$style['class'] = explode( ' ', $style[ 'class' ] );
 			}
 			$attributes['class'] = array_merge( $attributes['class'], $style['class'] );
@@ -574,14 +573,14 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * Get the CSS styles that apply to all rows, cells and widgets
+	 * Get the CSS styles that apply to all rows, cells and widgets.
 	 *
 	 * @param $css
 	 * @param $style
 	 *
 	 * @return mixed
 	 */
-	static function general_style_css( $css, $style ){
+	static function general_style_css( $css, $style ) {
 
 		if ( ! empty( $style['background'] ) ) {
 			$css[ 'background-color' ] = $style['background'];
@@ -648,13 +647,13 @@ class SiteOrigin_Panels_Styles {
 			$css[ 'color' ] = $style['font_color'];
 		}
 
-		if( ! empty( $style[ 'padding' ] ) ) {
+		if ( ! empty( $style[ 'padding' ] ) ) {
 			$css['padding'] = $style[ 'padding' ];
 		}
 
-		// Find which key the CSS is stored in
-		foreach( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
-			if( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
+		// Find which key the CSS is stored in.
+		foreach ( array( 'row_css', 'cell_css', 'widget_css', '' ) as $css_key ) {
+			if ( empty( $css_key ) || ! empty( $style[ $css_key ] ) ) {
 				break;
 			}
 		}
@@ -672,15 +671,15 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * Get the tablet styling for rows, cells and widgets
+	 * Get the tablet styling for rows, cells and widgets.
 	 *
 	 * @param $css
 	 * @param $style
 	 *
 	 * @return mixed
 	 */
-	static function general_style_tablet_css( $css, $style ){
-		if( ! empty( $style['tablet_padding'] ) ) {
+	static function general_style_tablet_css( $css, $style ) {
+		if ( ! empty( $style['tablet_padding'] ) ) {
 			$css['padding'] = $style[ 'tablet_padding' ];
 		}
 
@@ -696,15 +695,15 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * Get the mobile styling for rows, cells and widgets
+	 * Get the mobile styling for rows, cells and widgets.
 	 *
 	 * @param $css
 	 * @param $style
 	 *
 	 * @return mixed
 	 */
-	static function general_style_mobile_css( $css, $style ){
-		if( ! empty( $style['mobile_padding'] ) ) {
+	static function general_style_mobile_css( $css, $style ) {
+		if ( ! empty( $style['mobile_padding'] ) ) {
 			$css['padding'] = $style[ 'mobile_padding' ];
 		}
 		
@@ -739,12 +738,12 @@ class SiteOrigin_Panels_Styles {
 		$tablet_width = siteorigin_panels_setting( 'tablet-width' );
 		$tablet_layout = siteorigin_panels_setting( 'tablet-layout' );
 		$mobile_width = siteorigin_panels_setting( 'mobile-width' );
-		if( empty( $layout ) ) {
+		if ( empty( $layout ) ) {
 			return $css;
 		}
 
-		foreach( $layout as $ri => $row ) {
-			if( empty( $row[ 'style' ] ) ) $row[ 'style' ] = array();
+		foreach ( $layout as $ri => $row ) {
+			if ( empty( $row[ 'style' ] ) ) $row[ 'style' ] = array();
 
 			$standard_css = apply_filters( 'siteorigin_panels_row_style_css', array(), $row['style'] );
 			$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_row_style_tablet_css', array(), $row['style'] ) : '';
@@ -779,7 +778,7 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
-			// Add in flexbox alignment to the main row element
+			// Add in flexbox alignment to the main row element.
 			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
 
 				$selector = array();
@@ -807,11 +806,11 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
-			// Process the cells if there are any
-			if( empty( $row[ 'cells' ] ) ) continue;
+			// Process the cells if there are any.
+			if ( empty( $row[ 'cells' ] ) ) continue;
 
-			foreach( $row[ 'cells' ] as $ci => $cell ) {
-				if( empty( $cell[ 'style' ] ) ) $cell[ 'style' ] = array();
+			foreach ( $row[ 'cells' ] as $ci => $cell ) {
+				if ( empty( $cell[ 'style' ] ) ) $cell[ 'style' ] = array();
 
 				$standard_css = apply_filters( 'siteorigin_panels_cell_style_css', array(), $cell['style'] );
 				$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_cell_style_tablet_css', array(), $cell['style'] ) : '';
@@ -859,10 +858,32 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
-				// Process the widgets if there are any
-				if( empty( $cell[ 'widgets' ] ) ) continue;
+				if ( ! empty( $cell['style']['link_color'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						' a',
+						array(
+							'color' => $cell['style']['link_color']
+						)
+					);
+				}
+				if ( ! empty( $cell['style']['link_color_hover'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						' a:hover', array(
+							'color' => $cell['style']['link_color_hover']
+						)
+					);
+				}
 
-				foreach( $cell['widgets'] as $wi => $widget ) {
+				// Process the widgets if there are any.
+				if ( empty( $cell[ 'widgets' ] ) ) continue;
+
+				foreach ( $cell['widgets'] as $wi => $widget ) {
 					if ( empty( $widget['panels_info'] ) ) continue;
 					if ( empty( $widget['panels_info']['style'] ) ) $widget['panels_info']['style'] = array();
 
@@ -870,7 +891,7 @@ class SiteOrigin_Panels_Styles {
 					$tablet_css = $tablet_layout ? apply_filters( 'siteorigin_panels_widget_style_tablet_css', array(), $widget['panels_info']['style'] ) : '';
 					$mobile_css = apply_filters( 'siteorigin_panels_widget_style_mobile_css', array(), $widget['panels_info']['style'] );
 
-					if( ! empty( $standard_css ) ) {
+					if ( ! empty( $standard_css ) ) {
 						$css->add_widget_css(
 							$post_id,
 							$ri,
@@ -892,7 +913,7 @@ class SiteOrigin_Panels_Styles {
 							"$tablet_width:$mobile_width"
 						);
 					}
-					if( ! empty( $mobile_css ) ) {
+					if ( ! empty( $mobile_css ) ) {
 						$css->add_widget_css(
 							$post_id,
 							$ri,
@@ -922,7 +943,7 @@ class SiteOrigin_Panels_Styles {
 	}
 	
 	/**
-	 * Add in custom styles for the row's bottom margin
+	 * Add in custom styles for the row's bottom margin.
 	 *
 	 * @param $margin
 	 * @param $grid
@@ -945,7 +966,7 @@ class SiteOrigin_Panels_Styles {
 	 *
 	 * @return mixed
 	 */
-	static function filter_row_cell_bottom_margin($margin, $cell, $ci, $row, $ri){
+	static function filter_row_cell_bottom_margin($margin, $cell, $ci, $row, $ri) {
 		if ( ! empty( $row['style']['mobile_cell_margin'] ) ) {
 			$margin = $row['style']['mobile_cell_margin'];
 		}
@@ -963,7 +984,7 @@ class SiteOrigin_Panels_Styles {
 	}
 	
 	/**
-	 * Add in custom styles for a row's mobile bottom margin
+	 * Add in custom styles for a row's mobile bottom margin.
 	 *
 	 * @param $margin
 	 * @param $grid
@@ -989,7 +1010,7 @@ class SiteOrigin_Panels_Styles {
 	/**
 	 * Adds widget specific styles not included in the general style fields.
 	 *
-	 * @param $widget_css The CSS properties and values
+	 * @param $widget_css The CSS properties and values.
 	 * @param $widget_style_data The style settings as obtained from the style fields.
 	 *
 	 * @return mixed
@@ -1002,14 +1023,14 @@ class SiteOrigin_Panels_Styles {
 		return $widget_css;
 	}
 	
-	public static function get_attachment_image_src( $image, $size = 'full' ){
-		if( empty( $image ) ) {
+	public static function get_attachment_image_src( $image, $size = 'full' ) {
+		if ( empty( $image ) ) {
 			return false;
 		}
-		else if( is_numeric( $image ) ) {
+		elseif ( is_numeric( $image ) ) {
 			return wp_get_attachment_image_src( $image, $size );
 		}
-		else if( is_string( $image ) ) {
+		elseif ( is_string( $image ) ) {
 			preg_match( '/(.*?)\#([0-9]+)x([0-9]+)$/', $image, $matches );
 			return ! empty( $matches ) ? $matches : false;
 		}

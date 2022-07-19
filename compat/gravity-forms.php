@@ -9,7 +9,11 @@
  * @return $instance
  */
 function siteorigin_gravity_forms_override_disable_print_scripts( $instance, $the_widget, $widget_class ) {
-	if ( $the_widget->id_base == 'gform_widget' ) {
+	if (
+		! empty( $the_widget ) &&
+		is_object( $the_widget ) &&
+		$the_widget->id_base == 'gform_widget'
+	) {
 		$instance['disable_scripts'] = true;
 
 		// Disable print scripts for older versions of Gravity Forms.
