@@ -1610,45 +1610,62 @@ class SiteOrigin_Panels_Admin {
 				margin-top: 1px;
 			}
 
+			<?php
+			$screen = get_current_screen();
+			if ( ! empty( $screen ) && $screen->base == 'edit' && $screen->id == 'edit-download' ) :
+				?>
+				.split-page-title-action .expander {
+					margin-top: 4.5px;
+				}
+
+				.split-page-title-action .expander::after {
+					padding: 4.35px 5px 4.35px 4px;
+				}
+			<?php endif; ?>
 		</style>
 		<script type="text/javascript">
 			document.addEventListener( 'DOMContentLoaded', function() {
-				var buttons = document.getElementsByClassName( 'page-title-action' ),
-					button = buttons.item( 0 );
+				var timeoutSetup = document.getElementsByClassName( 'post-type-download' ).length ? 100 : 0;
+				setupAddNewBTN = function() {
+					var buttons = document.getElementsByClassName( 'page-title-action' ),
+						button = buttons.item( 0 ),
+						btnText;
 
-				if ( ! button ) {
-					return;
-				}
+					if ( ! button ) {
+						return;
+					}
 
-				var url = button.href;
-				var urlHasParams = ( -1 !== url.indexOf( '?' ) );
-				var panelsUrl = url + ( urlHasParams ? '&' : '?' ) + 'siteorigin-page-builder';
-				var blockEditorUrl = url + ( urlHasParams ? '&' : '?' ) + 'block-editor';
+					var url = button.href;
+					var urlHasParams = ( -1 !== url.indexOf( '?' ) );
+					var panelsUrl = url + ( urlHasParams ? '&' : '?' ) + 'siteorigin-page-builder';
+					var blockEditorUrl = url + ( urlHasParams ? '&' : '?' ) + 'block-editor';
 
-				var newbutton = '<span id="split-page-title-action" class="split-page-title-action">';
-				newbutton += '<a href="' + url + '">' + button.innerText + '</a>';
-				newbutton += '<span class="expander" tabindex="0" role="button" aria-haspopup="true" aria-label="<?php echo esc_attr( __( 'Toggle editor selection menu', 'siteorigin-panels' ) ); ?>"></span>';
-				newbutton += '<span class="dropdown"><a href="' + panelsUrl + '"><?php echo esc_html( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ) ); ?></a>';
-				newbutton += '<a href="' + blockEditorUrl + '"><?php echo esc_html( __( 'Block Editor', 'siteorigin-panels' ) ); ?></a></span></span><span class="page-title-action" style="display:none;"></span>';
+					var newbutton = '<span id="split-page-title-action" class="split-page-title-action">';
+					newbutton += '<a href="' + url + '">' + button.innerText + '</a>';
+					newbutton += '<span class="expander" tabindex="0" role="button" aria-haspopup="true" aria-label="<?php echo esc_attr( __( 'Toggle editor selection menu', 'siteorigin-panels' ) ); ?>"></span>';
+					newbutton += '<span class="dropdown"><a href="' + panelsUrl + '"><?php echo esc_html( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ) ); ?></a>';
+					newbutton += '<a href="' + blockEditorUrl + '"><?php echo esc_html( __( 'Block Editor', 'siteorigin-panels' ) ); ?></a></span></span><span class="page-title-action" style="display:none;"></span>';
 
-				button.insertAdjacentHTML( 'afterend', newbutton );
-				button.parentNode.removeChild( button );
+					button.insertAdjacentHTML( 'afterend', newbutton );
+					button.parentNode.removeChild( button );
 
-				var expander = document.getElementById( 'split-page-title-action' ).getElementsByClassName( 'expander' ).item( 0 );
-				var dropdown = expander.parentNode.querySelector( '.dropdown' );
-				function toggleDropdown() {
-					dropdown.classList.toggle( 'visible' );
-				}
-				expander.addEventListener( 'click', function( e ) {
-					e.preventDefault();
-					toggleDropdown();
-				} );
-				expander.addEventListener( 'keydown', function( e ) {
-					if ( 13 === e.which || 32 === e.which ) {
+					var expander = document.getElementById( 'split-page-title-action' ).getElementsByClassName( 'expander' ).item( 0 );
+					var dropdown = expander.parentNode.querySelector( '.dropdown' );
+					function toggleDropdown() {
+						dropdown.classList.toggle( 'visible' );
+					}
+					expander.addEventListener( 'click', function( e ) {
 						e.preventDefault();
 						toggleDropdown();
-					}
-				} );
+					} );
+					expander.addEventListener( 'keydown', function( e ) {
+						if ( 13 === e.which || 32 === e.which ) {
+							e.preventDefault();
+							toggleDropdown();
+						}
+					} );
+				}
+				setTimeout( setupAddNewBTN, timeoutSetup );
 			} );
 		</script>
 		<?php
