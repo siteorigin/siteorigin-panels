@@ -54,7 +54,8 @@ function origin_widgets_generate_css($class, $style, $preset, $version = null){
 function origin_widgets_footer_css(){
 	global $origin_widgets_generated_css;
 	if( !empty( $origin_widgets_generated_css ) ) {
-		echo '<style type="text/css">';
+		$type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
+		echo "<style$type_attr>";
 		foreach( $origin_widgets_generated_css as $id => $css ) {
 			if( empty($css) ) continue;
 			echo $css;
