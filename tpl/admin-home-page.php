@@ -16,10 +16,10 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 		>
 		<div id="icon-index" class="icon32"><br></div>
 		<h2>
-			<label class="switch">
-				<input class="switch-input" type="checkbox" <?php checked( ( get_option('siteorigin_panels_home_page_id') && get_option('siteorigin_panels_home_page_id') == get_option('page_on_front') && get_option('show_on_front') == 'page' ) ) ?> name="siteorigin_panels_home_enabled">
-				<span class="switch-label" data-on="<?php _e('On', 'siteorigin-panels') ?>" data-off="<?php _e('Off', 'siteorigin-panels') ?>"></span>
-				<span class="switch-handle"></span>
+			<label class="so-toggle-switch">
+				<input class="so-toggle-switch-input" type="checkbox" <?php checked( ( get_option( 'siteorigin_panels_home_page_id' ) && get_option( 'siteorigin_panels_home_page_id' ) == get_option( 'page_on_front' ) && get_option( 'show_on_front' ) == 'page' ) ); ?> name="siteorigin_panels_home_enabled">
+				<span class="so-toggle-switch-label" data-on="<?php _e( 'On', 'siteorigin-panels' ); ?>" data-off="<?php _e( 'Off', 'siteorigin-panels' ); ?>"></span>
+				<span class="so-toggle-switch-handle"></span>
 			</label>
 
 			<?php esc_html_e('Custom Home Page', 'siteorigin-panels') ?>

@@ -309,7 +309,7 @@ module.exports = Backbone.View.extend( {
 		// Set up all the toggle fields
 		this.$( '.style-field-toggle' ).each( function () {
 			var $$ = $( this );
-			var checkbox = $$.find( '.so-toggle-label > input' );
+			var checkbox = $$.find( '.so-toggle-switch-input' );
 			var settings = $$.find( '.so-toggle-fields' );
 
 			checkbox.on( 'change', function() {
@@ -320,8 +320,8 @@ module.exports = Backbone.View.extend( {
 				}
 			} );
 		} );
-		this.$( '.style-field-toggle .so-toggle-label > input' ).trigger( 'change' );
-		
+		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
+
 		// Allow other plugins to setup custom fields.
 		$( document ).trigger( 'setup_style_fields', this );
 	}
