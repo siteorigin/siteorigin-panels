@@ -1615,10 +1615,6 @@ class SiteOrigin_Panels_Admin {
 				.post-type-download .split-page-title-action .expander {
 					margin-top: 4.5px;
 				}
-
-				.post-type-download .split-page-title-action .expander::after {
-					padding: 4.35px 5px 4.35px 4px;
-				}
 			<?php endif; ?>
 		</style>
 		<script type="text/javascript">
