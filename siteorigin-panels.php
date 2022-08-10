@@ -691,7 +691,7 @@ class SiteOrigin_Panels {
 	 * Script that removes the siteorigin-panels-before-js class from the body.
 	 */
 	public function strip_before_js() {
-		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
+		?><script<?php echo current_theme_supports( 'html5', 'script' ) ? '' : ' type="text/javascript"'; ?>>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 
 	/**
