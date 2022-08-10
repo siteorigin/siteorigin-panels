@@ -786,6 +786,126 @@
 
 }
 
+/* Toggle Switch used on the custom home page interface and Toggle Style Admin fields. */
+.so-panels-dialog .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
+.block-editor-page .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
+#panels-home-page {
+	.so-toggle-switch {
+		@switch_height: 24px;
+		@switch_width: 68px;
+		@switch_padding: 3px;
+
+		background-color: #fff;
+		background-image: linear-gradient(to bottom, #eee, #fff 25px);
+		border-radius: @switch_height;
+		box-shadow: inset 0 -1px #fff, inset 0 1px 1px rgba(0, 0, 0, 0.05);
+		cursor: pointer;
+		display: inline-block;
+		height: @switch_height;
+		margin: 0 10px 0 0;
+		padding: @switch_padding;
+		position: relative;
+		vertical-align: top;
+		width: @switch_width;
+
+		.so-toggle-switch-input {
+			left: 0;
+			opacity: 0;
+			position: absolute;
+			top: 0;
+		}
+
+		.so-toggle-switch-label {
+			background: #eceeef;
+			border-radius: inherit;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.15);
+			display: block;
+			font-size: @switch_height/2;
+			height: inherit;
+			position: relative;
+			text-transform: uppercase;
+			transition-property: opacity background;
+			transition: 0.15s ease-out;
+		}
+
+		.so-toggle-switch-label:before,
+		.so-toggle-switch-label:after {
+			line-height: 1;
+			margin-top: -.5em;
+			position: absolute;
+			top: 50%;
+			transition: inherit;
+		}
+
+		.so-toggle-switch-label:before {
+			color: #aaa;
+			content: attr(data-off);
+			right: 11px;
+			text-shadow: 0 1px rgba(255, 255, 255, 0.5);
+		}
+
+		.so-toggle-switch-label:after {
+			color: #fff;
+			content: attr(data-on);
+			left: @switch_height/2 + 1px;
+			opacity: 0;
+			text-shadow: 0 1px rgba(0, 0, 0, 0.2);
+		}
+
+		.so-toggle-switch-input:checked ~ .so-toggle-switch-label {
+			background: #47a8d8;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15), inset 0 0 3px rgba(0, 0, 0, 0.2);
+		}
+
+		.so-toggle-switch-input:checked ~ .so-toggle-switch-label:before {
+			opacity: 0;
+		}
+
+		.so-toggle-switch-input:checked ~ .so-toggle-switch-label:after {
+			opacity: 1;
+		}
+
+		.so-toggle-switch-handle {
+			background-image: linear-gradient(to bottom, #fff 40%, #f0f0f0);
+			background: #fff;
+			border-radius: @switch_height/2;
+			box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+			height: @switch_height - 2px;
+			left: @switch_padding + 1px;
+			position: absolute;
+			top: 4px;
+			transition: left 0.15s ease-out;
+			width: @switch_height - 2px;
+		}
+
+		.so-toggle-switch-handle:before {
+			background-image: -moz-linear-gradient(top, #eee, #fff);
+			background-image: -o-linear-gradient(top, #eee, #fff);
+			background-image: -webkit-linear-gradient(top, #eee, #fff);
+			background-image: linear-gradient(to bottom, #eee, #fff);
+			background: #f9f9f9;
+			border-radius: (@switch_height/2 + 2px) / 2;
+			box-shadow: inset 0 1px rgba(0, 0, 0, 0.02);
+			content: '';
+			height: @switch_height/2 + 2px;
+			left: 50%;
+			margin: -7px 0 0 -7px;
+			position: absolute;
+			top: 50%;
+			width: @switch_height/2 + 2px;
+		}
+
+		.so-toggle-switch-input:checked ~ .so-toggle-switch-handle {
+			box-shadow: -1px 1px 5px rgba(0, 0, 0, 0.2);
+			left: @switch_width - @switch_height + 2px + 2px;
+		}
+
+		.so-toggle-switch-green > .so-toggle-switch-input:checked ~ .so-toggle-switch-label {
+			background: #4fb845;
+		}
+	}
+}
+
 .so-panels-dialog,
 .block-editor-page {
 
@@ -1954,8 +2074,26 @@
 					}
 				}
 
-				.style-field-toggle .so-toggle-fields {
-					margin-top: 20px;
+				.style-field-toggle {
+					.so-toggle-switch {
+						padding: 0;
+						height: 18px;
+						width: 51px;
+						.so-toggle-switch-handle {
+							height: 16.5px;
+							left: 1px;
+							top: 0.5px;
+							width: 16.5px;
+						}
+
+						.so-toggle-switch-input:checked ~ .so-toggle-switch-handle {
+							left: 33.8px;
+						}
+					}
+
+					.so-toggle-fields {
+						margin-top: 20px;
+					}
 				}
 			}
 		}
@@ -2460,127 +2598,6 @@
 	#panels-view-as-page {
 		display: inline-block;
 		margin-left: 50px;
-	}
-}
-
-
-/* Toggle Switch used on the custom home page interface and Toggle Style Admin fields. */
-.so-panels-dialog .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
-.block-editor-page .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
-#panels-home-page {
-	.so-toggle-switch {
-		@switch_height: 24px;
-		@switch_width: 68px;
-		@switch_padding: 3px;
-
-		background-color: #fff;
-		background-image: linear-gradient(to bottom, #eee, #fff 25px);
-		border-radius: @switch_height;
-		box-shadow: inset 0 -1px #fff, inset 0 1px 1px rgba(0, 0, 0, 0.05);
-		cursor: pointer;
-		display: inline-block;
-		height: @switch_height;
-		margin: 0 10px 0 0;
-		padding: @switch_padding;
-		position: relative;
-		vertical-align: top;
-		width: @switch_width;
-
-		.so-toggle-switch-input {
-			left: 0;
-			opacity: 0;
-			position: absolute;
-			top: 0;
-		}
-
-		.so-toggle-switch-label {
-			background: #eceeef;
-			border-radius: inherit;
-			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.15);
-			display: block;
-			font-size: @switch_height/2;
-			height: inherit;
-			position: relative;
-			text-transform: uppercase;
-			transition-property: opacity background;
-			transition: 0.15s ease-out;
-		}
-
-		.so-toggle-switch-label:before,
-		.so-toggle-switch-label:after {
-			line-height: 1;
-			margin-top: -.5em;
-			position: absolute;
-			top: 50%;
-			transition: inherit;
-		}
-
-		.so-toggle-switch-label:before {
-			color: #aaa;
-			content: attr(data-off);
-			right: 11px;
-			text-shadow: 0 1px rgba(255, 255, 255, 0.5);
-		}
-
-		.so-toggle-switch-label:after {
-			color: #fff;
-			content: attr(data-on);
-			left: @switch_height/2 + 1px;
-			opacity: 0;
-			text-shadow: 0 1px rgba(0, 0, 0, 0.2);
-		}
-
-		.so-toggle-switch-input:checked ~ .so-toggle-switch-label {
-			background: #47a8d8;
-			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15), inset 0 0 3px rgba(0, 0, 0, 0.2);
-		}
-
-		.so-toggle-switch-input:checked ~ .so-toggle-switch-label:before {
-			opacity: 0;
-		}
-
-		.so-toggle-switch-input:checked ~ .so-toggle-switch-label:after {
-			opacity: 1;
-		}
-
-		.so-toggle-switch-handle {
-			background-image: linear-gradient(to bottom, #fff 40%, #f0f0f0);
-			background: #fff;
-			border-radius: @switch_height/2;
-			box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
-			height: @switch_height - 2px;
-			left: @switch_padding + 1px;
-			position: absolute;
-			top: 4px;
-			transition: left 0.15s ease-out;
-			width: @switch_height - 2px;
-		}
-
-		.so-toggle-switch-handle:before {
-			background-image: -moz-linear-gradient(top, #eee, #fff);
-			background-image: -o-linear-gradient(top, #eee, #fff);
-			background-image: -webkit-linear-gradient(top, #eee, #fff);
-			background-image: linear-gradient(to bottom, #eee, #fff);
-			background: #f9f9f9;
-			border-radius: (@switch_height/2 + 2px) / 2;
-			box-shadow: inset 0 1px rgba(0, 0, 0, 0.02);
-			content: '';
-			height: @switch_height/2 + 2px;
-			left: 50%;
-			margin: -7px 0 0 -7px;
-			position: absolute;
-			top: 50%;
-			width: @switch_height/2 + 2px;
-		}
-
-		.so-toggle-switch-input:checked ~ .so-toggle-switch-handle {
-			box-shadow: -1px 1px 5px rgba(0, 0, 0, 0.2);
-			left: @switch_width - @switch_height + 2px + 2px;
-		}
-
-		.so-toggle-switch-green > .so-toggle-switch-input:checked ~ .so-toggle-switch-label {
-			background: #4fb845;
-		}
 	}
 }
 
