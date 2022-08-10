@@ -1610,22 +1610,22 @@ class SiteOrigin_Panels_Admin {
 				margin-top: 1px;
 			}
 
-			<?php
-			$screen = get_current_screen();
-			if ( ! empty( $screen ) && $screen->base == 'edit' && $screen->id == 'edit-download' ) :
-				?>
-				.split-page-title-action .expander {
+			/* Easy Digital Downloads Compatibility */
+			<?php if ( class_exists( 'EDD_Requirements_Check' ) ) : ?>
+				.post-type-download .split-page-title-action .expander {
 					margin-top: 4.5px;
-				}
-
-				.split-page-title-action .expander::after {
-					padding: 4.35px 5px 4.35px 4px;
 				}
 			<?php endif; ?>
 		</style>
 		<script type="text/javascript">
 			document.addEventListener( 'DOMContentLoaded', function() {
-				var timeoutSetup = document.getElementsByClassName( 'post-type-download' ).length ? 100 : 0;
+				/* Easy Digital Downloads Compatibility */
+				<?php if ( class_exists( 'EDD_Requirements_Check' ) ) : ?>
+					var timeoutSetup = document.getElementsByClassName( 'post-type-download' ).length ? 100 : 0;
+				<?php else: ?>
+					var timeoutSetup = 0;
+				<?php endif; ?>
+
 				setupAddNewBTN = function() {
 					var buttons = document.getElementsByClassName( 'page-title-action' ),
 						button = buttons.item( 0 ),
