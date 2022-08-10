@@ -107,6 +107,12 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.18 - 10 August 2022 =
+* Easy Digital Downloads: Resolved `Add New` button error.
+* Resolved a Customizer Layout Builder widget sizing issue.
+* Improved `style` tag HTML validation.
+* Resolved a potential Panels preview PHP 8.3 type error.
+
 = 2.16.17 - 19 July 2022 =
 * Restored Cell `Link Color` and `Link Hover Color` settings.
 * Gravity Forms: Added additional check to prevent an unrelated notice.
