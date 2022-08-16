@@ -413,7 +413,6 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Create the sortable element for rows.
-		var wpVersion = $( 'body' ).attr( 'class' ).match( /version-([0-9-]+)/ )[0].replace( /\D/g,'' );
 		this.rowsSortable = this.$( '.so-rows-container:not(.sow-row-color)' ).sortable( {
 			appendTo: container,
 			items: '.so-row-container',

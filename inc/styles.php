@@ -112,7 +112,6 @@ class SiteOrigin_Panels_Styles {
 		$fields = array();
 
 		// All the attribute fields.
-
 		$fields['id'] = array(
 			'name'        => sprintf( __( '%s ID', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
@@ -146,7 +145,6 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		// The layout fields.
-
 		$fields['padding'] = array(
 			'name'        => __( 'Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -254,7 +252,6 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		// Add the layout fields.
-
 		$fields['bottom_margin'] = array(
 			'name'        => __( 'Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -333,7 +330,7 @@ class SiteOrigin_Panels_Styles {
 			);
 		}
 
-		// Add the mobile layout fields.	
+		// Add the mobile layout fields.
 		$fields['mobile_bottom_margin'] = array(
 			'name'        => __( 'Mobile Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',

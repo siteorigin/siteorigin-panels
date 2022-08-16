@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.16.19 - 16 August 2022 =
+* Resolved `Uncaught TypeError` Customizer Layout Builder console error.
+
 = 2.16.18 - 10 August 2022 =
 * Easy Digital Downloads: Resolved `Add New` button error.
 * Resolved a Customizer Layout Builder widget sizing issue.
