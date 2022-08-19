@@ -769,6 +769,10 @@ class SiteOrigin_Panels_Styles {
 			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
 		}
 
+		if ( ! empty( $style['box_shadow_hover'] ) && empty( $css['transition'] ) ) {
+			$css['transition'] = '300ms ease-in-out box-shadow';
+		}
+
 		return $css;
 	}
 
