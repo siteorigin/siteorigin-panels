@@ -253,18 +253,18 @@ class SiteOrigin_Panels_Styles {
 					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
 					'priority'    => 3,
-					'default'     => '3px',
+					'default'     => '5px',
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
 					'priority'    => 4,
-					'default'     => '10px',
+					'default'     => '15px',
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 5,
+					'priority'    => 0,
 				),
 			),
 		);
@@ -652,19 +652,22 @@ class SiteOrigin_Panels_Styles {
 		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
 
 		$box_shadow_offset_horizontal = ! empty( $style[ $prefix . '_offset_horizontal' ] ) ? $style[ $prefix . '_offset_horizontal' ] : 0;
-		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '3px';
-		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '10px';
+		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '5px';
+		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '15px';
 		$box_shadow_spread = ! empty( $style[ $prefix . '_spread' ] ) ? $style[ $prefix . '_spread' ] : '';
 
 		if ( ! empty( $style[ $prefix . '_color' ] ) ) {
 			$box_shadow_color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
 			$box_shadow_color = $box_shadow_color->__get( 'rgb' );
-			$box_shadow_color = "$box_shadow_color[0] $box_shadow_color[1] $box_shadow_color[2]";
+			$box_shadow_color = "$box_shadow_color[0], $box_shadow_color[1], $box_shadow_color[2]";
 		} else {
-			$box_shadow_color = '0 0 0';
+			$box_shadow_color = '0, 0, 0';
 		}
+		$box_shadow = $prefix == 'box_shadow' ? 0.15 : 0.30;
 
-		return array( 'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgb($box_shadow_color / 0.2)" );
+		return array(
+			'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow )"
+		);
 	}
 
 	/**
