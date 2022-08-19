@@ -234,7 +234,7 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
 		}
 
-		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' && class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( class_exists( 'Jetpack' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
 		}
 
@@ -691,7 +691,7 @@ class SiteOrigin_Panels {
 	 * Script that removes the siteorigin-panels-before-js class from the body.
 	 */
 	public function strip_before_js() {
-		?><script type="text/javascript">document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
+		?><script<?php echo current_theme_supports( 'html5', 'script' ) ? '' : ' type="text/javascript"'; ?>>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 
 	/**

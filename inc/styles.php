@@ -112,7 +112,6 @@ class SiteOrigin_Panels_Styles {
 		$fields = array();
 
 		// All the attribute fields.
-
 		$fields['id'] = array(
 			'name'        => sprintf( __( '%s ID', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
@@ -125,7 +124,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => sprintf( __( '%s Class', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
 			'group'       => 'attributes',
-			'description' => __( 'A CSS class name.', 'siteorigin-panels' ),
+			'description' => sprintf(__( 'A custom class used for this %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 5,
 		);
 
@@ -146,7 +145,6 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		// The layout fields.
-
 		$fields['padding'] = array(
 			'name'        => __( 'Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -195,7 +193,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Background Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Background color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 5,
 		);
 
@@ -203,7 +200,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Background Image', 'siteorigin-panels' ),
 			'type'        => 'image',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Background image of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 6,
 		);
 
@@ -219,7 +215,6 @@ class SiteOrigin_Panels_Styles {
 				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
 				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
 			),
-			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
 			'priority'    => 7,
 		);
 
@@ -227,7 +222,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Border Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Border color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 10,
 		);
 
@@ -330,7 +324,6 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		// Add the layout fields.
-
 		$fields['bottom_margin'] = array(
 			'name'        => __( 'Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -409,7 +402,7 @@ class SiteOrigin_Panels_Styles {
 			);
 		}
 
-		// Add the mobile layout fields.	
+		// Add the mobile layout fields.
 		$fields['mobile_bottom_margin'] = array(
 			'name'        => __( 'Mobile Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -458,7 +451,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of text inside this cell.', 'siteorigin-panels' ),
 			'priority'    => 15,
 		);
 
@@ -466,7 +458,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
 			'priority'    => 16,
 		);
 
@@ -474,7 +465,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
 			'priority'    => 17,
 		);
 
@@ -506,7 +496,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of text inside this widget.', 'siteorigin-panels' ),
 			'priority'    => 15,
 		);
 
@@ -514,7 +503,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget.', 'siteorigin-panels' ),
 			'priority'    => 16,
 		);
 
@@ -522,7 +510,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
 			'priority'    => 17,
 		);
 

@@ -406,11 +406,15 @@ module.exports = Backbone.View.extend( {
 
 		var builderView = this;
 		var builderID = builderView.$el.attr( 'id' );
+		var container = 'parent';
 
-		// Create the sortable for the rows
-		var wpVersion = $( 'body' ).attr( 'class' ).match( /version-([0-9-]+)/ )[0].replace( /\D/g,'' );
+		if ( ! $( 'body' ).hasClass( 'wp-customizer' ) && $( 'body' ).attr( 'class' ).match( /version-([0-9-]+)/ )[0].replace( /\D/g,'' ) < 59 ) {
+			wpVersion = '#wpwrap';
+		}
+
+		// Create the sortable element for rows.
 		this.rowsSortable = this.$( '.so-rows-container:not(.sow-row-color)' ).sortable( {
-			appendTo: wpVersion >= 59 ? 'parent' : '#wpwrap',
+			appendTo: container,
 			items: '.so-row-container',
 			handle: '.so-row-move',
 			// For the block editor, where it's possible to have multiple Page Builder blocks on a page.
