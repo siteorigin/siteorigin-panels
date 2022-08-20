@@ -285,18 +285,18 @@ class SiteOrigin_Panels_Styles {
 					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
 					'priority'    => 3,
-					'default'     => '3px',
+					'default'     => '5px',
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
 					'priority'    => 4,
-					'default'     => '10px',
+					'default'     => '15px',
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 5,
+					'priority'    => 0,
 				),
 			),
 		);
