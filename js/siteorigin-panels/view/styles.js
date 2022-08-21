@@ -305,7 +305,23 @@ module.exports = Backbone.View.extend( {
 			text.on( 'change', setValue );
 			unit.on( 'change', setValue );
 		} );
-		
+
+		// Set up all the toggle fields
+		this.$( '.style-field-toggle' ).each( function () {
+			var $$ = $( this );
+			var checkbox = $$.find( '.so-toggle-switch-input' );
+			var settings = $$.find( '.so-toggle-fields' );
+
+			checkbox.on( 'change', function() {
+				if ( $( this ).prop( 'checked' ) ) {
+					settings.slideDown();
+				} else {
+					settings.slideUp();
+				}
+			} );
+		} );
+		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
+
 		// Allow other plugins to setup custom fields.
 		$( document ).trigger( 'setup_style_fields', this );
 	}

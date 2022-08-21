@@ -334,6 +334,45 @@ class SiteOrigin_Panels_Styles_Admin {
 					            echo 'so-field-code';
 				            } ?>" rows="4"><?php echo esc_textarea( stripslashes( $current ) ) ?></textarea><?php
 				break;
+			case 'toggle' :
+				$current = (bool) $current;
+				?>
+
+				<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : '' ); ?>
+				<label class="so-toggle-switch">
+					<input class="so-toggle-switch-input" type="checkbox" <?php checked( $current ); ?> name="<?php echo esc_attr( $field_name ); ?>">
+					<span class="so-toggle-switch-label" data-on="<?php _e( 'On', 'siteorigin-panels' ); ?>" data-off="<?php _e( 'Off', 'siteorigin-panels' ); ?>"></span>
+					<span class="so-toggle-switch-handle"></span>
+				</label>
+
+				<?php if ( ! empty( $field['fields'] ) ) : ?>
+					<div class="so-toggle-fields">
+						<?php foreach ( $field['fields'] as $sub_field_id => $sub_field ) : ?>
+							<?php $sub_field_id = $field_id . '_' . $sub_field_id; ?>
+							<div class="style-field-wrapper so-field-<?php echo esc_attr( $sub_field_id ); ?>">
+								<?php if ( ! empty( $sub_field['name'] ) ) : ?>
+									<label><?php echo $sub_field['name'] ?></label>
+								<?php endif; ?>
+								<div
+									class="style-field style-field-<?php echo sanitize_html_class( $sub_field['type'] ) ?>">
+									<?php
+									$default = isset( $sub_field[ 'default' ] ) ? $sub_field[ 'default' ] : false;
+									$this->render_style_field(
+										$sub_field,
+										isset( $current_styles[ $sub_field_id ] ) ? $current_styles[ $sub_field_id ] : $default,
+										$sub_field_id,
+										$current_styles
+									);
+									?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
+
+				<?php
+				break;
 		}
 
 		echo '</div>';
@@ -392,16 +431,20 @@ class SiteOrigin_Panels_Styles_Admin {
 	 *
 	 * @return array Sanitized styles
 	 */
-	function sanitize_style_fields( $section, $styles ) {
+	function sanitize_style_fields( $section, $styles, $sub_field = array() ) {
 		// Use the filter to get the fields for this section.
-		if ( empty( $fields_cache[ $section ] ) ) {
-			// This filter doesn't pass in the arguments $post_id and $args
-			// Plugins looking to extend fields, should always add their fields if these are empty
-            $fields_cache[ $section ] = array();
-			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', $fields_cache[ $section ], false, false );
-			$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_general_style_fields', $fields_cache[ $section ], false, false );
+		if ( empty( $sub_field ) ) {
+			if ( empty( $fields_cache[ $section ] ) ) {
+				// This filter doesn't pass in the arguments $post_id and $args
+				// Plugins looking to extend fields, should always add their fields if these are empty
+	            $fields_cache[ $section ] = array();
+				$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_' . $section . '_style_fields', $fields_cache[ $section ], false, false );
+				$fields_cache[ $section ] = apply_filters( 'siteorigin_panels_general_style_fields', $fields_cache[ $section ], false, false );
+			}
+			$fields = $fields_cache[ $section ];
+		} else {
+			$fields = $sub_field;
 		}
-		$fields = $fields_cache[ $section ];
 		
 		if ( empty( $fields ) ) {
 			return array();
@@ -412,6 +455,11 @@ class SiteOrigin_Panels_Styles_Admin {
 			// Skip this if no field type is set
 			if ( empty( $field['type'] ) ) {
 				continue;
+			}
+
+			// Sub fields prefix the parent field name.
+			if ( ! empty( $sub_field ) ) {
+				$k = $section . '_' . $k;
 			}
 
 			// Handle the special case of a checkbox
@@ -467,6 +515,13 @@ class SiteOrigin_Panels_Styles_Admin {
 						$return[ $k ] = $styles[ $k ];
 					}
 					break;
+				case 'toggle' :
+					$return[ $k ] = $styles[ $k ];
+
+					$return[ $k ] = ! empty( $styles[ $k ] ) ? true : '';
+					if ( ! empty( $field['fields'] ) ) {
+						$return = $return + $this->sanitize_style_fields( $k, $styles, $field['fields'] );
+					}
 				default:
 					// Just pass the value through.
 					$return[ $k ] = $styles[ $k ];
