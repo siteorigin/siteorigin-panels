@@ -225,6 +225,14 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 10,
 		);
 
+		$fields['border_radius'] = array(
+			'name'        => __( 'Border Radius', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'design',
+			'priority'    => 12,
+			'multiple'    => true
+		);
+
 		$fields['box_shadow'] = array(
 			'name'        => __( 'Box Shadow', 'siteorigin-panels' ),
 			'type'        => 'toggle',
@@ -750,6 +758,10 @@ class SiteOrigin_Panels_Styles {
 					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
 				}
 			}
+		}
+
+		if ( isset( $style['border_radius'] ) ) {
+			$css['border-radius'] = $style['border_radius'];
 		}
 
 		if ( ! empty( $style['box_shadow'] ) ) {
