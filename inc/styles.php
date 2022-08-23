@@ -234,31 +234,38 @@ class SiteOrigin_Panels_Styles {
 				'color' => array(
 					'name'        => __( 'Color', 'siteorigin-panels' ),
 					'type'        => 'color',
-					'priority'    => 1,
+					'priority'    => 10,
 					'default'     => '#000000',
+				),
+				'opacity' => array(
+					'name'        => __( 'Opacity', 'siteorigin-panels' ),
+					'type'        => 'number',
+					'priority'    => 20,
+					'default'     => 15,
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
 				),				
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 2,
+					'priority'    => 30,
 					'default'     => 0,
 				),
 				'offset_vertical' => array(
 					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 3,
+					'priority'    => 40,
 					'default'     => '5px',
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 4,
+					'priority'    => 50,
 					'default'     => '15px',
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 0,
+					'priority'    => 60,
 				),
 			),
 		);
@@ -272,31 +279,38 @@ class SiteOrigin_Panels_Styles {
 				'color' => array(
 					'name'        => __( 'Color', 'siteorigin-panels' ),
 					'type'        => 'color',
-					'priority'    => 1,
+					'priority'    => 10,
 					'default'     => '#000000',
-				),				
+				),
+				'opacity' => array(
+					'name'        => __( 'Opacity', 'siteorigin-panels' ),
+					'type'        => 'number',
+					'priority'    => 20,
+					'default'     => 30,
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+				),
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 2,
+					'priority'    => 30,
 					'default'     => 0,
 				),
 				'offset_vertical' => array(
 					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 3,
+					'priority'    => 40,
 					'default'     => '5px',
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 4,
+					'priority'    => 50,
 					'default'     => '15px',
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 0,
+					'priority'    => 60,
 				),
 			),
 		);
@@ -650,10 +664,11 @@ class SiteOrigin_Panels_Styles {
 		} else {
 			$box_shadow_color = '0, 0, 0';
 		}
-		$box_shadow = $prefix == 'box_shadow' ? 0.15 : 0.30;
+		$box_shadow_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
+		$box_shadow_opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $box_shadow_default;
 
 		return array(
-			'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow )"
+			'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow_opacity )"
 		);
 	}
 
