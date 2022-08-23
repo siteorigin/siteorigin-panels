@@ -242,7 +242,7 @@ class SiteOrigin_Panels_Styles {
 					'type'        => 'number',
 					'priority'    => 20,
 					'default'     => 15,
-					'description' => __( 'Between 0 and 100 with 100 not being transparent.', 'siteorigin-panels' ),
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
 				),				
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
@@ -287,7 +287,7 @@ class SiteOrigin_Panels_Styles {
 					'type'        => 'number',
 					'priority'    => 20,
 					'default'     => 30,
-					'description' => __( 'Between 0 and 100 with 100 not being transparent.', 'siteorigin-panels' ),
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
 				),
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
