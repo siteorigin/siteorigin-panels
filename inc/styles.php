@@ -124,7 +124,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => sprintf( __( '%s Class', 'siteorigin-panels' ), $label ),
 			'type'        => 'text',
 			'group'       => 'attributes',
-			'description' => __( 'A CSS class name.', 'siteorigin-panels' ),
+			'description' => sprintf(__( 'A custom class used for this %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 5,
 		);
 
@@ -193,7 +193,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Background Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Background color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 5,
 		);
 
@@ -201,7 +200,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Background Image', 'siteorigin-panels' ),
 			'type'        => 'image',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Background image of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 6,
 		);
 
@@ -217,7 +215,6 @@ class SiteOrigin_Panels_Styles {
 				'fixed'             => __( 'Fixed', 'siteorigin-panels' ),
 				'parallax'          => __( 'Parallax', 'siteorigin-panels' ),
 			),
-			'description' => __( 'How the background image is displayed.', 'siteorigin-panels' ),
 			'priority'    => 7,
 		);
 
@@ -225,8 +222,105 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Border Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => sprintf( __( 'Border color of the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 10,
+		);
+
+		$fields['border_radius'] = array(
+			'name'        => __( 'Border Radius', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'design',
+			'priority'    => 12,
+			'multiple'    => true
+		);
+
+		$fields['box_shadow'] = array(
+			'name'        => __( 'Box Shadow', 'siteorigin-panels' ),
+			'type'        => 'toggle',
+			'group'       => 'design',
+			'priority'    => 20,
+			'fields' => array(
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
+					'priority'    => 10,
+					'default'     => '#000000',
+				),
+				'opacity' => array(
+					'name'        => __( 'Opacity', 'siteorigin-panels' ),
+					'type'        => 'number',
+					'priority'    => 20,
+					'default'     => 15,
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+				),				
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 30,
+					'default'     => 0,
+				),
+				'offset_vertical' => array(
+					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 40,
+					'default'     => '5px',
+				),
+				'blur' => array(
+					'name'        => __( 'Blur', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 50,
+					'default'     => '15px',
+				),
+				'spread' => array(
+					'name'        => __( 'Spread', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 60,
+				),
+			),
+		);
+
+		$fields['box_shadow_hover'] = array(
+			'name'        => __( 'Box Shadow Hover', 'siteorigin-panels' ),
+			'type'        => 'toggle',
+			'group'       => 'design',
+			'priority'    => 25,
+			'fields' => array(
+				'color' => array(
+					'name'        => __( 'Color', 'siteorigin-panels' ),
+					'type'        => 'color',
+					'priority'    => 10,
+					'default'     => '#000000',
+				),
+				'opacity' => array(
+					'name'        => __( 'Opacity', 'siteorigin-panels' ),
+					'type'        => 'number',
+					'priority'    => 20,
+					'default'     => 30,
+					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+				),
+				'offset_horizontal' => array(
+					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 30,
+					'default'     => 0,
+				),
+				'offset_vertical' => array(
+					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 40,
+					'default'     => '5px',
+				),
+				'blur' => array(
+					'name'        => __( 'Blur', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 50,
+					'default'     => '15px',
+				),
+				'spread' => array(
+					'name'        => __( 'Spread', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'priority'    => 60,
+				),
+			),
 		);
 
 		return $fields;
@@ -379,7 +473,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of text inside this cell.', 'siteorigin-panels' ),
 			'priority'    => 15,
 		);
 
@@ -387,7 +480,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this cell.', 'siteorigin-panels' ),
 			'priority'    => 16,
 		);
 
@@ -395,7 +487,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
 			'priority'    => 17,
 		);
 
@@ -427,7 +518,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Font Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of text inside this widget.', 'siteorigin-panels' ),
 			'priority'    => 15,
 		);
 
@@ -435,7 +525,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget.', 'siteorigin-panels' ),
 			'priority'    => 16,
 		);
 
@@ -443,7 +532,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Link Hover Color', 'siteorigin-panels' ),
 			'type'        => 'color',
 			'group'       => 'design',
-			'description' => __( 'Color of links inside this widget when hovered.', 'siteorigin-panels' ),
 			'priority'    => 17,
 		);
 
@@ -569,6 +657,29 @@ class SiteOrigin_Panels_Styles {
 		return $output;
 	}
 
+	static function generate_box_shadow_css( $prefix, $style ) {
+		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
+
+		$box_shadow_offset_horizontal = ! empty( $style[ $prefix . '_offset_horizontal' ] ) ? $style[ $prefix . '_offset_horizontal' ] : 0;
+		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '5px';
+		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '15px';
+		$box_shadow_spread = ! empty( $style[ $prefix . '_spread' ] ) ? $style[ $prefix . '_spread' ] : '';
+
+		if ( ! empty( $style[ $prefix . '_color' ] ) ) {
+			$box_shadow_color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
+			$box_shadow_color = $box_shadow_color->__get( 'rgb' );
+			$box_shadow_color = "$box_shadow_color[0], $box_shadow_color[1], $box_shadow_color[2]";
+		} else {
+			$box_shadow_color = '0, 0, 0';
+		}
+		$box_shadow_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
+		$box_shadow_opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $box_shadow_default;
+
+		return array(
+			'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow_opacity )"
+		);
+	}
+
 	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets.
 	 *
@@ -662,6 +773,18 @@ class SiteOrigin_Panels_Styles {
 					$css[ $matches[1][ $i ] ] = $matches[2][ $i ];
 				}
 			}
+		}
+
+		if ( isset( $style['border_radius'] ) ) {
+			$css['border-radius'] = $style['border_radius'];
+		}
+
+		if ( ! empty( $style['box_shadow'] ) ) {
+			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
+		}
+
+		if ( ! empty( $style['box_shadow_hover'] ) && empty( $css['transition'] ) ) {
+			$css['transition'] = '300ms ease-in-out box-shadow';
 		}
 
 		return $css;
@@ -775,6 +898,18 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
+			if ( ! empty( $row['style']['box_shadow_hover'] ) ) {
+				$css->add_row_css(
+					$post_id,
+					$ri,
+					'> .panel-row-style:hover',
+					self::generate_box_shadow_css(
+						'box_shadow_hover',
+						$row['style']
+					)
+				);
+			}
+
 			// Add in flexbox alignment to the main row element.
 			if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' && ! SiteOrigin_Panels::is_legacy_browser() && ! empty( $row['style']['cell_alignment'] ) ) {
 
@@ -855,6 +990,19 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
+				if ( ! empty( $cell['style']['box_shadow_hover'] ) ) {
+					$css->add_cell_css(
+						$post_id,
+						$ri,
+						$ci,
+						'> .panel-cell-style:hover',
+						self::generate_box_shadow_css(
+							'box_shadow_hover',
+							$cell['style']
+						)
+					);
+				}
+
 				if ( ! empty( $cell['style']['link_color'] ) ) {
 					$css->add_cell_css(
 						$post_id,
@@ -866,6 +1014,7 @@ class SiteOrigin_Panels_Styles {
 						)
 					);
 				}
+
 				if ( ! empty( $cell['style']['link_color_hover'] ) ) {
 					$css->add_cell_css(
 						$post_id,
@@ -927,10 +1076,25 @@ class SiteOrigin_Panels_Styles {
 							'color' => $widget['panels_info']['style']['link_color']
 						) );
 					}
+
 					if ( ! empty( $widget['panels_info']['style']['link_color_hover'] ) ) {
 						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a:hover', array(
 							'color' => $widget['panels_info']['style']['link_color_hover']
 						) );
+					}
+
+					if ( ! empty( $widget['panels_info']['style']['box_shadow_hover'] ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'> .panel-widget-style:hover',
+							self::generate_box_shadow_css(
+								'box_shadow_hover',
+								$widget['panels_info']['style']
+							)
+						);
 					}
 				}
 			}
