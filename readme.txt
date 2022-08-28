@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.17.0 - 28 August 2022 =
+* Row, Cell, and Widget Design Settings: Added Border Radius and Box Shadow settings.
+
 = 2.16.19 - 16 August 2022 =
 * Resolved `Uncaught TypeError` Customizer Layout Builder console error.
 
