@@ -174,46 +174,6 @@
 	.so-rows-container{
 		padding: 20px 15px 0 15px;
 
-		// See tpl/js-templates.php variable $row_color_count. It should match the number of colors defined here.
-		@row_colors: #CDE2EC, #F2C2BE, #D5CCDF, #CAE7CD, #E2DCB1;
-
-		.row-colors( @i: 1 ) when ( @i <= length( @row_colors ) ) {
-			@row_color: extract( @row_colors, @i );
-
-			// The color selectors
-			.so-row-color-@{i} {
-				&.so-row-color {
-					background-color: @row_color;
-					border: 1px solid darken( @row_color, 11% );
-
-					&.so-row-color-selected:before {
-						background: darken( @row_color, 10% );
-					}
-				}
-			}
-
-			// The actual container
-			.so-row-container.so-row-color-@{i} .so-cells .cell {
-				.cell-wrapper {
-					background-color: @row_color;
-				}
-
-				&.cell-selected .cell-wrapper {
-					background-color: darken( @row_color, 14% );
-				}
-
-				.resize-handle {
-					background-color: lighten( @row_color, 7% );
-
-					&:hover {
-						background-color: lighten( @row_color, 4% );
-					}
-				}
-			}
-
-			.row-colors( ( @i + 1 ) );
-		} .row-colors();
-
 		h3.so-row-label {
 			display: inline-block;
 			font-size: 1em;
