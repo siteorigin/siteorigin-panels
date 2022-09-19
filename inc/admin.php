@@ -1034,7 +1034,7 @@ class SiteOrigin_Panels_Admin {
 				$valid_row_colors[ $name ] = array_map( 'sanitize_hex_color', $color );
 			}
 		}
-		return $valid_row_colors;
+		return ! empty( $valid_row_colors ) ? $valid_row_colors : array();
 	}
 
 	/**
