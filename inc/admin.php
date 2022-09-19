@@ -633,7 +633,7 @@ class SiteOrigin_Panels_Admin {
 						background-color: ' . $color['cell_divider'] . ';
 					}
 					.siteorigin-panels-builder .so-rows-container .so-row-container.so-row-color-' . $name . ' .so-cells .cell .resize-handle:hover {
-						background-color: ' . $color['cell_hover'] . ';
+						background-color: ' . $color['cell_divider_hover'] . ';
 					}';
 			}
 
@@ -995,31 +995,31 @@ class SiteOrigin_Panels_Admin {
 				'inactive' => '#cde2ec',
 				'active' => '#a4cadd',
 				'cell_divider' => '#e7f1f6',
-				'cell_hover' => '#dcebf2',
+				'cell_divider_hover' => '#dcebf2',
 			),
 			2 => array(
 				'inactive' => '#f2c2be',
 				'active' => '#e9968f',
 				'cell_divider' => '#f8dedc',
-				'cell_hover' => '#f5d2cf',
+				'cell_divider_hover' => '#f5d2cf',
 			),
 			3 => array(
 				'inactive' => '#d5ccdf',
 				'active' => '#b9aac9',
 				'cell_divider' => '#e7e2ed',
-				'cell_hover' => '#dfd9e7',
+				'cell_divider_hover' => '#dfd9e7',
 			),
 			4 => array(
 				'inactive' => '#cae7cd',
 				'active' => '#a3d6a9',
 				'cell_divider' => '#e3f2e4',
-				'cell_hover' => '#d8edda',
+				'cell_divider_hover' => '#d8edda',
 			),
 			5 => array(
 				'inactive' => '#e2dcb1',
 				'active' => '#d3ca88',
 				'cell_divider' => '#ece8cb',
-				'cell_hover' => '#e8e3c0',
+				'cell_divider_hover' => '#e8e3c0',
 			),
 		) );
 
@@ -1029,7 +1029,7 @@ class SiteOrigin_Panels_Admin {
 				! empty( $color['inactive'] ) &&
 				! empty( $color['active'] ) &&
 				! empty( $color['cell_divider'] ) &&
-				! empty( $color['cell_hover'] )
+				! empty( $color['cell_divider_hover'] )
 			) {
 				$valid_row_colors[ $name ] = array_map( 'sanitize_hex_color', $color );
 			}
