@@ -381,6 +381,7 @@ module.exports = Backbone.View.extend( {
 
 		// Allow for external field validation when attempting to close a widget.
 		if ( typeof this.widgetView == 'object' ) {
+			var values = this.getFormValues();
 			if ( typeof values.widgets == 'object' ) {
 				validSave = $( document ).triggerHandler(
 					'close_dialog_validation',
