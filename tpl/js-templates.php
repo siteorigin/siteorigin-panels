@@ -104,7 +104,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li class="so-row-colors-container">
 							<?php
 							$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
-							foreach ( $row_colors as $name => $color) {
+							foreach ( $row_colors as $id => $color ) {
+								$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
 								?>
 								<div data-color-label="<?php echo esc_attr( $name ); ?>"
 									class="<?php echo esc_attr( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"

@@ -612,7 +612,8 @@ class SiteOrigin_Panels_Admin {
 
 			$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
 			$row_colors_css = '';
-			foreach ( $row_colors as $name => $color ) {
+			foreach ( $row_colors as $id => $color ) {
+				$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
 				$row_colors_css .= '
 					.siteorigin-panels-builder .so-rows-container .so-row-color-' . $name . '.so-row-color {
 						background-color: ' . $color['active'] . ';
@@ -1029,14 +1030,25 @@ class SiteOrigin_Panels_Admin {
 		) );
 
 		// Ensure all of the colors are valid.
-		foreach ( $row_colors as $name => $color ) {
+		foreach ( $row_colors as $id => $color ) {
+			unset( $name );
 			if (
 				! empty( $color['inactive'] ) &&
 				! empty( $color['active'] ) &&
 				! empty( $color['cell_divider'] ) &&
 				! empty( $color['cell_divider_hover'] )
 			) {
-				$valid_row_colors[ $name ] = array_map( 'sanitize_hex_color', $color );
+				// If color has a name set, store it and re-apply later.
+				if ( ! empty( $color['name'] ) ) {
+					$name = $color['name'];
+					unset( $color['name'] );
+				}
+
+				$valid_row_colors[ $id ] = array_map( 'sanitize_hex_color', $color );
+
+				if ( ! empty( $name ) ) {
+					$valid_row_colors[ $id ]['name'] = $name;
+				}
 			}
 		}
 		return ! empty( $valid_row_colors ) ? $valid_row_colors : array();
