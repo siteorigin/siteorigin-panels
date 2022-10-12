@@ -992,30 +992,35 @@ class SiteOrigin_Panels_Admin {
 	public static function get_row_colors() {
 		$row_colors = apply_filters( 'siteorigin_panels_admin_row_colors', array(
 			1 => array(
+				'name' => __( 'Soft Blue', 'siteorigin-panels' ),
 				'inactive' => '#cde2ec',
 				'active' => '#a4cadd',
 				'cell_divider' => '#e7f1f6',
 				'cell_divider_hover' => '#dcebf2',
 			),
 			2 => array(
+				'name' => __( 'Soft Red', 'siteorigin-panels' ),
 				'inactive' => '#f2c2be',
 				'active' => '#e9968f',
 				'cell_divider' => '#f8dedc',
 				'cell_divider_hover' => '#f5d2cf',
 			),
 			3 => array(
+				'name' => __( 'Grayish Violet', 'siteorigin-panels' ),
 				'inactive' => '#d5ccdf',
 				'active' => '#b9aac9',
 				'cell_divider' => '#e7e2ed',
 				'cell_divider_hover' => '#dfd9e7',
 			),
 			4 => array(
+				'name' => __( 'Lime Green', 'siteorigin-panels' ),
 				'inactive' => '#cae7cd',
 				'active' => '#a3d6a9',
 				'cell_divider' => '#e3f2e4',
 				'cell_divider_hover' => '#d8edda',
 			),
 			5 => array(
+				'name' => __( 'Desaturated Yellow', 'siteorigin-panels' ),
 				'inactive' => '#e2dcb1',
 				'active' => '#d3ca88',
 				'cell_divider' => '#ece8cb',
