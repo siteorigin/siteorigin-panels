@@ -251,29 +251,36 @@ class SiteOrigin_Panels_Styles {
 					'priority'    => 20,
 					'default'     => 15,
 					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+				),	
+				'inset' => array(
+					'name'        => __( 'Inset', 'siteorigin-panels' ),
+					'type'        => 'checkbox',
+					'priority'    => 30,
+					'default'     => false,
+					'description' => sprintf( __( 'Inset box shadows appear inside the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 				),				
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 30,
+					'priority'    => 40,
 					'default'     => 0,
 				),
 				'offset_vertical' => array(
 					'name'        => __( 'Vertical Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 40,
+					'priority'    => 50,
 					'default'     => '5px',
 				),
 				'blur' => array(
 					'name'        => __( 'Blur', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 50,
+					'priority'    => 60,
 					'default'     => '15px',
 				),
 				'spread' => array(
 					'name'        => __( 'Spread', 'siteorigin-panels' ),
 					'type'        => 'measurement',
-					'priority'    => 60,
+					'priority'    => 70,
 				),
 			),
 		);
@@ -297,6 +304,13 @@ class SiteOrigin_Panels_Styles {
 					'default'     => 30,
 					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
 				),
+				'inset' => array(
+					'name'        => __( 'Inset', 'siteorigin-panels' ),
+					'type'        => 'checkbox',
+					'priority'    => 30,
+					'default'     => false,
+					'description' => sprintf( __( 'Inset box shadows appear inside the %s.', 'siteorigin-panels' ), strtolower( $label ) ),
+				),				
 				'offset_horizontal' => array(
 					'name'        => __( 'Horizontal Offset', 'siteorigin-panels' ),
 					'type'        => 'measurement',
@@ -660,6 +674,7 @@ class SiteOrigin_Panels_Styles {
 	static function generate_box_shadow_css( $prefix, $style ) {
 		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
 
+		$box_shadow_inset = ! empty( $style[ $prefix . '_inset' ] ) ? 'inset' : '';
 		$box_shadow_offset_horizontal = ! empty( $style[ $prefix . '_offset_horizontal' ] ) ? $style[ $prefix . '_offset_horizontal' ] : 0;
 		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '5px';
 		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '15px';
@@ -676,7 +691,7 @@ class SiteOrigin_Panels_Styles {
 		$box_shadow_opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $box_shadow_default;
 
 		return array(
-			'box-shadow' => "$box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow_opacity )"
+			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow_opacity )"
 		);
 	}
 

@@ -139,7 +139,7 @@ module.exports = Backbone.View.extend( {
 					// Create the media frame.
 					frame = wp.media( {
 						// Set the title of the modal.
-						title: 'choose',
+						title: panelsOptions.add_media,
 
 						// Tell the modal to show only images.
 						library: {
