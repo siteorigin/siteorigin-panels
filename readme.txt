@@ -107,6 +107,13 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.18.0 - 22 October 2022 =
+* Box Shadow: Added a new `Inset` setting. Inset box shadows appear inside the row, cell, or widget.
+* Media Modal: Updated the title to `Choose Media`.
+* Developer: Added `siteorigin_panels_admin_row_colors` filter.
+* Developer: Added a client side event to allow for widget validation.
+* Developer: Accounted for a situation where `$panels_data` is passed as a string containing JSON rather than an array.
+
 = 2.17.0 - 28 August 2022 =
 * Row, Cell, and Widget Design Settings: Added Border Radius and Box Shadow settings.
 

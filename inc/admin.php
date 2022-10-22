@@ -368,6 +368,7 @@ class SiteOrigin_Panels_Admin {
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
+				'add_media'                 => __( 'Choose Media', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
 					array(
 						'weight' => 0.5,
@@ -609,6 +610,38 @@ class SiteOrigin_Panels_Admin {
 				SITEORIGIN_PANELS_VERSION
 			);
 			do_action( 'siteorigin_panel_enqueue_admin_styles' );
+
+			$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
+			$row_colors_css = '';
+			foreach ( $row_colors as $id => $color ) {
+				$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
+				$row_colors_css .= '
+					.siteorigin-panels-builder .so-rows-container .so-row-color-' . $name . '.so-row-color {
+						background-color: ' . $color['active'] . ';
+						border: 1px solid ' . $color['inactive'] . ';
+					}
+					.siteorigin-panels-builder .so-rows-container .so-row-color-' . $name . '.so-row-color.so-row-color-selected:before {
+					  background: ' . $color['active'] . ';
+					}
+
+					.siteorigin-panels-builder .so-rows-container .so-row-container.so-row-color-' . $name . ' .so-cells .cell .cell-wrapper {
+						background-color: ' . $color['inactive'] . ';
+					}
+					.siteorigin-panels-builder .so-rows-container .so-row-container.so-row-color-' . $name . ' .so-cells .cell.cell-selected .cell-wrapper {
+						background-color: ' . $color['active'] . ';
+					}
+
+					.siteorigin-panels-builder .so-rows-container .so-row-container.so-row-color-' . $name . ' .so-cells .cell .resize-handle {
+						background-color: ' . $color['cell_divider'] . ';
+					}
+					.siteorigin-panels-builder .so-rows-container .so-row-container.so-row-color-' . $name . ' .so-cells .cell .resize-handle:hover {
+						background-color: ' . $color['cell_divider_hover'] . ';
+					}';
+			}
+
+			if ( ! empty( $row_colors_css ) ) {
+				wp_add_inline_style( 'so-panels-admin', $row_colors_css );
+			}
 		}
 	}
 
@@ -956,6 +989,70 @@ class SiteOrigin_Panels_Admin {
 	 */
 	function js_templates() {
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
+	}
+
+	public static function get_row_colors() {
+		$row_colors = apply_filters( 'siteorigin_panels_admin_row_colors', array(
+			1 => array(
+				'name' => __( 'Soft Blue', 'siteorigin-panels' ),
+				'inactive' => '#cde2ec',
+				'active' => '#a4cadd',
+				'cell_divider' => '#e7f1f6',
+				'cell_divider_hover' => '#dcebf2',
+			),
+			2 => array(
+				'name' => __( 'Soft Red', 'siteorigin-panels' ),
+				'inactive' => '#f2c2be',
+				'active' => '#e9968f',
+				'cell_divider' => '#f8dedc',
+				'cell_divider_hover' => '#f5d2cf',
+			),
+			3 => array(
+				'name' => __( 'Grayish Violet', 'siteorigin-panels' ),
+				'inactive' => '#d5ccdf',
+				'active' => '#b9aac9',
+				'cell_divider' => '#e7e2ed',
+				'cell_divider_hover' => '#dfd9e7',
+			),
+			4 => array(
+				'name' => __( 'Lime Green', 'siteorigin-panels' ),
+				'inactive' => '#cae7cd',
+				'active' => '#a3d6a9',
+				'cell_divider' => '#e3f2e4',
+				'cell_divider_hover' => '#d8edda',
+			),
+			5 => array(
+				'name' => __( 'Desaturated Yellow', 'siteorigin-panels' ),
+				'inactive' => '#e2dcb1',
+				'active' => '#d3ca88',
+				'cell_divider' => '#ece8cb',
+				'cell_divider_hover' => '#e8e3c0',
+			),
+		) );
+
+		// Ensure all of the colors are valid.
+		foreach ( $row_colors as $id => $color ) {
+			unset( $name );
+			if (
+				! empty( $color['inactive'] ) &&
+				! empty( $color['active'] ) &&
+				! empty( $color['cell_divider'] ) &&
+				! empty( $color['cell_divider_hover'] )
+			) {
+				// If color has a name set, store it and re-apply later.
+				if ( ! empty( $color['name'] ) ) {
+					$name = $color['name'];
+					unset( $color['name'] );
+				}
+
+				$valid_row_colors[ $id ] = array_map( 'sanitize_hex_color', $color );
+
+				if ( ! empty( $name ) ) {
+					$valid_row_colors[ $id ]['name'] = $name;
+				}
+			}
+		}
+		return ! empty( $valid_row_colors ) ? $valid_row_colors : array();
 	}
 
 	/**

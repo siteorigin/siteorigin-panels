@@ -452,6 +452,9 @@ class SiteOrigin_Panels_Renderer {
 			if ( $panels_data === false ) {
 				return false;
 			}
+		} elseif ( is_string( $panels_data ) ) {
+			// If $panels_data is a string, it's likely json, try decoding it.
+			$panels_data = json_decode( $panels_data, true );
 		}
 
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
