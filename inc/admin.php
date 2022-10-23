@@ -534,7 +534,7 @@ class SiteOrigin_Panels_Admin {
 						4 => __( 'lime-green', 'siteorigin-panels' ),
 						5 => __( 'desaturated-yellow', 'siteorigin-panels' ),
 					) ),
-					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', __( 'lime-green', 'siteorigin-panels' ) ),
+					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', __( 'soft-blue', 'siteorigin-panels' ) ),
 				),
 			) );
 
