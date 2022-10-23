@@ -525,7 +525,16 @@ class SiteOrigin_Panels_Admin {
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 				'forms'                   => array(
 					'loadingFailed' => __( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
-				)
+				),
+				'row_color' => array(
+					'migrations' => apply_filters( 'siteorigin_panels_admin_row_colors_migration', array(
+						1 => __( 'soft-blue', 'siteorigin-panels' ),
+						2 => __( 'soft-red', 'siteorigin-panels' ),
+						3 => __( 'grayish-violet', 'siteorigin-panels' ),
+						4 => __( 'lime-green', 'siteorigin-panels' ),
+						5 => __( 'desaturated-yellow', 'siteorigin-panels' ),
+					) ),
+				),
 			) );
 
 			$js_widgets = array();

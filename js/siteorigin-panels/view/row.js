@@ -50,6 +50,12 @@ module.exports = Backbone.View.extend( {
 		this.setElement( this.template( { rowColorLabel: rowColorLabel, rowLabel: rowLabel } ) );
 		this.$el.data( 'view', this );
 
+		// Migrate legacy row color labels.
+		if ( typeof rowColorLabel == 'number' && typeof panelsOptions.row_color.migrations[ rowColorLabel ] == 'string' ) {
+			rowColorLabel = panelsOptions.row_color.migrations[ rowColorLabel ];
+			this.model.set( 'color_label', rowColorLabel );
+		}
+
 		// Create views for the cells in this row
 		var thisView = this;
 		this.model.get('cells').each( function ( cell ) {
