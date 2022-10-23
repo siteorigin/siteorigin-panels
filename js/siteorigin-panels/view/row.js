@@ -45,7 +45,7 @@ module.exports = Backbone.View.extend( {
 	 * @returns {panels.view.row}
 	 */
 	render: function () {
-		var rowColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : 1;
+		var rowColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : panelsOptions.row_color.default;
 		var rowLabel = this.model.has( 'label' ) ? this.model.get( 'label' ) : '';
 		this.setElement( this.template( { rowColorLabel: rowColorLabel, rowLabel: rowLabel } ) );
 		this.$el.data( 'view', this );
@@ -327,7 +327,7 @@ module.exports = Backbone.View.extend( {
 		this.$( '.so-row-color' ).removeClass( 'so-row-color-selected' );
 		var clickedColorElem = $( event.target );
 		var newColorLabel = clickedColorElem.data( 'color-label' );
-		var oldColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : 1;
+		var oldColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : panelsOptions.row_color.default;
 		clickedColorElem.addClass( 'so-row-color-selected' );
 		this.$el.removeClass( 'so-row-color-' + oldColorLabel );
 		this.$el.addClass( 'so-row-color-' + newColorLabel );
