@@ -101,19 +101,23 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
 						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
-						<li class="so-row-colors-container">
-							<?php
-							$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
-							foreach ( $row_colors as $id => $color ) {
-								$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
-								?>
-								<div data-color-label="<?php echo esc_attr( $name ); ?>"
-									class="<?php echo esc_attr( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
-									></div>
+						<?php
+						$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
+						if ( ! empty( $row_colors ) ) :
+						?>
+							<li class="so-row-colors-container">
 								<?php
-							}
-							?>
-						</li>
+								foreach ( $row_colors as $id => $color ) {
+									$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
+									?>
+									<div data-color-label="<?php echo esc_attr( $name ); ?>"
+										class="<?php echo esc_attr( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
+										></div>
+									<?php
+								}
+								?>
+							</li>
+						<?php endif; ?>
 					</ul>
 					<div class="so-pointer"></div>
 				</div>
