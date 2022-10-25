@@ -47,14 +47,20 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		var rowColorLabel = this.model.has( 'color_label' ) ? this.model.get( 'color_label' ) : panelsOptions.row_color.default;
 		var rowLabel = this.model.has( 'label' ) ? this.model.get( 'label' ) : '';
-		this.setElement( this.template( { rowColorLabel: rowColorLabel, rowLabel: rowLabel } ) );
 		this.$el.data( 'view', this );
 
 		// Migrate legacy row color labels.
 		if ( typeof rowColorLabel == 'number' && typeof panelsOptions.row_color.migrations[ rowColorLabel ] == 'string' ) {
+			this.$el.removeClass( 'so-row-color-' + rowColorLabel );
 			rowColorLabel = panelsOptions.row_color.migrations[ rowColorLabel ];
+			this.$el.addClass( 'so-row-color-' + rowColorLabel );
 			this.model.set( 'color_label', rowColorLabel );
 		}
+
+		this.setElement( this.template( {
+			rowColorLabel: rowColorLabel,
+			rowLabel: rowLabel
+		} ) );
 
 		// Create views for the cells in this row
 		var thisView = this;
