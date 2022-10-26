@@ -108,7 +108,7 @@ SiteOrigin Premium includes access to our professional email support service, pe
 == Changelog ==
 
 = 2.18.2 - 26 October 2022 =
-* Restored row re-orderding functionality.
+* Restored row re-ordering functionality.
 
 = 2.18.1 - 25 October 2022 =
 * Restored admin row background functionality.
