@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.18.2 - 26 October 2022 =
+* Restored row re-orderding functionality.
+
 = 2.18.1 - 25 October 2022 =
 * Restored admin row background functionality.
 * Developer: Added `siteorigin_panels_admin_row_colors_default` to set the default admin row background color.
