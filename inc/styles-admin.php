@@ -593,7 +593,11 @@ class SiteOrigin_Panels_Styles_Admin {
 			'ex',
 			'pt',
 			'pc',
-			'rem'
+			'rem',
+			'vw',
+			'vh',
+			'vmin',
+			'vmax',
 		);
 
 		// Allow themes and plugins to trim or enhance the list.
