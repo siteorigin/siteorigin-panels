@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
 Requires at least: 4.7
-Tested up to: 6.0
+Tested up to: 6.1
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
@@ -107,8 +107,12 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.18.3 - 09 November 2022 =
+* Styles: Added viewport units of measurement.
+* Updated `Tested up to` tag to 6.1.
+
 = 2.18.2 - 26 October 2022 =
-* Restored row re-orderding functionality.
+* Restored row re-ordering functionality.
 
 = 2.18.1 - 25 October 2022 =
 * Restored admin row background functionality.
