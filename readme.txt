@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.18.4 - 13 November 2022 =
+* Admin Row Colors: Adjusted swatches layout and spacing.
+
 = 2.18.3 - 09 November 2022 =
 * Styles: Added viewport units of measurement.
 * Updated `Tested up to` tag to 6.1.
