@@ -250,8 +250,9 @@
 					ul li.so-row-colors-container {
 						clear: both;
 						display: flex;
-						justify-content: space-around;
-
+						flex-wrap: wrap;
+						gap: 4px;
+						justify-content: space-evenly;
 						padding: 5px;
 
 						.so-row-color {
@@ -361,6 +362,10 @@
 						.transition(0.25s, background, ease-in-out);
 					}
 
+					&.cell-selected .cell-wrapper {
+						background: #a4cadd;
+
+					}
 					.so-live-editor-builder &.so-show-icon .widgets-container .so-widget:hover,
 					&.so-show-icon.so-small-actions .widgets-container .so-widget:hover {
 						.so-widget-wrapper {
@@ -629,6 +634,10 @@
 						height: 100%;
 
 						.transition(0.25s, background, ease-in-out);
+
+						&:hover {
+							background: #dcebf2;
+						}
 					}
 
 					&:first-child {
