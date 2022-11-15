@@ -224,6 +224,7 @@ class SiteOrigin_Panels_Styles {
 			'group'       => 'design',
 			'priority'    => 10,
 		);
+
 		$fields['border_thickness'] = array(
 			'name'        => __( 'Border Thickness', 'siteorigin-panels' ),
 			'type'        => 'measurement',
