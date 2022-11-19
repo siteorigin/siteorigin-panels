@@ -287,7 +287,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				?>
 				<select name="<?php echo esc_attr( $field_name ) ?>">
 					<?php foreach ( $sizes as $size_name => $size_config ) : ?>
-						<?php $sizing_label = is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : ''; ?>
+						<?php $sizing_label = ! empty( $size_config['width'] ) && is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : ''; ?>
 						<option
 							value="<?php echo esc_attr( $size_name ) ?>"
 							<?php selected( $current, $size_name ); ?>
