@@ -282,10 +282,26 @@ class SiteOrigin_Panels_Styles_Admin {
 				<?php
 				break;
 
+			case 'image_size':
+				$sizes = self::get_image_sizes();
+				?>
+				<select name="<?php echo esc_attr( $field_name ); ?>">
+					<?php foreach ( $sizes as $size_name => $size_config ) : ?>
+						<?php $sizing_label = ! empty( $size_config['width'] ) && is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : ''; ?>
+						<option
+							value="<?php echo esc_attr( $size_name ); ?>"
+							<?php selected( $current, $size_name ); ?>
+						>
+							<?php echo esc_html( ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) . $sizing_label ); ?>	
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<?php
+				break;
 			case 'url' :
 			case 'text' :
-				?><input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
+				?><input type="text" name="<?php echo esc_attr( $field_name ); ?>"
+				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
 				break;
 
 			case 'number' :
@@ -602,6 +618,31 @@ class SiteOrigin_Panels_Styles_Admin {
 
 		// Allow themes and plugins to trim or enhance the list.
 		return apply_filters( 'siteorigin_panels_style_get_measurements_list', $measurements );
+	}
+
+	static public function get_image_sizes() {
+		global $_wp_additional_image_sizes;
+
+		$sizes = array(
+			'full' => __( 'Full', 'siteorigin-panels' ),
+			'thumb' => __( 'Thumbnail (Theme-defined)', 'siteorigin-panels' ),
+		);
+
+		foreach ( get_intermediate_image_sizes() as $size ) {
+			if ( in_array( $size, array('thumbnail', 'medium', 'medium_large', 'large') ) ) {
+				$sizes[ $size ]['width']  = get_option( "{$size}_size_w" );
+				$sizes[ $size ]['height'] = get_option( "{$size}_size_h" );
+				$sizes[ $size ]['crop']   = (bool) get_option( "{$size}_crop" );
+			} elseif ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
+				$sizes[ $size ] = array(
+					'width' => $_wp_additional_image_sizes[ $size ]['width'],
+					'height' => $_wp_additional_image_sizes[ $size ]['height'],
+					'crop' => $_wp_additional_image_sizes[ $size ]['crop'],
+				);
+			}
+		}
+
+		return apply_filters( 'siteorigin_panels_image_sizes', $sizes );
 	}
 
 	/**

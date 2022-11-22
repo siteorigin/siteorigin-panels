@@ -218,6 +218,13 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 7,
 		);
 
+		$fields['background_image_size'] = array(
+			'name'        => __( 'Background Image Size', 'siteorigin-panels' ),
+			'type'        => 'image_size',
+			'group'       => 'design',
+			'priority'    => 8,
+		);
+
 		$fields['border_color'] = array(
 			'name'        => __( 'Border Color', 'siteorigin-panels' ),
 			'type'        => 'color',
@@ -581,7 +588,7 @@ class SiteOrigin_Panels_Styles {
 			)
 		) {
 			if ( siteorigin_panels_setting( 'parallax-type' ) == 'legacy' ) {
-				$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
+				$url = self::get_attachment_image_src( $style['background_image_attachment'], ! empty( $style['background_image_size'] ) ? $style['background_image_size'] : 'full' );
 				if ( ! empty( $url ) ) {
 					wp_enqueue_script( 'siteorigin-parallax' );
 					$parallax_args = array(
@@ -639,7 +646,7 @@ class SiteOrigin_Panels_Styles {
 
 				$image_html = wp_get_attachment_image(
 					$context['style']['background_image_attachment'],
-					'full',
+					! empty( $context['style']['background_image_size'] ) ? $context['style']['background_image_size'] : 'full',
 					false,
 					array(
 						'data-siteorigin-parallax' => 'true',
@@ -722,7 +729,7 @@ class SiteOrigin_Panels_Styles {
 		) {
 
 			if ( ! empty( $style['background_image_attachment'] ) ) {
-				$url = self::get_attachment_image_src( $style['background_image_attachment'], 'full' );
+				$url = self::get_attachment_image_src( $style['background_image_attachment'], ! empty( $style['background_image_size'] ) ? $style['background_image_size'] : 'full' );
 			}
 			
 			if ( empty( $url ) && ! empty( $style['background_image_attachment_fallback'] ) ) {
