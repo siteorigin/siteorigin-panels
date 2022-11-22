@@ -285,11 +285,11 @@ class SiteOrigin_Panels_Styles_Admin {
 			case 'image_size':
 				$sizes = self::get_image_sizes();
 				?>
-				<select name="<?php echo esc_attr( $field_name ) ?>">
+				<select name="<?php echo esc_attr( $field_name ); ?>">
 					<?php foreach ( $sizes as $size_name => $size_config ) : ?>
 						<?php $sizing_label = ! empty( $size_config['width'] ) && is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : ''; ?>
 						<option
-							value="<?php echo esc_attr( $size_name ) ?>"
+							value="<?php echo esc_attr( $size_name ); ?>"
 							<?php selected( $current, $size_name ); ?>
 						>
 							<?php echo esc_html( ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) . $sizing_label ); ?>	
@@ -300,8 +300,8 @@ class SiteOrigin_Panels_Styles_Admin {
 				break;
 			case 'url' :
 			case 'text' :
-				?><input type="text" name="<?php echo esc_attr( $field_name ) ?>"
-				         value="<?php echo esc_attr( $current ) ?>" class="widefat" /><?php
+				?><input type="text" name="<?php echo esc_attr( $field_name ); ?>"
+				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
 				break;
 
 			case 'number' :
