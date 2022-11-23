@@ -170,7 +170,7 @@ module.exports = Backbone.View.extend( {
 						$s.find( '.current-image' ).css( 'background-image', 'url(' + url + ')' );
 
 						// Store the ID
-						$s.find( '.so-image-selector > input' ).val( attachment.id );
+						$s.find( '.so-image-selector > input' ).val( attachment.id ).trigger( 'change' )
 
 						$s.find( '.remove-image' ).removeClass( 'hidden' );
 					} );
@@ -321,6 +321,36 @@ module.exports = Backbone.View.extend( {
 			} );
 		} );
 		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
+
+		var $background_image = this.$( '.so-field-background_image_attachment' ),
+			$background_image_display = this.$( '.so-field-background_display' ),
+			$background_image_size = this.$( '.so-field-background_image_size' );
+
+		if (
+			$background_image.length &&
+			(
+				$background_image_display.length ||
+				$background_image_size.length
+			)
+		) {
+			var soBackgroundImageVisibility = function() {
+				var hasImage = $background_image.find( '[name="style[background_image_attachment]"]' );
+
+				if ( ! hasImage.val() || hasImage.val() == 0 ) {
+					hasImage = $background_image.find( '[name="style[background_image_attachment_fallback]"]' );
+				}
+
+				if ( hasImage.val() && hasImage.val() != 0 ) {
+					$background_image_display.show();
+					$background_image_size.show();
+				} else {
+					$background_image_display.hide();
+					$background_image_size.hide();
+				}
+			}
+			soBackgroundImageVisibility();
+			$background_image.find( '[name="style[background_image_attachment]"], [name="style[background_image_attachment_fallback]"]' ).on( 'change', soBackgroundImageVisibility );
+		}
 
 		// Allow other plugins to setup custom fields.
 		$( document ).trigger( 'setup_style_fields', this );

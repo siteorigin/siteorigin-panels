@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.19.0 - 22 November 2022 =
+* Styles: Added a row, cell, and widget `Background Image Size` setting.
+
 = 2.18.4 - 13 November 2022 =
 * Admin Row Colors: Adjusted swatches layout and spacing.
 
