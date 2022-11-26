@@ -232,6 +232,14 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 10,
 		);
 
+		$fields['border_thickness'] = array(
+			'name'        => __( 'Border Thickness', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'design',
+			'default'     => '1px',
+			'priority'    => 11,
+		);
+
 		$fields['border_radius'] = array(
 			'name'        => __( 'Border Radius', 'siteorigin-panels' ),
 			'type'        => 'measurement',
@@ -770,7 +778,7 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if ( ! empty( $style[ 'border_color' ] ) ) {
-			$css[ 'border' ] = '1px solid ' . $style['border_color'];
+			$css[ 'border' ] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
 		}
 
 		if ( ! empty( $style[ 'font_color' ] ) ) {
