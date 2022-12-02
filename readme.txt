@@ -107,6 +107,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.20.0 - 02 December 2022 =
+* Styles: Added a row, cell, and widget `Border Thickness` setting.
+* Parallax: Resolved `Disable Parallax On Mobile` setting bug.
+
 = 2.19.0 - 22 November 2022 =
 * Styles: Added a row, cell, and widget `Background Image Size` setting.
 
