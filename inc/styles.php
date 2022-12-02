@@ -83,7 +83,7 @@ class SiteOrigin_Panels_Styles {
 
 			wp_localize_script( 'simpleParallax', 'parallaxStyles', array(
 				'mobile-breakpoint' => siteorigin_panels_setting( 'mobile-width' ) . 'px',
-				'disable-parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ) ?: siteorigin_panels_setting( 'parallax-mobile' ),
+				'disable-parallax-mobile' => ! empty( siteorigin_panels_setting( 'parallax-mobile' ) ),
 				'delay' => ! empty( siteorigin_panels_setting( 'parallax-delay' ) ) ? siteorigin_panels_setting( 'parallax-delay' ) : 0.4,
 				'scale' => ! empty( siteorigin_panels_setting( 'parallax-scale' ) ) ? siteorigin_panels_setting( 'parallax-scale' ) : 1.1,
 			) );
@@ -230,6 +230,14 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'color',
 			'group'       => 'design',
 			'priority'    => 10,
+		);
+
+		$fields['border_thickness'] = array(
+			'name'        => __( 'Border Thickness', 'siteorigin-panels' ),
+			'type'        => 'measurement',
+			'group'       => 'design',
+			'default'     => '1px',
+			'priority'    => 11,
 		);
 
 		$fields['border_radius'] = array(
@@ -770,7 +778,7 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if ( ! empty( $style[ 'border_color' ] ) ) {
-			$css[ 'border' ] = '1px solid ' . $style['border_color'];
+			$css[ 'border' ] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
 		}
 
 		if ( ! empty( $style[ 'font_color' ] ) ) {
