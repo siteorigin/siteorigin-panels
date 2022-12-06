@@ -102,5 +102,5 @@ function siteorigin_panels_activate(){
  * @return string Base URL of the widget, with $path appended.
  */
 function siteorigin_panels_url( $path = '' ) {
-	return plugins_url( 'siteorigin-panels/' . $path );
+	return plugins_url( $path, SITEORIGIN_PANELS_BASE_FILE );
 }
