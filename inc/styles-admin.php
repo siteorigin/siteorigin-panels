@@ -389,6 +389,20 @@ class SiteOrigin_Panels_Styles_Admin {
 
 				<?php
 				break;
+			default:
+				// No standard style fields used. See if there's a custom one set.
+				$custom_style_field = apply_filters( 'siteorigin_panels_style_field_'. $field['type'],
+					$field,
+					$field_name,
+					$current,
+					$field_id
+				);
+
+				if ( ! empty( $custom_style_field ) ) {
+					echo $custom_style_field;
+				}
+
+				break;
 		}
 
 		echo '</div>';
@@ -539,8 +553,23 @@ class SiteOrigin_Panels_Styles_Admin {
 						$return = $return + $this->sanitize_style_fields( $k, $styles, $field['fields'] );
 					}
 				default:
-					// Just pass the value through.
-					$return[ $k ] = $styles[ $k ];
+					// No standard style fields used. See if there's a custom one set.
+					$custom_style_sanitized_data = apply_filters(
+						'siteorigin_panels_style_field_sanitize_'. $field['type'],
+						$styles[ $k ],
+						$k,
+						$field,
+						$styles,
+						$sub_field
+					);
+
+					if ( ! empty( $custom_style_sanitized_data ) ) {
+						$return[ $k ] = $custom_style_sanitized_data;
+					} else {
+						// Just pass the value through.
+						$return[ $k ] = $styles[ $k ];
+					}
+
 					break;
 
 			}
