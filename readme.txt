@@ -107,6 +107,11 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.20.1 - 09 December 2022 =
+* Darkened default cell admin background color.
+* Removed `@font-face` query string.
+* Altered `siteorigin_panels_url` to better allow different directory names.
+
 = 2.20.0 - 02 December 2022 =
 * Styles: Added a row, cell, and widget `Border Thickness` setting.
 * Parallax: Resolved `Disable Parallax On Mobile` setting bug.
