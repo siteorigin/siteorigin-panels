@@ -359,6 +359,7 @@ module.exports = Backbone.View.extend( {
 			}
 			soBackgroundImageVisibility();
 			$background_image.find( '[name="style[background_image_attachment]"], [name="style[background_image_attachment_fallback]"]' ).on( 'change', soBackgroundImageVisibility );
+			$background_image.find( '.remove-image' ).on( 'click', soBackgroundImageVisibility );
 		}
 
 		// Conditionally show Border related settings.
