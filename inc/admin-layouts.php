@@ -338,10 +338,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 			wp_die();
 		}
 
-
 		if ( ! isset( $_REQUEST['lid'] ) ) {
 			wp_die();
 		}
+
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
 			wp_die();
 		}
