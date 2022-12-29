@@ -470,9 +470,7 @@ class SiteOrigin_Panels_Renderer {
 			$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		}
 		
-		if ( ! empty( $layout_data ) ) {
-			$layout_data = $this->get_panels_layout_data( $panels_data );
-		}
+		$layout_data = $this->get_panels_layout_data( $panels_data );
 		$layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
 
 		ob_start();
