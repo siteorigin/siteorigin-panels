@@ -11,6 +11,7 @@ module.exports = Backbone.View.extend( {
 	dataField: false,
 	currentData: '',
 	contentPreview: '',
+	initialContentPreviewSetup: false,
 
 	attachedToEditor: false,
 	attachedVisible: false,
@@ -785,12 +786,17 @@ module.exports = Backbone.View.extend( {
 					},
 					function ( content ) {
 						// Post content doesn't need to be generated on load while contentPreview does.
-						if ( this.contentPreview && content.post_content !== '' ) {
+						if (
+							this.contentPreview &&
+							content.post_content !== '' &&
+							this.initialContentPreviewSetup
+						) {
 							this.updateEditorContent( content.post_content );
 						}
 
 						if ( content.preview !== '' ) {
 							this.contentPreview = content.preview;
+							this.initialContentPreviewSetup = true;
 						}
 					}.bind( this )
 				);
