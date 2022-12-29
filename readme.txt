@@ -107,9 +107,13 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.20.3 - 29 December 2022 =
+* Reverted: Prevented `$layout_data` loading if already set.
+
 = 2.20.2 - 29 December 2022 =
 * Styles: Improved `Background Image Display` and `Size` settings conditional display behavior.
 * Classic Editor: Prevented potential notice when opening a saved widget.
+* Developer: Prevented `$layout_data` loading if already set.
 * Developer: Added custom style field type support via `siteorigin_panels_style_field_*`, and `siteorigin_panels_style_field_sanitize_*`.
 
 = 2.20.1 - 09 December 2022 =
