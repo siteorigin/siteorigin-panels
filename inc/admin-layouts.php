@@ -337,9 +337,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 		if ( empty( $_REQUEST['type'] ) ) {
 			wp_die();
 		}
-		if ( empty( $_REQUEST['lid'] ) ) {
+
+		if ( ! isset( $_REQUEST['lid'] ) ) {
 			wp_die();
 		}
+
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
 			wp_die();
 		}
@@ -350,9 +352,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 		
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
-			$lid = ! empty( $_REQUEST['lid'] ) ? $_REQUEST['lid'] : false;
-			
-			if ( empty( $lid ) || empty( $layouts[ $lid ] ) ) {
+
+			if ( ! is_numeric( $_REQUEST['lid'] ) && empty( $layouts[ $_REQUEST['lid'] ] ) ) {
 				wp_send_json_error( array(
 					'error'   => true,
 					'message' => __( 'Missing layout ID or no such layout exists', 'siteorigin-panels' ),
@@ -374,7 +375,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 			
 			// A theme or plugin could use this to change the data in the layout
-			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $lid );
+			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $_REQUEST['lid'] );
 			
 			// Remove all the layout specific attributes
 			if ( isset( $panels_data['name'] ) ) unset( $panels_data['name'] );
