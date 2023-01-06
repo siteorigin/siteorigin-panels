@@ -1536,6 +1536,16 @@ class SiteOrigin_Panels_Admin {
 				'url' => SiteOrigin_Panels::premium_url(),
 				'anchor' => __( 'SiteOrigin Preimum', 'siteorigin-panels' ),
 			),
+			array(
+				'text' => __( 'Organize your Page Builder rows with custom background colors using %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/custom-row-colors'),
+				'anchor' => __( 'SiteOrigin Preimum', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Add widget, cell, and row Retina background images for high-pixel-density displays with %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/retina-background-images' ),
+				'anchor' => __( 'SiteOrigin Preimum', 'siteorigin-panels' ),
+			),
 		);
 		if ( class_exists( 'woocommerce' ) ) {
 			$links[] = array(
