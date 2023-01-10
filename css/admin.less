@@ -175,13 +175,13 @@
 		padding: 20px 15px 0 15px;
 
 		h3.so-row-label {
-			display: inline-block;
-			font-size: 1em;
-			font-weight: 500;
 			color: #474747;
-			margin: 0 0 0 4px;
-			line-height: 22px;
+			display: inline-block;
 			float: left;
+			font-size: 13px;
+			font-weight: 500;
+			line-height: 22px;
+			margin: 0 0 0 4px;
 		}
 
 		.so-row-toolbar {
@@ -425,21 +425,18 @@
 					.widgets-container {
 
 						.so-widget {
+							background: #f9f9fb;
+							border: 1px solid rgba( 255, 255, 255, 0.75 );
+							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
+							.box-sizing(border-box);
 							cursor: move;
+							margin-bottom: 6px;
+							max-height: 49px;
 
 							&.so-widget-no-move {
 								cursor: auto;
 							}
 
-							margin-bottom: 6px;
-
-							background: #f9f9fb;
-
-							border: 1px solid rgba( 255, 255, 255, 0.75 );
-							max-height: 49px;
-
-							.box-shadow(~"0 1px 1px rgba(0,0,0,0.075)");
-							.box-sizing(border-box);
 
 							&:focus,
 							&:hover {
@@ -460,17 +457,17 @@
 								height: 100%;
 							}
 
-							h4{
-								display: block;
+							h4 {
+								-webkit-text-size-adjust: 100%;
+								color: #474747;
 								cursor: pointer;
-								margin: 0 15px 3px 0;
-								font-size: 1em;
+								display: block;
+								font-size: 13px;
 								font-weight: 600;
 								line-height: 1.25em;
-								color: #474747;
+								margin: 0 15px 3px 0;
 								text-shadow: 0 1px 0 #FFF;
 								white-space: nowrap;
-								-webkit-text-size-adjust: 100%;
 
 								span {
 									font-weight: normal;
@@ -554,11 +551,12 @@
 								display: none;
 							}
 
-							small{
+							small {
+								color: #777 !important;
 								display: block;
+								font-size: 13px;
 								height: 16px;
 								overflow: hidden;
-								color: #777;
 
 								@media (max-width:782px) {
 									display: none;
@@ -872,6 +870,25 @@
 
 		.so-toggle-switch-green > .so-toggle-switch-input:checked ~ .so-toggle-switch-label {
 			background: #4fb845;
+		}
+	}
+}
+
+.wp-customizer,
+.block-editor-page {
+	/* Styles for PB in block editor. */
+	.siteorigin-panels-layout-block-container {
+		font-size: 13px;
+		line-height: 1.4em;
+
+		&,
+		h4,
+		ul {
+			font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
+		}
+
+		ul {
+			list-style: none;
 		}
 	}
 }
@@ -1416,6 +1433,7 @@
 
 						small {
 							color: #eee;
+							font-size: 13px;
 						}
 
 						&:hover {
@@ -2246,7 +2264,8 @@
 
 	/* Special case of the builder interface being inside a dialog, or block editor. */
 
-	.so-content, .siteorigin-panels-layout-block-container {
+	.so-content,
+	.siteorigin-panels-layout-block-container {
 		.siteorigin-panels-builder {
 			.so-builder-toolbar {
 				border: 1px solid #dedede;
@@ -2262,18 +2281,6 @@
 				padding-right: 0;
 				line-height: 2.5em;
 			}
-		}
-	}
-
-	/* Styles for PB in block editor. */
-	.siteorigin-panels-layout-block-container {
-		font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
-		font-size: 13px;
-		line-height: 1.4em;
-
-		ul {
-			font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
-			list-style: none;
 		}
 	}
 
@@ -2725,12 +2732,13 @@
 		padding: 6px 0 0 0;
 
 		ul {
-			margin: 0;
-			border: 1px solid #c0c0c0;
 			background: #f9f9f9;
-			.rounded(2px);
-			padding: 4px 0;
+			border: 1px solid #c0c0c0;
 			.box-shadow(~"0 2px 2px rgba(0,0,0,0.1)");
+			font-family: 123
+			margin: 0;
+			padding: 4px 0;
+			.rounded(2px);
 
 			li {
 				margin: 0;
