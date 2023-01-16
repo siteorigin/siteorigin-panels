@@ -107,6 +107,13 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.20.4 - 16 January 2023 =
+* Prevented potential "Are you sure you want to navigate away." notice.
+* Customizer Widgets Block Editor: Fixed Layout Block styling.
+* Layouts Directory: Allowed layouts to be named "0".
+* Modern Parallax Sliders: Prevented a potential mobile display issue.
+* Developer: Prevented `$layout_data` loading if already set.
+
 = 2.20.3 - 29 December 2022 =
 * Reverted: Prevented `$layout_data` loading if already set.
 

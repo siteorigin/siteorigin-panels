@@ -469,9 +469,11 @@ class SiteOrigin_Panels_Renderer {
 		if ( $is_preview ) {
 			$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		}
-		
-		$layout_data = $this->get_panels_layout_data( $panels_data );
-		$layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
+
+		if ( empty( $layout_data ) ) {
+			$layout_data = $this->get_panels_layout_data( $panels_data );
+			$layout_data = apply_filters( 'siteorigin_panels_layout_data', $layout_data, $post_id );
+		}
 
 		ob_start();
 

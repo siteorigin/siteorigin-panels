@@ -440,13 +440,6 @@ var parallax_ParallaxInstance = /*#__PURE__*/function () {
       });
     } // check if the current element is visible in the Viewport
     // for browser that not support Intersection Observer API
-
-  }, {
-    key: "checkIfVisible",
-    value: function checkIfVisible() {
-      return this.elementBottom > viewport.positions.top && this.elementTop < viewport.positions.bottom;
-    } // calculate the range between image will be translated
-
   }, {
     key: "getRangeMax",
     value: function getRangeMax() {
@@ -663,8 +656,8 @@ var simpleParallax_SimpleParallax = /*#__PURE__*/function () {
       var isVisible = false; // if this is a custom container
       // use old function to check if element visible
 
-      if (this.customContainer) {
-        isVisible = instance.checkIfVisible(); // else, use response from Intersection Observer API Callback
+      if ( instance.element.hasAttribute( 'data-siteorigin-parallax' ) ) {
+        isVisible = true;
       } else {
         isVisible = instance.isVisible;
       } // if element not visible, stop it
