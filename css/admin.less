@@ -12,7 +12,7 @@
 	font-style: normal;
 }
 
-/* This is for the metabox */
+// WP Editor Metabox Styling.
 
 #so-panels-panels {
 	&.attached-to-editor{
@@ -36,13 +36,13 @@
 	}
 }
 
-/* Everything for the main builder interface */
+// Everything for the main builder interface.
 
 .siteorigin-panels-builder {
 
 	position: relative;
 
-	/* These are generic iconic buttons used in the page builder interface */
+	// These are generic iconic buttons used in the page builder interface.
 	.so-tool-button {
 		padding: 6px 7px;
 		text-decoration: none;
@@ -110,7 +110,7 @@
 		margin-top: 0 !important;
 		.clearfix();
 
-		/* The toolbar buttons */
+		// The toolbar buttons.
 		.so-tool-button {
 			display: inline-block;
 			color: #666;
@@ -720,9 +720,9 @@
 
 }
 
-/* This is to display a draggable widget  */
+// Resolve WP issue preventing widgets from being draggable.
 .so-widget.ui-sortable-helper.widget-being-dragged {
-	/* Need a high z-index for layout builder widget */
+	// Need a high z-index for layout builder widget.
 	z-index: 500002 !important;
 
 	opacity: 0.9;
@@ -732,7 +732,7 @@
 	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
 
-/* Handles displaying a builder in the WordPress widget interface */
+// CSS for Layout Builder, Layout Form Field, and other instances of PB inside of widgets.
 .widgets-holder-wrap .widget-inside {
 
 	.siteorigin-panels-builder {
@@ -754,7 +754,7 @@
 
 }
 
-/* Toggle Switch used on the custom home page interface and Toggle Style Admin fields. */
+// Toggle Switch used on the custom home page interface and Toggle Style Admin fields.
 .so-panels-dialog .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
 .block-editor-page .so-visual-styles .style-section-fields .style-field-wrapper .style-field-toggle,
 #panels-home-page {
@@ -876,7 +876,7 @@
 
 .wp-customizer,
 .block-editor-page {
-	/* Styles for PB in block editor. */
+	// Styles for PB in block editor.
 	.siteorigin-panels-layout-block-container {
 		font-size: 13px;
 		line-height: 1.4em;
@@ -1045,7 +1045,7 @@
 
 		}
 
-		/* These are the action buttons in the title bar */
+		// Action buttons in Title bar.
 		a {
 			cursor: pointer;
 			position: relative;
@@ -1128,7 +1128,6 @@
 				}
 			}
 
-			/* Disabled nav */
 			&.so-nav.so-disabled {
 				cursor: default;
 				pointer-events:none;
@@ -1471,8 +1470,7 @@
 
 	}
 
-	/* The add widget dialog */
-
+	// The Add Widget dialog
 	&.so-panels-dialog-add-widget {
 
 		.widget-type-list {
@@ -1483,7 +1481,7 @@
 			min-height: 10px;
 
 			.widget-type {
-				-ms-user-select: none; /* IE 10+ */
+				-ms-user-select: none;
 				-moz-user-select: -moz-none;
 				-khtml-user-select: none;
 				-webkit-user-select: none;
@@ -1555,8 +1553,7 @@
 
 	}
 
-	/* The row edit dialog */
-
+	// The Row Edit dialog.
 	&.so-panels-dialog-row-edit {
 
 		.so-content {
@@ -1736,8 +1733,7 @@
 		}
 	}
 
-	/* For prebuilt layouts */
-
+	// The Prebuilt Layouts dialog.
 	&.so-panels-dialog-prebuilt-layouts {
 		.so-content {
 
@@ -2118,8 +2114,7 @@
 			}
 		}
 
-		/* All the field types */
-
+		// Row/Cell/Widget Styling for fields.
 		.style-field-measurement {
 			.measurement-inputs {
 				overflow: auto;
@@ -2233,9 +2228,9 @@
 
 		.style-field-checkbox {
 			label {
-				-webkit-user-select: none;  /* Chrome all / Safari all */
-				-moz-user-select: none;     /* Firefox all */
-				-ms-user-select: none;      /* IE 10+ */
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
 				user-select: none;
 			}
 		}
@@ -2263,8 +2258,7 @@
 		}
 	}
 
-	/* Special case of the builder interface being inside a dialog, or block editor. */
-
+	// Account for the builder interface being inside a dialog, or block editor.
 	.so-content,
 	.siteorigin-panels-layout-block-container {
 		.siteorigin-panels-builder {
@@ -2285,7 +2279,7 @@
 		}
 	}
 
-	/* PB Icon in block editor */
+	// PB Icon in Block Editor.
 	.siteorigin-panels-block-icon {
 		display: inline-block;
 		background-size: cover;
@@ -2345,7 +2339,7 @@
 	}
 }
 
-/* Display the dialog with a proper z-index in the customizer */
+// Display the dialog with a proper z-index in the customizer.
 .wp-customizer .so-panels-dialog {
 	.so-overlay, .so-content, .so-title-bar, .so-toolbar {
 		z-index: 500001;
@@ -2584,7 +2578,7 @@
 }
 
 
-/* For the custom home page interface */
+// For the custom home page interface.
 
 #panels-home-page {
 	.so-toggle-switch {
@@ -2788,7 +2782,7 @@
 	}
 }
 
-/* Page Builder icons */
+// Page Builder icons.
 .so-panels-icon {
 	font-family: 'siteorigin-panels-icons';
 	speak: none;
@@ -2797,8 +2791,6 @@
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
-
-	/* Better Font Rendering =========== */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 
@@ -2855,7 +2847,7 @@
 	margin-top: -21px !important;
 }
 
-/* PB Icon for general use */
+// PB Icon for general use.
 .siteorigin-page-builder-icon {
 	display: inline-block;
 	background-size: cover;
@@ -2868,7 +2860,7 @@
 	}
 }
 
-/* 5.8 Widgets Page */
+// 5.8 Widgets Page.
 .widgets-php.block-editor-page {
 
 	.siteorigin-panels-layout-block-container {
@@ -2926,7 +2918,7 @@
 		}
 
 		select.siteorigin-widget-field {
-			/* 5.7.2 .wp-core-ui select styling */
+			// 5.7.2 .wp-core-ui select styling.
 			-webkit-appearance: none;
 			background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
 			background-size: auto;
