@@ -206,7 +206,7 @@ class SiteOrigin_Panels_Admin {
 	function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		$preview_content = $this->generate_panels_preview( $post->ID, $panels_data );
+		$preview_content = siteorigin_panels_setting( 'copy-content' ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		$builder_id = uniqid();
 		$builder_type = apply_filters( 'siteorigin_panels_post_builder_type', 'editor_attached', $post, $panels_data );
 		$builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array(), $post, $panels_data );
