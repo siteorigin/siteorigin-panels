@@ -18,9 +18,10 @@ wp_enqueue_style( 'siteorigin-preview-style', siteorigin_panels_url( 'css/live-e
 	<div id="content" class="site-content">
 		<div class="entry-content">
 			<?php
-			if( !empty( $_POST['live_editor_panels_data'] ) ) {
+			if ( !empty( $_POST['live_editor_panels_data'] ) ) {
 				$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
-				if(
+
+				if (
 					!empty( $data['widgets'] ) && (
 						!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
 						method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
@@ -28,7 +29,7 @@ wp_enqueue_style( 'siteorigin-preview-style', siteorigin_panels_url( 'css/live-e
 				) {
 					$data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $data['widgets'], false, false );
 				}
-				echo siteorigin_panels_render( 'l' . md5( serialize( $data ) ), true, $data);
+				echo siteorigin_panels_render( 'l' . md5( serialize( $data ) ), true, $data );
 			}
 			?>
 		</div><!-- .entry-content -->

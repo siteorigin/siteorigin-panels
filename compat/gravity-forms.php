@@ -2,10 +2,6 @@
 /**
  * Override Gravity Forms "Disable Print Scripts" setting to prevent missing jQuery error.
  *
- * @param $instance
- * @param $the_widget
- * @param $widget_class
- *
  * @return $instance
  */
 function siteorigin_gravity_forms_override_disable_print_scripts( $instance, $the_widget, $widget_class ) {

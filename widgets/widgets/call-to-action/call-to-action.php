@@ -1,7 +1,7 @@
 <?php
 
 class SiteOrigin_Panels_Widget_Call_To_Action extends SiteOrigin_Panels_Widget {
-	function __construct() {
+	public function __construct() {
 		parent::__construct(
 			__( 'Call To Action (PB)', 'siteorigin-panels' ),
 			array(
@@ -34,6 +34,6 @@ class SiteOrigin_Panels_Widget_Call_To_Action extends SiteOrigin_Panels_Widget {
 		);
 
 		// We need the button style.
-		$this->add_sub_widget( 'button', __( 'Button', 'siteorigin-panels' ), 'SiteOrigin_Panels_Widget_Button') ;
+		$this->add_sub_widget( 'button', __( 'Button', 'siteorigin-panels' ), 'SiteOrigin_Panels_Widget_Button' );
 	}
 }

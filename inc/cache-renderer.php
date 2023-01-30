@@ -2,7 +2,7 @@
 
 class SiteOrigin_Panels_Cache_Renderer {
 
-	function __construct() {
+	public function __construct() {
 		// Clear cache when the Page Builder version changes
 		add_action( 'siteorigin_panels_version_changed', array( $this, 'clear_cache' ), 10, 0 );
 
@@ -21,8 +21,9 @@ class SiteOrigin_Panels_Cache_Renderer {
 	/**
 	 * @return SiteOrigin_Panels_Cache_Renderer
 	 */
-	static function single() {
+	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -31,7 +32,7 @@ class SiteOrigin_Panels_Cache_Renderer {
 	 *
 	 * Keep this around for a bit in attempt to delete any existing caches.
 	 */
-	public function clear_cache(){
+	public function clear_cache() {
 		delete_post_meta_by_key( 'siteorigin_panels_cache' );
 	}
 }

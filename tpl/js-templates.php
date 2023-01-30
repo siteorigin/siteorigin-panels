@@ -9,49 +9,48 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="so-builder-toolbar">
 
-			<a class="so-tool-button so-widget-add" title="<?php esc_attr_e( 'Add Widget', 'siteorigin-panels' ) ?>" tabindex="0">
+			<a class="so-tool-button so-widget-add" title="<?php esc_attr_e( 'Add Widget', 'siteorigin-panels' ); ?>" tabindex="0">
 				<span class="so-panels-icon so-panels-icon-add-widget"></span>
-				<span class="so-button-text"><?php esc_html_e('Add Widget', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e( 'Add Widget', 'siteorigin-panels' ); ?></span>
 			</a>
 
-			<a class="so-tool-button so-row-add" title="<?php esc_attr_e( 'Add Row', 'siteorigin-panels' ) ?>" tabindex="0">
+			<a class="so-tool-button so-row-add" title="<?php esc_attr_e( 'Add Row', 'siteorigin-panels' ); ?>" tabindex="0">
 				<span class="so-panels-icon so-panels-icon-add-row"></span>
-				<span class="so-button-text"><?php esc_html_e('Add Row', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e( 'Add Row', 'siteorigin-panels' ); ?></span>
 			</a>
 
-			<a class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ) ?>" tabindex="0">
+			<a class="so-tool-button so-prebuilt-add" title="<?php esc_attr_e( 'Prebuilt Layouts', 'siteorigin-panels' ); ?>" tabindex="0">
 				<span class="so-panels-icon so-panels-icon-layouts"></span>
-				<span class="so-button-text"><?php esc_html_e('Layouts', 'siteorigin-panels') ?></span>
+				<span class="so-button-text"><?php esc_html_e( 'Layouts', 'siteorigin-panels' ); ?></span>
 			</a>
 
 			<?php
 			if (
 				! empty( $post ) ||
-				( function_exists( 'get_current_screen' ) && get_current_screen()->base == 'widgets' &&  get_current_screen()->is_block_editor )
+				( function_exists( 'get_current_screen' ) && get_current_screen()->base == 'widgets' && get_current_screen()->is_block_editor )
+			) {
+				?>
 
-			) :
-			?>
-
-				<a class="so-tool-button so-history" style="display: none" title="<?php esc_attr_e( 'Edit History', 'siteorigin-panels' ) ?>" tabindex="0">
+				<a class="so-tool-button so-history" style="display: none" title="<?php esc_attr_e( 'Edit History', 'siteorigin-panels' ); ?>" tabindex="0">
 					<span class="so-panels-icon so-panels-icon-history"></span>
-					<span class="so-button-text"><?php _e('History', 'siteorigin-panels') ?></span>
+					<span class="so-button-text"><?php _e( 'History', 'siteorigin-panels' ); ?></span>
 				</a>
 
-				<a class="so-tool-button so-live-editor" style="display: none" title="<?php esc_html_e( 'Live Editor', 'siteorigin-panels' ) ?>" tabindex="0">
+				<a class="so-tool-button so-live-editor" style="display: none" title="<?php esc_html_e( 'Live Editor', 'siteorigin-panels' ); ?>" tabindex="0">
 					<span class="so-panels-icon so-panels-icon-live-editor"></span>
-					<span class="so-button-text"><?php _e('Live Editor', 'siteorigin-panels') ?></span>
+					<span class="so-button-text"><?php _e( 'Live Editor', 'siteorigin-panels' ); ?></span>
 				</a>
 
-			<?php endif; ?>
+			<?php } ?>
 
-			<?php if( SiteOrigin_Panels::display_premium_teaser() ) : ?>
-				<a class="so-tool-button so-learn" title="<?php esc_attr_e( 'Page Builder Addons', 'siteorigin-panels' ) ?>" href="<?php echo esc_url( SiteOrigin_Panels::premium_url() ) ?>" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;" tabindex="0">
+			<?php if ( SiteOrigin_Panels::display_premium_teaser() ) { ?>
+				<a class="so-tool-button so-learn" title="<?php esc_attr_e( 'Page Builder Addons', 'siteorigin-panels' ); ?>" href="<?php echo esc_url( SiteOrigin_Panels::premium_url() ); ?>" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;" tabindex="0">
 					<span class="so-panels-icon so-panels-icon-addons"></span>
-					<span class="so-button-text"><?php esc_html_e( 'Addons', 'siteorigin-panels' ) ?></span>
+					<span class="so-button-text"><?php esc_html_e( 'Addons', 'siteorigin-panels' ); ?></span>
 				</a>
-			<?php endif; ?>
+			<?php } ?>
 			
-			<a class="so-switch-to-standard" tabindex="0"><?php _e('Revert to Editor', 'siteorigin-panels') ?></a>
+			<a class="so-switch-to-standard" tabindex="0"><?php _e( 'Revert to Editor', 'siteorigin-panels' ); ?></a>
 
 		</div>
 
@@ -64,20 +63,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<?php
 				printf(
 					__( 'Add a %s, %s or %s to get started. Read our %s if you need help.', 'siteorigin-panels' ),
-					"<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . "</a>",
-					"<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . "</a>",
-					"<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . "</a>",
-					"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . "</a>"
+					"<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . '</a>',
+					"<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . '</a>',
+					"<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . '</a>',
+					"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . '</a>'
 				);
 				?>
 			</div>
 
-			<?php if( SiteOrigin_Panels::display_premium_teaser() ) : ?>
+			<?php if ( SiteOrigin_Panels::display_premium_teaser() ) { ?>
 				<div class="so-tip-wrapper">
-					<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ) ?>: </strong>
-					<?php SiteOrigin_Panels_Admin::display_footer_premium_link() ?>
+					<strong><?php _e( 'Pro Tip', 'siteorigin-panels' ); ?>: </strong>
+					<?php SiteOrigin_Panels_Admin::display_footer_premium_link(); ?>
 				</div>
-			<?php endif; ?>
+			<?php } ?>
 		</div>
 
 	</div>
@@ -98,13 +97,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 				<div class="so-dropdown-links-wrapper">
 					<ul>
-						<li><a class="so-row-settings"><?php _e('Edit Row', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-row-duplicate"><?php _e('Duplicate Row', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>"><?php _e('Delete Row', 'siteorigin-panels') ?></a></li>
+						<li><a class="so-row-settings"><?php _e( 'Edit Row', 'siteorigin-panels' ); ?></a></li>
+						<li><a class="so-row-duplicate"><?php _e( 'Duplicate Row', 'siteorigin-panels' ); ?></a></li>
+						<li><a class="so-row-delete so-needs-confirm" data-confirm="<?php esc_attr_e( 'Are you sure?', 'siteorigin-panels' ); ?>"><?php _e( 'Delete Row', 'siteorigin-panels' ); ?></a></li>
 						<?php
 						$row_colors = SiteOrigin_Panels_Admin::get_row_colors();
-						if ( ! empty( $row_colors ) ) :
-						?>
+
+						if ( ! empty( $row_colors ) ) {
+							?>
 							<li class="so-row-colors-container">
 								<?php
 								foreach ( $row_colors as $id => $color ) {
@@ -112,12 +112,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 									?>
 									<div data-color-label="<?php echo esc_attr( $name ); ?>"
 										class="<?php echo esc_attr( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
-										></div>
-									<?php
-								}
-								?>
+									></div>
+								<?php } ?>
 							</li>
-						<?php endif; ?>
+						<?php } ?>
 					</ul>
 					<div class="so-pointer"></div>
 				</div>
@@ -216,7 +214,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-builder">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php _e('Page Builder', 'siteorigin-panels') ?></h3>
+		<h3 class="title"><?php _e( 'Page Builder', 'siteorigin-panels' ); ?></h3>
 
 		<div class="content">
 			<div class="siteorigin-panels-builder">
@@ -225,7 +223,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 		</div>
 
 	</div>
@@ -239,11 +237,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-widgets">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php printf( __('Add New Widget %s', 'siteorigin-panels'), '<span class="current-tab-title"></span>' ) ?></h3>
+		<h3 class="title"><?php printf( __( 'Add New Widget %s', 'siteorigin-panels' ), '<span class="current-tab-title"></span>' ); ?></h3>
 
 		<div class="left-sidebar">
 
-			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e('Search Widgets', 'siteorigin-panels') ?>" />
+			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e( 'Search Widgets', 'siteorigin-panels' ); ?>" />
 
 			<ul class="so-sidebar-tabs">
 			</ul>
@@ -255,7 +253,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Close', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Close', 'siteorigin-panels' ); ?>" />
 		</div>
 
 	</div>
@@ -286,11 +284,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<div class="action-buttons">
-				<a class="so-delete" tabindex="0"><?php _e('Delete', 'siteorigin-panels') ?></a>
-				<a class="so-duplicate" tabindex="0"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+				<a class="so-delete" tabindex="0"><?php _e( 'Delete', 'siteorigin-panels' ); ?></a>
+				<a class="so-duplicate" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
 			</div>
 
-			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 		</div>
 
 	</div>
@@ -318,8 +316,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			<div class="row-set-form">
 				<?php
-				$cells_field = apply_filters('siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />');
-				$ratios = apply_filters('siteorigin_panels_column_ratios', array(
+				$cells_field = apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
+				$ratios = apply_filters( 'siteorigin_panels_column_ratios', array(
 					'Even' => 1,
 					'Golden' => 0.61803398,
 					'Halves' => 0.5,
@@ -334,14 +332,15 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					'Bipenton' => 0.46,
 				) );
 				$ratio_field = '<select name="ratio" class="so-row-field">';
-				foreach( $ratios as $name => $value ) {
-					$ratio_field .= '<option value="' . esc_attr($value) .  '">' . esc_html($name . ' (' . round($value, 3) . ')') . '</option>';
+
+				foreach ( $ratios as $name => $value ) {
+					$ratio_field .= '<option value="' . esc_attr( $value ) . '">' . esc_html( $name . ' (' . round( $value, 3 ) . ')' ) . '</option>';
 				}
 				$ratio_field .= '</select>';
 
 				$direction_field = '<select name="ratio_direction" class="so-row-field">';
-				$direction_field .= '<option value="right">' . esc_html__('Left to Right', 'siteorigin-panels') . '</option>';
-				$direction_field .= '<option value="left">' . esc_html__('Right to Left', 'siteorigin-panels') . '</option>';
+				$direction_field .= '<option value="right">' . esc_html__( 'Left to Right', 'siteorigin-panels' ) . '</option>';
+				$direction_field .= '<option value="left">' . esc_html__( 'Right to Left', 'siteorigin-panels' ) . '</option>';
 				$direction_field .= '</select>';
 
 				printf(
@@ -352,13 +351,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						array(
 							'<strong>$1</strong>',
 						),
-						__('1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s', 'siteorigin-panels')
+						__( '1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s', 'siteorigin-panels' )
 					),
 					$cells_field,
 					$ratio_field,
 					$direction_field
 				);
-				echo '<button class="button-secondary set-row">' . esc_html__('Set', 'siteorigin-panels') . '</button>';
+				echo '<button class="button-secondary set-row">' . esc_html__( 'Set', 'siteorigin-panels' ) . '</button>';
 				?>
 			</div>
 
@@ -371,15 +370,15 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="buttons">
 			{{% if( dialogType == 'edit' ) { %}}
 				<div class="action-buttons">
-					<a class="so-delete" tabindex="0"><?php _e('Delete', 'siteorigin-panels') ?></a>
-					<a class="so-duplicate" tabindex="0"><?php _e('Duplicate', 'siteorigin-panels') ?></a>
+					<a class="so-delete" tabindex="0"><?php _e( 'Delete', 'siteorigin-panels' ); ?></a>
+					<a class="so-duplicate" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
 				</div>
 			{{% } %}}
 
 			{{% if( dialogType == 'create' ) { %}}
-				<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" />
+				<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e( 'Insert', 'siteorigin-panels' ); ?>" />
 			{{% } else { %}}
-				<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e('Done', 'siteorigin-panels') ?>" />
+				<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 			{{% } %}}
 		</div>
 
@@ -397,33 +396,38 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php _e('Page Builder Layouts', 'siteorigin-panels') ?></h3>
+		<h3 class="title"><?php _e( 'Page Builder Layouts', 'siteorigin-panels' ); ?></h3>
 
 		<div class="left-sidebar">
 
-			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e('Search', 'siteorigin-panels') ?>" />
+			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e( 'Search', 'siteorigin-panels' ); ?>" />
 
 			<ul class="so-sidebar-tabs">
-				<?php if( !empty( $layouts ) ) : ?>
+				<?php if ( !empty( $layouts ) ) { ?>
 					<li>
-						<a href="#prebuilt"><?php _e('Prebuilt Layouts', 'siteorigin-panels') ?></a>
+						<a href="#prebuilt"><?php _e( 'Prebuilt Layouts', 'siteorigin-panels' ); ?></a>
 					</li>
-				<?php endif; ?>
+				<?php } ?>
 				
 				<?php
 				$directories = SiteOrigin_Panels_Admin_Layouts::single()->get_directories();
+
 				foreach ( $directories as $id => $directory ) {
-					?><li><a href="#directory-<?php echo urlencode( $id ) ?>"><?php echo esc_html( $directory['title'] ) ?></a></li><?php
+					?><li><a href="#directory-<?php echo urlencode( $id ); ?>"><?php echo esc_html( $directory['title'] ); ?></a></li><?php
 				}
 				?>
-				<li><a href="#import"><?php _e('Import/Export', 'siteorigin-panels') ?></a></li>
+				<li><a href="#import"><?php _e( 'Import/Export', 'siteorigin-panels' ); ?></a></li>
 
 				<?php
-				$post_types = siteorigin_panels_setting('post-types');
-				foreach($post_types as $post_type) {
+				$post_types = siteorigin_panels_setting( 'post-types' );
+
+				foreach ( $post_types as $post_type ) {
 					$type = get_post_type_object( $post_type );
-					if( empty($type) ) continue;
-					?><li><a href="#<?php echo 'clone_'.$post_type ?>"><?php printf( __('Clone: %s', 'siteorigin-panels'), $type->labels->name ) ?></a></li><?php
+
+					if ( empty( $type ) ) {
+						continue;
+					}
+					?><li><a href="#<?php echo 'clone_' . $post_type; ?>"><?php printf( __( 'Clone: %s', 'siteorigin-panels' ), $type->labels->name ); ?></a></li><?php
 				}
 				?>
 			</ul>
@@ -435,13 +439,13 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<span class="so-dropdown-wrapper">
-				<input type="button" class="button-primary so-dropdown-button so-import-layout disabled" value="<?php esc_attr_e('Insert', 'siteorigin-panels') ?>" disabled="disabled"/>
+				<input type="button" class="button-primary so-dropdown-button so-import-layout disabled" value="<?php esc_attr_e( 'Insert', 'siteorigin-panels' ); ?>" disabled="disabled"/>
 
 				<div class="so-dropdown-links-wrapper hidden">
 					<ul class="so-layout-position">
-						<li><a class="so-toolbar-button" data-value="after" tabindex="0"><?php esc_html_e('Insert after', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-toolbar-button" data-value="before" tabindex="0"><?php esc_html_e('Insert before', 'siteorigin-panels') ?></a></li>
-						<li><a class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e('Are you sure?', 'siteorigin-panels') ?>" tabindex="0"><?php esc_html_e('Replace current', 'siteorigin-panels') ?></a></li>
+						<li><a class="so-toolbar-button" data-value="after" tabindex="0"><?php esc_html_e( 'Insert after', 'siteorigin-panels' ); ?></a></li>
+						<li><a class="so-toolbar-button" data-value="before" tabindex="0"><?php esc_html_e( 'Insert before', 'siteorigin-panels' ); ?></a></li>
+						<li><a class="so-toolbar-button so-needs-confirm" data-value="replace" data-confirm="<?php esc_attr_e( 'Are you sure?', 'siteorigin-panels' ); ?>" tabindex="0"><?php esc_html_e( 'Replace current', 'siteorigin-panels' ); ?></a></li>
 					</ul>
 				</div>
 			</span>
@@ -452,8 +456,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 <script type="text/template" id="siteorigin-panels-directory-enable">
 	<div class="so-enable-prebuilt">
-		<?php _e('Do you want to browse the Prebuilt Layouts directory?', 'siteorigin-panels') ?>
-		<button class="button-primary so-panels-enable-directory"><?php _e('Enable', 'siteorigin-panels') ?></button>
+		<?php _e( 'Do you want to browse the Prebuilt Layouts directory?', 'siteorigin-panels' ); ?>
+		<button class="button-primary so-panels-enable-directory"><?php _e( 'Enable', 'siteorigin-panels' ); ?></button>
 	</div>
 </script>
 
@@ -494,8 +498,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="clear"></div>
 
 		<div class="so-directory-pages">
-			<a class="so-previous button-secondary" data-direction="prev"><?php _e('Previous', 'siteorigin-panels') ?></a>
-			<a class="so-next button-secondary" data-direction="next"><?php _e('Next', 'siteorigin-panels') ?></a>
+			<a class="so-previous button-secondary" data-direction="prev"><?php _e( 'Previous', 'siteorigin-panels' ); ?></a>
+			<a class="so-next button-secondary" data-direction="next"><?php _e( 'Next', 'siteorigin-panels' ); ?></a>
 		</div>
 	</div>
 </script>
@@ -505,11 +509,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="import-upload-ui hide-if-no-js">
 			<div class="drag-upload-area">
 
-				<h2 class="drag-drop-message"><?php _e('Drop import file here', 'siteorigin-panels'); ?></h2>
-				<p class="drag-drop-message"><?php _e('Or', 'siteorigin-panels') ?></p>
+				<h2 class="drag-drop-message"><?php _e( 'Drop import file here', 'siteorigin-panels' ); ?></h2>
+				<p class="drag-drop-message"><?php _e( 'Or', 'siteorigin-panels' ); ?></p>
 
 				<p class="drag-drop-buttons">
-					<input type="button" value="<?php esc_attr_e('Select Import File', 'siteorigin-panels'); ?>" class="file-browse-button button" />
+					<input type="button" value="<?php esc_attr_e( 'Select Import File', 'siteorigin-panels' ); ?>" class="file-browse-button button" />
 				</p>
 
 				<p class="drag-drop-message js-so-selected-file"></p>
@@ -522,10 +526,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="export-file-ui">
 			<iframe id="siteorigin-panels-export-iframe" style="display: none;" name="siteorigin-panels-export-iframe"></iframe>
-			<form action="<?php echo admin_url('admin-ajax.php?action=so_panels_export_layout') ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
-				<input type="submit" value="<?php esc_attr_e('Download Layout', 'siteorigin-panels') ?>" class="button-primary" />
+			<form action="<?php echo esc_url( admin_url( 'admin-ajax.php?action=so_panels_export_layout' ) ); ?>" target="siteorigin-panels-export-iframe" class="so-export" method="post">
+				<input type="submit" value="<?php esc_attr_e( 'Download Layout', 'siteorigin-panels' ); ?>" class="button-primary" />
 				<input type="hidden" name="panels_export_data" value="" />
-				<?php wp_nonce_field('panels_action', '_panelsnonce') ?>
+				<?php wp_nonce_field( 'panels_action', '_panelsnonce' ); ?>
 			</form>
 		</div>
 	</div>
@@ -534,7 +538,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-history">
 	<div class="dialog-data">
 
-		<h3 class="title"><?php _e('Page Builder Change History', 'siteorigin-panels') ?></h3>
+		<h3 class="title"><?php _e( 'Page Builder Change History', 'siteorigin-panels' ); ?></h3>
 
 		<div class="left-sidebar">
 			<div class="history-entries"></div>
@@ -549,7 +553,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
-			<input type="button" class="button-primary so-restore" value="<?php esc_attr_e('Restore Version', 'siteorigin-panels') ?>" />
+			<input type="button" class="button-primary so-restore" value="<?php esc_attr_e( 'Restore Version', 'siteorigin-panels' ); ?>" />
 		</div>
 
 	</div>
@@ -572,18 +576,18 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="so-sidebar-tools">
 			<button
 				class="live-editor-save button-primary"
-				data-save="<?php esc_html_e('Save Draft', 'siteorigin-panels') ?>"
-				data-update="<?php esc_html_e('Update', 'siteorigin-panels') ?>"
-			><?php esc_html_e('Update', 'siteorigin-panels') ?></button>
-			<button class="live-editor-close button-secondary"><?php esc_html_e('Close', 'siteorigin-panels') ?></button>
+				data-save="<?php esc_html_e( 'Save Draft', 'siteorigin-panels' ); ?>"
+				data-update="<?php esc_html_e( 'Update', 'siteorigin-panels' ); ?>"
+			><?php esc_html_e( 'Update', 'siteorigin-panels' ); ?></button>
+			<button class="live-editor-close button-secondary"><?php esc_html_e( 'Close', 'siteorigin-panels' ); ?></button>
 
-			<a class="live-editor-mode live-editor-desktop so-active" title="<?php esc_attr_e( 'Toggle desktop mode', 'siteorigin-panels' ) ?>" data-mode="desktop" data-width="100%"  tabindex="0">
+			<a class="live-editor-mode live-editor-desktop so-active" title="<?php esc_attr_e( 'Toggle desktop mode', 'siteorigin-panels' ); ?>" data-mode="desktop" data-width="100%"  tabindex="0">
 				<span class="dashicons dashicons-desktop"></span>
 			</a>
-			<a class="live-editor-mode live-editor-tablet" title="<?php esc_attr_e( 'Toggle tablet mode', 'siteorigin-panels' ) ?>" data-mode="tablet" data-width="720px" tabindex="0">
+			<a class="live-editor-mode live-editor-tablet" title="<?php esc_attr_e( 'Toggle tablet mode', 'siteorigin-panels' ); ?>" data-mode="tablet" data-width="720px" tabindex="0">
 				<span class="dashicons dashicons-tablet"></span>
 			</a>
-			<a class="live-editor-mode live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ) ?>" data-mode="mobile" data-width="320px" tabindex="0">
+			<a class="live-editor-mode live-editor-mobile" title="<?php esc_attr_e( 'Toggle mobile mode', 'siteorigin-panels' ); ?>" data-mode="mobile" data-width="320px" tabindex="0">
 				<span class="dashicons dashicons-smartphone"></span>
 			</a>
 
@@ -622,7 +626,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</ul>
 		{{% if( settings.search ) { %}}
 		<div class="so-no-results">
-			<?php _e('No Results', 'siteorigin-panels') ?>
+			<?php _e( 'No Results', 'siteorigin-panels' ); ?>
 		</div>
 		{{% } %}}
 	</div>
@@ -632,7 +636,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="siteorigin-panels-add-layout-block wp-block">
 		<button class="components-button is-button is-primary">
 			<span class="siteorigin-panels-block-icon white"></span>
-			<?php _e( 'Add SiteOrigin Layout Block', 'siteorigin-panels' ) ?>
+			<?php _e( 'Add SiteOrigin Layout Block', 'siteorigin-panels' ); ?>
 		</button>
 	</div>
 </script>
