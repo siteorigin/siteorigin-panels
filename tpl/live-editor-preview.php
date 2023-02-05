@@ -18,11 +18,11 @@ wp_enqueue_style( 'siteorigin-preview-style', siteorigin_panels_url( 'css/live-e
 	<div id="content" class="site-content">
 		<div class="entry-content">
 			<?php
-			if ( !empty( $_POST['live_editor_panels_data'] ) ) {
+			if ( ! empty( $_POST['live_editor_panels_data'] ) ) {
 				$data = json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true );
 
 				if (
-					!empty( $data['widgets'] ) && (
+					! empty( $data['widgets'] ) && (
 						!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
 						method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
 					)

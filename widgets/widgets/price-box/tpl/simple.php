@@ -10,7 +10,7 @@ $this->sub_widget( 'button', array(
 	'url' => $instance['button_url'],
 	'align' => 'center',
 	'origin_style' => $instance['origin_style_button'],
-	'new_window' => !empty( $instance['button_new_window'] ),
+	'new_window' => ! empty( $instance['button_new_window'] ),
 ) );
 
 ?>

@@ -368,7 +368,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$layout = $layouts[ $_REQUEST['lid'] ];
 
 			// Fix the format of this layout
-			if ( !empty( $layout[ 'filename' ] ) ) {
+			if ( ! empty( $layout[ 'filename' ] ) ) {
 				$filename = $layout[ 'filename' ];
 				// Only accept filenames that end with .json
 				if ( substr( $filename, -5, 5 ) === '.json' && file_exists( $filename ) ) {

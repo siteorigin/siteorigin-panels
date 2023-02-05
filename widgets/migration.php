@@ -8,13 +8,13 @@
  * @return array
  */
 function siteorigin_panels_legacy_widget_migration( $panels_data ) {
-	if ( !empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
+	if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
 		foreach ( $panels_data['widgets'] as &$widget ) {
 			switch( $widget['panels_info']['class'] ) {
 				case 'SiteOrigin_Panels_Widgets_Gallery':
 					$shortcode = '[gallery ';
 
-					if ( !empty( $widget['ids'] ) ) {
+					if ( ! empty( $widget['ids'] ) ) {
 						$shortcode .= 'ids="' . esc_attr( $widget['ids'] ) . '" ';
 					}
 					$shortcode = trim( $shortcode ) . ']';

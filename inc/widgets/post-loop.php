@@ -82,7 +82,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 			return $helper->update( $new, $old );
 		} else {
-			$new['more'] = !empty( $new['more'] );
+			$new['more'] = ! empty( $new['more'] );
 
 			return $new;
 		}
@@ -203,9 +203,9 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 		global $siteorigin_panels_current_post;
 
-		if ( !empty( $siteorigin_panels_current_post ) ) {
-			if ( !empty( $query_args['post__not_in'] ) ) {
-				if ( !is_array( $query_args['post__not_in'] ) ) {
+		if ( ! empty( $siteorigin_panels_current_post ) ) {
+			if ( ! empty( $query_args['post__not_in'] ) ) {
+				if ( ! is_array( $query_args['post__not_in'] ) ) {
 					$query_args['post__not_in'] = explode( ',', $query_args['post__not_in'] );
 					$query_args['post__not_in'] = array_map( 'intval', $query_args['post__not_in'] );
 				}
@@ -215,7 +215,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			}
 		}
 
-		if ( !empty( $query_args['post__in'] ) && !is_array( $query_args['post__in'] ) ) {
+		if ( ! empty( $query_args['post__in'] ) && ! is_array( $query_args['post__in'] ) ) {
 			$query_args['post__in'] = explode( ',', $query_args['post__in'] );
 			$query_args['post__in'] = array_map( 'intval', $query_args['post__in'] );
 		}
@@ -227,7 +227,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		// Filter the title
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
-		if ( !empty( $instance['title'] ) ) {
+		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . $instance['title'] . $args['after_title'];
 		}
 
@@ -313,7 +313,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 								$headers = get_file_data( self::locate_template( $template ), array(
 									'loop_name' => 'Loop Name',
 								) );
-							echo esc_html( !empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
+							echo esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
 							?>
 							</option>
 						<?php } ?>

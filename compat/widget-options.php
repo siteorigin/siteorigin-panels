@@ -19,7 +19,7 @@ function siteorigin_panels_widget_options_compat_panels_data( $panels_data ) {
 add_filter( 'siteorigin_panels_data', 'siteorigin_panels_widget_options_compat_panels_data' );
 
 /**
- * Filter that removes any empty strings so they pass an !isset test.
+ * Filter that removes any empty strings so they pass an ! isset() test.
  *
  * @return array
  */

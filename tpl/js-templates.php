@@ -403,7 +403,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e( 'Search', 'siteorigin-panels' ); ?>" />
 
 			<ul class="so-sidebar-tabs">
-				<?php if ( !empty( $layouts ) ) { ?>
+				<?php if ( ! empty( $layouts ) ) { ?>
 					<li>
 						<a href="#prebuilt"><?php _e( 'Prebuilt Layouts', 'siteorigin-panels' ); ?></a>
 					</li>

@@ -47,9 +47,9 @@
 									<?php
 									$this->display_field( $field_id, $field );
 
-									if ( !empty( $field['description'] ) ) {
+									if ( ! empty( $field['description'] ) ) {
 										?>
-										<small class="description" data-keywords="<?php if ( !empty( $field['keywords'] ) ) {
+										<small class="description" data-keywords="<?php if ( ! empty( $field['keywords'] ) ) {
 											echo esc_attr( $field['keywords'] );
 										} ?>">
 											<?php
