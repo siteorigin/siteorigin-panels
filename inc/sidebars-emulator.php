@@ -141,10 +141,16 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 				// Add the widget option names from the layout widget
 				$widget_option_names = array_merge( $widget_option_names, $this->get_widget_option_names( $post_id, $widget_instance[ 'panels_data' ] ) );
 			}
+
 			$sidebar_id = $this->get_sidebar_id( $widget_instance );
 
 			if ( ! empty( $sidebar_id ) ) {
-				$widget_option_names[] = $widget_instance['option_name'];
+				if ( ! empty( $widget_instance['option_name'] ) ) {
+						$widget_option_names[] = $widget_instance['option_name'];
+				} else {
+					// Something went wrong. Skip this widget.
+					continue;
+				}
 			}
 			$this->all_posts_widgets[ $post_id ][] = $widget_instance;
 		}

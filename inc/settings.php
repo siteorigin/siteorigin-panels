@@ -744,6 +744,8 @@ class SiteOrigin_Panels_Settings {
 
 		// These are post types we know we don't want to show Page Builder on.
 		unset( $types['ml-slider'] );
+		unset( $types['shop_coupon'] );
+		unset( $types['shop_order'] );
 
 		foreach ( $types as $type_id => $type ) {
 			$type_object = get_post_type_object( $type_id );
