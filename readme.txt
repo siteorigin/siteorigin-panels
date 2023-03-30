@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.20.6 - 30 March 2023 =
+* Updated Tested up to tag.
+
 = 2.20.5 - 04 March 2023 =
 * Excluded some WooCommerce post types from the Page Builder Post Types list.
 * Sidebar Emulator: Resolved `Undefined array key "option_name"` warning.
