@@ -210,6 +210,11 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
 		}
 
+		// Compatibility with Rank Math.
+		if ( class_exists( 'RankMath' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/rank-math.php';
+		}
+
 		// Compatibility with AMP plugin.
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
