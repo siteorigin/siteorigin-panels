@@ -403,31 +403,36 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="text" class="so-sidebar-search" placeholder="<?php esc_attr_e( 'Search', 'siteorigin-panels' ); ?>" />
 
 			<ul class="so-sidebar-tabs">
-				<?php if ( ! empty( $layouts ) ) { ?>
-					<li>
-						<a href="#prebuilt"><?php _e( 'Prebuilt Layouts', 'siteorigin-panels' ); ?></a>
-					</li>
-				<?php } ?>
-				
 				<?php
+				$tabs = array();
+				if ( ! empty( $layouts ) ) {
+					$tabs['prebuilt'] = __( 'Prebuilt Layouts', 'siteorigin-panels' );
+				}
+
 				$directories = SiteOrigin_Panels_Admin_Layouts::single()->get_directories();
 
 				foreach ( $directories as $id => $directory ) {
-					?><li><a href="#directory-<?php echo urlencode( $id ); ?>"><?php echo esc_html( $directory['title'] ); ?></a></li><?php
+					$tabs[ 'directory-' . urlencode( $id ) ] = $directory['title'];
 				}
-				?>
-				<li><a href="#import"><?php _e( 'Import/Export', 'siteorigin-panels' ); ?></a></li>
+				$tabs['import'] = __( 'Import/Export', 'siteorigin-panels' );
 
-				<?php
 				$post_types = siteorigin_panels_setting( 'post-types' );
-
-				foreach ( $post_types as $post_type ) {
+				foreach( $post_types as $post_type ) {
 					$type = get_post_type_object( $post_type );
-
 					if ( empty( $type ) ) {
 						continue;
 					}
-					?><li><a href="#<?php echo 'clone_' . $post_type; ?>"><?php printf( __( 'Clone: %s', 'siteorigin-panels' ), $type->labels->name ); ?></a></li><?php
+
+					$tabs[ 'clone_' . $post_type ] = sprintf( __( 'Clone: %s', 'siteorigin-panels' ), $type->labels->name );
+				}
+
+				$tabs = apply_filters( 'siteorigin_panels_layout_tabs', $tabs );
+				foreach ( $tabs as $id => $tab ) {
+					?>
+					<li>
+						<a href="#<?php echo esc_html( $id ); ?>"><?php echo esc_html( $tab ); ?></a>
+					</li>
+					<?php
 				}
 				?>
 			</ul>
