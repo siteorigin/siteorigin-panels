@@ -2,12 +2,8 @@
 /**
  * Apply background and Lazy Load attributes/classes to rows, cells and widgets.
  *
- * @param $attributes
- * @param $style
- *
  * @return array $attributes
  */
-
 function siteorigin_apply_lazy_load_attributes( $attributes, $style ) {
 	if (
 		! empty( $style['background_display'] ) &&
@@ -41,9 +37,6 @@ add_filter( 'siteorigin_panels_widget_style_attributes', 'siteorigin_apply_lazy_
 
 /**
  * Prevent background image from being added using CSS.
- *
- * @param $css
- * @param $style
  *
  * @return mixed
  */

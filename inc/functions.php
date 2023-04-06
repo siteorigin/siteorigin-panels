@@ -23,7 +23,6 @@ function siteorigin_panels_is_panel( $can_edit = false ) {
 	return SiteOrigin_Panels::is_panel( $can_edit );
 }
 
-
 function siteorigin_panels_get_home_page_data() {
 	return SiteOrigin_Panels::single()->get_home_page_data();
 }
@@ -44,20 +43,14 @@ function siteorigin_panels_render( $post_id = false, $enqueue_css = true, $panel
 /**
  * Generate the CSS for the page layout.
  *
- * @param $post_id
- * @param $panels_data
  * @return string
  */
-function siteorigin_panels_generate_css($post_id, $panels_data = false){
+function siteorigin_panels_generate_css( $post_id, $panels_data = false ) {
 	return SiteOrigin_Panels::renderer()->generate_css( $post_id, $panels_data );
 }
 
 /**
  * Legacy function to process raw widgets.
- *
- * @param $widgets
- * @param $old_widgets
- * @param $escape_classes
  *
  * @return array
  */
@@ -89,10 +82,9 @@ function siteorigin_panels_plugin_activation_install_url( $plugin, $plugin_name,
  *
  * @return bool
  */
-function siteorigin_panels_activate(){
+function siteorigin_panels_activate() {
 	return false;
 }
-
 
 /**
  * Returns the base URL of our widget with `$path` appended.

@@ -1,13 +1,13 @@
 <?php
 
 class SiteOrigin_Panels_Home {
-
-	function __construct() {
+	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
 	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -38,11 +38,13 @@ class SiteOrigin_Panels_Home {
 		global $post;
 
 		$home_page_id = get_option( 'page_on_front' );
+
 		if ( empty( $home_page_id ) ) {
 			$home_page_id = get_option( 'siteorigin_panels_home_page_id' );
 		}
 
 		$home_page = get_post( $home_page_id );
+
 		if ( ! empty( $home_page ) && get_post_meta( $home_page->ID, 'panels_data', true ) != '' ) {
 			$post = $home_page;
 		}
@@ -50,5 +52,4 @@ class SiteOrigin_Panels_Home {
 		$panels_data = SiteOrigin_Panels_Admin::single()->get_current_admin_panels_data();
 		include plugin_dir_path( __FILE__ ) . '../tpl/admin-home-page.php';
 	}
-
 }
