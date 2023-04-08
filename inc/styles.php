@@ -192,6 +192,7 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'color',
 			'group'       => 'design',
 			'priority'    => 5,
+			'alpha'       => true,
 		);
 
 		$fields['background_image_attachment'] = array(

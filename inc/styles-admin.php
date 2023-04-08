@@ -242,8 +242,16 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			case 'color' :
 				?>
-				<input type="text" name="<?php echo esc_attr( $field_name ); ?>"
-				       value="<?php echo esc_attr( $current ); ?>" class="so-wp-color-field"/>
+				<input
+					type="text"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					value="<?php echo esc_attr( $current ); ?>"
+					class="so-wp-color-field"
+					<?php if ( ! empty( $field['alpha'] ) ) { ?>
+						data-alpha-enabled="true"
+						data-alpha-color-type="hex"
+					<?php } ?>
+				/>
 				<?php
 				break;
 
@@ -504,12 +512,18 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			switch ( $field['type'] ) {
 				case 'color' :
-					$color = $styles[ $k ];
-
-					if ( preg_match( '|^#([A-Fa-f0-9]{3,8})$|', $color ) ) {
-						$return[ $k ] = $color;
+					if ( ! empty( $field['alpha'] ) && strpos( $color, 'rgba' ) !== false ) {
+						sscanf( $color, 'rgba(%d,%d,%d,%f)', $r, $g, $b, $a );
+						if (
+							! empty( $r ) && ! empty( $g ) && ! empty( $b ) && ! empty( $a )
+							&& is_numeric( $r ) && is_numeric( $g ) && is_numeric( $b ) && is_numeric( $a )
+						) {
+							$return[ $k ] = "rgba($r,$g,$b,$a)";
+						} else {
+							$return[ $k ] = '';
+						}
 					} else {
-						$return[ $k ] = '';
+						$return[ $k ] = sanitize_hex_color( $color );
 					}
 					break;
 
