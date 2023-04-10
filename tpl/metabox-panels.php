@@ -1,10 +1,10 @@
 <div id="siteorigin-panels-metabox"
 	data-builder-type="<?php echo esc_attr( $builder_type ); ?>"
 	data-preview-url="<?php echo $preview_url; ?>"
-	<?php if ( ! empty( $preview_content ) ) { ?>
-		data-preview-markup="<?php echo esc_attr( json_encode( $preview_content ) ); ?>"
-	<?php } ?>
 	data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ); ?>"
+	<?php if ( ! empty( $preview_content ) ) { ?>
+		data-preview-markup="<?php echo esc_attr( json_encode( wp_unslash( $preview_content ) ) ); ?>"
+	<?php } ?>
 	<?php if ( ! empty( $_GET['so_live_editor'] ) ) { ?>
 		data-live-editor="1"
 		data-live-editor-close="<?php echo siteorigin_panels_setting( 'live-editor-quick-link' ); ?>"
