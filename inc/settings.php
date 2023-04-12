@@ -525,7 +525,7 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['layout']['fields']['inline-styles'] = array(
 			'type'        => 'checkbox',
-			'label'       => __( 'Output Certain Styles Inline', 'siteorigin-panels' ),
+			'label'       => __( 'Inline Styles', 'siteorigin-panels' ),
 			'description' => __( 'This setting will output Margin, Border, and Padding inline to reduce the chance of a CLS impact.', 'siteorigin-panels' ),
 		);
 
