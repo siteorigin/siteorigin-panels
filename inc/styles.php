@@ -1200,7 +1200,7 @@ class SiteOrigin_Panels_Styles {
 	 * @return mixed
 	 */
 	public static function filter_widget_style_css( $widget_css, $widget_style_data ) {
-		if ( ! empty( $widget_style_data['margin'] ) && siteorigin_panels_setting( 'inline-styles' ) ) {
+		if ( ! empty( $widget_style_data['margin'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
 			$widget_css['margin'] = $widget_style_data['margin'];
 		}
 
