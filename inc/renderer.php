@@ -545,6 +545,21 @@ class SiteOrigin_Panels_Renderer {
 			$attributes['style'] = '';
 		}
 
+		// Check if Page Builder is set to output certain styles inline and if it is, do so.
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			if ( ! empty( $style['padding'] ) ) {
+				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
+			}
+
+			if ( ! empty( $style['margin'] ) ) {
+				$attributes['style'] .= 'margin: ' . $style['margin'] . ';';
+			}
+
+			if ( ! empty( $style['border_color'] ) ) {
+				$attributes['style'] .= 'border: ' . ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'] . ';';
+			}
+		}
+
 		// Get everything related to the style wrapper
 		$attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
 		$attributes = apply_filters( 'siteorigin_panels_general_style_attributes', $attributes, $style );

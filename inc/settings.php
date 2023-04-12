@@ -176,6 +176,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['margin-sides']                = 30;
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
+		$defaults['inline-styles']               = false;
 
 		// Content fields.
 		$defaults['copy-content'] = true;
@@ -520,6 +521,12 @@ class SiteOrigin_Panels_Settings {
 			),
 			'label'       => __( 'Page Builder Layout CSS Output Location', 'siteorigin-panels' ),
 			'description' => __( 'This setting is only applicable in the Classic Editor.', 'siteorigin-panels' ),
+		);
+
+		$fields['layout']['fields']['inline-styles'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Output Certain Styles Inline', 'siteorigin-panels' ),
+			'description' => __( 'This setting will output Padding, Margin, and Border styles inline to reduce the chance of a CLS impact.', 'siteorigin-panels' ),
 		);
 
 		// Content settings.

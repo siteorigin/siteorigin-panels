@@ -770,16 +770,16 @@ class SiteOrigin_Panels_Styles {
 			}
 		}
 
-		if ( ! empty( $style[ 'border_color' ] ) ) {
-			$css[ 'border' ] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
+		if ( ! empty( $style['border_color'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
+			$css['border'] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
 		}
 
-		if ( ! empty( $style[ 'font_color' ] ) ) {
-			$css[ 'color' ] = $style['font_color'];
+		if ( ! empty( $style['font_color'] ) ) {
+			$css['color'] = $style['font_color'];
 		}
 
-		if ( ! empty( $style[ 'padding' ] ) ) {
-			$css['padding'] = $style[ 'padding' ];
+		if ( ! empty( $style['padding'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
+			$css['padding'] = $style['padding'];
 		}
 
 		// Find which key the CSS is stored in.
@@ -1200,7 +1200,7 @@ class SiteOrigin_Panels_Styles {
 	 * @return mixed
 	 */
 	public static function filter_widget_style_css( $widget_css, $widget_style_data ) {
-		if ( ! empty( $widget_style_data['margin'] ) ) {
+		if ( ! empty( $widget_style_data['margin'] ) && siteorigin_panels_setting( 'inline-styles' ) ) {
 			$widget_css['margin'] = $widget_style_data['margin'];
 		}
 
