@@ -194,7 +194,7 @@ class SiteOrigin_Panels_Renderer {
 				}
 			}
 
-			if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			if ( ! siteorigin_panels_setting( 'inline-styles' ) ) {
 				if (
 					$ri != count( $layout_data ) - 1 ||
 					! empty( $row['style']['bottom_margin'] ) ||
@@ -927,10 +927,10 @@ class SiteOrigin_Panels_Renderer {
 		$row_classes[] = ! empty( $row_style_wrapper ) ? 'panel-has-style' : 'panel-no-style';
 		$row_classes = apply_filters( 'siteorigin_panels_row_classes', $row_classes, $row );
 
-		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
+		$row_attributes = array(
 			'id'    => 'pg-' . $post_id . '-' . $ri,
 			'class' => implode( ' ', $row_classes ),
-		), $row );
+		);
 
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', siteorigin_panels_setting( 'margin-bottom' ) . 'px', $row, $ri, $panels_data, $post_id );
@@ -943,6 +943,8 @@ class SiteOrigin_Panels_Renderer {
 				$row_attributes['style'] = 'margin-bottom: ' . $panels_margin_bottom;
 			}
 		}
+
+		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', $row_attributes, $row );
 
 		// This allows other themes and plugins to add html before the row
 		echo apply_filters( 'siteorigin_panels_before_row', '', $row, $row_attributes );
