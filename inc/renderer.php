@@ -194,14 +194,16 @@ class SiteOrigin_Panels_Renderer {
 				}
 			}
 
-			if (
-				$ri != count( $layout_data ) - 1 ||
-				! empty( $row['style']['bottom_margin'] ) ||
-				! empty( $panels_margin_bottom_last_row )
-			) {
-				$css->add_row_css( $post_id, $ri, '', array(
-					'margin-bottom' => $panels_margin_bottom,
-				) );
+			if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+				if (
+					$ri != count( $layout_data ) - 1 ||
+					! empty( $row['style']['bottom_margin'] ) ||
+					! empty( $panels_margin_bottom_last_row )
+				) {
+					$css->add_row_css( $post_id, $ri, '', array(
+						'margin-bottom' => $panels_margin_bottom,
+					) );
+				}
 			}
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
@@ -929,6 +931,18 @@ class SiteOrigin_Panels_Renderer {
 			'id'    => 'pg-' . $post_id . '-' . $ri,
 			'class' => implode( ' ', $row_classes ),
 		), $row );
+
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', siteorigin_panels_setting( 'margin-bottom' ) . 'px', $row, $ri, $panels_data, $post_id );
+
+			if  (
+				! empty( $row['style']['bottom_margin'] ) ||
+				$ri != count( $panels_data['grids'] ) - 1 ||
+				! empty( siteorigin_panels_setting( 'margin-bottom-last-row' ) )
+			) {
+				$row_attributes['style'] = 'margin-bottom: ' . $panels_margin_bottom;
+			}
+		}
 
 		// This allows other themes and plugins to add html before the row
 		echo apply_filters( 'siteorigin_panels_before_row', '', $row, $row_attributes );
