@@ -201,7 +201,15 @@ class SiteOrigin_Panels_Admin {
 	public function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
+		
+		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
+			SiteOrigin_Panels_Post_Content_Filters::add_filters();
+			$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+			$preview_content = SiteOrigin_Panels::renderer()->render( (int) $post->ID, false, wp_unslash( $panels_data ) );
+			SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+			unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+		}
+
 		$builder_id = uniqid();
 		$builder_type = apply_filters( 'siteorigin_panels_post_builder_type', 'editor_attached', $post, $panels_data );
 		$builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array(), $post, $panels_data );

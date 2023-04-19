@@ -37,7 +37,7 @@ jQuery(function($){
 			var extractContent = function( data ) {
 				var $data = $( data );
 
-				if( $data.find( '.so-panel.widget' ).length === 0 ) {
+				if ( $data.find( '.so-panel' ).length === 0 ) {
 					// Skip this for empty pages
 					return data;
 				}
