@@ -185,7 +185,7 @@ class SiteOrigin_Panels_Renderer {
 							$wi,
 							'',
 							array(
-								'margin' => $panels_mobile_widget_mobile_margin,
+								'margin' => $panels_mobile_widget_mobile_margin . ' !important',
 							),
 							$panels_mobile_width,
 							true
@@ -194,14 +194,16 @@ class SiteOrigin_Panels_Renderer {
 				}
 			}
 
-			if (
-				$ri != count( $layout_data ) - 1 ||
-				! empty( $row['style']['bottom_margin'] ) ||
-				! empty( $panels_margin_bottom_last_row )
-			) {
-				$css->add_row_css( $post_id, $ri, '', array(
-					'margin-bottom' => $panels_margin_bottom,
-				) );
+			if ( ! siteorigin_panels_setting( 'inline-styles' ) ) {
+				if (
+					$ri != count( $layout_data ) - 1 ||
+					! empty( $row['style']['bottom_margin'] ) ||
+					! empty( $panels_margin_bottom_last_row )
+				) {
+					$css->add_row_css( $post_id, $ri, '', array(
+						'margin-bottom' => $panels_margin_bottom,
+					) );
+				}
 			}
 
 			$collapse_order = ! empty( $row['style']['collapse_order'] ) ? $row['style']['collapse_order'] : ( ! is_rtl() ? 'left-top' : 'right-top' );
@@ -312,13 +314,15 @@ class SiteOrigin_Panels_Renderer {
 			} // End of responsive code
 		}
 
-		// Add the bottom margins
-		$css->add_widget_css( $post_id, false, false, false, '', array(
-			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id ),
-		) );
-		$css->add_widget_css( $post_id, false, false, false, ':last-of-type', array(
-			'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id ),
-		) );
+		// Add the bottom margins.
+		if ( ! siteorigin_panels_setting( 'inline-styles' ) ) {
+			$css->add_widget_css( $post_id, false, false, false, '', array(
+				'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_margin_bottom', $settings['margin-bottom'] . 'px', false, false, $panels_data, $post_id ),
+			) );
+			$css->add_widget_css( $post_id, false, false, false, ':last-of-type', array(
+				'margin-bottom' => apply_filters( 'siteorigin_panels_css_cell_last_margin_bottom', '0px', false, false, $panels_data, $post_id ),
+			) );
+		}
 
 		if ( $settings['responsive'] ) {
 			$css->add_cell_css( $post_id, false, false, '', array(
@@ -545,6 +549,21 @@ class SiteOrigin_Panels_Renderer {
 			$attributes['style'] = '';
 		}
 
+		// Check if Page Builder is set to output certain styles inline and if it is, do so.
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			if ( ! empty( $style['padding'] ) ) {
+				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
+			}
+
+			if ( ! empty( $style['margin'] ) ) {
+				$attributes['style'] .= 'margin: ' . $style['margin'] . ';';
+			}
+
+			if ( ! empty( $style['border_color'] ) ) {
+				$attributes['style'] .= 'border: ' . ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'] . ';';
+			}
+		}
+
 		// Get everything related to the style wrapper
 		$attributes = apply_filters( 'siteorigin_panels_' . $name . '_style_attributes', $attributes, $style );
 		$attributes = apply_filters( 'siteorigin_panels_general_style_attributes', $attributes, $style );
@@ -683,11 +702,20 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Attributes of the widget wrapper
-		$attributes = apply_filters( 'siteorigin_panels_widget_attributes', array(
+		$attributes = array(
 			'id'         => $id,
 			'class'      => implode( ' ', $classes ),
 			'data-index' => $widget_info['widget_index'],
-		), $widget_info );
+		);
+
+		if ( siteorigin_panels_setting( 'inline-styles' ) && ! $is_last ) {
+			$widget_bottom_margin = apply_filters( 'siteorigin_panels_css_cell_margin_bottom', siteorigin_panels_setting('margin-bottom') . 'px', false, false, $panels_data, $post_id );
+			if ( ! empty( $widget_bottom_margin ) ) {
+				$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
+			}
+		}
+
+		$attributes = apply_filters( 'siteorigin_panels_widget_attributes', $attributes, $widget_info );
 
 		$before_widget = '<div ';
 
@@ -910,10 +938,24 @@ class SiteOrigin_Panels_Renderer {
 		$row_classes[] = ! empty( $row_style_wrapper ) ? 'panel-has-style' : 'panel-no-style';
 		$row_classes = apply_filters( 'siteorigin_panels_row_classes', $row_classes, $row );
 
-		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', array(
+		$row_attributes = array(
 			'id'    => 'pg-' . $post_id . '-' . $ri,
 			'class' => implode( ' ', $row_classes ),
-		), $row );
+		);
+
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', siteorigin_panels_setting( 'margin-bottom' ) . 'px', $row, $ri, $panels_data, $post_id );
+
+			if  (
+				! empty( $row['style']['bottom_margin'] ) ||
+				$ri != count( $panels_data['grids'] ) - 1 ||
+				! empty( siteorigin_panels_setting( 'margin-bottom-last-row' ) )
+			) {
+				$row_attributes['style'] = 'margin-bottom: ' . $panels_margin_bottom;
+			}
+		}
+
+		$row_attributes = apply_filters( 'siteorigin_panels_row_attributes', $row_attributes, $row );
 
 		// This allows other themes and plugins to add html before the row
 		echo apply_filters( 'siteorigin_panels_before_row', '', $row, $row_attributes );
