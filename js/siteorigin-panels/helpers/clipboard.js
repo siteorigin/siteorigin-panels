@@ -22,6 +22,15 @@ module.exports = {
 			serial.thingType = 'widget-model';
 		}
 
+		// Can Page Builder cross domain copy paste?
+		if (
+			typeof SiteOriginPremium == 'object' &&
+			typeof SiteOriginPremium.CrossDomainCopyPasteAddon == 'function' &&
+			typeof SiteOriginPremium.CrossDomainCopyPasteAddon.allowed == 'boolean'
+		) {
+			SiteOriginPremium.CrossDomainCopyPasteAddon().copy( serial );
+		}
+
 		// Store this in local storage
 		localStorage[ 'panels_clipboard_' + panelsOptions.user ] = JSON.stringify( serial );
 		return true;
