@@ -107,6 +107,14 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.21.0 - 22 April 2023 =
+* Added an Inline Styles setting at `Settings > Page Builder > Layout`. Supports margin, border, and padding.
+* Classic Editor: Improved preview markup handling.
+* Rank Math: Removed `wp_targeted_link_rel` from sitemap compatibility.
+* SEO: Removed widget class requirement.
+* Added Cross Domain Copy Paste support.
+* PHP coding standards update.
+
 = 2.20.6 - 30 March 2023 =
 * Updated Tested up to tag.
 
