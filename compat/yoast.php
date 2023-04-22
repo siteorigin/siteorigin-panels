@@ -1,22 +1,24 @@
 <?php
+
 if (
 	class_exists( 'WPSEO_Options' ) &&
 	method_exists( 'WPSEO_Options', 'get' ) &&
 	WPSEO_Options::get( 'opengraph' )
 ) {
 	/**
-	 * If Yoast OpenGraph is enabled, we'll need disable PB when it gets the excerpt 
+	 * If Yoast OpenGraph is enabled, we'll need disable PB when it gets the excerpt
 	 * to avoid conflicts with other plugins.
-	 *
 	 */
 	function siteorigin_yoast_opengraph_panels_disable( $content ) {
 		global $wp_current_filter;
+
 		if ( count( $wp_current_filter ) > 2 && $wp_current_filter[1] == 'wpseo_head' ) {
 			// Temporarily disable Page Builder for this instance of the_content.
 			add_filter( 'siteorigin_panels_filter_content_enabled', '__return_false' );
 		} else {
 			add_filter( 'siteorigin_panels_filter_content_enabled', '__return_true' );
 		}
+
 		return $content;
 	}
 
@@ -77,11 +79,11 @@ if ( function_exists( 'yoast_wpseo_video_seo_init' ) ) {
 	 * @return string
 	 */
 	function siteorigin_yoast_video_render_page_builder( $content, $vid, $post ) {
-		if ( ! empty( $_POST['panels_data'] ) ) { 
+		if ( ! empty( $_POST['panels_data'] ) ) {
 			$content = SiteOrigin_Panels::renderer()->render( $post->ID );
 		}
-		return $content;
 
+		return $content;
 	}
 	add_filter( 'wpseo_video_index_content', 'siteorigin_yoast_video_render_page_builder', 10, 3 );
 }

@@ -6,14 +6,13 @@
  * Class SiteOrigin_Panels_Settings
  */
 class SiteOrigin_Panels_Settings {
-
 	private $settings;
 	private $fields;
 	private $settings_saved;
 
-	function __construct() {
-		$this->settings       = array();
-		$this->fields         = array();
+	public function __construct() {
+		$this->settings = array();
+		$this->fields = array();
 		$this->settings_saved = false;
 
 		// Admin actions
@@ -30,12 +29,13 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * @return SiteOrigin_Panels_Settings
 	 */
-	static function single() {
+	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
-	function clear_cache() {
+	public function clear_cache() {
 		$this->settings = array();
 	}
 
@@ -44,19 +44,18 @@ class SiteOrigin_Panels_Settings {
 	 *
 	 * @param string $key
 	 *
-	 * @return array|bool|mixed|null|void
+	 * @return array|bool|mixed|void|null
 	 */
-	function get( $key = '' ) {
-
+	public function get( $key = '' ) {
 		if ( empty( $this->settings ) ) {
-
 			// Get the settings, attempt to fetch new settings first.
 			$current_settings = get_option( 'siteorigin_panels_settings', false );
 
 			if ( $current_settings === false ) {
 				// We can't find the settings, so try access old settings.
 				$current_settings = get_option( 'siteorigin_panels_display', array() );
-				$post_types       = get_option( 'siteorigin_panels_post_types' );
+				$post_types = get_option( 'siteorigin_panels_post_types' );
+
 				if ( ! empty( $post_types ) ) {
 					$current_settings['post-types'] = $post_types;
 				}
@@ -67,6 +66,7 @@ class SiteOrigin_Panels_Settings {
 
 			// Get the settings provided by the theme.
 			$theme_settings = get_theme_support( 'siteorigin-panels' );
+
 			if ( ! empty( $theme_settings ) ) {
 				$theme_settings = $theme_settings[0];
 			} else {
@@ -89,12 +89,9 @@ class SiteOrigin_Panels_Settings {
 
 	/**
 	 * Set a settings value
-	 *
-	 * @param $key
-	 * @param $value
 	 */
-	function set( $key, $value ) {
-		$current_settings         = get_option( 'siteorigin_panels_settings', array() );
+	public function set( $key, $value ) {
+		$current_settings = get_option( 'siteorigin_panels_settings', array() );
 		$current_settings[ $key ] = $value;
 		update_option( 'siteorigin_panels_settings', $current_settings );
 	}
@@ -102,12 +99,10 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Add default settings for the Page Builder settings.
 	 *
-	 * @param $defaults
-	 *
 	 * @return mixed
 	 */
-	function settings_defaults( $defaults ) {
-		$defaults['home-page']         = false;
+	public function settings_defaults( $defaults ) {
+		$defaults['home-page'] = false;
 		$defaults['home-page-default'] = false;
 		$defaults['home-template']     = 'home-panels.php';
 		$defaults['affiliate-id']      = apply_filters( 'siteorigin_panels_affiliate_id', false );
@@ -118,7 +113,7 @@ class SiteOrigin_Panels_Settings {
 
 		/**
 		 * Certain settings have different defaults depending on if this is a new
-		 * install, or not. 
+		 * install, or not.
 		 *
 		 * This is done here rather than using `siteorigin_panels_version_changed` as
 		 * that hook is triggered after the settings are loaded.
@@ -181,6 +176,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['margin-sides']                = 30;
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
+		$defaults['inline-styles']               = false;
 
 		// Content fields.
 		$defaults['copy-content'] = true;
@@ -192,16 +188,13 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Set the option on whether to add widget classes for known themes.
 	 *
-	 * @param $add_class
-	 *
 	 * @return bool
 	 */
-	function add_widget_class( $add_class ) {
-
+	public function add_widget_class( $add_class ) {
 		switch ( get_option( 'stylesheet' ) ) {
-			case 'twentysixteen';
-				$add_class = false;
-				break;
+			case 'twentysixteen':
+			$add_class = false;
+			break;
 		}
 
 		return $add_class;
@@ -209,10 +202,8 @@ class SiteOrigin_Panels_Settings {
 
 	/**
 	 * Enqueue admin scripts
-	 *
-	 * @param $prefix
 	 */
-	function admin_scripts( $prefix ) {
+	public function admin_scripts( $prefix ) {
 		if ( $prefix != 'settings_page_siteorigin_panels' ) {
 			return;
 		}
@@ -233,10 +224,10 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Add the Page Builder settings page
 	 */
-	function add_settings_page() {
+	public function add_settings_page() {
 		$page = add_options_page( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ), __( 'Page Builder', 'siteorigin-panels' ), 'manage_options', 'siteorigin_panels', array(
 			$this,
-			'display_settings_page'
+			'display_settings_page',
 		) );
 		add_action( 'load-' . $page, array( $this, 'add_help_tab' ) );
 		add_action( 'load-' . $page, array( $this, 'save_settings' ) );
@@ -245,7 +236,7 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Display the Page Builder settings page.
 	 */
-	function display_settings_page() {
+	public function display_settings_page() {
 		$settings_fields = $this->fields = apply_filters( 'siteorigin_panels_settings_fields', array() );
 		include plugin_dir_path( __FILE__ ) . '../settings/tpl/settings.php';
 	}
@@ -253,7 +244,7 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Add a settings help tab.
 	 */
-	function add_help_tab() {
+	public function add_help_tab() {
 		$screen = get_current_screen();
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . '../settings/tpl/help.php';
@@ -262,19 +253,16 @@ class SiteOrigin_Panels_Settings {
 		$screen->add_help_tab( array(
 			'id'      => 'panels-help-tab',
 			'title'   => __( 'Page Builder Settings', 'siteorigin-panels' ),
-			'content' => $content
+			'content' => $content,
 		) );
 	}
 
 	/**
 	 * Add the default Page Builder settings.
 	 *
-	 * @param $fields
-	 *
 	 * @return mixed
 	 */
-	function settings_fields( $fields ) {
-
+	public function settings_fields( $fields ) {
 		// General settings.
 
 		$fields['general'] = array(
@@ -292,7 +280,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['general']['fields']['use-classic'] = array(
 			'type' => 'checkbox',
 			'label' => __( 'Use Classic Editor for New Posts', 'siteorigin-panels' ),
-			'description' => __( 'New posts of the above Post Types will be created using the Classic Editor.', 'siteorigin-panels' )
+			'description' => __( 'New posts of the above Post Types will be created using the Classic Editor.', 'siteorigin-panels' ),
 		);
 
 		$fields['general']['fields']['live-editor-quick-link'] = array(
@@ -310,7 +298,7 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Display Post State', 'siteorigin-panels' ),
 			'description' => sprintf(
-				__( "Display a %sSiteOrigin Page Builder%s post state in the admin lists of posts/pages to indicate Page Builder is active.", 'siteorigin-panels' ),
+				__( 'Display a %sSiteOrigin Page Builder%s post state in the admin lists of posts/pages to indicate Page Builder is active.', 'siteorigin-panels' ),
 				'<strong>',
 				'</strong>'
 			),
@@ -321,7 +309,7 @@ class SiteOrigin_Panels_Settings {
 			'label'       => __( 'Display Widget Count', 'siteorigin-panels' ),
 			'description' => __( "Display a widget count in the admin lists of posts/pages where you're using Page Builder.", 'siteorigin-panels' ),
 		);
-		
+
 		$fields['general']['fields']['parallax-type'] = array(
 			'type'        => 'select',
 			'label'       => __( 'Parallax Type', 'siteorigin-panels' ),
@@ -366,12 +354,12 @@ class SiteOrigin_Panels_Settings {
 
 		$fields['general']['fields']['display-teaser'] = array(
 			'type' => 'checkbox',
-			'label' => __('Upgrade Teaser', 'siteorigin-panels'),
+			'label' => __( 'Upgrade Teaser', 'siteorigin-panels' ),
 			'description' => sprintf(
-				__('Display the %sSiteOrigin Premium%s upgrade teaser in the Page Builder toolbar.', 'siteorigin-panels'),
+				__( 'Display the %sSiteOrigin Premium%s upgrade teaser in the Page Builder toolbar.', 'siteorigin-panels' ),
 				'<a href="https://siteorigin.com/downloads/premium/" target="_blank" rel="noopener noreferrer">',
 				'</a>'
-			)
+			),
 		);
 
 		$fields['general']['fields']['load-on-attach'] = array(
@@ -381,7 +369,7 @@ class SiteOrigin_Panels_Settings {
 				__( 'New Classic Editor posts/pages that you create will start with the Page Builder loaded. The %s"Use Classic Editor for New Posts"%s setting must be enabled.', 'siteorigin-panels' ),
 				'<strong>',
 				'</strong>'
-			)
+			),
 		);
 
 		$fields['general']['fields']['layout-block-default-mode'] = array(
@@ -410,7 +398,7 @@ class SiteOrigin_Panels_Settings {
 		$fields['widgets']['fields']['add-widget-class'] = array(
 			'type'        => 'checkbox',
 			'label'       => __( 'Add Widget Class', 'siteorigin-panels' ),
-			'description' => __( "Add the widget class to Page Builder widgets. Disable if theme widget styles are negatively impacting widgets in Page Builder.", 'siteorigin-panels' ),
+			'description' => __( 'Add the widget class to Page Builder widgets. Disable if theme widget styles are negatively impacting widgets in Page Builder.', 'siteorigin-panels' ),
 		);
 
 		$fields['widgets']['fields']['bundled-widgets'] = array(
@@ -535,6 +523,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'This setting is only applicable in the Classic Editor.', 'siteorigin-panels' ),
 		);
 
+		$fields['layout']['fields']['inline-styles'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Inline Styles', 'siteorigin-panels' ),
+			'description' => __( 'Output margin, border, and padding styles inline to reduce potential Cumulative Layout Shift.', 'siteorigin-panels' ),
+		);
+
 		// Content settings.
 
 		$fields['content'] = array(
@@ -559,11 +553,8 @@ class SiteOrigin_Panels_Settings {
 
 	/**
 	 * Display a settings field.
-	 *
-	 * @param $field_id
-	 * @param $field
 	 */
-	function display_field( $field_id, $field ) {
+	public function display_field( $field_id, $field ) {
 		$value = siteorigin_panels_setting( $field_id );
 
 		$field_name = 'panels_setting[' . $field_id . ']';
@@ -571,22 +562,22 @@ class SiteOrigin_Panels_Settings {
 		switch ( $field['type'] ) {
 			case 'text':
 			case 'float':
-				?><input name="<?php echo esc_attr( $field_name ) ?>"
-					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="text"
-					value="<?php echo esc_attr( $value ) ?>" /> <?php
+				?><input name="<?php echo esc_attr( $field_name ); ?>"
+					class="panels-setting-<?php echo esc_attr( $field['type'] ); ?>" type="text"
+					value="<?php echo esc_attr( $value ); ?>" /> <?php
 				break;
 
 			case 'password':
-				?><input name="<?php echo esc_attr( $field_name ) ?>"
-					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>" type="password"
-					value="<?php echo esc_attr( $value ) ?>" /> <?php
+				?><input name="<?php echo esc_attr( $field_name ); ?>"
+					class="panels-setting-<?php echo esc_attr( $field['type'] ); ?>" type="password"
+					value="<?php echo esc_attr( $value ); ?>" /> <?php
 				break;
 
 			case 'number':
 				?>
-				<input name="<?php echo esc_attr( $field_name ) ?>" type="number"
-					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?>"
-					value="<?php echo esc_attr( $value ) ?>"/>
+				<input name="<?php echo esc_attr( $field_name ); ?>" type="number"
+					class="panels-setting-<?php echo esc_attr( $field['type'] ); ?>"
+					value="<?php echo esc_attr( $value ); ?>"/>
 				<?php
 				if ( ! empty( $field['unit'] ) ) {
 					echo esc_html( $field['unit'] );
@@ -594,28 +585,28 @@ class SiteOrigin_Panels_Settings {
 				break;
 
 			case 'html':
-				?><textarea name="<?php echo esc_attr( $field_name ) ?>"
-					class="panels-setting-<?php echo esc_attr( $field['type'] ) ?> widefat"
-					rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2 ?>"><?php echo esc_textarea( $value ) ?></textarea> <?php
+				?><textarea name="<?php echo esc_attr( $field_name ); ?>"
+					class="panels-setting-<?php echo esc_attr( $field['type'] ); ?> widefat"
+					rows="<?php echo ! empty( $field['rows'] ) ? (int) $field['rows'] : 2; ?>"><?php echo esc_textarea( $value ); ?></textarea> <?php
 				break;
 
 			case 'checkbox':
 				?>
 				<label class="widefat">
-					<input name="<?php echo esc_attr( $field_name ) ?>"
-						type="checkbox" <?php checked( ! empty( $value ) ) ?> />
-					<?php echo ! empty( $field['checkbox_text'] ) ? esc_html( $field['checkbox_text'] ) : __( 'Enabled', 'siteorigin-panels' ) ?>
+					<input name="<?php echo esc_attr( $field_name ); ?>"
+						type="checkbox" <?php checked( ! empty( $value ) ); ?> />
+					<?php echo ! empty( $field['checkbox_text'] ) ? esc_html( $field['checkbox_text'] ) : __( 'Enabled', 'siteorigin-panels' ); ?>
 				</label>
 				<?php
 				break;
 
 			case 'select':
 				?>
-				<select name="<?php echo esc_attr( $field_name ) ?>">
-					<?php foreach ( $field['options'] as $option_id => $option ) : ?>
+				<select name="<?php echo esc_attr( $field_name ); ?>">
+					<?php foreach ( $field['options'] as $option_id => $option ) { ?>
 						<option
-							value="<?php echo esc_attr( $option_id ) ?>" <?php selected( $option_id, $value ) ?>><?php echo esc_html( $option ) ?></option>
-					<?php endforeach; ?>
+							value="<?php echo esc_attr( $option_id ); ?>" <?php selected( $option_id, $value ); ?>><?php echo esc_html( $option ); ?></option>
+					<?php } ?>
 				</select>
 				<?php
 				break;
@@ -624,9 +615,9 @@ class SiteOrigin_Panels_Settings {
 				foreach ( $field['options'] as $option_id => $option ) {
 					?>
 					<label class="widefat">
-						<input name="<?php echo esc_attr( $field_name ) ?>[<?php echo esc_attr( $option_id ) ?>]"
-							type="checkbox" <?php checked( in_array( $option_id, $value ) ) ?> />
-						<?php echo esc_html( $option ) ?>
+						<input name="<?php echo esc_attr( $field_name ); ?>[<?php echo esc_attr( $option_id ); ?>]"
+							type="checkbox" <?php checked( in_array( $option_id, $value ) ); ?> />
+						<?php echo esc_html( $option ); ?>
 					</label>
 					<?php
 				}
@@ -638,8 +629,9 @@ class SiteOrigin_Panels_Settings {
 	/**
 	 * Save the Page Builder settings.
 	 */
-	function save_settings() {
+	public function save_settings() {
 		$screen = get_current_screen();
+
 		if ( $screen->base != 'settings_page_siteorigin_panels' ) {
 			return;
 		}
@@ -647,15 +639,17 @@ class SiteOrigin_Panels_Settings {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+
 		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'panels-settings' ) ) {
 			return;
 		}
+
 		if ( empty( $_POST['panels_setting'] ) ) {
 			return;
 		}
 
-		$values          = array();
-		$post            = stripslashes_deep( $_POST['panels_setting'] );
+		$values = array();
+		$post = stripslashes_deep( $_POST['panels_setting'] );
 		$settings_fields = $this->fields = apply_filters( 'siteorigin_panels_settings_fields', array() );
 
 		if ( empty( $settings_fields ) ) {
@@ -670,7 +664,7 @@ class SiteOrigin_Panels_Settings {
 			foreach ( $section['fields'] as $field_id => $field ) {
 				// Sanitize the fields
 				switch ( $field['type'] ) {
-					case 'text' :
+					case 'text':
 						$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? sanitize_text_field( $post[ $field_id ] ) : '';
 						break;
 
@@ -702,6 +696,7 @@ class SiteOrigin_Panels_Settings {
 
 					case 'select':
 						$values[ $field_id ] = ! empty( $post[ $field_id ] ) ? $post[ $field_id ] : '';
+
 						if ( ! in_array( $values[ $field_id ], array_keys( $field['options'] ) ) ) {
 							unset( $values[ $field_id ] );
 						}
@@ -709,10 +704,12 @@ class SiteOrigin_Panels_Settings {
 
 					case 'select_multi':
 						$values[ $field_id ] = array();
-						$multi_values        = array();
+						$multi_values = array();
+
 						foreach ( $field['options'] as $option_id => $option ) {
 							$multi_values[ $option_id ] = ! empty( $post[ $field_id ][ $option_id ] );
 						}
+
 						foreach ( $multi_values as $k => $v ) {
 							if ( $v ) {
 								$values[ $field_id ][] = $k;
@@ -730,7 +727,7 @@ class SiteOrigin_Panels_Settings {
 		// Save the values to the database.
 		update_option( 'siteorigin_panels_settings', $values );
 		do_action( 'siteorigin_panels_save_settings', $values );
-		$this->settings       = wp_parse_args( $values, $this->settings );
+		$this->settings = wp_parse_args( $values, $this->settings );
 		$this->settings_saved = true;
 	}
 
@@ -739,12 +736,12 @@ class SiteOrigin_Panels_Settings {
 	 *
 	 * @return array
 	 */
-	function get_post_types() {
+	public function get_post_types() {
 		$post_types = get_post_types( array( '_builtin' => false ) );
 
 		$types = array(
 			'page' => 'page',
-			'post' => 'post'
+			'post' => 'post',
 		);
 
 		// Don't use `array_merge` here as it will break things if a post type has a numeric slug.
@@ -770,5 +767,4 @@ class SiteOrigin_Panels_Settings {
 
 		return apply_filters( 'siteorigin_panels_settings_enabled_post_types', $types );
 	}
-
 }

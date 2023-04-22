@@ -1,4 +1,5 @@
 <?php
+
 class SiteOrigin_Panels_Compat_ACF_Widgets {
 	public function __construct() {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_assets' ), 100 );
@@ -14,7 +15,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 
 	public static function single() {
 		static $single;
-		
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
@@ -47,7 +48,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 
 			if ( ! empty( $field_groups ) ) {
 				// Get all fields, and merge them into a single array.
-				foreach( $field_groups as $field_group ) {
+				foreach ( $field_groups as $field_group ) {
 					$fields[] = acf_get_fields( $field_group );
 				}
 				$fields = call_user_func_array( 'array_merge', $fields );
@@ -61,8 +62,6 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	/**
 	 * Sets the ACF Widget Field values based on instance data.
 	 *
-	 * @param $value
-	 * @param $post_id
 	 * @param $widget_field The ACF object for the field being processed.
 	 *
 	 * @return string if set, the user defined field value.
@@ -91,7 +90,6 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	 * Generates and filters out invalid fields and indexes from the ACF Widget fields array.
 	 *
 	 * @param $fields A possible array containing fields, or a string containing a field value.
-	 *
 	 */
 	private function generate_fields_array( $fields ) {
 		if ( is_array( $fields ) ) {
@@ -118,7 +116,6 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	 * @param $new_instance An array of new settings.
 	 * @param $old_instance An array of old settings.
 	 * @param $the_widget The current widget instance.
-	 *
 	 */
 	public function acf_override_instance( $instance, $widget, $old_widget, $the_widget ) {
 		// Ensure widget update is from Page Builder and there's ACF data present.

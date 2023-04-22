@@ -6,8 +6,7 @@
  * Class SiteOrigin_Panels_Live_Editor
  */
 class SiteOrigin_Panels_Live_Editor {
-
-	function __construct() {
+	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'xss_headers' ) );
 		add_action( 'get_post_metadata', array( $this, 'post_metadata' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
@@ -18,10 +17,11 @@ class SiteOrigin_Panels_Live_Editor {
 
 	public static function single() {
 		static $single;
+
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
-	public function xss_headers(){
+	public function xss_headers() {
 		global $post;
 
 		if ( ! isset( $_GET['_panelsnonce'] ) || ! wp_verify_nonce( $_GET['_panelsnonce'], 'live-editor-preview' ) ) {
@@ -31,7 +31,7 @@ class SiteOrigin_Panels_Live_Editor {
 			wp_die();
 		}
 
-		if(
+		if (
 			! empty( $_POST['live_editor_panels_data'] ) &&
 			! empty( $post->ID ) &&
 			current_user_can( 'edit_post', $post->ID )
@@ -40,19 +40,14 @@ class SiteOrigin_Panels_Live_Editor {
 			header( 'X-XSS-Protection: 0' );
 		}
 	}
-	
-	
+
 	/**
 	 * Edit the page builder data when we're viewing the live editor version. This is necessary to ensure updated styles
 	 * are rendered in the preview.
 	 *
-	 * @param $value
-	 * @param $post_id
-	 * @param $meta_key
-	 *
 	 * @return array
 	 */
-	function post_metadata( $value, $post_id, $meta_key ) {
+	public function post_metadata( $value, $post_id, $meta_key ) {
 		if (
 			$meta_key == 'panels_data' &&
 			current_user_can( 'edit_post', $post_id ) &&
@@ -61,13 +56,14 @@ class SiteOrigin_Panels_Live_Editor {
 		) {
 			$value = array( json_decode( wp_unslash( $_POST['live_editor_panels_data'] ), true ) );
 		}
+
 		return $value;
 	}
 
 	/**
 	 * Load the frontend scripts for the live editor
 	 */
-	function frontend_scripts() {
+	public function frontend_scripts() {
 		wp_enqueue_script(
 			'live-editor-front',
 			siteorigin_panels_url( 'js/live-editor/live-editor-front' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
