@@ -512,10 +512,11 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			switch ( $field['type'] ) {
 				case 'color' :
+					$color = $styles[ $k ];
 					if ( ! empty( $field['alpha'] ) && strpos( $color, 'rgba' ) !== false ) {
 						sscanf( $color, 'rgba(%d,%d,%d,%f)', $r, $g, $b, $a );
 						if (
-							! empty( $r ) && ! empty( $g ) && ! empty( $b ) && ! empty( $a )
+							isset( $r ) && isset( $g ) && isset( $b ) && isset( $a )
 							&& is_numeric( $r ) && is_numeric( $g ) && is_numeric( $b ) && is_numeric( $a )
 						) {
 							$return[ $k ] = "rgba($r,$g,$b,$a)";
