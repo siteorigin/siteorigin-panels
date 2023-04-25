@@ -81,7 +81,10 @@ module.exports = Backbone.View.extend( {
 		$panelsMetabox = $( '#siteorigin-panels-metabox' );
 		if ( $panelsMetabox.length ) {
 			var previewContent = $.parseHTML( $panelsMetabox.data( 'preview-markup' ) );
-			this.contentPreview = previewContent.length > 1 ? previewContent[1] : previewContent;
+
+			if ( previewContent !== null ) {
+				this.contentPreview = previewContent.length > 1 ? previewContent[1] : previewContent;
+			}
 		}
 
 		// Set the builder for each dialog and render it.
