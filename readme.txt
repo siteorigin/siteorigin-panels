@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.21.1 - 25 April 2023 =
+* Prevented potential new page JavaScript error.
+
 = 2.21.0 - 22 April 2023 =
 * Added an Inline Styles setting at `Settings > Page Builder > Layout`. Supports margin, border, and padding.
 * Classic Editor: Improved preview markup handling.
