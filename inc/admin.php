@@ -318,6 +318,13 @@ class SiteOrigin_Panels_Admin {
 		$screen = get_current_screen();
 
 		if ( $force || self::is_admin() ) {
+			wp_register_script(
+				'wp-color-picker-alpha',
+				siteorigin_panels_url( 'js/lib/wp-color-picker-alpha' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'wp-color-picker' ),
+				'3.0.2',
+				true
+			);
 			// Media is required for row styles.
 			wp_enqueue_media();
 			wp_enqueue_script(
@@ -328,7 +335,7 @@ class SiteOrigin_Panels_Admin {
 					'jquery-ui-resizable',
 					'jquery-ui-sortable',
 					'jquery-ui-draggable',
-					'wp-color-picker',
+					'wp-color-picker-alpha',
 					'underscore',
 					'backbone',
 					'plupload',
