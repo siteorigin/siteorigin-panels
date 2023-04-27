@@ -242,8 +242,16 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			case 'color' :
 				?>
-				<input type="text" name="<?php echo esc_attr( $field_name ); ?>"
-				       value="<?php echo esc_attr( $current ); ?>" class="so-wp-color-field"/>
+				<input
+					type="text"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					value="<?php echo esc_attr( $current ); ?>"
+					class="so-wp-color-field"
+					<?php if ( ! empty( $field['alpha'] ) ) { ?>
+						data-alpha-enabled="true"
+						data-alpha-color-type="hex"
+					<?php } ?>
+				/>
 				<?php
 				break;
 
@@ -505,11 +513,18 @@ class SiteOrigin_Panels_Styles_Admin {
 			switch ( $field['type'] ) {
 				case 'color' :
 					$color = $styles[ $k ];
-
-					if ( preg_match( '|^#([A-Fa-f0-9]{3,8})$|', $color ) ) {
-						$return[ $k ] = $color;
+					if ( ! empty( $field['alpha'] ) && strpos( $color, 'rgba' ) !== false ) {
+						sscanf( $color, 'rgba(%d,%d,%d,%f)', $r, $g, $b, $a );
+						if (
+							isset( $r ) && isset( $g ) && isset( $b ) && isset( $a )
+							&& is_numeric( $r ) && is_numeric( $g ) && is_numeric( $b ) && is_numeric( $a )
+						) {
+							$return[ $k ] = "rgba($r,$g,$b,$a)";
+						} else {
+							$return[ $k ] = '';
+						}
 					} else {
-						$return[ $k ] = '';
+						$return[ $k ] = sanitize_hex_color( $color );
 					}
 					break;
 
@@ -611,6 +626,17 @@ class SiteOrigin_Panels_Styles_Admin {
 		return $panels_data;
 	}
 
+	function migrate_box_shadow( $color, $opacity ) {
+		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) {
+			require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
+		}
+		$color = new SiteOrigin_Color_Object( $color );
+		$color = $color->__get( 'rgb' );
+		$opacity = $opacity / 100;
+
+		return "rgba($color[0],$color[1],$color[2],$opacity)";
+	}
+
 	/**
 	 * Migrate deprecated styles.
 	 *
@@ -623,6 +649,16 @@ class SiteOrigin_Panels_Styles_Admin {
 	public function style_migration( $style, $post_id, $type, $args ) {
 		if ( isset( $style['background_display'] ) && $style['background_display'] == 'parallax-original' ) {
 			$style['background_display'] = 'parallax';
+		}
+
+		if ( isset( $style['box_shadow_color'] ) && isset( $style['box_shadow_opacity'] ) ) {
+			$style['box_shadow_color'] = $this->migrate_box_shadow( $style['box_shadow_color'], $style['box_shadow_opacity'] );
+			unset( $style['box_shadow_opacity'] );
+		}
+
+		if ( isset( $style['box_shadow_hover_color'] ) && isset( $style['box_shadow_hover_opacity'] ) ) {
+			$style['box_shadow_hover_color'] = $this->migrate_box_shadow( $style['box_shadow_hover_color'], $style['box_shadow_hover_opacity'] );
+			unset( $style['box_shadow_hover_opacity'] );
 		}
 
 		return $style;
