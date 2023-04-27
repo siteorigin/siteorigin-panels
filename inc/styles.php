@@ -821,7 +821,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_tablet_css( $css, $style ) {
 		if ( ! empty( $style['tablet_padding'] ) ) {
-			$css['padding'] = $style['tablet_padding'] . ' !important';
+			$css['padding'] = $style['tablet_padding'] . siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '';
 		}
 
 		if (
@@ -842,7 +842,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_mobile_css( $css, $style ) {
 		if ( ! empty( $style['mobile_padding'] ) ) {
-			$css['padding'] = $style['mobile_padding'] . ' !important';
+			$css['padding'] = $style['mobile_padding'] . siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '';
 		}
 
 		if ( ! empty( $style['background_display'] ) &&

@@ -185,7 +185,7 @@ class SiteOrigin_Panels_Renderer {
 							$wi,
 							'',
 							array(
-								'margin' => $panels_mobile_widget_mobile_margin . ' !important',
+								'margin' => $panels_mobile_widget_mobile_margin . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' ),
 							),
 							$panels_mobile_width,
 							true
