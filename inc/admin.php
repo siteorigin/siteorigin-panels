@@ -203,11 +203,7 @@ class SiteOrigin_Panels_Admin {
 		$preview_url = SiteOrigin_Panels::preview_url();
 		
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
-			SiteOrigin_Panels_Post_Content_Filters::add_filters();
-			$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-			$preview_content = SiteOrigin_Panels::renderer()->render( (int) $post->ID, false, wp_unslash( $panels_data ) );
-			SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-			unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
 
 		$builder_id = uniqid();
@@ -318,6 +314,13 @@ class SiteOrigin_Panels_Admin {
 		$screen = get_current_screen();
 
 		if ( $force || self::is_admin() ) {
+			wp_register_script(
+				'wp-color-picker-alpha',
+				siteorigin_panels_url( 'js/lib/wp-color-picker-alpha' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'wp-color-picker' ),
+				'3.0.2',
+				true
+			);
 			// Media is required for row styles.
 			wp_enqueue_media();
 			wp_enqueue_script(
@@ -328,7 +331,7 @@ class SiteOrigin_Panels_Admin {
 					'jquery-ui-resizable',
 					'jquery-ui-sortable',
 					'jquery-ui-draggable',
-					'wp-color-picker',
+					'wp-color-picker-alpha',
 					'underscore',
 					'backbone',
 					'plupload',

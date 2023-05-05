@@ -192,6 +192,7 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'color',
 			'group'       => 'design',
 			'priority'    => 5,
+			'alpha'       => true,
 		);
 
 		$fields['background_image_attachment'] = array(
@@ -256,14 +257,9 @@ class SiteOrigin_Panels_Styles {
 					'name'        => __( 'Color', 'siteorigin-panels' ),
 					'type'        => 'color',
 					'priority'    => 10,
-					'default'     => '#000000',
-				),
-				'opacity' => array(
-					'name'        => __( 'Opacity', 'siteorigin-panels' ),
-					'type'        => 'number',
-					'priority'    => 20,
-					'default'     => 15,
-					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+					'default'     => 'rgba(0,0,0,0.15)',
+					'alpha'       => true,
+
 				),
 				'inset' => array(
 					'name'        => __( 'Inset', 'siteorigin-panels' ),
@@ -308,14 +304,8 @@ class SiteOrigin_Panels_Styles {
 					'name'        => __( 'Color', 'siteorigin-panels' ),
 					'type'        => 'color',
 					'priority'    => 10,
-					'default'     => '#000000',
-				),
-				'opacity' => array(
-					'name'        => __( 'Opacity', 'siteorigin-panels' ),
-					'type'        => 'number',
-					'priority'    => 20,
-					'default'     => 30,
-					'description' => __( 'Enter a value between 0 and 100.', 'siteorigin-panels' ),
+					'default'     => 'rgba(0,0,0,0.30)',
+					'alpha'       => true,
 				),
 				'inset' => array(
 					'name'        => __( 'Inset', 'siteorigin-panels' ),
@@ -678,28 +668,32 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	public static function generate_box_shadow_css( $prefix, $style ) {
-		if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) {
-			require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
-		}
-
 		$box_shadow_inset = ! empty( $style[ $prefix . '_inset' ] ) ? 'inset' : '';
 		$box_shadow_offset_horizontal = ! empty( $style[ $prefix . '_offset_horizontal' ] ) ? $style[ $prefix . '_offset_horizontal' ] : 0;
 		$box_shadow_offset_vertical = ! empty( $style[ $prefix . '_offset_vertical' ] ) ? $style[ $prefix . '_offset_vertical' ] : '5px';
 		$box_shadow_blur = ! empty( $style[ $prefix . '_blur' ] ) ? $style[ $prefix . '_blur' ] : '15px';
 		$box_shadow_spread = ! empty( $style[ $prefix . '_spread' ] ) ? $style[ $prefix . '_spread' ] : '';
 
-		if ( ! empty( $style[ $prefix . '_color' ] ) ) {
-			$box_shadow_color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
-			$box_shadow_color = $box_shadow_color->__get( 'rgb' );
-			$box_shadow_color = "$box_shadow_color[0], $box_shadow_color[1], $box_shadow_color[2]";
+		// Migrate legacy color setting.
+		if ( isset( $style[ $prefix . '_opacity' ] ) ) {
+			$opacity_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
+			$opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $opacity_default;
+
+
+			if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) {
+				require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
+			}
+
+			$color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
+			$color = $color->__get( 'rgb' );
+			$opacity = $opacity;
+			$box_shadow_color = "rgba($color[0],$color[1],$color[2],$opacity)";
 		} else {
-			$box_shadow_color = '0, 0, 0';
+			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] :  'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
 		}
-		$box_shadow_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
-		$box_shadow_opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $box_shadow_default;
 
 		return array(
-			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread rgba($box_shadow_color, $box_shadow_opacity )",
+			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread $box_shadow_color"
 		);
 	}
 
@@ -821,7 +815,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_tablet_css( $css, $style ) {
 		if ( ! empty( $style['tablet_padding'] ) ) {
-			$css['padding'] = $style['tablet_padding'] . ' !important';
+			$css['padding'] = $style['tablet_padding'] . siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '';
 		}
 
 		if (
@@ -842,7 +836,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_mobile_css( $css, $style ) {
 		if ( ! empty( $style['mobile_padding'] ) ) {
-			$css['padding'] = $style['mobile_padding'] . ' !important';
+			$css['padding'] = $style['mobile_padding'] . siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '';
 		}
 
 		if ( ! empty( $style['background_display'] ) &&

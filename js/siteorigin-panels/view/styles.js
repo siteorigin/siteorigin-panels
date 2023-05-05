@@ -124,15 +124,25 @@ module.exports = Backbone.View.extend( {
 					return el;
 				} );
 			}
+			var alphaImage = '';
+			$.fn.handleAlphaDefault = function() {
+				$colorResult = $( this ).parents( '.wp-picker-container' ).find( '.wp-color-result' );
+				$colorResult.css( 'background-image', $( this ).val() == '' ? 'none' : alphaImage );
+			}
 
 			// Trigger a change event when user selects a color.
 			panelsOptions.wpColorPickerOptions.change = function( e, ui ) {
 				setTimeout( function() {
+					$( e.target ).handleAlphaDefault();
 					$( e.target ).trigger( 'change' );
 				}, 100 );
 			};
 
 			this.$( '.so-wp-color-field' ).wpColorPicker( panelsOptions.wpColorPickerOptions );
+			alphaImage = this.$( '.wp-color-picker[data-alpha-enabled]' ).parents( '.wp-picker-container' ).find( '.wp-color-result' ).css( 'background-image' );
+			this.$( '.wp-color-picker[data-alpha-enabled]' ).on( 'change', function() {
+				$( this ).handleAlphaDefault();
+			} ).trigger( 'change' );
 		}
 
 		// Set up the image select fields
