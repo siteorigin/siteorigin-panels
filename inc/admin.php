@@ -203,11 +203,7 @@ class SiteOrigin_Panels_Admin {
 		$preview_url = SiteOrigin_Panels::preview_url();
 		
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
-			SiteOrigin_Panels_Post_Content_Filters::add_filters();
-			$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-			$preview_content = SiteOrigin_Panels::renderer()->render( (int) $post->ID, false, wp_unslash( $panels_data ) );
-			SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-			unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
 
 		$builder_id = uniqid();
