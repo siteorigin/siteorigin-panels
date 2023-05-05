@@ -107,6 +107,11 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.22.0 - 05 May 2023 =
+* Color Settings: Added alpha channel support which specifies the opacity for a color.
+* Styles: Prevented `!important` from being added to tablet and mobile padding.
+* Classic Editor: Further SEO plugin compatibility changes on load.
+
 = 2.21.1 - 25 April 2023 =
 * Prevented potential new page JavaScript error.
 
