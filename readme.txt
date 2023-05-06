@@ -107,6 +107,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.22.1 - 06 May 2023 =
+* Inline Styles: Restored tablet and mobile padding.
+
 = 2.22.0 - 05 May 2023 =
 * Color Settings: Added alpha channel support which specifies the opacity for a color.
 * Styles: Prevented `!important` from being added to tablet and mobile padding.
