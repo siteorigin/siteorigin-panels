@@ -801,7 +801,10 @@ class SiteOrigin_Panels_Styles {
 			$css['border-radius'] = $style['border_radius'];
 		}
 
-		if ( ! empty( $style['box_shadow'] ) ) {
+		if (
+			! empty( $style['box_shadow'] ) &&
+			! empty( $style['box_shadow_color'] )
+		) {
 			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
 		}
 
@@ -915,7 +918,10 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
-			if ( ! empty( $row['style']['box_shadow_hover'] ) ) {
+			if (
+				! empty( $row['style']['box_shadow_hover'] ) &&
+				! empty( $row['style']['box_shadow_hover_color'] ) 
+			) {
 				$css->add_row_css(
 					$post_id,
 					$ri,
@@ -1012,7 +1018,10 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
-				if ( ! empty( $cell['style']['box_shadow_hover'] ) ) {
+				if (
+					! empty( $cell['style']['box_shadow_hover'] ) &&
+					! empty( $cell['style']['box_shadow_hover_color'] )
+				) {
 					$css->add_cell_css(
 						$post_id,
 						$ri,
@@ -1114,7 +1123,10 @@ class SiteOrigin_Panels_Styles {
 						) );
 					}
 
-					if ( ! empty( $widget['panels_info']['style']['box_shadow_hover'] ) ) {
+					if (
+						! empty( $widget['panels_info']['style']['box_shadow_hover'] ) &&
+						! empty( $widget['panels_info']['style']['box_shadow_hover_color'] )
+					) {
 						$css->add_widget_css(
 							$post_id,
 							$ri,
