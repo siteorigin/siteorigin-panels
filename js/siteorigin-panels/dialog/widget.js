@@ -15,6 +15,9 @@ module.exports = panels.view.dialog.extend( {
 
 	events: {
 		'click .so-close': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
 		'keyup .so-close': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
@@ -298,9 +301,14 @@ module.exports = panels.view.dialog.extend( {
 	/**
 	 * Save a history entry for this widget. Called when the dialog is closed.
 	 */
-	saveHandler: function () {
+	saveHandler: function( savePage = false, e ) {
 		this.builder.addHistoryEntry( 'widget_edited' );
-		this.closeDialog();
+		if ( typeof savePage == 'boolean' ) {
+			this.updateModel();
+			panels.helpers.utils.saveHeartbeat( this );
+		} else {
+			this.closeDialog();
+		}
 	},
 
 	/**

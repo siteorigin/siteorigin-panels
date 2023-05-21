@@ -14,6 +14,9 @@ module.exports = panels.view.dialog.extend({
 
 		// Toolbar buttons
 		'click .so-toolbar .so-save': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
 		'click .so-toolbar .so-insert': 'insertHandler',
 		'click .so-toolbar .so-delete': 'deleteHandler',
 		'keyup .so-toolbar .so-delete': function( e ) {
@@ -774,12 +777,15 @@ module.exports = panels.view.dialog.extend({
 	/**
 	 * We'll just save this model and close the dialog
 	 */
-	saveHandler: function () {
-		this.builder.addHistoryEntry('row_edited');
+	saveHandler: function( savePage = false, e ) {
+		this.builder.addHistoryEntry( 'row_edited' );
 		this.updateModel();
-		this.closeDialog();
-
-		this.builder.model.refreshPanelsData();
+		if ( typeof savePage == 'boolean' ) {
+			panels.helpers.utils.saveHeartbeat( this );
+		} else {
+			this.builder.model.refreshPanelsData();
+			this.closeDialog();
+		}
 
 		return false;
 	},

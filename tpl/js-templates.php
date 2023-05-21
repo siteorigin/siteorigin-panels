@@ -223,6 +223,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		</div>
 
 		<div class="buttons">
+			<input type="button" class="button-primary so-saveinline" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
 			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 		</div>
 
@@ -288,6 +289,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<a class="so-duplicate" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
 			</div>
 
+			<input type="button" class="button-primary so-saveinline" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
 			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 		</div>
 
@@ -378,6 +380,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% if( dialogType == 'create' ) { %}}
 				<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e( 'Insert', 'siteorigin-panels' ); ?>" />
 			{{% } else { %}}
+				<input type="button" class="button-primary so-saveinline" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
 				<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 			{{% } %}}
 		</div>
