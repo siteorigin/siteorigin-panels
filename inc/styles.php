@@ -676,18 +676,22 @@ class SiteOrigin_Panels_Styles {
 
 		// Migrate legacy color setting.
 		if ( isset( $style[ $prefix . '_opacity' ] ) ) {
-			$opacity_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
-			$opacity = isset( $style[ $prefix . '_opacity' ] ) && is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $opacity_default;
-
+			// If invalid hex, don't attempt migration and don't try to output a box shadow.
+			if ( empty( sanitize_hex_color( $style[ $prefix . '_color' ] ) ) ) {
+				return false;
+			}
 
 			if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) {
 				require plugin_dir_path( __FILE__ ) . '../widgets/lib/color.php';
 			}
-
 			$color = new SiteOrigin_Color_Object( $style[ $prefix . '_color' ] );
 			$color = $color->__get( 'rgb' );
-			$opacity = $opacity;
+
+			$opacity_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
+			$opacity = is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $opacity_default;
+			
 			$box_shadow_color = "rgba($color[0],$color[1],$color[2],$opacity)";
+			unset( $style[ $prefix . '_opacity' ] );
 		} else {
 			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] :  'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
 		}
@@ -797,7 +801,10 @@ class SiteOrigin_Panels_Styles {
 			$css['border-radius'] = $style['border_radius'];
 		}
 
-		if ( ! empty( $style['box_shadow'] ) ) {
+		if (
+			! empty( $style['box_shadow'] ) &&
+			! empty( $style['box_shadow_color'] )
+		) {
 			$css['box-shadow'] = self::generate_box_shadow_css( 'box_shadow', $style )['box-shadow'];
 		}
 
@@ -911,7 +918,10 @@ class SiteOrigin_Panels_Styles {
 				);
 			}
 
-			if ( ! empty( $row['style']['box_shadow_hover'] ) ) {
+			if (
+				! empty( $row['style']['box_shadow_hover'] ) &&
+				! empty( $row['style']['box_shadow_hover_color'] ) 
+			) {
 				$css->add_row_css(
 					$post_id,
 					$ri,
@@ -1008,7 +1018,10 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
-				if ( ! empty( $cell['style']['box_shadow_hover'] ) ) {
+				if (
+					! empty( $cell['style']['box_shadow_hover'] ) &&
+					! empty( $cell['style']['box_shadow_hover_color'] )
+				) {
 					$css->add_cell_css(
 						$post_id,
 						$ri,
@@ -1110,7 +1123,10 @@ class SiteOrigin_Panels_Styles {
 						) );
 					}
 
-					if ( ! empty( $widget['panels_info']['style']['box_shadow_hover'] ) ) {
+					if (
+						! empty( $widget['panels_info']['style']['box_shadow_hover'] ) &&
+						! empty( $widget['panels_info']['style']['box_shadow_hover_color'] )
+					) {
 						$css->add_widget_css(
 							$post_id,
 							$ri,
