@@ -107,6 +107,13 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 2.23.0 - 21 May 2023 =
+* Row Styles: Added a Full Height setting to the Design section.
+* Box Shadow: Resolved potential migration error due to an invalid hex.
+* Widget Admin Titles: Improved display of unusually long strings.
+* Color Settings: Update to ensure only alpha enabled settings apply opacity to the swatch.
+* Page Builder Settings Page: Minor styling update.
+
 = 2.22.1 - 06 May 2023 =
 * Inline Styles: Restored tablet and mobile padding.
 
