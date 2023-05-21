@@ -124,10 +124,14 @@ module.exports = Backbone.View.extend( {
 					return el;
 				} );
 			}
-			var alphaImage = '';
 			$.fn.handleAlphaDefault = function() {
-				$colorResult = $( this ).parents( '.wp-picker-container' ).find( '.wp-color-result' );
-				$colorResult.css( 'background-image', $( this ).val() == '' ? 'none' : alphaImage );
+				var $parent = $( this ).parents( '.wp-picker-container' );
+				var $colorResult = $parent.find( '.wp-color-result' );
+				if ( $parent.find( '.wp-color-picker[data-alpha-enabled]' ).length ) {
+					$colorResult.css( 'background-image', $( this ).val() == '' ? 'none' : alphaImage );
+				} else {
+					$colorResult.css( 'background-image', 'none' );
+				}
 			}
 
 			// Trigger a change event when user selects a color.
@@ -139,7 +143,7 @@ module.exports = Backbone.View.extend( {
 			};
 
 			this.$( '.so-wp-color-field' ).wpColorPicker( panelsOptions.wpColorPickerOptions );
-			alphaImage = this.$( '.wp-color-picker[data-alpha-enabled]' ).parents( '.wp-picker-container' ).find( '.wp-color-result' ).css( 'background-image' );
+			var alphaImage = this.$( '.wp-color-picker[data-alpha-enabled]' ).parents( '.wp-picker-container' ).find( '.wp-color-result' ).css( 'background-image' );
 			this.$( '.wp-color-picker[data-alpha-enabled]' ).on( 'change', function() {
 				$( this ).handleAlphaDefault();
 			} ).trigger( 'change' );
