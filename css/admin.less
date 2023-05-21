@@ -488,20 +488,17 @@
 
 							.title {
 								.actions {
+									background: #feffff;
 									font-size: 12px;
 									position: absolute;
 									top: 5px;
-									right: 7px;
+									right: 0;
 									cursor: pointer;
-									padding: 2px 2px 2px 15px;
+									padding: 2px 8px 2px 15px;
 									z-index: 10;
 
-									&:hover {
-										background: #feffff;
-
-										a{
-											opacity: 1;
-										}
+									&:hover a {
+										opacity: 1;
 									}
 
 									a {
@@ -986,9 +983,10 @@
 
 		h3.so-title {
 			.box-sizing( border-box );
-			margin: 0 150px 0 -3px;
-			padding: @pane_padding;
-			display: inline-block;
+			box-sizing: border-box;
+			display: block;
+			margin: 0 150px 0 50px;
+			padding: 15px;
 
 			&.so-title-editable {
 				&:hover,
