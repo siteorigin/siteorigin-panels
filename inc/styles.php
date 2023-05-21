@@ -340,6 +340,17 @@ class SiteOrigin_Panels_Styles {
 			),
 		);
 
+		if ( $id == 'row' ) {
+			$fields['full_height'] = array(
+				'name'        => __( 'Full Height', 'siteorigin-panels' ),
+				'type'        => 'checkbox',
+				'group'       => 'design',
+				'priority'    => 30,
+				'default'     => false,
+				'description' => __( 'Set the minimum height of the row to the full height of the browser.', 'siteorigin-panels' ),
+			);
+		}
+
 		return $fields;
 	}
 
@@ -810,6 +821,10 @@ class SiteOrigin_Panels_Styles {
 
 		if ( ! empty( $style['box_shadow_hover'] ) && empty( $css['transition'] ) ) {
 			$css['transition'] = '300ms ease-in-out box-shadow';
+		}
+
+		if ( ! empty( $style['full_height'] ) ) {
+			$css['min-height'] = apply_filters( 'siteorigin_panels_row_style_full_height', '100vh' );
 		}
 
 		return $css;
