@@ -2163,7 +2163,21 @@
 				width: 72%;
 			}
 		}
-
+		.so-field-border_radius .style-field-measurement .measurement-value {
+			&.measurement-top {
+				box-shadow: inset 2px 2px 1px rgba(0, 115, 170, .35);
+			}
+			&.measurement-right {
+				box-shadow: inset -2px 2px 1px rgba(0, 115, 170, .35);
+			}
+			&.measurement-bottom {
+				box-shadow: inset -2px -2px 1px rgba(0, 115, 170, .35);
+			}
+			&.measurement-left {
+				box-shadow: inset 2px -2px 2px rgba(0, 115, 170, .35);
+			}			
+		}
+		
 		.style-field-image {
 
 			@image_field_height: 28px;
