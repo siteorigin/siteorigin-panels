@@ -63,6 +63,7 @@ module.exports = {
             '!{build,build/**}',                // Ignore build/ and contents
             'widgets/less/*.less',              // LESS libraries used in runtime styles
             'widgets/**/styles/*.less',         // All the widgets' runtime .less files
+            'inc/installer/js/*js',             // Include Installer JS.
             '!widgets/**/styles/*.css',         // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',  // Ignore node_modules/ and contents
             '!{tmp,tmp/**}',                    // Ignore dist/ and contents
