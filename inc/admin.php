@@ -64,6 +64,11 @@ class SiteOrigin_Panels_Admin {
 		// Check to make sure we have all the correct markup.
 		SiteOrigin_Panels_Admin_Dashboard::single();
 
+		// Load the Installer if it's not already active.
+		if ( ! class_exists( 'SiteOrigin_Installer' ) ) {
+			include plugin_dir_path( __FILE__ ) . 'installer/siteorigin-installer.php';
+		}
+
 		$this->in_save_post = false;
 
 		// Enqueue Yoast compatibility
