@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.24.0 - 20 June 2023 =
+* Row Styles: Improved Border Radius field user interface.
+* Resolved `Creation of dynamic property` deprecated notice.
+* Minor styling update to SiteOrigin Page Builder News dashboard widget.
+* Added SiteOrigin Installer.
+
 = 2.23.0 - 21 May 2023 =
 * Row Styles: Added a Full Height setting to the Design section.
 * Box Shadow: Resolved potential migration error due to an invalid hex.
