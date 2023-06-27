@@ -74,17 +74,27 @@
 							<tr class="panels-setting">
 								<th scope="row">
 									<label>
-										<?php echo __( 'Enable SiteOrigin Installer: ', 'siteorigin-panels' ); ?>
+										<?php echo __( 'Installer ', 'siteorigin-panels' ); ?>
 									</label>
 								</th>
 								<td>
-									<input
-										type="checkbox"
-										name="installer_status"
-										class="installer_status"
-										<?php checked( get_option( 'siteorigin_installer', true ), 1 ); ?>
-										data-nonce="<?php echo wp_create_nonce( 'siteorigin_installer_status' ); ?>"
+									<label class="widefat">
+										<input
+											type="checkbox"
+											name="installer_status"
+											class="installer_status"
+											<?php checked( get_option( 'siteorigin_installer', true ), 1 ); ?>
+											data-nonce="<?php echo wp_create_nonce( 'siteorigin_installer_status' ); ?>"
+										>
+										<?php echo __( 'Enabled', 'siteorigin-panels' ); ?>
+									</label>
+
+									<small
+										class="description"
+										data-keywords="<?php echo esc_attr( __( 'Installer', 'siteorigin-panels' ) ); ?>"
 									>
+										<?php echo __( 'Display the SiteOrigin Installer admin menu item.', 'siteorigin-panels' ); ?>
+									</small>
 								</td>
 							</tr>
 						<?php } ?>
