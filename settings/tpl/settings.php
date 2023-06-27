@@ -66,6 +66,27 @@
 									<?php } ?>
 								</td>
 							</tr>
+							<?php
+						}
+
+						if ( $section_id == 'general' ) {
+							?>
+							<tr class="panels-setting">
+								<th scope="row">
+									<label>
+										<?php echo __( 'Enable SiteOrigin Installer: ', 'siteorigin-panels' ); ?>
+									</label>
+								</th>
+								<td>
+									<input
+										type="checkbox"
+										name="installer_status"
+										class="installer_status"
+										<?php checked( get_option( 'siteorigin_installer', true ), 1 ); ?>
+										data-nonce="<?php echo wp_create_nonce( 'siteorigin_installer_status' ); ?>"
+									>
+								</td>
+							</tr>
 						<?php } ?>
 					</tbody>
 				</table>
