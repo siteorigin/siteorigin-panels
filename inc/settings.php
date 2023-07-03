@@ -154,6 +154,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['parallax-scale']                     = 1.2;
 		$defaults['sidebars-emulator']                  = true;
 		$defaults['layout-block-default-mode']          = 'preview';
+		$defaults['layout-block-quick-add']             = true;
 
 		// Widgets fields.
 		$defaults['title-html']           = '<h3 class="widget-title">{{title}}</h3>';
@@ -380,6 +381,12 @@ class SiteOrigin_Panels_Settings {
 				'preview' => __( 'Preview', 'siteorigin-panels' ),
 			),
 			'description' => __( 'Whether to display SiteOrigin Layout Blocks in edit mode or preview mode in the Block Editor.', 'siteorigin-panels' ),
+		);
+
+		$fields['general']['fields']['layout-block-quick-add'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Block Editor Layout Block Quick Add Button', 'siteorigin-panels' ),
+			'description' => __( 'Display the Add SiteOrigin Layout Block quick add button in the Block Editor.', 'siteorigin-panels' ),
 		);
 
 		// Widgets settings.
