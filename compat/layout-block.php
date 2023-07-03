@@ -68,7 +68,10 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					'postId' => get_the_ID(),
 					'liveEditor' => SiteOrigin_Panels::preview_url(),
 					'defaultMode' => siteorigin_panels_setting( 'layout-block-default-mode' ),
-					'showAddButton' => apply_filters( 'siteorigin_layout_block_show_add_button', $is_panels_post_type ),
+					'showAddButton' => apply_filters(
+						'siteorigin_layout_block_show_add_button',
+						$is_panels_post_type && siteorigin_panels_setting( 'layout-block-quick-add' )
+					),
 				)
 			);
 			// This is only available in WP5.
