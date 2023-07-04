@@ -55,7 +55,6 @@ jQuery( function ( $ ) {
 			$( window ).trigger( 'panelsStretchRows' );
 		}
 	}
-	stretchFullWidthRows();
 
 	if (
 		typeof parallaxStyles != 'undefined' &&
@@ -73,7 +72,7 @@ jQuery( function ( $ ) {
 
 	$( window ).on( 'resize load', function() {
 		stretchFullWidthRows();
-	} );
+	} ).trigger( 'resize' );
 
 	// This should have been done in the footer, but run it here just incase.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
