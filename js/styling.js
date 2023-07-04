@@ -22,9 +22,15 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
-				'padding-left': defaultSidePadding,
-				'padding-right': defaultSidePadding
 			} );
+
+			// Reset row padding to prevent potential offset.
+			if ( stretchType !== 'full-stretched-padded' ) {
+				$$.css( {
+					'padding-left': defaultSidePadding,
+					'padding-right': defaultSidePadding
+				} );
+			}
 
 			var leftSpace = $$.offset().left - fullContainer.offset().left,
 				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
@@ -32,9 +38,15 @@ jQuery( function ( $ ) {
 			$$.css( {
 				'margin-left': - leftSpace + 'px',
 				'margin-right': - rightSpace + 'px',
-				'padding-left': stretchType === 'full' ? leftSpace + 'px' : defaultSidePadding,
-				'padding-right': stretchType === 'full' ? rightSpace + 'px': defaultSidePadding
 			} );
+
+			// If Row Layout is Full Width, apply content container.
+			if ( stretchType === 'full' ) {
+				$$.css( {
+					'padding-left': leftSpace + 'px',
+					'padding-right': rightSpace + 'px'
+				} );
+			}
 
 			var cells = $$.find( '> .panel-grid-cell' );
 
