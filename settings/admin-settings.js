@@ -169,21 +169,6 @@ jQuery( function($){
     handleSettingVisibility();
     $( '.panels-setting select, .panels-setting input' ).on( 'change', handleSettingVisibility );
 
-    $( '.installer_status' ).on( 'change', function() {
-        var $$ = $( this );
-        $$.prop( 'disabled', true );
-        jQuery.post(
-            ajaxurl,
-            {
-                action: 'so_installer_status',
-                nonce: $$.data( 'nonce' ),
-                status: $$.is( ':checked' )
-            },
-            function() {
-                $$.prop( 'disabled', false );
-            }
-        );
-    } );
 } );
 
 // Fitvids
