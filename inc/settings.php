@@ -178,7 +178,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
 		$defaults['inline-styles']               = false;
-		$defaults['installer']                   = get_option( 'siteorigin_installer', true );
+		$defaults['installer']                   = (bool) get_option( 'siteorigin_installer', true );
 
 		// Content fields.
 		$defaults['copy-content'] = true;
