@@ -178,7 +178,6 @@ class SiteOrigin_Panels_Settings {
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
 		$defaults['inline-styles']               = false;
-		$defaults['installer']                   = (bool) get_option( 'siteorigin_installer', true );
 
 		// Content fields.
 		$defaults['copy-content'] = true;
@@ -569,7 +568,7 @@ class SiteOrigin_Panels_Settings {
 	 * Display a settings field.
 	 */
 	public function display_field( $field_id, $field ) {
-		$value = siteorigin_panels_setting( $field_id );
+		$value = $field_id != 'installer' ? siteorigin_panels_setting( $field_id ) : (bool) get_option( 'siteorigin_installer', true );
 
 		$field_name = 'panels_setting[' . $field_id . ']';
 
