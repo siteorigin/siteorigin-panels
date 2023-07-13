@@ -389,6 +389,12 @@ class SiteOrigin_Panels_Settings {
 			'description' => __( 'Display the Add SiteOrigin Layout Block quick add button in the Block Editor.', 'siteorigin-panels' ),
 		);
 
+		$fields['general']['fields']['installer'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Installer', 'siteorigin-panels' ),
+			'description' => __( 'Display the SiteOrigin Installer admin menu item.', 'siteorigin-panels' ),
+		);
+
 		// Widgets settings.
 
 		$fields['widgets'] = array(
@@ -562,7 +568,7 @@ class SiteOrigin_Panels_Settings {
 	 * Display a settings field.
 	 */
 	public function display_field( $field_id, $field ) {
-		$value = siteorigin_panels_setting( $field_id );
+		$value = $field_id != 'installer' ? siteorigin_panels_setting( $field_id ) : (bool) get_option( 'siteorigin_installer', true );
 
 		$field_name = 'panels_setting[' . $field_id . ']';
 
@@ -730,6 +736,11 @@ class SiteOrigin_Panels_Settings {
 
 		// Don't let mobile width go below 320.
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
+
+		if ( isset( $values['installer'] ) ) {
+			update_option( 'siteorigin_installer', rest_sanitize_boolean( $values['installer'] ) );
+			unset( $values['installer'] );
+		}
 
 		// Save the values to the database.
 		update_option( 'siteorigin_panels_settings', $values );

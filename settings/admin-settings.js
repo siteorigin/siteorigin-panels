@@ -168,6 +168,7 @@ jQuery( function($){
     }
     handleSettingVisibility();
     $( '.panels-setting select, .panels-setting input' ).on( 'change', handleSettingVisibility );
+
 } );
 
 // Fitvids
