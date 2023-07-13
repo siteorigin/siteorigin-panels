@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.25.0 - 13 July 2023 =
+* Added "Block Editor Layout Block Quick Add Button" setting to display the "Add SiteOrigin Layout Block" quick add button in the Block Editor.
+* Added "Enable SiteOrigin Installer" setting to display the SiteOrigin Installer admin menu item.
+* Updated SiteOrigin Installer.
+* Resolved sizing issues in row layouts.
+* Improved handling of padding in row layouts to prevent potential offset.
+* Triggered resize event on load to avoid a situation where the `body` width is incorrect.
+
 = 2.24.0 - 20 June 2023 =
 * Row Styles: Improved Border Radius field user interface.
 * Resolved `Creation of dynamic property` deprecated notice.
