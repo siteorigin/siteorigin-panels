@@ -7,7 +7,7 @@ module.exports = panels.view.dialog.extend( {
 	sidebarWidgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html() ) ),
 
 	dialogClass: 'so-panels-dialog-edit-widget',
-    dialogIcon: 'add-widget',
+	dialogIcon: 'add-widget',
 
 	widgetView: false,
 	savingWidget: false,
@@ -17,6 +17,19 @@ module.exports = panels.view.dialog.extend( {
 		'click .so-close': 'saveHandler',
 		'click .so-toolbar .so-saveinline': function( e ) {
 			this.saveHandler( true );
+		},
+		'click .so-mode': 'switchModeShow',
+		'click .so-saveinline-mode': function() {
+			this.switchMode( true );
+		},
+		'keyup .so-mode-list li': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-close-mode': function() {
+			this.switchMode( false );
+		},
+		'keyup .so-close-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
 		'keyup .so-close': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e );
@@ -333,5 +346,19 @@ module.exports = panels.view.dialog.extend( {
 
 		return false;
 	}
+
+	switchModeShow: function() {
+		this.$( '.so-mode-list' ).show();
+		this.$( '.button-primary' ).hide();
+	},
+	
+	switchMode: function( inline = false ) {
+		this.$( '.so-mode-list' ).hide();
+		if ( inline ) {
+			this.$( '.so-toolbar .so-saveinline' ).show();
+		} else {
+			this.$( '.so-toolbar .so-close' ).show();
+		}
+	},
 
 } );
