@@ -72,7 +72,10 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 
 		if ( ! empty( $fields ) ) {
 			foreach ( $fields->data as $field ) {
-				if ( $widget_field['type'] != 'repeater' ) {
+				if (
+					$widget_field['type'] != 'repeater' ||
+					$widget_field['type'] != 'checkbox'
+				) {
 					if (
 						$field['key'] == $widget_field['key'] &&
 						! empty( $instance->data[ $field['key'] ] )

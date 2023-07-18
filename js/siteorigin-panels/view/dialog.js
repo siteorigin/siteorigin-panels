@@ -539,7 +539,10 @@ module.exports = Backbone.View.extend( {
 				}
 
 				// Is this field an ACF Repeater?
-				if ( $$.parents( '.acf-repeater' ).length ) {
+				if (
+					$$.parents( '.acf-repeater' ).length ||
+					$$.parents( '.acf-field-checkbox' ).length
+				) {
 					// If field is empty, skip it - this is to avoid indexes which are admin only.
 					if ( fieldValue == '' ) {
 						return;
