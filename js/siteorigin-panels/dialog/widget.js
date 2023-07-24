@@ -345,7 +345,7 @@ module.exports = panels.view.dialog.extend( {
 		this.builder.model.refreshPanelsData();
 
 		return false;
-	}
+	},
 
 	switchModeShow: function() {
 		this.$( '.so-mode-list' ).show();
