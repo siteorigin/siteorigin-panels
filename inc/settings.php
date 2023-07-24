@@ -738,7 +738,7 @@ class SiteOrigin_Panels_Settings {
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
 
 		if ( isset( $values['installer'] ) ) {
-			update_option( 'siteorigin_installer', rest_sanitize_boolean( $values['installer'] ) );
+			update_option( 'siteorigin_installer', (string) rest_sanitize_boolean( $values['installer'] ) );
 			unset( $values['installer'] );
 		}
 
