@@ -665,8 +665,8 @@ module.exports = panels.view.dialog.extend({
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 				}
 			}
-			catch (err) {
-				console.log('Error setting cells - ' + err.message);
+			catch ( err ) {
+				console.log( 'Error setting cells - ' + err.message );
 			}
 	
 	
