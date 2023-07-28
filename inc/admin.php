@@ -1022,6 +1022,24 @@ class SiteOrigin_Panels_Admin {
 	 * Add all the footer JS templates.
 	 */
 	public function js_templates() {
+		$column_sizes = apply_filters( 'siteorigin_panels_column_sizes', array(
+			2 => array(
+				array( 50, 50 ),
+				array( 25, 75 ),
+			),
+			3 => array(
+				array( 33, 33, 33 ),
+				array( 25, 50, 25 ),
+			),
+			4 => array(
+				array( 25, 25, 25, 25 ),
+				array( 10, 40, 40, 10 ),
+			),
+			5 => array(
+				array( 20, 20, 20, 20, 20 ),
+				array( 10, 15, 30, 15, 30 ),
+			),
+		) );
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 

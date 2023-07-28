@@ -24,15 +24,16 @@ module.exports = panels.view.dialog.extend({
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
 
-		// Changing the row
-		'change .row-set-form > *': 'setCellsFromForm',
-		'click .row-set-form button.set-row': 'setCellsFromForm',
+		// Changing the row.
+		'click .row-set-form .so-row-field': 'changeCellTotal',
+		'click .cell-resize-sizing span': 'changeCellRatio',
 	},
 
 	rowView: null,
 	dialogIcon: 'add-row',
 	dialogClass: 'so-panels-dialog-row-edit',
 	styleType: 'row',
+	columnResizeData: [],
 
 	dialogType: 'edit',
 
@@ -56,6 +57,7 @@ module.exports = panels.view.dialog.extend({
 				this.setRowModel(null);
 			}
 
+			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
 			this.renderStyles();
 			this.openSelectedCellStyles();
@@ -135,12 +137,6 @@ module.exports = panels.view.dialog.extend({
 		if ( ! _.isUndefined( this.model ) && this.dialogType == 'edit' ) {
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
-			if ( this.model.has( 'ratio' ) ) {
-				this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
-			}
-			if ( this.model.has( 'ratio_direction' ) ) {
-				this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
-			}
 		}
 
 		this.$( 'input.so-row-field' ).on( 'keyup', function() {
@@ -198,19 +194,11 @@ module.exports = panels.view.dialog.extend({
 		this.row = {
 			cells: this.model.get('cells').clone(),
 			style: {},
-			ratio: this.model.get('ratio'),
-			ratio_direction: this.model.get('ratio_direction'),
 		};
 
 		// Set the initial value of the cell field.
 		if ( this.dialogType == 'edit' ) {
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
-			if ( this.model.has( 'ratio' ) ) {
-				this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
-			}
-			if ( this.model.has( 'ratio_direction' ) ) {
-				this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
-			}
 		}
 
 		this.clearCellStylesCache();
@@ -571,107 +559,120 @@ module.exports = panels.view.dialog.extend({
 		});
 	},
 
-	/**
-	 * Get the weights from the
-	 */
-	setCellsFromForm: function () {
-
-		try {
-			var f = {
-				'cells': parseInt(this.$('.row-set-form input[name="cells"]').val()),
-				'ratio': parseFloat(this.$('.row-set-form select[name="ratio"]').val()),
-				'direction': this.$('.row-set-form select[name="ratio_direction"]').val()
-			};
-
-			if (_.isNaN(f.cells)) {
-				f.cells = 1;
-			}
-			if (isNaN(f.ratio)) {
-				f.ratio = 1;
-			}
-			if (f.cells < 1) {
-				f.cells = 1;
-				this.$('.row-set-form input[name="cells"]').val(f.cells);
-			}
-			else if (f.cells > 12) {
-				f.cells = 12;
-				this.$('.row-set-form input[name="cells"]').val(f.cells);
-			}
-
-			this.$('.row-set-form select[name="ratio"]').val(f.ratio);
-
-			var cells = [];
-			var cellCountChanged = (
-				this.row.cells.length !== f.cells
-			);
-
-			// Now, lets create some cells
-			var currentWeight = 1;
-			for (var i = 0; i < f.cells; i++) {
-				cells.push(currentWeight);
-				currentWeight *= f.ratio;
-			}
-
-			// Now lets make sure that the row weights add up to 1
-
-			var totalRowWeight = _.reduce(cells, function (memo, weight) {
-				return memo + weight;
-			});
-			cells = _.map(cells, function (cell) {
-				return cell / totalRowWeight;
-			});
-
-			// Don't return cells that are too small
-			cells = _.filter(cells, function (cell) {
-				return cell > 0.01;
-			});
-
-			if (f.direction === 'left') {
-				cells = cells.reverse();
-			}
-
-			// Discard deleted cells.
-			this.row.cells = new panels.collection.cells(this.row.cells.first(cells.length));
-
-			_.each(cells, function (cellWeight, index) {
-				var cell = this.row.cells.at(index);
-				if (!cell) {
-					cell = new panels.model.cell({weight: cellWeight, row: this.model});
-					this.row.cells.add(cell);
-				} else {
-					cell.set('weight', cellWeight);
+	drawCellResizers: function() {
+		this.$( '.cell-resize' ).empty();
+		var cellsCount = parseInt( this.$( '.row-set-form input[name="cells"]' ).val() );
+		var currentCellSizes = this.columnResizeData[ cellsCount ];
+		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
+			this.$( '.cell-resize-container' ).show();
+			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
+				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
+				$lastCell.data( 'cells', currentCellSizes[ ci ] );
+				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
+					$lastCell.append( '<span style="width: ' + currentCellSizes[ ci ][ cs ] + '%;">' + currentCellSizes[ ci ][ cs ] + '%</span>' );
 				}
-			}.bind(this));
-			
-			this.row.ratio = f.ratio;
-			this.row.ratio_direction = f.direction;
-
-			if (cellCountChanged) {
-				this.regenerateRowPreview();
-			} else {
-				var thisDialog = this;
-
-				// Now lets animate the cells into their new widths
-				this.$('.preview-cell').each(function (i, el) {
-					var cellWeight = thisDialog.row.cells.at(i).get('weight');
-					$(el).animate({'width': Math.round(cellWeight * 1000) / 10 + "%"}, 250);
-					$(el).find('.preview-cell-weight').html(Math.round(cellWeight * 1000) / 10);
-				});
-
-				// So the draggable handle is not hidden.
-				this.$('.preview-cell').css('overflow', 'visible');
-
-				setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
 			}
+		} else {
+			this.$( '.cell-resize-container' ).hide();
 		}
-		catch (err) {
-			console.log('Error setting cells - ' + err.message);
-		}
-
-
-		// Remove the button primary class
-		this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
 	},
+
+	changeCellRatio: function( e ) {
+		this.changeCellTotal( $( e.target ).parent().data('cells' ) )
+	},
+
+	changeCellTotal: function ( cellRatio = 0 ) {
+			 try {
+				var cellsCount = parseInt( this.$('.row-set-form input[name="cells"]').val() );
+				this.drawCellResizers( cellsCount );
+	
+				if (_.isNaN( cellsCount )) {
+					cellsCount = 1;
+				} else {
+					if ( cellsCount < 1 ) {
+						cellsCount = 1;
+						this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
+					} else if ( cellsCount > 12 ) {
+						cellsCount = 12;
+					}
+				}
+				this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
+	
+				var cells = [];
+				var cellCountChanged = (
+					this.row.cells.length !== cellsCount
+				);
+	
+				// Create some cells
+				var currentWeight = 1;
+				for ( var i = 0; i < cellsCount; i++ ) {
+					cells.push(1);
+				}
+
+				// Lets make sure that the row weights add up to 1.
+				var totalRowWeight = _.reduce( cells, function( memo, weight ) {
+					return memo + weight;
+				} );
+
+				cells = _.map (cells, function( cell ) {
+					return cell / totalRowWeight;
+				} );
+	
+				// Don't return cells that are too small
+				cells = _.filter( cells, function( cell ) {
+					return cell > 0.01;
+				} );
+
+				// Discard deleted cells.
+				this.row.cells = new panels.collection.cells( this.row.cells.first( cells.length ) );
+	
+				_.each( cells, function( cellWeight, index ) {
+					var cell = this.row.cells.at( index );
+					if ( ! cell ) {
+						cell = new panels.model.cell( {
+							weight: cellWeight,
+							row: this.model
+						} );
+						this.row.cells.add( cell );
+					} else {
+						cell.set(
+							'weight',
+							cellRatio.length ? cellRatio[ index ] / 100 : cellWeight
+						);
+					}
+				}.bind( this ) );
+	
+				if ( cellCountChanged ) {
+					this.regenerateRowPreview();
+				} else {
+					var thisDialog = this;
+	
+					// // Now lets animate the cells into their new widths
+					this.$( '.preview-cell' ).each( function( i, el ) {
+						var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
+						var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
+						// To prevent a jump, don't animate cells that haven't changed size.
+						if ( parseInt( $previewCellWeight.text() ) != width ) {
+							$( el ).animate( { 'width': width + "%" }, 250 );
+							$previewCellWeight.html( width );
+						}
+					} );
+	
+					// So the draggable handle is not hidden.
+					this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+	
+					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
+				}
+			}
+			catch (err) {
+				console.log('Error setting cells - ' + err.message);
+			}
+	
+	
+			// Remove the button primary class
+			this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
+		},
 
 	/**
 	 * Handle a click on the dialog left bar tab
@@ -697,7 +698,6 @@ module.exports = panels.view.dialog.extend({
 		if (!_.isEmpty(this.model)) {
 			this.model.setCells( this.row.cells );
 			this.model.set( 'ratio', this.row.ratio );
-			this.model.set( 'ratio_direction', this.row.ratio_direction );
 		}
 
 		// Update the row styles if they've loaded
