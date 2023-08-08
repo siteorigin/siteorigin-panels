@@ -701,7 +701,7 @@ class SiteOrigin_Panels_Renderer {
 			$after_title = '</h3>';
 		}
 
-		// Attributes of the widget wrapper
+		// Attributes of the widget wrapper.
 		$attributes = array(
 			'id'         => $id,
 			'class'      => implode( ' ', $classes ),
@@ -709,7 +709,14 @@ class SiteOrigin_Panels_Renderer {
 		);
 
 		if ( siteorigin_panels_setting( 'inline-styles' ) && ! $is_last ) {
-			$widget_bottom_margin = apply_filters( 'siteorigin_panels_css_cell_margin_bottom', siteorigin_panels_setting('margin-bottom') . 'px', false, false, array(), $post_id );
+			$widget_bottom_margin = apply_filters(
+				'siteorigin_panels_css_cell_margin_bottom',
+				( empty( $widget_info['style']['margin'] ) ? siteorigin_panels_setting('margin-bottom') : 0 ) . 'px',
+				false,
+				false,
+				array(),
+				$post_id
+			);
 			if ( ! empty( $widget_bottom_margin ) ) {
 				$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
 			}
