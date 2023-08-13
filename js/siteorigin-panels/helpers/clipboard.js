@@ -25,8 +25,7 @@ module.exports = {
 		// Can Page Builder cross domain copy paste?
 		if (
 			typeof SiteOriginPremium == 'object' &&
-			typeof SiteOriginPremium.CrossDomainCopyPasteAddon == 'function' &&
-			typeof SiteOriginPremium.CrossDomainCopyPasteAddon.allowed == 'boolean'
+			typeof SiteOriginPremium.CrossDomainCopyPasteAddon == 'function'
 		) {
 			SiteOriginPremium.CrossDomainCopyPasteAddon().copy( serial );
 		}
