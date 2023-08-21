@@ -575,7 +575,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					if ( ! empty( $field['fields'] ) ) {
 						$return = $return + $this->sanitize_style_fields( $k, $styles, $field['fields'] );
 					}
-					// no break
+					break;
 				default:
 					// No standard style fields used. See if there's a custom one set.
 					$custom_style_sanitized_data = apply_filters(
