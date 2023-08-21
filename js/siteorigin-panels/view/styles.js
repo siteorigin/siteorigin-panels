@@ -344,6 +344,31 @@ module.exports = Backbone.View.extend( {
 		} );
 		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
 
+		// Set up all the Slider fields.
+		this.$( '.style-field-slider' ).each( function() {
+			var $$ = $( this );
+			var $input = $$.find( '.so-wp-input-slider' );
+			var $c = $$.find( '.so-wp-value-slider' );
+
+			$c.slider( {
+				max: parseFloat( $input.attr( 'max' ) ),
+				min: parseFloat( $input.attr( 'min' ) ),
+				step: parseFloat( $input.attr( 'step' ) ),
+				value: parseFloat( $input.val() ),
+				slide: function( e, ui ) {
+					$input.val( parseFloat( ui.value ) );
+					$input.trigger( 'change' );
+					$$.find( '.so-wp-slider-value' ).html( ui.value );
+				},
+			});
+			$input.on( 'change', function( event, data ) {
+				if ( ! ( data && data.silent ) ) {
+					$c.slider( 'value', parseFloat( $input.val() ) );
+					$$.find('.so-wp-slider-value').html( $input.val() );
+				}
+			} );
+		} );
+
 		// Conditionally show Background related settings.
 		var $background_image = this.$( '.so-field-background_image_attachment' ),
 			$background_image_display = this.$( '.so-field-background_display' ),
