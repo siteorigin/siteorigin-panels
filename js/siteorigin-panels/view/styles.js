@@ -373,12 +373,14 @@ module.exports = Backbone.View.extend( {
 		var $background_image = this.$( '.so-field-background_image_attachment' ),
 			$background_image_display = this.$( '.so-field-background_display' ),
 			$background_image_size = this.$( '.so-field-background_image_size' );
+			$background_image_opacity = this.$( '.so-field-background_image_opacity' );
 
 		if (
 			$background_image.length &&
 			(
 				$background_image_display.length ||
-				$background_image_size.length
+				$background_image_size.length ||
+				$background_image_opacity.length
 			)
 		) {
 			var soBackgroundImageVisibility = function() {
@@ -391,9 +393,11 @@ module.exports = Backbone.View.extend( {
 				if ( hasImage.val() && hasImage.val() != 0 ) {
 					$background_image_display.show();
 					$background_image_size.show();
+					$background_image_opacity.show();
 				} else {
 					$background_image_display.hide();
 					$background_image_size.hide();
+					$background_image_opacity.hide();
 				}
 			}
 			soBackgroundImageVisibility();
