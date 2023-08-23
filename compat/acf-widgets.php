@@ -98,7 +98,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 		if ( is_array( $fields ) ) {
 			foreach ( $fields as $field_id => $field ) {
 				// If it's a cloneindex, or empty, don't keep it.
-				if ( $field_id === 'acfcloneindex' || empty( $field ) ) {
+				if ( $field_id == 'acfcloneindex' || empty( $field ) ) {
 					unset( $fields[ $field_id ] );
 					continue;
 				}
