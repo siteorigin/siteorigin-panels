@@ -59,6 +59,7 @@ module.exports = panels.view.dialog.extend({
 
 			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
+			this.drawCellResizers( parseInt( this.$('.row-set-form input[name="cells"]').val() ) );
 			this.renderStyles();
 			this.openSelectedCellStyles();
 		}, this);
