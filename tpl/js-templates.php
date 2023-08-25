@@ -293,7 +293,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<input type="button" class="button-secondary so-mode" tabindex="0" value="<?php esc_attr_e( ':', 'siteorigin-panels' ); ?>" />
 			<ul class="so-mode-list" style="display: none;">
 				<li class="so-saveinline-mode" tabindex="0" >
-					<?php _e( 'Ajax Saving', 'siteorigin-panels' ); ?>
+					<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
 				</li>
 				<li class="so-close-mode" tabindex="0" >
 					<?php _e( 'Close Widget', 'siteorigin-panels' ); ?>
@@ -393,7 +393,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<input type="button" class="button-secondary so-mode" tabindex="0" value="<?php esc_attr_e( ':', 'siteorigin-panels' ); ?>" />
 				<ul class="so-mode-list" style="display: none;">
 					<li class="so-saveinline-mode" tabindex="0" >
-						<?php _e( 'Ajax Saving', 'siteorigin-panels' ); ?>
+						<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
 					</li>
 					<li class="so-close-mode" tabindex="0" >
 						<?php _e( 'Close Row', 'siteorigin-panels' ); ?>
