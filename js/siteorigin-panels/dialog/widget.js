@@ -348,12 +348,24 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	switchModeShow: function() {
-		this.$( '.so-mode-list' ).show();
-		this.$( '.button-primary' ).hide();
+		this.$( '.so-toolbar .so-mode-list' ).show();
+		this.$( '.so-toolbar .button-primary:visible' ).addClass( 'so-active-mode' );
+		this.$( '.so-toolbar .button-primary' ).hide();
+		setTimeout( function() {
+			$( document ).one( 'click', function( e ) {
+				var $$ = jQuery( e.target );
+
+				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
+					$( '.so-mode-list' ).hide();
+					$( '.so-toolbar .so-active-mode' ).show()
+				}
+			} );
+		}, 100 );
 	},
-	
+
 	switchMode: function( inline = false ) {
-		this.$( '.so-mode-list' ).hide();
+		this.$( '.so-toolbar .so-mode-list' ).hide();
+		this.$( '.so-toolbar .button-primary' ).removeClass( 'so-active-mode' );
 		if ( inline ) {
 			this.$( '.so-toolbar .so-saveinline' ).show();
 		} else {
