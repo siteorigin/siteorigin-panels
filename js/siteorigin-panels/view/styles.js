@@ -176,6 +176,16 @@ module.exports = Backbone.View.extend( {
 						}
 					} );
 
+					// If there's a selected image, highlight it. 
+					frame.on( 'open', function() {
+						var selection = frame.state().get( 'selection' );
+						var selectedImage = $s.find( '.so-image-selector > input' ).val();
+						if ( selectedImage ) {
+							selection.add( wp.media.attachment( selectedImage ) );
+						}
+					} );
+
+
 					frame.on( 'select', function () {
 						var attachment = frame.state().get( 'selection' ).first().attributes;
 
