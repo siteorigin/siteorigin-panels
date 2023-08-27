@@ -383,6 +383,7 @@ class SiteOrigin_Panels_Admin {
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
 				'add_media'                 => __( 'Choose Media', 'siteorigin-panels' ),
+				'add_media_done'            => __( 'Done', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
 					array(
 						'weight' => 0.5,

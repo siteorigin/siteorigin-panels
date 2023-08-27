@@ -171,7 +171,7 @@ module.exports = Backbone.View.extend( {
 						// Customize the submit button.
 						button: {
 							// Set the text of the button.
-							text: 'Done',
+							text: panelsOptions.add_media_done,
 							close: true
 						}
 					} );
