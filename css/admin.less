@@ -1612,9 +1612,14 @@
 							height: 24px;
 							width: 190px !important;
 
-							&:hover {
+							&.so-active-ratio,
+							&:not(.so-active-ratio):hover {
 								cursor: pointer;
 								background: #cae7f4;
+							}
+
+							&.so-active-ratio:hover {
+								cursor: default;
 							}
 
 							& > span {

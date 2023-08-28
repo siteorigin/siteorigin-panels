@@ -60,6 +60,7 @@ module.exports = panels.view.dialog.extend({
 			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
 			this.drawCellResizers( parseInt( this.$('.row-set-form input[name="cells"]').val() ) );
+			this.updateActiveCellClass();
 			this.renderStyles();
 			this.openSelectedCellStyles();
 		}, this);
@@ -476,6 +477,8 @@ module.exports = panels.view.dialog.extend({
 
 		}, this);
 
+		this.updateActiveCellClass();
+
 		this.trigger('form_loaded', this);
 	},
 
@@ -576,6 +579,24 @@ module.exports = panels.view.dialog.extend({
 			}
 		} else {
 			this.$( '.cell-resize-container' ).hide();
+		}
+	},
+
+	updateActiveCellClass: function() {
+		$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
+		var activeCellRatio = this.$( '.preview-cell-weight' ).map( function() {
+			return Math.trunc( Number( $( this ).text() ) );
+		} ).get();
+
+		$.each( this.columnResizeData[ parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ) ], function( i, ratio ) {
+			if ( ratio.toString() === activeCellRatio.toString() ) {
+				activeCellRatio = i;
+				return false;
+			}
+		} );
+
+		if ( typeof activeCellRatio == 'number' ) {
+			$( $( '.cell-resize-sizing' ).get( activeCellRatio ) ).addClass( 'so-active-ratio' );
 		}
 	},
 
