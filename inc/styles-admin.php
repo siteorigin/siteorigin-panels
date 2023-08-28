@@ -254,6 +254,25 @@ class SiteOrigin_Panels_Styles_Admin {
 				/>
 				<?php
 				break;
+			case 'slider' :
+				?>
+				<div class="so-wp-slider-value">
+					<?php echo ! empty( $current ) ? esc_html( $current ) : 100; ?>
+				</div>
+				<div class="so-wp-slider-wrapper">
+					<div class="so-wp-value-slider"></div>
+				</div>
+				<input
+					type="number"
+					class="so-wp-input-slider"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					value="<?php echo ! empty( $current ) ? esc_attr( ( float ) $current ) : 100; ?>"
+					min="<?php echo isset( $field['min'] ) ? ( float ) $field['min'] : 0; ?>"
+					max="<?php echo isset( $field['max'] ) ? ( float ) $field['max'] : 100; ?>"
+					step="<?php echo isset( $field['step'] ) ? ( float ) $field['step'] : 1; ?>"
+				/>
+				<?php
+				break;
 
 			case 'image' :
 				$image = false;

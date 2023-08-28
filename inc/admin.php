@@ -336,6 +336,7 @@ class SiteOrigin_Panels_Admin {
 					'jquery-ui-resizable',
 					'jquery-ui-sortable',
 					'jquery-ui-draggable',
+					'jquery-ui-slider',
 					'wp-color-picker-alpha',
 					'underscore',
 					'backbone',
