@@ -425,7 +425,8 @@ class SiteOrigin_Panels_Styles_Admin {
 					$field,
 					$field_name,
 					$current,
-					$field_id
+					$field_id,
+					$current_styles
 				);
 
 				if ( ! empty( $custom_style_field ) ) {
