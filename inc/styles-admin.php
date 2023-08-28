@@ -613,6 +613,16 @@ class SiteOrigin_Panels_Styles_Admin {
 						$return[ $k ] = $styles[ $k ];
 					}
 
+					// Allow field to modify other values.
+					$return = apply_filters(
+						'siteorigin_panels_style_field_sanitize_all_' . $field['type'],
+						$return,
+						$return[ $k ],
+						$k,
+						$field,
+						$styles
+					);
+
 					break;
 			}
 		}
