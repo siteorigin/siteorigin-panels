@@ -624,33 +624,43 @@ class SiteOrigin_Panels_Styles {
 	public function add_overlay( $html, $context ) {
 		if (
 			(
-				! empty( $context['style']['background_image_attachment'] ) || 
-				! empty( $context['style']['background_image_attachment_fallback'] ) || 
-				apply_filters( 'siteorigin_panels_overlay', false, $context )
-			) &&
-			! self::is_background_parallax( $context['style']['background_display'] ) &&
-			(
-				isset( $context['style']['background_image_opacity'] ) &&
-				$context['style']['background_image_opacity'] != 100
-			)
+				(
+					! empty( $context['style']['background_image_attachment'] ) || 
+					! empty( $context['style']['background_image_attachment_fallback'] )
+				) &&
+				! self::is_background_parallax( $context['style']['background_display'] ) &&
+				(
+					isset( $context['style']['background_image_opacity'] ) &&
+					$context['style']['background_image_opacity'] != 100
+				)
+			) ||
+			apply_filters( 'siteorigin_panels_overlay', false, $context )
 		) {
 			$styles = self::generate_background_style( $context['style'] );
+			// Is this a background overlay?
 			if ( ! empty( $styles ) ) {
 				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
 				unset( $styles['background-color'] );
+			} else {
+				$custom_overlay = apply_filters( 'siteorigin_panels_overlay', false, $context );
+			}
+
+			if ( ! empty( $styles ) || ! empty( $custom_overlay ) ) {
 				ob_start();
 				?>
 				<div
 					class="panel-background-overlay"
-					style="
-					<?php
-					foreach( $styles as $p => $v ) {
-						echo esc_attr( $p . ':' . $v . ';' );
-					}
-					?>
-					"
+					<?php if ( ! empty( $styles ) ) { ?>
+						style="
+						<?php
+						foreach( $styles as $p => $v ) {
+							echo esc_attr( $p . ':' . $v . ';' );
+						}
+						?>
+						"
+					<?php } ?>
 				>
-					&nbsp;
+					<?php echo apply_filters( 'siteorigin_panels_overlay_content', '', $context, ! empty( $custom_overlay ) ); ?>
 				</div>
 				<?php
 				$html .= ob_get_clean();
