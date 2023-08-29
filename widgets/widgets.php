@@ -929,8 +929,13 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 	public function widget( $args, $instance ) {
 		$embed = new WP_Embed();
 
-		if ( !wp_script_is( 'fitvids' ) ) {
-			wp_enqueue_script( 'fitvids', plugin_dir_url( __FILE__ ) . 'js/jquery.fitvids.js', array( 'jquery' ), SITEORIGIN_PANELS_VERSION );
+		if ( ! wp_script_is( 'fitvids' ) ) {
+			wp_enqueue_script(
+				'fitvids',
+				siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION
+			);
 		}
 
 		if ( !wp_script_is( 'siteorigin-panels-embedded-video' ) ) {
