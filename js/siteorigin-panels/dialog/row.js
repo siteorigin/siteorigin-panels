@@ -601,7 +601,16 @@ module.exports = panels.view.dialog.extend({
 	},
 
 	changeCellRatio: function( e ) {
-		this.changeCellTotal( $( e.target ).parent().data('cells' ) )
+		var $current = $( e.target );
+		if ( ! $current.hasClass( 'cell-resize-sizing' ) ) {
+			$current = $current.parent();
+		}
+
+		if ( ! $current.hasClass( 'so-active-ratio' ) ) {
+			$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
+			$current.addClass( 'so-active-ratio' );
+			this.changeCellTotal( $current.data('cells' ) )
+		}
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {
