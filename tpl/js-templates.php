@@ -296,7 +296,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
 				</li>
 				<li class="so-close-mode" tabindex="0" >
-					<?php _e( 'Close Widget', 'siteorigin-panels' ); ?>
+					<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
 				</li>
 			</ul>
 		</div>
@@ -396,7 +396,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 						<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
 					</li>
 					<li class="so-close-mode" tabindex="0" >
-						<?php _e( 'Close Row', 'siteorigin-panels' ); ?>
+						<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
 					</li>
 				</ul>
 			{{% } %}}
