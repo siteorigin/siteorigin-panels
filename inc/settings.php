@@ -217,7 +217,7 @@ class SiteOrigin_Panels_Settings {
 		wp_enqueue_script(
 			'siteorigin-panels-settings',
 			siteorigin_panels_url( 'settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-			array(),
+			array( 'fitvids' ),
 			SITEORIGIN_PANELS_VERSION
 		);
 	}
