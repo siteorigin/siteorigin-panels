@@ -194,8 +194,8 @@ class SiteOrigin_Panels_Settings {
 	public function add_widget_class( $add_class ) {
 		switch ( get_option( 'stylesheet' ) ) {
 			case 'twentysixteen':
-			$add_class = false;
-			break;
+				$add_class = false;
+				break;
 		}
 
 		return $add_class;

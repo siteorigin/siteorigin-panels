@@ -34,7 +34,7 @@ add_action( 'admin_enqueue_scripts', 'origin_widgets_enqueue' );
 function origin_widgets_generate_css( $class, $style, $preset, $version = null ) {
 	$widget = new $class();
 
-	if ( !is_subclass_of( $widget, 'SiteOrigin_Panels_Widget' ) ) {
+	if ( ! is_subclass_of( $widget, 'SiteOrigin_Panels_Widget' ) ) {
 		return '';
 	}
 
@@ -131,7 +131,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 	 */
 	public function update( $new, $old ) {
 		// We wont clear cache if this is a preview
-		if ( !is_preview() ) {
+		if ( ! is_preview() ) {
 			// Remove the old CSS file
 			if ( ! empty( $old['origin_style'] ) ) {
 				list( $style, $preset ) = explode( ':', $old['origin_style'] );
@@ -202,29 +202,67 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 
 			switch( $field_args['type'] ) {
 				case 'text':
-					?><input type="text" class="widefat" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" value="<?php echo esc_attr( $instance[ $field_id ] ); ?>" /><?php
+					?>
+					<input
+						type="text"
+						class="widefat"
+						id="<?php echo $this->get_field_id( $field_id ); ?>"
+						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						value="<?php echo esc_attr( $instance[ $field_id ] ); ?>"
+					/>
+					<?php
 					break;
 
 				case 'textarea':
 					if ( empty( $field_args['height'] ) ) {
 						$field_args['height'] = 6;
 					}
-					?><textarea class="widefat" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" rows="<?php echo (int) $field_args['height']; ?>"><?php echo esc_textarea( $instance[$field_id] ); ?></textarea><?php
+					?>
+					<textarea
+						class="widefat"
+						id="<?php echo $this->get_field_id( $field_id ); ?>"
+						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						rows="<?php echo (int) $field_args['height']; ?>"
+					><?php echo esc_textarea( $instance[ $field_id ] ); ?></textarea>
+					<?php
 					break;
 
 				case 'number':
-					?><input type="number" class="small-text" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" value="<?php echo (float) $instance[ $field_id] ; ?>" /><?php
+					?>
+					<input
+						type="number"
+						class="small-text"
+						id="<?php echo $this->get_field_id( $field_id ); ?>"
+						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						value="<?php echo (float) $instance[ $field_id]; ?>"
+					/>
+					<?php
 					break;
 
 				case 'checkbox':
-					?><input type="checkbox" class="small-text" id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>" <?php checked( ! empty( $instance[ $field_id ] ) ); ?>/><?php
+					?>
+					<input
+						type="checkbox"
+						class="small-text"
+						id="<?php echo $this->get_field_id( $field_id ); ?>"
+						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
+					/>
+					<?php
 					break;
 
 				case 'select':
 					?>
-					<select id="<?php echo $this->get_field_id( $field_id ); ?>" name="<?php echo $this->get_field_name( $field_id ); ?>">
+					<select
+						id="<?php echo $this->get_field_id( $field_id ); ?>"
+						name="<?php echo $this->get_field_name( $field_id ); ?>">
 						<?php foreach ( $field_args['options'] as $k => $v ) { ?>
-							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $instance[ $field_id ], $k ); ?>><?php echo esc_html( $v ); ?></option>
+							<option
+								value="<?php echo esc_attr( $k ); ?>"
+								<?php selected( $instance[ $field_id ], $k ); ?>
+							>
+								<?php echo esc_html( $v ); ?>
+							</option>
 						<?php } ?>
 					</select>
 					<?php
@@ -235,7 +273,9 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				echo '<small class="description">' . esc_html( $field_args['description'] ) . '</small>';
 			}
 
-			?></p><?php
+			?>
+			</p>
+			<?php
 		}
 
 		if ( ! isset( $instance['origin_style'] ) ) {
