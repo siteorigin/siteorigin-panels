@@ -315,50 +315,17 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="content">
 
 			<div class="row-set-form">
-				<?php
-				$cells_field = apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
-				$ratios = apply_filters( 'siteorigin_panels_column_ratios', array(
-					'Even' => 1,
-					'Golden' => 0.61803398,
-					'Halves' => 0.5,
-					'Thirds' => 0.33333333,
-					'Diagon' => 0.41421356,
-					'Hecton' => 0.73205080,
-					'Hemidiagon' => 0.11803398,
-					'Penton' => 0.27201964,
-					'Trion' => 0.15470053,
-					'Quadriagon' => 0.207,
-					'Biauron' => 0.30901699,
-					'Bipenton' => 0.46,
-				) );
-				$ratio_field = '<select name="ratio" class="so-row-field">';
+				<div class="row-cell-column">
+					<?php				
+					echo __( 'Set Row Layout', 'siteorigin-panels' );
+					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
+					?>
+				</div>
 
-				foreach ( $ratios as $name => $value ) {
-					$ratio_field .= '<option value="' . esc_attr( $value ) . '">' . esc_html( $name . ' (' . round( $value, 3 ) . ')' ) . '</option>';
-				}
-				$ratio_field .= '</select>';
-
-				$direction_field = '<select name="ratio_direction" class="so-row-field">';
-				$direction_field .= '<option value="right">' . esc_html__( 'Left to Right', 'siteorigin-panels' ) . '</option>';
-				$direction_field .= '<option value="left">' . esc_html__( 'Right to Left', 'siteorigin-panels' ) . '</option>';
-				$direction_field .= '</select>';
-
-				printf(
-					preg_replace(
-						array(
-							'/1\{ *(.*?) *\}/',
-						),
-						array(
-							'<strong>$1</strong>',
-						),
-						__( '1{Set row layout}: %1$s columns with a ratio of %2$s going from %3$s', 'siteorigin-panels' )
-					),
-					$cells_field,
-					$ratio_field,
-					$direction_field
-				);
-				echo '<button class="button-secondary set-row">' . esc_html__( 'Set', 'siteorigin-panels' ) . '</button>';
-				?>
+				<div class="cell-resize-container">
+					<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
+				</div>
 			</div>
 
 			<div class="row-preview">

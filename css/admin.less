@@ -1560,10 +1560,17 @@
 
 			.row-set-form {
 				.clearfix();
-				padding: 8px;
-				border: 1px solid #ccc;
-				margin-bottom: 20px;
 				background: #f3f3f3;
+				border: 1px solid #ccc;
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+				padding: 8px;
+
+				@media (max-width: 700px) {
+					justify-content: center;
+					align-items: center;
+				}
 
 				input, select, button, strong, span {
 					display: inline;
@@ -1581,6 +1588,57 @@
 				label{
 					display: inline;
 				}
+
+				.row-cell-column {
+					flex: 1;
+				}
+
+				.cell-resize-container {
+					align-items: center;
+					display: flex;
+
+					@media (max-width: 700px) {
+						justify-content: center;
+						margin-top: 5px;
+					}
+
+					.cell-resize {
+						display: flex;
+
+						&-sizing {
+							background: #e4eff4;
+							border: 1px solid #8c8f94;
+							display: flex !important;
+							height: 24px;
+							width: 190px !important;
+
+							&.so-active-ratio,
+							&:not(.so-active-ratio):hover {
+								cursor: pointer;
+								background: #cae7f4;
+							}
+
+							&.so-active-ratio:hover {
+								cursor: default;
+							}
+
+							& > span {
+								align-self: center;
+								border-right: 1px solid #bcccd2;
+								display: inline-block  !important;
+								font-size: 10px;
+								margin: 0  !important;
+								padding: 0 !important;
+								text-align: center;
+
+								&:last-of-type {
+									border-right: none;
+								}
+							}
+						}
+					}
+				}
+
 			}
 
 			.row-preview {
