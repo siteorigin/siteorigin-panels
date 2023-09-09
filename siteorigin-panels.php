@@ -33,6 +33,8 @@ class SiteOrigin_Panels {
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_general_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_general_scripts' ) );
 
 		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
 
@@ -614,6 +616,17 @@ class SiteOrigin_Panels {
 		}
 
 		return $admin_bar;
+	}
+
+	public function register_general_scripts() {
+		if ( ! wp_script_is( 'fitvids', 'registered' ) ) {
+			wp_register_script(
+				'fitvids',
+				siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION
+			);
+		}
 	}
 
 	public function widgets_init() {
