@@ -146,7 +146,7 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 
 			if ( ! empty( $sidebar_id ) ) {
 				if ( ! empty( $widget_instance['option_name'] ) ) {
-						$widget_option_names[] = $widget_instance['option_name'];
+					$widget_option_names[] = $widget_instance['option_name'];
 				} else {
 					// Something went wrong. Skip this widget.
 					continue;
