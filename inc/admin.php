@@ -1819,7 +1819,7 @@ class SiteOrigin_Panels_Admin {
 				$response['error'] = __( 'Invalid nonce.', 'siteorigin-panels' );
 			} elseif ( is_numeric( $panels_data['id'] ) && ! empty( $panels_data['data'] ) ) {
 				$_POST['_sopanels_nonce'] = $panels_data['nonce'];
-				$_POST['panels_data'] = json_encode( $panels_data['data'] );
+				$_POST['panels_data'] = wp_slash( json_encode( $panels_data['data'] ) );
 				$this->save_post( $panels_data['id'] );
 			}
 		}
