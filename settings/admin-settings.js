@@ -170,6 +170,3 @@ jQuery( function($){
     $( '.panels-setting select, .panels-setting input' ).on( 'change', handleSettingVisibility );
 
 } );
-
-// Works with either jQuery or Zepto
-})( window.jQuery || window.Zepto );
