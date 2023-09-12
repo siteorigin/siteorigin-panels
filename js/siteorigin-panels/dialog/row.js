@@ -866,6 +866,8 @@ module.exports = panels.view.dialog.extend({
 		} else {
 			this.$( '.so-toolbar .so-save' ).show();
 		}
+
+		window.panelsMode = inline ? 'inline' : 'dialog';
 	},
 
 });

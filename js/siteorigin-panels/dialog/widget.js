@@ -371,6 +371,8 @@ module.exports = panels.view.dialog.extend( {
 		} else {
 			this.$( '.so-toolbar .so-close' ).show();
 		}
+
+		window.panelsMode = inline ? 'inline' : 'dialog';
 	},
 
 } );
