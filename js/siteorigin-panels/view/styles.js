@@ -171,10 +171,20 @@ module.exports = Backbone.View.extend( {
 						// Customize the submit button.
 						button: {
 							// Set the text of the button.
-							text: 'Done',
+							text: panelsOptions.add_media_done,
 							close: true
 						}
 					} );
+
+					// If there's a selected image, highlight it. 
+					frame.on( 'open', function() {
+						var selection = frame.state().get( 'selection' );
+						var selectedImage = $s.find( '.so-image-selector > input' ).val();
+						if ( selectedImage ) {
+							selection.add( wp.media.attachment( selectedImage ) );
+						}
+					} );
+
 
 					frame.on( 'select', function () {
 						var attachment = frame.state().get( 'selection' ).first().attributes;
@@ -344,16 +354,43 @@ module.exports = Backbone.View.extend( {
 		} );
 		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
 
+		// Set up all the Slider fields.
+		this.$( '.style-field-slider' ).each( function() {
+			var $$ = $( this );
+			var $input = $$.find( '.so-wp-input-slider' );
+			var $c = $$.find( '.so-wp-value-slider' );
+
+			$c.slider( {
+				max: parseFloat( $input.attr( 'max' ) ),
+				min: parseFloat( $input.attr( 'min' ) ),
+				step: parseFloat( $input.attr( 'step' ) ),
+				value: parseFloat( $input.val() ),
+				slide: function( e, ui ) {
+					$input.val( parseFloat( ui.value ) );
+					$input.trigger( 'change' );
+					$$.find( '.so-wp-slider-value' ).html( ui.value );
+				},
+			});
+			$input.on( 'change', function( event, data ) {
+				if ( ! ( data && data.silent ) ) {
+					$c.slider( 'value', parseFloat( $input.val() ) );
+					$$.find('.so-wp-slider-value').html( $input.val() );
+				}
+			} );
+		} );
+
 		// Conditionally show Background related settings.
 		var $background_image = this.$( '.so-field-background_image_attachment' ),
 			$background_image_display = this.$( '.so-field-background_display' ),
 			$background_image_size = this.$( '.so-field-background_image_size' );
+			$background_image_opacity = this.$( '.so-field-background_image_opacity' );
 
 		if (
 			$background_image.length &&
 			(
 				$background_image_display.length ||
-				$background_image_size.length
+				$background_image_size.length ||
+				$background_image_opacity.length
 			)
 		) {
 			var soBackgroundImageVisibility = function() {
@@ -366,9 +403,11 @@ module.exports = Backbone.View.extend( {
 				if ( hasImage.val() && hasImage.val() != 0 ) {
 					$background_image_display.show();
 					$background_image_size.show();
+					$background_image_opacity.show();
 				} else {
 					$background_image_display.hide();
 					$background_image_size.hide();
+					$background_image_opacity.hide();
 				}
 			}
 			soBackgroundImageVisibility();

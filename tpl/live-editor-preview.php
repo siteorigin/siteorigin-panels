@@ -23,7 +23,7 @@ wp_enqueue_style( 'siteorigin-preview-style', siteorigin_panels_url( 'css/live-e
 
 				if (
 					! empty( $data['widgets'] ) && (
-						!class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
+						! class_exists( 'SiteOrigin_Widget_Field_Class_Loader' ) ||
 						method_exists( 'SiteOrigin_Widget_Field_Class_Loader', 'extend' )
 					)
 				) {

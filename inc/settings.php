@@ -194,8 +194,8 @@ class SiteOrigin_Panels_Settings {
 	public function add_widget_class( $add_class ) {
 		switch ( get_option( 'stylesheet' ) ) {
 			case 'twentysixteen':
-			$add_class = false;
-			break;
+				$add_class = false;
+				break;
 		}
 
 		return $add_class;
@@ -217,7 +217,7 @@ class SiteOrigin_Panels_Settings {
 		wp_enqueue_script(
 			'siteorigin-panels-settings',
 			siteorigin_panels_url( 'settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-			array(),
+			array( 'fitvids' ),
 			SITEORIGIN_PANELS_VERSION
 		);
 	}
@@ -738,7 +738,7 @@ class SiteOrigin_Panels_Settings {
 		$values[ 'mobile-width' ] = max( $values[ 'mobile-width' ], 320 );
 
 		if ( isset( $values['installer'] ) ) {
-			update_option( 'siteorigin_installer', rest_sanitize_boolean( $values['installer'] ) );
+			update_option( 'siteorigin_installer', (string) rest_sanitize_boolean( $values['installer'] ) );
 			unset( $values['installer'] );
 		}
 

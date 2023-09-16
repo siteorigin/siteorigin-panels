@@ -72,7 +72,10 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 
 		if ( ! empty( $fields ) ) {
 			foreach ( $fields->data as $field ) {
-				if ( $widget_field['type'] != 'repeater' ) {
+				if (
+					$widget_field['type'] != 'repeater' ||
+					$widget_field['type'] != 'checkbox'
+				) {
 					if (
 						$field['key'] == $widget_field['key'] &&
 						! empty( $instance->data[ $field['key'] ] )
@@ -95,7 +98,13 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 		if ( is_array( $fields ) ) {
 			foreach ( $fields as $field_id => $field ) {
 				// If it's a cloneindex, or empty, don't keep it.
-				if ( $field_id == 'acfcloneindex' || empty( $field ) ) {
+				if (
+					$field_id === 'acfcloneindex' ||
+					(
+						$field_id !== 0 &&
+						empty( $field )
+					)
+				) {
 					unset( $fields[ $field_id ] );
 					continue;
 				}

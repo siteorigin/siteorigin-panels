@@ -358,6 +358,16 @@ module.exports = Backbone.View.extend( {
 
 		this.onResize();
 
+		if ( typeof window.panelsMode == 'string' ) {
+			if ( window.panelsMode == 'inline' ) {
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).hide();
+				this.$( '.so-toolbar .so-saveinline' ).show().addClass( 'so-active-mode' );
+			} else {
+				this.$( '.so-toolbar .so-saveinline' ).hide();
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).show().addClass( 'so-active-mode' );
+			}
+		}
+
 		this.$el.show();
 
 		if ( ! options.silent ) {
@@ -539,7 +549,10 @@ module.exports = Backbone.View.extend( {
 				}
 
 				// Is this field an ACF Repeater?
-				if ( $$.parents( '.acf-repeater' ).length ) {
+				if (
+					$$.parents( '.acf-repeater' ).length ||
+					$$.parents( '.acf-field-checkbox' ).length
+				) {
 					// If field is empty, skip it - this is to avoid indexes which are admin only.
 					if ( fieldValue == '' ) {
 						return;

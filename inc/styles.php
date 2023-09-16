@@ -20,6 +20,11 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_cell_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_attributes', array( $this, 'general_style_attributes' ), 10, 2 );
 
+		// Background Opacity.
+		add_filter( 'siteorigin_panels_inside_row_before', array( $this, 'add_overlay' ), 10, 2 );
+		add_filter( 'siteorigin_panels_inside_cell_before', array( $this, 'add_overlay' ), 10, 2 );
+		add_filter( 'siteorigin_panels_inside_widget_before', array( $this, 'add_overlay' ), 10, 2 );
+
 		// Style wrapper CSS.
 		add_filter( 'siteorigin_panels_row_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'general_style_css' ), 10, 2 );
@@ -222,6 +227,13 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'image_size',
 			'group'       => 'design',
 			'priority'    => 8,
+		);
+
+		$fields['background_image_opacity'] = array(
+			'name'        => __( 'Background Image Opacity', 'siteorigin-panels' ),
+			'type'        => 'slider',
+			'group'       => 'design',
+			'priority'    => 9,
 		);
 
 		$fields['border_color'] = array(
@@ -609,6 +621,46 @@ class SiteOrigin_Panels_Styles {
 		return $attributes;
 	}
 
+	public function add_overlay( $html, $context ) {
+		if (
+			(
+				! empty( $context['style']['background_image_attachment'] ) ||
+				! empty( $context['style']['background_image_attachment_fallback'] ) ||
+				apply_filters( 'siteorigin_panels_overlay', false, $context )
+			) &&
+			! self::is_background_parallax( $context['style']['background_display'] ) &&
+			(
+				isset( $context['style']['background_image_opacity'] ) &&
+				$context['style']['background_image_opacity'] != 100
+			)
+		) {
+			$styles = self::generate_background_style( $context['style'] );
+
+			if ( ! empty( $styles ) ) {
+				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
+				unset( $styles['background-color'] );
+				ob_start();
+				?>
+				<div
+					class="panel-background-overlay"
+					style="
+					<?php
+					foreach ( $styles as $p => $v ) {
+						echo esc_attr( $p . ':' . $v . ';' );
+					}
+				?>
+					"
+				>
+					&nbsp;
+				</div>
+				<?php
+				$html .= ob_get_clean();
+			}
+		}
+
+		return $html;
+	}
+
 	public static function row_style_attributes( $attributes, $style ) {
 		if ( ! empty( $style['row_stretch'] ) ) {
 			$attributes['class'][] = 'siteorigin-panels-stretch';
@@ -644,14 +696,23 @@ class SiteOrigin_Panels_Styles {
 					add_filter( 'jetpack_photon_skip_image', 'siteorigin_panels_photon_exclude_parallax', 10, 3 );
 				}
 
+				$attr = array(
+					'data-siteorigin-parallax' => 'true',
+					'loading' => 'eager',
+				);
+
+				if (
+					isset( $context['style']['background_image_opacity'] ) &&
+					$context['style']['background_image_opacity'] != 100
+				) {
+					$attr['style'] = 'opacity: 0.' . (int) $context['style']['background_image_opacity'] . ';';
+				}
+
 				$image_html = wp_get_attachment_image(
 					$context['style']['background_image_attachment'],
 					! empty( $context['style']['background_image_size'] ) ? $context['style']['background_image_size'] : 'full',
 					false,
-					array(
-						'data-siteorigin-parallax' => 'true',
-						'loading' => 'eager',
-					)
+					$attr
 				);
 
 				if ( $photon_exclude ) {
@@ -700,24 +761,19 @@ class SiteOrigin_Panels_Styles {
 
 			$opacity_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
 			$opacity = is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $opacity_default;
-			
+
 			$box_shadow_color = "rgba($color[0],$color[1],$color[2],$opacity)";
 			unset( $style[ $prefix . '_opacity' ] );
 		} else {
-			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] :  'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
+			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] : 'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
 		}
 
 		return array(
-			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread $box_shadow_color"
+			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread $box_shadow_color",
 		);
 	}
 
-	/**
-	 * Get the CSS styles that apply to all rows, cells and widgets.
-	 *
-	 * @return mixed
-	 */
-	public static function general_style_css( $css, $style ) {
+	public static function generate_background_style( $style, & $css = array() ) {
 		if ( ! empty( $style['background'] ) ) {
 			$css[ 'background-color' ] = $style['background'];
 		}
@@ -777,6 +833,22 @@ class SiteOrigin_Panels_Styles {
 						break;
 				}
 			}
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Get the CSS styles that apply to all rows, cells and widgets.
+	 *
+	 * @return mixed
+	 */
+	public static function general_style_css( $css, $style ) {
+		if (
+			! isset( $style['background_image_opacity'] ) ||
+			$style['background_image_opacity'] == 100
+		) {
+			self::generate_background_style( $style, $css );
 		}
 
 		if ( ! empty( $style['border_color'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
@@ -935,7 +1007,7 @@ class SiteOrigin_Panels_Styles {
 
 			if (
 				! empty( $row['style']['box_shadow_hover'] ) &&
-				! empty( $row['style']['box_shadow_hover_color'] ) 
+				! empty( $row['style']['box_shadow_hover_color'] )
 			) {
 				$css->add_row_css(
 					$post_id,
