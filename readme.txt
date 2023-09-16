@@ -121,6 +121,30 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.26.0 - 16 September 2023 =
+* Added Inline Widget Saving: Click the two vertical dots next to the widget Done button to change modes.
+* Row Cell Ratio: Improved styling, layout, and functionality.
+* Color Field: Improved spacing on smaller displays.
+* Updated FitVids.
+* Switched CSS container `var` to `public.
+* PHP formatting improvements.
+
+= 2.25.3 - 26 August 2023 =
+* Fixed box shadow related settings. Added missing `break` statement in the `styles-admin.php` file for better code structure and readability.
+* Allowed fields that store arrays to have a `0` index, enhancing the functionality of the Advanced Custom Fields (ACF) compatibility.
+* Removed the check for the allowed state in the SiteOrigin Premium Copy Paste feature, improving cross-domain copy and paste functionality.
+* Removed extra spacing from the WordPress color picker in the admin.less file for cleaner UI.
+
+= 2.25.2 - 13 August 2023 =
+* Updated the Build submodule.
+* Excluded the standalone updater from SiteOrigin Installer.
+
+= 2.25.1 - 09 August 2023 =
+* Advanced Custom Fields: Added support for multiple options.
+* Inline Styles: Resolved an issue with unexpected widget margins when custom margins are set.
+* Fixed an issue with saving settings in the SiteOrigin Installer.
+* Updated the "Tested up to" version in the readme.txt file from 6.2 to 6.3.
+
 = 2.25.0 - 13 July 2023 =
 * Added "Block Editor Layout Block Quick Add Button" setting to display the "Add SiteOrigin Layout Block" quick add button in the Block Editor.
 * Added "Enable SiteOrigin Installer" setting to display the SiteOrigin Installer admin menu item.
