@@ -625,7 +625,7 @@ class SiteOrigin_Panels_Styles {
 		if (
 			(
 				(
-					! empty( $context['style']['background_image_attachment'] ) || 
+					! empty( $context['style']['background_image_attachment'] ) ||
 					! empty( $context['style']['background_image_attachment_fallback'] )
 				) &&
 				! self::is_background_parallax( $context['style']['background_display'] ) &&
@@ -653,7 +653,7 @@ class SiteOrigin_Panels_Styles {
 					<?php if ( ! empty( $styles ) ) { ?>
 						style="
 						<?php
-						foreach( $styles as $p => $v ) {
+						foreach ( $styles as $p => $v ) {
 							echo esc_attr( $p . ':' . $v . ';' );
 						}
 						?>
@@ -666,6 +666,7 @@ class SiteOrigin_Panels_Styles {
 				$html .= ob_get_clean();
 			}
 		}
+
 		return $html;
 	}
 
@@ -769,15 +770,15 @@ class SiteOrigin_Panels_Styles {
 
 			$opacity_default = $prefix == 'box_shadow' ? 0.15 : 0.30;
 			$opacity = is_numeric( $style[ $prefix . '_opacity' ] ) ? min( 100, $style[ $prefix . '_opacity' ] ) / 100 : $opacity_default;
-			
+
 			$box_shadow_color = "rgba($color[0],$color[1],$color[2],$opacity)";
 			unset( $style[ $prefix . '_opacity' ] );
 		} else {
-			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] :  'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
+			$box_shadow_color = ! empty( $style[ $prefix . '_color' ] ) ? $style[ $prefix . '_color' ] : 'rgba( 0, 0, 0, ' . ( $prefix == 'box_shadow' ? 0.15 : 0.30 ) . ')';
 		}
 
 		return array(
-			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread $box_shadow_color"
+			'box-shadow' => "$box_shadow_inset $box_shadow_offset_horizontal $box_shadow_offset_vertical $box_shadow_blur $box_shadow_spread $box_shadow_color",
 		);
 	}
 
@@ -845,7 +846,6 @@ class SiteOrigin_Panels_Styles {
 
 		return $css;
 	}
-	
 
 	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets.
@@ -1016,7 +1016,7 @@ class SiteOrigin_Panels_Styles {
 
 			if (
 				! empty( $row['style']['box_shadow_hover'] ) &&
-				! empty( $row['style']['box_shadow_hover_color'] ) 
+				! empty( $row['style']['box_shadow_hover_color'] )
 			) {
 				$css->add_row_css(
 					$post_id,

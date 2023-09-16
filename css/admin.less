@@ -1245,7 +1245,54 @@
 			}
 
 			float: right;
+
+			@media (max-width: 980px) {
+
+				.so-mode.button-secondary.so-mode {
+					display: none;
+				}
+			}
+
+			@media (min-width: 980px) {
+
+				.button-primary.so-close,
+				.button-primary.so-save,
+				.button-primary.so-saveinline {
+					border-bottom-right-radius: 0;
+					border-top-right-radius: 0;
+				}
+
+				.so-mode.button-secondary.so-mode {
+					border-bottom-left-radius: 0;
+					border-top-left-radius: 0;
+					margin-left: -4px;
+				}
+
+				.so-mode-list {
+					background: #fff;
+					border: 1px solid #ededed;
+					font-size: 12px;
+					position: absolute;
+					right: 14px;
+					top: -49%;
+
+					li {
+						cursor: pointer;
+						padding: 6px 8px;
+						margin: 0;
+
+						&:hover {
+							background: #f5f5f5;
+						}
+					}
+
+					.so-close-mode {
+						border-top: 1px solid #f5f5f5;
+					}
+				}
+			}
 		}
+
 	}
 
 	.so-left-sidebar, .so-right-sidebar {
@@ -1560,10 +1607,17 @@
 
 			.row-set-form {
 				.clearfix();
-				padding: 8px;
-				border: 1px solid #ccc;
-				margin-bottom: 20px;
 				background: #f3f3f3;
+				border: 1px solid #ccc;
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+				padding: 8px;
+
+				@media (max-width: 700px) {
+					justify-content: center;
+					align-items: center;
+				}
 
 				input, select, button, strong, span {
 					display: inline;
@@ -1581,6 +1635,57 @@
 				label{
 					display: inline;
 				}
+
+				.row-cell-column {
+					flex: 1;
+				}
+
+				.cell-resize-container {
+					align-items: center;
+					display: flex;
+
+					@media (max-width: 700px) {
+						justify-content: center;
+						margin-top: 5px;
+					}
+
+					.cell-resize {
+						display: flex;
+
+						&-sizing {
+							background: #e4eff4;
+							border: 1px solid #8c8f94;
+							display: flex !important;
+							height: 24px;
+							width: 190px !important;
+
+							&.so-active-ratio,
+							&:not(.so-active-ratio):hover {
+								cursor: pointer;
+								background: #cae7f4;
+							}
+
+							&.so-active-ratio:hover {
+								cursor: default;
+							}
+
+							& > span {
+								align-self: center;
+								border-right: 1px solid #bcccd2;
+								display: inline-block  !important;
+								font-size: 10px;
+								margin: 0  !important;
+								padding: 0 !important;
+								text-align: center;
+
+								&:last-of-type {
+									border-right: none;
+								}
+							}
+						}
+					}
+				}
+
 			}
 
 			.row-preview {
@@ -2054,6 +2159,15 @@
 
 					input {
 						font-size: 12px;
+					}
+
+					.so-wp-color-field {
+						margin-left: 6px;
+					}
+
+					.wp-color-result,
+					.so-wp-color-field {
+						margin-bottom: 10px;
 					}
 				}
 

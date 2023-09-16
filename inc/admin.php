@@ -93,6 +93,10 @@ class SiteOrigin_Panels_Admin {
 				add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
 			}
 		}
+
+		
+		// Inline Saving.
+		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
 	}
 
 	/**
@@ -1024,6 +1028,24 @@ class SiteOrigin_Panels_Admin {
 	 * Add all the footer JS templates.
 	 */
 	public function js_templates() {
+		$column_sizes = apply_filters( 'siteorigin_panels_column_sizes', array(
+			2 => array(
+				array( 50, 50 ),
+				array( 25, 75 ),
+			),
+			3 => array(
+				array( 33, 33, 33 ),
+				array( 25, 50, 25 ),
+			),
+			4 => array(
+				array( 25, 25, 25, 25 ),
+				array( 10, 40, 40, 10 ),
+			),
+			5 => array(
+				array( 20, 20, 20, 20, 20 ),
+				array( 10, 15, 30, 15, 30 ),
+			),
+		) );
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 
@@ -1812,6 +1834,22 @@ class SiteOrigin_Panels_Admin {
 			} );
 		</script>
 		<?php
+	}
+
+	public function inline_saving_heartbeat_received( $response, $data ) {
+		
+		if ( ! empty( $data['panels'] ) ) {
+			$panels_data = json_decode( $data['panels'], true );
+			if ( ! wp_verify_nonce( $panels_data['nonce'], 'save' ) ) {
+				$response['error'] = __( 'Invalid nonce.', 'siteorigin-panels' );
+			} elseif ( is_numeric( $panels_data['id'] ) && ! empty( $panels_data['data'] ) ) {
+				$_POST['_sopanels_nonce'] = $panels_data['nonce'];
+				$_POST['panels_data'] = wp_slash( json_encode( $panels_data['data'] ) );
+				$this->save_post( $panels_data['id'] );
+			}
+		}
+
+		return $response;
 	}
 
 	private function show_add_new_dropdown_for_type( $post_type ) {

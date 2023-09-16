@@ -32,4 +32,19 @@ module.exports = {
 		sel.addRange( range );
 	},
 
+	saveHeartbeat: function( thisDialog ) {
+		jQuery( '.so-saveinline' ).attr( 'disabled', 'disabled' )
+		jQuery( document ).one( 'heartbeat-send', function( event, data ) {
+			data.panels = JSON.stringify( {
+				data: thisDialog.builder.model.getPanelsData(),
+				nonce: jQuery( '#_sopanels_nonce' ).val(),
+				id: thisDialog.builder.config.postId
+			} );
+		} );
+		jQuery( document ).one( 'heartbeat-tick', function( event, data ) {
+			jQuery( '.so-saveinline' ).removeAttr( 'disabled' )
+		} );
+		wp.autosave.server.triggerSave()
+	},
+
 }
