@@ -358,6 +358,16 @@ module.exports = Backbone.View.extend( {
 
 		this.onResize();
 
+		if ( typeof window.panelsMode == 'string' ) {
+			if ( window.panelsMode == 'inline' ) {
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).hide();
+				this.$( '.so-toolbar .so-saveinline' ).show().addClass( 'so-active-mode' );
+			} else {
+				this.$( '.so-toolbar .so-saveinline' ).hide();
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).show().addClass( 'so-active-mode' );
+			}
+		}
+
 		this.$el.show();
 
 		if ( ! options.silent ) {

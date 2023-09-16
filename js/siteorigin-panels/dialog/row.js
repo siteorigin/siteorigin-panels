@@ -13,7 +13,27 @@ module.exports = panels.view.dialog.extend({
 		},
 
 		// Toolbar buttons
+		'click .so-close': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
+		'click .so-mode': 'switchModeShow',
+		'click .so-saveinline-mode': function() {
+			this.switchMode( true );
+		},
+		'keyup .so-mode-list li': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-close-mode': function() {
+			this.switchMode( false );
+		},
+		'keyup .so-close-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-toolbar .so-save': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
 		'click .so-toolbar .so-insert': 'insertHandler',
 		'click .so-toolbar .so-delete': 'deleteHandler',
 		'keyup .so-toolbar .so-delete': function( e ) {
@@ -805,12 +825,15 @@ module.exports = panels.view.dialog.extend({
 	/**
 	 * We'll just save this model and close the dialog
 	 */
-	saveHandler: function () {
-		this.builder.addHistoryEntry('row_edited');
+	saveHandler: function( savePage = false, e ) {
+		this.builder.addHistoryEntry( 'row_edited' );
 		this.updateModel();
-		this.closeDialog();
-
-		this.builder.model.refreshPanelsData();
+		if ( typeof savePage == 'boolean' ) {
+			panels.helpers.utils.saveHeartbeat( this );
+		} else {
+			this.builder.model.refreshPanelsData();
+			this.closeDialog();
+		}
 
 		return false;
 	},
@@ -848,6 +871,34 @@ module.exports = panels.view.dialog.extend({
 		if( ! _.isUndefined(this.cellStyles) ) {
 			this.cellStyles = undefined;
 		}
+	},
+
+	switchModeShow: function() {
+		this.$( '.so-toolbar .so-mode-list' ).show();
+		this.$( '.so-toolbar .button-primary:visible' ).addClass( 'so-active-mode' );
+		this.$( '.so-toolbar .button-primary' ).hide();
+		setTimeout( function() {
+			$( document ).one( 'click', function( e ) {
+				var $$ = jQuery( e.target );
+
+				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
+					$( '.so-mode-list' ).hide();
+					$( '.so-toolbar .so-active-mode' ).show()
+				}
+			} );
+		}, 100 );
+	},
+
+	switchMode: function( inline = false ) {
+		this.$( '.so-toolbar .so-mode-list' ).hide();
+		this.$( '.so-toolbar .button-primary' ).removeClass( 'so-active-mode' );
+		if ( inline ) {
+			this.$( '.so-toolbar .so-saveinline' ).show();
+		} else {
+			this.$( '.so-toolbar .so-save' ).show();
+		}
+
+		window.panelsMode = inline ? 'inline' : 'dialog';
 	},
 
 });
