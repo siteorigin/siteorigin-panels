@@ -263,7 +263,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
 			$response = wp_remote_get( $url );
 
-			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
+			if (
+				! is_wp_error( $response ) &&
+				is_array( $response ) && $response['response']['code'] == 200
+			) {
 				$results = json_decode( $response['body'], true );
 
 				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
