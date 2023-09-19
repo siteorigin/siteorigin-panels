@@ -619,16 +619,25 @@
 					}
 
 					.resize-handle{
-						z-index: 100;
+						background: #f6fafb;
+						cursor: col-resize;
+						height: 100%;
+						left: -5px;
 						position: absolute;
 						top: 0;
 						width: 10px;
-						left: -5px;
-						cursor: col-resize;
-						background: #f6fafb;
-						height: 100%;
+						z-index: 100;
 
 						.transition(0.25s, background, ease-in-out);
+
+						&::before {
+							color: #5e6d72;
+							content: '\205E';
+							font-size: 20px;
+							left: 4.5px;
+							position: absolute;
+							top: 50%;
+						}
 
 						&:hover {
 							background: #dcebf2;
@@ -1719,18 +1728,19 @@
 
 						.preview-cell-weight,
 						.preview-cell-weight-input {
-							position: absolute;
+							background: #fff;
+							border: 1px solid #d0d0d0;
+							color: #5e6d72;
 							font-size: 17px;
 							font-weight: bold;
-							top: 50%;
 							left: 50%;
-							width: 80px;
-							text-align: center;
-							color: #5e6d72;
+							line-height: 1.4em !important;
 							margin: -0.95em 0 0 -40px;
 							padding: 10px 0;
-							border: 1px solid transparent;
-							line-height: 1.4em !important;
+							position: absolute;
+							text-align: center;
+							top: 50%;
+							width: 80px;
 
 							&:after{
 								content: '%';
@@ -1740,7 +1750,6 @@
 
 							&:hover {
 								background: #f6f6f6;
-								border: 1px solid #d0d0d0;
 							}
 						}
 
@@ -1752,16 +1761,25 @@
 					}
 
 					.resize-handle{
-						z-index: 100;
+						background: #e5f4fb;
+						cursor: col-resize;
+						height: @preview_height;
+						left: -6px;
 						position: absolute;
 						top: 0;
 						width: 12px;
-						left: -6px;
-						cursor: col-resize;
-						background: #e5f4fb;
-						height: @preview_height;
+						z-index: 100;
 
 						.transition(0.15s, background, ease-in-out);
+
+						&::before {
+							color: #747474;
+							content: '\205E';
+							font-size: 20px;
+							left: 4.5px;
+							position: absolute;
+							top: 50%;
+						}
 
 						&:hover,
 						&.ui-draggable-dragging {
