@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.26.1 - 20 September 2023 =
+* Improved handling of a greater number of sizes in the Row Cell Ratio feature.
+* Prevented absolute position issues with the background overlay.
+* Resolved potential display issue with rows, cells, and widgets that have custom styles.
+
 = 2.26.0 - 16 September 2023 =
 * Added Inline Widget Saving: Click the two vertical dots next to the widget Done button to change modes.
 * Row Cell Ratio: Improved styling, layout, and functionality.
