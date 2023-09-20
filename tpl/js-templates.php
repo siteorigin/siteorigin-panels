@@ -333,7 +333,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				</div>
 
 				<div class="cell-resize-container">
-					<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+					<span class="cell-resize-label">
+						<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+					</span>
 					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
 				</div>
 			</div>
