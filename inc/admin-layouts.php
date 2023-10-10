@@ -236,52 +236,64 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 			$return['max_num_pages'] = 1;
 		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
-			$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
-
-			// This is a query of the prebuilt layout directory
-			$query = array();
-
-			if ( ! empty( $search ) ) {
-				$query['search'] = $search;
-			}
-			$query['page'] = $page_num;
-
+			// Directories are cached for an hour so check to see if there's one stored for this type.
 			$directory_id = str_replace( 'directory-', '', $type );
-			$directories = $this->get_directories();
-			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
+			// $cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id );
+			// if ( ! empty( $cache ) ) {
+			// 	$return = $cache;
+			// } else {
+				$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
 
-			if ( empty( $directory ) ) {
-				return false;
-			}
+				// This is a query of the prebuilt layout directory
+				$query = array();
+				$directories = $this->get_directories();
+				$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
-			$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
-
-			if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
-				$url = add_query_arg( $directory[ 'args' ], $url );
-			}
-
-			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
-			$response = wp_remote_get( $url );
-
-			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
-				$results = json_decode( $response['body'], true );
-
-				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
-					foreach ( $results['items'] as $item ) {
-						$item['id'] = $item['slug'];
-						$item['type'] = $type;
-
-						if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
-							$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
-							$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700';
-						}
-
-						$return['items'][] = $item;
-					}
+				if ( empty( $directory ) ) {
+					return false;
 				}
 
-				$return['max_num_pages'] = $results['max_num_pages'];
-			}
+				$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
+
+				if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
+					$url = add_query_arg( $directory[ 'args' ], $url );
+				}
+
+				$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
+				$response = wp_remote_get( $url );
+				if ( is_array( $response ) && $response['response']['code'] == 200 ) {
+					$results = json_decode( $response['body'], true );
+
+					if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
+						foreach ( $results['items'] as $item ) {
+							$item['id'] = $item['slug'];
+							$item['type'] = $type;
+
+							if ( ! empty( $item['access'] ) ) {
+								$item['access'] = $item['access'];
+								$item['category'] = $item['category'];
+								$niches = ( empty( $item['niches'] ) ? '' : ' ' . implode( ' ', json_decode( $item['niches'] ) ) );
+								$item['niches'] = $niches;
+								$item['class'] = $item['category'] . ( empty( $item['niches'] ) ? '' : ' ' . $niches );
+							}
+
+							if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
+								$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
+								$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700';
+							}
+
+							$return['items'][] = $item;
+						}
+
+						if ( ! empty( $results['niches'] ) ) {
+							$return['niches'] = $results['niches'];
+							$return['categories'] = $results['categories'];
+						}
+					}
+				}
+				set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id, $results, 3600 );
+			// }
+			$no_search_title = true;
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
 			// Check that the user can view the given page types
 			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
@@ -326,7 +338,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 
 		// Add the search part to the title
-		if ( ! empty( $search ) ) {
+		if ( ! empty( $search ) && empty( $no_search_title ) ) {
 			$return['title'] .= __( ' - Results For:', 'siteorigin-panels' ) . ' <em>' . esc_html( $search ) . '</em>';
 		}
 
