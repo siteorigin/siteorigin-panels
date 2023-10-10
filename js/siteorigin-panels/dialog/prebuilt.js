@@ -275,12 +275,31 @@ module.exports = panels.view.dialog.extend( {
 				// Add the directory items
 				c.removeClass( 'so-panels-loading' ).html( thisView.directoryTemplate( data ) );
 
-				// if type contains the word directory-
+				// Depending on the active type, we need to handle things slightly differently.
 				if ( type.match( '^directory-' ) ) {
 					thisView.directoryPage = page;
 					thisView.updatePagination();
 				} else {
-					// TODO: Add pagination for other types.
+					// Lets setup the next and previous buttons
+					var prev = c.find( '.so-previous' ), next = c.find( '.so-next' );
+
+					if ( page <= 1 ) {
+						prev.addClass( 'button-disabled' );
+					} else {
+						prev.on( 'click', function( e ) {
+							e.preventDefault();
+							thisView.displayLayoutDirectory( search, page - 1, thisView.currentTab );
+						} );
+					}
+
+					if ( page === data.max_num_pages || data.max_num_pages === 0 ) {
+						next.addClass( 'button-disabled' );
+					} else {
+						next.on( 'click', function( e ) {
+							e.preventDefault();
+							thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
+						} );
+					}
 				}
 
 				if ( page <= 1 ) {
