@@ -1764,6 +1764,7 @@
 					.resize-handle{
 						background: #e5f4fb;
 						cursor: col-resize;
+						display: flex;
 						height: @preview_height;
 						left: -6px;
 						position: absolute;
@@ -1774,13 +1775,15 @@
 						.transition(0.15s, background, ease-in-out);
 
 						&::before {
+							align-items: center;
 							color: #747474;
 							content: '\205E';
+							display: flex;
 							font-family: Verdana;
 							font-size: 20px;
-							left: 3.75px;
-							position: absolute;
-							top: 50%;
+							justify-content: center;
+							line-height: 1;
+							width: 100%;
 						}
 
 						&:hover,
