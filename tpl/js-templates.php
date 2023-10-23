@@ -518,7 +518,6 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					{{% if ( typeof item.class != 'undefined' ) { %}}
 						{{%- item.class %}}"
 					{{% } %}}
-					"
 
 					data-layout-id="{{%- item.id %}}"
 					data-layout-type="{{%- item.type %}}"
