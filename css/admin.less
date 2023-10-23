@@ -1963,14 +1963,25 @@
 					padding: 5px 7.5px;
 				}
 
+				span {
+					font-weight: 600;
+				}
+
 				li {
-					background: #f3f3f3;
-					text-transform: capitalize;
 					cursor: pointer;
+					text-decoration: underline;
+					text-transform: capitalize;
+
+					&:focus,
+					&:hover {
+						background: #f3f3f3;
+						text-decoration: none;
+					}
 
 					&.so-active-filter {
-						background: #fff;
-						font-weight: 600;
+						background: #f3f3f3;
+						cursor: default;
+						text-decoration: none;
 					}
 				}
 			}
