@@ -234,7 +234,7 @@ module.exports = panels.view.dialog.extend( {
 			type = 'directory-siteorigin';
 		}
 
-		if ( type.match('^directory-') && ! panelsOptions.directory_enabled ) {
+		if ( type.match( '^directory-' ) && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
 			c.find( '.so-panels-enable-directory' ).on( 'click', function( e ) {
@@ -300,6 +300,8 @@ module.exports = panels.view.dialog.extend( {
 							thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
 						} );
 					}
+
+					thisView.$( '.so-directory-items' ).toggleClass( 'so-empty', ! data.items.length );
 				}
 
 				if ( page <= 1 ) {
@@ -336,7 +338,7 @@ module.exports = panels.view.dialog.extend( {
 
 		var category = this.$( '.so-directory-items-filter-categories li.so-active-filter' ).data( 'filter' );
 		var niches = this.$( '.so-directory-items-filter-niches li.so-active-filter' ).map( function() {
-			return $( this ).data( 'filter' );
+		  return $( this ).data( 'filter' );
 		} ).get();
 
 		this.activeFilter = category + niches.map( function( filter ) {
@@ -359,9 +361,9 @@ module.exports = panels.view.dialog.extend( {
 
 	getItems: function() {
 		if ( this.activeFilter.length ) {
-			return this.$( '.so-directory-items-wrapper' ).find( '.so-filter' );
+			return this.$( '.so-directory-items-wrapper .so-filter:not(.so-search-hidden)' );
 		} else {
-			return this.$( '.so-directory-items-wrapper .so-directory-item' );
+			return this.$( '.so-directory-items-wrapper .so-directory-item:not(.so-search-hidden)' );
 		}
 	},
 
@@ -461,11 +463,9 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	canAddLayout: function () {
-		return
-			(
-				this.selectedLayoutItem || this.uploadedLayout
-			) &&
-			! this.addingLayout;
+		return (
+			   this.selectedLayoutItem || this.uploadedLayout
+			   ) && ! this.addingLayout;
 	},
 
 	/**
@@ -501,12 +501,47 @@ module.exports = panels.view.dialog.extend( {
 		return deferredLayout.promise();
 	},
 
+	filterByTitle: function( title ) {
+
+		if ( title === '' ) {
+			this.$( '.so-directory-items-wrapper .so-directory-item' ).removeClass( 'so-hidden so-search-hidden' );
+		} else {
+			this.$( '.so-directory-items' ).removeClass( 'so-search-hidden' );
+			var $items = this.getItems();
+
+			$items.each( function() {
+				let $$ = $( this );
+				let found = $$.find( '.so-title' ).text().toLowerCase().includes( title );
+
+				if ( found && $$.hasClass( 'so-hidden' ) ) {
+					$$.removeClass( 'so-hidden so-search-hidden' )
+				} else if ( ! found ) {
+					$$.addClass( 'so-hidden so-search-hidden' );
+				}
+			} );
+
+		}
+
+		// Show or hide the no results message.
+		this.$( '.so-directory-items' ).toggleClass(
+			'so-empty',
+			! this.$('.so-directory-items-wrapper .so-directory-item:not(.so-hidden)').length
+		);
+
+		this.updatePagination();
+	},
+
 	/**
 	 * Handle an update to the search
 	 */
 	searchHandler: function ( e ) {
 		if ( e.keyCode === 13 ) {
-			this.displayLayoutDirectory( $( e.currentTarget ).val(), 1, this.currentTab );
+			var search = $( e.currentTarget ).val().toLowerCase();
+			if ( this.currentTab.match( '^directory-' ) ) {
+				this.filterByTitle( search );
+			} else {
+				this.displayLayoutDirectory( search, 1, this.currentTab );
+			}
 		}
 	},
 
