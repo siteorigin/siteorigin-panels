@@ -290,8 +290,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 							$return['categories'] = $results['categories'];
 						}
 					}
+					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id, $results, 3600 );
 				}
-				set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id, $results, 3600 );
 			// }
 			$no_search_title = true;
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
