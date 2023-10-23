@@ -285,7 +285,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 					}
 
 					$return['max_num_pages'] = $results['max_num_pages'];
-					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num, $results, 86400 );
+					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num, $return, 86400 );
 				}
 			}
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
