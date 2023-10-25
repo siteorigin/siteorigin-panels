@@ -121,6 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.26.2 - 25 October 2023 =
+* Added compatibility with SEOPress Content Analysis.
+* Developer: Made adjustments to the styles filter in the admin panel. Added a new parameter `current_styles` to the `apply_filters` function call. Also, introduced a new filter `siteorigin_panels_style_field_sanitize_all_` that allows a field to modify other values.
+
 = 2.26.1 - 20 September 2023 =
 * Improved handling of a greater number of sizes in the Row Cell Ratio feature.
 * Prevented absolute position issues with the background overlay.
