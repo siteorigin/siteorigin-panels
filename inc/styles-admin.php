@@ -425,7 +425,8 @@ class SiteOrigin_Panels_Styles_Admin {
 					$field,
 					$field_name,
 					$current,
-					$field_id
+					$field_id,
+					$current_styles
 				);
 
 				if ( ! empty( $custom_style_field ) ) {
@@ -612,6 +613,16 @@ class SiteOrigin_Panels_Styles_Admin {
 						// Just pass the value through.
 						$return[ $k ] = $styles[ $k ];
 					}
+
+					// Allow field to modify other values.
+					$return = apply_filters(
+						'siteorigin_panels_style_field_sanitize_all_' . $field['type'],
+						$return,
+						$return[ $k ],
+						$k,
+						$field,
+						$styles
+					);
 
 					break;
 			}
