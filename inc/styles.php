@@ -408,7 +408,7 @@ class SiteOrigin_Panels_Styles {
 				''               => __( 'Standard', 'siteorigin-panels' ),
 				'full'           => __( 'Full Width', 'siteorigin-panels' ),
 				'full-stretched' => __( 'Full Width Stretched', 'siteorigin-panels' ),
-				'full-stretched-padded' => __( 'Full Width Stretched Padded', 'siteorigin-panels' ),
+				'full-stretched-padded' => __( 'Full Width Stretched With Padding Support', 'siteorigin-panels' ),
 			),
 			'priority' => 10,
 		);
