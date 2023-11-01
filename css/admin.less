@@ -618,17 +618,30 @@
 
 					}
 
-					.resize-handle{
-						z-index: 100;
+					.resize-handle {
+						background: #f6fafb;
+						cursor: col-resize;
+						height: 100%;
+						left: -5px;
 						position: absolute;
 						top: 0;
 						width: 10px;
-						left: -5px;
-						cursor: col-resize;
-						background: #f6fafb;
-						height: 100%;
+						z-index: 100;
 
 						.transition(0.25s, background, ease-in-out);
+
+						&::before {
+							color: #5e6d72;
+							content: '\205E';
+							font-family: Verdana;
+							font-size: 20px;
+							height: 0;
+							left: 2px;
+							line-height: 0;
+							position: absolute;
+							top: 50%;
+							transform: translateY(-50%);
+						}
 
 						&:hover {
 							background: #dcebf2;
@@ -1644,7 +1657,7 @@
 				}
 
 				button {
-					margin-top: 2px;
+					margin-top: 6px;
 				}
 
 				label{
@@ -1759,18 +1772,19 @@
 
 						.preview-cell-weight,
 						.preview-cell-weight-input {
-							position: absolute;
+							background: #fff;
+							border: 1px solid #d0d0d0;
+							color: #5e6d72;
 							font-size: 17px;
 							font-weight: bold;
-							top: 50%;
 							left: 50%;
-							width: 80px;
-							text-align: center;
-							color: #5e6d72;
+							line-height: 1.4em !important;
 							margin: -0.95em 0 0 -40px;
 							padding: 10px 0;
-							border: 1px solid transparent;
-							line-height: 1.4em !important;
+							position: absolute;
+							text-align: center;
+							top: 50%;
+							width: 80px;
 
 							&:after{
 								content: '%';
@@ -1780,7 +1794,6 @@
 
 							&:hover {
 								background: #f6f6f6;
-								border: 1px solid #d0d0d0;
 							}
 						}
 
@@ -1792,16 +1805,31 @@
 					}
 
 					.resize-handle{
-						z-index: 100;
+						background: #e5f4fb;
+						cursor: col-resize;
+						display: flex;
+						height: @preview_height;
+						left: -6px;
 						position: absolute;
 						top: 0;
 						width: 12px;
-						left: -6px;
-						cursor: col-resize;
-						background: #e5f4fb;
-						height: @preview_height;
+						z-index: 100;
 
 						.transition(0.15s, background, ease-in-out);
+
+						&::before {
+							align-items: center;
+							color: #747474;
+							content: '\205E';
+							display: flex;
+							font-family: Verdana;
+							font-size: 20px;
+							justify-content: center;
+							line-height: 1;
+							margin-right: 1px;
+							margin-top: 5px;
+							width: 100%;
+						}
 
 						&:hover,
 						&.ui-draggable-dragging {
