@@ -644,10 +644,9 @@ class SiteOrigin_Panels_Styles {
 			if ( ! empty( $styles ) ) {
 				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
 				unset( $styles['background-color'] );
-			} else {
-				$custom_overlay = apply_filters( 'siteorigin_panels_overlay', false, $context );
 			}
 
+			$custom_overlay = apply_filters( 'siteorigin_panels_overlay', false, $context );
 			if ( ! empty( $styles ) || ! empty( $custom_overlay ) ) {
 				ob_start();
 				?>
