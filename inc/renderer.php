@@ -507,6 +507,11 @@ class SiteOrigin_Panels_Renderer {
 		if ( is_rtl() ) {
 			$layout_classes[] = 'panel-is-rtl';
 		}
+
+		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
+			$layout_classes[] = 'panel-has-overlay';
+		}
+
 		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
 			'id'    => 'pl-' . $post_id,
 			'class' => implode( ' ', $layout_classes ),
@@ -971,6 +976,11 @@ class SiteOrigin_Panels_Renderer {
 
 		$row_classes = array( 'panel-grid' );
 		$row_classes[] = ! empty( $row_style_wrapper ) ? 'panel-has-style' : 'panel-no-style';
+
+		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
+			$row_classes[] = 'panel-has-overlay';
+		}
+
 		$row_classes = apply_filters( 'siteorigin_panels_row_classes', $row_classes, $row );
 
 		$row_attributes = array(
@@ -1072,6 +1082,10 @@ class SiteOrigin_Panels_Renderer {
 
 		// Themes can add their own styles to cells
 		$cell_classes = apply_filters( 'siteorigin_panels_cell_classes', $cell_classes, $cell );
+
+		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $cell ) ) {
+			$cell_classes[] = 'panel-has-overlay';
+		}
 
 		// Legacy filter, use `siteorigin_panels_cell_classes` instead
 		$cell_classes = apply_filters( 'siteorigin_panels_row_cell_classes', $cell_classes, $panels_data, $cell );

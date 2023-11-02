@@ -64,6 +64,22 @@ class SiteOrigin_Panels_Styles {
 		return empty( $single ) ? $single = new self() : $single;
 	}
 
+	public static function has_overlay( $context ) {
+		return
+			(
+				(
+					! empty( $context['style']['background_image_attachment'] ) ||
+					! empty( $context['style']['background_image_attachment_fallback'] )
+				) &&
+				! self::is_background_parallax( $context['style']['background_display'] ) &&
+				(
+					isset( $context['style']['background_image_opacity'] ) &&
+					$context['style']['background_image_opacity'] != 100
+				)
+			) ||
+			apply_filters( 'siteorigin_panels_overlay', false, $context );
+	}
+
 	public static function register_scripts() {
 		wp_register_script(
 			'siteorigin-panels-front-styles',
@@ -622,20 +638,7 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	public function add_overlay( $html, $context ) {
-		if (
-			(
-				(
-					! empty( $context['style']['background_image_attachment'] ) ||
-					! empty( $context['style']['background_image_attachment_fallback'] )
-				) &&
-				! self::is_background_parallax( $context['style']['background_display'] ) &&
-				(
-					isset( $context['style']['background_image_opacity'] ) &&
-					$context['style']['background_image_opacity'] != 100
-				)
-			) ||
-			apply_filters( 'siteorigin_panels_overlay', false, $context )
-		) {
+		if ( self::has_overlay( $context ) ) {
 			$styles = self::generate_background_style( $context['style'] );
 			// Is this a background overlay?
 			if ( ! empty( $styles ) ) {
