@@ -119,11 +119,12 @@ module.exports = Backbone.View.extend( {
 
 		// Set up the color fields
 		if ( ! _.isUndefined( $.fn.wpColorPicker ) ) {
-			if ( _.isObject( panelsOptions.wpColorPickerOptions.palettes ) && ! $.isArray( panelsOptions.wpColorPickerOptions.palettes ) ) {
+			if ( typeof panelsOptions.wpColorPickerOptions.palettes === 'object' && ! Array.isArray( panelsOptions.wpColorPickerOptions.palettes ) ) {
 				panelsOptions.wpColorPickerOptions.palettes = $.map( panelsOptions.wpColorPickerOptions.palettes, function ( el ) {
 					return el;
 				} );
 			}
+
 			$.fn.handleAlphaDefault = function() {
 				var $parent = $( this ).parents( '.wp-picker-container' );
 				var $colorResult = $parent.find( '.wp-color-result' );
