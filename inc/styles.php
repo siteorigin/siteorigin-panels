@@ -642,7 +642,12 @@ class SiteOrigin_Panels_Styles {
 			$styles = self::generate_background_style( $context['style'] );
 			// Is this a background overlay?
 			if ( ! empty( $styles ) ) {
-				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
+				if (
+					! empty( $context['style']['background_image_opacity'] ) &&
+					$context['style']['background_image_opacity'] != 100
+				) {
+					$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
+				}
 				unset( $styles['background-color'] );
 			}
 
