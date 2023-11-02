@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.27.0 - 02 November 2023 =
+* Improved user experience of cell resizers in the admin interface with visual enhancements and interaction adjustments.
+* Adjusted the spacing in the Color Style Field to improve field consistency.
+* Improved the design of the Save Mode Button by aligning them to the right and adding a new visual style for the save mode list.
+* Renamed the "Full Width Stretched Padded" setting to "Full Width Stretched With Padding Support" for better description.
+* Resolved a jQuery Migrate flag related to the color picker by updating the code to use Array.isArray instead of the deprecated $.isArray function.
+* Made adjustments to the styles filter in the admin panel by adding a new parameter current_styles to the apply_filters function call.
+
 = 2.26.2 - 25 October 2023 =
 * Added compatibility with SEOPress Content Analysis.
 * Developer: Made adjustments to the styles filter in the admin panel. Added a new parameter `current_styles` to the `apply_filters` function call. Also, introduced a new filter `siteorigin_panels_style_field_sanitize_all_` that allows a field to modify other values.
