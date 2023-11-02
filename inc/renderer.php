@@ -508,7 +508,7 @@ class SiteOrigin_Panels_Renderer {
 			$layout_classes[] = 'panel-is-rtl';
 		}
 
-		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
+		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $panels_data ) ) {
 			$layout_classes[] = 'panel-has-overlay';
 		}
 
