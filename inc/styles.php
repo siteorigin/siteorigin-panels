@@ -640,15 +640,14 @@ class SiteOrigin_Panels_Styles {
 	public function add_overlay( $html, $context ) {
 		if ( self::has_overlay( $context ) ) {
 			$styles = self::generate_background_style( $context['style'] );
-			// Is this a background overlay?
-			if ( ! empty( $styles ) ) {
-				if (
-					! empty( $context['style']['background_image_opacity'] ) &&
-					$context['style']['background_image_opacity'] != 100
-				) {
-					$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
-				}
-				unset( $styles['background-color'] );
+
+			// Is Background Opacity set?
+			if (
+				! empty( $styles ) &&
+				! empty( $context['style']['background_image_opacity'] ) &&
+				$context['style']['background_image_opacity'] != 100
+			) {
+				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
 			}
 
 			$custom_overlay = apply_filters( 'siteorigin_panels_overlay', false, $context );
