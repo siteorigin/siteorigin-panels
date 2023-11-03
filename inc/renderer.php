@@ -91,7 +91,7 @@ class SiteOrigin_Panels_Renderer {
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', $settings['row-mobile-margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 
-			if ( self::has_background_overlay( $row ) ) {
+			if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-has-style > .panel-row-style',
 				), array(
@@ -144,7 +144,7 @@ class SiteOrigin_Panels_Renderer {
 					),
 				), $css_container_cutoff );
 
-				if ( self::has_background_overlay( $cell ) ) {
+				if ( SiteOrigin_Panels_Styles::single()->has_overlay( $cell ) ) {
 					$css->add_cell_css( $post_id, $ri, $ci, '', array(
 						'position' => 'relative',
 					) );
@@ -206,7 +206,7 @@ class SiteOrigin_Panels_Renderer {
 						);
 					}
 
-					if ( self::has_background_overlay( $widget['panels_info'] ) ) {
+					if ( SiteOrigin_Panels_Styles::single()->has_overlay( $widget['panels_info'] ) ) {
 						$css->add_widget_css(
 							$post_id,
 							$ri,
@@ -214,7 +214,7 @@ class SiteOrigin_Panels_Renderer {
 							$wi,
 							'',
 							array(
-							'position' => 'relative',
+								'position' => 'relative',
 							)
 						);
 					}
@@ -1170,17 +1170,4 @@ class SiteOrigin_Panels_Renderer {
 		return siteorigin_panels_url( 'css/front-flex' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' );
 	}
 
-	private static function has_background_overlay( $context ) {
-		return (
-			(
-				! empty( $context['style']['background_image_attachment'] ) ||
-				! empty( $context['style']['background_image_attachment_fallback'] )
-			) &&
-			(
-				isset( $context['style']['background_image_opacity'] ) &&
-				$context['style']['background_image_opacity'] != 100
-			)
-		) ||
-		apply_filters( 'siteorigin_panels_overlay', false, $context );
-	}
 }
