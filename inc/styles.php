@@ -788,9 +788,17 @@ class SiteOrigin_Panels_Styles {
 		);
 	}
 
-	public static function generate_background_style( $style, & $css = array() ) {
+	public static function generate_background_style( $style, & $css = array(), $general_css = false ) {
 		if ( ! empty( $style['background'] ) ) {
 			$css[ 'background-color' ] = $style['background'];
+		}
+
+		if (
+			$general_css && self::has_overlay( array(
+				'style' => $style
+			) )
+		) {
+			return $css;
 		}
 
 		if (
@@ -859,12 +867,7 @@ class SiteOrigin_Panels_Styles {
 	 * @return mixed
 	 */
 	public static function general_style_css( $css, $style ) {
-		if (
-			! isset( $style['background_image_opacity'] ) ||
-			$style['background_image_opacity'] == 100
-		) {
-			self::generate_background_style( $style, $css );
-		}
+		self::generate_background_style( $style, $css, true );
 
 		if ( ! empty( $style['border_color'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
 			$css['border'] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
