@@ -94,7 +94,7 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-		
+
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
 	}
@@ -210,7 +210,7 @@ class SiteOrigin_Panels_Admin {
 	public function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		
+
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
 			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
@@ -1032,6 +1032,7 @@ class SiteOrigin_Panels_Admin {
 			2 => array(
 				array( 50, 50 ),
 				array( 25, 75 ),
+				array( 61.8, 38.2 ),
 			),
 			3 => array(
 				array( 33, 33, 33 ),
@@ -1847,7 +1848,7 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	public function inline_saving_heartbeat_received( $response, $data ) {
-		
+
 		if ( ! empty( $data['panels'] ) ) {
 			$panels_data = json_decode( $data['panels'], true );
 			if ( ! wp_verify_nonce( $panels_data['nonce'], 'save' ) ) {
