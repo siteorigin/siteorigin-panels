@@ -94,7 +94,7 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-		
+
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
 	}
@@ -210,7 +210,7 @@ class SiteOrigin_Panels_Admin {
 	public function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		
+
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
 			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
@@ -1024,6 +1024,13 @@ class SiteOrigin_Panels_Admin {
 		return $widgets;
 	}
 
+	private function column_sizes_round( $size ) {
+		if ( is_array( $size ) ) {
+			return array_map( array( $this, 'column_sizes_round' ), $size );
+		}
+		return round( $size , 2);
+	}
+
 	/**
 	 * Add all the footer JS templates.
 	 */
@@ -1046,6 +1053,12 @@ class SiteOrigin_Panels_Admin {
 				array( 10, 15, 30, 15, 30 ),
 			),
 		) );
+
+		// Prevent extra long column sizes.
+		if ( ! empty( $column_sizes ) ) {
+			$column_sizes = array_map( array( $this, 'column_sizes_round' ), $column_sizes );
+		}
+
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 
@@ -1847,7 +1860,7 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	public function inline_saving_heartbeat_received( $response, $data ) {
-		
+
 		if ( ! empty( $data['panels'] ) ) {
 			$panels_data = json_decode( $data['panels'], true );
 			if ( ! wp_verify_nonce( $panels_data['nonce'], 'save' ) ) {
