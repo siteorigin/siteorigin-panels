@@ -498,6 +498,7 @@ module.exports = panels.view.dialog.extend({
 								}
 							}
 						} )
+						.on( 'blur', resizeCells )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
 							if ( $( this ).is( ':focus' ) ) {
