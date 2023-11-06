@@ -376,10 +376,10 @@ class SiteOrigin_Panels_Styles {
 		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'row', __( 'Row', 'siteorigin-panels' ) ) );
 
 		$fields['cell_class'] = array(
-			'name'        => __( 'Cell Class', 'siteorigin-panels' ),
+			'name'        => __( 'Column Class', 'siteorigin-panels' ),
 			'type'        => 'text',
 			'group'       => 'attributes',
-			'description' => __( 'Class added to all cells in this row.', 'siteorigin-panels' ),
+			'description' => __( 'Class added to all columns in this row.', 'siteorigin-panels' ),
 			'priority'    => 6,
 		);
 
@@ -396,7 +396,7 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Gutter', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'layout',
-			'description' => sprintf( __( 'Amount of space between cells. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
+			'description' => sprintf( __( 'Amount of space between columns. Default is %spx.', 'siteorigin-panels' ), siteorigin_panels_setting( 'margin-sides' ) ),
 			'priority'    => 6,
 		);
 
@@ -438,7 +438,7 @@ class SiteOrigin_Panels_Styles {
 
 		if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always'  ) {
 			$fields['cell_alignment'] = array(
-				'name'     => __( 'Cell Vertical Alignment', 'siteorigin-panels' ),
+				'name'     => __( 'Column Vertical Alignment', 'siteorigin-panels' ),
 				'type'     => 'select',
 				'group'    => 'layout',
 				'options'  => array(
@@ -472,10 +472,10 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['mobile_cell_margin'] = array(
-			'name'        => __( 'Mobile Cell Bottom Margin', 'siteorigin-panels' ),
+			'name'        => __( 'Mobile Column Bottom Margin', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'mobile_layout',
-			'description' => sprintf( __( 'Vertical space between cells in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), ! empty( siteorigin_panels_setting( 'mobile-cell-margin' ) ) ? siteorigin_panels_setting( 'mobile-cell-margin' ) : siteorigin_panels_setting( 'margin-bottom' ) ),
+			'description' => sprintf( __( 'Vertical space between columns in a collapsed mobile row. Default is %spx.', 'siteorigin-panels' ), ! empty( siteorigin_panels_setting( 'mobile-cell-margin' ) ) ? siteorigin_panels_setting( 'mobile-cell-margin' ) : siteorigin_panels_setting( 'margin-bottom' ) ),
 			'priority'    => 5,
 		);
 
@@ -489,7 +489,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function cell_style_fields( $fields ) {
 		// Add the general fields.
-		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'cell', __( 'Cell', 'siteorigin-panels' ) ) );
+		$fields = wp_parse_args( $fields, self::get_general_style_fields( 'cell', __( 'Column', 'siteorigin-panels' ) ) );
 
 		$fields['vertical_alignment'] = array(
 			'name'     => __( 'Vertical Alignment', 'siteorigin-panels' ),
@@ -1109,7 +1109,7 @@ class SiteOrigin_Panels_Styles {
 						$ci,
 						'',
 						array(
-							'align-self' => $cell[ 'style' ]['vertical_alignment'],
+							'align-self' => $cell['style']['vertical_alignment'],
 						)
 					);
 				}
@@ -1155,7 +1155,7 @@ class SiteOrigin_Panels_Styles {
 				}
 
 				// Process the widgets if there are any.
-				if ( empty( $cell[ 'widgets' ] ) ) {
+				if ( empty( $cell['widgets'] ) ) {
 					continue;
 				}
 
