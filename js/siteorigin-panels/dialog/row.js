@@ -79,7 +79,7 @@ module.exports = panels.view.dialog.extend({
 
 			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
-			this.drawCellResizers( parseInt( this.$('.row-set-form input[name="cells"]').val() ) );
+			this.drawCellResizers();
 			this.updateActiveCellClass();
 			this.renderStyles();
 			this.openSelectedCellStyles();
@@ -585,8 +585,9 @@ module.exports = panels.view.dialog.extend({
 
 	drawCellResizers: function() {
 		this.$( '.cell-resize' ).empty();
-		var cellsCount = parseInt( this.$( '.row-set-form input[name="cells"]' ).val() );
+		var cellsCount = this.getCurrentCellCount();
 		var currentCellSizes = this.columnResizeData[ cellsCount ];
+
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
@@ -608,7 +609,8 @@ module.exports = panels.view.dialog.extend({
 			return Math.trunc( Number( $( this ).text() ) );
 		} ).get();
 
-		$.each( this.columnResizeData[ parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ) ], function( i, ratio ) {
+		var cellsCount = this.getCurrentCellCount();
+		$.each( this.columnResizeData[ cellsCount ], function( i, ratio ) {
 			if ( ratio.toString() === activeCellRatio.toString() ) {
 				activeCellRatio = i;
 				return false;
@@ -633,17 +635,19 @@ module.exports = panels.view.dialog.extend({
 		}
 	},
 
+	getCurrentCellCount: function() {
+		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
 	changeCellTotal: function ( cellRatio = 0 ) {
 			 try {
-				var cellsCount = parseInt( this.$('.row-set-form input[name="cells"]').val() );
-				this.drawCellResizers( cellsCount );
-	
+				var cellsCount = this.getCurrentCellCount();
+				this.drawCellResizers();
 				if (_.isNaN( cellsCount )) {
 					cellsCount = 1;
 				} else {
 					if ( cellsCount < 1 ) {
 						cellsCount = 1;
-						this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
 					} else if ( cellsCount > 12 ) {
 						cellsCount = 12;
 					}
