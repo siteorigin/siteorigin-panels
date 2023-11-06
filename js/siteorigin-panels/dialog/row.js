@@ -47,6 +47,7 @@ module.exports = panels.view.dialog.extend({
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
+		'click .cell-resize-direction ': 'changeSizeDirection',
 	},
 
 	rowView: null,
@@ -589,7 +590,7 @@ module.exports = panels.view.dialog.extend({
 		var currentCellSizes = this.columnResizeData[ cellsCount ];
 
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
-			this.$( '.cell-resize-container' ).show();
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
 				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
@@ -599,7 +600,7 @@ module.exports = panels.view.dialog.extend({
 				}
 			}
 		} else {
-			this.$( '.cell-resize-container' ).hide();
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).hide();
 		}
 	},
 
@@ -620,6 +621,24 @@ module.exports = panels.view.dialog.extend({
 		if ( typeof activeCellRatio == 'number' ) {
 			$( $( '.cell-resize-sizing' ).get( activeCellRatio ) ).addClass( 'so-active-ratio' );
 		}
+	},
+
+	changeSizeDirection: function( e ) {
+		var $current = $( e.target );
+		var currentDirection = $current.attr( 'data-direction' );
+		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+
+		$current
+			.removeClass( 'dashicons-arrow-' + currentDirection )
+			.addClass( 'dashicons-arrow-' + newDirection )
+			.attr( 'data-direction', newDirection );
+
+		// Reverse all column sizes.
+		for ( var columnCount in this.columnResizeData) {
+			this.columnResizeData[ columnCount ] = this.columnResizeData[ columnCount ].reverse();
+		}
+
+		this.drawCellResizers();
 	},
 
 	changeCellRatio: function( e ) {

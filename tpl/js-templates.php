@@ -342,6 +342,11 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					</span>
 					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
 				</div>
+				<div class="cell-resize-direction-container">
+					<?php echo __( 'Direction:', 'siteorigin-panels' ); ?>
+
+					<span class="cell-resize-direction dashicons dashicons-arrow-left" data-direction="left"></span>
+				</div>
 			</div>
 
 			<div class="row-preview">
