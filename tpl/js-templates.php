@@ -331,7 +331,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="row-set-form">
 				<div class="row-cell-column">
 					<?php
-					echo __( 'Set Row Layout', 'siteorigin-panels' );
+					echo __( 'Column Count:', 'siteorigin-panels' );
 					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
 					?>
 				</div>
