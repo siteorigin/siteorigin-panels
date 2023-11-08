@@ -508,9 +508,6 @@ class SiteOrigin_Panels_Renderer {
 			$layout_classes[] = 'panel-is-rtl';
 		}
 
-		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $panels_data ) ) {
-			$layout_classes[] = 'panel-has-overlay';
-		}
 
 		$layout_attributes = apply_filters( 'siteorigin_panels_layout_attributes', array(
 			'id'    => 'pl-' . $post_id,
@@ -715,6 +712,11 @@ class SiteOrigin_Panels_Renderer {
 		if ( $is_last ) {
 			$classes[] = 'panel-last-child';
 		}
+
+		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $widget_info ) ) {
+			$classes[] = 'panel-has-overlay';
+		}
+
 		$id = 'panel-' . $post_id . '-' . $grid_index . '-' . $cell_index . '-' . $widget_index;
 
 		// Filter and sanitize the classes
