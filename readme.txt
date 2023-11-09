@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
 Requires at least: 4.7
-Tested up to: 6.3
+Tested up to: 6.4
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
@@ -120,6 +120,12 @@ Page Builder is compatible with the vast majority of third-party plugins and wid
 SiteOrigin offers a single premium plugin that enhances and extends Page Builder, the Widgets Bundle, SiteOrigin CSS and all of our free themes. Find out more about [SiteOrigin Premium](https://siteorigin.com/downloads/premium/) and the powerful addons it offers.
 
 == Changelog ==
+
+= 2.27.1 - 09 November 2023 =
+* Renamed "Cell" to "Column" throughout the codebase for improved clarity and consistency.
+* Updated the "Tested up to" version in the readme.txt file from 6.3 to 6.4.
+* Rewrote the usage of Lodash functions in the `siteorigin-panels-layout-block.js` file for better performance and code readability.
+* Updated the Installer by changing the subproject commit.
 
 = 2.27.0 - 02 November 2023 =
 * Improved user experience of cell resizers in the admin interface with visual enhancements and interaction adjustments.
