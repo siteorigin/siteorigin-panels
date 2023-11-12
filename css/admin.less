@@ -1742,15 +1742,16 @@
 			}
 
 			.row-preview {
-
-				margin: 0 -6px;
+				background: #f6f6f6;
 				height: @preview_height;
+				margin: 0 -6px;
 				position: relative;
-				.preview-cell, .preview-cell-in, .preview-cell-weight {
-					.box-sizing(border-box);
-				}
-
 				white-space: nowrap;
+
+				.preview-cell, .preview-cell-in,
+				.preview-cell-weight {
+					.box-sizing( border-box );
+				}
 
 				.preview-cell {
 					display: inline-block;
