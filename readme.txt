@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.28.0 - 12 November 2023 =
+* Column Preset Sizes: Added `Golden Ratio` for two columns.
+* Rounded column sizes to two decimal places to prevent display issues.
+* Row update to allow for custom overlays.
+
 = 2.27.1 - 09 November 2023 =
 * Renamed "Cell" to "Column" throughout the codebase for improved clarity and consistency.
 * Updated the "Tested up to" version in the readme.txt file from 6.3 to 6.4.
