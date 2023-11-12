@@ -1645,8 +1645,20 @@
 				padding: 8px;
 
 				@media (max-width: 700px) {
-					justify-content: center;
 					align-items: center;
+					flex-direction: column;
+					justify-content: center;
+
+					.row-cell-column {
+						width: 100%;
+						display: flex;
+						flex-direction: column;
+
+						.so-row-field {
+							width: 100%;
+							margin: 0 0 4px;
+						}
+					}
 				}
 
 				input, select, button, strong, span {
@@ -1701,7 +1713,7 @@
 							display: inline-flex !important;
 							height: 24px;
 							margin: 0;
-							width: 168px !important;
+							width: 168px;
 
 							&.so-active-ratio,
 							&:not(.so-active-ratio):hover {
@@ -1732,15 +1744,16 @@
 					}
 
 					@media (max-width: 1024px) {
-						flex-direction: column;
+						display: block;
+
+						&,
+						.cell-resize-sizing {
+							width: 100%;
+						}
 
 						.cell-resize {
 							padding-left: 0;
 							justify-content: start;
-						}
-
-						.cell-resize-sizing {
-							width: 47%;
 						}
 					}
 				}
