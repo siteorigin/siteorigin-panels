@@ -1764,7 +1764,23 @@
 					display: flex;
 
 					.cell-resize-direction {
+						align-items: center;
+						background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f9f9f9));
+						border-radius: 4px;
+						border: 1px solid;
+						color: #777;
+						cursor: pointer;
+						display: flex;
+						height: 24px;
 						line-height: 1;
+						margin: 0;
+						margin-left: 5px;
+						padding: 0 3px;
+
+						&:hover,
+						&:focus {
+							background: #fff;
+						}
 					}
 				}
 			}
