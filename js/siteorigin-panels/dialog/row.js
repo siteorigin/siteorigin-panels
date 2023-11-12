@@ -633,9 +633,11 @@ module.exports = panels.view.dialog.extend({
 			.addClass( 'dashicons-arrow-' + newDirection )
 			.attr( 'data-direction', newDirection );
 
-		// Reverse all column sizes.
-		for ( var columnCount in this.columnResizeData) {
-			this.columnResizeData[ columnCount ] = this.columnResizeData[ columnCount ].reverse();
+		// Reverse all sizes.
+		for ( var columnCount in this.columnResizeData ) {
+			this.columnResizeData[ columnCount ] = this.columnResizeData[ columnCount ].map( function( size ) {
+				return size.reverse();
+			} );
 		}
 
 		this.drawCellResizers();
