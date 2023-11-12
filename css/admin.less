@@ -1635,16 +1635,30 @@
 
 			.row-set-form {
 				.clearfix();
+				align-items: center;
 				background: #f3f3f3;
 				border: 1px solid #ccc;
 				display: flex;
+				gap: 10px;
 				justify-content: space-between;
 				margin-bottom: 20px;
 				padding: 8px;
 
 				@media (max-width: 700px) {
-					justify-content: center;
 					align-items: center;
+					flex-direction: column;
+					justify-content: center;
+
+					.row-cell-column {
+						width: 100%;
+						display: flex;
+						flex-direction: column;
+
+						.so-row-field {
+							width: 100%;
+							margin: 0 0 4px;
+						}
+					}
 				}
 
 				input, select, button, strong, span {
@@ -1654,6 +1668,10 @@
 
 					outline: none;
 					box-shadow: none;
+				}
+
+				.row-cell-column input {
+					width: 58px;
 				}
 
 				button {
@@ -1695,7 +1713,7 @@
 							display: inline-flex !important;
 							height: 24px;
 							margin: 0;
-							width: 200px !important;
+							width: 200px;
 
 							&.so-active-ratio,
 							&:not(.so-active-ratio):hover {
@@ -1725,19 +1743,45 @@
 					}
 
 					@media (max-width: 1024px) {
-						flex-direction: column;
+						display: block;
+
+						&,
+						.cell-resize-sizing {
+							width: 100%;
+						}
 
 						.cell-resize {
 							padding-left: 0;
 							justify-content: start;
 						}
-
-						.cell-resize-sizing {
-							width: 47%;
-						}
 					}
 				}
 
+				.cell-resize-direction-container {
+					align-items: center;
+					cursor: pointer;
+					display: flex;
+
+					.cell-resize-direction {
+						align-items: center;
+						background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f9f9f9));
+						border-radius: 4px;
+						border: 1px solid;
+						color: #777;
+						cursor: pointer;
+						display: flex;
+						height: 24px;
+						line-height: 1;
+						margin: 0;
+						margin-left: 5px;
+						padding: 0 3px;
+
+						&:hover,
+						&:focus {
+							background: #fff;
+						}
+					}
+				}
 			}
 
 			.row-preview {
