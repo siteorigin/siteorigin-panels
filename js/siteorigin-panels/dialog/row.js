@@ -682,9 +682,8 @@ module.exports = panels.view.dialog.extend({
 			);
 
 			// Create some cells
-			var currentWeight = 1;
 			for ( var i = 0; i < cellsCount; i++ ) {
-				cells.push(1);
+				cells.push( 1 );
 			}
 
 			// Lets make sure that the row weights add up to 1.
@@ -692,7 +691,7 @@ module.exports = panels.view.dialog.extend({
 				return memo + weight;
 			} );
 
-			cells = _.map (cells, function( cell ) {
+			cells = _.map( cells, function( cell ) {
 				return cell / totalRowWeight;
 			} );
 
