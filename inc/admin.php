@@ -1024,6 +1024,13 @@ class SiteOrigin_Panels_Admin {
 		return $widgets;
 	}
 
+	private function column_sizes_round( $size ) {
+		if ( is_array( $size ) ) {
+			return array_map( array( $this, 'column_sizes_round' ), $size );
+		}
+		return round( $size , 2);
+	}
+
 	/**
 	 * Add all the footer JS templates.
 	 */
@@ -1047,6 +1054,12 @@ class SiteOrigin_Panels_Admin {
 				array( 10, 15, 30, 15, 30 ),
 			),
 		) );
+
+		// Prevent extra long column sizes.
+		if ( ! empty( $column_sizes ) ) {
+			$column_sizes = array_map( array( $this, 'column_sizes_round' ), $column_sizes );
+		}
+
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 
