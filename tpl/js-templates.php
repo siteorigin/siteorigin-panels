@@ -331,14 +331,14 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="row-set-form">
 				<div class="row-cell-column">
 					<?php
-					echo __( 'Set Row Layout', 'siteorigin-panels' );
+					echo __( 'Column Count:', 'siteorigin-panels' );
 					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
 					?>
 				</div>
 
 				<div class="cell-resize-container">
 					<span class="cell-resize-label">
-						<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+						<?php echo __( 'Column Presets: ', 'siteorigin-panels' ); ?>
 					</span>
 					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
 				</div>
