@@ -364,27 +364,25 @@ module.exports = panels.view.dialog.extend({
 
 			}.bind(this));
 
-			// Make this row weight click editable
 			newCell.find( '.preview-cell-weight' ).on( 'click', function( ci ) {
 
-				// Disable the draggable while entering values
+				// Disable the draggable while entering values.
 				thisDialog.$( '.resize-handle' ).css( 'pointer-event', 'none' ).draggable( 'disable' );
 
 				var resizeCells = function( refocusIndex = false ) {
 					timeout = setTimeout( function() {
 						var rowPreviewInputs = rowPreview.find( '.preview-cell-weight-input' );
-						// If there are no weight inputs, then skip this
+						// If there are no weight inputs, then skip this.
 						if ( rowPreviewInputs.length === 0 ) {
 							return false;
 						}
 
-						// Go through all the inputs
 						var rowWeights = [],
 							rowChanged = [],
 							changedSum = 0,
 							unchangedSum = 0;
 
-						rowPreviewInputs.each(function( i, el ) {
+						rowPreviewInputs.each( function( i, el ) {
 							var val = parseFloat( $( el ).val() );
 							if ( isNaN( val ) ) {
 								val = 1 / thisDialog.row.cells.length;
@@ -392,7 +390,7 @@ module.exports = panels.view.dialog.extend({
 								val = Math.round( val * 10 ) / 1000;
 							}
 
-							// Check within 3 decimal points
+							// Check within 3 decimal points.
 							var changed = ! $( el ).hasClass( 'no-user-interacted' );
 
 							rowWeights.push( val );
@@ -405,10 +403,8 @@ module.exports = panels.view.dialog.extend({
 							}
 						} );
 
-						if ( changedSum > 0 && unchangedSum > 0 && (
-								1 - changedSum
-							) > 0 ) {
-							// Balance out the unchanged rows to occupy the weight left over by the changed sum
+						if ( changedSum > 0 && unchangedSum > 0 && 1 - changedSum > 0 ) {
+							// Balance out the unchanged rows to occupy the weight left over by the changed sum.
 							for ( var i = 0; i < rowWeights.length; i++ ) {
 								if ( ! rowChanged[ i ] ) {
 									rowWeights[ i ] = (
@@ -420,7 +416,7 @@ module.exports = panels.view.dialog.extend({
 							}
 						}
 
-						// Last check to ensure total weight is 1
+						// Last check to ensure total weight is 1.
 						var sum = _.reduce( rowWeights, function ( memo, num ) {
 							return memo + num;
 						} );
@@ -436,7 +432,7 @@ module.exports = panels.view.dialog.extend({
 							} );
 						}
 
-						// Now lets animate the cells into their new widths
+						// Now lets animate the cells into their new widths.
 						rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
 							var cellWeight = thisDialog.row.cells.at( i ).get( 'weight');
 							$( el ).animate( { 'width': Math.round( cellWeight * 1000 ) / 10 + "%" }, 250 );
@@ -465,17 +461,17 @@ module.exports = panels.view.dialog.extend({
 						} )
 						.on( 'keyup', function( e ) {
 							if ( e.keyCode !== 9 ) {
-								// Only register the interaction if the user didn't press tab
+								// Only register the interaction if the user didn't press tab.
 								$( this ).removeClass( 'no-user-interacted' );
 							}
 
-							// Enter is clicked
+							// Enter is pressed.
 							if ( e.keyCode === 13 ) {
 								e.preventDefault();
 								resizeCells();
 							}
 
-							// Up or down is clicked
+							// Up or down is pressed.
 							if ( e.keyCode === 38 || e.keyCode === 40 ) {
 								e.preventDefault();
 								// During the row regeneration, the inputs are removed and re-added so we need the id to refocus.
@@ -488,7 +484,7 @@ module.exports = panels.view.dialog.extend({
 							if ( e.keyCode === 9 ) {
 								e.preventDefault();
 
-								// Tab will always cycle around the row inputs
+								// Tab will always cycle around the row inputs.
 								var inputs = rowPreview.find( '.preview-cell-weight-input' );
 								var i = inputs.index( $( this ) );
 								if ( i === inputs.length - 1 ) {
