@@ -493,8 +493,12 @@ module.exports = panels.view.dialog.extend({
 				});
 
 				$(this).siblings( '.preview-cell-weight-input' ).trigger( 'select');
-
 			});
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
+			} );
 
 		}, this);
 
