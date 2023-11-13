@@ -390,20 +390,6 @@ module.exports = panels.view.dialog.extend({
 								$( this ).trigger( 'blur' );
 							}
 						})
-						.on( 'keydown', function( e ) {
-							if (e.keyCode === 9) {
-								e.preventDefault();
-
-								// Tab will always cycle around the row inputs
-								var inputs = rowPreview.find('.preview-cell-weight-input');
-								var i = inputs.index($(this));
-								if (i === inputs.length - 1) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
-								}
-							}
-						})
 						.on( 'blur', function() {
 							rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
 								if (isNaN(parseFloat($(el).val()))) {
