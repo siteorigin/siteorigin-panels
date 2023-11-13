@@ -516,6 +516,7 @@ class SiteOrigin_Panels_Admin {
 					'row' => array(
 						'add' => __( 'New Row', 'siteorigin-panels' ),
 						'edit' => __( 'Row', 'siteorigin-panels' ),
+						'cellInput' => __( 'Adjust column size of column %s.', 'siteorigin-panels' ),
 					),
 					'welcomeMessage' => array(
 						'addingDisabled' => __( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),

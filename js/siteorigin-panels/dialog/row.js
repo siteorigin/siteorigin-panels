@@ -372,8 +372,18 @@ module.exports = panels.view.dialog.extend({
 				thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
 
 				rowPreview.find('.preview-cell-weight').each(function () {
-					var $$ = jQuery(this).hide();
-					$('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
+					var $$ = jQuery( this ).hide();
+					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
+					var label = panelsOptions.loc.row.cellInput.replace( '%s', ci + 1 );
+
+					$( `<input
+						type="number"
+						class="preview-cell-weight-input no-user-interacted"
+						id="column-${ ci }"
+						min="1"
+						max="${ maxSize }"
+						aria-label="${ label }"
+					/>` )
 						.val(parseFloat($$.html())).insertAfter($$)
 						.on( 'focus', function() {
 							clearTimeout(timeout);
