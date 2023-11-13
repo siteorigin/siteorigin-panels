@@ -439,7 +439,6 @@ module.exports = panels.view.dialog.extend({
 							$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
 						});
 
-						rowPreview.find( '.preview-cell' ).css( 'overflow', 'visible' );
 						setTimeout( function() {
 							if ( typeof refocusIndex === 'number' ) {
 								rowPreviewInputs.get( refocusIndex ).focus();
@@ -721,9 +720,6 @@ module.exports = panels.view.dialog.extend({
 							$previewCellWeight.html( width );
 						}
 					} );
-	
-					// So the draggable handle is not hidden.
-					this.$( '.preview-cell' ).css( 'overflow', 'visible' );
 	
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 				}
