@@ -1785,21 +1785,23 @@
 			}
 
 			.row-preview {
-
-				margin: 0 -6px;
+				background: #e5f4fb;
 				height: @preview_height;
+				margin: 0 -6px;
 				position: relative;
-				.preview-cell, .preview-cell-in, .preview-cell-weight {
-					.box-sizing(border-box);
-				}
-
 				white-space: nowrap;
 
+				.preview-cell, .preview-cell-in,
+				.preview-cell-weight {
+					.box-sizing( border-box );
+				}
+
 				.preview-cell {
-					display: inline-block;
-					position: relative;
-					padding: 0 6px;
 					cursor: pointer;
+					display: inline-block;
+					overflow: visible !important;
+					padding: 0 6px;
+					position: relative;
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;
