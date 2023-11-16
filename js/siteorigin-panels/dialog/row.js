@@ -672,6 +672,7 @@ module.exports = panels.view.dialog.extend({
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {
+		var thisDialog = this;
 		 try {
 			var cellsCount = this.getCurrentCellCount();
 			this.drawCellResizers();
@@ -735,8 +736,6 @@ module.exports = panels.view.dialog.extend({
 			if ( cellCountChanged ) {
 				this.regenerateRowPreview();
 			} else {
-				var thisDialog = this;
-
 				// // Now lets animate the cells into their new widths
 				this.$( '.preview-cell' ).each( function( i, el ) {
 					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
