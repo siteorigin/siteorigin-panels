@@ -20,10 +20,9 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     var _this;
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
     _this = _super.call(this, props);
-    var editMode = window.soPanelsBlockEditorAdmin.defaultMode === 'edit' || props.panelsData && props.panelsData.length > 0
-    // lodash.isEmpty( props.panelsData )
-    ;
-
+    var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
+    var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
+    var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
     _this.state = {
       editing: editMode,
       loadingPreview: !editMode,
