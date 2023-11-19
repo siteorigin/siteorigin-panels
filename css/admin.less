@@ -1787,7 +1787,6 @@
 			.row-preview {
 				background: #e5f4fb;
 				height: @preview_height;
-				margin: 0 -6px;
 				position: relative;
 				white-space: nowrap;
 
@@ -1802,6 +1801,14 @@
 					overflow: visible !important;
 					padding: 0 6px;
 					position: relative;
+
+					&:first-of-type {
+						padding-left: 0;
+					}
+
+					&:last-of-type {
+						padding-right: 0;
+					}
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;
