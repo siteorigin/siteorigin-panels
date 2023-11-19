@@ -1795,12 +1795,7 @@
 					.box-sizing( border-box );
 				}
 
-				.preview-cell {
-					cursor: pointer;
-					display: inline-block;
-					overflow: visible !important;
-					padding: 0 6px;
-					position: relative;
+				& > .preview-cell {
 
 					&:first-of-type {
 						padding-left: 0;
@@ -1809,6 +1804,25 @@
 					&:last-of-type {
 						padding-right: 0;
 					}
+				}
+
+				.preview-cell .resize-handle .preview-cell {
+
+					&:first-of-type {
+						padding-right: 0;
+					}
+
+					&:last-of-type {
+						padding-left: 0;
+					}
+				}
+
+				.preview-cell {
+					cursor: pointer;
+					display: inline-block;
+					overflow: visible !important;
+					padding: 0 6px;
+					position: relative;
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;

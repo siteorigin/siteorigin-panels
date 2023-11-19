@@ -316,8 +316,6 @@ module.exports = panels.view.dialog.extend({
 								) / rowPreview.width()
 							);
 
-						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
-
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
