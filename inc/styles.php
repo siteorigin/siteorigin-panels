@@ -873,8 +873,6 @@ class SiteOrigin_Panels_Styles {
 			$padding[1] = $padding[3] = 0;
 			$style[ $field ] = implode( ' ', $padding );
 		}
-
-		return $style;
 	}
 
 	/**
