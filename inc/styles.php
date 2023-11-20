@@ -421,10 +421,9 @@ class SiteOrigin_Panels_Styles {
 			'type'     => 'select',
 			'group'    => 'layout',
 			'options'  => array(
-				''               => __( 'Standard', 'siteorigin-panels' ),
-				'full'           => __( 'Full Width', 'siteorigin-panels' ),
-				'full-stretched' => __( 'Full Width Stretched', 'siteorigin-panels' ),
-				'full-stretched-padded' => __( 'Full Width Stretched With Padding Support', 'siteorigin-panels' ),
+				''             => __( 'Standard', 'siteorigin-panels' ),
+				'full'         => __( 'Full Width', 'siteorigin-panels' ),
+				'full-width-stretch' => __( 'Full Width Stretched', 'siteorigin-panels' ),
 			),
 			'priority' => 10,
 		);
@@ -862,6 +861,22 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
+	 * For backwards compatibility, we need to clear the left and right padding for (legacy) full width stretched rows.
+	 *
+	 * @param array $style The style array.
+	 * @return array The modified style array.
+	 */
+	public function full_width_stretched_legacy_padding( & $style, $field ) {
+		if ( $style['row_stretch'] == 'full-stretched' ) {
+			$padding = explode( ' ', $style[ $field ] );
+			$padding[1] = $padding[3] = 0;
+			$style[ $field ] = implode( ' ', $padding );
+		}
+
+		return $style;
+	}
+
+	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets.
 	 *
 	 * @return mixed
@@ -878,6 +893,7 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if ( ! empty( $style['padding'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'padding' );
 			$css['padding'] = $style['padding'];
 		}
 
@@ -927,6 +943,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_tablet_css( $css, $style ) {
 		if ( ! empty( $style['tablet_padding'] ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'tablet_padding' );
 			$css['padding'] = $style['tablet_padding'] . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' );
 		}
 
@@ -948,6 +965,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_mobile_css( $css, $style ) {
 		if ( ! empty( $style['mobile_padding'] ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'mobile_padding' );
 			$css['padding'] = $style['mobile_padding'] . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' );
 		}
 
