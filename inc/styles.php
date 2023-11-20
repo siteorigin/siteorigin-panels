@@ -861,10 +861,11 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
-	 * For backwards compatibility, we need to clear the left and right padding for (legacy) full width stretched rows.
+	 * Clears the left and right padding for (legacy) full width stretched rows.
+	 *
 	 *
 	 * @param array $style The style array.
-	 * @return array The modified style array.
+	 * @param string $field The field to modify.
 	 */
 	public function full_width_stretched_legacy_padding( & $style, $field ) {
 		if ( $style['row_stretch'] == 'full-stretched' ) {
