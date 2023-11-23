@@ -868,7 +868,10 @@ class SiteOrigin_Panels_Styles {
 	 * @param string $field The field to modify.
 	 */
 	public function full_width_stretched_legacy_padding( & $style, $field ) {
-		if ( $style['row_stretch'] == 'full-stretched' ) {
+		if (
+			! empty( $style['row_stretch'] ) &&
+			$style['row_stretch'] == 'full-stretched'
+		) {
 			$padding = explode( ' ', $style[ $field ] );
 			$padding[1] = $padding[3] = 0;
 			$style[ $field ] = implode( ' ', $padding );
