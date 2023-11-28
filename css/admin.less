@@ -60,7 +60,7 @@
 		.gradient(#eee, #eee, #f9f9f9);
 		box-shadow: 0 1px 1px rgba(0,0,0,0.04), inset 0 1px 0 rgba( 255,255,255,0.5 );
 		outline: none;
-		border-radius: 2px;
+		border-radius: 3px;
 
 		.so-panels-icon {
 			font-size: 12px;
@@ -1765,7 +1765,7 @@
 					.cell-resize-direction {
 						align-items: center;
 						background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f9f9f9));
-						border-radius: 4px;
+						border-radius: 3px;
 						border: 1px solid;
 						color: #777;
 						cursor: pointer;
@@ -1785,21 +1785,23 @@
 			}
 
 			.row-preview {
-
-				margin: 0 -6px;
+				background: #e5f4fb;
 				height: @preview_height;
+				margin: 0 -6px;
 				position: relative;
-				.preview-cell, .preview-cell-in, .preview-cell-weight {
-					.box-sizing(border-box);
-				}
-
 				white-space: nowrap;
 
+				.preview-cell, .preview-cell-in,
+				.preview-cell-weight {
+					.box-sizing( border-box );
+				}
+
 				.preview-cell {
-					display: inline-block;
-					position: relative;
-					padding: 0 6px;
 					cursor: pointer;
+					display: inline-block;
+					overflow: visible !important;
+					padding: 0 6px;
+					position: relative;
 
 					.preview-cell-in {
 						border: 1px solid #bcccd2;
@@ -1823,7 +1825,7 @@
 							left: 50%;
 							line-height: 1.4em !important;
 							margin: -0.95em 0 0 -40px;
-							padding: 10px 0;
+							padding: 10px 5px;
 							position: absolute;
 							text-align: center;
 							top: 50%;
@@ -1843,7 +1845,7 @@
 						.preview-cell-weight-input {
 							.box-shadow( none );
 							background: #f6f6f6;
-							border-radius: 4px;
+							border-radius: 3px;
 							border: 1px solid #d0d0d0;
 						}
 					}
