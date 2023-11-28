@@ -251,6 +251,10 @@ class SiteOrigin_Panels {
 		if ( class_exists( 'Polylang' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/polylang.php';
 		}
+
+		if ( defined( 'SEOPRESS_VERSION' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/seopress.php';
+		}
 	}
 
 	/**

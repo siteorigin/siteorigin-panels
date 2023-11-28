@@ -288,17 +288,21 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<a class="so-duplicate" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
 			</div>
 
-			<input type="button" class="button-primary so-saveinline" style="display: none;" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
-			<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
-			<input type="button" class="button-secondary so-mode" tabindex="0" value="<?php esc_attr_e( ':', 'siteorigin-panels' ); ?>" />
-			<ul class="so-mode-list" style="display: none;">
-				<li class="so-saveinline-mode" tabindex="0" >
-					<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
-				</li>
-				<li class="so-close-mode" tabindex="0" >
-					<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
-				</li>
-			</ul>
+			<div class="save-buttons">
+				<input type="button" class="button-primary so-saveinline" style="display: none;" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
+				<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
+
+				<span class="button-secondary dashicons so-mode" tabindex="0" aria-label="<?php _e( 'Access Modes', 'siteorigin-panels' ); ?> ">
+				</span>
+				<ul class="so-mode-list" style="display: none;">
+					<li class="so-saveinline-mode" tabindex="0" >
+						<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
+					</li>
+					<li class="so-close-mode" tabindex="0" >
+						<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
+					</li>
+				</ul>
+			</div>
 		</div>
 
 	</div>
@@ -327,16 +331,21 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="row-set-form">
 				<div class="row-cell-column">
 					<?php
-					echo __( 'Set Row Layout', 'siteorigin-panels' );
+					echo __( 'Column Count:', 'siteorigin-panels' );
 					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
 					?>
 				</div>
 
 				<div class="cell-resize-container">
 					<span class="cell-resize-label">
-						<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+						<?php echo __( 'Column Presets: ', 'siteorigin-panels' ); ?>
 					</span>
 					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
+				</div>
+				<div class="cell-resize-direction-container">
+					<?php echo __( 'Direction:', 'siteorigin-panels' ); ?>
+
+					<span class="cell-resize-direction dashicons dashicons-arrow-left" data-direction="left"></span>
 				</div>
 			</div>
 
@@ -354,21 +363,25 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				</div>
 			{{% } %}}
 
-			{{% if( dialogType == 'create' ) { %}}
-				<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e( 'Insert', 'siteorigin-panels' ); ?>" />
-			{{% } else { %}}
-				<input type="button" class="button-primary so-saveinline" tabindex="0" style="display: none;" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
-				<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
-				<input type="button" class="button-secondary so-mode" tabindex="0" value="<?php esc_attr_e( ':', 'siteorigin-panels' ); ?>" />
-				<ul class="so-mode-list" style="display: none;">
-					<li class="so-saveinline-mode" tabindex="0" >
-						<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
-					</li>
-					<li class="so-close-mode" tabindex="0" >
-						<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
-					</li>
-				</ul>
-			{{% } %}}
+			<div class="save-buttons">
+				{{% if( dialogType == 'create' ) { %}}
+					<input type="button" class="button-primary so-insert" tabindex="0" value="<?php esc_attr_e( 'Insert', 'siteorigin-panels' ); ?>" />
+				{{% } else { %}}
+					<input type="button" class="button-primary so-saveinline" tabindex="0" style="display: none;" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
+					<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
+
+					<span class="button-secondary dashicons so-mode" tabindex="0" aria-label="<?php _e( 'Access Modes', 'siteorigin-panels' ); ?> ">
+					</span>
+					<ul class="so-mode-list" style="display: none;">
+						<li class="so-saveinline-mode" tabindex="0" >
+							<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
+						</li>
+						<li class="so-close-mode" tabindex="0" >
+							<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
+						</li>
+					</ul>
+				{{% } %}}
+			</div>
 		</div>
 
 	</div>

@@ -47,6 +47,7 @@ module.exports = panels.view.dialog.extend({
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
+		'click .cell-resize-direction ': 'changeSizeDirection',
 	},
 
 	rowView: null,
@@ -79,7 +80,7 @@ module.exports = panels.view.dialog.extend({
 
 			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
-			this.drawCellResizers( parseInt( this.$('.row-set-form input[name="cells"]').val() ) );
+			this.drawCellResizers();
 			this.updateActiveCellClass();
 			this.renderStyles();
 			this.openSelectedCellStyles();
@@ -167,13 +168,13 @@ module.exports = panels.view.dialog.extend({
 
 		return this;
 	},
-	
+
 	renderStyles: function () {
 		if ( this.styles ) {
 			this.styles.off( 'styles_loaded' );
 			this.styles.remove();
 		}
-		
+
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();
 		this.styles.model = this.model;
@@ -181,16 +182,16 @@ module.exports = panels.view.dialog.extend({
 			builderType: this.builder.config.builderType,
 			dialog: this
 		});
-		
+
 		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
 		this.styles.attach( $rightSidebar );
-		
+
 		// Handle the loading class
 		this.styles.on('styles_loaded', function (hasStyles) {
 			if ( ! hasStyles ) {
 				// If we don't have styles remove the view.
 				this.styles.remove();
-				
+
 				// If the sidebar is empty, hide it.
 				if ( $rightSidebar.children().length === 0 ) {
 					$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
@@ -364,136 +365,147 @@ module.exports = panels.view.dialog.extend({
 
 			}.bind(this));
 
-			// Make this row weight click editable
 			newCell.find( '.preview-cell-weight' ).on( 'click', function( ci ) {
 
-				// Disable the draggable while entering values
-				thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
+				// Disable the draggable while entering values.
+				thisDialog.$( '.resize-handle' ).css( 'pointer-event', 'none' ).draggable( 'disable' );
 
-				rowPreview.find('.preview-cell-weight').each(function () {
-					var $$ = jQuery(this).hide();
-					$('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
-						.val(parseFloat($$.html())).insertAfter($$)
+				var resizeCells = function( refocusIndex = false ) {
+					timeout = setTimeout( function() {
+						var rowPreviewInputs = rowPreview.find( '.preview-cell-weight-input' );
+						// If there are no weight inputs, then skip this.
+						if ( rowPreviewInputs.length === 0 ) {
+							return false;
+						}
+
+						var rowWeights = [],
+							rowChanged = [],
+							changedSum = 0,
+							unchangedSum = 0;
+
+						rowPreviewInputs.each( function( i, el ) {
+							var val = parseFloat( $( el ).val() );
+							if ( isNaN( val ) ) {
+								val = 1 / thisDialog.row.cells.length;
+							} else {
+								val = Math.round( val * 10 ) / 1000;
+							}
+
+							// Check within 3 decimal points.
+							var changed = ! $( el ).hasClass( 'no-user-interacted' );
+
+							rowWeights.push( val );
+							rowChanged.push( changed );
+
+							if ( changed ) {
+								changedSum += val;
+							} else {
+								unchangedSum += val;
+							}
+						} );
+
+						if ( changedSum > 0 && unchangedSum > 0 && 1 - changedSum > 0 ) {
+							// Balance out the unchanged rows to occupy the weight left over by the changed sum.
+							for ( var i = 0; i < rowWeights.length; i++ ) {
+								if ( ! rowChanged[ i ] ) {
+									rowWeights[ i ] = (
+											rowWeights[ i ] / unchangedSum
+										) * (
+											1 - changedSum
+										);
+								}
+							}
+						}
+
+						// Last check to ensure total weight is 1.
+						var sum = _.reduce( rowWeights, function ( memo, num ) {
+							return memo + num;
+						} );
+
+						rowWeights = rowWeights.map( function( w ) {
+							return w / sum;
+						} );
+
+						// Set the new cell weights and regenerate the preview.
+						if ( Math.min.apply( Math, rowWeights ) > 0.01 ) {
+							thisDialog.row.cells.each( function( cell, i ) {
+								cell.set( 'weight', rowWeights[ i ] );
+							} );
+						}
+
+						// Now lets animate the cells into their new widths.
+						rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
+							var cellWeight = thisDialog.row.cells.at( i ).get( 'weight');
+							$( el ).animate( { 'width': Math.round( cellWeight * 1000 ) / 10 + "%" }, 250 );
+							$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
+						});
+
+						setTimeout( function() {
+							if ( typeof refocusIndex === 'number' ) {
+								rowPreviewInputs.get( refocusIndex ).focus();
+							}
+
+							// So the draggable handle is not hidden.
+							thisDialog.regenerateRowPreview.bind( thisDialog )
+						}, 260 );
+
+					}, 100 );
+				}
+
+				rowPreview.find( '.preview-cell-weight' ).each( function() {
+					var $$ = jQuery( this ).hide();
+					$( '<input type="number" class="preview-cell-weight-input no-user-interacted" />' )
+						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
 						.on( 'focus', function() {
-							clearTimeout(timeout);
-						})
+							clearTimeout( timeout );
+						} )
 						.on( 'keyup', function( e ) {
-							if (e.keyCode !== 9) {
-								// Only register the interaction if the user didn't press tab
-								$(this).removeClass('no-user-interacted');
+							if ( e.keyCode !== 9 ) {
+								// Only register the interaction if the user didn't press tab.
+								$( this ).removeClass( 'no-user-interacted' );
 							}
 
-							// Enter is clicked
-							if (e.keyCode === 13) {
+							// Enter is pressed.
+							if ( e.keyCode === 13 ) {
 								e.preventDefault();
-								$( this ).trigger( 'blur' );
+								resizeCells();
 							}
-						})
+
+							// Up or down is pressed.
+							if ( e.keyCode === 38 || e.keyCode === 40 ) {
+								e.preventDefault();
+								// During the row regeneration, the inputs are removed and re-added so we need the id to refocus.
+								var parent = $( e.target ).parents( '.preview-cell' ).index();
+
+								resizeCells( parent );
+							}
+						} )
 						.on( 'keydown', function( e ) {
-							if (e.keyCode === 9) {
+							if ( e.keyCode === 9 ) {
 								e.preventDefault();
 
-								// Tab will always cycle around the row inputs
-								var inputs = rowPreview.find('.preview-cell-weight-input');
-								var i = inputs.index($(this));
-								if (i === inputs.length - 1) {
+								// Tab will always cycle around the row inputs.
+								var inputs = rowPreview.find( '.preview-cell-weight-input' );
+								var i = inputs.index( $( this ) );
+								if ( i === inputs.length - 1 ) {
 									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
 								} else {
 									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
 								}
 							}
-						})
-						.on( 'blur', function() {
-							rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
-								if (isNaN(parseFloat($(el).val()))) {
-									$(el).val(Math.floor(thisDialog.row.cells.at(i).get('weight') * 1000) / 10);
-								}
-							});
-
-							timeout = setTimeout(function () {
-								// If there are no weight inputs, then skip this
-								if (rowPreview.find('.preview-cell-weight-input').length === 0) {
-									return false;
-								}
-
-								// Go through all the inputs
-								var rowWeights = [],
-									rowChanged = [],
-									changedSum = 0,
-									unchangedSum = 0;
-
-								rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
-									var val = parseFloat($(el).val());
-									if (isNaN(val)) {
-										val = 1 / thisDialog.row.cells.length;
-									} else {
-										val = Math.round(val * 10) / 1000;
-									}
-
-									// Check within 3 decimal points
-									var changed = !$(el).hasClass('no-user-interacted');
-
-									rowWeights.push(val);
-									rowChanged.push(changed);
-
-									if (changed) {
-										changedSum += val;
-									} else {
-										unchangedSum += val;
-									}
-								});
-
-								if (changedSum > 0 && unchangedSum > 0 && (
-										1 - changedSum
-									) > 0) {
-									// Balance out the unchanged rows to occupy the weight left over by the changed sum
-									for (var i = 0; i < rowWeights.length; i++) {
-										if (!rowChanged[i]) {
-											rowWeights[i] = (
-													rowWeights[i] / unchangedSum
-												) * (
-													1 - changedSum
-												);
-										}
-									}
-								}
-
-								// Last check to ensure total weight is 1
-								var sum = _.reduce(rowWeights, function (memo, num) {
-									return memo + num;
-								});
-								rowWeights = rowWeights.map(function (w) {
-									return w / sum;
-								});
-
-								// Set the new cell weights and regenerate the preview.
-								if (Math.min.apply(Math, rowWeights) > 0.01) {
-									thisDialog.row.cells.each(function (cell, i) {
-										cell.set('weight', rowWeights[i]);
-									});
-								}
-
-								// Now lets animate the cells into their new widths
-								rowPreview.find('.preview-cell').each(function (i, el) {
-									var cellWeight = thisDialog.row.cells.at(i).get('weight');
-									$(el).animate({'width': Math.round(cellWeight * 1000) / 10 + "%"}, 250);
-									$(el).find('.preview-cell-weight-input').val(Math.round(cellWeight * 1000) / 10);
-								});
-
-								// So the draggable handle is not hidden.
-								rowPreview.find('.preview-cell').css('overflow', 'visible');
-								setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
-
-							}, 100);
-						})
+						} )
+						.on( 'blur', resizeCells )
 						.on( 'click', function () {
+							// If the input is already focused, the user has clicked a step.
+							if ( $( this ).is( ':focus' ) ) {
+								resizeCells();
+							}
 							$( this ).trigger( 'select' );
-						});
-				});
+						} );
+				} );
 
-				$(this).siblings( '.preview-cell-weight-input' ).trigger( 'select');
-
-			});
+				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+			} );
 
 		}, this);
 
@@ -585,10 +597,11 @@ module.exports = panels.view.dialog.extend({
 
 	drawCellResizers: function() {
 		this.$( '.cell-resize' ).empty();
-		var cellsCount = parseInt( this.$( '.row-set-form input[name="cells"]' ).val() );
+		var cellsCount = this.getCurrentCellCount();
 		var currentCellSizes = this.columnResizeData[ cellsCount ];
+
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
-			this.$( '.cell-resize-container' ).show();
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
 				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
@@ -598,7 +611,7 @@ module.exports = panels.view.dialog.extend({
 				}
 			}
 		} else {
-			this.$( '.cell-resize-container' ).hide();
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).hide();
 		}
 	},
 
@@ -608,7 +621,8 @@ module.exports = panels.view.dialog.extend({
 			return Math.trunc( Number( $( this ).text() ) );
 		} ).get();
 
-		$.each( this.columnResizeData[ parseInt( this.$( '.row-set-form input[name="cells"]' ).val() ) ], function( i, ratio ) {
+		var cellsCount = this.getCurrentCellCount();
+		$.each( this.columnResizeData[ cellsCount ], function( i, ratio ) {
 			if ( ratio.toString() === activeCellRatio.toString() ) {
 				activeCellRatio = i;
 				return false;
@@ -618,6 +632,26 @@ module.exports = panels.view.dialog.extend({
 		if ( typeof activeCellRatio == 'number' ) {
 			$( $( '.cell-resize-sizing' ).get( activeCellRatio ) ).addClass( 'so-active-ratio' );
 		}
+	},
+
+	changeSizeDirection: function( e ) {
+		var $current = $( e.target );
+		var currentDirection = $current.attr( 'data-direction' );
+		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+
+		$current
+			.removeClass( 'dashicons-arrow-' + currentDirection )
+			.addClass( 'dashicons-arrow-' + newDirection )
+			.attr( 'data-direction', newDirection );
+
+		// Reverse all sizes.
+		for ( var columnCount in this.columnResizeData ) {
+			this.columnResizeData[ columnCount ] = this.columnResizeData[ columnCount ].map( function( size ) {
+				return size.reverse();
+			} );
+		}
+
+		this.drawCellResizers();
 	},
 
 	changeCellRatio: function( e ) {
@@ -633,97 +667,99 @@ module.exports = panels.view.dialog.extend({
 		}
 	},
 
+	getCurrentCellCount: function() {
+		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
 	changeCellTotal: function ( cellRatio = 0 ) {
-			 try {
-				var cellsCount = parseInt( this.$('.row-set-form input[name="cells"]').val() );
-				this.drawCellResizers( cellsCount );
-	
-				if (_.isNaN( cellsCount )) {
+		var thisDialog = this;
+		 try {
+			var cellsCount = this.getCurrentCellCount();
+			this.drawCellResizers();
+
+			if (_.isNaN( cellsCount )) {
+				cellsCount = 1;
+			} else {
+				if ( cellsCount < 1 ) {
 					cellsCount = 1;
-				} else {
-					if ( cellsCount < 1 ) {
-						cellsCount = 1;
-						this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
-					} else if ( cellsCount > 12 ) {
-						cellsCount = 12;
-					}
+				} else if ( cellsCount > 12 ) {
+					cellsCount = 12;
 				}
-				this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
-	
-				var cells = [];
-				var cellCountChanged = (
-					this.row.cells.length !== cellsCount
-				);
-	
-				// Create some cells
-				var currentWeight = 1;
-				for ( var i = 0; i < cellsCount; i++ ) {
-					cells.push(1);
-				}
+			}
+			this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
 
-				// Lets make sure that the row weights add up to 1.
-				var totalRowWeight = _.reduce( cells, function( memo, weight ) {
-					return memo + weight;
-				} );
+			var cells = [];
+			var cellCountChanged = (
+				this.row.cells.length !== cellsCount
+			);
 
-				cells = _.map (cells, function( cell ) {
-					return cell / totalRowWeight;
-				} );
-	
-				// Don't return cells that are too small
-				cells = _.filter( cells, function( cell ) {
-					return cell > 0.01;
-				} );
+			// Create some cells
+			for ( var i = 0; i < cellsCount; i++ ) {
+				cells.push( 1 );
+			}
 
-				// Discard deleted cells.
-				this.row.cells = new panels.collection.cells( this.row.cells.first( cells.length ) );
-	
-				_.each( cells, function( cellWeight, index ) {
-					var cell = this.row.cells.at( index );
-					if ( ! cell ) {
-						cell = new panels.model.cell( {
-							weight: cellWeight,
-							row: this.model
-						} );
-						this.row.cells.add( cell );
-					} else {
-						cell.set(
-							'weight',
-							cellRatio.length ? cellRatio[ index ] / 100 : cellWeight
-						);
-					}
-				}.bind( this ) );
-	
-				if ( cellCountChanged ) {
-					this.regenerateRowPreview();
-				} else {
-					var thisDialog = this;
-	
-					// // Now lets animate the cells into their new widths
-					this.$( '.preview-cell' ).each( function( i, el ) {
-						var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
-						var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
-						// To prevent a jump, don't animate cells that haven't changed size.
-						if ( parseInt( $previewCellWeight.text() ) != width ) {
-							$( el ).animate( { 'width': width + "%" }, 250 );
-							$previewCellWeight.html( width );
-						}
+			// Lets make sure that the row weights add up to 1.
+			var totalRowWeight = _.reduce( cells, function( memo, weight ) {
+				return memo + weight;
+			} );
+
+			cells = _.map( cells, function( cell ) {
+				return cell / totalRowWeight;
+			} );
+
+			// Don't return cells that are too small
+			cells = _.filter( cells, function( cell ) {
+				return cell > 0.01;
+			} );
+
+			// Discard deleted cells.
+			this.row.cells = new panels.collection.cells( this.row.cells.first( cells.length ) );
+
+			_.each( cells, function( cellWeight, index ) {
+				var cell = this.row.cells.at( index );
+				if ( ! cell ) {
+					cell = new panels.model.cell( {
+						weight: cellWeight,
+						row: this.model
 					} );
 	
-					// So the draggable handle is not hidden.
-					this.$( '.preview-cell' ).css( 'overflow', 'visible' );
-	
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
+					this.row.cells.add( cell );
+				} else {
+					cell.set(
+						'weight',
+						cellRatio.length ? cellRatio[ index ] / 100 : cellWeight
+					);
 				}
+			}.bind( this ) );
+
+			if ( cellCountChanged ) {
+				this.regenerateRowPreview();
+			} else {
+				// // Now lets animate the cells into their new widths
+				this.$( '.preview-cell' ).each( function( i, el ) {
+					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
+					var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
+					// To prevent a jump, don't animate cells that haven't changed size.
+					if ( parseInt( $previewCellWeight.text() ) != width ) {
+						$( el ).animate( { 'width': width + "%" }, 250 );
+						$previewCellWeight.html( width );
+					}
+				} );
+
+				// So the draggable handle is not hidden.
+				this.$( '.preview-cell' ).css( 'overflow', 'visible' );
+
+				setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 			}
-			catch ( err ) {
-				console.log( 'Error setting cells - ' + err.message );
-			}
-	
-	
-			// Remove the button primary class
-			this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
-		},
+		}
+		catch ( err ) {
+			console.log( 'Error setting cells - ' + err.message );
+		}
+
+		// Remove the button primary class
+		this.$( '.row-set-form .so-button-row-set' ).removeClass( 'button-primary' );
+	},
 
 	/**
 	 * Handle a click on the dialog left bar tab
@@ -901,4 +937,4 @@ module.exports = panels.view.dialog.extend({
 		window.panelsMode = inline ? 'inline' : 'dialog';
 	},
 
-});
+} );

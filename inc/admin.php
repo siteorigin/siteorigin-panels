@@ -94,7 +94,7 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-		
+
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
 	}
@@ -210,7 +210,7 @@ class SiteOrigin_Panels_Admin {
 	public function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		
+
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
 			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
@@ -468,7 +468,7 @@ class SiteOrigin_Panels_Admin {
 						'row_pasted'        => __( 'Row pasted', 'siteorigin-panels' ),
 
 						// Cells.
-						'cell_resized'      => __( 'Cell resized', 'siteorigin-panels' ),
+						'cell_resized'      => __( 'Column resized', 'siteorigin-panels' ),
 
 						// Prebuilt.
 						'prebuilt_loaded'   => __( 'Prebuilt layout loaded', 'siteorigin-panels' ),
@@ -488,13 +488,13 @@ class SiteOrigin_Panels_Admin {
 					// Everything for the contextual menu.
 					'contextual'           => array(
 						'add_widget_below' => __( 'Add Widget Below', 'siteorigin-panels' ),
-						'add_widget_cell'  => __( 'Add Widget to Cell', 'siteorigin-panels' ),
+						'add_widget_cell'  => __( 'Add Widget to Column', 'siteorigin-panels' ),
 						'search_widgets'   => __( 'Search Widgets', 'siteorigin-panels' ),
 
 						'add_row' => __( 'Add Row', 'siteorigin-panels' ),
 						'column'  => __( 'Column', 'siteorigin-panels' ),
 
-						'cell_actions'        => __( 'Cell Actions', 'siteorigin-panels' ),
+						'cell_actions'        => __( 'Column Actions', 'siteorigin-panels' ),
 						'cell_paste_widget'   => __( 'Paste Widget', 'siteorigin-panels' ),
 
 						'widget_actions'   => __( 'Widget Actions', 'siteorigin-panels' ),
@@ -1024,6 +1024,13 @@ class SiteOrigin_Panels_Admin {
 		return $widgets;
 	}
 
+	private function column_sizes_round( $size ) {
+		if ( is_array( $size ) ) {
+			return array_map( array( $this, 'column_sizes_round' ), $size );
+		}
+		return round( $size , 2);
+	}
+
 	/**
 	 * Add all the footer JS templates.
 	 */
@@ -1032,6 +1039,7 @@ class SiteOrigin_Panels_Admin {
 			2 => array(
 				array( 50, 50 ),
 				array( 25, 75 ),
+				array( 61.8, 38.2 ),
 			),
 			3 => array(
 				array( 33, 33, 33 ),
@@ -1046,6 +1054,12 @@ class SiteOrigin_Panels_Admin {
 				array( 10, 15, 30, 15, 30 ),
 			),
 		) );
+
+		// Prevent extra long column sizes.
+		if ( ! empty( $column_sizes ) ) {
+			$column_sizes = array_map( array( $this, 'column_sizes_round' ), $column_sizes );
+		}
+
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 
@@ -1515,7 +1529,7 @@ class SiteOrigin_Panels_Admin {
 	public static function display_footer_premium_link() {
 		$links = array(
 			array(
-				'text' => __( 'Get the row, cell, and widget %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Get the row, column, and widget %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/animations' ),
 				'anchor' => __( 'Animations Addon', 'siteorigin-panels' ),
 			),
@@ -1535,7 +1549,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Link an entire Page Builder row, cell, or widget with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Link an entire Page Builder row, column, or widget with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/link-overlay' ),
 				'anchor' => __( 'Link Overlay Addon', 'siteorigin-panels' ),
 			),
@@ -1590,7 +1604,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Add widget, cell, and row Retina background images for high-pixel-density displays with %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Add widget, column, and row Retina background images for high-pixel-density displays with %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/retina-background-images' ),
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
@@ -1847,7 +1861,7 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	public function inline_saving_heartbeat_received( $response, $data ) {
-		
+
 		if ( ! empty( $data['panels'] ) ) {
 			$panels_data = json_decode( $data['panels'], true );
 			if ( ! wp_verify_nonce( $panels_data['nonce'], 'save' ) ) {
