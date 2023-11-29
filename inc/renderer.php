@@ -91,10 +91,6 @@ class SiteOrigin_Panels_Renderer {
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', $settings['row-mobile-margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 
-			if ( ! empty( $panels_mobile_margin_bottom ) && siteorigin_panels_setting( 'inline-styles' ) ) {
-				$panels_mobile_margin_bottom .= ' !important';
-			}
-
 			if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
 				$css->add_row_css( $post_id, $ri, array(
 					'.panel-has-style > .panel-row-style',
@@ -591,7 +587,6 @@ class SiteOrigin_Panels_Renderer {
 		// Check if Page Builder is set to output certain styles inline and if it is, do so.
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
 			if ( ! empty( $style['padding'] ) ) {
-				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'padding' );
 				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
 			}
 
