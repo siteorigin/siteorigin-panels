@@ -326,8 +326,6 @@ module.exports = panels.view.dialog.extend({
 								) / rowPreview.width()
 							);
 
-						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
-
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
@@ -490,20 +488,6 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'keydown', function( e ) {
-							if ( e.keyCode === 9 ) {
-								e.preventDefault();
-
-								// Tab will always cycle around the row inputs.
-								var inputs = rowPreview.find( '.preview-cell-weight-input' );
-								var i = inputs.index( $( this ) );
-								if ( i === inputs.length - 1 ) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
-								}
-							}
-						} )
 						.on( 'blur', resizeCells )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
@@ -515,6 +499,11 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+			} );
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
 			} );
 
 		}, this);
@@ -682,6 +671,7 @@ module.exports = panels.view.dialog.extend({
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {
+		var thisDialog = this;
 		 try {
 			var cellsCount = this.getCurrentCellCount();
 			this.drawCellResizers();
@@ -745,8 +735,6 @@ module.exports = panels.view.dialog.extend({
 			if ( cellCountChanged ) {
 				this.regenerateRowPreview();
 			} else {
-				var thisDialog = this;
-
 				// // Now lets animate the cells into their new widths
 				this.$( '.preview-cell' ).each( function( i, el ) {
 					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
