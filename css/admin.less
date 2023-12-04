@@ -1785,15 +1785,35 @@
 			}
 
 			.row-preview {
-				background: #e5f4fb;
 				height: @preview_height;
-				margin: 0 -6px;
 				position: relative;
 				white-space: nowrap;
 
 				.preview-cell, .preview-cell-in,
 				.preview-cell-weight {
 					.box-sizing( border-box );
+				}
+
+				& > .preview-cell {
+
+					&:first-of-type {
+						padding-left: 0;
+					}
+
+					&:last-of-type {
+						padding-right: 0;
+					}
+				}
+
+				.preview-cell .resize-handle .preview-cell {
+
+					&:first-of-type {
+						padding-right: 0;
+					}
+
+					&:last-of-type {
+						padding-left: 0;
+					}
 				}
 
 				.preview-cell {
