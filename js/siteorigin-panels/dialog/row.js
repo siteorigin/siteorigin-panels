@@ -478,20 +478,6 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'keydown', function( e ) {
-							if ( e.keyCode === 9 ) {
-								e.preventDefault();
-
-								// Tab will always cycle around the row inputs.
-								var inputs = rowPreview.find( '.preview-cell-weight-input' );
-								var i = inputs.index( $( this ) );
-								if ( i === inputs.length - 1 ) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
-								}
-							}
-						} )
 						.on( 'blur', resizeCells )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
@@ -503,6 +489,11 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+			} );
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
 			} );
 
 		}, this);
