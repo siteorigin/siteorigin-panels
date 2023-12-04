@@ -1293,6 +1293,10 @@ class SiteOrigin_Panels_Styles {
 	public static function filter_row_mobile_bottom_margin( $margin, $grid ) {
 		if ( ! empty( $grid['style']['mobile_bottom_margin'] ) ) {
 			$margin = $grid['style']['mobile_bottom_margin'];
+
+			if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+				$margin .= ' !important';
+			}
 		}
 
 		return $margin;

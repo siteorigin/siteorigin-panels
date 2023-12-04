@@ -48,6 +48,16 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+		'keyup .cell-resize-sizing': function( e ) {
+			if ( e.which == 13 ) {
+				var size = $( e.target ).index();
+				var parent = $( e.target ).parent();
+				$( e.target ).find( 'span' ).trigger( 'click' );
+
+				// Refocus on the selected size to prevent focus loss.
+				parent.find( '.cell-resize-sizing' ).eq( size ).trigger( 'focus' );
+			}
+		},
 	},
 
 	rowView: null,
@@ -316,8 +326,6 @@ module.exports = panels.view.dialog.extend({
 								) / rowPreview.width()
 							);
 
-						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
-
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
@@ -480,20 +488,6 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'keydown', function( e ) {
-							if ( e.keyCode === 9 ) {
-								e.preventDefault();
-
-								// Tab will always cycle around the row inputs.
-								var inputs = rowPreview.find( '.preview-cell-weight-input' );
-								var i = inputs.index( $( this ) );
-								if ( i === inputs.length - 1 ) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
-								}
-							}
-						} )
 						.on( 'blur', resizeCells )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
@@ -505,6 +499,11 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+			} );
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
 			} );
 
 		}, this);
@@ -603,7 +602,7 @@ module.exports = panels.view.dialog.extend({
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
-				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing" tabindex="0"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
 				$lastCell.data( 'cells', currentCellSizes[ ci ] );
 				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
@@ -722,7 +721,7 @@ module.exports = panels.view.dialog.extend({
 						weight: cellWeight,
 						row: this.model
 					} );
-	
+
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 					this.row.cells.add( cell );
 				} else {
