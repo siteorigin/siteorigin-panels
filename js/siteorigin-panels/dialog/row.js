@@ -48,6 +48,12 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+
+		// If user clicks the column size indicator, focus the field.
+		'click .preview-cell-unit ': function( e ) {
+			$( e.target ).next().trigger( 'focus' );
+		},
+
 		'keyup .cell-resize-direction': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e, true );
 		},
@@ -465,10 +471,21 @@ module.exports = panels.view.dialog.extend({
 
 				rowPreview.find( '.preview-cell-weight' ).each( function() {
 					var $$ = jQuery( this ).hide();
-					$( '<input type="number" class="preview-cell-weight-input no-user-interacted" />' )
+					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
+					var label = panelsOptions.loc.row.cellInput.replace( '%s', ci + 1 );
+
+					$( `<input
+						type="number"
+						class="preview-cell-weight-input no-user-interacted"
+						id="column-${ ci }"
+						min="1"
+						max="${ maxSize }"
+						aria-label="${ label }"
+					/>` )
 						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
 						.on( 'focus', function() {
 							clearTimeout( timeout );
+							$( this ).attr( 'type', 'number' );
 						} )
 						.on( 'keyup', function( e ) {
 							if ( e.keyCode !== 9 ) {
@@ -491,7 +508,7 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'blur', resizeCells )
+						.on( 'blur', 'resizeCells' )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
 							if ( $( this ).is( ':focus' ) ) {
@@ -502,6 +519,11 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+
+				// When the field blurs, we convert the inputs to text to prevent an overlap with the step counter with the percentage.
+				rowPreview.find( '.preview-cell-weight-input' ).on( 'blur', function() {
+					rowPreview.find( '.preview-cell-weight-input' ).attr( 'type', 'text' );
+				} );
 			} );
 
 			// When a user tabs to  one of the column previews, switch all of them to inputs.
