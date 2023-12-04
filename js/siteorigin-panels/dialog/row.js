@@ -48,6 +48,11 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+
+		// If user clicks the column size indicator, focus the field.
+		'click .preview-cell-unit ': function( e ) {
+			$( e.target ).next().trigger( 'focus' );
+		},
 	},
 
 	rowView: null,
