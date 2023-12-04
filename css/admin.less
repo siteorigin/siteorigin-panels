@@ -1835,19 +1835,39 @@
 							box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 						}
 
+						.preview-cell-unit {
+							left: 53%;
+							top: 49.2%;
+							z-index: 1;
+						}
+
+						.preview-cell-weight,
+						.preview-cell-weight-input,
+						.preview-cell-unit {
+							color: #5e6d72;
+							font-size: 17px;
+							font-weight: bold;
+							position: absolute;
+							text-align: center;
+						}
+
+						.preview-cell-weight-input[type="text"] {
+							padding-right: 22px;
+						}
+
+						.preview-cell-weight-input[type="number"] {
+							z-index: 2;
+						}
+
 						.preview-cell-weight,
 						.preview-cell-weight-input {
 							background: #fff;
 							border: 1px solid #d0d0d0;
-							color: #5e6d72;
-							font-size: 17px;
-							font-weight: bold;
 							left: 50%;
 							line-height: 1.4em !important;
 							margin: -0.95em 0 0 -40px;
 							padding: 10px 5px;
 							position: absolute;
-							text-align: center;
 							top: 50%;
 							width: 80px;
 

@@ -466,6 +466,7 @@ module.exports = panels.view.dialog.extend({
 						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
 						.on( 'focus', function() {
 							clearTimeout( timeout );
+							$( this ).attr( 'type', 'number' );
 						} )
 						.on( 'keyup', function( e ) {
 							if ( e.keyCode !== 9 ) {
@@ -488,7 +489,7 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'blur', resizeCells )
+						.on( 'blur', 'resizeCells' )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
 							if ( $( this ).is( ':focus' ) ) {
@@ -499,6 +500,11 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+
+				// When the field blurs, we convert the inputs to text to prevent an overlap with the step counter with the percentage.
+				rowPreview.find( '.preview-cell-weight-input' ).on( 'blur', function() {
+					rowPreview.find( '.preview-cell-weight-input' ).attr( 'type', 'text' );
+				} );
 			} );
 
 			// When a user tabs to  one of the column previews, switch all of them to inputs.
