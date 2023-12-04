@@ -48,6 +48,16 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+		'keyup .cell-resize-sizing': function( e ) {
+			if ( e.which == 13 ) {
+				var size = $( e.target ).index();
+				var parent = $( e.target ).parent();
+				$( e.target ).find( 'span' ).trigger( 'click' );
+
+				// Refocus on the selected size to prevent focus loss.
+				parent.find( '.cell-resize-sizing' ).eq( size ).trigger( 'focus' );
+			}
+		},
 	},
 
 	rowView: null,
@@ -592,7 +602,7 @@ module.exports = panels.view.dialog.extend({
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
-				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing" tabindex="0"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
 				$lastCell.data( 'cells', currentCellSizes[ ci ] );
 				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
@@ -711,7 +721,7 @@ module.exports = panels.view.dialog.extend({
 						weight: cellWeight,
 						row: this.model
 					} );
-	
+
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 					this.row.cells.add( cell );
 				} else {
