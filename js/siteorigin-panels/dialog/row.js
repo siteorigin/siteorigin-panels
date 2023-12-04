@@ -53,6 +53,20 @@ module.exports = panels.view.dialog.extend({
 		'click .preview-cell-unit ': function( e ) {
 			$( e.target ).next().trigger( 'focus' );
 		},
+
+		'keyup .cell-resize-direction': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e, true );
+		},
+		'keyup .cell-resize-sizing': function( e ) {
+			if ( e.which == 13 ) {
+				var size = $( e.target ).index();
+				var parent = $( e.target ).parent();
+				$( e.target ).find( 'span' ).trigger( 'click' );
+
+				// Refocus on the selected size to prevent focus loss.
+				parent.find( '.cell-resize-sizing' ).eq( size ).trigger( 'focus' );
+			}
+		},
 	},
 
 	rowView: null,
@@ -613,7 +627,7 @@ module.exports = panels.view.dialog.extend({
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
-				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing" tabindex="0"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
 				$lastCell.data( 'cells', currentCellSizes[ ci ] );
 				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
@@ -648,11 +662,13 @@ module.exports = panels.view.dialog.extend({
 		var $current = $( e.target );
 		var currentDirection = $current.attr( 'data-direction' );
 		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+		var label = panelsOptions.loc.row.direction.replace( '%s', panelsOptions.loc.row[ newDirection ] );
 
 		$current
 			.removeClass( 'dashicons-arrow-' + currentDirection )
 			.addClass( 'dashicons-arrow-' + newDirection )
-			.attr( 'data-direction', newDirection );
+			.attr( 'data-direction', newDirection )
+			.attr( 'aria-label', label );
 
 		// Reverse all sizes.
 		for ( var columnCount in this.columnResizeData ) {
@@ -732,7 +748,7 @@ module.exports = panels.view.dialog.extend({
 						weight: cellWeight,
 						row: this.model
 					} );
-	
+
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 					this.row.cells.add( cell );
 				} else {

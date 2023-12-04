@@ -345,7 +345,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<div class="cell-resize-direction-container">
 					<?php echo __( 'Direction:', 'siteorigin-panels' ); ?>
 
-					<span class="cell-resize-direction dashicons dashicons-arrow-left" data-direction="left"></span>
+					<span
+						class="cell-resize-direction dashicons dashicons-arrow-left"
+						data-direction="left"
+						tabindex="0"
+						aria-label="<?php echo esc_attr( 'Change column direction to the left', 'siteorigin-panels' ); ?>"
+					></span>
 				</div>
 			</div>
 
