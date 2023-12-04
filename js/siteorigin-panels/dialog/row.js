@@ -48,6 +48,9 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+		'keyup .cell-resize-direction': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e, true );
+		},
 		'keyup .cell-resize-sizing': function( e ) {
 			if ( e.which == 13 ) {
 				var size = $( e.target ).index();
@@ -637,11 +640,13 @@ module.exports = panels.view.dialog.extend({
 		var $current = $( e.target );
 		var currentDirection = $current.attr( 'data-direction' );
 		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+		var label = panelsOptions.loc.row.direction.replace( '%s', panelsOptions.loc.row[ newDirection ] );
 
 		$current
 			.removeClass( 'dashicons-arrow-' + currentDirection )
 			.addClass( 'dashicons-arrow-' + newDirection )
-			.attr( 'data-direction', newDirection );
+			.attr( 'data-direction', newDirection )
+			.attr( 'aria-label', label );
 
 		// Reverse all sizes.
 		for ( var columnCount in this.columnResizeData ) {
