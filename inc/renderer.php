@@ -120,6 +120,7 @@ class SiteOrigin_Panels_Renderer {
 				! empty( $row['style']['row_stretch'] ) &&
 				 (
 				 	$row['style']['row_stretch'] == 'full' ||
+				 	$row['style']['row_stretch'] == 'full-width-stretch' ||
 				 	$row['style']['row_stretch'] == 'full-stretched' ||
 				 	$row['style']['row_stretch'] == 'full-stretched-padded'
 				 )
@@ -328,8 +329,13 @@ class SiteOrigin_Panels_Renderer {
 					$panels_tablet_width > $collapse_point &&
 					! empty( $row['style']['tablet_bottom_margin'] )
 				) {
+					$tablet_bottom_margin = $row['style']['tablet_bottom_margin'];
+					if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+						$tablet_bottom_margin .= ' !important';
+					}
+
 					$css->add_row_css( $post_id, $ri, '', array(
-						'margin-bottom' => $row['style']['tablet_bottom_margin'],
+						'margin-bottom' => $tablet_bottom_margin,
 					), "$panels_tablet_width:$collapse_point" );
 				}
 
