@@ -469,15 +469,16 @@ module.exports = panels.view.dialog.extend({
 					}, 100 );
 				}
 
-				rowPreview.find( '.preview-cell-weight' ).each( function() {
+				rowPreview.find( '.preview-cell-weight' ).each( function( ci ) {
+					var columnId = ci + 1;
 					var $$ = jQuery( this ).hide();
 					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
-					var label = panelsOptions.loc.row.cellInput.replace( '%s', ci + 1 );
+					var label = panelsOptions.loc.row.cellInput.replace( '%s', columnId );
 
 					$( `<input
 						type="number"
 						class="preview-cell-weight-input no-user-interacted"
-						id="column-${ ci }"
+						id="column-${ columnId }"
 						min="1"
 						max="${ maxSize }"
 						aria-label="${ label }"
