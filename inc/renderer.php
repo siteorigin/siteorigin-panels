@@ -179,6 +179,30 @@ class SiteOrigin_Panels_Renderer {
 						true
 					);
 
+					$panels_tablet_widget_tablet_margin = apply_filters(
+						'siteorigin_panels_css_tablet_mobile_margin',
+						! empty( $widget['panels_info']['style']['tablet_margin'] ) ? $widget['panels_info']['style']['tablet_margin'] : false,
+						$widget,
+						$wi,
+						$panels_data,
+						$post_id
+					);
+
+					if ( ! empty( $panels_tablet_widget_tablet_margin ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'',
+							array(
+								'margin' => $panels_tablet_widget_tablet_margin . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' ),
+							),
+							$panels_tablet_width . ':' . ( $panels_mobile_width + 1 ),
+							true
+						);
+					}
+
 					$panels_mobile_widget_mobile_margin = apply_filters(
 						'siteorigin_panels_css_widget_mobile_margin',
 						! empty( $widget['panels_info']['style']['mobile_margin'] ) ? $widget['panels_info']['style']['mobile_margin'] : false,
