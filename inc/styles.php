@@ -45,6 +45,7 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_row_mobile_margin_bottom', array( $this, 'filter_row_mobile_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
+		add_filter( 'filter_widget_tablet_margin', array( $this, 'filter_widget_tablet_margin' ), 10, 5 );
 		add_filter( 'siteorigin_panels_css_widget_mobile_margin', array( $this, 'filter_widget_mobile_margin' ), 10, 5 );
 
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
@@ -183,6 +184,17 @@ class SiteOrigin_Panels_Styles {
 				'priority'    => 8,
 				'multiple'    => true,
 			);
+
+			if ( $label == 'Widget' ) {
+				$fields['tablet_margin'] = array(
+					'name'        => __( 'Tablet Margin', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'group'       => 'tablet_layout',
+					'description' => __( 'Margins around the widget when on tablet devices.', 'siteorigin-panels' ),
+					'priority'    => 7,
+					'multiple'    => true,
+				);
+			}
 		}
 
 		// Mobile layout fields.
@@ -1272,6 +1284,14 @@ class SiteOrigin_Panels_Styles {
 	public static function filter_row_cell_bottom_margin( $margin, $cell, $ci, $row, $ri ) {
 		if ( ! empty( $row['style']['mobile_cell_margin'] ) ) {
 			$margin = $row['style']['mobile_cell_margin'];
+		}
+
+		return $margin;
+	}
+
+	public static function filter_widget_tablet_margin( $margin, $widget, $wi, $panels_data, $post_id ) {
+		if ( ! empty( $widget['style']['tablet_margin'] ) ) {
+			$margin = $widget['style']['tablet_margin'];
 		}
 
 		return $margin;
