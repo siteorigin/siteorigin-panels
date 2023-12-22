@@ -83,7 +83,7 @@
 			}
 		}
 	}
-	
+
 	@media (max-width: 782px) {
 		.so-tool-button.so-row-settings {
 			margin-right: 8px;
@@ -134,16 +134,16 @@
 				}
 			}
 		}
-		
+
 		@media ( max-width: 782px ) {
 			.so-tool-button {
 				margin-right: 8px;
-				
+
 				.so-button-text {
 					margin: 7px 0px 2px 5px;
 					font-size: 14px;
 				}
-				
+
 				.so-panels-icon {
 					margin: 3px 0;
 					font-size: 21px;
@@ -191,7 +191,7 @@
 				.box-sizing(border-box);
 				padding: 4px;
 				float: right;
-				
+
 				.so-panels-icon {
 					color: #777;
 					font-size: 11px;
@@ -199,23 +199,23 @@
 					height: 11px;
 					display: block;
 				}
-				
+
 				&:hover {
 					.so-panels-icon {
 						color: #555;
 					}
 				}
-				
+
 				&.so-row-move {
 					cursor: move;
 				}
 			}
-			
-			
+
+
 			@media ( max-width: 782px ) {
-				
+
 				margin-bottom: 8px;
-				
+
 				.so-tool-button {
 					.so-panels-icon {
 						font-size: 21px;
@@ -489,12 +489,13 @@
 							.title {
 								.actions {
 									background: #feffff;
-									font-size: 12px;
-									position: absolute;
-									top: 5px;
-									right: 0;
 									cursor: pointer;
+									font-size: 12px;
+									opacity: 0;
 									padding: 2px 8px 2px 15px;
+									position: absolute;
+									right: 0;
+									top: 5px;
 									z-index: 10;
 
 									&:hover a {
@@ -537,10 +538,15 @@
 								}
 							}
 
-							&:hover {
-								.title a{
+							&:hover,
+							&:focus {
+								.title a {
 									display: inline-block;
 									opacity: 0.5;
+								}
+
+								.actions {
+									opacity: 1;
 								}
 							}
 
@@ -669,7 +675,7 @@
 			padding: 15px 10px;
 			background: #f8f8f8;
 			border: 1px solid #e0e0e0;
-			
+
 			@media only screen and (max-width:782px) {
 				font-size: 14px;
 			}
@@ -682,7 +688,7 @@
 			color: #666;
 			padding: 5px 10px;
 			margin: 0 3px;
-			
+
 			@media only screen and (max-width:782px) {
 				padding: 9px 10px;
 			}
@@ -1105,19 +1111,19 @@
 					content: "\f335";
 				}
 			}
-			
+
 			&.so-show-left-sidebar {
 				float: left;
 				display: inline;
 				padding: 16px 25px;
 				border-right: 1px solid #d8d8d8;
 				border-bottom: 1px solid #d8d8d8;
-				
+
 				.so-dialog-icon:before  {
 					content: '\f333';
 				}
 			}
-			
+
 			&.so-show-right-sidebar {
 				display: inline-block;
 				.so-dialog-icon:before  {
@@ -1149,15 +1155,15 @@
 			}
 
 		}
-		
+
 		.so-title-bar-buttons {
 			position: absolute;
 			right: 0;
 			top: 0;
 		}
-		
+
 		&.so-has-left-button {
-			
+
 			&.so-has-icon {
 				.so-panels-icon {
 					left: 70px;
@@ -1415,7 +1421,7 @@
 				margin-top: 0;
 			}
 		}
-		
+
 		@media only screen and (max-width:980px) {
 			z-index: 110000;
 			top: @title_bar_height;
@@ -2194,7 +2200,7 @@
 						border-top: 1px solid #d0d0d0;
 					}
 
-					&:hover, 
+					&:hover,
 					&:focus	{
 						.so-buttons {
 							visibility: visible;
@@ -2525,9 +2531,9 @@
 			}
 			&.measurement-left {
 				box-shadow: inset 2px -2px 2px rgba(0, 115, 170, .35);
-			}			
+			}
 		}
-		
+
 		.style-field-image {
 
 			@image_field_height: 28px;
@@ -2596,7 +2602,7 @@
 				user-select: none;
 			}
 		}
-		
+
 		.style-field-radio label {
 			display: block;
 		}
@@ -2648,7 +2654,7 @@
 		width: 20px;
 		height: 20px;
 		background-image: url('./images/pb-icon.svg');
-		
+
 		&.white {
 			background-image: url('./images/pb-icon_white.svg');
 		}
@@ -2662,7 +2668,7 @@
 			}
 		}
 	}
-	
+
 	.siteorigin-panels-add-layout-block {
 		text-align: center;
 		margin-left: auto;
