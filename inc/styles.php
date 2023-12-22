@@ -169,7 +169,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'layout',
-			'description' => sprintf( __( 'Padding around the entire %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 7,
 			'multiple'    => true,
 		);
