@@ -611,6 +611,7 @@ class SiteOrigin_Panels_Renderer {
 		// Check if Page Builder is set to output certain styles inline and if it is, do so.
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
 			if ( ! empty( $style['padding'] ) ) {
+				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'padding' );
 				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
 			}
 
