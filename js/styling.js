@@ -14,23 +14,13 @@ jQuery( function ( $ ) {
 		var $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
 		$panelsRow.each( function () {
 			var $$ = $( this );
-			
 			var stretchType = $$.data( 'stretch-type' );
-			var defaultSidePadding = stretchType === 'full-stretched-padded' ? '' : 0;
-			
+
 			// Reset all the styles associated with row stretching
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
 			} );
-
-			// Reset row padding to prevent potential offset.
-			if ( stretchType !== 'full-stretched-padded' ) {
-				$$.css( {
-					'padding-left': defaultSidePadding,
-					'padding-right': defaultSidePadding
-				} );
-			}
 
 			var leftSpace = $$.offset().left - fullContainer.offset().left,
 				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
@@ -47,20 +37,6 @@ jQuery( function ( $ ) {
 					'padding-right': rightSpace + 'px'
 				} );
 			}
-
-			var cells = $$.find( '> .panel-grid-cell' );
-
-			if ( stretchType === 'full-stretched' && cells.length === 1 ) {
-				cells.css( {
-					'padding-left': 0,
-					'padding-right': 0
-				} );
-			}
-
-			$$.css( {
-				'border-left': defaultSidePadding,
-				'border-right': defaultSidePadding
-			} );
 		} );
 
 		if ( $panelsRow.length ) {
