@@ -255,6 +255,10 @@ class SiteOrigin_Panels {
 		if ( defined( 'SEOPRESS_VERSION' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/seopress.php';
 		}
+
+		if ( class_exists( 'WP_Event_Manager' ) ) {
+			add_filter( 'display_event_description', array( $this, 'generate_post_content' ), 11 );
+		}
 	}
 
 	/**
