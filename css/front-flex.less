@@ -52,12 +52,16 @@
 
 // Prevent content appearing behind the overlay.
 .panel-has-overlay .panel-grid-cell {
-  position: relative;
+	position: relative;
 }
 
-.panel-grid-cell.panel-has-overlay .panel-background-overlay,
+.panel-grid-cell.panel-has-overlay .panel-grid-cell {
+	position: relative;
+	z-index: 1;
+}
+
 .panel-has-overlay.so-panel .panel-background-overlay {
-  z-index: -1;
+	z-index: -1;
 }
 
 .panel-layout.panel-is-rtl {
