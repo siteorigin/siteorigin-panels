@@ -699,14 +699,14 @@ class SiteOrigin_Panels_Styles_Admin {
 				$style['row_stretch'] == 'full-stretched-padded'
 			)
 		) {
-			$style['row_stretch'] = 'full-width-stretch';
-
 			// To prevent unexpected spacing, remove any right/left padding.
 			if ( $style['row_stretch'] == 'full-stretched' ) {
 				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'padding' );
 				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'mobile_padding' );
 				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'tablet_padding' );
 			}
+
+			$style['row_stretch'] = 'full-width-stretch';
 		}
 
 		return $style;
