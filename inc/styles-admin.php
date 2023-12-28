@@ -8,6 +8,8 @@ class SiteOrigin_Panels_Styles_Admin {
 		add_filter( 'siteorigin_panels_prebuilt_layout', array( $this, 'convert_data' ) );
 
 		add_filter( 'siteorigin_panels_general_current_styles', array( $this, 'style_migration' ), 10, 4 );
+
+		add_filter( 'siteorigin_panels_data_migration', array( $this, 'panels_data_migrations' ) );
 	}
 
 	public static function single() {
@@ -443,12 +445,67 @@ class SiteOrigin_Panels_Styles_Admin {
 		}
 	}
 
+	public function panels_data_migrations( $panels_data ) {
+		// Full Width Stretch Migrations.
+		if ( empty( $panels_data['grids'] ) ) {
+			return $panels_data;
+		}
+
+		foreach ( $panels_data['grids'] as $grid_id => $row ) {
+			if ( empty( $row ) || empty( $row['style'] ) ) {
+				continue;
+			}
+
+			// Check if the row has the old Row Stretch values.
+			if (
+				! isset( $row['style']['row_stretch'] ) ||
+				(
+					$row['style']['row_stretch'] !== 'full-stretched' &&
+					$row['style']['row_stretch'] !== 'full-stretched-padded'
+				)
+			) {
+				// It doesn't. Skip it.
+				continue;
+			}
+
+			if ( $row['style']['row_stretch'] == 'full-stretched' ) {
+				if ( ! empty( $row['style']['padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'padding'
+					);
+				}
+
+				if ( ! empty( $row['style']['mobile_padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'mobile_padding'
+					);
+				}
+
+				if ( ! empty( $row['style']['tablet_padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'tablet_padding'
+					);
+				}
+			}
+
+			$row['style']['row_stretch'] = 'full-width-stretch';
+
+			$panels_data['grids'][ $grid_id ] = $row;
+		}
+
+		return $panels_data;
+	}
+
 	/**
 	 * Sanitize the style fields in panels_data
 	 *
 	 * @return mixed
 	 */
 	public function sanitize_all( $panels_data ) {
+		$panels_data = apply_filters( 'siteorigin_panels_data_migration', $panels_data );
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			// Sanitize the widgets
 			for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {

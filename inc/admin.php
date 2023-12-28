@@ -22,7 +22,6 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_init', array( $this, 'save_home_page' ) );
 		add_action( 'save_post', array( $this, 'save_post' ) );
-		add_filter( 'siteorigin_panels_data_migration', array( $this, 'save_post_migrations' ), 10, 3 );
 
 		add_action( 'after_switch_theme', array( $this, 'update_home_on_theme_change' ) );
 
@@ -256,7 +255,6 @@ class SiteOrigin_Panels_Admin {
 			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
 		}
 
-		$panels_data = apply_filters( 'siteorigin_panels_data_migration', $panels_data, $post, $post_id );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
@@ -302,52 +300,6 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$this->in_save_post = false;
-	}
-
-	public function save_post_migrations( $panels_data, $post, $post_id ) {
-		// Full Width Stretch Migrations.
-		if ( empty( $panels_data['grids'] ) ) {
-			return $panels_data;
-		}
-
-		foreach ( $panels_data['grids'] as $grid_id => $row ) {
-			if ( empty( $row ) || empty( $row['style'] ) ) {
-				continue;
-			}
-
-			// Check if the row has the old Row Stretch values.
-			if (
-				! isset( $row['style']['row_stretch'] ) ||
-				(
-					$row['style']['row_stretch'] !== 'full-stretched' &&
-					$row['style']['row_stretch'] !== 'full-stretched-padded'
-				)
-			) {
-				// It doesn't. Skip it.
-				continue;
-			}
-
-			if ( $row['style']['row_stretch'] == 'full-stretched' ) {
-				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
-					$row['style'],
-					'padding'
-				);
-				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
-					$row['style'],
-					'mobile_padding'
-				);
-				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
-					$row['style'],
-					'tablet_padding'
-				);
-			}
-
-			$row['style']['row_stretch'] = 'full-width-stretch';
-
-			$panels_data['grids'][ $grid_id ] = $row;
-		}
-
-		return $panels_data;
 	}
 
 	/*
