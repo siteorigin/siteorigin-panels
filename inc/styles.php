@@ -884,7 +884,8 @@ class SiteOrigin_Panels_Styles {
 			$style['row_stretch'] == 'full-stretched'
 		) {
 			$padding = explode( ' ', $style[ $field ] );
-			$padding[1] = $padding[3] = 0;
+			$unit = preg_replace( '/[^a-z]/i', '', $padding[0] );
+			$padding[1] = $padding[3] = "0$unit";
 			$style[ $field ] = implode( ' ', $padding );
 		}
 	}
