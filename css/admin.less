@@ -1721,6 +1721,22 @@
 							margin: 0;
 							width: 200px;
 
+							@media (min-width: 1350px) and (max-width: 1425px) {
+								width: 180px
+							}
+
+							@media (min-width: 1276px) and (max-width: 1350px) {
+								width: 160px
+							}
+
+							@media (min-width: 1182px) and (max-width: 1276px) {
+								width: 135px
+							}
+
+							@media (min-width: 1126px) and (max-width: 1182px) {
+								width: 120px
+							}
+
 							&.so-active-ratio,
 							&:not(.so-active-ratio):hover {
 								cursor: pointer;
@@ -1753,7 +1769,7 @@
 						}
 					}
 
-					@media (max-width: 1024px) {
+					@media (max-width: 1125px) {
 						display: block;
 
 						&,
