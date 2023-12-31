@@ -45,6 +45,7 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_css_row_margin_bottom', array( $this, 'filter_row_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_row_mobile_margin_bottom', array( $this, 'filter_row_mobile_bottom_margin' ), 10, 2 );
 		add_filter( 'siteorigin_panels_css_cell_mobile_margin_bottom', array( $this, 'filter_row_cell_bottom_margin' ), 10, 5 );
+		add_filter( 'filter_widget_tablet_margin', array( $this, 'filter_widget_tablet_margin' ), 10, 5 );
 		add_filter( 'siteorigin_panels_css_widget_mobile_margin', array( $this, 'filter_widget_mobile_margin' ), 10, 5 );
 
 		add_filter( 'siteorigin_panels_css_row_gutter', array( $this, 'filter_row_gutter' ), 10, 2 );
@@ -168,7 +169,6 @@ class SiteOrigin_Panels_Styles {
 			'name'        => __( 'Padding', 'siteorigin-panels' ),
 			'type'        => 'measurement',
 			'group'       => 'layout',
-			'description' => sprintf( __( 'Padding around the entire %s.', 'siteorigin-panels' ), strtolower( $label ) ),
 			'priority'    => 7,
 			'multiple'    => true,
 		);
@@ -183,6 +183,17 @@ class SiteOrigin_Panels_Styles {
 				'priority'    => 8,
 				'multiple'    => true,
 			);
+
+			if ( $label == 'Widget' ) {
+				$fields['tablet_margin'] = array(
+					'name'        => __( 'Tablet Margin', 'siteorigin-panels' ),
+					'type'        => 'measurement',
+					'group'       => 'tablet_layout',
+					'description' => __( 'Margins around the widget when on tablet devices.', 'siteorigin-panels' ),
+					'priority'    => 7,
+					'multiple'    => true,
+				);
+			}
 		}
 
 		// Mobile layout fields.
@@ -421,10 +432,9 @@ class SiteOrigin_Panels_Styles {
 			'type'     => 'select',
 			'group'    => 'layout',
 			'options'  => array(
-				''               => __( 'Standard', 'siteorigin-panels' ),
-				'full'           => __( 'Full Width', 'siteorigin-panels' ),
-				'full-stretched' => __( 'Full Width Stretched', 'siteorigin-panels' ),
-				'full-stretched-padded' => __( 'Full Width Stretched With Padding Support', 'siteorigin-panels' ),
+				''             => __( 'Standard', 'siteorigin-panels' ),
+				'full'         => __( 'Full Width', 'siteorigin-panels' ),
+				'full-width-stretch' => __( 'Full Width Stretched', 'siteorigin-panels' ),
 			),
 			'priority' => 10,
 		);
@@ -862,6 +872,26 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	/**
+	 * Clears the left and right padding for (legacy) full width stretched rows.
+	 *
+	 *
+	 * @param array $style The style array.
+	 * @param string $field The field to modify.
+	 */
+	public static function full_width_stretched_legacy_padding( & $style, $field ) {
+		if (
+			! empty( $style['row_stretch'] ) &&
+			$style['row_stretch'] == 'full-stretched' &&
+			! empty( $style[ $field ] )
+		) {
+			$padding = explode( ' ', $style[ $field ] );
+			$unit = preg_replace( '/[0-9]+/', '', $padding[0] );
+			$padding[1] = $padding[3] = "0$unit";
+			$style[ $field ] = implode( ' ', $padding );
+		}
+	}
+
+	/**
 	 * Get the CSS styles that apply to all rows, cells and widgets.
 	 *
 	 * @return mixed
@@ -878,6 +908,7 @@ class SiteOrigin_Panels_Styles {
 		}
 
 		if ( ! empty( $style['padding'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'padding' );
 			$css['padding'] = $style['padding'];
 		}
 
@@ -927,6 +958,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_tablet_css( $css, $style ) {
 		if ( ! empty( $style['tablet_padding'] ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'tablet_padding' );
 			$css['padding'] = $style['tablet_padding'] . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' );
 		}
 
@@ -948,6 +980,7 @@ class SiteOrigin_Panels_Styles {
 	 */
 	public static function general_style_mobile_css( $css, $style ) {
 		if ( ! empty( $style['mobile_padding'] ) ) {
+			self::full_width_stretched_legacy_padding( $style, 'mobile_padding' );
 			$css['padding'] = $style['mobile_padding'] . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' );
 		}
 
@@ -1277,6 +1310,14 @@ class SiteOrigin_Panels_Styles {
 		return $margin;
 	}
 
+	public static function filter_widget_tablet_margin( $margin, $widget, $wi, $panels_data, $post_id ) {
+		if ( ! empty( $widget['style']['tablet_margin'] ) ) {
+			$margin = $widget['style']['tablet_margin'];
+		}
+
+		return $margin;
+	}
+
 	public static function filter_widget_mobile_margin( $margin, $widget, $wi, $panels_data, $post_id ) {
 		if ( ! empty( $widget['style']['mobile_margin'] ) ) {
 			$margin = $widget['style']['mobile_margin'];
@@ -1293,6 +1334,10 @@ class SiteOrigin_Panels_Styles {
 	public static function filter_row_mobile_bottom_margin( $margin, $grid ) {
 		if ( ! empty( $grid['style']['mobile_bottom_margin'] ) ) {
 			$margin = $grid['style']['mobile_bottom_margin'];
+
+			if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+				$margin .= ' !important';
+			}
 		}
 
 		return $margin;

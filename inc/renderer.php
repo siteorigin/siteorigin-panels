@@ -120,6 +120,7 @@ class SiteOrigin_Panels_Renderer {
 				! empty( $row['style']['row_stretch'] ) &&
 				 (
 				 	$row['style']['row_stretch'] == 'full' ||
+				 	$row['style']['row_stretch'] == 'full-width-stretch' ||
 				 	$row['style']['row_stretch'] == 'full-stretched' ||
 				 	$row['style']['row_stretch'] == 'full-stretched-padded'
 				 )
@@ -177,6 +178,30 @@ class SiteOrigin_Panels_Renderer {
 						1920,
 						true
 					);
+
+					$panels_tablet_widget_tablet_margin = apply_filters(
+						'siteorigin_panels_css_tablet_mobile_margin',
+						! empty( $widget['panels_info']['style']['tablet_margin'] ) ? $widget['panels_info']['style']['tablet_margin'] : false,
+						$widget,
+						$wi,
+						$panels_data,
+						$post_id
+					);
+
+					if ( ! empty( $panels_tablet_widget_tablet_margin ) ) {
+						$css->add_widget_css(
+							$post_id,
+							$ri,
+							$ci,
+							$wi,
+							'',
+							array(
+								'margin' => $panels_tablet_widget_tablet_margin . ( siteorigin_panels_setting( 'inline-styles' ) ? ' !important' : '' ),
+							),
+							$panels_tablet_width . ':' . ( $panels_mobile_width + 1 ),
+							true
+						);
+					}
 
 					$panels_mobile_widget_mobile_margin = apply_filters(
 						'siteorigin_panels_css_widget_mobile_margin',
@@ -328,8 +353,13 @@ class SiteOrigin_Panels_Renderer {
 					$panels_tablet_width > $collapse_point &&
 					! empty( $row['style']['tablet_bottom_margin'] )
 				) {
+					$tablet_bottom_margin = $row['style']['tablet_bottom_margin'];
+					if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+						$tablet_bottom_margin .= ' !important';
+					}
+
 					$css->add_row_css( $post_id, $ri, '', array(
-						'margin-bottom' => $row['style']['tablet_bottom_margin'],
+						'margin-bottom' => $tablet_bottom_margin,
 					), "$panels_tablet_width:$collapse_point" );
 				}
 
@@ -581,6 +611,7 @@ class SiteOrigin_Panels_Renderer {
 		// Check if Page Builder is set to output certain styles inline and if it is, do so.
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
 			if ( ! empty( $style['padding'] ) ) {
+				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'padding' );
 				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
 			}
 

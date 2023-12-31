@@ -230,6 +230,10 @@ class SiteOrigin_Panels {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/gravity-forms.php';
 		}
 
+		if ( class_exists( 'YIKES_Custom_Product_Tabs' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'compat/yikes.php';
+		}
+
 		$load_lazy_load_compat = false;
 		// LazyLoad by WP Rocket.
 		if ( defined( 'ROCKET_LL_VERSION' ) ) {
@@ -254,6 +258,10 @@ class SiteOrigin_Panels {
 
 		if ( defined( 'SEOPRESS_VERSION' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/seopress.php';
+		}
+
+		if ( class_exists( 'WP_Event_Manager' ) ) {
+			add_filter( 'display_event_description', array( $this, 'generate_post_content' ), 11 );
 		}
 	}
 

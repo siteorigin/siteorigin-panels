@@ -338,9 +338,19 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 				<div class="cell-resize-container">
 					<span class="cell-resize-label">
-						<?php echo __( 'Resize Columns: ', 'siteorigin-panels' ); ?>
+						<?php echo __( 'Column Presets: ', 'siteorigin-panels' ); ?>
 					</span>
 					<div class="cell-resize" data-resize="<?php echo esc_js( json_encode( $column_sizes ) ); ?>"></div>
+				</div>
+				<div class="cell-resize-direction-container">
+					<?php echo __( 'Direction:', 'siteorigin-panels' ); ?>
+
+					<span
+						class="cell-resize-direction dashicons dashicons-arrow-left"
+						data-direction="left"
+						tabindex="0"
+						aria-label="<?php echo esc_attr( 'Change column direction to the left', 'siteorigin-panels' ); ?>"
+					></span>
 				</div>
 			</div>
 
@@ -385,7 +395,10 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 <script type="text/template" id="siteorigin-panels-dialog-row-cell-preview">
 	<div class="preview-cell" style="width: {{%- weight*100 %}}%">
 		<div class="preview-cell-in">
-			<div class="preview-cell-weight" tabIndex="0">{{% print(Math.round(weight * 1000) / 10) %}}</div>
+			<div class="preview-cell-container">
+				<span class="preview-cell-unit">%</span>
+				<div class="preview-cell-weight" tabIndex="0">{{% print( Math.round( weight * 1000 ) / 10 ) %}}</div>
+			</div>
 		</div>
 	</div>
 </script>

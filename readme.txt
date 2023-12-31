@@ -121,6 +121,13 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.0 - 31 December 2023 =
+* Layout Block: Defaulted the Layout Block to edit mode when no content is present.
+* Row Layout: Merged `Full Width Stretched` & `With Padding Support` settings.
+* Renamed Resize Columns to Column Presets and improved responsive behavior.
+* Added a Column Presets `Direction` button. Enhances the Column Presets feature by offering an efficient way to reverse the order of columns in a preset layout.
+* Improved cell size field accessibility.
+
 = 2.28.0 - 12 November 2023 =
 * Column Preset Sizes: Added `Golden Ratio` for two columns.
 * Rounded column sizes to two decimal places to prevent display issues.
