@@ -881,7 +881,8 @@ class SiteOrigin_Panels_Styles {
 	public static function full_width_stretched_legacy_padding( & $style, $field ) {
 		if (
 			! empty( $style['row_stretch'] ) &&
-			$style['row_stretch'] == 'full-stretched'
+			$style['row_stretch'] == 'full-stretched' &&
+			! empty( $style[ $field ] )
 		) {
 			$padding = explode( ' ', $style[ $field ] );
 			$unit = preg_replace( '/[0-9]+/', '', $padding[0] );
