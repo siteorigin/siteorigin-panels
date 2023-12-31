@@ -625,6 +625,9 @@ module.exports = panels.view.dialog.extend({
 		var cellsCount = this.getCurrentCellCount();
 		var currentCellSizes = this.columnResizeData[ cellsCount ];
 
+		// Certain sizes may require some additional CSS spacing.
+		this.$( '.row-set-form' ).attr( 'data-cells', cellsCount );
+
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
