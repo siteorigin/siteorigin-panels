@@ -23,4 +23,6 @@ function siteorigin_panels_vantage_full_width_stretch( $data, $post_id ) {
 
 	return $data;
 }
-add_filter( 'siteorigin_panels_data', 'siteorigin_panels_vantage_full_width_stretch', 9, 2 );
+if ( ! is_admin() ) {
+	add_filter( 'siteorigin_panels_data', 'siteorigin_panels_vantage_full_width_stretch', 9, 2 );
+}
