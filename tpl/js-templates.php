@@ -284,25 +284,21 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="buttons">
 			<div class="action-buttons">
-				<a class="so-delete" role="button" tabindex="0"><?php _e( 'Delete', 'siteorigin-panels' ); ?></a>
-				<a class="so-duplicate" role="button" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
+				<a class="so-delete" tabindex="0"><?php _e( 'Delete', 'siteorigin-panels' ); ?></a>
+				<a class="so-duplicate" tabindex="0"><?php _e( 'Duplicate', 'siteorigin-panels' ); ?></a>
 			</div>
 
 			<div class="save-buttons">
 				<input type="button" class="button-primary so-saveinline" style="display: none;" tabindex="0" value="<?php esc_attr_e( 'Save', 'siteorigin-panels' ); ?>" />
 				<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 
-				<span
-					class="button-secondary dashicons so-mode"
-					tabindex="0"
-					aria-label="<?php _e( 'Access Modes', 'siteorigin-panels' ); ?>"
-					role="button"
-				>
+				<span class="button-secondary dashicons so-mode" tabindex="0" aria-label="<?php _e( 'Access Modes', 'siteorigin-panels' ); ?> ">
 				</span>
 				<ul class="so-mode-list" style="display: none;">
-					<li class="so-saveinline-mode" tabindex="0" role="button">
+					<li class="so-saveinline-mode" tabindex="0" >
 						<?php _e( 'Save Now', 'siteorigin-panels' ); ?>
 					</li>
+					<li class="so-close-mode" tabindex="0" >
 						<?php _e( 'Save With Page Save', 'siteorigin-panels' ); ?>
 					</li>
 				</ul>
