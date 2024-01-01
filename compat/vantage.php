@@ -1,4 +1,12 @@
 <?php
+function siteorigin_panels_vantage_row_style_attributes( $attributes, $style ) {
+	if ( isset( $style['class'] ) && $style['class'] == 'wide-grey' && ! empty( $attributes['style'] ) ) {
+		$attributes['style'] = preg_replace( '/padding-left: 1000px; padding-right: 1000px;/', '', $attributes['style'] );
+	}
+
+	return $attributes;
+}
+add_filter( 'siteorigin_panels_row_style_attributes', 'siteorigin_panels_vantage_row_style_attributes', 10, 2 );
 
 // Ensure all full width stretched rows have padding.
 // This will prevent a situation where the content is squished.
