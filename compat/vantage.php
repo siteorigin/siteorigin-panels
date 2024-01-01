@@ -17,7 +17,7 @@ function siteorigin_panels_vantage_full_width_stretch( $data, $post_id ) {
 			$grid['style']['row_stretch'] == 'full-width-stretch' &&
 			empty( $grid['style']['padding'] )
 		) {
-			$data['grids'][ $grid_id ]['style']['padding'] = '0';
+			$data['grids'][ $grid_id ]['style']['padding'] = '0px 0px 0px 0px';
 		}
 	}
 
