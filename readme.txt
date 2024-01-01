@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.1 - 01 January 2023 =
+* Vantage Theme: Prevented a potential Full Width Stretched display issue when no padding is set.
+
 = 2.29.0 - 31 December 2023 =
 * Layout Block: Defaulted the Layout Block to edit mode when no content is present.
 * Row Layout: Merged `Full Width Stretched` & `With Padding Support` settings.
