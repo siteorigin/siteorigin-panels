@@ -80,9 +80,6 @@ class SiteOrigin_Panels {
 		// Remove the default excerpt function.
 		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 9 );
 
-		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
-		SiteOrigin_Panels_Cache_Renderer::single();
-
 		if ( function_exists( 'register_block_type' ) ) {
 			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
