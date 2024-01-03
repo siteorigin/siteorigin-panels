@@ -15,6 +15,11 @@ class SiteOrigin_Panels_Compatibility {
 	}
 
 	public function admin_init() {
+		// SEO analysis compatibility.
+		if ( defined( 'WPSEO_FILE' ) || defined( 'RANK_MATH_VERSION' ) ) {
+			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/seo.php';
+		}
+
 		// Compatibility with ACF.
 		if (
 			class_exists( 'ACF' ) &&
