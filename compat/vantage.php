@@ -18,7 +18,12 @@ function siteorigin_panels_vantage_full_width_stretch( $data, $post_id ) {
 	foreach( $data['grids'] as $grid_id => $grid ) {
 		if (
 			! empty( $grid['style']['row_stretch'] ) &&
-			$grid['style']['row_stretch'] == 'full-width-stretch' &&
+			(
+				$grid['style']['row_stretch'] == 'full-width-stretch' ||
+				// In the off chance the row data hasn't been migrated yet.
+				$grid['style']['row_stretch'] == 'full-stretched' ||
+				$grid['style']['row_stretch'] == 'full-stretched-padded'
+			) &&
 			empty( $grid['style']['padding'] )
 		) {
 			$data['grids'][ $grid_id ]['style']['padding'] = '0px 0px 0px 0px';
