@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.3 - 03 January 2023 =
+* Vantage Theme: Account for unmigrated legacy row layouts.
+* Toggle style field accessibility improvements.
+* Save mode accessibility improvements.
+* Live Editor Redirection: Resolve PHP 8 warning and deprecated notice.
+* Color Field: Minor border color adjustment.
+* Removed legacy content cache cleanup.
+
 = 2.29.2 - 03 January 2023 =
 * Vantage Theme: Prevented a type error if empty rows are present.
 
