@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.2 - 03 January 2023 =
+* Vantage Theme: Prevented a type error if empty rows are present.
+
 = 2.29.1 - 01 January 2023 =
 * Vantage Theme: Prevented a potential Full Width Stretched display issue when no padding is set.
 
