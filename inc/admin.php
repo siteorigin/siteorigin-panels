@@ -294,6 +294,7 @@ class SiteOrigin_Panels_Admin {
 		// If this is a Live Editor Quick Edit, setup redirection.
 		if (
 			siteorigin_panels_setting( 'live-editor-quick-link-close-after' ) &&
+			! empty( $_POST['_wp_http_referer'] ) &&
 			strpos( $_POST['_wp_http_referer'], 'so_live_editor' ) !== false
 		) {
 			add_filter( 'redirect_post_location', array( $this, 'live_editor_redirect_after' ), 10, 2 );
