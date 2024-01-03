@@ -341,15 +341,38 @@ module.exports = Backbone.View.extend( {
 
 		// Set up all the toggle fields
 		this.$( '.style-field-toggle' ).each( function () {
-			var $$ = $( this );
-			var checkbox = $$.find( '.so-toggle-switch-input' );
-			var settings = $$.find( '.so-toggle-fields' );
+			const $$ = $( this );
+			const checkbox = $$.find( '.so-toggle-switch-input' );
+			const label = checkbox.next();
+			const settings = $$.find( '.so-toggle-fields' );
+
+			const changeLabel = function() {
+				if ( checkbox.prop( 'checked' ) ) {
+					label.attr( 'aria-checked', 'true' )
+					.attr( 'aria-label', label.data( 'on' ) );
+				} else {
+					label.attr( 'aria-checked', 'false' )
+					.attr( 'aria-label', label.data( 'off' ) );
+				}
+			};
+
+			changeLabel();
 
 			checkbox.on( 'change', function() {
 				if ( $( this ).prop( 'checked' ) ) {
 					settings.slideDown();
 				} else {
 					settings.slideUp();
+				}
+
+				changeLabel();
+			} );
+
+			label.on( 'keyup', function( e ) {
+				if ( e.key == 'Enter' ) {
+					const isChecked = checkbox.prop( 'checked' );
+					checkbox.prop( 'checked', ! isChecked )
+						.trigger( 'change' );
 				}
 			} );
 		} );

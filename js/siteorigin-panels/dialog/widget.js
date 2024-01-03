@@ -19,6 +19,9 @@ module.exports = panels.view.dialog.extend( {
 			this.saveHandler( true );
 		},
 		'click .so-mode': 'switchModeShow',
+		'keyup .so-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-saveinline-mode': function() {
 			this.switchMode( true );
 		},
@@ -348,31 +351,38 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	switchModeShow: function() {
-		this.$( '.so-toolbar .so-mode-list' ).show();
-		this.$( '.so-toolbar .button-primary:visible' ).addClass( 'so-active-mode' );
-		this.$( '.so-toolbar .button-primary' ).hide();
+		const list = this.$( '.so-toolbar .so-mode-list' );
+		const toolbar = this.$( '.so-toolbar' );
+		list.show();
+		list.find( 'li:first-of-type' ).trigger( 'focus' );
+		toolbar.find( '.button-primary:visible' ).addClass( 'so-active-mode' );
+		toolbar.find( '.button-primary' ).hide();
+
 		setTimeout( function() {
 			$( document ).one( 'click', function( e ) {
-				var $$ = jQuery( e.target );
+				var $$ = $( e.target );
 
 				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
-					$( '.so-mode-list' ).hide();
-					$( '.so-toolbar .so-active-mode' ).show()
+					list.hide();
+					toolbar.find( '.so-active-mode' ).show()
 				}
 			} );
 		}, 100 );
 	},
 
 	switchMode: function( inline = false ) {
-		this.$( '.so-toolbar .so-mode-list' ).hide();
-		this.$( '.so-toolbar .button-primary' ).removeClass( 'so-active-mode' );
+		const toolbar = this.$( '.so-toolbar' );
+		toolbar.find( '.so-mode-list' ).hide();
+		toolbar.find( '.button-primary' ).removeClass( 'so-active-mode' );
 		if ( inline ) {
-			this.$( '.so-toolbar .so-saveinline' ).show();
+			toolbar.find( '.so-saveinline' ).show();
 		} else {
-			this.$( '.so-toolbar .so-close' ).show();
+			toolbar.find( '.so-close' ).show();
 		}
 
 		window.panelsMode = inline ? 'inline' : 'dialog';
+
+		this.$( '.so-mode' ).trigger( 'focus' );
 	},
 
 } );
