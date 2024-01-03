@@ -31,7 +31,6 @@ class SiteOrigin_Panels {
 
 		add_action( 'plugins_loaded', array( $this, 'version_check' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
-		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_general_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_general_scripts' ) );
@@ -85,6 +84,8 @@ class SiteOrigin_Panels {
 		}
 
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
+
+		SiteOrigin_Panels_Compatibility::single();
 	}
 
 	public static function single() {
@@ -192,77 +193,6 @@ class SiteOrigin_Panels {
 		// Check if we need to initialize the admin class.
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
-		}
-	}
-
-	/**
-	 * Loads Page Builder compatibility to allow other plugins/themes
-	 */
-	public function init_compat() {
-		// Compatibility with Widget Options plugin.
-		if ( class_exists( 'WP_Widget_Options' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
-		}
-
-		// Compatibility with Yoast plugins.
-		if (
-			defined( 'WPSEO_FILE' ) ||
-			function_exists( 'yoast_wpseo_video_seo_init' )
-		) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
-		}
-
-		// Compatibility with Rank Math.
-		if ( class_exists( 'RankMath' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/rank-math.php';
-		}
-
-		// Compatibility with AMP plugin.
-		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
-		}
-
-		// Compatibility with Gravity Forms.
-		if ( class_exists( 'GFCommon' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/gravity-forms.php';
-		}
-
-		if ( class_exists( 'YIKES_Custom_Product_Tabs' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/yikes.php';
-		}
-
-		$load_lazy_load_compat = false;
-		// LazyLoad by WP Rocket.
-		if ( defined( 'ROCKET_LL_VERSION' ) ) {
-			$lazy_load_settings = get_option( 'rocket_lazyload_options' );
-			$load_lazy_load_compat = ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
-		// WP Rocket.
-		} elseif ( function_exists( 'get_rocket_option' ) && ! defined( 'DONOTROCKETOPTIMIZE' ) ) {
-			$load_lazy_load_compat = get_rocket_option( 'lazyload' ) && apply_filters( 'do_rocket_lazyload', true );
-		}
-
-		if ( apply_filters( 'siteorigin_lazyload_compat', $load_lazy_load_compat ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
-		}
-
-		if ( class_exists( 'Jetpack' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
-		}
-
-		if ( class_exists( 'Polylang' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/polylang.php';
-		}
-
-		if ( defined( 'SEOPRESS_VERSION' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/seopress.php';
-		}
-
-		if ( class_exists( 'WP_Event_Manager' ) ) {
-			add_filter( 'display_event_description', array( $this, 'generate_post_content' ), 11 );
-		}
-
-		if ( get_template() == 'vantage' ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/vantage.php';
 		}
 	}
 

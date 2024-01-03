@@ -75,13 +75,6 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
 		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
 
-		if (
-			class_exists( 'ACF' ) &&
-			version_compare( get_option( 'acf_version' ), '5.7.10', '>=' )
-		) {
-			SiteOrigin_Panels_Compat_ACF_Widgets::single();
-		}
-
 		// Block editor specific actions.
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -93,7 +86,6 @@ class SiteOrigin_Panels_Admin {
 				add_filter( 'display_post_states', array( $this, 'add_panels_post_state' ), 10, 2 );
 			}
 		}
-
 
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
