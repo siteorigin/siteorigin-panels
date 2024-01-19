@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.4 - 19 January 2023 =
+* Added compatibility with Pagelayer Templates. The panels filter is selectively enabled or disabled based on template usage.
+* Prevented the row overlay from covering widget contents by adjusting CSS rules in `front-flex.less`.
+* Developer: Added `siteorigin_panels_data` filter. Allows for the filtering of `$panels_data` when `generate_css` is run.
+
 = 2.29.3 - 03 January 2023 =
 * Vantage Theme: Account for unmigrated legacy row layouts.
 * Toggle style field accessibility improvements.
