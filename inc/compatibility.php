@@ -102,5 +102,10 @@ class SiteOrigin_Panels_Compatibility {
 		if ( get_template() == 'vantage' ) {
 			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/vantage.php';
 		}
+
+		// Compatibility with Pagelayer.
+		if ( defined( 'PAGELAYER_VERSION' ) ) {
+			SiteOrigin_Panels_Compat_Pagelayer::single();
+		}
 	}
 }
