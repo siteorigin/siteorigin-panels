@@ -8,7 +8,7 @@ Author: SiteOrigin
 Author URI: https://siteorigin.com
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
-Donate link: http://siteorigin.com/page-builder/#donate
+Donate link: https://siteorigin.com/downloads/premium/
 */
 
 define( 'SITEORIGIN_PANELS_VERSION', 'dev' );
@@ -193,6 +193,15 @@ class SiteOrigin_Panels {
 		// Check if we need to initialize the admin class.
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();
+		}
+	}
+
+	/**
+	 * Loads Page Builder compatibility to allow other plugins/themes
+	 */
+	public function init_compat() {
+		if ( defined( 'PAGELAYER_VERSION' ) ) {
+			SiteOrigin_Panels_Compat_Pagelayer::single();
 		}
 	}
 

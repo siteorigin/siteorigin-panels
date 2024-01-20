@@ -60,8 +60,14 @@
 	z-index: 1;
 }
 
-.panel-has-overlay.so-panel .panel-background-overlay {
-	z-index: -1;
+.panel-has-overlay.so-panel {
+	.panel-widget-style > * {
+		position: relative;
+	}
+
+	.panel-background-overlay {
+		position: absolute;
+	}
 }
 
 .panel-layout.panel-is-rtl {
