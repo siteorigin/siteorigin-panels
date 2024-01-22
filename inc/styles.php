@@ -71,6 +71,7 @@ class SiteOrigin_Panels_Styles {
 					! empty( $context['style']['background_image_attachment'] ) ||
 					! empty( $context['style']['background_image_attachment_fallback'] )
 				) &&
+				! empty( $context['style']['background_display'] ) &&
 				! self::is_background_parallax( $context['style']['background_display'] ) &&
 				(
 					isset( $context['style']['background_image_opacity'] ) &&
