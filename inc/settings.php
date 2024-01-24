@@ -533,7 +533,6 @@ class SiteOrigin_Panels_Settings {
 				'footer' => __( 'Footer', 'siteorigin-panels' ),
 			),
 			'label'       => __( 'Page Builder Layout CSS Output Location', 'siteorigin-panels' ),
-			'description' => __( 'This setting is only applicable in the Classic Editor.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['inline-styles'] = array(

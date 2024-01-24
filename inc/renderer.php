@@ -31,9 +31,7 @@ class SiteOrigin_Panels_Renderer {
 				$css_output_set = true;
 			}
 
-			// The CSS can only be output in the header if the page is powered by the Classic Editor.
-			// $post_id won't be a number if the current page is powered by the Block Editor.
-			if ( ! $css_output_set && $output_css == 'header' && is_numeric( $post_id ) ) {
+			if ( ! $css_output_set && $output_css == 'header' ) {
 				add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
 				$css_output_set = true;
 			}
