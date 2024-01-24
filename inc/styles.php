@@ -639,6 +639,10 @@ class SiteOrigin_Panels_Styles {
 			}
 		}
 
+		if ( ! empty( $style['border_radius'] ) ) {
+			$attributes['class'][] = 'so-rounded';
+		}
+
 		if ( ! empty( $style['id'] ) ) {
 			$attributes['id'] = sanitize_html_class( $style['id'] );
 		}
