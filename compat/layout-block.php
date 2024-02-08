@@ -22,6 +22,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 		// We need to override the container when using the Block Editor to allow for resizing.
 		add_filter( 'siteorigin_panels_full_width_container', array( $this, 'override_container' ) );
+
+		add_action( 'wp_head', array( $this, 'maybe_generate_layout_block_css' ) );
 	}
 
 	public function register_layout_block() {
@@ -129,5 +131,71 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 	public function override_container( $container ) {
 		return SiteOrigin_Panels_Admin::is_block_editor() ? '.editor-styles-wrapper' : $container;
+	}
+
+	// If the CSS Output Location is set to Header, we need to generate the CSS early to allow for it to work as expected.
+	public function maybe_generate_layout_block_css() {
+		if ( SiteOrigin_Panels_Admin::is_block_editor() ) {
+			return;
+		}
+
+		$content = get_post_field( 'post_content', get_the_ID() );
+		if ( empty( $content ) ) {
+			return;
+		}
+
+		if ( siteorigin_panels_setting( 'output-css-header' ) != 'header' ) {
+			return;
+		}
+
+		// Okay! We're good to look for Layout Blocks.
+		$blocks = parse_blocks( $content );
+		if ( empty( $blocks ) ) {
+			return;
+		}
+
+		$blocks = array_filter( $blocks, array( $this, 'find_layout_block' ) );
+		if ( empty( $blocks ) ) {
+			return;
+		}
+
+		// Found them. Let's generate the CSS.
+		foreach ( $blocks as $block ) {
+			if (
+				empty( $block['attrs'] ) ||
+				empty( $block['attrs']['panelsData'] )
+			) {
+				continue;
+			}
+
+			$panels_data = $block['attrs']['panelsData'];
+			if ( empty( $panels_data ) ) {
+				continue;
+			}
+
+			$panels_data = $this->sanitize_panels_data( $panels_data );
+			$builder_id = isset( $block['attrs']['builder_id'] ) ? $block['attrs']['builder_id'] : 'gb' . get_the_ID() . '-' . md5( serialize( $panels_data ) ) . '-';
+
+			SiteOrigin_Panels::renderer()->render(
+				$builder_id,
+				true,
+				$panels_data
+			);
+		}
+	}
+
+	public function find_layout_block( $block ) {
+		$found_blocks = array();
+
+		if ( ! empty( $block['blockName'] ) && $block['blockName'] === 'siteorigin-panels/layout-block' ) {
+			$found_blocks[] = $block;
+		}
+
+		foreach( $block['innerBlocks'] as $inner ) {
+			$inner_blocks = $this->find_layout_block( $inner );
+			$found_blocks = array_merge( $found_blocks, $inner_blocks );
+		}
+
+		return $found_blocks;
 	}
 }
