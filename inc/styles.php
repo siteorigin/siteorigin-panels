@@ -71,6 +71,7 @@ class SiteOrigin_Panels_Styles {
 					! empty( $context['style']['background_image_attachment'] ) ||
 					! empty( $context['style']['background_image_attachment_fallback'] )
 				) &&
+				! empty( $context['style']['background_display'] ) &&
 				! self::is_background_parallax( $context['style']['background_display'] ) &&
 				(
 					isset( $context['style']['background_image_opacity'] ) &&
@@ -461,7 +462,7 @@ class SiteOrigin_Panels_Styles {
 			'priority' => 16,
 		);
 
-		if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always'  ) {
+		if ( siteorigin_panels_setting( 'legacy-layout' ) != 'always' ) {
 			$fields['cell_alignment'] = array(
 				'name'     => __( 'Column Vertical Alignment', 'siteorigin-panels' ),
 				'type'     => 'select',
@@ -639,6 +640,10 @@ class SiteOrigin_Panels_Styles {
 			}
 		}
 
+		if ( ! empty( $style['border_radius'] ) ) {
+			$attributes['class'][] = 'so-rounded';
+		}
+
 		if ( ! empty( $style['id'] ) ) {
 			$attributes['id'] = sanitize_html_class( $style['id'] );
 		}
@@ -650,13 +655,18 @@ class SiteOrigin_Panels_Styles {
 		if ( self::has_overlay( $context ) ) {
 			$styles = self::generate_background_style( $context['style'] );
 
-			// Is Background Opacity set?
-			if (
-				! empty( $styles ) &&
-				! empty( $context['style']['background_image_opacity'] ) &&
-				$context['style']['background_image_opacity'] != 100
-			) {
-				$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
+			// Add supported styles as needed.
+			if ( ! empty( $styles ) ) {
+				if (
+					! empty( $context['style']['background_image_opacity'] ) &&
+					$context['style']['background_image_opacity'] != 100
+				) {
+					$styles['opacity'] = '0.' . (int) $context['style']['background_image_opacity'];
+				}
+
+				if ( ! empty( $context['style']['border_radius'] ) ) {
+					$styles['border-radius'] = $context['style']['border_radius'];
+				}
 			}
 
 			$custom_overlay = apply_filters( 'siteorigin_panels_overlay', false, $context );

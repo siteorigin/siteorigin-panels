@@ -121,12 +121,19 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
-= 2.29.4 - 19 January 2023 =
+= 2.29.5 - 16 February 2024 =
+* Media Style: Adjust border color to match other fields.
+* Background Overlay: Added `border-radius` support.
+* Border Radius: Added a context class for additional styling.
+* CSS Output Location: Added Block Editor support.
+* Inline CSS Styles: Update to apply widget margin directly to the widget.
+
+= 2.29.4 - 19 January 2024 =
 * Added compatibility with Pagelayer Templates. The panels filter is selectively enabled or disabled based on template usage.
 * Prevented the row overlay from covering widget contents by adjusting CSS rules in `front-flex.less`.
 * Developer: Added `siteorigin_panels_data` filter. Allows for the filtering of `$panels_data` when `generate_css` is run.
 
-= 2.29.3 - 03 January 2023 =
+= 2.29.3 - 03 January 2024 =
 * Vantage Theme: Account for unmigrated legacy row layouts.
 * Toggle style field accessibility improvements.
 * Save mode accessibility improvements.
@@ -134,10 +141,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 * Color Field: Minor border color adjustment.
 * Removed legacy content cache cleanup.
 
-= 2.29.2 - 03 January 2023 =
+= 2.29.2 - 03 January 2024 =
 * Vantage Theme: Prevented a type error if empty rows are present.
 
-= 2.29.1 - 01 January 2023 =
+= 2.29.1 - 01 January 2024 =
 * Vantage Theme: Prevented a potential Full Width Stretched display issue when no padding is set.
 
 = 2.29.0 - 31 December 2023 =
