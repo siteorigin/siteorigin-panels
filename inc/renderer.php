@@ -31,7 +31,9 @@ class SiteOrigin_Panels_Renderer {
 				$css_output_set = true;
 			}
 
-			if ( ! $css_output_set && $output_css == 'header' ) {
+			// The CSS can only be output in the header if the page is powered by the Classic Editor.
+			// $post_id won't be a number if the current page is powered by the Block Editor.
+			if ( ! $css_output_set && $output_css == 'header' && is_numeric( $post_id ) ) {
 				add_action( 'wp_head', array( $this, 'print_inline_css' ), 12 );
 				$css_output_set = true;
 			}
@@ -613,7 +615,7 @@ class SiteOrigin_Panels_Renderer {
 				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
 			}
 
-			if ( ! empty( $style['margin'] ) ) {
+			if ( $name !== 'widget' && ! empty( $style['margin'] ) ) {
 				$attributes['style'] .= 'margin: ' . $style['margin'] . ';';
 			}
 
@@ -771,18 +773,24 @@ class SiteOrigin_Panels_Renderer {
 			'data-index' => $widget_info['widget_index'],
 		);
 
-		if ( siteorigin_panels_setting( 'inline-styles' ) && ! $is_last ) {
-			$widget_bottom_margin = apply_filters(
-				'siteorigin_panels_css_cell_margin_bottom',
-				( empty( $widget_info['style']['margin'] ) ? siteorigin_panels_setting( 'margin-bottom' ) : 0 ) . 'px',
-				false,
-				false,
-				array(),
-				$post_id
-			);
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			if ( ! empty( $widget_info['style']['margin'] ) ) {
+				$attributes['style'] = 'margin: ' . $widget_info['style']['margin'];
+			}
 
-			if ( ! empty( $widget_bottom_margin ) ) {
-				$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
+			if ( ! $is_last ) {
+				$widget_bottom_margin = apply_filters(
+					'siteorigin_panels_css_cell_margin_bottom',
+					( empty( $widget_info['style']['margin'] ) ? siteorigin_panels_setting( 'margin-bottom' ) : 0 ) . 'px',
+					false,
+					false,
+					array(),
+					$post_id
+				);
+
+				if ( ! empty( $widget_bottom_margin ) ) {
+					$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
+				}
 			}
 		}
 
