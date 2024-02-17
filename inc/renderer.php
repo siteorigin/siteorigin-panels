@@ -774,8 +774,9 @@ class SiteOrigin_Panels_Renderer {
 		);
 
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			$attributes['style'] = '';
 			if ( ! empty( $widget_info['style']['margin'] ) ) {
-				$attributes['style'] = 'margin: ' . $widget_info['style']['margin'];
+				$attributes['style'] .= 'margin: ' . $widget_info['style']['margin'] . ';';
 			}
 
 			if ( ! $is_last ) {
@@ -789,8 +790,12 @@ class SiteOrigin_Panels_Renderer {
 				);
 
 				if ( ! empty( $widget_bottom_margin ) ) {
-					$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
+					$attributes['style'] .= 'margin-bottom: ' . $widget_bottom_margin;
 				}
+			}
+
+			if ( empty( $attributes['style'] ) ) {
+				unset( $attributes['style'] );
 			}
 		}
 
