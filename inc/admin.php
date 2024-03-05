@@ -94,9 +94,12 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
+
+		// Classic editor notice.
+		add_filter( 'so_panels_show_classic_admin_notice', array( $this, 'maybe_hide_admin_notice' ), 9 );
+		add_action( 'wp_ajax_so_panels_dismiss_post_notice', array( $this, 'dismiss_admin_post_notice' ) );
 	}
 
 	/**
@@ -1672,10 +1675,50 @@ class SiteOrigin_Panels_Admin {
 				__( "This post type is set to use the Classic Editor by default for new posts. If you'd like to change this to the Block Editor, please go to <a href='%s' class='components-notice__action is-link'>Page Builder Settings</a> and disable <strong>Use Classic Editor for New Posts</strong>." ),
 				$settings_url
 			);
+
+			$dismiss_url = wp_nonce_url(
+					add_query_arg( array(
+					'action' => 'so_panels_dismiss_post_notice',
+				), admin_url( 'admin-ajax.php' ) ),
+				'so_panels_dismiss_post_notice'
+			);
 			?>
-			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info"><p id="use-classic-notice"><?php echo $notice; ?></p></div>
+			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info">
+				<p id="use-classic-notice">
+					<?php echo wp_kses_post( $notice ); ?>
+
+					<button
+						type="button"
+						class="siteorigin-notice-dismiss"
+						data-url="<?php echo esc_url( $dismiss_url ); ?>"
+					>
+						<span class="dashicons dashicons-dismiss" aria-hidden="true"></span>
+						<span class="screen-reader-text">
+							<?php esc_html_e( 'Dismiss Notice', 'siteorigin-panels' ); ?>
+						</span>
+					</button>
+				</p>
+			</div>
 			<?php
+			wp_enqueue_script(
+				'so-panels-admin-notice',
+				siteorigin_panels_url( 'js/admin-notice' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION,
+				true
+			);
 		}
+	}
+
+	public function maybe_hide_admin_notice( $status ) {
+		$user_status = get_user_meta( get_current_user_id(), 'so_panels_hide_post_notice', true );
+		return $user_status ? false : $status;
+	}
+
+	public function dismiss_admin_post_notice() {
+		check_ajax_referer( 'so_panels_dismiss_post_notice' );
+		add_user_meta( get_current_user_id(), 'so_panels_hide_post_notice', true, true );
+		die();
 	}
 
 	/**
