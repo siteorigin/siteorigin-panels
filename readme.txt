@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.6 - 05 March 2024 =
+* Added a dismiss button to the Classic Editor notice in the admin panel.
+* Improved saving functionality of the Layouts Block with server-side validation for post types, enhanced rendering, block sanitization methods, and improved functionality for locating layout blocks.
+* Ensured that errors are not processed and returned as part of the layout in the Layouts Block.
+
 = 2.29.5 - 16 February 2024 =
 * Media Style: Adjust border color to match other fields.
 * Background Overlay: Added `border-radius` support.
