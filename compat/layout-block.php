@@ -24,6 +24,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		add_filter( 'siteorigin_panels_full_width_container', array( $this, 'override_container' ) );
 
 		add_action( 'wp_head', array( $this, 'maybe_generate_layout_block_css' ) );
+
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		if ( empty( $post_types ) ) {
+			$post_types = array( 'post', 'page' );
+		}
+		foreach ( $post_types as $post_type ) {
+			add_action( 'rest_pre_insert_' . $post_type, array( $this, 'server_side_validation' ), 10, 2 );
+		}
 	}
 
 	public function register_layout_block() {
@@ -47,7 +55,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				'siteorigin-panels-layout-block',
 				plugins_url( 'js/siteorigin-panels-layout-block' . SITEORIGIN_PANELS_JS_SUFFIX . '.js', __FILE__ ),
 				array(
-					// The WP 5.8 Widget Area requires a speciic editor script to be used.
+					// The WP 5.8 Widget Area requires a specific editor script to be used.
 					$current_screen->base == 'widgets' ? 'wp-edit-widgets' : 'wp-editor',
 					'wp-blocks',
 					'wp-i18n',
@@ -95,11 +103,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 	}
 
-	public function render_layout_block( $attributes ) {
+	public function render_layout_block( $attributes, $return_layout = true ) {
 		if ( empty( $attributes['panelsData'] ) ) {
 			return '<div>' .
-				   __( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
-				   '</div>';
+			__( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
+			'</div>';
 		}
 		$panels_data = $attributes['panelsData'];
 		$panels_data = $this->sanitize_panels_data( $panels_data );
@@ -114,15 +122,25 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $class_names;
 		};
 		add_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
+		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
-		return $rendered_layout;
+		if ( $return_layout || is_wp_error( $rendered_layout ) ) {
+			return $rendered_layout;
+		}
+
+		$attributes['panelsData'] = $panels_data;
+		$attributes['renderedLayout'] = $rendered_layout;
+		$attributes['contentPreview'] = wp_json_encode( $rendered_layout );
+
+		return $attributes;
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
-		// We force calling widgets' update functions here, but a better solution is to ensure these are called when
-		// the block is saved, but there is currently no simple method to do so.
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
@@ -184,6 +202,63 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 	}
 
+	public function server_side_validation( $prepared_post, $request ) {
+		if ( empty( $prepared_post->post_content ) ) {
+			return $prepared_post;
+		}
+
+		$blocks = parse_blocks( $prepared_post->post_content );
+		if ( empty( $blocks ) ) {
+			return $prepared_post;
+		}
+
+		foreach( $blocks as &$block ) {
+			$block = $this->sanitize_blocks( $block, true );
+		}
+		$prepared_post->post_content = serialize_blocks( $blocks );
+
+		return $prepared_post;
+	}
+
+	public function sanitize_blocks( $block ) {
+		if (
+			! empty( $block['blockName'] ) &&
+			$block['blockName'] === 'siteorigin-panels/layout-block'
+		) {
+				$block = $this->sanitize_block( $block );
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach( $block['innerBlocks'] as $i => $inner ) {
+				$block['innerBlocks'][$i] = $this->sanitize_blocks( $inner );
+			}
+		}
+
+		return $block;
+	}
+
+	public function sanitize_block( $block ) {
+		if (
+			empty( $block['attrs'] ) ||
+			empty( $block['attrs']['panelsData'] )
+		) {
+			return $block;
+		}
+
+		$block['attrs'] = $this->render_layout_block( $block['attrs'], false );
+		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
+			$rendered_layout = '<div class="wp-block-siteorigin-panels-layout-block panel-layout">' . wp_json_encode( $block['attrs']['renderedLayout'] ) . '</div>';
+			$block['innerHTML'] = $rendered_layout;
+			if ( ! is_array( $block['innerContent'] ) ) {
+				$block['innerContent'] = array();
+			}
+			$block['innerContent'][0] = $rendered_layout;
+
+			unset( $block['attrs']['renderedLayout'] );
+		}
+		return $block;
+	}
+
 	public function find_layout_block( $block ) {
 		$found_blocks = array();
 
@@ -191,9 +266,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			$found_blocks[] = $block;
 		}
 
-		foreach( $block['innerBlocks'] as $inner ) {
-			$inner_blocks = $this->find_layout_block( $inner );
-			$found_blocks = array_merge( $found_blocks, $inner_blocks );
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach( $block['innerBlocks'] as $inner ) {
+				$inner_blocks = $this->find_layout_block( $inner );
+				$found_blocks = array_merge( $found_blocks, $inner_blocks );
+			}
 		}
 
 		return $found_blocks;
