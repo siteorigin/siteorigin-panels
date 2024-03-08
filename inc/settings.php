@@ -210,13 +210,13 @@ class SiteOrigin_Panels_Settings {
 		}
 		wp_enqueue_style(
 			'siteorigin-panels-settings',
-			siteorigin_panels_url( 'settings/admin-settings.css' ),
+			esc_url( siteorigin_panels_url( 'settings/admin-settings.css' ) ),
 			array(),
 			SITEORIGIN_PANELS_VERSION
 		);
 		wp_enqueue_script(
 			'siteorigin-panels-settings',
-			siteorigin_panels_url( 'settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+			esc_url( siteorigin_panels_url( 'settings/admin-settings' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 			array( 'fitvids' ),
 			SITEORIGIN_PANELS_VERSION
 		);
@@ -226,7 +226,7 @@ class SiteOrigin_Panels_Settings {
 	 * Add the Page Builder settings page
 	 */
 	public function add_settings_page() {
-		$page = add_options_page( __( 'SiteOrigin Page Builder', 'siteorigin-panels' ), __( 'Page Builder', 'siteorigin-panels' ), 'manage_options', 'siteorigin_panels', array(
+		$page = add_options_page( esc_html( 'SiteOrigin Page Builder', 'siteorigin-panels' ), esc_html( 'Page Builder', 'siteorigin-panels' ), 'manage_options', 'siteorigin_panels', array(
 			$this,
 			'display_settings_page',
 		) );
@@ -253,7 +253,7 @@ class SiteOrigin_Panels_Settings {
 
 		$screen->add_help_tab( array(
 			'id'      => 'panels-help-tab',
-			'title'   => __( 'Page Builder Settings', 'siteorigin-panels' ),
+			'title'   => esc_html( 'Page Builder Settings', 'siteorigin-panels' ),
 			'content' => $content,
 		) );
 	}
@@ -607,7 +607,7 @@ class SiteOrigin_Panels_Settings {
 				<label class="widefat">
 					<input name="<?php echo esc_attr( $field_name ); ?>"
 						type="checkbox" <?php checked( ! empty( $value ) ); ?> />
-					<?php echo ! empty( $field['checkbox_text'] ) ? esc_html( $field['checkbox_text'] ) : __( 'Enabled', 'siteorigin-panels' ); ?>
+					<?php esc_html_e( ! empty( $field['checkbox_text'] ) ? $field['checkbox_text'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
 				</label>
 				<?php
 				break;
@@ -617,7 +617,9 @@ class SiteOrigin_Panels_Settings {
 				<select name="<?php echo esc_attr( $field_name ); ?>">
 					<?php foreach ( $field['options'] as $option_id => $option ) { ?>
 						<option
-							value="<?php echo esc_attr( $option_id ); ?>" <?php selected( $option_id, $value ); ?>><?php echo esc_html( $option ); ?></option>
+							value="<?php echo esc_attr( $option_id ); ?>" <?php selected( $option_id, $value ); ?>>
+							<?php echo esc_html( $option ); ?>
+						</option>
 					<?php } ?>
 				</select>
 				<?php

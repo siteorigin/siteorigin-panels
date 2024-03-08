@@ -84,7 +84,7 @@ class SiteOrigin_Panels_Styles {
 	public static function register_scripts() {
 		wp_register_script(
 			'siteorigin-panels-front-styles',
-			siteorigin_panels_url( 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+			esc_url( siteorigin_panels_url( 'js/styling' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 			array( 'jquery' ),
 			SITEORIGIN_PANELS_VERSION
 		);
@@ -98,7 +98,7 @@ class SiteOrigin_Panels_Styles {
 		if ( siteorigin_panels_setting( 'parallax-type' ) == 'modern' ) {
 			wp_register_script(
 				'simpleParallax',
-				siteorigin_panels_url( 'js/lib/simpleparallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/lib/simpleparallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array( 'siteorigin-panels-front-styles' ),
 				'5.5.1'
 			);
@@ -112,7 +112,7 @@ class SiteOrigin_Panels_Styles {
 		} else {
 			wp_register_script(
 				'siteorigin-parallax',
-				siteorigin_panels_url( 'js/siteorigin-legacy-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/siteorigin-legacy-parallax' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array( 'jquery' ),
 				SITEORIGIN_PANELS_VERSION
 			);
@@ -679,7 +679,7 @@ class SiteOrigin_Panels_Styles {
 						style="
 						<?php
 						foreach ( $styles as $p => $v ) {
-							echo esc_attr( $p . ':' . $v . ';' );
+							esc_attr_e( $p . ':' . $v . ';' );
 						}
 						?>
 						"

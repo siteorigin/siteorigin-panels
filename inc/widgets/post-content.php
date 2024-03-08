@@ -23,7 +23,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 
 		echo $args['before_widget'];
 		$content = apply_filters( 'siteorigin_panels_widget_post_content', $this->default_content( $instance['type'] ) );
-		echo $content;
+		echo wp_kses_post( $content );
 		echo $args['after_widget'];
 	}
 
@@ -47,11 +47,13 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				return '<div class="entry-content">' . wpautop( $post->post_content ) . '</div>';
 
 			case 'featured':
-				if ( !has_post_thumbnail() ) {
+				if ( ! has_post_thumbnail() ) {
 					return '';
 				}
 
-				return '<div class="featured-image">' . get_the_post_thumbnail( $post->ID ) . '</div>';
+				return '<div class="featured-image">' .
+					esc_url( get_the_post_thumbnail( $post->ID ) )
+					. '</div>';
 			default:
 				return '';
 		}
@@ -75,8 +77,8 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 		?>
 		<div class="siteorigin-widget-content">
 			<p>
-				<label for="<?php echo $this->get_field_id( 'type' ); ?>"><?php _e( 'Display Content', 'siteorigin-panels' ); ?></label>
-				<select id="<?php echo $this->get_field_id( 'type' ); ?>" name="<?php echo $this->get_field_name( 'type' ); ?>" class="siteorigin-widget-field">
+				<label for="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>"><?php esc_html_e( 'Display Content', 'siteorigin-panels' ); ?></label>
+				<select id="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>" class="siteorigin-widget-field">
 					<?php foreach ( $types as $type_id => $title ) { ?>
 						<option value="<?php echo esc_attr( $type_id ); ?>" <?php selected( $type_id, $instance['type'] ); ?>><?php echo esc_html( $title ); ?></option>
 					<?php } ?>
