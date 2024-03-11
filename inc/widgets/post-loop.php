@@ -228,7 +228,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . $instance['title'] . $args['after_title'];
+			echo $args['before_title'] . esc_html( $instance['title'] ) . $args['after_title'];
 		}
 
 		global $more;
@@ -301,32 +301,48 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 			?>
 			<div class="siteorigin-widget-content">
 				<p>
-					<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title', 'siteorigin-panels' ); ?></label>
-					<input type="text" class="widefat siteorigin-widget-field" name="<?php echo $this->get_field_name( 'title' ); ?>" id="<?php echo $this->get_field_id( 'title' ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>">
+					<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title', 'siteorigin-panels' ); ?></label>
+					<input type="text" class="widefat siteorigin-widget-field" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>">
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id( 'template' ); ?>"><?php _e( 'Template', 'siteorigin-panels' ); ?></label>
-					<select id="<?php echo $this->get_field_id( 'template' ); ?>" name="<?php echo $this->get_field_name( 'template' ); ?>" class="siteorigin-widget-field">
+					<label for="<?php echo esc_attr( $this->get_field_id( 'template' ) ); ?>">
+							<?php esc_html_e( 'Template', 'siteorigin-panels' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $this->get_field_id( 'template' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'template' ) ); ?>"
+						class="siteorigin-widget-field"
+					>
 						<?php foreach ( $templates as $template ) { ?>
 							<option value="<?php echo esc_attr( $template ); ?>" <?php selected( $instance['template'], $template ); ?>>
 								<?php
 								$headers = get_file_data( self::locate_template( $template ), array(
 									'loop_name' => 'Loop Name',
 								) );
-							echo esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
-							?>
+								echo esc_html( ! empty( $headers['loop_name'] ) ? $headers['loop_name'] : $template );
+								?>
 							</option>
 						<?php } ?>
 					</select>
 				</p>
-				
+
 				<p>
-					<label for="<?php echo $this->get_field_id( 'more' ); ?>"><?php _e( 'More Link', 'siteorigin-panels' ); ?></label>
-					<input type="checkbox" class="siteorigin-widget-field" id="<?php echo $this->get_field_id( 'more' ); ?>" name="<?php echo $this->get_field_name( 'more' ); ?>" <?php checked( $instance['more'] ); ?> /><br/>
-					<small><?php _e( 'If the template supports it, cut posts and display the more link.', 'siteorigin-panels' ); ?></small>
+					<label for="<?php echo esc_attr( $this->get_field_id( 'more' ) ); ?>">
+						<?php esc_html_e( 'More Link', 'siteorigin-panels' ); ?>
+					</label>
+					<input
+						type="checkbox"
+						class="siteorigin-widget-field"
+						id="<?php echo esc_attr( $this->get_field_id( 'more' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'more' ) ); ?>"
+						<?php checked( $instance['more'] ); ?>
+					/>
+					<br/>
+					<small>
+						<?php esc_html_e( 'If the template supports it, cut posts and display the more link.', 'siteorigin-panels' ); ?>
+					</small>
 				</p>
 				<?php
-
 				if ( ! empty( $instance['posts'] ) ) {
 					$instance = wp_parse_args( $instance['posts'], $instance );
 					unset( $instance['posts'] );
@@ -338,71 +354,157 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 				$post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item' ) );
 				?>
 				<p>
-					<label for="<?php echo $this->get_field_id( 'post_type' ); ?>"><?php _e( 'Post Type', 'siteorigin-panels' ); ?></label>
-					<select id="<?php echo $this->get_field_id( 'post_type' ); ?>" name="<?php echo $this->get_field_name( 'post_type' ); ?>" class="siteorigin-widget-field" value="<?php echo esc_attr( $instance['post_type'] ); ?>">
+					<label
+						for="<?php echo esc_attr( $this->get_field_id( 'post_type' ) ); ?>"
+					>
+						<?php esc_html_e( 'Post Type', 'siteorigin-panels' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $this->get_field_id( 'post_type' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'post_type' ) ); ?>"
+						class="siteorigin-widget-field"
+						value="<?php echo esc_attr( $instance['post_type'] ); ?>"
+					>
 						<?php foreach ( $post_types as $type ) { ?>
-							<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $instance['post_type'], $type ); ?>><?php echo esc_html( $type ); ?></option>
+							<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $instance['post_type'], $type ); ?>>
+								<?php echo esc_html( $type ); ?>
+							</option>
 						<?php } ?>
 					</select>
 				</p>
-				
+
 				<p>
-					<label for="<?php echo $this->get_field_id( 'posts_per_page' ); ?>"><?php _e( 'Posts Per Page', 'siteorigin-panels' ); ?></label>
-					<input type="text" class="small-text siteorigin-widget-field" id="<?php echo $this->get_field_id( 'posts_per_page' ); ?>" name="<?php echo $this->get_field_name( 'posts_per_page' ); ?>" class="siteorigin-widget-field" value="<?php echo esc_attr( $instance['posts_per_page'] ); ?>" />
+					<label
+						for="<?php echo esc_attr( $this->get_field_id( 'posts_per_page' ) ); ?>"
+					>
+						<?php esc_html_e( 'Posts Per Page', 'siteorigin-panels' ); ?>
+					</label>
+					<input
+						type="text"
+						class="small-text siteorigin-widget-field"
+						id="<?php echo esc_attr( $this->get_field_id( 'posts_per_page' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'posts_per_page' ) ); ?>" class="siteorigin-widget-field"
+						value="<?php echo esc_attr( $instance['posts_per_page'] ); ?>"
+					/>
 				</p>
-				
+
 				<p>
-					<label <?php echo $this->get_field_id( 'orderby' ); ?>><?php _e( 'Order By', 'siteorigin-panels' ); ?></label>
-					<select id="<?php echo $this->get_field_id( 'orderby' ); ?>" name="<?php echo $this->get_field_name( 'orderby' ); ?>" class="siteorigin-widget-field" value="<?php echo esc_attr( $instance['orderby'] ); ?>">
-						<option value="none" <?php selected( $instance['orderby'], 'none' ); ?>><?php esc_html_e( 'None', 'siteorigin-panels' ); ?></option>
-						<option value="ID" <?php selected( $instance['orderby'], 'ID' ); ?>><?php esc_html_e( 'Post ID', 'siteorigin-panels' ); ?></option>
-						<option value="author" <?php selected( $instance['orderby'], 'author' ); ?>><?php esc_html_e( 'Author', 'siteorigin-panels' ); ?></option>
-						<option value="name" <?php selected( $instance['orderby'], 'name' ); ?>><?php esc_html_e( 'Name', 'siteorigin-panels' ); ?></option>
-						<option value="name" <?php selected( $instance['orderby'], 'name' ); ?>><?php esc_html_e( 'Name', 'siteorigin-panels' ); ?></option>
-						<option value="date" <?php selected( $instance['orderby'], 'date' ); ?>><?php esc_html_e( 'Date', 'siteorigin-panels' ); ?></option>
-						<option value="modified" <?php selected( $instance['orderby'], 'modified' ); ?>><?php esc_html_e( 'Modified', 'siteorigin-panels' ); ?></option>
-						<option value="parent" <?php selected( $instance['orderby'], 'parent' ); ?>><?php esc_html_e( 'Parent', 'siteorigin-panels' ); ?></option>
-						<option value="rand" <?php selected( $instance['orderby'], 'rand' ); ?>><?php esc_html_e( 'Random', 'siteorigin-panels' ); ?></option>
-						<option value="comment_count" <?php selected( $instance['orderby'], 'comment_count' ); ?>><?php esc_html_e( 'Comment Count', 'siteorigin-panels' ); ?></option>
-						<option value="menu_order" <?php selected( $instance['orderby'], 'menu_order' ); ?>><?php esc_html_e( 'Menu Order', 'siteorigin-panels' ); ?></option>
-						<option value="post__in" <?php selected( $instance['orderby'], 'post__in' ); ?>><?php esc_html_e( 'Post In Order', 'siteorigin-panels' ); ?></option>
+					<label for="<?php echo esc_attr( $this->get_field_id( 'orderby' ) ); ?>">
+						<?php esc_html_e( 'Order By', 'siteorigin-panels' ); ?>
+					</label>
+
+					<select
+						id="<?php echo esc_attr( $this->get_field_id( 'orderby' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'orderby' ) ); ?>"
+						class="siteorigin-widget-field"
+						value="<?php echo esc_attr( $instance['orderby'] ); ?>"
+					>
+						<option value="none" <?php selected( $instance['orderby'], 'none' ); ?>>
+							<?php esc_html_e( 'None', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="ID" <?php selected( $instance['orderby'], 'ID' ); ?>>
+							<?php esc_html_e( 'Post ID', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="author" <?php selected( $instance['orderby'], 'author' ); ?>>
+							<?php esc_html_e( 'Author', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="name" <?php selected( $instance['orderby'], 'name' ); ?>>
+							<?php esc_html_e( 'Name', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="name" <?php selected( $instance['orderby'], 'name' ); ?>>
+							<?php esc_html_e( 'Name', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="date" <?php selected( $instance['orderby'], 'date' ); ?>>
+							<?php esc_html_e( 'Date', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="modified" <?php selected( $instance['orderby'], 'modified' ); ?>>
+							<?php esc_html_e( 'Modified', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="parent" <?php selected( $instance['orderby'], 'parent' ); ?>>
+							<?php esc_html_e( 'Parent', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="rand" <?php selected( $instance['orderby'], 'rand' ); ?>>
+							<?php esc_html_e( 'Random', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="comment_count" <?php selected( $instance['orderby'], 'comment_count' ); ?>>
+							<?php esc_html_e( 'Comment Count', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="menu_order" <?php selected( $instance['orderby'], 'menu_order' ); ?>>
+							<?php esc_html_e( 'Menu Order', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="post__in" <?php selected( $instance['orderby'], 'post__in' ); ?>>
+							<?php esc_html_e( 'Post In Order', 'siteorigin-panels' ); ?>
+						</option>
 					</select>
 				</p>
-				
+
 				<p>
-					<label for="<?php echo $this->get_field_id( 'order' ); ?>"><?php _e( 'Order', 'siteorigin-panels' ); ?></label>
-					<select id="<?php echo $this->get_field_id( 'order' ); ?>" class="siteorigin-widget-field" name="<?php echo $this->get_field_name( 'order' ); ?>" value="<?php echo esc_attr( $instance['order'] ); ?>">
-						<option value="DESC" <?php selected( $instance['order'], 'DESC' ); ?>><?php esc_html_e( 'Descending', 'siteorigin-panels' ); ?></option>
-						<option value="ASC" <?php selected( $instance['order'], 'ASC' ); ?>><?php esc_html_e( 'Ascending', 'siteorigin-panels' ); ?></option>
+					<label for="<?php echo esc_attr( $this->get_field_id( 'order' ) ); ?>">
+						<?php esc_html_e( 'Order', 'siteorigin-panels' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $this->get_field_id( 'order' ) ); ?>"
+						class="siteorigin-widget-field"
+						name="<?php echo esc_attr( $this->get_field_name( 'order' ) ); ?>"
+						value="<?php echo esc_attr( $instance['order'] ); ?>"
+					>
+						<option value="DESC" <?php selected( $instance['order'], 'DESC' ); ?>>
+							<?php esc_html_e( 'Descending', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="ASC" <?php selected( $instance['order'], 'ASC' ); ?>>
+							<?php esc_html_e( 'Ascending', 'siteorigin-panels' ); ?>
+						</option>
 					</select>
 				</p>
-				
+
 				<p>
-					<label for="<?php echo $this->get_field_id( 'sticky' ); ?>"><?php _e( 'Sticky Posts', 'siteorigin-panels' ); ?></label>
-					<select id="<?php echo $this->get_field_id( 'sticky' ); ?>" class="siteorigin-widget-field" name="<?php echo $this->get_field_name( 'sticky' ); ?>" value="<?php echo esc_attr( $instance['sticky'] ); ?>">
-						<option value="" <?php selected( $instance['sticky'], '' ); ?>><?php esc_html_e( 'Default', 'siteorigin-panels' ); ?></option>
-						<option value="ignore" <?php selected( $instance['sticky'], 'ignore' ); ?>><?php esc_html_e( 'Ignore Sticky', 'siteorigin-panels' ); ?></option>
-						<option value="exclude" <?php selected( $instance['sticky'], 'exclude' ); ?>><?php esc_html_e( 'Exclude Sticky', 'siteorigin-panels' ); ?></option>
-						<option value="only" <?php selected( $instance['sticky'], 'only' ); ?>><?php esc_html_e( 'Only Sticky', 'siteorigin-panels' ); ?></option>
+					<label for="<?php echo esc_attr( $this->get_field_id( 'sticky' ) ); ?>">
+						<?php esc_html_e( 'Sticky Posts', 'siteorigin-panels' ); ?>
+					</label>
+					<select
+						id="<?php echo esc_attr( $this->get_field_id( 'sticky' ) ); ?>"
+						class="siteorigin-widget-field"
+						name="<?php echo esc_attr( $this->get_field_name( 'sticky' ) ); ?>"
+						value="<?php echo esc_attr( $instance['sticky'] ); ?>"
+					>
+						<option value="" <?php selected( $instance['sticky'], '' ); ?>>
+							<?php esc_html_e( 'Default', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="ignore" <?php selected( $instance['sticky'], 'ignore' ); ?>>
+							<?php esc_html_e( 'Ignore Sticky', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="exclude" <?php selected( $instance['sticky'], 'exclude' ); ?>>
+							<?php esc_html_e( 'Exclude Sticky', 'siteorigin-panels' ); ?>
+						</option>
+						<option value="only" <?php selected( $instance['sticky'], 'only' ); ?>>
+							<?php esc_html_e( 'Only Sticky', 'siteorigin-panels' ); ?>
+						</option>
 					</select>
 				</p>
-				
+
 				<p>
-					<label for="<?php echo $this->get_field_id( 'additional' ); ?>"><?php _e( 'Additional ', 'siteorigin-panels' ); ?></label>
-					<input type="text" class="widefat siteorigin-widget-field" id="<?php echo $this->get_field_id( 'additional' ); ?>" name="<?php echo $this->get_field_name( 'additional' ); ?>" class="siteorigin-widget-field" value="<?php echo esc_attr( $instance['additional'] ); ?>" />
+					<label for="<?php echo esc_attr( $this->get_field_id( 'additional' ) ); ?>">
+						<?php esc_html_e( 'Additional ', 'siteorigin-panels' ); ?>
+					</label>
+					<input
+						type="text"
+						class="widefat siteorigin-widget-field"
+						id="<?php echo esc_attr( $this->get_field_id( 'additional' ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( 'additional' ) ); ?>" class="siteorigin-widget-field" value="<?php echo esc_attr( $instance['additional'] ); ?>"
+					/>
 					<small>
 						<?php
 						echo preg_replace(
 							'/1\{ *(.*?) *\}/',
 							'<a href="http://codex.wordpress.org/Function_Reference/query_posts">$1</a>',
-							__( 'Additional query arguments. See 1{query_posts}.', 'siteorigin-panels' )
+							esc_html__( 'Additional query arguments. See 1{query_posts}.', 'siteorigin-panels' )
 						);
 						?>
 					</small>
 				</p>
-				
+
 				<a href="https://siteorigin.com/page-builder/bundled-widgets/post-loop-widget/" class="siteorigin-widget-help-link siteorigin-panels-help-link" target="_blank" rel="noopener noreferrer">
-					<?php _e( 'Help', 'siteorigin-panels' ); ?>
+					<?php esc_html_e( 'Help', 'siteorigin-panels' ); ?>
 				</a>
 			</div>
 			<?php
@@ -494,7 +596,8 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	private function get_helper_widget( $templates ) {
 		if ( empty( $this->helper ) &&
 			class_exists( 'SiteOrigin_Widget' ) &&
-			class_exists( 'SiteOrigin_Widget_Field_Posts' ) ) {
+			class_exists( 'SiteOrigin_Widget_Field_Posts' )
+		) {
 			$this->helper = new SiteOrigin_Panels_Widgets_PostLoop_Helper( $templates );
 		}
 		// These ensure the form fields name attributes are correct.
