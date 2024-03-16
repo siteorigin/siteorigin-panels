@@ -226,11 +226,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				$return['items'][] = array(
-					'title'       => $vals['name'],
-					'id'          => $id,
+					'title'       => esc_html( $vals['name'] ),
+					'id'          => esc_html( $id ),
 					'type'        => 'prebuilt',
-					'description' => isset( $vals['description'] ) ? $vals['description'] : '',
-					'screenshot'  => ! empty( $vals['screenshot'] ) ? $vals['screenshot'] : '',
+					'description' => isset( $vals['description'] ) ? esc_html( $vals['description'] ) : '',
+					'screenshot'  => ! empty( $vals['screenshot'] ) ? esc_url( $vals['screenshot'] ) : '',
 				);
 			}
 
@@ -261,19 +261,19 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 
 			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
-			$response = wp_remote_get( $url );
+			$response = wp_remote_get( esc_url( $url ) );
 
 			if ( is_array( $response ) && $response['response']['code'] == 200 ) {
 				$results = json_decode( $response['body'], true );
 
 				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
 					foreach ( $results['items'] as $item ) {
-						$item['id'] = $item['slug'];
-						$item['type'] = $type;
+						$item['id'] = esc_html( $item['slug'] );
+						$item['type'] = esc_html( $type );
 
 						if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
 							$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
-							$item['screenshot'] = 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700';
+							$item['screenshot'] = esc_url( 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700' );
 						}
 
 						$return['items'][] = $item;
@@ -311,12 +311,12 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$total_posts = $wpdb->get_var( 'SELECT FOUND_ROWS();' );
 
 			foreach ( $results as $result ) {
-				$thumbnail = get_the_post_thumbnail_url( $result->ID, array( 400, 300 ) );
+				$thumbnail = get_the_post_thumbnail_url( (int) $result->ID, array( 400, 300 ) );
 				$return['items'][] = array(
-					'id'         => $result->ID,
-					'title'      => $result->post_title,
-					'type'       => $type,
-					'screenshot' => ! empty( $thumbnail ) ? $thumbnail : '',
+					'id'         => (int) $result->ID,
+					'title'      => esc_html( $result->post_title ),
+					'type'       => esc_html( $type ),
+					'screenshot' => ! empty( $thumbnail ) ? esc_url( $thumbnail ) : '',
 				);
 			}
 
@@ -330,7 +330,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$return['title'] .= __( ' - Results For:', 'siteorigin-panels' ) . ' <em>' . esc_html( $search ) . '</em>';
 		}
 
-		echo json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
+		echo wp_json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
 
 		wp_die();
 	}
@@ -358,7 +358,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 		if ( $_REQUEST['type'] == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
-			if ( ! is_numeric( $_REQUEST['lid'] ) && empty( $layouts[ $_REQUEST['lid'] ] ) ) {
+			if (
+				! is_numeric( $_REQUEST['lid'] ) &&
+				empty( $layouts[ $_REQUEST['lid'] ] )
+			) {
 				wp_send_json_error( array(
 					'error'   => true,
 					'message' => __( 'Missing layout ID or no such layout exists', 'siteorigin-panels' ),
@@ -398,6 +401,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$raw_panels_data = true;
 		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
 			$directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
+
 			$directories = $this->get_directories();
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
@@ -448,16 +452,38 @@ class SiteOrigin_Panels_Admin_Layouts {
 			wp_die();
 		}
 
-		if ( ! empty( $_FILES['panels_import_data']['tmp_name'] ) ) {
-			header( 'content-type:application/json' );
-			$json = file_get_contents( $_FILES['panels_import_data']['tmp_name'] );
-			$panels_data = json_decode( $json, true );
-			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
-			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
-			$json = json_encode( $panels_data );
-			@unlink( $_FILES['panels_import_data']['tmp_name'] );
-			echo $json;
+		// Ensure there wasn't an error during upload.
+		if (
+			empty( $_FILES['panels_import_data']['tmp_name'] ) ||
+			! file_exists( $_FILES['panels_import_data']['tmp_name'] )
+		) {
+			wp_die();
 		}
+
+		$json = file_get_contents( $_FILES['panels_import_data']['tmp_name'] );
+		$panels_data = json_decode( $json, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			@unlink( $_FILES['panels_import_data']['tmp_name'] );
+			wp_die();
+		}
+
+		$panels_data = wp_unslash( $panels_data );
+
+		// Newer exports could be encoded further.
+		if ( ! is_array( $panels_data ) ) {
+			$panels_data = json_decode( $panels_data, true );
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				@unlink( $_FILES['panels_import_data']['tmp_name'] );
+				wp_die();
+			}
+		}
+
+		header( 'content-type:application/json' );
+		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+		@unlink( $_FILES['panels_import_data']['tmp_name'] );
+		echo wp_json_encode( $panels_data );
 		wp_die();
 	}
 
@@ -472,10 +498,13 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$export_data = wp_unslash( $_POST['panels_export_data'] );
 
 		$decoded_export_data = json_decode( $export_data, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_die();
+		}
 
 		if ( ! empty( $decoded_export_data['name'] ) ) {
 			$decoded_export_data['id'] = sanitize_title_with_dashes( $decoded_export_data['name'] );
-			$filename = $decoded_export_data['id'];
+			$filename = sanitize_file_name( $decoded_export_data['id'] );
 		} else {
 			$filename = 'layout-' . date( 'dmY' );
 		}
@@ -483,7 +512,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		header( 'content-type: application/json' );
 		header( "Content-Disposition: attachment; filename=$filename.json" );
 
-		echo $export_data;
+		echo wp_json_encode( $export_data );
 
 		wp_die();
 	}
@@ -509,11 +538,14 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 */
 	public static function load_layout( $id, $name, $json_file, $screenshot = false ) {
 		$layout_data = json_decode( file_get_contents( $json_file ), true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_die();
+		}
 		$layout_data = apply_filters( 'siteorigin_panels_load_layout_' . $id, $layout_data );
 
 		$layout_data = array_merge( array(
-			'name' => $name,
-			'screenshot' => $screenshot,
+			'name' => sanitize_text_field( $name ),
+			'screenshot' => esc_url( $screenshot ),
 		), $layout_data );
 
 		return $layout_data;

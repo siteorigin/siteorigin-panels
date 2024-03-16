@@ -573,7 +573,7 @@ class SiteOrigin_Panels_Renderer {
 		$rendered_layout = apply_filters( 'siteorigin_panels_render', $html, $post_id, ! empty( $post ) ? $post : null );
 
 		if ( $is_preview ) {
-			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+			$widget_css = '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
 			$widget_css .= SiteOrigin_Panels::renderer()->generate_css( $post_id, $panels_data, $layout_data );
 			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
 			$type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
@@ -876,8 +876,10 @@ class SiteOrigin_Panels_Renderer {
 
 			if ( ! empty( $the_css ) ) {
 				?>
-                <style<?php echo current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"'; ?> media="all"
-                       id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ); ?>"><?php echo $the_css; ?></style><?php
+				<style
+					media="all"
+					id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ); ?>"
+				><?php echo $the_css; ?></style><?php
 			}
 		}
 	}
@@ -887,7 +889,12 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	public function enqueue_styles() {
 		// Register the style to support possible lazy loading
-		wp_register_style( 'siteorigin-panels-front', SiteOrigin_Panels::front_css_url(), array(), SITEORIGIN_PANELS_VERSION );
+		wp_register_style(
+			'siteorigin-panels-front',
+			esc_url( SiteOrigin_Panels::front_css_url() ),
+			array(),
+			SITEORIGIN_PANELS_VERSION
+		);
 	}
 
 	/**
@@ -988,11 +995,11 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array  $attributes The attributes for the HTML element.
 	 */
 	private function render_element( $tag, $attributes ) {
-		echo '<' . $tag;
+		echo '<' . esc_html( $tag );
 
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
-				echo ' ' . $name . '="' . esc_attr( $value ) . '" ';
+				echo ' ' . esc_html( $name ) . '="' . esc_attr( $value ) . '" ';
 			}
 		}
 		echo '>';

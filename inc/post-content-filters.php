@@ -30,7 +30,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function row_attributes( $attributes, $row ) {
 		if ( ! empty( $row['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $row['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $row['style'] );
 		}
 
 		if ( ! empty( $row['ratio'] ) ) {
@@ -57,7 +57,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function cell_attributes( $attributes, $cell ) {
 		if ( ! empty( $cell['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $cell['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $cell['style'] );
 		}
 
 		$attributes[ 'data-weight' ] = $cell['weight'];
@@ -70,7 +70,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function widget_attributes( $attributes, $widget ) {
 		if ( ! empty( $widget['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $widget['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $widget['style'] );
 		}
 
 		if ( ! empty( $widget['label'] ) ) {

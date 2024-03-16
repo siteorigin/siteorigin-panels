@@ -66,8 +66,7 @@ function origin_widgets_footer_css() {
 	global $origin_widgets_generated_css;
 
 	if ( ! empty( $origin_widgets_generated_css ) ) {
-		$type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
-		echo "<style$type_attr>";
+		echo "<style>";
 
 		foreach ( $origin_widgets_generated_css as $id => $css ) {
 			if ( empty( $css ) ) {
@@ -194,7 +193,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				$instance[ $field_id ] = false;
 			}
 
-			?><p><label for="<?php echo $this->get_field_id( $field_id ); ?>"><?php echo esc_html( $field_args['label'] ); ?></label><?php
+			?><p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_html( $field_args['label'] ); ?></label><?php
 
 			if ( $field_args['type'] != 'checkbox' ) {
 				echo '<br />';
@@ -206,8 +205,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<input
 						type="text"
 						class="widefat"
-						id="<?php echo $this->get_field_id( $field_id ); ?>"
-						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
 						value="<?php echo esc_attr( $instance[ $field_id ] ); ?>"
 					/>
 					<?php
@@ -220,8 +219,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					?>
 					<textarea
 						class="widefat"
-						id="<?php echo $this->get_field_id( $field_id ); ?>"
-						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
 						rows="<?php echo (int) $field_args['height']; ?>"
 					><?php echo esc_textarea( $instance[ $field_id ] ); ?></textarea>
 					<?php
@@ -232,9 +231,9 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<input
 						type="number"
 						class="small-text"
-						id="<?php echo $this->get_field_id( $field_id ); ?>"
-						name="<?php echo $this->get_field_name( $field_id ); ?>"
-						value="<?php echo (float) $instance[ $field_id]; ?>"
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
+						value="<?php echo (float) $instance[ $field_id ]; ?>"
 					/>
 					<?php
 					break;
@@ -244,8 +243,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<input
 						type="checkbox"
 						class="small-text"
-						id="<?php echo $this->get_field_id( $field_id ); ?>"
-						name="<?php echo $this->get_field_name( $field_id ); ?>"
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
 						<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
 					/>
 					<?php
@@ -254,8 +253,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				case 'select':
 					?>
 					<select
-						id="<?php echo $this->get_field_id( $field_id ); ?>"
-						name="<?php echo $this->get_field_name( $field_id ); ?>">
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>">
 						<?php foreach ( $field_args['options'] as $k => $v ) { ?>
 							<option
 								value="<?php echo esc_attr( $k ); ?>"
@@ -290,8 +289,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		if ( ! empty( $styles ) ) {
 			?>
 			<p>
-				<label for="<?php echo $this->get_field_id( 'origin_style' ); ?>"><?php _e( 'Style', 'siteorigin-panels' ); ?></label>
-				<select name="<?php echo $this->get_field_name( 'origin_style' ); ?>" id="<?php echo $this->get_field_id( 'origin_style' ); ?>">
+				<label for="<?php echo esc_attr( $this->get_field_id( 'origin_style' ) ); ?>"><?php esc_html_e( 'Style', 'siteorigin-panels' ); ?></label>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'origin_style' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'origin_style' ) ); ?>">
 					<?php
 					foreach ( $this->get_styles() as $style_id => $style_info ) {
 						$presets = $this->get_style_presets( $style_id ); ?>
@@ -320,8 +319,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 
 			?>
 			<p>
-				<label for="<?php echo $this->get_field_id( 'origin_style_' . $id ); ?>"><?php printf( __( '%s Style', 'siteorigin-panels' ), $sub[0] ); ?></label>
-				<select name="<?php echo $this->get_field_name( 'origin_style_' . $id ); ?>" id="<?php echo $this->get_field_id( 'origin_style_' . $id ); ?>">
+				<label for="<?php echo esc_attr( $this->get_field_id( 'origin_style_' . $id ) ); ?>"><?php printf( __( '%s Style', 'siteorigin-panels' ), $sub[0] ); ?></label>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'origin_style_' . $id ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'origin_style_' . $id ) ); ?>">
 					<?php foreach ( $the_widget->get_styles() as $style_id => $style_info ) {
 						$presets = $the_widget->get_style_presets( $style_id ); ?>
 						<?php if ( ! empty( $presets ) ) {
@@ -393,7 +392,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 
 		if ( empty( $template_file ) ) {
 			echo $args['before_widget'];
-			echo 'Template not found';
+			esc_html_e( 'Template not found', 'siteorigin-panels' );
 			echo $args['after_widget'];
 
 			return false;
@@ -433,7 +432,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		}
 
 		echo $args['before_widget'];
-		echo '<div class="' . esc_attr( implode( ' ', $widget_classes ) ) . '">';
+		echo '<div class="' .  sanitize_html_class( implode( ' ', $widget_classes ) ) . '">';
 		include $template_file;
 		echo '</div>';
 		echo $args['after_widget'];
@@ -810,7 +809,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			if ( empty( $v ) ) {
 				continue;
 			}
-			$shortcode_attr[] = $k . '="' . esc_attr( $v ) . '"';
+			$shortcode_attr[] = esc_html( $k ) . '="' . esc_attr( $v ) . '"';
 		}
 
 		echo do_shortcode( '[gallery ' . implode( ' ', $shortcode_attr ) . ']' );
@@ -837,17 +836,17 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'ids' ); ?>"><?php _e( 'Gallery Images', 'siteorigin-panels' ); ?></label>
-			<a href="#" onclick="return false;" class="so-gallery-widget-select-attachments hidden"><?php _e( 'edit gallery', 'siteorigin-panels' ); ?></a>
-			<input type="text" class="widefat" value="<?php echo esc_attr( $instance['ids'] ); ?>" name="<?php echo $this->get_field_name( 'ids' ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'ids' ) ); ?>"><?php esc_html_e( 'Gallery Images', 'siteorigin-panels' ); ?></label>
+			<a href="#" onclick="return false;" class="so-gallery-widget-select-attachments hidden"><?php esc_html_e( 'edit gallery', 'siteorigin-panels' ); ?></a>
+			<input type="text" class="widefat" value="<?php echo esc_attr( $instance['ids'] ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'ids' ) ); ?>" />
 		</p>
 		<p class="description">
 			<?php _e( "Comma separated attachment IDs. Defaults to all current page's attachments.", 'siteorigin-panels' ); ?>
 		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'size' ); ?>"><?php _e( 'Image Size', 'siteorigin-panels' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'size' ); ?>" id="<?php echo $this->get_field_id( 'size' ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'size' ) ); ?>"><?php esc_html_e( 'Image Size', 'siteorigin-panels' ); ?></label>
+			<select name="<?php echo esc_attr( $this->get_field_name( 'size' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'size' ) ); ?>">
 				<option value="" <?php selected( empty( $instance['size'] ) ); ?>><?php esc_html_e( 'Default', 'siteorigin-panels' ); ?></option>
 				<option value="large" <?php selected( 'large', $instance['size'] ); ?>><?php esc_html_e( 'Large', 'siteorigin-panels' ); ?></option>
 				<option value="medium" <?php selected( 'medium', $instance['size'] ); ?>><?php esc_html_e( 'Medium', 'siteorigin-panels' ); ?></option>
@@ -862,18 +861,18 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'type' ); ?>"><?php _e( 'Gallery Type', 'siteorigin-panels' ); ?></label>
-			<input type="text" class="regular" value="<?php echo esc_attr( $instance['type'] ); ?>" name="<?php echo $this->get_field_name( 'type' ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>"><?php esc_html_e( 'Gallery Type', 'siteorigin-panels' ); ?></label>
+			<input type="text" class="regular" value="<?php echo esc_attr( $instance['type'] ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>" />
 		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'columns' ); ?>"><?php _e( 'Columns', 'siteorigin-panels' ); ?></label>
-			<input type="text" class="regular" value="<?php echo esc_attr( $instance['columns'] ); ?>" name="<?php echo $this->get_field_name( 'columns' ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>"><?php esc_html_e( 'Columns', 'siteorigin-panels' ); ?></label>
+			<input type="text" class="regular" value="<?php echo esc_attr( $instance['columns'] ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'columns' ) ); ?>" />
 		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'link' ); ?>"><?php _e( 'Link To', 'siteorigin-panels' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'link' ); ?>" id="<?php echo $this->get_field_id( 'link' ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'link' ) ); ?>"><?php esc_html_e( 'Link To', 'siteorigin-panels' ); ?></label>
+			<select name="<?php echo esc_attr( $this->get_field_name( 'link' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'link' ) ); ?>">
 				<option value="" <?php selected( '', $instance['link'] ); ?>><?php esc_html_e( 'Attachment Page', 'siteorigin-panels' ); ?></option>
 				<option value="file" <?php selected( 'file', $instance['link'] ); ?>><?php esc_html_e( 'File', 'siteorigin-panels' ); ?></option>
 				<option value="none" <?php selected( 'none', $instance['link'] ); ?>><?php esc_html_e( 'None', 'siteorigin-panels' ); ?></option>
@@ -908,7 +907,7 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 		echo $args['before_widget'];
 
 		if ( ! empty( $instance['href'] ) ) {
-			echo '<a href="' . $instance['href'] . '">';
+			echo '<a href="' . esc_url( $instance['href'] ) . '">';
 		}
 		echo '<img src="' . esc_url( $instance['src'] ) . '" />';
 
@@ -935,12 +934,12 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'src' ); ?>"><?php _e( 'Image URL', 'siteorigin-panels' ); ?></label>
-			<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'src' ); ?>" name="<?php echo $this->get_field_name( 'src' ); ?>" value="<?php echo esc_attr( $instance['src'] ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'src' ) ); ?>"><?php esc_html_e( 'Image URL', 'siteorigin-panels' ); ?></label>
+			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'src' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'src' ) ); ?>" value="<?php echo esc_attr( $instance['src'] ); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'href' ); ?>"><?php _e( 'Destination URL', 'siteorigin-panels' ); ?></label>
-			<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'href' ); ?>" name="<?php echo $this->get_field_name( 'href' ); ?>" value="<?php echo esc_attr( $instance['href'] ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'href' ) ); ?>"><?php esc_html_e( 'Destination URL', 'siteorigin-panels' ); ?></label>
+			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'href' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'href' ) ); ?>" value="<?php echo esc_attr( $instance['href'] ); ?>" />
 		</p>
 	<?php
 	}
@@ -992,7 +991,7 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'video' ); ?>"><?php _e( 'Video', 'siteorigin-panels' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'video' ); ?>"><?php esc_html_e( 'Video', 'siteorigin-panels' ); ?></label>
 			<input type="text" class="widefat" name="<?php echo $this->get_field_name( 'video' ); ?>" id="<?php echo $this->get_field_id( 'video' ); ?>" value="<?php echo esc_attr( $instance['video'] ); ?>" />
 		</p>
 		<?php
@@ -1059,18 +1058,18 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'url' ); ?>"><?php _e( 'Video URL', 'siteorigin-panels' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'url' ); ?>"><?php esc_html_e( 'Video URL', 'siteorigin-panels' ); ?></label>
 			<input id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['url'] ); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'poster' ); ?>"><?php _e( 'Poster URL', 'siteorigin-panels' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'poster' ); ?>"><?php esc_html_e( 'Poster URL', 'siteorigin-panels' ); ?></label>
 			<input id="<?php echo $this->get_field_id( 'poster' ); ?>" name="<?php echo $this->get_field_name( 'poster' ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['poster'] ); ?>" />
-			<small class="description"><?php _e( 'An image that displays before the video starts playing.', 'siteorigin-panels' ); ?></small>
+			<small class="description"><?php esc_html_e( 'An image that displays before the video starts playing.', 'siteorigin-panels' ); ?></small>
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'autoplay' ); ?>">
 				<input id="<?php echo $this->get_field_id( 'autoplay' ); ?>" name="<?php echo $this->get_field_name( 'autoplay' ); ?>" type="checkbox" value="1" <?php checked( $instance['autoplay'] ); ?> />
-				<?php _e( 'Auto Play Video', 'siteorigin-panels' ); ?>
+				<?php esc_html_e( 'Auto Play Video', 'siteorigin-panels' ); ?>
 			</label>
 		</p>
 	<?php

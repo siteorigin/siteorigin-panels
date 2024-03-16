@@ -23,7 +23,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 		if ( SiteOrigin_Panels_Admin::is_admin() ) {
 			wp_enqueue_script(
 				'so-panels-acf-widgets-compat',
-				siteorigin_panels_url( 'compat/js/acf-widgets' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'compat/js/acf-widgets' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array(
 					'jquery',
 					'so-panels-admin',
