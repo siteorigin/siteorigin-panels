@@ -468,6 +468,17 @@ class SiteOrigin_Panels_Admin_Layouts {
 			wp_die();
 		}
 
+		$panels_data = wp_unslash( $panels_data );
+
+		// Newer exports could be encoded further.
+		if ( ! is_array( $panels_data ) ) {
+			$panels_data = json_decode( $panels_data, true );
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				@unlink( $_FILES['panels_import_data']['tmp_name'] );
+				wp_die();
+			}
+		}
+
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
