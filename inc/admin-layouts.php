@@ -227,7 +227,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 				$return['items'][] = array(
 					'title'       => esc_html( $vals['name'] ),
-					'id'          => (int) $id,
+					'id'          => esc_html( $id ),
 					'type'        => 'prebuilt',
 					'description' => isset( $vals['description'] ) ? esc_html( $vals['description'] ) : '',
 					'screenshot'  => ! empty( $vals['screenshot'] ) ? esc_url( $vals['screenshot'] ) : '',
