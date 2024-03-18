@@ -781,7 +781,7 @@ class SiteOrigin_Panels_Renderer {
 
 			if (
 				! $is_last &&
-				! empty( $widget_info['style']['margin'] )
+				empty( $widget_info['style']['margin'] )
 			) {
 				$widget_bottom_margin = apply_filters(
 					'siteorigin_panels_css_cell_margin_bottom',
