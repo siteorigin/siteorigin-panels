@@ -776,20 +776,26 @@ class SiteOrigin_Panels_Renderer {
 		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
 			$attributes['style'] = '';
 			if ( ! empty( $widget_info['style']['margin'] ) ) {
-				$attributes['style'] .= 'margin: ' . $widget_info['style']['margin'] . ';';
+				$attributes['style'] .= 'margin: ' . esc_attr( $widget_info['style']['margin'] ) . ';';
 			}
 
-			if ( ! $is_last ) {
+			if (
+				! $is_last &&
+				! empty( $widget_info['style']['margin'] )
+			) {
 				$widget_bottom_margin = apply_filters(
 					'siteorigin_panels_css_cell_margin_bottom',
-					( empty( $widget_info['style']['margin'] ) ? siteorigin_panels_setting( 'margin-bottom' ) : 0 ) . 'px',
+					siteorigin_panels_setting( 'margin-bottom' ) . 'px',
 					false,
 					false,
 					array(),
 					$post_id
 				);
 
-				if ( ! empty( $widget_bottom_margin ) ) {
+				if (
+					! empty( $widget_bottom_margin ) &&
+					$widget_bottom_margin !== '0px'
+				) {
 					$attributes['style'] .= 'margin-bottom: ' . $widget_bottom_margin;
 				}
 			}
