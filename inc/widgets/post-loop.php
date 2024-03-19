@@ -228,7 +228,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 		$instance['title'] = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . esc_html( $instance['title'] ) . $args['after_title'];
+			echo $args['before_title'] . wp_kses_post( $instance['title'] ) . $args['after_title'];
 		}
 
 		global $more;
