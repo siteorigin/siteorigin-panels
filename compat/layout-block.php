@@ -123,9 +123,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		};
 		add_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		SiteOrigin_Panels_Post_Content_Filters::add_filters( true );
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
-		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters( true );
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
