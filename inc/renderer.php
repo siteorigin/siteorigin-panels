@@ -886,11 +886,7 @@ class SiteOrigin_Panels_Renderer {
 			$the_css = apply_filters( 'siteorigin_panels_inline_styles', $the_css );
 
 			if ( ! empty( $the_css ) ) {
-				?>
-				<style
-					media="all"
-					id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ); ?>"
-				><?php echo $the_css; ?></style><?php
+				printf( '<style media="all" id="siteorigin-panels-layouts-%s">%s</style>', esc_attr( $css_id ), $the_css );
 			}
 		}
 	}

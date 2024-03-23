@@ -121,6 +121,21 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.9 - 23 March 2024 =
+* Layouts: Resolved import error.
+* Inline CSS Generation: Resolved inline CSS potentially printing on the site front-end.
+* Block Editor: Removed redundant shortcode fallback.
+
+= 2.29.8 - 19 March 2024 =
+* Post Loop: Update to allow HTML formatting in the widget title.
+
+= 2.29.7 - 18 March 2024 =
+* ACF: Added gallery field support.
+* Resolved a potential layout import error.
+* Inline Styles: Aligned widget margin value output with non-inline value output.
+* Updated the SiteOrigin Installer submodule.
+* Added additional data sanitization.
+
 = 2.29.6 - 05 March 2024 =
 * Added a dismiss button to the Classic Editor notice in the admin panel.
 * Improved saving functionality of the Layouts Block with server-side validation for post types, enhanced rendering, block sanitization methods, and improved functionality for locating layout blocks.

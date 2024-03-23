@@ -335,6 +335,30 @@ class SiteOrigin_Panels_Admin_Layouts {
 		wp_die();
 	}
 
+	private function delete_file( $file ) {
+		if ( ! empty( $file ) && file_exists( $file ) ) {
+			@unlink( $file );
+		}
+	}
+
+	public function decode_panels_data( $data, $file = null ) {
+		$panels_data = json_decode( $data, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			$this->delete_file( $file );
+			wp_die();
+		}
+
+		// Newer exports may require further decoding.
+		if ( ! is_array( $panels_data ) ) {
+			$panels_data = $this->decode_panels_data( $panels_data );
+		}
+
+		$panels_data = wp_unslash( $panels_data );
+		$this->delete_file( $file );
+		return $panels_data;
+	}
+
 	/**
 	 * Ajax handler to get an individual prebuilt layout
 	 */
@@ -448,7 +472,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 * Ajax handler to import a layout
 	 */
 	public function action_import_layout() {
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+		if (
+			empty( $_REQUEST['_panelsnonce'] ) ||
+			! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' )
+		) {
 			wp_die();
 		}
 
@@ -461,28 +488,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 
 		$json = file_get_contents( $_FILES['panels_import_data']['tmp_name'] );
-		$panels_data = json_decode( $json, true );
-
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			@unlink( $_FILES['panels_import_data']['tmp_name'] );
-			wp_die();
-		}
-
-		$panels_data = wp_unslash( $panels_data );
-
-		// Newer exports could be encoded further.
-		if ( ! is_array( $panels_data ) ) {
-			$panels_data = json_decode( $panels_data, true );
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				@unlink( $_FILES['panels_import_data']['tmp_name'] );
-				wp_die();
-			}
-		}
+		$panels_data = $this->decode_panels_data( $json, $_FILES['panels_import_data']['tmp_name'] );
 
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
-		@unlink( $_FILES['panels_import_data']['tmp_name'] );
 		echo wp_json_encode( $panels_data );
 		wp_die();
 	}
@@ -496,11 +506,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 
 		$export_data = wp_unslash( $_POST['panels_export_data'] );
-
-		$decoded_export_data = json_decode( $export_data, true );
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			wp_die();
-		}
+		$decoded_export_data = $this->decode_panels_data( $export_data );
 
 		if ( ! empty( $decoded_export_data['name'] ) ) {
 			$decoded_export_data['id'] = sanitize_title_with_dashes( $decoded_export_data['name'] );
@@ -536,11 +542,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 *
 	 * @return array The data for the layout
 	 */
-	public static function load_layout( $id, $name, $json_file, $screenshot = false ) {
-		$layout_data = json_decode( file_get_contents( $json_file ), true );
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			wp_die();
-		}
+	public function load_layout( $id, $name, $json_file, $screenshot = false ) {
+		$json = file_get_contents( $json_file );
+		$layout_data = $this->decode_panels_data( $json );
+
 		$layout_data = apply_filters( 'siteorigin_panels_load_layout_' . $id, $layout_data );
 
 		$layout_data = array_merge( array(
