@@ -68,7 +68,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			}
 		}
 
-		// Third-party plugins dettection.
+		// Third-party plugins detection.
 		foreach ( $widgets as $widget_id => &$widget ) {
 			if ( strpos( $widget_id, 'WC_' ) === 0 || strpos( $widget_id, 'WooCommerce' ) !== false ) {
 				$widget['groups'][] = 'woocommerce';
