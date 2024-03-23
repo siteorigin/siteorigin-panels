@@ -92,6 +92,11 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	 * @return array
 	 */
 	public function add_widgets_dialog_tabs( $tabs ) {
+		$stored_tabs = get_transient( 'siteorigin_panels_widget_dialog_tabs' );
+		if ( $stored_tabs ) {
+			return $stored_tabs;
+		}
+
 		$tabs['widgets_bundle'] = array(
 			'title'  => __( 'Widgets Bundle', 'siteorigin-panels' ),
 			'filter' => array(
@@ -184,6 +189,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 				'groups' => array( 'recommended' ),
 			),
 		);
+		set_transient( 'siteorigin_panels_widget_dialog_tabs', $tabs, DAY_IN_SECONDS );
 
 		return $tabs;
 	}
