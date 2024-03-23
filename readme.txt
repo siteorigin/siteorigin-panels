@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.9 - 23 March 2024 =
+* Layouts: Resolved import error.
+* Inline CSS Generation: Resolved inline CSS potentially printing on the site front-end.
+* Block Editor: Removed redundant shortcode fallback.
+
 = 2.29.8 - 19 March 2024 =
 * Post Loop: Update to allow HTML formatting in the widget title.
 
