@@ -468,15 +468,32 @@ class SiteOrigin_Panels {
 			$excerpt_length = apply_filters( 'excerpt_length', 55 );
 
 			foreach ( $panels_data['widgets'] as $widget ) {
-				$panels_info = $widget['panels_info'];
+				// Is the widget valid?
+				if ( empty( $widget['panels_info'] ) ) {
+					continue;
+				}
 
+				$panels_info = $widget['panels_info'];
 				if ( $panels_info['grid'] > 1 ) {
 					// Limiting search for a text type widget to the first two PB rows to avoid having excerpt content
 					// that's very far down in a post.
 					break;
 				}
 
-				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' || $panels_info['class'] == 'WP_Widget_Black_Studio_TinyMCE' ) {
+				$widgets = apply_filters( 'siteorigin_panels_excerpt_widgets', array(
+					'SiteOrigin_Widget_Editor_Widget',
+					'WP_Widget_Text',
+					'WP_Widget_Black_Studio_TinyMCE',
+				) );
+
+				if ( empty( $widgets ) ) {
+					break;
+				}
+
+				if ( in_array( $panels_info['class'], $widgets ) ) {
+					if ( empty( $widget['text'] ) ) {
+						continue;
+					}
 					$raw_excerpt .= ' ' . $widget['text'];
 					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
 					// We're just applying it to text type widgets content in the first two rows.
