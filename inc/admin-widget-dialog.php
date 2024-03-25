@@ -106,7 +106,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 					'/1\{ *(.*?) *\}/',
 				),
 				array(
-					'<a href="' . admin_url( 'plugins.php?page=so-widgets-plugins' ) . '">$1</a>',
+					'<a href="' . esc_url( admin_url( 'plugins.php?page=so-widgets-plugins' ) ) . '">$1</a>',
 				),
 				__( 'Enable more widgets in the 1{Widgets Bundle settings}.', 'siteorigin-panels' )
 			);
@@ -129,7 +129,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 					'/1\{ *(.*?) *\}/',
 				),
 				array(
-					'<a href="' . admin_url( 'options-general.php?page=siteorigin_panels' ) . '">$1</a>',
+					'<a href="' . esc_url( admin_url( 'options-general.php?page=siteorigin_panels' ) ) . '">$1</a>',
 				),
 				__( 'You can enable the legacy (PB) widgets in the 1{Page Builder settings}.', 'siteorigin-panels' )
 			),

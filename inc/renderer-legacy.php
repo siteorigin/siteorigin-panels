@@ -16,6 +16,7 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 		// Exit if we don't have panels data
 		if ( empty( $panels_data ) ) {
 			$panels_data = get_post_meta( $post_id, 'panels_data', true );
+			$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 
 			if ( empty( $panels_data ) ) {
 				return '';

@@ -89,7 +89,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		if ( ! is_admin() && ! defined( 'REST_REQUEST' ) ) {
 			?>
 			<p>
-				<?php _e( 'This widget can currently only be used in the WordPress admin interface.', 'siteorigin-panels' ); ?>
+				<?php esc_html_e( 'This widget can currently only be used in the WordPress admin interface.', 'siteorigin-panels' ); ?>
 			</p>
 			<?php
 			return;
@@ -108,7 +108,7 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		}
 
 		if ( ! is_string( $instance['panels_data'] ) ) {
-			$instance['panels_data'] = json_encode( $instance['panels_data'] );
+			$instance['panels_data'] = wp_json_encode( $instance['panels_data'] );
 		}
 
 		$builder_supports = apply_filters( 'siteorigin_panels_layout_builder_supports', array(), $instance['panels_data'] );
@@ -121,22 +121,22 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 		<div class="siteorigin-page-builder-widget" id="siteorigin-page-builder-widget-<?php echo esc_attr( $form_id ); ?>"
 			data-builder-id="<?php echo esc_attr( $form_id ); ?>"
 			data-type="layout_widget"
-			data-builder-supports="<?php echo esc_attr( json_encode( $builder_supports ) ); ?>"
+			data-builder-supports="<?php echo esc_attr( wp_json_encode( $builder_supports ) ); ?>"
 			>
 			<p>
-				<button class="button-secondary siteorigin-panels-display-builder" ><?php _e( 'Open Builder', 'siteorigin-panels' ); ?></button>
+				<button class="button-secondary siteorigin-panels-display-builder" ><?php esc_html_e( 'Open Builder', 'siteorigin-panels' ); ?></button>
 			</p>
-			
+
 			<input
 				type="hidden"
 				data-panels-filter="json_parse"
 				class="panels-data"
 				value="<?php echo $panels_data; ?>"
-				name="<?php echo $this->get_field_name( 'panels_data' ); ?>"
-				id="<?php echo $this->get_field_id( 'panels_data' ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'panels_data' ) ); ?>"
+				id="<?php echo esc_attr( $this->get_field_id( 'panels_data' ) ); ?>"
 			/>
 
-			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ); ?>" name="<?php echo $this->get_field_name( 'builder_id' ); ?>" />
+			<input type="hidden" value="<?php echo esc_attr( $instance['builder_id'] ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'builder_id' ) ); ?>" />
 		</div>
 		<script type="text/javascript">
 			if(

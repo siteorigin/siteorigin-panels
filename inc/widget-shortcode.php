@@ -99,7 +99,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	}
 
 	public static function encode_data( $data ) {
-		return '<input type="hidden" value="' . esc_textarea( json_encode( $data, JSON_UNESCAPED_UNICODE ) ) . '" />';
+		return '<input type="hidden" value="' . esc_textarea( wp_json_encode( $data, JSON_UNESCAPED_UNICODE ) ) . '" />';
 	}
 
 	public static function decode_data( $string ) {

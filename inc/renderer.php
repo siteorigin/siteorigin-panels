@@ -573,7 +573,7 @@ class SiteOrigin_Panels_Renderer {
 		$rendered_layout = apply_filters( 'siteorigin_panels_render', $html, $post_id, ! empty( $post ) ? $post : null );
 
 		if ( $is_preview ) {
-			$widget_css = '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+			$widget_css = '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
 			$widget_css .= SiteOrigin_Panels::renderer()->generate_css( $post_id, $panels_data, $layout_data );
 			$widget_css = preg_replace( '/\s+/', ' ', $widget_css );
 			$type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
@@ -615,7 +615,7 @@ class SiteOrigin_Panels_Renderer {
 				$attributes['style'] .= 'padding: ' . $style['padding'] . ';';
 			}
 
-			if ( ! empty( $style['margin'] ) ) {
+			if ( $name !== 'widget' && ! empty( $style['margin'] ) ) {
 				$attributes['style'] .= 'margin: ' . $style['margin'] . ';';
 			}
 
@@ -773,18 +773,35 @@ class SiteOrigin_Panels_Renderer {
 			'data-index' => $widget_info['widget_index'],
 		);
 
-		if ( siteorigin_panels_setting( 'inline-styles' ) && ! $is_last ) {
-			$widget_bottom_margin = apply_filters(
-				'siteorigin_panels_css_cell_margin_bottom',
-				( empty( $widget_info['style']['margin'] ) ? siteorigin_panels_setting( 'margin-bottom' ) : 0 ) . 'px',
-				false,
-				false,
-				array(),
-				$post_id
-			);
+		if ( siteorigin_panels_setting( 'inline-styles' ) ) {
+			$attributes['style'] = '';
+			if ( ! empty( $widget_info['style']['margin'] ) ) {
+				$attributes['style'] .= 'margin: ' . esc_attr( $widget_info['style']['margin'] ) . ';';
+			}
 
-			if ( ! empty( $widget_bottom_margin ) ) {
-				$attributes['style'] = 'margin-bottom: ' . $widget_bottom_margin;
+			if (
+				! $is_last &&
+				empty( $widget_info['style']['margin'] )
+			) {
+				$widget_bottom_margin = apply_filters(
+					'siteorigin_panels_css_cell_margin_bottom',
+					siteorigin_panels_setting( 'margin-bottom' ) . 'px',
+					false,
+					false,
+					array(),
+					$post_id
+				);
+
+				if (
+					! empty( $widget_bottom_margin ) &&
+					$widget_bottom_margin !== '0px'
+				) {
+					$attributes['style'] .= 'margin-bottom: ' . $widget_bottom_margin;
+				}
+			}
+
+			if ( empty( $attributes['style'] ) ) {
+				unset( $attributes['style'] );
 			}
 		}
 
@@ -869,9 +886,7 @@ class SiteOrigin_Panels_Renderer {
 			$the_css = apply_filters( 'siteorigin_panels_inline_styles', $the_css );
 
 			if ( ! empty( $the_css ) ) {
-				?>
-                <style<?php echo current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"'; ?> media="all"
-                       id="siteorigin-panels-layouts-<?php echo esc_attr( $css_id ); ?>"><?php echo $the_css; ?></style><?php
+				printf( '<style media="all" id="siteorigin-panels-layouts-%s">%s</style>', esc_attr( $css_id ), $the_css );
 			}
 		}
 	}
@@ -881,7 +896,12 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	public function enqueue_styles() {
 		// Register the style to support possible lazy loading
-		wp_register_style( 'siteorigin-panels-front', SiteOrigin_Panels::front_css_url(), array(), SITEORIGIN_PANELS_VERSION );
+		wp_register_style(
+			'siteorigin-panels-front',
+			esc_url( SiteOrigin_Panels::front_css_url() ),
+			array(),
+			SITEORIGIN_PANELS_VERSION
+		);
 	}
 
 	/**
@@ -982,11 +1002,11 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array  $attributes The attributes for the HTML element.
 	 */
 	private function render_element( $tag, $attributes ) {
-		echo '<' . $tag;
+		echo '<' . esc_html( $tag );
 
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
-				echo ' ' . $name . '="' . esc_attr( $value ) . '" ';
+				echo ' ' . esc_html( $name ) . '="' . esc_attr( $value ) . '" ';
 			}
 		}
 		echo '>';

@@ -8,7 +8,7 @@ Author: SiteOrigin
 Author URI: https://siteorigin.com
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
-Donate link: http://siteorigin.com/page-builder/#donate
+Donate link: https://siteorigin.com/downloads/premium/
 */
 
 define( 'SITEORIGIN_PANELS_VERSION', 'dev' );
@@ -264,6 +264,11 @@ class SiteOrigin_Panels {
 		if ( get_template() == 'vantage' ) {
 			require_once plugin_dir_path( __FILE__ ) . 'compat/vantage.php';
 		}
+
+		if ( defined( 'PAGELAYER_VERSION' ) ) {
+			SiteOrigin_Panels_Compat_Pagelayer::single();
+		}
+
 	}
 
 	/**
@@ -635,7 +640,7 @@ class SiteOrigin_Panels {
 		if ( ! wp_script_is( 'fitvids', 'registered' ) ) {
 			wp_register_script(
 				'fitvids',
-				siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array( 'jquery' ),
 				SITEORIGIN_PANELS_VERSION
 			);
@@ -731,7 +736,7 @@ class SiteOrigin_Panels {
 	 * Script that removes the siteorigin-panels-before-js class from the body.
 	 */
 	public function strip_before_js() {
-		?><script<?php echo current_theme_supports( 'html5', 'script' ) ? '' : ' type="text/javascript"'; ?>>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
+		?><script>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 
 	/**

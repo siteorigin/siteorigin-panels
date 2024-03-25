@@ -2356,7 +2356,7 @@
 					}
 
 					.wp-color-result {
-						border-color: #ccc;
+						border-color: #8c8f94;
 					}
 
 					.wp-color-result,
@@ -2490,6 +2490,7 @@
 					margin: 0;
 
 					.wp-color-result-text {
+						border-left: 1px solid #8c8f94;
 						height: 28px;
 					}
 				}
@@ -2569,7 +2570,7 @@
 			.so-image-selector {
 				display: inline-block;
 				background-color: #f7f7f7;
-				border: 1px solid #ccc;
+				border: 1px solid #8c8f94;
 				height: @image_field_height;
 				float: left;
 				.rounded(3px);
@@ -2587,7 +2588,7 @@
 					width: @image_field_height;
 					float: left;
 					background: #fff;
-					border-right: 1px solid #ccc;
+					border-right: 1px solid #8c8f94;
 					background-size: cover;
 
 					.border-radius(0, 0, 3px, 3px);
@@ -3331,6 +3332,32 @@
 			padding: 0 24px 0 8px;
 			vertical-align: middle;
 			width: auto;
+		}
+	}
+}
+
+#siteorigin-panels-use-classic-notice {
+	padding-right: 25px;
+	position: relative;
+
+	.siteorigin-notice-dismiss {
+		background: none;
+		border: none;
+		color: #787c82;
+		cursor: pointer;
+		margin: 9px;
+		position: absolute;
+		right: 1px;
+		text-decoration: none;
+		top: 0;
+
+		&:focus,
+		&:hover {
+			color: #d63638;
+		}
+
+		.dashicons {
+			font-size: 17px;
 		}
 	}
 }

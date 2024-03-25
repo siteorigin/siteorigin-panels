@@ -2,19 +2,21 @@
 
 jQuery( function ( $ ) {
 	// Stretch all the full width rows
-	var stretchFullWidthRows = function () {
-		if ( ! panelsStyles.stretchRows ) {
-			return;
-		}
-		var fullContainer = $( panelsStyles.fullContainer );
+	const stretchFullWidthRows = function () {
+		let fullContainer = $( panelsStyles.fullContainer );
 		if ( fullContainer.length === 0 ) {
 			fullContainer = $( 'body' );
 		}
 
-		var $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
+		const $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
+		// Are there any rows to stretch?
+		if ( ! $panelsRow.length ) {
+			return;
+		}
+
 		$panelsRow.each( function () {
-			var $$ = $( this );
-			var stretchType = $$.data( 'stretch-type' );
+			const $$ = $( this );
+			const stretchType = $$.data( 'stretch-type' );
 
 			// Reset all the styles associated with row stretching
 			$$.css( {
@@ -22,8 +24,8 @@ jQuery( function ( $ ) {
 				'margin-right': 0,
 			} );
 
-			var leftSpace = $$.offset().left - fullContainer.offset().left,
-				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
+			const leftSpace = $$.offset().left - fullContainer.offset().left;
+			const rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
 			$$.css( {
 				'margin-left': - leftSpace + 'px',
@@ -39,30 +41,30 @@ jQuery( function ( $ ) {
 			}
 		} );
 
-		if ( $panelsRow.length ) {
-			$( window ).trigger( 'panelsStretchRows' );
-		}
+		$( window ).trigger( 'panelsStretchRows' );
+	}
+
+	if ( panelsStyles.stretchRows ) {
+		$( window ).on( 'resize load', stretchFullWidthRows ).trigger( 'resize' );
 	}
 
 	if (
-		typeof parallaxStyles != 'undefined' &&
-		typeof simpleParallax != 'undefined' &&
-		(
-			! parallaxStyles['disable-parallax-mobile'] ||
-			! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
-		)
+		typeof parallaxStyles !== 'undefined' &&
+		typeof simpleParallax !== 'undefined'
 	) {
-		new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
-			delay: parallaxStyles['delay'],
-			scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
-		} );
-	}
+		const { 'disable-parallax-mobile': disableParallaxMobile, 'mobile-breakpoint': mobileBreakpoint, delay, scale } = parallaxStyles;
 
-	$( window ).on( 'resize load', function() {
-		stretchFullWidthRows();
-	} ).trigger( 'resize' );
+		if (
+			! disableParallaxMobile ||
+			! window.matchMedia( `(max-width: ${ mobileBreakpoint })` ).matches
+		) {
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
+				delay,
+				scale: scale < 1.1 ? 1.1 : scale,
+			} );
+		}
+	}
 
 	// This should have been done in the footer, but run it here just incase.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
-
 } );
