@@ -26,7 +26,7 @@ function siteorigin_enqueue_seo_compat() {
 	if ( $enqueue ) {
 		wp_enqueue_script(
 			'so-panels-seo-compat',
-			siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+			esc_url( siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 			$deps,
 			SITEORIGIN_PANELS_VERSION,
 			true
