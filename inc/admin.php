@@ -888,8 +888,6 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function get_widgets() {
 		global $wp_widget_factory;
-		$widgets = array();
-
 		$widgets = get_transient( 'siteorigin_panels_widgets' );
 
 		if ( $widgets !== false ) {

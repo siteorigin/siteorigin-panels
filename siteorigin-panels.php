@@ -42,7 +42,9 @@ class SiteOrigin_Panels {
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 
-		add_action( 'activated_plugin', array( $this, 'activation_flag_redirect' ) );
+		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
+		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+
 		add_action( 'admin_init', array( $this, 'activation_do_redirect' ) );
 
 		if (
@@ -794,10 +796,17 @@ class SiteOrigin_Panels {
 	/**
 	 * Flag redirect to welcome page after activation.
 	 */
-	public function activation_flag_redirect( $plugin ) {
+	public function activated_plugin( $plugin ) {
 		if ( $plugin == plugin_basename( __FILE__ ) ) {
 			set_transient( 'siteorigin_panels_activation_welcome', true, 30 );
 		}
+
+		$this->deactivated_plugin( $plugin );
+	}
+
+	public function deactivated_plugin( $plugin ) {
+		delete_transient( 'siteorigin_panels_widgets' );
+		delete_transient( 'siteorigin_panels_widget_dialog_tabs' );
 	}
 
 	/**
