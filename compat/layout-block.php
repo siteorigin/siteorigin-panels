@@ -130,7 +130,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
-		if ( $return_layout || is_wp_error( $rendered_layout ) ) {
+		if ( is_wp_error( $rendered_layout ) ) {
+			return $rendered_layout;
+		}
+
+		$rendered_layout = $this->remove_block_comments( $rendered_layout );
+
+
+		if ( $return_layout ) {
 			return SiteOrigin_Panels_Admin::is_block_editor() ? wp_json_encode( $rendered_layout ) : $rendered_layout;
 		}
 
@@ -139,6 +146,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$attributes['contentPreview'] = wp_json_encode( $rendered_layout );
 
 		return $attributes;
+	}
+
+	// Remove Blocks to prevent potential issues.
+	private function remove_block_comments( $content ) {
+		return preg_replace( '/<!-- \/?(wp:.*?)-->/s', '', $content );
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
