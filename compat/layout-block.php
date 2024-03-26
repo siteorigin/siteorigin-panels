@@ -130,7 +130,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
 		if ( $return_layout || is_wp_error( $rendered_layout ) ) {
-			return $rendered_layout;
+			return SiteOrigin_Panels_Admin::is_block_editor() ? wp_json_encode( $rendered_layout ) : $rendered_layout;
 		}
 
 		$attributes['panelsData'] = $panels_data;
