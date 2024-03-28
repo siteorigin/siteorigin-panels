@@ -888,6 +888,12 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function get_widgets() {
 		global $wp_widget_factory;
+		$widgets = get_transient( 'siteorigin_panels_widgets' );
+
+		if ( $widgets !== false ) {
+			return $widgets;
+		}
+
 		$widgets = array();
 
 		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
@@ -937,6 +943,8 @@ class SiteOrigin_Panels_Admin {
 
 		// Sort the widgets alphabetically.
 		uasort( $widgets, array( $this, 'widgets_sorter' ) );
+
+		set_transient( 'siteorigin_panels_widgets', $widgets, 10 * 60 );
 
 		return $widgets;
 	}

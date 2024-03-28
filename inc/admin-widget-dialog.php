@@ -68,7 +68,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			}
 		}
 
-		// Third-party plugins dettection.
+		// Third-party plugins detection.
 		foreach ( $widgets as $widget_id => &$widget ) {
 			if ( strpos( $widget_id, 'WC_' ) === 0 || strpos( $widget_id, 'WooCommerce' ) !== false ) {
 				$widget['groups'][] = 'woocommerce';
@@ -92,6 +92,11 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	 * @return array
 	 */
 	public function add_widgets_dialog_tabs( $tabs ) {
+		$stored_tabs = get_transient( 'siteorigin_panels_widget_dialog_tabs' );
+		if ( $stored_tabs ) {
+			return $stored_tabs;
+		}
+
 		$tabs['widgets_bundle'] = array(
 			'title'  => __( 'Widgets Bundle', 'siteorigin-panels' ),
 			'filter' => array(
@@ -178,12 +183,31 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			);
 		}
 
-		$tabs['recommended'] = array(
-			'title'  => __( 'Recommended Widgets', 'siteorigin-panels' ),
-			'filter' => array(
-				'groups' => array( 'recommended' ),
-			),
-		);
+		// Are there any recommended widgets?
+		$widgets = SiteOrigin_Panels_Admin::single()->get_widgets();
+		$recommendedWidgets = array();
+
+		foreach ( $widgets as $widgetName => $widgetData ) {
+			if (
+				isset( $widgetData['groups'] ) &&
+				in_array( 'recommended', $widgetData['groups'] )
+			) {
+				$recommendedWidgets[ $widgetName ] = $widgetData;
+				// No need to continue loop.
+				break;
+			}
+		}
+
+		if ( ! empty( $recommendedWidgets ) ) {
+			$tabs['recommended'] = array(
+				'title'  => __( 'Recommended Widgets', 'siteorigin-panels' ),
+				'filter' => array(
+					'groups' => array( 'recommended' ),
+				),
+			);
+		}
+
+		set_transient( 'siteorigin_panels_widget_dialog_tabs', $tabs, DAY_IN_SECONDS );
 
 		return $tabs;
 	}
