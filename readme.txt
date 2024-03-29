@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.10 - 29 March 2024 =
+* SiteOrigin Layout Block: Update to prevent a potential issue during rendering and saving.
+* Legacy Widgets: Update to resolve styles not outputting correctly.
+* Excerpt Generation: Update to prevent potential warnings. Expanded the list of supported widgets.
+* Recommended Widgets: Update to ensure the tab doesn't display if there are no widgets to recommend.
+* Resolved column preset sizes display issue.
+* Sortable: Update to prevent third-party plugins from misaligning text.
+
 = 2.29.9 - 23 March 2024 =
 * Layouts: Resolved import error.
 * Inline CSS Generation: Resolved inline CSS potentially printing on the site front-end.
