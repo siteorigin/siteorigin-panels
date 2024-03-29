@@ -345,7 +345,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<span class="cell-resize-label">
 						<?php echo esc_html_e( 'Column Presets: ', 'siteorigin-panels' ); ?>
 					</span>
-					<div class="cell-resize" data-resize="<?php echo wp_json_encode( $column_sizes ); ?>"></div>
+					<div class="cell-resize" data-resize="<?php echo esc_attr( wp_json_encode( $column_sizes ) ); ?>"></div>
 				</div>
 				<div class="cell-resize-direction-container">
 					<?php esc_html_e( 'Direction:', 'siteorigin-panels' ); ?>
