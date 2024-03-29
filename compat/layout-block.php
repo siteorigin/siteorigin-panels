@@ -2,6 +2,7 @@
 
 class SiteOrigin_Panels_Compat_Layout_Block {
 	const BLOCK_NAME = 'siteorigin-panels/layout-block';
+	private $return_layout = true;
 
 	/**
 	 * Get the singleton instance
@@ -103,7 +104,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 	}
 
-	public function render_layout_block( $attributes, $return_layout = true ) {
+	public function render_layout_block( $attributes, $content = null ) {
 		if ( empty( $attributes['panelsData'] ) ) {
 			return '<div>' .
 			__( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
@@ -121,16 +122,20 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 			return $class_names;
 		};
+
 		add_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
-		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
 		SiteOrigin_Panels_Post_Content_Filters::add_filters( true );
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters( true );
-		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
-		if ( $return_layout || is_wp_error( $rendered_layout ) ) {
+		if ( is_wp_error( $rendered_layout ) ) {
 			return $rendered_layout;
+		}
+
+		$rendered_layout = $this->remove_block_comments( $rendered_layout );
+		if ( $this->return_layout ) {
+			return SiteOrigin_Panels_Admin::is_block_editor() ? wp_json_encode( $rendered_layout ) : $rendered_layout;
 		}
 
 		$attributes['panelsData'] = $panels_data;
@@ -138,6 +143,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$attributes['contentPreview'] = wp_json_encode( $rendered_layout );
 
 		return $attributes;
+	}
+
+	// Remove Blocks to prevent potential issues.
+	private function remove_block_comments( $content ) {
+		return preg_replace( '/<!-- \/?(wp:.*?)-->/s', '', $content );
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
@@ -215,6 +225,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		foreach( $blocks as &$block ) {
 			$block = $this->sanitize_blocks( $block, true );
 		}
+
 		$prepared_post->post_content = serialize_blocks( $blocks );
 
 		return $prepared_post;
@@ -245,14 +256,12 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $block;
 		}
 
-		$block['attrs'] = $this->render_layout_block( $block['attrs'], false );
+		$this->return_layout = false;
+		$block['attrs'] = $this->render_layout_block( $block['attrs'] );
+		$this->return_layout = true;
 		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
-			$rendered_layout = '<div class="wp-block-siteorigin-panels-layout-block panel-layout">' . wp_json_encode( $block['attrs']['renderedLayout'] ) . '</div>';
+			$rendered_layout = '<div class="wp-block-siteorigin-panels-layout-block panel-layout test">' . wp_json_encode( $block['attrs']['renderedLayout'] ) . '</div>';
 			$block['innerHTML'] = $rendered_layout;
-			if ( ! is_array( $block['innerContent'] ) ) {
-				$block['innerContent'] = array();
-			}
-			$block['innerContent'][0] = $rendered_layout;
 
 			unset( $block['attrs']['renderedLayout'] );
 		}

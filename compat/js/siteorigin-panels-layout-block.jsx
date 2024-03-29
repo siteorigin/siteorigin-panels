@@ -371,16 +371,22 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 				onRowOrWidgetMouseUp={enableSelection}
 			/>
 		);
-	},
-
-	save( { attributes } ) {
-		return attributes.hasOwnProperty('contentPreview') ?
-			<wp.element.RawHTML>{attributes.contentPreview}</wp.element.RawHTML> :
-			null;
 	}
 } );
 
 ( ( jQuery ) => {
+	// Resolve Block Editor warning for SO Layout Block.
+	let unsubscribe = null;
+	unsubscribe = wp.data.subscribe( () => {
+		const isEditorReady = wp.data.select( 'core/editor' ).__unstableIsEditorReady();
+		if ( isEditorReady && unsubscribe ) {
+			unsubscribe();
+			setTimeout( function () {
+				jQuery( '.wp-block[data-type="siteorigin-panels/layout-block"].has-warning .block-editor-warning__action .components-button' ).trigger( 'click' );
+			}, 250 );
+		}
+	} );
+
 	if ( window.soPanelsBlockEditorAdmin.showAddButton ) {
 		jQuery( () => {
 			setTimeout( () => {

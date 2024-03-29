@@ -432,7 +432,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		}
 
 		echo $args['before_widget'];
-		echo '<div class="' .  sanitize_html_class( implode( ' ', $widget_classes ) ) . '">';
+		echo '<div class="' . esc_attr( implode( ' ', $widget_classes ) ) . '">';
 		include $template_file;
 		echo '</div>';
 		echo $args['after_widget'];
