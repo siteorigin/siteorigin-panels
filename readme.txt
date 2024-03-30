@@ -1,5 +1,5 @@
 === Page Builder by SiteOrigin ===
-Tags: page builder, responsive, parallax, widgets, blocks, gallery, layout, grid, cms, builder, widget
+Tags: page builder, website builder, responsive design, drag and drop, visual editor
 Requires at least: 4.7
 Tested up to: 6.4
 Requires PHP: 5.6.20
