@@ -52,7 +52,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				}
 
 				return '<div class="featured-image">' .
-					esc_url( get_the_post_thumbnail( $post->ID ) )
+					get_the_post_thumbnail( $post->ID )
 					. '</div>';
 			default:
 				return '';
