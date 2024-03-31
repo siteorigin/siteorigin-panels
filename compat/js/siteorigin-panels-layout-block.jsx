@@ -378,7 +378,14 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 	// Resolve Block Editor warning for SO Layout Block.
 	let unsubscribe = null;
 	unsubscribe = wp.data.subscribe( () => {
-		const isEditorReady = wp.data.select( 'core/editor' ).__unstableIsEditorReady();
+		let isEditorReady = false;
+
+		if ( wp.data.select( 'core/block-editor' ) ) {
+			isEditorReady = wp.data.select( 'core/block-editor' ).hasInserterItems();
+		} else if( wp.data.select( 'core/editor' ) ) {
+			isEditorReady = wp.data.select( 'core/editor' ).__unstableIsEditorReady();
+		}
+
 		if ( isEditorReady && unsubscribe ) {
 			unsubscribe();
 			setTimeout( function () {
