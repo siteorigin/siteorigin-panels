@@ -265,7 +265,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 			if (
 				! is_wp_error( $response ) &&
-				is_array( $response ) && $response['response']['code'] == 200
+				is_array( $response ) &&
+				$response['response']['code'] == 200
 			) {
 				$results = json_decode( $response['body'], true );
 
