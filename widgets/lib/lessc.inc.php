@@ -2145,7 +2145,7 @@ class lessc_parser {
 		$this->count = 0;
 		$this->line = 1;
 
-		$this->env = new stdClass(); // block stack
+		$this->env = null; // block stack
 		$this->buffer = $this->writeComments ? $buffer : $this->removeComments($buffer);
 		$this->pushSpecialBlock("root");
 		$this->eatWhiteDefault = true;
