@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.11 - 31 March 2024 =
+* Post Content Widget: Fixed post featured image output.
+* Post Content Widget: Remove unused content and improved title output.
+* Block-Based Widgets Editor: Resolved JavaScript error.
+* Legacy PB Widgets: Resolved `lessphp` notices.
+
 = 2.29.10 - 29 March 2024 =
 * SiteOrigin Layout Block: Update to prevent a potential issue during rendering and saving.
 * Legacy Widgets: Update to resolve styles not outputting correctly.

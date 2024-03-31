@@ -1,7 +1,7 @@
 <?php
 
 /**
- * lessphp v0.3.9
+ * lessphp v0.3.9 - Edited.
  * http://leafo.net/lessphp
  *
  * LESS css compiler, adapted from http://lesscss.org
@@ -52,6 +52,22 @@ class lessc {
 
 	public $importDisabled = false;
 	public $importDir = '';
+
+	public $buffer;
+	public $parser;
+	public $scope;
+	public $env;
+	public $formatter;
+	public $formatterName;
+	public $count;
+	public $allParsedFiles;
+	public $_parseFile;
+	public $lessc;
+	public $sriteComments;
+	public $eatWhiteDefault;
+	public $sourceName;
+	public $writeComments;
+	public $inExp;
 
 	protected $numberPrecision = null;
 
@@ -112,6 +128,10 @@ class lessc {
 		$this->addParsedFile($realPath);
 		$parser = $this->makeParser($realPath);
 		$root = $parser->parse(file_get_contents($realPath));
+
+		if ( $root === null ) {
+			return;
+		}
 
 		// set the parents of all the block props
 		foreach ($root->props as $prop) {
@@ -575,6 +595,10 @@ class lessc {
 	// sets all argument names in $args to either the default value
 	// or the one passed in through $values
 	protected function zipSetArgs($args, $values) {
+		if ( empty( $args ) ) {
+			return;
+		}
+
 		$i = 0;
 		$assignedValues = array();
 		foreach ($args as $a) {
@@ -1410,7 +1434,7 @@ class lessc {
 		}
 
 		// type based operators
-		$fname = "op_${ltype}_${rtype}";
+		$fname = "op_{$ltype}_{$rtype}";
 		if (is_callable(array($this, $fname))) {
 			$out = $this->$fname($op, $left, $right);
 			if (!is_null($out)) return $out;
@@ -1646,9 +1670,9 @@ class lessc {
 	public function compile($string, $name = null) {
 		$locale = setlocale(LC_NUMERIC, 0);
 		setlocale(LC_NUMERIC, "C");
-		
+
 		// Account for import increasing the buffer length.
-		$this->count = strlen( $this->buffer );
+		$this->count = ! empty( $this->buffer ) ? strlen( $this->buffer ) : 0;
 
 		$this->parser = $this->makeParser($name);
 		$root = $this->parser->parse($string);
@@ -2084,6 +2108,19 @@ class lessc_parser {
 
 	// caches preg escaped literals
 	static protected $literalCache = array();
+
+	public $writeComments;
+	public $eatWhiteDefault;
+	public $buffer;
+	public $count;
+	public $lessc;
+	public $sourceName;
+	public $line;
+	public $env;
+	public $seenComments;
+	public $inExp;
+	public $currentProperty;
+	public $commentsSeen;
 
 	public function __construct($lessc, $sourceName = null) {
 		$this->eatWhiteDefault = true;
@@ -3200,12 +3237,15 @@ class lessc_parser {
 
 	// try to match something on head of buffer
 	protected function match($regex, &$out, $eatWhitespace = null) {
-		if ($eatWhitespace === null) $eatWhitespace = $this->eatWhiteDefault;
-
-		$r = '/'.$regex.($eatWhitespace && !$this->writeComments ? '\s*' : '').'/Ais';
-		if (preg_match($r, $this->buffer, $out, null, $this->count)) {
-			$this->count += strlen($out[0]);
-			if ($eatWhitespace && $this->writeComments) $this->whitespace();
+		if ( $eatWhitespace === null ) {
+			$eatWhitespace = $this->eatWhiteDefault;
+		}
+		$r = '/' . $regex . ( $eatWhitespace && ! $this->writeComments ? '\s*' : '') . '/Ais';
+		if ( preg_match( $r, $this->buffer, $out, 0, $this->count ) ) {
+			$this->count += strlen( $out[0] );
+			if ( $eatWhitespace && $this->writeComments ) {
+				$this->whitespace();
+			}
 			return true;
 		}
 		return false;
@@ -3215,7 +3255,7 @@ class lessc_parser {
 	protected function whitespace() {
 		if ($this->writeComments) {
 			$gotWhite = false;
-			while (preg_match(self::$whitePattern, $this->buffer, $m, null, $this->count)) {
+			while (preg_match(self::$whitePattern, $this->buffer, $m, 0, $this->count)) {
 				if (isset($m[1]) && empty($this->commentsSeen[$this->count])) {
 					$this->append(array("comment", $m[1]));
 					$this->commentsSeen[$this->count] = true;
@@ -3234,7 +3274,7 @@ class lessc_parser {
 	protected function peek($regex, &$out = null, $from=null) {
 		if (is_null($from)) $from = $this->count;
 		$r = '/'.$regex.'/Ais';
-		$result = preg_match($r, $this->buffer, $out, null, $from);
+		$result = preg_match($r, $this->buffer, $out, 0, $from);
 
 		return $result;
 	}
@@ -3378,6 +3418,7 @@ class lessc_formatter_classic {
 	public $breakSelectors = false;
 
 	public $compressColors = false;
+	public $indentLevel;
 
 	public function __construct() {
 		$this->indentLevel = 0;
@@ -3476,5 +3517,3 @@ class lessc_formatter_lessjs extends lessc_formatter_classic {
 	public $assignSeparator = ": ";
 	public $selectorSeparator = ",";
 }
-
-
