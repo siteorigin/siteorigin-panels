@@ -1,35 +1,58 @@
 == Changelog ==
 
+= 2.29.10 - 29 March 2024 =
+- SiteOrigin Layout Block: Update to prevent a potential issue during rendering and saving.
+- Legacy Widgets: Update to resolve styles not outputting correctly.
+- Excerpt Generation: Update to prevent potential warnings. Expanded the list of supported widgets.
+- Recommended Widgets: Update to ensure the tab doesn't display if there are no widgets to recommend.
+- Resolved column preset sizes display issue.
+- Sortable: Update to prevent third-party plugins from misaligning text.
+
+= 2.29.9 - 23 March 2024 =
+- Layouts: Resolved import error.
+- Inline CSS Generation: Resolved inline CSS potentially printing on the site front-end.
+- Block Editor: Removed redundant shortcode fallback.
+
+= 2.29.8 - 19 March 2024 =
+- Post Loop: Update to allow HTML formatting in the widget title.
+
+= 2.29.7 - 18 March 2024 =
+- ACF: Added gallery field support.
+- Resolved a potential layout import error.
+- Inline Styles: Aligned widget margin value output with non-inline value output.
+- Updated the SiteOrigin Installer submodule.
+- Added additional data sanitization.
+
 = 2.29.6 - 05 March 2024 =
-* Added a dismiss button to the Classic Editor notice in the admin panel.
-* Improved saving functionality of the Layouts Block with server-side validation for post types, enhanced rendering, block sanitization methods, and improved functionality for locating layout blocks.
-* Ensured that errors are not processed and returned as part of the layout in the Layouts Block.
+- Added a dismiss button to the Classic Editor notice in the admin panel.
+- Improved saving functionality of the Layouts Block with server-side validation for post types, enhanced rendering, block sanitization methods, and improved functionality for locating layout blocks.
+- Ensured that errors are not processed and returned as part of the layout in the Layouts Block.
 
 = 2.29.5 - 16 February 2024 =
-* Media Style: Adjust border color to match other fields.
-* Background Overlay: Added `border-radius` support.
-* Border Radius: Added a context class for additional styling.
-* CSS Output Location: Added Block Editor support.
-* Inline CSS Styles: Update to apply widget margin directly to the widget.
+- Media Style: Adjust border color to match other fields.
+- Background Overlay: Added `border-radius` support.
+- Border Radius: Added a context class for additional styling.
+- CSS Output Location: Added Block Editor support.
+- Inline CSS Styles: Update to apply widget margin directly to the widget.
 
 = 2.29.4 - 19 January 2024 =
-* Added compatibility with Pagelayer Templates. The panels filter is selectively enabled or disabled based on template usage.
-* Prevented the row overlay from covering widget contents by adjusting CSS rules in `front-flex.less`.
-* Developer: Added `siteorigin_panels_data` filter. Allows for the filtering of `$panels_data` when `generate_css` is run.
+- Added compatibility with Pagelayer Templates. The panels filter is selectively enabled or disabled based on template usage.
+- Prevented the row overlay from covering widget contents by adjusting CSS rules in `front-flex.less`.
+- Developer: Added `siteorigin_panels_data` filter. Allows for the filtering of `$panels_data` when `generate_css` is run.
 
 = 2.29.3 - 03 January 2024 =
-* Vantage Theme: Account for unmigrated legacy row layouts.
-* Toggle style field accessibility improvements.
-* Save mode accessibility improvements.
-* Live Editor Redirection: Resolve PHP 8 warning and deprecated notice.
-* Color Field: Minor border color adjustment.
-* Removed legacy content cache cleanup.
+- Vantage Theme: Account for unmigrated legacy row layouts.
+- Toggle style field accessibility improvements.
+- Save mode accessibility improvements.
+- Live Editor Redirection: Resolve PHP 8 warning and deprecated notice.
+- Color Field: Minor border color adjustment.
+- Removed legacy content cache cleanup.
 
 = 2.29.2 - 03 January 2024 =
-* Vantage Theme: Prevented a type error if empty rows are present.
+- Vantage Theme: Prevented a type error if empty rows are present.
 
 = 2.29.1 - 01 January 2024 =
-* Vantage Theme: Prevented a potential Full Width Stretched display issue when no padding is set.
+- Vantage Theme: Prevented a potential Full Width Stretched display issue when no padding is set.
 
 = 2.29.0 - 31 December 2023 =
 - Layout Block: Defaulted the Layout Block to edit mode when no content is present.
