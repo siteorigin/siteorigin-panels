@@ -41,10 +41,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 
 		switch( $type ) {
 			case 'title':
-				return '<h1 class="entry-title">' . $post->post_title . '</h1>';
-
-			case 'content':
-				return '<div class="entry-content">' . wpautop( $post->post_content ) . '</div>';
+				return '<h1 class="entry-title">' . wp_kses_post( $post->post_title ) . '</h1>';
 
 			case 'featured':
 				if ( ! has_post_thumbnail() ) {
@@ -52,7 +49,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				}
 
 				return '<div class="featured-image">' .
-					esc_url( get_the_post_thumbnail( $post->ID ) )
+					get_the_post_thumbnail( $post->ID )
 					. '</div>';
 			default:
 				return '';
