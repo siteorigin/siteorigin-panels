@@ -51,8 +51,20 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				return '<div class="featured-image">' .
 					get_the_post_thumbnail( $post->ID )
 					. '</div>';
-			default:
-				return '';
+
+			case 'content':
+				if ( in_the_loop() ) {
+					esc_html_e( 'This widget should not be used in the main post area.', 'siteorigin-panels' );
+					return;
+				}
+
+				if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
+					$content = SiteOrigin_Panels::renderer()->render( $post->ID );
+				} else {
+					$content = apply_filters( 'the_content', $post->post_content );
+				}
+
+				return '<div class="entry-content">' . $content . '</div>';
 		}
 	}
 
@@ -69,6 +81,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 			'' => __( 'None', 'siteorigin-panels' ),
 			'title' => __( 'Title', 'siteorigin-panels' ),
 			'featured' => __( 'Featured Image', 'siteorigin-panels' ),
+			'content' => __( 'Content', 'siteorigin-panels' ),
 		) );
 
 		?>
