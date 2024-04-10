@@ -52,7 +52,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 					get_the_post_thumbnail( $post->ID )
 					. '</div>';
 
-			case 'content':
+			case 'post_content':
 				if ( in_the_loop() ) {
 					esc_html_e( 'This widget should not be used in the main post area.', 'siteorigin-panels' );
 					return;
@@ -74,14 +74,14 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 
 	public function form( $instance ) {
 		$instance = wp_parse_args( $instance, array(
-			'type' => 'content',
+			'type' => '',
 		) );
 
 		$types = apply_filters( 'siteorigin_panels_widget_post_content_types', array(
 			'' => __( 'None', 'siteorigin-panels' ),
 			'title' => __( 'Title', 'siteorigin-panels' ),
 			'featured' => __( 'Featured Image', 'siteorigin-panels' ),
-			'content' => __( 'Content', 'siteorigin-panels' ),
+			'post_content' => __( 'Content', 'siteorigin-panels' ),
 		) );
 
 		?>
@@ -90,7 +90,10 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				<label for="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>"><?php esc_html_e( 'Display Content', 'siteorigin-panels' ); ?></label>
 				<select id="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>" class="siteorigin-widget-field">
 					<?php foreach ( $types as $type_id => $title ) { ?>
-						<option value="<?php echo esc_attr( $type_id ); ?>" <?php selected( $type_id, $instance['type'] ); ?>><?php echo esc_html( $title ); ?></option>
+						<option
+							value="<?php echo esc_attr( $type_id ); ?>"
+							<?php selected( $type_id, $instance['type'] ); ?>
+						><?php echo esc_html( $title ); ?></option>
 					<?php } ?>
 				</select>
 			</p>
