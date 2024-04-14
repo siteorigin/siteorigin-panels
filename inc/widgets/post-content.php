@@ -61,7 +61,7 @@ class SiteOrigin_Panels_Widgets_PostContent extends WP_Widget {
 				if ( get_post_meta( $post->ID, 'panels_data', true ) ) {
 					$content = SiteOrigin_Panels::renderer()->render( $post->ID );
 				} else {
-					$content = apply_filters( 'the_content', $post->post_content );
+					$content = wp_kses_post( apply_filters( 'the_content', $post->post_content ) );
 				}
 
 				return '<div class="entry-content">' . $content . '</div>';
