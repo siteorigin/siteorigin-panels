@@ -7,6 +7,7 @@ function siteorigin_enqueue_seo_compat() {
 		defined( 'WPSEO_FILE' ) &&
 		(
 			// => 18
+			wp_script_is( 'yoast-seo-post-edit' ) ||
 			wp_script_is( 'yoast-seo-post-edit-classic' ) ||
 			// => 14.6 <= 17.9.
 			wp_script_is( 'yoast-seo-admin-global-script' ) ||

@@ -22,7 +22,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	componentDidMount() {
 		this.isStillMounted = true;
 
-		if ( this.state.editing ) {
+		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( ! this.state.editing && ! this.previewInitialized ) {
 			clearTimeout( this.fetchPreviewTimer );
@@ -41,7 +41,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		if ( this.state.editing && ! this.state.panelsInitialized ) {
+		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
         	if ( ! this.state.pendingPreviewRequest ) {

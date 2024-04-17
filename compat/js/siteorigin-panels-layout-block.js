@@ -40,7 +40,7 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     key: "componentDidMount",
     value: function componentDidMount() {
       this.isStillMounted = true;
-      if (this.state.editing) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
       } else if (!this.state.editing && !this.previewInitialized) {
         clearTimeout(this.fetchPreviewTimer);
@@ -61,7 +61,7 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      if (this.state.editing && !this.state.panelsInitialized) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         if (!this.state.pendingPreviewRequest) {
