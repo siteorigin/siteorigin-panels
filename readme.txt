@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, website builder, responsive design, drag and drop, visual editor
 Requires at least: 4.7
-Tested up to: 6.4
+Tested up to: 6.5.2
 Requires PHP: 5.6.20
 Stable tag: trunk
 Build time: unbuilt
