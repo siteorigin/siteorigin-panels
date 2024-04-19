@@ -70,17 +70,6 @@ class SiteOrigin_Panels_Admin {
 
 		$this->in_save_post = false;
 
-		// Enqueue Yoast compatibility
-		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
-		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
-
-		if (
-			class_exists( 'ACF' ) &&
-			version_compare( get_option( 'acf_version' ), '5.7.10', '>=' )
-		) {
-			SiteOrigin_Panels_Compat_ACF_Widgets::single();
-		}
-
 		// Block editor specific actions.
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -602,35 +591,6 @@ class SiteOrigin_Panels_Admin {
 				}
 				do_action( 'siteorigin_panel_enqueue_admin_scripts' );
 				do_action( 'sidebar_admin_setup' );
-			}
-		}
-	}
-
-	public function enqueue_seo_compat() {
-		if ( self::is_admin() ) {
-			if (
-				defined( 'WPSEO_FILE' ) &&
-				(
-					wp_script_is( 'yoast-seo-metabox' ) || // <= 14.5.
-					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6 <= 17.9.
-					wp_script_is( 'yoast-seo-post-edit-classic' ) // => 18
-				)
-			) {
-				wp_enqueue_script(
-					'so-panels-seo-compat',
-					esc_url( siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
-					array( 'jquery' ),
-					SITEORIGIN_PANELS_VERSION,
-					true
-				);
-			} elseif ( defined( 'RANK_MATH_VERSION' ) && wp_script_is( 'rank-math-analyzer' ) ) {
-				wp_enqueue_script(
-					'so-panels-seo-compat',
-					esc_url( siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
-					array( 'jquery', 'rank-math-analyzer' ),
-					SITEORIGIN_PANELS_VERSION,
-					true
-				);
 			}
 		}
 	}
@@ -1457,7 +1417,7 @@ class SiteOrigin_Panels_Admin {
 			// We need this to get our widgets bundle to add it's styles inline for previews.
 			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
 		}
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
+		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data );
 
 		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
 		// so neither the `wp_head` nor the `wp_footer` actions are called, which usually trigger `siteorigin_widget_print_styles`.

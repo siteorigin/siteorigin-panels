@@ -12,17 +12,17 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			previewHtml: '',
 			previewInitialized: ! editMode,
 			pendingPreviewRequest: false,
+			panelsInitialized: false,
 		};
 		this.panelsContainer = wp.element.createRef();
 		this.previewContainer = wp.element.createRef();
-		this.panelsInitialized = false;
 		this.fetchPreviewTimer;
 	}
 
 	componentDidMount() {
 		this.isStillMounted = true;
 
-		if ( this.state.editing ) {
+		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( ! this.state.editing && ! this.previewInitialized ) {
 			clearTimeout( this.fetchPreviewTimer );
@@ -41,7 +41,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		if ( this.state.editing && ! this.panelsInitialized ) {
+		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		} else if ( this.state.loadingPreview ) {
         	if ( ! this.state.pendingPreviewRequest ) {
@@ -63,6 +63,11 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	setupPanels() {
+		// Should we set up panels?
+		if ( ! this.state.editing || this.state.panelsInitialized ) {
+			return;
+		  }
+
 		var $panelsContainer = jQuery( this.panelsContainer.current );
 
 		var config = {
@@ -172,7 +177,9 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		}
 		window.soPanelsBuilderView.push( this.builderView );
 
-		this.panelsInitialized = true;
+		this.setState({
+			panelsInitialized: true
+		} );
 	}
 
 	fetchPreview( props ) {
@@ -195,7 +202,11 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			}
 		} )
 		.then( ( preview ) => {
-			if ( this.isStillMounted && fetchRequest === this.currentFetchRequest && preview ) {
+			if (
+				this.isStillMounted &&
+				fetchRequest === this.currentFetchRequest &&
+				preview
+			) {
 				this.setState( {
 					previewHtml: preview,
 					loadingPreview: false,
@@ -211,7 +222,6 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		const { panelsData } = this.props;
 
 		let switchToEditing = () => {
-			this.panelsInitialized = false;
 			this.setState( { editing: true } );
 		}
 
@@ -219,64 +229,54 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			if ( panelsData ) {
 				this.setState({
 					editing: false,
-					loadingPreview: ! this.state.previewHtml,
-					previewInitialized: false,
 				});
 			}
 		}
 
-		if ( this.state.editing ) {
-			return (
-				<wp.element.Fragment>
-					{ panelsData ? (
-						<wp.blockEditor.BlockControls>
-							<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
-								<wp.components.ToolbarButton
-									icon="visibility"
-									className="components-icon-button components-toolbar__control"
-									label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
-									onClick={ switchToPreview }
-								/>
-							</wp.components.Toolbar>
-						</wp.blockEditor.BlockControls>
-					) : (
-						null
-					) }
-					<div
-						key="layout-block"
-						className="siteorigin-panels-layout-block-container"
-						ref={this.panelsContainer}
+		return (
+			<wp.element.Fragment>
+				<wp.blockEditor.BlockControls>
+				<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+					{this.state.editing ? (
+					<wp.components.ToolbarButton
+						icon="visibility"
+						className="components-icon-button components-toolbar__control"
+						label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
+						onClick={ switchToPreview }
 					/>
-				</wp.element.Fragment>
-			);
-		} else {
-			const loadingPreview = this.state.loadingPreview;
-			return (
-				<wp.element.Fragment>
-					<wp.blockEditor.BlockControls>
-						<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
-							<wp.components.ToolbarButton
-								icon="edit"
-								className="components-icon-button components-toolbar__control"
-								label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
-								onClick={ switchToEditing }
-							/>
-						</wp.components.Toolbar>
-					</wp.blockEditor.BlockControls>
-					<div key="preview" className="so-panels-block-layout-preview-container">
-						{ loadingPreview ? (
-							<div className="so-panels-spinner-container">
-								<span><wp.components.Spinner/></span>
-							</div>
-						) : (
-							<div className="so-panels-raw-html-container" ref={this.previewContainer}>
-								<wp.element.RawHTML>{this.state.previewHtml}</wp.element.RawHTML>
-							</div>
-						) }
+					) : (
+					<wp.components.ToolbarButton
+						icon="edit"
+						className="components-icon-button components-toolbar__control"
+						label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
+						onClick={ switchToEditing }
+					/>
+					)}
+				</wp.components.Toolbar>
+				</wp.blockEditor.BlockControls>
+				<div
+				key="layout-block"
+				className="siteorigin-panels-layout-block-container"
+				ref={ this.panelsContainer }
+				hidden={ ! this.state.editing }
+				/>
+				<div
+					key="preview"
+					className="so-panels-block-layout-preview-container"
+					hidden={ this.state.editing }
+				>
+				{ this.state.loadingPreview ? (
+					<div className="so-panels-spinner-container">
+						<span><wp.components.Spinner/></span>
 					</div>
-				</wp.element.Fragment>
-			);
-		}
+				) : (
+					<div className="so-panels-raw-html-container" ref={ this.previewContainer }>
+						<wp.element.RawHTML>{ this.state.previewHtml }</wp.element.RawHTML>
+					</div>
+				) }
+				</div>
+			</wp.element.Fragment>
+		);
 	}
 
 }

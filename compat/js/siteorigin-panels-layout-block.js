@@ -28,11 +28,11 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       loadingPreview: !editMode,
       previewHtml: '',
       previewInitialized: !editMode,
-      pendingPreviewRequest: false
+      pendingPreviewRequest: false,
+      panelsInitialized: false
     };
     _this.panelsContainer = wp.element.createRef();
     _this.previewContainer = wp.element.createRef();
-    _this.panelsInitialized = false;
     _this.fetchPreviewTimer;
     return _this;
   }
@@ -40,7 +40,7 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     key: "componentDidMount",
     value: function componentDidMount() {
       this.isStillMounted = true;
-      if (this.state.editing) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
       } else if (!this.state.editing && !this.previewInitialized) {
         clearTimeout(this.fetchPreviewTimer);
@@ -61,7 +61,7 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      if (this.state.editing && !this.panelsInitialized) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         if (!this.state.pendingPreviewRequest) {
@@ -85,6 +85,10 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     key: "setupPanels",
     value: function setupPanels() {
       var _this2 = this;
+      // Should we set up panels?
+      if (!this.state.editing || this.state.panelsInitialized) {
+        return;
+      }
       var $panelsContainer = jQuery(this.panelsContainer.current);
       var config = {
         editorType: 'standalone',
@@ -168,7 +172,9 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
         window.soPanelsBuilderView = [];
       }
       window.soPanelsBuilderView.push(this.builderView);
-      this.panelsInitialized = true;
+      this.setState({
+        panelsInitialized: true
+      });
     }
   }, {
     key: "fetchPreview",
@@ -207,7 +213,6 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       var _this4 = this;
       var panelsData = this.props.panelsData;
       var switchToEditing = function switchToEditing() {
-        _this4.panelsInitialized = false;
         _this4.setState({
           editing: true
         });
@@ -215,44 +220,37 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
           _this4.setState({
-            editing: false,
-            loadingPreview: !_this4.state.previewHtml,
-            previewInitialized: false
+            editing: false
           });
         }
       };
-      if (this.state.editing) {
-        return /*#__PURE__*/React.createElement(wp.element.Fragment, null, panelsData ? /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
-          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
-        }, /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
-          icon: "visibility",
-          className: "components-icon-button components-toolbar__control",
-          label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
-          onClick: switchToPreview
-        }))) : null, /*#__PURE__*/React.createElement("div", {
-          key: "layout-block",
-          className: "siteorigin-panels-layout-block-container",
-          ref: this.panelsContainer
-        }));
-      } else {
-        var loadingPreview = this.state.loadingPreview;
-        return /*#__PURE__*/React.createElement(wp.element.Fragment, null, /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
-          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
-        }, /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
-          icon: "edit",
-          className: "components-icon-button components-toolbar__control",
-          label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
-          onClick: switchToEditing
-        }))), /*#__PURE__*/React.createElement("div", {
-          key: "preview",
-          className: "so-panels-block-layout-preview-container"
-        }, loadingPreview ? /*#__PURE__*/React.createElement("div", {
-          className: "so-panels-spinner-container"
-        }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(wp.components.Spinner, null))) : /*#__PURE__*/React.createElement("div", {
-          className: "so-panels-raw-html-container",
-          ref: this.previewContainer
-        }, /*#__PURE__*/React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
-      }
+      return /*#__PURE__*/React.createElement(wp.element.Fragment, null, /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
+        label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+      }, this.state.editing ? /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
+        icon: "visibility",
+        className: "components-icon-button components-toolbar__control",
+        label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
+        onClick: switchToPreview
+      }) : /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
+        icon: "edit",
+        className: "components-icon-button components-toolbar__control",
+        label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
+        onClick: switchToEditing
+      }))), /*#__PURE__*/React.createElement("div", {
+        key: "layout-block",
+        className: "siteorigin-panels-layout-block-container",
+        ref: this.panelsContainer,
+        hidden: !this.state.editing
+      }), /*#__PURE__*/React.createElement("div", {
+        key: "preview",
+        className: "so-panels-block-layout-preview-container",
+        hidden: this.state.editing
+      }, this.state.loadingPreview ? /*#__PURE__*/React.createElement("div", {
+        className: "so-panels-spinner-container"
+      }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(wp.components.Spinner, null))) : /*#__PURE__*/React.createElement("div", {
+        className: "so-panels-raw-html-container",
+        ref: this.previewContainer
+      }, /*#__PURE__*/React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
     }
   }]);
   return SiteOriginPanelsLayoutBlock;
