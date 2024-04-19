@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.12 – 19 April 2024 =
+* Layout Block: Improved preview.
+* Layout Block: Fix repeated rendering when switching to editor.
+* Layout Block: Restored data integration for SEO content analysis.
+* Post Content Widget: Added "Content" option.
+
 = 2.29.11 – 31 March 2024 =
 * Post Content Widget: Fixed post featured image output.
 * Post Content Widget: Remove unused content and improved title output.
