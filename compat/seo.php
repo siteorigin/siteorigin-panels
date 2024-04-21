@@ -21,7 +21,7 @@ function siteorigin_enqueue_seo_compat() {
 		wp_script_is( 'rank-math-analyzer' )
 	) {
 		$enqueue = true;
-		$deps[] = array( 'rank-math-analyzer' );
+		$deps[] = 'rank-math-analyzer';
 	}
 
 	if ( $enqueue ) {
