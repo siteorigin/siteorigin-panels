@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.14 – 26 April 2024 =
+* Layout Block: Restored preview functionality.
+
 = 2.29.13 – 21 April 2024 =
 * Rank Math SEO Compatibility: Resolved dependency error.
 

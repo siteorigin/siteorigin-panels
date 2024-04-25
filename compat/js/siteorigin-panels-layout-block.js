@@ -42,7 +42,8 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       this.isStillMounted = true;
       if (!this.state.panelsInitialized) {
         this.setupPanels();
-      } else if (!this.state.editing && !this.previewInitialized) {
+      }
+      if (!this.state.editing && !this.previewInitialized) {
         clearTimeout(this.fetchPreviewTimer);
         var current = this;
         this.fetchPreviewTimer = setTimeout(function () {

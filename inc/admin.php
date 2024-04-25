@@ -1418,15 +1418,18 @@ class SiteOrigin_Panels_Admin {
 			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
 		}
 		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data );
+		ob_start();
 
 		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
 		// so neither the `wp_head` nor the `wp_footer` actions are called, which usually trigger `siteorigin_widget_print_styles`.
 		if ( $sowb_active ) {
-			ob_start();
 			siteorigin_widget_print_styles();
-			$rendered_layout .= ob_get_clean();
 		}
-
+		?>
+		<style>@import url('<?php echo esc_url( SiteOrigin_Panels::front_css_url() ); ?>');</style>
+		<?php
+		echo SiteOrigin_Panels_Renderer::single()->print_inline_css( true );
+		$rendered_layout .= ob_get_clean();
 		echo $rendered_layout;
 		wp_die();
 	}

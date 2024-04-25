@@ -125,13 +125,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 		add_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 		SiteOrigin_Panels_Post_Content_Filters::add_filters( true );
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
+		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters( true );
 		remove_filter( 'siteorigin_panels_layout_classes', $add_custom_class_name );
 
 		if ( is_wp_error( $rendered_layout ) ) {
 			return $rendered_layout;
 		}
+
+		$rendered_layout .= SiteOrigin_Panels_Renderer::single()->print_inline_css( true );
 
 		$rendered_layout = $this->remove_block_comments( $rendered_layout );
 		if ( $this->return_layout ) {
