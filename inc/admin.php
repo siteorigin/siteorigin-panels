@@ -1428,7 +1428,7 @@ class SiteOrigin_Panels_Admin {
 		?>
 		<style>@import url('<?php echo esc_url( SiteOrigin_Panels::front_css_url() ); ?>');</style>
 		<?php
-		SiteOrigin_Panels_Renderer::single()->print_inline_css();
+		echo SiteOrigin_Panels_Renderer::single()->print_inline_css( true );
 		$rendered_layout .= ob_get_clean();
 		echo $rendered_layout;
 		wp_die();
