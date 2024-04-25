@@ -853,7 +853,7 @@ class SiteOrigin_Panels_Renderer {
 	/**
 	 * Print inline CSS in the header and footer.
 	 */
-	public function print_inline_css() {
+	public function print_inline_css( $return_css = false ) {
 		if ( ! empty( $this->inline_css ) ) {
 			$the_css = '';
 
@@ -886,7 +886,15 @@ class SiteOrigin_Panels_Renderer {
 			$the_css = apply_filters( 'siteorigin_panels_inline_styles', $the_css );
 
 			if ( ! empty( $the_css ) ) {
+				if ( $return_css ) {
+					ob_start();
+				}
+
 				printf( '<style media="all" id="siteorigin-panels-layouts-%s">%s</style>', esc_attr( $css_id ), $the_css );
+
+				if ( $return_css ) {
+					return ob_get_clean();
+				}
 			}
 		}
 	}
