@@ -24,7 +24,9 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
-		} else if ( ! this.state.editing && ! this.previewInitialized ) {
+		}
+
+		if ( ! this.state.editing && ! this.previewInitialized ) {
 			clearTimeout( this.fetchPreviewTimer );
 			var current = this;
 			this.fetchPreviewTimer = setTimeout( function() {
