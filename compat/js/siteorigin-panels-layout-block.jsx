@@ -26,7 +26,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			this.setupPanels();
 		}
 
-		if ( ! this.state.editing && ! this.previewInitialized ) {
+		if ( ! this.previewInitialized ) {
 			clearTimeout( this.fetchPreviewTimer );
 			var current = this;
 			this.fetchPreviewTimer = setTimeout( function() {
@@ -204,8 +204,14 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			}
 		} )
 		.then( ( preview ) => {
+			if ( ! this.isStillMounted ) {
+				return;
+			}
+
+			setTimeout(function() {
+				jQuery(document).trigger('panels_setup_preview');
+			}, 1000);
 			if (
-				this.isStillMounted &&
 				fetchRequest === this.currentFetchRequest &&
 				preview
 			) {

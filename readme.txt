@@ -121,6 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.15 – 27 April 2024 =
+* Layout Block: Further improvements to preview functionality and performance.
+* Admin Area: Update to ensure Classic Editor notice is translatable.
+
 = 2.29.14 – 26 April 2024 =
 * Layout Block: Restored preview functionality.
 
