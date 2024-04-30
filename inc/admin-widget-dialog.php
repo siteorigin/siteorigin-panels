@@ -94,7 +94,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	public function add_widgets_dialog_tabs( $tabs ) {
 		$stored_tabs = get_transient( 'siteorigin_panels_widget_dialog_tabs' );
 		if ( $stored_tabs ) {
-			return $stored_tabs;
+			return array_merge( $tabs, $stored_tabs );
 		}
 
 		$widgets_bundle = array(
