@@ -95,7 +95,7 @@ class SiteOrigin_Panels_Compatibility {
 
 		// Compatibility with WP Event Manager.
 		if ( class_exists( 'WP_Event_Manager' ) ) {
-			add_filter( 'display_event_description', array( $this, 'generate_post_content' ), 11 );
+			add_filter( 'display_event_description', array( SiteOrigin_Panels::single(), 'generate_post_content' ), 11 );
 		}
 
 		// Compatibility with Vantage.
