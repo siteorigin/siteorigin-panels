@@ -359,21 +359,28 @@ class SiteOrigin_Panels_Admin {
 
 			$user = wp_get_current_user();
 
+			$tabs = apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
+				0 => array(
+					'title'  => __( 'All Widgets', 'siteorigin-panels' ),
+					'filter' => array(
+						'installed' => true,
+						'groups'    => '',
+					),
+				),
+			) );
+			$tabs = array_map( function ( $tab ) {
+				$tab['title'] = esc_html( $tab['title'] );
+				$tab['filter']['groups'] = esc_html( $tab['filter']['groups'] );
+				return $tab;
+			}, $tabs );
+
 			$load_on_attach = siteorigin_panels_setting( 'load-on-attach' ) || isset( $_GET['siteorigin-page-builder'] );
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
 				'ajaxurl'                   => esc_url( wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ) ),
 				'widgets'                   => $widgets,
 				'text_widget'               => $text_widget,
-				'widget_dialog_tabs'        => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
-					0 => array(
-						'title'  => __( 'All Widgets', 'siteorigin-panels' ),
-						'filter' => array(
-							'installed' => true,
-							'groups'    => '',
-						),
-					),
-				) ),
+				'widget_dialog_tabs'        => $tabs,
 				'row_layouts'               => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
