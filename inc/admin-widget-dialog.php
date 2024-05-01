@@ -4,7 +4,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 	public function __construct() {
 		add_filter( 'siteorigin_panels_widgets', array( $this, 'add_recommended_widgets' ) );
-		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), 20 );
+		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), 10 );
 	}
 
 	/**
@@ -94,11 +94,11 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	public function add_widgets_dialog_tabs( $tabs ) {
 		$stored_tabs = get_transient( 'siteorigin_panels_widget_dialog_tabs' );
 		if ( $stored_tabs ) {
-			return $stored_tabs;
+			return array_merge( $tabs, $stored_tabs );
 		}
 
-		$tabs['widgets_bundle'] = array(
-			'title'  => __( 'Widgets Bundle', 'siteorigin-panels' ),
+		$widgets_bundle = array(
+			'title'  => __( 'SiteOrigin Widgets Bundle', 'siteorigin-panels' ),
 			'filter' => array(
 				'groups' => array( 'so-widgets-bundle' ),
 			),
@@ -106,7 +106,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 		if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
 			// Add a message about enabling more widgets
-			$tabs['widgets_bundle']['message'] = preg_replace(
+			$widgets_bundle['message'] = preg_replace(
 				array(
 					'/1\{ *(.*?) *\}/',
 				),
@@ -117,17 +117,19 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			);
 		} else {
 			// Add a message about installing the widgets bundle
-			$tabs['widgets_bundle']['message'] = preg_replace(
+			$widgets_bundle['message'] = preg_replace(
 				'/1\{ *(.*?) *\}/',
 				'<a href="' . siteorigin_panels_plugin_activation_install_url( 'so-widgets-bundle', __( 'SiteOrigin Widgets Bundle', 'siteorigin-panels' ) ) . '">$1</a>',
 				__( 'Install the 1{Widgets Bundle} to get extra widgets.', 'siteorigin-panels' )
 			);
 		}
 
-		// Add the Widgets Bundle message to the main widgets tab
-		$tabs[0]['message'] = $tabs['widgets_bundle']['message'];
+		$tabs[] = $widgets_bundle;
 
-		$tabs['page_builder'] = array(
+		// Add the Widgets Bundle message to the main widgets tab
+		$tabs[0]['message'] = $widgets_bundle['message'];
+
+		$tabs[] = array(
 			'title'   => __( 'Page Builder Widgets', 'siteorigin-panels' ),
 			'message' => preg_replace(
 				array(
@@ -143,7 +145,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			),
 		);
 
-		$tabs['wordpress'] = array(
+		$tabs[] = array(
 			'title'  => __( 'WordPress Widgets', 'siteorigin-panels' ),
 			'filter' => array(
 				'groups' => array( 'wordpress' ),
@@ -152,7 +154,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 		// Check for woocommerce plugin.
 		if ( defined( 'WOOCOMMERCE_VERSION' ) ) {
-			$tabs['woocommerce'] = array(
+			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
 				'title'  => __( 'WooCommerce', 'woocommerce' ),
 				'filter' => array(
@@ -163,7 +165,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 		// Check for jetpack plugin.
 		if ( defined( 'JETPACK__VERSION' ) ) {
-			$tabs['jetpack'] = array(
+			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
 				'title'  => __( 'Jetpack', 'jetpack' ),
 				'filter' => array(
@@ -174,7 +176,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 		// Check for bbpress plugin.
 		if ( function_exists( 'bbpress' ) ) {
-			$tabs['bbpress'] = array(
+			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
 				'title'  => __( 'BBPress', 'bbpress' ),
 				'filter' => array(
@@ -199,7 +201,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		}
 
 		if ( ! empty( $recommendedWidgets ) ) {
-			$tabs['recommended'] = array(
+			$tabs[] = array(
 				'title'  => __( 'Recommended Widgets', 'siteorigin-panels' ),
 				'filter' => array(
 					'groups' => array( 'recommended' ),
