@@ -42,6 +42,9 @@ class SiteOrigin_Panels_Widget_Shortcode {
 			$widget_args = ! empty( $data[ 'args' ] ) ? $data[ 'args' ] : array();
 			$widget_instance = ! empty( $data[ 'instance' ] ) ? $data[ 'instance' ] : array();
 
+			$widget_args = self::escape_widget_data( $widget_args );
+			$widget_instance = self::escape_widget_data( $widget_instance );
+
 			$widget_args = wp_parse_args( array(
 				'before_widget' => '',
 				'after_widget' => '',
@@ -54,6 +57,18 @@ class SiteOrigin_Panels_Widget_Shortcode {
 
 			return ob_get_clean();
 		}
+	}
+
+	public static function escape_widget_data( $data ) {
+		$escaped_data = array();
+		foreach ( $data as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$escaped_data[ $key ] = escape_widget_data( $value );
+			} else {
+				$escaped_data[ $key ] = esc_html( $value );
+			}
+		}
+		return $escaped_data;
 	}
 
 	/**
