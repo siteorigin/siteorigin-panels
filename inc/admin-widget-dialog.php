@@ -98,7 +98,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		}
 
 		$widgets_bundle = array(
-			'title'  => __( 'Widgets Bundle', 'siteorigin-panels' ),
+			'title'  => __( 'SiteOrigin Widgets Bundle', 'siteorigin-panels' ),
 			'filter' => array(
 				'groups' => array( 'so-widgets-bundle' ),
 			),
