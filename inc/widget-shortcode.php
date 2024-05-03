@@ -63,7 +63,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		$escaped_data = array();
 		foreach ( $data as $key => $value ) {
 			if ( is_array( $value ) ) {
-				$escaped_data[ $key ] = escape_widget_data( $value );
+				$escaped_data[ $key ] = self::escape_widget_data( $value );
 			} else {
 				$escaped_data[ $key ] = esc_html( $value );
 			}
