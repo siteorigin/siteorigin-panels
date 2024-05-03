@@ -60,15 +60,20 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	}
 
 	public static function escape_widget_data( $data ) {
-		$escaped_data = array();
-		foreach ( $data as $key => $value ) {
-			if ( is_array( $value ) ) {
-				$escaped_data[ $key ] = self::escape_widget_data( $value );
-			} else {
-				$escaped_data[ $key ] = esc_html( $value );
+		try {
+			$escaped_data = array();
+			foreach ( $data as $key => $value ) {
+				if ( is_array( $value ) ) {
+					$escaped_data[ $key ] = self::escape_widget_data( $value );
+				} else {
+					$escaped_data[ $key ] = esc_html( $value );
+				}
 			}
+			return $escaped_data;
+		} catch (Exception $e) {
+			// There was an error, return empty array.
+			return array();
 		}
-		return $escaped_data;
 	}
 
 	/**
