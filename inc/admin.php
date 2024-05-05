@@ -370,7 +370,7 @@ class SiteOrigin_Panels_Admin {
 			) );
 			$tabs = array_map( function ( $tab ) {
 				$tab['title'] = esc_html( $tab['title'] );
-				$tab['filter']['groups'] = esc_html( $tab['filter']['groups'] );
+				$tab['filter']['groups'] = self::escape_text_recursive( $tab['filter']['groups'] );
 				return $tab;
 			}, $tabs );
 
@@ -1927,5 +1927,19 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		return $post_states;
+	}
+
+	/**
+	 * Recursively escapes text to prevent HTML entities from being rendered.
+	 *
+	 * @param mixed $text The text to be escaped.
+	 * @return mixed The escaped text or array.
+	 */
+	private function escape_text_recursive( $text ) {
+		if ( is_array( $text ) ) {
+			return array_map( array( $this, 'escape_text_recursive' ), $text );
+		} else {
+			return esc_html( $text );
+		}
 	}
 }
