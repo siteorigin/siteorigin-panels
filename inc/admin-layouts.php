@@ -254,37 +254,43 @@ class SiteOrigin_Panels_Admin_Layouts {
 				return false;
 			}
 
-			$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
+			$cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num );
+			if ( empty( $search ) && ! empty( $cache ) ) {
+				$return = $cache;
+			} else {
+				$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
 
-			if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
-				$url = add_query_arg( $directory[ 'args' ], $url );
-			}
-
-			$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
-			$response = wp_remote_get( esc_url( $url ) );
-
-			if (
-				! is_wp_error( $response ) &&
-				is_array( $response ) &&
-				$response['response']['code'] == 200
-			) {
-				$results = json_decode( $response['body'], true );
-
-				if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
-					foreach ( $results['items'] as $item ) {
-						$item['id'] = esc_html( $item['slug'] );
-						$item['type'] = esc_html( $type );
-
-						if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
-							$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
-							$item['screenshot'] = esc_url( 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700' );
-						}
-
-						$return['items'][] = $item;
-					}
+				if ( ! empty( $directory['args'] ) && is_array( $directory['args'] ) ) {
+					$url = add_query_arg( $directory['args'], $url );
 				}
 
-				$return['max_num_pages'] = $results['max_num_pages'];
+				$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
+				$response = wp_remote_get( esc_url( $url ) );
+
+				if (
+					! is_wp_error( $response ) &&
+					is_array( $response ) &&
+					$response['response']['code'] == 200
+				) {
+					$results = json_decode( $response['body'], true );
+
+					if ( ! empty( $results ) && ! empty( $results['items'] ) ) {
+						foreach ( $results['items'] as $item ) {
+							$item['id'] = esc_html( $item['slug'] );
+							$item['type'] = esc_html( $type );
+
+							if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
+								$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
+								$item['screenshot'] = esc_url( 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700' );
+							}
+
+							$return['items'][] = $item;
+						}
+					}
+
+					$return['max_num_pages'] = $results['max_num_pages'];
+					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num, $return, 86400 );
+				}
 			}
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
 			// Check that the user can view the given page types
