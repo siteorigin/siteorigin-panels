@@ -290,8 +290,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 						}
 
 						if ( ! empty( $results['niches'] ) ) {
-							$return['niches'] = esc_html( $results['niches'] );
-							$return['categories'] = esc_html( $results['categories'] );
+							$return['niches'] = $this->escape_results( $results['niches'] );
+							$return['categories'] = $this->escape_results( $results['categories'] );
 						}
 					}
 					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id, $results, 3600 );
@@ -349,6 +349,22 @@ class SiteOrigin_Panels_Admin_Layouts {
 		echo wp_json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
 
 		wp_die();
+	}
+
+	/**
+	 * Escapes the keys and values of an array using the `esc_html` function.
+	 *
+	 * @param array $results The array to escape.
+	 * @return array The escaped array.
+	 */
+	private function escape_results( $results = array() ) {
+		$escaped_values = array();
+		foreach ( $results as $key => $value ) {
+			$escaped_key = esc_html( $key );
+			$escaped_value = esc_html( $value );
+			$escaped_values[ $escaped_key ] = $escaped_value;
+		}
+		return $escaped_values;
 	}
 
 	private function delete_file( $file ) {
