@@ -9,18 +9,24 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	/**
 	 * Add filters that include data-* attributes on Page Builder divs
 	 */
-	public static function add_filters() {
+	public static function add_filters( $is_block_editor = false ) {
 		add_filter( 'siteorigin_panels_row_attributes', 'SiteOrigin_Panels_Post_Content_Filters::row_attributes', 99, 2 );
 		add_filter( 'siteorigin_panels_cell_attributes', 'SiteOrigin_Panels_Post_Content_Filters::cell_attributes', 99, 2 );
 		add_filter( 'siteorigin_panels_widget_attributes', 'SiteOrigin_Panels_Post_Content_Filters::widget_attributes', 99, 2 );
-		SiteOrigin_Panels_Widget_Shortcode::add_filters();
+
+		if ( ! $is_block_editor ) {
+			SiteOrigin_Panels_Widget_Shortcode::add_filters();
+		}
 	}
 
-	public static function remove_filters() {
+	public static function remove_filters( $is_block_editor = false ) {
 		remove_filter( 'siteorigin_panels_row_attributes', 'SiteOrigin_Panels_Post_Content_Filters::row_attributes', 99, 2 );
 		remove_filter( 'siteorigin_panels_cell_attributes', 'SiteOrigin_Panels_Post_Content_Filters::cell_attributes', 99, 2 );
 		remove_filter( 'siteorigin_panels_widget_attributes', 'SiteOrigin_Panels_Post_Content_Filters::widget_attributes', 99, 2 );
-		SiteOrigin_Panels_Widget_Shortcode::remove_filters();
+
+		if ( ! $is_block_editor ) {
+			SiteOrigin_Panels_Widget_Shortcode::remove_filters();
+		}
 	}
 
 	/**
@@ -30,7 +36,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function row_attributes( $attributes, $row ) {
 		if ( ! empty( $row['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $row['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $row['style'] );
 		}
 
 		if ( ! empty( $row['ratio'] ) ) {
@@ -57,7 +63,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function cell_attributes( $attributes, $cell ) {
 		if ( ! empty( $cell['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $cell['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $cell['style'] );
 		}
 
 		$attributes[ 'data-weight' ] = $cell['weight'];
@@ -70,7 +76,7 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 */
 	public static function widget_attributes( $attributes, $widget ) {
 		if ( ! empty( $widget['style'] ) ) {
-			$attributes[ 'data-style' ] = json_encode( $widget['style'] );
+			$attributes[ 'data-style' ] = wp_json_encode( $widget['style'] );
 		}
 
 		if ( ! empty( $widget['label'] ) ) {

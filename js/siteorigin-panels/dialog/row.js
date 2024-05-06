@@ -18,6 +18,9 @@ module.exports = panels.view.dialog.extend({
 			this.saveHandler( true );
 		},
 		'click .so-mode': 'switchModeShow',
+		'keyup .so-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-saveinline-mode': function() {
 			this.switchMode( true );
 		},
@@ -48,6 +51,25 @@ module.exports = panels.view.dialog.extend({
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
+
+		// If user clicks the column size indicator, focus the field.
+		'click .preview-cell-unit ': function( e ) {
+			$( e.target ).next().trigger( 'focus' );
+		},
+
+		'keyup .cell-resize-direction': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e, true );
+		},
+		'keyup .cell-resize-sizing': function( e ) {
+			if ( e.which == 13 ) {
+				var size = $( e.target ).index();
+				var parent = $( e.target ).parent();
+				$( e.target ).find( 'span' ).trigger( 'click' );
+
+				// Refocus on the selected size to prevent focus loss.
+				parent.find( '.cell-resize-sizing' ).eq( size ).trigger( 'focus' );
+			}
+		},
 	},
 
 	rowView: null,
@@ -316,8 +338,6 @@ module.exports = panels.view.dialog.extend({
 								) / rowPreview.width()
 							);
 
-						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
-
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
@@ -452,12 +472,24 @@ module.exports = panels.view.dialog.extend({
 					}, 100 );
 				}
 
-				rowPreview.find( '.preview-cell-weight' ).each( function() {
+				rowPreview.find( '.preview-cell-weight' ).each( function( ci ) {
+					var columnId = ci + 1;
 					var $$ = jQuery( this ).hide();
-					$( '<input type="number" class="preview-cell-weight-input no-user-interacted" />' )
+					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
+					var label = panelsOptions.loc.row.cellInput.replace( '%s', columnId );
+
+					$( `<input
+						type="number"
+						class="preview-cell-weight-input no-user-interacted"
+						id="column-${ columnId }"
+						min="1"
+						max="${ maxSize }"
+						aria-label="${ label }"
+					/>` )
 						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
 						.on( 'focus', function() {
 							clearTimeout( timeout );
+							$( this ).attr( 'type', 'number' );
 						} )
 						.on( 'keyup', function( e ) {
 							if ( e.keyCode !== 9 ) {
@@ -480,20 +512,6 @@ module.exports = panels.view.dialog.extend({
 								resizeCells( parent );
 							}
 						} )
-						.on( 'keydown', function( e ) {
-							if ( e.keyCode === 9 ) {
-								e.preventDefault();
-
-								// Tab will always cycle around the row inputs.
-								var inputs = rowPreview.find( '.preview-cell-weight-input' );
-								var i = inputs.index( $( this ) );
-								if ( i === inputs.length - 1 ) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
-								}
-							}
-						} )
 						.on( 'blur', resizeCells )
 						.on( 'click', function () {
 							// If the input is already focused, the user has clicked a step.
@@ -505,6 +523,16 @@ module.exports = panels.view.dialog.extend({
 				} );
 
 				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+
+				// When the field blurs, we convert the inputs to text to prevent an overlap with the step counter with the percentage.
+				rowPreview.find( '.preview-cell-weight-input' ).on( 'blur', function() {
+					rowPreview.find( '.preview-cell-weight-input' ).attr( 'type', 'text' );
+				} );
+			} );
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
 			} );
 
 		}, this);
@@ -600,10 +628,13 @@ module.exports = panels.view.dialog.extend({
 		var cellsCount = this.getCurrentCellCount();
 		var currentCellSizes = this.columnResizeData[ cellsCount ];
 
+		// Certain sizes may require some additional CSS spacing.
+		this.$( '.row-set-form' ).attr( 'data-cells', cellsCount );
+
 		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
 			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
 			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
-				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing"></span>' );
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing" tabindex="0"></span>' );
 				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
 				$lastCell.data( 'cells', currentCellSizes[ ci ] );
 				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
@@ -638,11 +669,13 @@ module.exports = panels.view.dialog.extend({
 		var $current = $( e.target );
 		var currentDirection = $current.attr( 'data-direction' );
 		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+		var label = panelsOptions.loc.row.direction.replace( '%s', panelsOptions.loc.row[ newDirection ] );
 
 		$current
 			.removeClass( 'dashicons-arrow-' + currentDirection )
 			.addClass( 'dashicons-arrow-' + newDirection )
-			.attr( 'data-direction', newDirection );
+			.attr( 'data-direction', newDirection )
+			.attr( 'aria-label', label );
 
 		// Reverse all sizes.
 		for ( var columnCount in this.columnResizeData ) {
@@ -722,7 +755,7 @@ module.exports = panels.view.dialog.extend({
 						weight: cellWeight,
 						row: this.model
 					} );
-	
+
 					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 					this.row.cells.add( cell );
 				} else {
@@ -910,31 +943,38 @@ module.exports = panels.view.dialog.extend({
 	},
 
 	switchModeShow: function() {
-		this.$( '.so-toolbar .so-mode-list' ).show();
-		this.$( '.so-toolbar .button-primary:visible' ).addClass( 'so-active-mode' );
-		this.$( '.so-toolbar .button-primary' ).hide();
+		const list = this.$( '.so-toolbar .so-mode-list' );
+		const toolbar = this.$( '.so-toolbar' );
+		list.show();
+		list.find( 'li:first-of-type' ).trigger( 'focus' );
+		toolbar.find( '.button-primary:visible' ).addClass( 'so-active-mode' );
+		toolbar.find( '.button-primary' ).hide();
+
 		setTimeout( function() {
 			$( document ).one( 'click', function( e ) {
-				var $$ = jQuery( e.target );
+				var $$ = $( e.target );
 
 				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
-					$( '.so-mode-list' ).hide();
-					$( '.so-toolbar .so-active-mode' ).show()
+					list.hide();
+					toolbar.find( '.so-active-mode' ).show()
 				}
 			} );
 		}, 100 );
 	},
 
 	switchMode: function( inline = false ) {
-		this.$( '.so-toolbar .so-mode-list' ).hide();
-		this.$( '.so-toolbar .button-primary' ).removeClass( 'so-active-mode' );
+		const toolbar = this.$( '.so-toolbar' );
+		toolbar.find( '.so-mode-list' ).hide();
+		toolbar.find( '.button-primary' ).removeClass( 'so-active-mode' );
 		if ( inline ) {
-			this.$( '.so-toolbar .so-saveinline' ).show();
+			toolbar.find( '.so-saveinline' ).show();
 		} else {
-			this.$( '.so-toolbar .so-save' ).show();
+			toolbar.find( '.so-save' ).show();
 		}
 
 		window.panelsMode = inline ? 'inline' : 'dialog';
+
+		this.$( '.so-mode' ).trigger( 'focus' );
 	},
 
 } );

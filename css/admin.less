@@ -39,7 +39,6 @@
 // Everything for the main builder interface.
 
 .siteorigin-panels-builder {
-
 	position: relative;
 
 	// These are generic iconic buttons used in the page builder interface.
@@ -83,7 +82,7 @@
 			}
 		}
 	}
-	
+
 	@media (max-width: 782px) {
 		.so-tool-button.so-row-settings {
 			margin-right: 8px;
@@ -134,16 +133,16 @@
 				}
 			}
 		}
-		
+
 		@media ( max-width: 782px ) {
 			.so-tool-button {
 				margin-right: 8px;
-				
+
 				.so-button-text {
 					margin: 7px 0px 2px 5px;
 					font-size: 14px;
 				}
-				
+
 				.so-panels-icon {
 					margin: 3px 0;
 					font-size: 21px;
@@ -191,7 +190,7 @@
 				.box-sizing(border-box);
 				padding: 4px;
 				float: right;
-				
+
 				.so-panels-icon {
 					color: #777;
 					font-size: 11px;
@@ -199,23 +198,23 @@
 					height: 11px;
 					display: block;
 				}
-				
+
 				&:hover {
 					.so-panels-icon {
 						color: #555;
 					}
 				}
-				
+
 				&.so-row-move {
 					cursor: move;
 				}
 			}
-			
-			
+
+
 			@media ( max-width: 782px ) {
-				
+
 				margin-bottom: 8px;
-				
+
 				.so-tool-button {
 					.so-panels-icon {
 						font-size: 21px;
@@ -489,12 +488,13 @@
 							.title {
 								.actions {
 									background: #feffff;
-									font-size: 12px;
-									position: absolute;
-									top: 5px;
-									right: 0;
 									cursor: pointer;
+									font-size: 12px;
+									opacity: 0;
 									padding: 2px 8px 2px 15px;
+									position: absolute;
+									right: 0;
+									top: 5px;
 									z-index: 10;
 
 									&:hover a {
@@ -537,10 +537,15 @@
 								}
 							}
 
-							&:hover {
-								.title a{
+							&:hover,
+							&:focus {
+								.title a {
 									display: inline-block;
 									opacity: 0.5;
+								}
+
+								.actions {
+									opacity: 1;
 								}
 							}
 
@@ -669,7 +674,7 @@
 			padding: 15px 10px;
 			background: #f8f8f8;
 			border: 1px solid #e0e0e0;
-			
+
 			@media only screen and (max-width:782px) {
 				font-size: 14px;
 			}
@@ -682,7 +687,7 @@
 			color: #666;
 			padding: 5px 10px;
 			margin: 0 3px;
-			
+
 			@media only screen and (max-width:782px) {
 				padding: 9px 10px;
 			}
@@ -728,6 +733,9 @@
 		}
 	}
 
+	.ui-sortable-handle {
+		text-align: left;
+	}
 }
 
 // Resolve WP issue preventing widgets from being draggable.
@@ -1105,19 +1113,19 @@
 					content: "\f335";
 				}
 			}
-			
+
 			&.so-show-left-sidebar {
 				float: left;
 				display: inline;
 				padding: 16px 25px;
 				border-right: 1px solid #d8d8d8;
 				border-bottom: 1px solid #d8d8d8;
-				
+
 				.so-dialog-icon:before  {
 					content: '\f333';
 				}
 			}
-			
+
 			&.so-show-right-sidebar {
 				display: inline-block;
 				.so-dialog-icon:before  {
@@ -1149,15 +1157,15 @@
 			}
 
 		}
-		
+
 		.so-title-bar-buttons {
 			position: absolute;
 			right: 0;
 			top: 0;
 		}
-		
+
 		&.so-has-left-button {
-			
+
 			&.so-has-icon {
 				.so-panels-icon {
 					left: 70px;
@@ -1415,7 +1423,7 @@
 				margin-top: 0;
 			}
 		}
-		
+
 		@media only screen and (max-width:980px) {
 			z-index: 110000;
 			top: @title_bar_height;
@@ -1645,7 +1653,7 @@
 				padding: 8px;
 
 				@media (max-width: 700px) {
-					align-items: center;
+					align-items: baseline;
 					flex-direction: column;
 					justify-content: center;
 
@@ -1715,10 +1723,35 @@
 							margin: 0;
 							width: 200px;
 
+							@media (min-width: 1426px) and (max-width: 1550px) {
+								width: 190px
+							}
+
+							@media (min-width: 1350px) and (max-width: 1426px) {
+								width: 180px
+							}
+
+							@media (min-width: 1276px) and (max-width: 1350px) {
+								width: 160px
+							}
+
+							@media (min-width: 1182px) and (max-width: 1276px) {
+								width: 135px
+							}
+
+							@media (min-width: 1126px) and (max-width: 1182px) {
+								width: 120px
+							}
+
 							&.so-active-ratio,
 							&:not(.so-active-ratio):hover {
 								cursor: pointer;
 								background: #cae7f4;
+							}
+
+							&:focus {
+								background: #e5f4fb;
+								border-color: #c6d6dc;
 							}
 
 							&.so-active-ratio:hover {
@@ -1742,7 +1775,7 @@
 						}
 					}
 
-					@media (max-width: 1024px) {
+					@media (max-width: 1125px) {
 						display: block;
 
 						&,
@@ -1782,18 +1815,42 @@
 						}
 					}
 				}
+
+				&[data-cells="5"] .cell-resize-sizing {
+					width: 204px;
+				}
 			}
 
 			.row-preview {
-				background: #e5f4fb;
 				height: @preview_height;
-				margin: 0 -6px;
 				position: relative;
 				white-space: nowrap;
 
 				.preview-cell, .preview-cell-in,
 				.preview-cell-weight {
 					.box-sizing( border-box );
+				}
+
+				& > .preview-cell {
+
+					&:first-of-type {
+						padding-left: 0;
+					}
+
+					&:last-of-type {
+						padding-right: 0;
+					}
+				}
+
+				.preview-cell .resize-handle .preview-cell {
+
+					&:first-of-type {
+						padding-right: 0;
+					}
+
+					&:last-of-type {
+						padding-left: 0;
+					}
 				}
 
 				.preview-cell {
@@ -1815,27 +1872,56 @@
 							box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 						}
 
+						.preview-cell-unit {
+							left: 8px;
+							position: absolute;
+							top: -2.5px;
+							z-index: 1;
+							line-height: 1;
+						}
+
+						.preview-cell-container {
+							left: 50%;
+							position: absolute;
+							top: 50%;
+						}
+
+						.preview-cell-weight,
+						.preview-cell-weight-input,
+						.preview-cell-unit {
+							color: #5e6d72;
+							font-size: 17px;
+							font-weight: bold;
+						}
+
+						.preview-cell-weight-input[type="text"] {
+							padding-right: 22px;
+						}
+
+						.preview-cell-weight-input[type="number"] {
+							z-index: 2;
+						}
+
+						.preview-cell-weight {
+							padding: 10px 22px 10px 5px;
+
+						}
+
+						.preview-cell-weight-input {
+							padding: 10px 5px;
+						}
+
 						.preview-cell-weight,
 						.preview-cell-weight-input {
 							background: #fff;
 							border: 1px solid #d0d0d0;
-							color: #5e6d72;
-							font-size: 17px;
-							font-weight: bold;
-							left: 50%;
+							cursor: pointer;
 							line-height: 1.4em !important;
 							margin: -0.95em 0 0 -40px;
-							padding: 10px 5px;
+							overflow: hidden;
 							position: absolute;
 							text-align: center;
-							top: 50%;
 							width: 80px;
-
-							&:after{
-								content: '%';
-							}
-							overflow: hidden;
-							cursor: pointer;
 
 							&:hover {
 								background: #f6f6f6;
@@ -2197,7 +2283,7 @@
 						border-top: 1px solid #d0d0d0;
 					}
 
-					&:hover, 
+					&:hover,
 					&:focus	{
 						.so-buttons {
 							visibility: visible;
@@ -2332,6 +2418,10 @@
 						font-size: 12px;
 					}
 
+					.wp-color-result {
+						border-color: #8c8f94;
+					}
+
 					.wp-color-result,
 					.so-wp-color-field {
 						margin-bottom: 4px;
@@ -2388,7 +2478,7 @@
 						background: #f4f4f4;
 						border: 1px solid #e0e0e0;
 						display: block;
-						margin: 10px 0;
+						margin-top: 10px;
 						margin-left: 55px;
 						max-width: 500px;
 						padding: 12px 15px;
@@ -2461,6 +2551,11 @@
 
 				.wp-color-result {
 					margin: 0;
+
+					.wp-color-result-text {
+						border-left: 1px solid #8c8f94;
+						height: 28px;
+					}
 				}
 			}
 		}
@@ -2528,9 +2623,9 @@
 			}
 			&.measurement-left {
 				box-shadow: inset 2px -2px 2px rgba(0, 115, 170, .35);
-			}			
+			}
 		}
-		
+
 		.style-field-image {
 
 			@image_field_height: 28px;
@@ -2538,7 +2633,7 @@
 			.so-image-selector {
 				display: inline-block;
 				background-color: #f7f7f7;
-				border: 1px solid #ccc;
+				border: 1px solid #8c8f94;
 				height: @image_field_height;
 				float: left;
 				.rounded(3px);
@@ -2556,7 +2651,7 @@
 					width: @image_field_height;
 					float: left;
 					background: #fff;
-					border-right: 1px solid #ccc;
+					border-right: 1px solid #8c8f94;
 					background-size: cover;
 
 					.border-radius(0, 0, 3px, 3px);
@@ -2599,7 +2694,7 @@
 				user-select: none;
 			}
 		}
-		
+
 		.style-field-radio label {
 			display: block;
 		}
@@ -2651,7 +2746,7 @@
 		width: 20px;
 		height: 20px;
 		background-image: url('./images/pb-icon.svg');
-		
+
 		&.white {
 			background-image: url('./images/pb-icon_white.svg');
 		}
@@ -2665,7 +2760,7 @@
 			}
 		}
 	}
-	
+
 	.siteorigin-panels-add-layout-block {
 		text-align: center;
 		margin-left: auto;
@@ -3300,6 +3395,32 @@
 			padding: 0 24px 0 8px;
 			vertical-align: middle;
 			width: auto;
+		}
+	}
+}
+
+#siteorigin-panels-use-classic-notice {
+	padding-right: 25px;
+	position: relative;
+
+	.siteorigin-notice-dismiss {
+		background: none;
+		border: none;
+		color: #787c82;
+		cursor: pointer;
+		margin: 9px;
+		position: absolute;
+		right: 1px;
+		text-decoration: none;
+		top: 0;
+
+		&:focus,
+		&:hover {
+			color: #d63638;
+		}
+
+		.dashicons {
+			font-size: 17px;
 		}
 	}
 }

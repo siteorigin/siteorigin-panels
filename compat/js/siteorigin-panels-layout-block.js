@@ -28,11 +28,11 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       loadingPreview: !editMode,
       previewHtml: '',
       previewInitialized: !editMode,
-      pendingPreviewRequest: false
+      pendingPreviewRequest: false,
+      panelsInitialized: false
     };
     _this.panelsContainer = wp.element.createRef();
     _this.previewContainer = wp.element.createRef();
-    _this.panelsInitialized = false;
     _this.fetchPreviewTimer;
     return _this;
   }
@@ -40,9 +40,10 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     key: "componentDidMount",
     value: function componentDidMount() {
       this.isStillMounted = true;
-      if (this.state.editing) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
-      } else if (!this.state.editing && !this.previewInitialized) {
+      }
+      if (!this.previewInitialized) {
         clearTimeout(this.fetchPreviewTimer);
         var current = this;
         this.fetchPreviewTimer = setTimeout(function () {
@@ -61,7 +62,7 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      if (this.state.editing && !this.panelsInitialized) {
+      if (!this.state.panelsInitialized) {
         this.setupPanels();
       } else if (this.state.loadingPreview) {
         if (!this.state.pendingPreviewRequest) {
@@ -85,6 +86,10 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
     key: "setupPanels",
     value: function setupPanels() {
       var _this2 = this;
+      // Should we set up panels?
+      if (!this.state.editing || this.state.panelsInitialized) {
+        return;
+      }
       var $panelsContainer = jQuery(this.panelsContainer.current);
       var config = {
         editorType: 'standalone',
@@ -168,7 +173,9 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
         window.soPanelsBuilderView = [];
       }
       window.soPanelsBuilderView.push(this.builderView);
-      this.panelsInitialized = true;
+      this.setState({
+        panelsInitialized: true
+      });
     }
   }, {
     key: "fetchPreview",
@@ -190,7 +197,13 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
           panelsData: JSON.stringify(panelsData)
         }
       }).then(function (preview) {
-        if (_this3.isStillMounted && fetchRequest === _this3.currentFetchRequest && preview) {
+        if (!_this3.isStillMounted) {
+          return;
+        }
+        setTimeout(function () {
+          jQuery(document).trigger('panels_setup_preview');
+        }, 1000);
+        if (fetchRequest === _this3.currentFetchRequest && preview) {
           _this3.setState({
             previewHtml: preview,
             loadingPreview: false,
@@ -207,7 +220,6 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       var _this4 = this;
       var panelsData = this.props.panelsData;
       var switchToEditing = function switchToEditing() {
-        _this4.panelsInitialized = false;
         _this4.setState({
           editing: true
         });
@@ -215,44 +227,37 @@ var SiteOriginPanelsLayoutBlock = /*#__PURE__*/function (_wp$element$Component) 
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
           _this4.setState({
-            editing: false,
-            loadingPreview: !_this4.state.previewHtml,
-            previewInitialized: false
+            editing: false
           });
         }
       };
-      if (this.state.editing) {
-        return /*#__PURE__*/React.createElement(wp.element.Fragment, null, panelsData ? /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
-          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
-        }, /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
-          icon: "visibility",
-          className: "components-icon-button components-toolbar__control",
-          label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
-          onClick: switchToPreview
-        }))) : null, /*#__PURE__*/React.createElement("div", {
-          key: "layout-block",
-          className: "siteorigin-panels-layout-block-container",
-          ref: this.panelsContainer
-        }));
-      } else {
-        var loadingPreview = this.state.loadingPreview;
-        return /*#__PURE__*/React.createElement(wp.element.Fragment, null, /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
-          label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
-        }, /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
-          icon: "edit",
-          className: "components-icon-button components-toolbar__control",
-          label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
-          onClick: switchToEditing
-        }))), /*#__PURE__*/React.createElement("div", {
-          key: "preview",
-          className: "so-panels-block-layout-preview-container"
-        }, loadingPreview ? /*#__PURE__*/React.createElement("div", {
-          className: "so-panels-spinner-container"
-        }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(wp.components.Spinner, null))) : /*#__PURE__*/React.createElement("div", {
-          className: "so-panels-raw-html-container",
-          ref: this.previewContainer
-        }, /*#__PURE__*/React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
-      }
+      return /*#__PURE__*/React.createElement(wp.element.Fragment, null, /*#__PURE__*/React.createElement(wp.blockEditor.BlockControls, null, /*#__PURE__*/React.createElement(wp.components.Toolbar, {
+        label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+      }, this.state.editing ? /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
+        icon: "visibility",
+        className: "components-icon-button components-toolbar__control",
+        label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
+        onClick: switchToPreview
+      }) : /*#__PURE__*/React.createElement(wp.components.ToolbarButton, {
+        icon: "edit",
+        className: "components-icon-button components-toolbar__control",
+        label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
+        onClick: switchToEditing
+      }))), /*#__PURE__*/React.createElement("div", {
+        key: "layout-block",
+        className: "siteorigin-panels-layout-block-container",
+        ref: this.panelsContainer,
+        hidden: !this.state.editing
+      }), /*#__PURE__*/React.createElement("div", {
+        key: "preview",
+        className: "so-panels-block-layout-preview-container",
+        hidden: this.state.editing
+      }, this.state.loadingPreview ? /*#__PURE__*/React.createElement("div", {
+        className: "so-panels-spinner-container"
+      }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(wp.components.Spinner, null))) : /*#__PURE__*/React.createElement("div", {
+        className: "so-panels-raw-html-container",
+        ref: this.previewContainer
+      }, /*#__PURE__*/React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
     }
   }]);
   return SiteOriginPanelsLayoutBlock;
@@ -328,13 +333,25 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
       onRowOrWidgetMouseDown: disableSelection,
       onRowOrWidgetMouseUp: enableSelection
     });
-  },
-  save: function save(_ref2) {
-    var attributes = _ref2.attributes;
-    return attributes.hasOwnProperty('contentPreview') ? /*#__PURE__*/React.createElement(wp.element.RawHTML, null, attributes.contentPreview) : null;
   }
 });
 (function (jQuery) {
+  // Resolve Block Editor warning for SO Layout Block.
+  var unsubscribe = null;
+  unsubscribe = wp.data.subscribe(function () {
+    var isEditorReady = false;
+    if (wp.data.select('core/block-editor')) {
+      isEditorReady = wp.data.select('core/block-editor').hasInserterItems();
+    } else if (wp.data.select('core/editor')) {
+      isEditorReady = wp.data.select('core/editor').__unstableIsEditorReady();
+    }
+    if (isEditorReady && unsubscribe) {
+      unsubscribe();
+      setTimeout(function () {
+        jQuery('.wp-block[data-type="siteorigin-panels/layout-block"].has-warning .block-editor-warning__action .components-button').trigger('click');
+      }, 250);
+    }
+  });
   if (window.soPanelsBlockEditorAdmin.showAddButton) {
     jQuery(function () {
       setTimeout(function () {

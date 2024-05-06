@@ -2,11 +2,11 @@
 	<div class="settings-banner">
 
 		<span class="icon">
-			<img src="<?php echo siteorigin_panels_url( 'settings/images/icon-layer.png' ); ?>" class="layer-3" />
-			<img src="<?php echo siteorigin_panels_url( 'settings/images/icon-layer.png' ); ?>" class="layer-2" />
-			<img src="<?php echo siteorigin_panels_url( 'settings/images/icon-layer.png' ); ?>" class="layer-1" />
+			<img src="<?php echo esc_url( siteorigin_panels_url( 'settings/images/icon-layer.png' ) ); ?>" class="layer-3" />
+			<img src="<?php echo esc_url( siteorigin_panels_url( 'settings/images/icon-layer.png' ) ); ?>" class="layer-2" />
+			<img src="<?php echo esc_url( siteorigin_panels_url( 'settings/images/icon-layer.png' ) ); ?>" class="layer-1" />
 		</span>
-		<h1><?php _e( 'SiteOrigin Page Builder', 'siteorigin-panels' ); ?></h1>
+		<h1><?php esc_html_e( 'SiteOrigin Page Builder', 'siteorigin-panels' ); ?></h1>
 
 		<div id="panels-settings-search">
 			<input type="search" placeholder="<?php esc_attr_e( 'Search Settings', 'siteorigin-panels' ); ?>" />
@@ -27,11 +27,11 @@
 
 	<?php if ( $this->settings_saved ) { ?>
 		<div id="setting-error-settings_updated" class="updated settings-error">
-			<p><strong><?php _e( 'Settings Saved', 'siteorigin-panels' ); ?></strong></p>
+			<p><strong><?php esc_html_e( 'Settings Saved', 'siteorigin-panels' ); ?></strong></p>
 		</div>
 	<?php } ?>
 
-	<form action="<?php echo admin_url( 'options-general.php?page=siteorigin_panels' ); ?>" method="post" >
+	<form action="<?php echo esc_url( admin_url( 'options-general.php?page=siteorigin_panels' ) ); ?>" method="post" >
 
 		<div id="panels-settings-sections">
 			<?php
@@ -42,7 +42,8 @@
 					<tbody>
 						<?php foreach ( $section['fields'] as $field_id => $field ) { ?>
 							<tr class="panels-setting">
-								<th scope="row"><label><?php echo esc_html( $field['label'] ); ?></label></th>
+								<th scope="row">
+									<label><?php echo esc_html( $field['label'] ); ?></label></th>
 								<td>
 									<?php
 									$this->display_field( $field_id, $field );
@@ -79,12 +80,12 @@
 			<div id="panels-settings-section-welcome" class="panels-settings-section" data-section="welcome">
 				<?php include plugin_dir_path( __FILE__ ) . 'welcome.php'; ?>
 			</div>
-			
+
 		</div>
 
 		<div class="submit">
 			<?php wp_nonce_field( 'panels-settings' ); ?>
-			<input type="submit" value="<?php _e( 'Save Settings', 'siteorigin-panels' ); ?>" class="button-primary" />
+			<input type="submit" value="<?php esc_html_e( 'Save Settings', 'siteorigin-panels' ); ?>" class="button-primary" />
 		</div>
 	</form>
 
