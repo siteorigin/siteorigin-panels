@@ -8,7 +8,7 @@ Author: SiteOrigin
 Author URI: https://siteorigin.com
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
-Donate link: http://siteorigin.com/page-builder/#donate
+Donate link: https://siteorigin.com/downloads/premium/
 */
 
 define( 'SITEORIGIN_PANELS_VERSION', 'dev' );
@@ -31,7 +31,6 @@ class SiteOrigin_Panels {
 
 		add_action( 'plugins_loaded', array( $this, 'version_check' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
-		add_action( 'plugins_loaded', array( $this, 'init_compat' ), 100 );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_general_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_general_scripts' ) );
@@ -42,7 +41,9 @@ class SiteOrigin_Panels {
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
 
-		add_action( 'activated_plugin', array( $this, 'activation_flag_redirect' ) );
+		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
+		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+
 		add_action( 'admin_init', array( $this, 'activation_do_redirect' ) );
 
 		if (
@@ -80,14 +81,13 @@ class SiteOrigin_Panels {
 		// Remove the default excerpt function.
 		add_filter( 'get_the_excerpt', array( $this, 'generate_post_excerpt' ), 9 );
 
-		// Content cache has been removed. SiteOrigin_Panels_Cache_Renderer just deletes any existing caches.
-		SiteOrigin_Panels_Cache_Renderer::single();
-
 		if ( function_exists( 'register_block_type' ) ) {
 			SiteOrigin_Panels_Compat_Layout_Block::single();
 		}
 
 		define( 'SITEORIGIN_PANELS_BASE_FILE', __FILE__ );
+
+		SiteOrigin_Panels_Compatibility::single();
 	}
 
 	public static function single() {
@@ -202,54 +202,8 @@ class SiteOrigin_Panels {
 	 * Loads Page Builder compatibility to allow other plugins/themes
 	 */
 	public function init_compat() {
-		// Compatibility with Widget Options plugin.
-		if ( class_exists( 'WP_Widget_Options' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/widget-options.php';
-		}
-
-		// Compatibility with Yoast plugins.
-		if (
-			defined( 'WPSEO_FILE' ) ||
-			function_exists( 'yoast_wpseo_video_seo_init' )
-		) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/yoast.php';
-		}
-
-		// Compatibility with Rank Math.
-		if ( class_exists( 'RankMath' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/rank-math.php';
-		}
-
-		// Compatibility with AMP plugin.
-		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/amp.php';
-		}
-
-		// Compatibility with Gravity Forms.
-		if ( class_exists( 'GFCommon' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/gravity-forms.php';
-		}
-
-		$load_lazy_load_compat = false;
-		// LazyLoad by WP Rocket.
-		if ( defined( 'ROCKET_LL_VERSION' ) ) {
-			$lazy_load_settings = get_option( 'rocket_lazyload_options' );
-			$load_lazy_load_compat = ! empty( $lazy_load_settings ) && ! empty( $lazy_load_settings['images'] );
-		// WP Rocket.
-		} elseif ( function_exists( 'get_rocket_option' ) && ! defined( 'DONOTROCKETOPTIMIZE' ) ) {
-			$load_lazy_load_compat = get_rocket_option( 'lazyload' ) && apply_filters( 'do_rocket_lazyload', true );
-		}
-
-		if ( apply_filters( 'siteorigin_lazyload_compat', $load_lazy_load_compat ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/lazy-load-backgrounds.php';
-		}
-
-		if ( class_exists( 'Jetpack' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/jetpack.php';
-		}
-
-		if ( class_exists( 'Polylang' ) ) {
-			require_once plugin_dir_path( __FILE__ ) . 'compat/polylang.php';
+		if ( defined( 'PAGELAYER_VERSION' ) ) {
+			SiteOrigin_Panels_Compat_Pagelayer::single();
 		}
 	}
 
@@ -450,15 +404,32 @@ class SiteOrigin_Panels {
 			$excerpt_length = apply_filters( 'excerpt_length', 55 );
 
 			foreach ( $panels_data['widgets'] as $widget ) {
-				$panels_info = $widget['panels_info'];
+				// Is the widget valid?
+				if ( empty( $widget['panels_info'] ) ) {
+					continue;
+				}
 
+				$panels_info = $widget['panels_info'];
 				if ( $panels_info['grid'] > 1 ) {
 					// Limiting search for a text type widget to the first two PB rows to avoid having excerpt content
 					// that's very far down in a post.
 					break;
 				}
 
-				if ( $panels_info['class'] == 'SiteOrigin_Widget_Editor_Widget' || $panels_info['class'] == 'WP_Widget_Text' || $panels_info['class'] == 'WP_Widget_Black_Studio_TinyMCE' ) {
+				$widgets = apply_filters( 'siteorigin_panels_excerpt_widgets', array(
+					'SiteOrigin_Widget_Editor_Widget',
+					'WP_Widget_Text',
+					'WP_Widget_Black_Studio_TinyMCE',
+				) );
+
+				if ( empty( $widgets ) ) {
+					break;
+				}
+
+				if ( in_array( $panels_info['class'], $widgets ) ) {
+					if ( empty( $widget['text'] ) ) {
+						continue;
+					}
 					$raw_excerpt .= ' ' . $widget['text'];
 					// This is all effectively default behavior for excerpts, copied from the `wp_trim_excerpt` function.
 					// We're just applying it to text type widgets content in the first two rows.
@@ -622,7 +593,7 @@ class SiteOrigin_Panels {
 		if ( ! wp_script_is( 'fitvids', 'registered' ) ) {
 			wp_register_script(
 				'fitvids',
-				siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/lib/jquery.fitvids' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array( 'jquery' ),
 				SITEORIGIN_PANELS_VERSION
 			);
@@ -718,7 +689,7 @@ class SiteOrigin_Panels {
 	 * Script that removes the siteorigin-panels-before-js class from the body.
 	 */
 	public function strip_before_js() {
-		?><script<?php echo current_theme_supports( 'html5', 'script' ) ? '' : ' type="text/javascript"'; ?>>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
+		?><script>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
 	}
 
 	/**
@@ -776,10 +747,17 @@ class SiteOrigin_Panels {
 	/**
 	 * Flag redirect to welcome page after activation.
 	 */
-	public function activation_flag_redirect( $plugin ) {
+	public function activated_plugin( $plugin ) {
 		if ( $plugin == plugin_basename( __FILE__ ) ) {
 			set_transient( 'siteorigin_panels_activation_welcome', true, 30 );
 		}
+
+		$this->deactivated_plugin( $plugin );
+	}
+
+	public function deactivated_plugin( $plugin ) {
+		delete_transient( 'siteorigin_panels_widgets' );
+		delete_transient( 'siteorigin_panels_widget_dialog_tabs' );
 	}
 
 	/**

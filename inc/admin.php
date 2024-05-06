@@ -53,7 +53,6 @@ class SiteOrigin_Panels_Admin {
 		add_action( 'wp_ajax_so_panels_builder_content_json', array( $this, 'action_builder_content_json' ) );
 		add_action( 'wp_ajax_so_panels_widget_form', array( $this, 'action_widget_form' ) );
 		add_action( 'wp_ajax_so_panels_live_editor_preview', array( $this, 'action_live_editor_preview' ) );
-		add_action( 'wp_ajax_so_panels_layout_block_sanitize', array( $this, 'layout_block_sanitize' ) );
 		add_action( 'wp_ajax_so_panels_layout_block_preview', array( $this, 'layout_block_preview' ) );
 
 		// Initialize the additional admin classes.
@@ -71,17 +70,6 @@ class SiteOrigin_Panels_Admin {
 
 		$this->in_save_post = false;
 
-		// Enqueue Yoast compatibility
-		add_action( 'admin_print_scripts-post-new.php', array( $this, 'enqueue_seo_compat' ), 100 );
-		add_action( 'admin_print_scripts-post.php', array( $this, 'enqueue_seo_compat' ), 100 );
-
-		if (
-			class_exists( 'ACF' ) &&
-			version_compare( get_option( 'acf_version' ), '5.7.10', '>=' )
-		) {
-			SiteOrigin_Panels_Compat_ACF_Widgets::single();
-		}
-
 		// Block editor specific actions.
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
@@ -94,9 +82,12 @@ class SiteOrigin_Panels_Admin {
 			}
 		}
 
-		
 		// Inline Saving.
 		add_filter( 'heartbeat_received', array( $this, 'inline_saving_heartbeat_received' ), 10, 2 );
+
+		// Classic editor notice.
+		add_filter( 'so_panels_show_classic_admin_notice', array( $this, 'maybe_hide_admin_notice' ), 9 );
+		add_action( 'wp_ajax_so_panels_dismiss_post_notice', array( $this, 'dismiss_admin_post_notice' ) );
 	}
 
 	/**
@@ -172,7 +163,7 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		unset( $links['edit'] );
-		$links[] = '<a href="' . admin_url( 'options-general.php?page=siteorigin_panels' ) . '">' . __( 'Settings', 'siteorigin-panels' ) . '</a>';
+		$links[] = '<a href="' . esc_url( admin_url( 'options-general.php?page=siteorigin_panels' ) ) . '">' . __( 'Settings', 'siteorigin-panels' ) . '</a>';
 		$links[] = '<a href="http://siteorigin.com/threads/plugin-page-builder/">' . __( 'Support', 'siteorigin-panels' ) . '</a>';
 
 		if ( SiteOrigin_Panels::display_premium_teaser() ) {
@@ -210,7 +201,7 @@ class SiteOrigin_Panels_Admin {
 	public function render_meta_boxes( $post ) {
 		$panels_data = $this->get_current_admin_panels_data();
 		$preview_url = SiteOrigin_Panels::preview_url();
-		
+
 		if ( apply_filters( 'siteorigin_panels_add_preview_content', true ) ) {
 			$preview_content = apply_filters( 'siteorigin_panels_add_preview_content', true ) ? $this->generate_panels_preview( $post->ID, $panels_data ) : '';
 		}
@@ -280,7 +271,7 @@ class SiteOrigin_Panels_Admin {
 				if ( siteorigin_panels_setting( 'copy-styles' ) ) {
 					$post->post_content .= "\n\n";
 					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
-					$post->post_content .= '@import url(' . SiteOrigin_Panels::front_css_url() . '); ';
+					$post->post_content .= '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
 				}
@@ -294,6 +285,7 @@ class SiteOrigin_Panels_Admin {
 		// If this is a Live Editor Quick Edit, setup redirection.
 		if (
 			siteorigin_panels_setting( 'live-editor-quick-link-close-after' ) &&
+			! empty( $_POST['_wp_http_referer'] ) &&
 			strpos( $_POST['_wp_http_referer'], 'so_live_editor' ) !== false
 		) {
 			add_filter( 'redirect_post_location', array( $this, 'live_editor_redirect_after' ), 10, 2 );
@@ -325,7 +317,7 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			wp_register_script(
 				'wp-color-picker-alpha',
-				siteorigin_panels_url( 'js/lib/wp-color-picker-alpha' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/lib/wp-color-picker-alpha' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array( 'wp-color-picker' ),
 				'3.0.2',
 				true
@@ -334,7 +326,7 @@ class SiteOrigin_Panels_Admin {
 			wp_enqueue_media();
 			wp_enqueue_script(
 				'so-panels-admin',
-				siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
+				esc_url( siteorigin_panels_url( 'js/siteorigin-panels' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
 				array(
 					'jquery',
 					'jquery-ui-resizable',
@@ -367,28 +359,35 @@ class SiteOrigin_Panels_Admin {
 
 			$user = wp_get_current_user();
 
+			$tabs = apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
+				0 => array(
+					'title'  => __( 'All Widgets', 'siteorigin-panels' ),
+					'filter' => array(
+						'installed' => true,
+						'groups'    => '',
+					),
+				),
+			) );
+			$tabs = array_map( function ( $tab ) {
+				$tab['title'] = esc_html( $tab['title'] );
+				$tab['filter']['groups'] = esc_html( $tab['filter']['groups'] );
+				return $tab;
+			}, $tabs );
+
 			$load_on_attach = siteorigin_panels_setting( 'load-on-attach' ) || isset( $_GET['siteorigin-page-builder'] );
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
-				'ajaxurl'                   => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ),
+				'ajaxurl'                   => esc_url( wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ) ),
 				'widgets'                   => $widgets,
 				'text_widget'               => $text_widget,
-				'widget_dialog_tabs'        => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
-					0 => array(
-						'title'  => __( 'All Widgets', 'siteorigin-panels' ),
-						'filter' => array(
-							'installed' => true,
-							'groups'    => '',
-						),
-					),
-				) ),
+				'widget_dialog_tabs'        => $tabs,
 				'row_layouts'               => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
-				'add_media'                 => __( 'Choose Media', 'siteorigin-panels' ),
-				'add_media_done'            => __( 'Done', 'siteorigin-panels' ),
+				'add_media'                 => esc_html__( 'Choose Media', 'siteorigin-panels' ),
+				'add_media_done'            => esc_html__( 'Done', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
 					array(
 						'weight' => 0.5,
@@ -412,149 +411,157 @@ class SiteOrigin_Panels_Admin {
 				// General localization messages
 				'loc'                       => array(
 					'missing_widget'       => array(
-						'title'       => __( 'Missing Widget', 'siteorigin-panels' ),
-						'description' => __( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
+						'title'       => esc_html__( 'Missing Widget', 'siteorigin-panels' ),
+						'description' => esc_html__( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
 					),
 					'time'                 => array(
 						// TRANSLATORS: Number of seconds since.
-						'seconds' => __( '%d seconds', 'siteorigin-panels' ),
+						'seconds' => esc_html__( '%d seconds', 'siteorigin-panels' ),
 						// TRANSLATORS: Number of minutes since.
-						'minutes' => __( '%d minutes', 'siteorigin-panels' ),
+						'minutes' => esc_html__( '%d minutes', 'siteorigin-panels' ),
 						// TRANSLATORS: Number of hours since.
-						'hours'   => __( '%d hours', 'siteorigin-panels' ),
+						'hours'   => esc_html__( '%d hours', 'siteorigin-panels' ),
 
 						// TRANSLATORS: A single second since.
-						'second'  => __( '%d second', 'siteorigin-panels' ),
+						'second'  => esc_html__( '%d second', 'siteorigin-panels' ),
 						// TRANSLATORS: A single minute since.
-						'minute'  => __( '%d minute', 'siteorigin-panels' ),
+						'minute'  => esc_html__( '%d minute', 'siteorigin-panels' ),
 						// TRANSLATORS: A single hour since.
-						'hour'    => __( '%d hour', 'siteorigin-panels' ),
+						'hour'    => esc_html__( '%d hour', 'siteorigin-panels' ),
 
 						// TRANSLATORS: Time ago - eg. "1 minute before".
-						'ago'     => __( '%s before', 'siteorigin-panels' ),
-						'now'     => __( 'Now', 'siteorigin-panels' ),
+						'ago'     => esc_html__( '%s before', 'siteorigin-panels' ),
+						'now'     => esc_html__( 'Now', 'siteorigin-panels' ),
 					),
 					'history'              => array(
 						// History messages.
-						'current'           => __( 'Current', 'siteorigin-panels' ),
-						'revert'            => __( 'Original', 'siteorigin-panels' ),
-						'restore'           => __( 'Version restored', 'siteorigin-panels' ),
-						'back_to_editor'    => __( 'Converted to editor', 'siteorigin-panels' ),
+						'current'           => esc_html__( 'Current', 'siteorigin-panels' ),
+						'revert'            => esc_html__( 'Original', 'siteorigin-panels' ),
+						'restore'           => esc_html__( 'Version restored', 'siteorigin-panels' ),
+						'back_to_editor'    => esc_html__( 'Converted to editor', 'siteorigin-panels' ),
 
 						// Widgets.
 						// TRANSLATORS: Message displayed in the history when a widget is deleted.
-						'widget_deleted'    => __( 'Widget deleted', 'siteorigin-panels' ),
+						'widget_deleted'    => esc_html__( 'Widget deleted', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is added.
-						'widget_added'      => __( 'Widget added', 'siteorigin-panels' ),
+						'widget_added'      => esc_html__( 'Widget added', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is edited.
-						'widget_edited'     => __( 'Widget edited', 'siteorigin-panels' ),
+						'widget_edited'     => esc_html__( 'Widget edited', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is duplicated.
-						'widget_duplicated' => __( 'Widget duplicated', 'siteorigin-panels' ),
+						'widget_duplicated' => esc_html__( 'Widget duplicated', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget position is changed.
-						'widget_moved'      => __( 'Widget moved', 'siteorigin-panels' ),
+						'widget_moved'      => esc_html__( 'Widget moved', 'siteorigin-panels' ),
 
 						// Rows
 						// TRANSLATORS: Message displayed in the history when a row is deleted.
-						'row_deleted'       => __( 'Row deleted', 'siteorigin-panels' ),
+						'row_deleted'       => esc_html__( 'Row deleted', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is added.
-						'row_added'         => __( 'Row added', 'siteorigin-panels' ),
+						'row_added'         => esc_html__( 'Row added', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is edited.
-						'row_edited'        => __( 'Row edited', 'siteorigin-panels' ),
+						'row_edited'        => esc_html__( 'Row edited', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row position is changed.
-						'row_moved'         => __( 'Row moved', 'siteorigin-panels' ),
+						'row_moved'         => esc_html__( 'Row moved', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is duplicated.
-						'row_duplicated'    => __( 'Row duplicated', 'siteorigin-panels' ),
+						'row_duplicated'    => esc_html__( 'Row duplicated', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is pasted.
-						'row_pasted'        => __( 'Row pasted', 'siteorigin-panels' ),
+						'row_pasted'        => esc_html__( 'Row pasted', 'siteorigin-panels' ),
 
 						// Cells.
-						'cell_resized'      => __( 'Cell resized', 'siteorigin-panels' ),
+						'cell_resized'      => esc_html__( 'Column resized', 'siteorigin-panels' ),
 
 						// Prebuilt.
-						'prebuilt_loaded'   => __( 'Prebuilt layout loaded', 'siteorigin-panels' ),
+						'prebuilt_loaded'   => esc_html__( 'Prebuilt layout loaded', 'siteorigin-panels' ),
 					),
 
 					// General localization.
-					'prebuilt_loading'     => __( 'Loading prebuilt layout', 'siteorigin-panels' ),
-					'confirm_use_builder'  => __( "Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels' ),
-					'confirm_stop_builder' => __( 'Would you like to clear your Page Builder content and revert to using the standard visual editor?', 'siteorigin-panels' ),
+					'prebuilt_loading'     => esc_html__( 'Loading prebuilt layout', 'siteorigin-panels' ),
+					'confirm_use_builder'  => esc_html__( "Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels' ),
+					'confirm_stop_builder' => esc_html__( 'Would you like to clear your Page Builder content and revert to using the standard visual editor?', 'siteorigin-panels' ),
 					// TRANSLATORS: This is the title for a widget called "Layout Builder".
-					'layout_widget'        => __( 'Layout Builder Widget', 'siteorigin-panels' ),
+					'layout_widget'        => esc_html__( 'Layout Builder Widget', 'siteorigin-panels' ),
 					// TRANSLATORS: A standard confirmation message
-					'dropdown_confirm'     => __( 'Are you sure?', 'siteorigin-panels' ),
+					'dropdown_confirm'     => esc_html__( 'Are you sure?', 'siteorigin-panels' ),
 					// TRANSLATORS: When a layout file is ready to be inserted. %s is the filename.
-					'ready_to_insert'      => __( '%s is ready to insert.', 'siteorigin-panels' ),
+					'ready_to_insert'      => esc_html__( '%s is ready to insert.', 'siteorigin-panels' ),
 
 					// Everything for the contextual menu.
 					'contextual'           => array(
-						'add_widget_below' => __( 'Add Widget Below', 'siteorigin-panels' ),
-						'add_widget_cell'  => __( 'Add Widget to Cell', 'siteorigin-panels' ),
-						'search_widgets'   => __( 'Search Widgets', 'siteorigin-panels' ),
+						'add_widget_below' => esc_html__( 'Add Widget Below', 'siteorigin-panels' ),
+						'add_widget_cell'  => esc_html__( 'Add Widget to Column', 'siteorigin-panels' ),
+						'search_widgets'   => esc_html__( 'Search Widgets', 'siteorigin-panels' ),
 
-						'add_row' => __( 'Add Row', 'siteorigin-panels' ),
-						'column'  => __( 'Column', 'siteorigin-panels' ),
+						'add_row' => esc_html__( 'Add Row', 'siteorigin-panels' ),
+						'column'  => esc_html__( 'Column', 'siteorigin-panels' ),
 
-						'cell_actions'        => __( 'Cell Actions', 'siteorigin-panels' ),
-						'cell_paste_widget'   => __( 'Paste Widget', 'siteorigin-panels' ),
+						'cell_actions'        => esc_html__( 'Column Actions', 'siteorigin-panels' ),
+						'cell_paste_widget'   => esc_html__( 'Paste Widget', 'siteorigin-panels' ),
 
-						'widget_actions'   => __( 'Widget Actions', 'siteorigin-panels' ),
-						'widget_edit'      => __( 'Edit Widget', 'siteorigin-panels' ),
-						'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
-						'widget_delete'    => __( 'Delete Widget', 'siteorigin-panels' ),
-						'widget_copy'      => __( 'Copy Widget', 'siteorigin-panels' ),
-						'widget_paste'     => __( 'Paste Widget Below', 'siteorigin-panels' ),
+						'widget_actions'   => esc_html__( 'Widget Actions', 'siteorigin-panels' ),
+						'widget_edit'      => esc_html__( 'Edit Widget', 'siteorigin-panels' ),
+						'widget_duplicate' => esc_html__( 'Duplicate Widget', 'siteorigin-panels' ),
+						'widget_delete'    => esc_html__( 'Delete Widget', 'siteorigin-panels' ),
+						'widget_copy'      => esc_html__( 'Copy Widget', 'siteorigin-panels' ),
+						'widget_paste'     => esc_html__( 'Paste Widget Below', 'siteorigin-panels' ),
 
-						'row_actions'   => __( 'Row Actions', 'siteorigin-panels' ),
-						'row_edit'      => __( 'Edit Row', 'siteorigin-panels' ),
-						'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
-						'row_delete'    => __( 'Delete Row', 'siteorigin-panels' ),
-						'row_copy'      => __( 'Copy Row', 'siteorigin-panels' ),
-						'row_paste'     => __( 'Paste Row', 'siteorigin-panels' ),
+						'row_actions'   => esc_html__( 'Row Actions', 'siteorigin-panels' ),
+						'row_edit'      => esc_html__( 'Edit Row', 'siteorigin-panels' ),
+						'row_duplicate' => esc_html__( 'Duplicate Row', 'siteorigin-panels' ),
+						'row_delete'    => esc_html__( 'Delete Row', 'siteorigin-panels' ),
+						'row_copy'      => esc_html__( 'Copy Row', 'siteorigin-panels' ),
+						'row_paste'     => esc_html__( 'Paste Row', 'siteorigin-panels' ),
 					),
-					'draft'                => __( 'Draft', 'siteorigin-panels' ),
-					'untitled'             => __( 'Untitled', 'siteorigin-panels' ),
+					'draft'                => esc_html__( 'Draft', 'siteorigin-panels' ),
+					'untitled'             => esc_html__( 'Untitled', 'siteorigin-panels' ),
 					'row' => array(
-						'add' => __( 'New Row', 'siteorigin-panels' ),
-						'edit' => __( 'Row', 'siteorigin-panels' ),
+						'add' => esc_html__( 'New Row', 'siteorigin-panels' ),
+						'edit' => esc_html__( 'Row', 'siteorigin-panels' ),
+						'cellInput' => esc_html__( 'Adjust column size of column %s.', 'siteorigin-panels' ),
+						'direction' => esc_html__( 'Change column direction to the %s', 'siteorigin-panels' ),
+						// TRANSLATORS: Used by the Column Preset Direction button aria-label.
+						'left'      => esc_html__( 'left', 'siteorigin-panels' ),
+						// TRANSLATORS: Used by the Column Preset Direction button aria-label.
+						'right'      => esc_html__( 'right', 'siteorigin-panels' ),
 					),
 					'welcomeMessage' => array(
-						'addingDisabled' => __( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),
-						'oneEnabled' => __( 'Add a {{%= items[0] %}} to get started.', 'siteorigin-panels' ),
-						'twoEnabled' => __( 'Add a {{%= items[0] %}} or {{%= items[1] %}} to get started.', 'siteorigin-panels' ),
-						'threeEnabled' => __( 'Add a {{%= items[0] %}}, {{%= items[1] %}} or {{%= items[2] %}} to get started.', 'siteorigin-panels' ),
-						'addWidgetButton' => "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . '</a>',
-						'addRowButton' => "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . '</a>',
-						'addPrebuiltButton' => "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . '</a>',
+						'addingDisabled' => esc_html__( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),
+						'oneEnabled' => esc_html__( 'Add a {{%= items[0] %}} to get started.', 'siteorigin-panels' ),
+						'twoEnabled' => esc_html__( 'Add a {{%= items[0] %}} or {{%= items[1] %}} to get started.', 'siteorigin-panels' ),
+						'threeEnabled' => esc_html__( 'Add a {{%= items[0] %}}, {{%= items[1] %}} or {{%= items[2] %}} to get started.', 'siteorigin-panels' ),
+						'addWidgetButton' => "<a href='#' class='so-tool-button so-widget-add'>" . esc_html__( 'Widget', 'siteorigin-panels' ) . '</a>',
+						'addRowButton' => "<a href='#' class='so-tool-button so-row-add'>" . esc_html__( 'Row', 'siteorigin-panels' ) . '</a>',
+						'addPrebuiltButton' => "<a href='#' class='so-tool-button so-prebuilt-add'>" . esc_html__( 'Prebuilt Layout', 'siteorigin-panels' ) . '</a>',
 						'docsMessage' => sprintf(
-							__( 'Read our %s if you need help.', 'siteorigin-panels' ),
-							"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . '</a>'
+							esc_html__( 'Read our %s if you need help.', 'siteorigin-panels' ),
+							"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . esc_html__( 'documentation', 'siteorigin-panels' ) . '</a>'
 						),
 					),
 				),
 				'plupload'                  => array(
 					'max_file_size'       => wp_max_upload_size() . 'b',
-					'url'                 => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ),
-					'flash_swf_url'       => includes_url( 'js/plupload/plupload.flash.swf' ),
-					'silverlight_xap_url' => includes_url( 'js/plupload/plupload.silverlight.xap' ),
-					'filter_title'        => __( 'Page Builder layouts', 'siteorigin-panels' ),
-					'error_message'       => __( 'Error uploading or importing file.', 'siteorigin-panels' ),
+					'url'                 => esc_url( wp_nonce_url(
+						admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce'
+					) ),
+					'flash_swf_url'       => esc_url( includes_url( 'js/plupload/plupload.flash.swf' ) ),
+					'silverlight_xap_url' => esc_url( includes_url( 'js/plupload/plupload.silverlight.xap' ) ),
+					'filter_title'        => esc_html__( 'Page Builder layouts', 'siteorigin-panels' ),
+					'error_message'       => esc_html__( 'Error uploading or importing file.', 'siteorigin-panels' ),
 				),
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
-				'prebuiltDefaultScreenshot' => siteorigin_panels_url( 'css/images/prebuilt-default.png' ),
+				'prebuiltDefaultScreenshot' => esc_url( siteorigin_panels_url( 'css/images/prebuilt-default.png' ) ),
 				'loadOnAttach'              => $load_on_attach,
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 				'forms'                   => array(
-					'loadingFailed' => __( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
+					'loadingFailed' => esc_html__( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
 				),
 				'row_color' => array(
 					'migrations' => apply_filters( 'siteorigin_panels_admin_row_colors_migration', array(
-						1 => __( 'soft-blue', 'siteorigin-panels' ),
-						2 => __( 'soft-red', 'siteorigin-panels' ),
-						3 => __( 'grayish-violet', 'siteorigin-panels' ),
-						4 => __( 'lime-green', 'siteorigin-panels' ),
-						5 => __( 'desaturated-yellow', 'siteorigin-panels' ),
+						1 => esc_html__( 'soft-blue', 'siteorigin-panels' ),
+						2 => esc_html__( 'soft-red', 'siteorigin-panels' ),
+						3 => esc_html__( 'grayish-violet', 'siteorigin-panels' ),
+						4 => esc_html__( 'lime-green', 'siteorigin-panels' ),
+						5 => esc_html__( 'desaturated-yellow', 'siteorigin-panels' ),
 					) ),
-					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', __( 'soft-blue', 'siteorigin-panels' ) ),
+					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', esc_html__( 'soft-blue', 'siteorigin-panels' ) ),
 				),
 			) );
 
@@ -595,35 +602,6 @@ class SiteOrigin_Panels_Admin {
 		}
 	}
 
-	public function enqueue_seo_compat() {
-		if ( self::is_admin() ) {
-			if (
-				defined( 'WPSEO_FILE' ) &&
-				(
-					wp_script_is( 'yoast-seo-metabox' ) || // <= 14.5.
-					wp_script_is( 'yoast-seo-admin-global-script' ) || // => 14.6 <= 17.9.
-					wp_script_is( 'yoast-seo-post-edit-classic' ) // => 18
-				)
-			) {
-				wp_enqueue_script(
-					'so-panels-seo-compat',
-					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-					array( 'jquery' ),
-					SITEORIGIN_PANELS_VERSION,
-					true
-				);
-			} elseif ( defined( 'RANK_MATH_VERSION' ) && wp_script_is( 'rank-math-analyzer' ) ) {
-				wp_enqueue_script(
-					'so-panels-seo-compat',
-					siteorigin_panels_url( 'js/seo-compat' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ),
-					array( 'jquery', 'rank-math-analyzer' ),
-					SITEORIGIN_PANELS_VERSION,
-					true
-				);
-			}
-		}
-	}
-
 	/**
 	 * Enqueue the admin panel styles.
 	 *
@@ -637,7 +615,7 @@ class SiteOrigin_Panels_Admin {
 		if ( $force || self::is_admin() ) {
 			wp_enqueue_style(
 				'so-panels-admin',
-				siteorigin_panels_url( 'css/admin' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
+				esc_url( siteorigin_panels_url( 'css/admin' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ) ),
 				array( 'wp-color-picker' ),
 				SITEORIGIN_PANELS_VERSION
 			);
@@ -877,6 +855,12 @@ class SiteOrigin_Panels_Admin {
 	 */
 	public function get_widgets() {
 		global $wp_widget_factory;
+		$widgets = get_transient( 'siteorigin_panels_widgets' );
+
+		if ( $widgets !== false ) {
+			return $widgets;
+		}
+
 		$widgets = array();
 
 		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
@@ -926,6 +910,8 @@ class SiteOrigin_Panels_Admin {
 
 		// Sort the widgets alphabetically.
 		uasort( $widgets, array( $this, 'widgets_sorter' ) );
+
+		set_transient( 'siteorigin_panels_widgets', $widgets, 10 * 60 );
 
 		return $widgets;
 	}
@@ -1024,6 +1010,13 @@ class SiteOrigin_Panels_Admin {
 		return $widgets;
 	}
 
+	private function column_sizes_round( $size ) {
+		if ( is_array( $size ) ) {
+			return array_map( array( $this, 'column_sizes_round' ), $size );
+		}
+		return round( $size , 2);
+	}
+
 	/**
 	 * Add all the footer JS templates.
 	 */
@@ -1032,6 +1025,7 @@ class SiteOrigin_Panels_Admin {
 			2 => array(
 				array( 50, 50 ),
 				array( 25, 75 ),
+				array( 61.8, 38.2 ),
 			),
 			3 => array(
 				array( 33, 33, 33 ),
@@ -1046,6 +1040,12 @@ class SiteOrigin_Panels_Admin {
 				array( 10, 15, 30, 15, 30 ),
 			),
 		) );
+
+		// Prevent extra long column sizes.
+		if ( ! empty( $column_sizes ) ) {
+			$column_sizes = array_map( array( $this, 'column_sizes_round' ), $column_sizes );
+		}
+
 		include plugin_dir_path( __FILE__ ) . '../tpl/js-templates.php';
 	}
 
@@ -1260,10 +1260,6 @@ class SiteOrigin_Panels_Admin {
 		return $return;
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//  ADMIN AJAX ACTIONS
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Get builder content based on the submitted panels_data.
 	 */
@@ -1279,13 +1275,15 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( empty( $_POST['post_id'] ) || empty( $_POST['panels_data'] ) ) {
-			echo '';
 			wp_die();
 		}
 
-		// Echo the content.
 		$old_panels_data = get_post_meta( $_POST['post_id'], 'panels_data', true );
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_die();
+		}
+
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			$panels_data['widgets'],
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
@@ -1327,12 +1325,16 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( empty( $_POST['panels_data'] ) ) {
-			echo json_encode( $return );
+			echo wp_json_encode( $return );
 			wp_die();
 		}
 
-		// Echo the content.
 		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			echo wp_json_encode( $return );
+			wp_die();
+		}
+
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			$panels_data['widgets'],
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
@@ -1350,7 +1352,7 @@ class SiteOrigin_Panels_Admin {
 
 		$return['preview'] = $this->generate_panels_preview( (int) $_POST['post_id'], $panels_data );
 
-		echo json_encode( $return );
+		echo wp_json_encode( $return );
 
 		wp_die();
 	}
@@ -1377,10 +1379,9 @@ class SiteOrigin_Panels_Admin {
 
 		$request = array_map( 'stripslashes_deep', $_REQUEST );
 
-		$widget_class = $request['widget'];
+		$widget_class = sanitize_text_field( $request['widget'] );
 		$widget_class = apply_filters( 'siteorigin_panels_widget_class', $widget_class );
 		$instance = ! empty( $request['instance'] ) ? json_decode( $request['instance'], true ) : array();
-
 		$form = $this->render_form( $widget_class, $instance, $_REQUEST['raw'] == 'true' );
 		$form = apply_filters( 'siteorigin_panels_ajax_widget_form', $form, $widget_class, $instance );
 
@@ -1410,6 +1411,10 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_die();
+		}
+
 		$builder_id = 'gbp' . uniqid();
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
@@ -1419,30 +1424,21 @@ class SiteOrigin_Panels_Admin {
 			// We need this to get our widgets bundle to add it's styles inline for previews.
 			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
 		}
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data, true );
+		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data );
+		ob_start();
 
 		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
 		// so neither the `wp_head` nor the `wp_footer` actions are called, which usually trigger `siteorigin_widget_print_styles`.
 		if ( $sowb_active ) {
-			ob_start();
 			siteorigin_widget_print_styles();
-			$rendered_layout .= ob_get_clean();
 		}
-
+		?>
+		<style>@import url('<?php echo esc_url( SiteOrigin_Panels::front_css_url() ); ?>');</style>
+		<?php
+		echo SiteOrigin_Panels_Renderer::single()->print_inline_css( true );
+		$rendered_layout .= ob_get_clean();
 		echo $rendered_layout;
 		wp_die();
-	}
-
-	public function layout_block_sanitize() {
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'layout-block-sanitize' ) ) {
-			wp_die();
-		}
-
-		$panels_data = json_decode( wp_unslash( $_POST['panelsData'] ), true );
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true, true );
-		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
-
-		wp_send_json( $panels_data );
 	}
 
 	/**
@@ -1515,7 +1511,7 @@ class SiteOrigin_Panels_Admin {
 	public static function display_footer_premium_link() {
 		$links = array(
 			array(
-				'text' => __( 'Get the row, cell, and widget %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Get the row, column, and widget %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/animations' ),
 				'anchor' => __( 'Animations Addon', 'siteorigin-panels' ),
 			),
@@ -1535,7 +1531,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Link an entire Page Builder row, cell, or widget with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Link an entire Page Builder row, column, or widget with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/link-overlay' ),
 				'anchor' => __( 'Link Overlay Addon', 'siteorigin-panels' ),
 			),
@@ -1590,10 +1586,25 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Add widget, cell, and row Retina background images for high-pixel-density displays with %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Add widget, column, and row Retina background images for high-pixel-density displays with %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/retina-background-images' ),
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
+			array(
+				'text' => __( 'Upgrade to %link% and copy-paste rows and widgets between domains to build pages faster.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/cross-domain-copy-paste' ),
+				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Boost your page-building speed by upgrading to %link% – copy and paste rows and widgets across domains with ease!', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/cross-domain-copy-paste' ),
+				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Introduce dynamic video backgrounds to any Page Builder row, column, or widget with %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/video-background' ),
+				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+			)
 		);
 
 		if ( class_exists( 'woocommerce' ) ) {
@@ -1631,15 +1642,55 @@ class SiteOrigin_Panels_Admin {
 		$show_classic_admin_notice = apply_filters( 'so_panels_show_classic_admin_notice', $show_classic_admin_notice );
 
 		if ( $show_classic_admin_notice ) {
-			$settings_url = self_admin_url( 'options-general.php?page=siteorigin_panels' );
+			$settings_url = esc_url( self_admin_url( 'options-general.php?page=siteorigin_panels' ) );
 			$notice = sprintf(
-				__( "This post type is set to use the Classic Editor by default for new posts. If you'd like to change this to the Block Editor, please go to <a href='%s' class='components-notice__action is-link'>Page Builder Settings</a> and disable <strong>Use Classic Editor for New Posts</strong>." ),
+				__( "This post type is set to use the Classic Editor by default for new posts. If you'd like to change this to the Block Editor, please go to <a href='%s' class='components-notice__action is-link'>Page Builder Settings</a> and disable <strong>Use Classic Editor for New Posts</strong>.", 'siteorigin-panels' ),
 				$settings_url
 			);
+
+			$dismiss_url = wp_nonce_url(
+				add_query_arg( array(
+					'action' => 'so_panels_dismiss_post_notice',
+				), admin_url( 'admin-ajax.php' ) ),
+				'so_panels_dismiss_post_notice'
+			);
 			?>
-			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info"><p id="use-classic-notice"><?php echo $notice; ?></p></div>
+			<div id="siteorigin-panels-use-classic-notice" class="notice notice-info">
+				<p id="use-classic-notice">
+					<?php echo wp_kses_post( $notice ); ?>
+
+					<button
+						type="button"
+						class="siteorigin-notice-dismiss"
+						data-url="<?php echo esc_url( $dismiss_url ); ?>"
+					>
+						<span class="dashicons dashicons-dismiss" aria-hidden="true"></span>
+						<span class="screen-reader-text">
+							<?php esc_html_e( 'Dismiss Notice', 'siteorigin-panels' ); ?>
+						</span>
+					</button>
+				</p>
+			</div>
 			<?php
+			wp_enqueue_script(
+				'so-panels-admin-notice',
+				esc_url( siteorigin_panels_url( 'js/admin-notice' . SITEORIGIN_PANELS_JS_SUFFIX . '.js' ) ),
+				array( 'jquery' ),
+				SITEORIGIN_PANELS_VERSION,
+				true
+			);
 		}
+	}
+
+	public function maybe_hide_admin_notice( $status ) {
+		$user_status = get_user_meta( get_current_user_id(), 'so_panels_hide_post_notice', true );
+		return $user_status ? false : $status;
+	}
+
+	public function dismiss_admin_post_notice() {
+		check_ajax_referer( 'so_panels_dismiss_post_notice' );
+		add_user_meta( get_current_user_id(), 'so_panels_hide_post_notice', true, true );
+		die();
 	}
 
 	/**
@@ -1837,7 +1888,7 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	public function inline_saving_heartbeat_received( $response, $data ) {
-		
+
 		if ( ! empty( $data['panels'] ) ) {
 			$panels_data = json_decode( $data['panels'], true );
 			if ( ! wp_verify_nonce( $panels_data['nonce'], 'save' ) ) {

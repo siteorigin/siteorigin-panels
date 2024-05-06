@@ -8,6 +8,8 @@ class SiteOrigin_Panels_Styles_Admin {
 		add_filter( 'siteorigin_panels_prebuilt_layout', array( $this, 'convert_data' ) );
 
 		add_filter( 'siteorigin_panels_general_current_styles', array( $this, 'style_migration' ), 10, 4 );
+
+		add_filter( 'siteorigin_panels_data_migration', array( $this, 'panels_data_migrations' ) );
 	}
 
 	public static function single() {
@@ -63,7 +65,7 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			case 'cell':
 				$cell_number = isset( $args['index'] ) ? ' ' . ( (int) $args['index'] + 1 ) : '';
-				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Cell%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
+				$this->render_styles_fields( 'cell', '<h3>' . sprintf( __( 'Column%s Styles', 'siteorigin-panels' ), $cell_number ) . '</h3>', '', $current, $post_id, $args );
 				break;
 
 			case 'widget':
@@ -159,7 +161,7 @@ class SiteOrigin_Panels_Styles_Admin {
 			?>
 			<div class="style-section-wrapper">
 				<div class="style-section-head" tabindex="0">
-					<h4><?php echo esc_html( $group['name'] ); ?></h4>
+					<h4><?php esc_html_e( $group['name'] ); ?></h4>
 				</div>
 				<div class="style-section-fields" style="display: none">
 					<?php
@@ -170,7 +172,9 @@ class SiteOrigin_Panels_Styles_Admin {
 							?>
 							<div class="style-field-wrapper so-field-<?php echo esc_attr( $field_id ); ?>">
 								<?php if ( ! empty( $field['name'] ) ) { ?>
-									<label><?php echo $field['name']; ?></label>
+									<label>
+										<?php esc_html_e( $field['name'] ); ?>
+									</label>
 								<?php } ?>
 								<div
 									class="style-field style-field-<?php echo sanitize_html_class( $field['type'] ); ?>">
@@ -207,19 +211,19 @@ class SiteOrigin_Panels_Styles_Admin {
 					<div class="measurement-inputs">
 						<div class="measurement-wrapper">
 							<input type="text" class="measurement-value measurement-top"
-							       placeholder="<?php _e( 'Top', 'siteorigin-panels' ); ?>"/>
+							       placeholder="<?php esc_html_e( 'Top', 'siteorigin-panels' ); ?>"/>
 						</div>
 						<div class="measurement-wrapper">
 							<input type="text" class="measurement-value measurement-right"
-							       placeholder="<?php _e( 'Right', 'siteorigin-panels' ); ?>"/>
+							       placeholder="<?php esc_html_e( 'Right', 'siteorigin-panels' ); ?>"/>
 						</div>
 						<div class="measurement-wrapper">
 							<input type="text" class="measurement-value measurement-bottom"
-							       placeholder="<?php _e( 'Bottom', 'siteorigin-panels' ); ?>"/>
+							       placeholder="<?php esc_html_e( 'Bottom', 'siteorigin-panels' ); ?>"/>
 						</div>
 						<div class="measurement-wrapper">
 							<input type="text" class="measurement-value measurement-left"
-							       placeholder="<?php _e( 'Left', 'siteorigin-panels' ); ?>"/>
+							       placeholder="<?php esc_html_e( 'Left', 'siteorigin-panels' ); ?>"/>
 						</div>
 					</div>
 					<?php
@@ -232,7 +236,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					class="measurement-unit measurement-unit-<?php echo ! empty( $field['multiple'] ) ? 'multiple' : 'single'; ?>">
 					<?php foreach ( $this->measurements_list() as $measurement ) { ?>
 						<option
-							value="<?php echo esc_html( $measurement ); ?>"><?php echo esc_html( $measurement ); ?></option>
+							value="<?php echo esc_attr( $measurement ); ?>"><?php esc_html_e( $measurement ); ?></option>
 					<?php } ?>
 				</select>
 				<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>"
@@ -267,9 +271,9 @@ class SiteOrigin_Panels_Styles_Admin {
 					class="so-wp-input-slider"
 					name="<?php echo esc_attr( $field_name ); ?>"
 					value="<?php echo ! empty( $current ) ? esc_attr( ( float ) $current ) : 100; ?>"
-					min="<?php echo isset( $field['min'] ) ? ( float ) $field['min'] : 0; ?>"
-					max="<?php echo isset( $field['max'] ) ? ( float ) $field['max'] : 100; ?>"
-					step="<?php echo isset( $field['step'] ) ? ( float ) $field['step'] : 1; ?>"
+					min="<?php echo isset( $field['min'] ) ? (float) $field['min'] : 0; ?>"
+					max="<?php echo isset( $field['max'] ) ? (float) $field['max'] : 100; ?>"
+					step="<?php echo isset( $field['step'] ) ? (float) $field['step'] : 1; ?>"
 				/>
 				<?php
 				break;
@@ -292,15 +296,15 @@ class SiteOrigin_Panels_Styles_Admin {
 					</div>
 
 					<div class="select-image">
-						<?php _e( 'Select Image', 'siteorigin-panels' ); ?>
+						<?php esc_html_e( 'Select Image', 'siteorigin-panels' ); ?>
 					</div>
 					<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>"
 					       value="<?php echo (int) $current; ?>"/>
 				</div>
 				<a href="#" class="remove-image <?php if ( empty( (int) $current ) ) {
 					echo ' hidden';
-				} ?>"><?php _e( 'Remove', 'siteorigin-panels' ); ?></a>
-				
+				} ?>"><?php esc_html_e( 'Remove', 'siteorigin-panels' ); ?></a>
+
 				<input type="text" value="<?php echo esc_url( $fallback_url ); ?>"
 					   placeholder="<?php esc_attr_e( 'External URL', 'siteorigin-panels' ); ?>"
 					   name="<?php echo esc_attr( $fallback_field_name ); ?>"
@@ -318,7 +322,7 @@ class SiteOrigin_Panels_Styles_Admin {
 							value="<?php echo esc_attr( $size_name ); ?>"
 							<?php selected( $current, $size_name ); ?>
 						>
-							<?php echo esc_html( ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) . $sizing_label ); ?>	
+							<?php esc_html_e( ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) . $sizing_label ); ?>
 						</option>
 					<?php } ?>
 				</select>
@@ -327,13 +331,22 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			case 'url' :
 			case 'text' :
-				?><input type="text" name="<?php echo esc_attr( $field_name ); ?>"
-				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
+				?>
+				<input
+					type="text"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					value="<?php echo esc_attr( $current ); ?>" class="widefat"
+				/>
+				<?php
 				break;
 
 			case 'number' :
-				?><input type="number" name="<?php echo esc_attr( $field_name ); ?>"
-				         value="<?php echo esc_attr( $current ); ?>" class="widefat" /><?php
+				?><input
+					type="number"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					value="<?php echo esc_attr( $current ); ?>" class="widefat"
+					/>
+					<?php
 				break;
 
 			case 'checkbox' :
@@ -341,7 +354,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				?>
 				<label class="so-checkbox-label">
 					<input type="checkbox" name="<?php echo esc_attr( $field_name ); ?>" <?php checked( $current ); ?> />
-					<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
+					<?php esc_html_e( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
 				</label>
 				<?php
 				break;
@@ -351,7 +364,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				<select name="<?php echo esc_attr( $field_name ); ?>">
 					<?php foreach ( $field['options'] as $k => $v ) { ?>
 						<option
-							value="<?php echo esc_attr( $k ); ?>" <?php selected( $current, $k ); ?>><?php echo esc_html( $v ); ?></option>
+							value="<?php echo esc_attr( $k ); ?>" <?php selected( $current, $k ); ?>><?php esc_html_e( $v ); ?></option>
 					<?php } ?>
 				</select>
 				<?php
@@ -365,7 +378,7 @@ class SiteOrigin_Panels_Styles_Admin {
 					<label for="<?php echo esc_attr( $radio_id . '-' . $k ); ?>">
 						<input type="radio" name="<?php echo esc_attr( $radio_id ); ?>"
 					       id="<?php echo esc_attr( $radio_id . '-' . $k ); ?>"
-					       value="<?php echo esc_attr( $k ); ?>" <?php checked( $k, $current ); ?>> <?php echo esc_html( $v ); ?>
+					       value="<?php echo esc_attr( $k ); ?>" <?php checked( $k, $current ); ?>> <?php esc_html_e( $v ); ?>
 					</label>
 					<?php
 				}
@@ -383,10 +396,10 @@ class SiteOrigin_Panels_Styles_Admin {
 				$current = (bool) $current;
 				?>
 
-				<?php echo esc_html( isset( $field['label'] ) ? $field['label'] : '' ); ?>
+				<?php esc_html_e( isset( $field['label'] ) ? $field['label'] : '' ); ?>
 				<label class="so-toggle-switch">
 					<input class="so-toggle-switch-input" type="checkbox" <?php checked( $current ); ?> name="<?php echo esc_attr( $field_name ); ?>">
-					<span class="so-toggle-switch-label" data-on="<?php _e( 'On', 'siteorigin-panels' ); ?>" data-off="<?php _e( 'Off', 'siteorigin-panels' ); ?>"></span>
+					<span class="so-toggle-switch-label" data-on="<?php esc_attr_e( 'On', 'siteorigin-panels' ); ?>" data-off="<?php esc_attr_e( 'Off', 'siteorigin-panels' ); ?>"></span>
 					<span class="so-toggle-switch-handle"></span>
 				</label>
 
@@ -396,7 +409,9 @@ class SiteOrigin_Panels_Styles_Admin {
 							<?php $sub_field_id = $field_id . '_' . $sub_field_id; ?>
 							<div class="style-field-wrapper so-field-<?php echo esc_attr( $sub_field_id ); ?>">
 								<?php if ( ! empty( $sub_field['name'] ) ) { ?>
-									<label><?php echo $sub_field['name']; ?></label>
+									<label>
+										<?php esc_html_e( $sub_field['name'] ); ?>
+									</label>
 								<?php } ?>
 								<div
 									class="style-field style-field-<?php echo sanitize_html_class( $sub_field['type'] ); ?>">
@@ -425,7 +440,8 @@ class SiteOrigin_Panels_Styles_Admin {
 					$field,
 					$field_name,
 					$current,
-					$field_id
+					$field_id,
+					$current_styles
 				);
 
 				if ( ! empty( $custom_style_field ) ) {
@@ -442,12 +458,67 @@ class SiteOrigin_Panels_Styles_Admin {
 		}
 	}
 
+	public function panels_data_migrations( $panels_data ) {
+		// Full Width Stretch Migrations.
+		if ( empty( $panels_data['grids'] ) ) {
+			return $panels_data;
+		}
+
+		foreach ( $panels_data['grids'] as $grid_id => $row ) {
+			if ( empty( $row ) || empty( $row['style'] ) ) {
+				continue;
+			}
+
+			// Check if the row has the old Row Stretch values.
+			if (
+				! isset( $row['style']['row_stretch'] ) ||
+				(
+					$row['style']['row_stretch'] !== 'full-stretched' &&
+					$row['style']['row_stretch'] !== 'full-stretched-padded'
+				)
+			) {
+				// It doesn't. Skip it.
+				continue;
+			}
+
+			if ( $row['style']['row_stretch'] == 'full-stretched' ) {
+				if ( ! empty( $row['style']['padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'padding'
+					);
+				}
+
+				if ( ! empty( $row['style']['mobile_padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'mobile_padding'
+					);
+				}
+
+				if ( ! empty( $row['style']['tablet_padding'] ) ) {
+					SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding(
+						$row['style'],
+						'tablet_padding'
+					);
+				}
+			}
+
+			$row['style']['row_stretch'] = 'full-width-stretch';
+
+			$panels_data['grids'][ $grid_id ] = $row;
+		}
+
+		return $panels_data;
+	}
+
 	/**
 	 * Sanitize the style fields in panels_data
 	 *
 	 * @return mixed
 	 */
 	public function sanitize_all( $panels_data ) {
+		$panels_data = apply_filters( 'siteorigin_panels_data_migration', $panels_data );
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			// Sanitize the widgets
 			for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {
@@ -613,6 +684,16 @@ class SiteOrigin_Panels_Styles_Admin {
 						$return[ $k ] = $styles[ $k ];
 					}
 
+					// Allow field to modify other values.
+					$return = apply_filters(
+						'siteorigin_panels_style_field_sanitize_all_' . $field['type'],
+						$return,
+						$return[ $k ],
+						$k,
+						$field,
+						$styles
+					);
+
 					break;
 			}
 		}
@@ -680,11 +761,29 @@ class SiteOrigin_Panels_Styles_Admin {
 			unset( $style['box_shadow_hover_opacity'] );
 		}
 
+		// Migrate old Full Width Stretched layouts to the new value.
+		if (
+			isset( $style['row_stretch'] ) &&
+			(
+				$style['row_stretch'] == 'full-stretched' ||
+				$style['row_stretch'] == 'full-stretched-padded'
+			)
+		) {
+			// To prevent unexpected spacing, remove any right/left padding.
+			if ( $style['row_stretch'] == 'full-stretched' ) {
+				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'padding' );
+				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'mobile_padding' );
+				SiteOrigin_Panels_Styles::single()->full_width_stretched_legacy_padding( $style, 'tablet_padding' );
+			}
+
+			$style['row_stretch'] = 'full-width-stretch';
+		}
+
 		return $style;
 	}
 
 	/**
-	 * Get list of supported mesurements
+	 * Get list of supported measurements.
 	 *
 	 * @return array
 	 */
@@ -745,5 +844,5 @@ class SiteOrigin_Panels_Styles_Admin {
 	}
 }
 
-// Initialise all the default styling
+// Initialize all the default styling.
 SiteOrigin_Panels_Styles::single();

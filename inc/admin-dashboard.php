@@ -44,7 +44,7 @@ class SiteOrigin_Panels_Admin_Dashboard {
 		if ( ! empty( $screen ) && $screen->id == 'dashboard' ) {
 			wp_enqueue_style(
 				'so-panels-dashboard',
-				siteorigin_panels_url( 'css/dashboard' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
+				esc_url( siteorigin_panels_url( 'css/dashboard' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ) ),
 				array( 'wp-color-picker' ),
 				SITEORIGIN_PANELS_VERSION
 			);

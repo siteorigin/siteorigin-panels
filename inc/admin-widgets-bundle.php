@@ -45,7 +45,7 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 			}
 
 			/** Pass all necessary information via URL if WP_Filesystem is needed */
-			$url = wp_nonce_url(
+			$url = esc_url( wp_nonce_url(
 				add_query_arg(
 					array(
 						'page'                  => 'siteorigin_panels_plugin_activation',
@@ -57,7 +57,7 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 					admin_url( 'themes.php' )
 				),
 				'siteorigin-pa-install'
-			);
+			) );
 			$method = ''; // Leave blank so WP_Filesystem can populate it as necessary
 			$fields = array( sanitize_key( 'siteorigin-pa-install' ) ); // Extra fields to pass to WP_Filesystem
 
@@ -123,11 +123,11 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 		}
 
 		if ( $installed && ! is_plugin_active( $plugin ) ) {
-			return wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=' . $plugin_path ), 'activate-plugin_' . $plugin_path );
+			return esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=' . $plugin_path ), 'activate-plugin_' . $plugin_path ) );
 		} elseif ( $installed && is_plugin_active( $plugin ) ) {
 			return '#';
 		} else {
-			return wp_nonce_url(
+			return esc_url( wp_nonce_url(
 				add_query_arg(
 					array(
 						'page'                  => 'siteorigin_panels_plugin_activation',
@@ -139,7 +139,7 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 					admin_url( 'plugins.php' )
 				),
 				'siteorigin-pa-install'
-			);
+			) );
 		}
 	}
 }
