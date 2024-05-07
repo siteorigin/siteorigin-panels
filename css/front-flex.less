@@ -51,22 +51,22 @@
 }
 
 // Prevent content appearing behind the overlay.
-.panel-has-overlay .panel-grid-cell {
-	position: relative;
-}
-
-.panel-grid-cell.panel-has-overlay .so-panel {
-	position: relative;
-	z-index: 1;
-}
-
-.panel-has-overlay.so-panel {
-	.panel-widget-style > * {
+.panel-has-overlay {
+	&,
+	.panel-grid-cell {
 		position: relative;
 	}
 
-	.panel-background-overlay {
-		position: absolute;
+	&.so-panel {
+		z-index: 1;
+
+		.panel-widget-style > * {
+			position: relative;
+		}
+
+		.panel-background-overlay {
+			position: absolute;
+		}
 	}
 }
 
