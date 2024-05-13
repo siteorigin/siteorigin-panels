@@ -4,7 +4,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 	public function __construct() {
 		add_filter( 'siteorigin_panels_widgets', array( $this, 'add_recommended_widgets' ) );
-		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), PHP_INT_MIN );
+		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), 1 );
 	}
 
 	/**
