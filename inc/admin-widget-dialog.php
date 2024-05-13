@@ -4,7 +4,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 
 	public function __construct() {
 		add_filter( 'siteorigin_panels_widgets', array( $this, 'add_recommended_widgets' ) );
-		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), 10 );
+		add_filter( 'siteorigin_panels_widget_dialog_tabs', array( $this, 'add_widgets_dialog_tabs' ), 1 );
 	}
 
 	/**
@@ -94,8 +94,16 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 	public function add_widgets_dialog_tabs( $tabs ) {
 		$stored_tabs = get_transient( 'siteorigin_panels_widget_dialog_tabs' );
 		if ( $stored_tabs ) {
-			return array_merge( $tabs, $stored_tabs );
+			return $stored_tabs;
 		}
+
+		$tabs[] = array(
+			'title'  => __( 'All Widgets', 'siteorigin-panels' ),
+			'filter' => array(
+				'installed' => true,
+				'groups'    => '',
+			),
+		);
 
 		$widgets_bundle = array(
 			'title'  => __( 'SiteOrigin Widgets Bundle', 'siteorigin-panels' ),
@@ -124,10 +132,11 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 			);
 		}
 
-		$tabs[] = $widgets_bundle;
 
 		// Add the Widgets Bundle message to the main widgets tab
 		$tabs[0]['message'] = $widgets_bundle['message'];
+
+		$tabs[] = $widgets_bundle;
 
 		$tabs[] = array(
 			'title'   => __( 'Page Builder Widgets', 'siteorigin-panels' ),
