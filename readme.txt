@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.16 – 13 May 2024 =
+* Adjusted Add Widget modal sidebar link order and display.
+* Restored WP Events Manager compatibility.
+* Resolved fallback shortcode decoding issue.
+* Added Layout Directory caching for better performance.
+* Increased required PHP version to `7.0.0`.
+* Developer: Improved `panelsOptions` translation handling.
+
 = 2.29.15 – 27 April 2024 =
 * Layout Block: Further improvements to preview functionality and performance.
 * Admin Area: Update to ensure Classic Editor notice is translatable.
