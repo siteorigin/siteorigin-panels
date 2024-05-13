@@ -31,16 +31,19 @@ class SiteOrigin_Panels_Widget_Shortcode {
 			'id' => '',
 		), $attr, 'siteorigin_widget' );
 
-		$attr[ 'class' ] = html_entity_decode( $attr[ 'class' ] );
-		$attr[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $attr[ 'class' ] );
+		$attr['class'] = html_entity_decode( $attr['class'] );
+		$attr['class'] = apply_filters( 'siteorigin_panels_widget_class', $attr['class'] );
 
-		$the_widget = ! empty( $attr[ 'class' ] ) ? SiteOrigin_Panels::get_widget_instance( $attr['class'] ) : null;
+		$the_widget = ! empty( $attr['class'] ) ? SiteOrigin_Panels::get_widget_instance( $attr['class'] ) : null;
 
 		if ( ! empty( $the_widget ) ) {
 			$data = self::decode_data( $content );
 
-			$widget_args = ! empty( $data[ 'args' ] ) ? $data[ 'args' ] : array();
-			$widget_instance = ! empty( $data[ 'instance' ] ) ? $data[ 'instance' ] : array();
+			$widget_args = ! empty( $data['args'] ) ? $data['args'] : array();
+			$widget_instance = ! empty( $data['instance'] ) ? $data['instance'] : array();
+
+			$widget_args = self::escape_widget_data( $widget_args );
+			$widget_instance = self::escape_widget_data( $widget_instance );
 
 			$widget_args = wp_parse_args( array(
 				'before_widget' => '',
@@ -56,13 +59,30 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		}
 	}
 
+	public static function escape_widget_data( $data ) {
+		try {
+			$escaped_data = array();
+			foreach ( $data as $key => $value ) {
+				if ( is_array( $value ) ) {
+					$escaped_data[ $key ] = self::escape_widget_data( $value );
+				} else {
+					$escaped_data[ $key ] = esc_html( $value );
+				}
+			}
+			return $escaped_data;
+		} catch (Exception $e) {
+			// There was an error, return empty array.
+			return array();
+		}
+	}
+
 	/**
 	 * Get the shortcode for a specific widget
 	 *
 	 * @return string
 	 */
 	public static function get_shortcode( $widget, $args, $instance ) {
-		unset( $instance[ 'panels_info' ] );
+		unset( $instance['panels_info'] );
 
 		$data = array(
 			'instance' => $instance,
@@ -85,7 +105,7 @@ class SiteOrigin_Panels_Widget_Shortcode {
 	 */
 	public static function widget_html( $html, $widget, $args, $instance ) {
 		if (
-			empty( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] ) ||
+			empty( $GLOBALS['SITEORIGIN_PANELS_POST_CONTENT_RENDER'] ) ||
 			// Don't try create HTML if there already is some
 			! empty( $html ) ||
 			! is_object( $widget ) ||

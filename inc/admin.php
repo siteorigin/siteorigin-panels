@@ -359,28 +359,27 @@ class SiteOrigin_Panels_Admin {
 
 			$user = wp_get_current_user();
 
+			$tabs = apply_filters( 'siteorigin_panels_widget_dialog_tabs', array() );
+			$tabs = array_map( function ( $tab ) {
+				$tab['title'] = esc_html( $tab['title'] );
+				$tab['filter']['groups'] = self::escape_text_recursive( $tab['filter']['groups'] );
+				return $tab;
+			}, $tabs );
+
 			$load_on_attach = siteorigin_panels_setting( 'load-on-attach' ) || isset( $_GET['siteorigin-page-builder'] );
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
 				'ajaxurl'                   => esc_url( wp_nonce_url( admin_url( 'admin-ajax.php' ), 'panels_action', '_panelsnonce' ) ),
 				'widgets'                   => $widgets,
 				'text_widget'               => $text_widget,
-				'widget_dialog_tabs'        => apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
-					0 => array(
-						'title'  => __( 'All Widgets', 'siteorigin-panels' ),
-						'filter' => array(
-							'installed' => true,
-							'groups'    => '',
-						),
-					),
-				) ),
+				'widget_dialog_tabs'        => $tabs,
 				'row_layouts'               => apply_filters( 'siteorigin_panels_row_layouts', array() ),
 				'directory_enabled'         => ! empty( $directory_enabled ),
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
-				'add_media'                 => __( 'Choose Media', 'siteorigin-panels' ),
-				'add_media_done'            => __( 'Done', 'siteorigin-panels' ),
+				'add_media'                 => esc_html__( 'Choose Media', 'siteorigin-panels' ),
+				'add_media_done'            => esc_html__( 'Done', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
 					array(
 						'weight' => 0.5,
@@ -404,128 +403,128 @@ class SiteOrigin_Panels_Admin {
 				// General localization messages
 				'loc'                       => array(
 					'missing_widget'       => array(
-						'title'       => __( 'Missing Widget', 'siteorigin-panels' ),
-						'description' => __( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
+						'title'       => esc_html__( 'Missing Widget', 'siteorigin-panels' ),
+						'description' => esc_html__( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
 					),
 					'time'                 => array(
 						// TRANSLATORS: Number of seconds since.
-						'seconds' => __( '%d seconds', 'siteorigin-panels' ),
+						'seconds' => esc_html__( '%d seconds', 'siteorigin-panels' ),
 						// TRANSLATORS: Number of minutes since.
-						'minutes' => __( '%d minutes', 'siteorigin-panels' ),
+						'minutes' => esc_html__( '%d minutes', 'siteorigin-panels' ),
 						// TRANSLATORS: Number of hours since.
-						'hours'   => __( '%d hours', 'siteorigin-panels' ),
+						'hours'   => esc_html__( '%d hours', 'siteorigin-panels' ),
 
 						// TRANSLATORS: A single second since.
-						'second'  => __( '%d second', 'siteorigin-panels' ),
+						'second'  => esc_html__( '%d second', 'siteorigin-panels' ),
 						// TRANSLATORS: A single minute since.
-						'minute'  => __( '%d minute', 'siteorigin-panels' ),
+						'minute'  => esc_html__( '%d minute', 'siteorigin-panels' ),
 						// TRANSLATORS: A single hour since.
-						'hour'    => __( '%d hour', 'siteorigin-panels' ),
+						'hour'    => esc_html__( '%d hour', 'siteorigin-panels' ),
 
 						// TRANSLATORS: Time ago - eg. "1 minute before".
-						'ago'     => __( '%s before', 'siteorigin-panels' ),
-						'now'     => __( 'Now', 'siteorigin-panels' ),
+						'ago'     => esc_html__( '%s before', 'siteorigin-panels' ),
+						'now'     => esc_html__( 'Now', 'siteorigin-panels' ),
 					),
 					'history'              => array(
 						// History messages.
-						'current'           => __( 'Current', 'siteorigin-panels' ),
-						'revert'            => __( 'Original', 'siteorigin-panels' ),
-						'restore'           => __( 'Version restored', 'siteorigin-panels' ),
-						'back_to_editor'    => __( 'Converted to editor', 'siteorigin-panels' ),
+						'current'           => esc_html__( 'Current', 'siteorigin-panels' ),
+						'revert'            => esc_html__( 'Original', 'siteorigin-panels' ),
+						'restore'           => esc_html__( 'Version restored', 'siteorigin-panels' ),
+						'back_to_editor'    => esc_html__( 'Converted to editor', 'siteorigin-panels' ),
 
 						// Widgets.
 						// TRANSLATORS: Message displayed in the history when a widget is deleted.
-						'widget_deleted'    => __( 'Widget deleted', 'siteorigin-panels' ),
+						'widget_deleted'    => esc_html__( 'Widget deleted', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is added.
-						'widget_added'      => __( 'Widget added', 'siteorigin-panels' ),
+						'widget_added'      => esc_html__( 'Widget added', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is edited.
-						'widget_edited'     => __( 'Widget edited', 'siteorigin-panels' ),
+						'widget_edited'     => esc_html__( 'Widget edited', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget is duplicated.
-						'widget_duplicated' => __( 'Widget duplicated', 'siteorigin-panels' ),
+						'widget_duplicated' => esc_html__( 'Widget duplicated', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a widget position is changed.
-						'widget_moved'      => __( 'Widget moved', 'siteorigin-panels' ),
+						'widget_moved'      => esc_html__( 'Widget moved', 'siteorigin-panels' ),
 
 						// Rows
 						// TRANSLATORS: Message displayed in the history when a row is deleted.
-						'row_deleted'       => __( 'Row deleted', 'siteorigin-panels' ),
+						'row_deleted'       => esc_html__( 'Row deleted', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is added.
-						'row_added'         => __( 'Row added', 'siteorigin-panels' ),
+						'row_added'         => esc_html__( 'Row added', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is edited.
-						'row_edited'        => __( 'Row edited', 'siteorigin-panels' ),
+						'row_edited'        => esc_html__( 'Row edited', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row position is changed.
-						'row_moved'         => __( 'Row moved', 'siteorigin-panels' ),
+						'row_moved'         => esc_html__( 'Row moved', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is duplicated.
-						'row_duplicated'    => __( 'Row duplicated', 'siteorigin-panels' ),
+						'row_duplicated'    => esc_html__( 'Row duplicated', 'siteorigin-panels' ),
 						// TRANSLATORS: Message displayed in the history when a row is pasted.
-						'row_pasted'        => __( 'Row pasted', 'siteorigin-panels' ),
+						'row_pasted'        => esc_html__( 'Row pasted', 'siteorigin-panels' ),
 
 						// Cells.
-						'cell_resized'      => __( 'Column resized', 'siteorigin-panels' ),
+						'cell_resized'      => esc_html__( 'Column resized', 'siteorigin-panels' ),
 
 						// Prebuilt.
-						'prebuilt_loaded'   => __( 'Prebuilt layout loaded', 'siteorigin-panels' ),
+						'prebuilt_loaded'   => esc_html__( 'Prebuilt layout loaded', 'siteorigin-panels' ),
 					),
 
 					// General localization.
-					'prebuilt_loading'     => __( 'Loading prebuilt layout', 'siteorigin-panels' ),
-					'confirm_use_builder'  => __( "Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels' ),
-					'confirm_stop_builder' => __( 'Would you like to clear your Page Builder content and revert to using the standard visual editor?', 'siteorigin-panels' ),
+					'prebuilt_loading'     => esc_html__( 'Loading prebuilt layout', 'siteorigin-panels' ),
+					'confirm_use_builder'  => esc_html__( "Would you like to copy this editor's existing content to Page Builder?", 'siteorigin-panels' ),
+					'confirm_stop_builder' => esc_html__( 'Would you like to clear your Page Builder content and revert to using the standard visual editor?', 'siteorigin-panels' ),
 					// TRANSLATORS: This is the title for a widget called "Layout Builder".
-					'layout_widget'        => __( 'Layout Builder Widget', 'siteorigin-panels' ),
+					'layout_widget'        => esc_html__( 'Layout Builder Widget', 'siteorigin-panels' ),
 					// TRANSLATORS: A standard confirmation message
-					'dropdown_confirm'     => __( 'Are you sure?', 'siteorigin-panels' ),
+					'dropdown_confirm'     => esc_html__( 'Are you sure?', 'siteorigin-panels' ),
 					// TRANSLATORS: When a layout file is ready to be inserted. %s is the filename.
-					'ready_to_insert'      => __( '%s is ready to insert.', 'siteorigin-panels' ),
+					'ready_to_insert'      => esc_html__( '%s is ready to insert.', 'siteorigin-panels' ),
 
 					// Everything for the contextual menu.
 					'contextual'           => array(
-						'add_widget_below' => __( 'Add Widget Below', 'siteorigin-panels' ),
-						'add_widget_cell'  => __( 'Add Widget to Column', 'siteorigin-panels' ),
-						'search_widgets'   => __( 'Search Widgets', 'siteorigin-panels' ),
+						'add_widget_below' => esc_html__( 'Add Widget Below', 'siteorigin-panels' ),
+						'add_widget_cell'  => esc_html__( 'Add Widget to Column', 'siteorigin-panels' ),
+						'search_widgets'   => esc_html__( 'Search Widgets', 'siteorigin-panels' ),
 
-						'add_row' => __( 'Add Row', 'siteorigin-panels' ),
-						'column'  => __( 'Column', 'siteorigin-panels' ),
+						'add_row' => esc_html__( 'Add Row', 'siteorigin-panels' ),
+						'column'  => esc_html__( 'Column', 'siteorigin-panels' ),
 
-						'cell_actions'        => __( 'Column Actions', 'siteorigin-panels' ),
-						'cell_paste_widget'   => __( 'Paste Widget', 'siteorigin-panels' ),
+						'cell_actions'        => esc_html__( 'Column Actions', 'siteorigin-panels' ),
+						'cell_paste_widget'   => esc_html__( 'Paste Widget', 'siteorigin-panels' ),
 
-						'widget_actions'   => __( 'Widget Actions', 'siteorigin-panels' ),
-						'widget_edit'      => __( 'Edit Widget', 'siteorigin-panels' ),
-						'widget_duplicate' => __( 'Duplicate Widget', 'siteorigin-panels' ),
-						'widget_delete'    => __( 'Delete Widget', 'siteorigin-panels' ),
-						'widget_copy'      => __( 'Copy Widget', 'siteorigin-panels' ),
-						'widget_paste'     => __( 'Paste Widget Below', 'siteorigin-panels' ),
+						'widget_actions'   => esc_html__( 'Widget Actions', 'siteorigin-panels' ),
+						'widget_edit'      => esc_html__( 'Edit Widget', 'siteorigin-panels' ),
+						'widget_duplicate' => esc_html__( 'Duplicate Widget', 'siteorigin-panels' ),
+						'widget_delete'    => esc_html__( 'Delete Widget', 'siteorigin-panels' ),
+						'widget_copy'      => esc_html__( 'Copy Widget', 'siteorigin-panels' ),
+						'widget_paste'     => esc_html__( 'Paste Widget Below', 'siteorigin-panels' ),
 
-						'row_actions'   => __( 'Row Actions', 'siteorigin-panels' ),
-						'row_edit'      => __( 'Edit Row', 'siteorigin-panels' ),
-						'row_duplicate' => __( 'Duplicate Row', 'siteorigin-panels' ),
-						'row_delete'    => __( 'Delete Row', 'siteorigin-panels' ),
-						'row_copy'      => __( 'Copy Row', 'siteorigin-panels' ),
-						'row_paste'     => __( 'Paste Row', 'siteorigin-panels' ),
+						'row_actions'   => esc_html__( 'Row Actions', 'siteorigin-panels' ),
+						'row_edit'      => esc_html__( 'Edit Row', 'siteorigin-panels' ),
+						'row_duplicate' => esc_html__( 'Duplicate Row', 'siteorigin-panels' ),
+						'row_delete'    => esc_html__( 'Delete Row', 'siteorigin-panels' ),
+						'row_copy'      => esc_html__( 'Copy Row', 'siteorigin-panels' ),
+						'row_paste'     => esc_html__( 'Paste Row', 'siteorigin-panels' ),
 					),
-					'draft'                => __( 'Draft', 'siteorigin-panels' ),
-					'untitled'             => __( 'Untitled', 'siteorigin-panels' ),
+					'draft'                => esc_html__( 'Draft', 'siteorigin-panels' ),
+					'untitled'             => esc_html__( 'Untitled', 'siteorigin-panels' ),
 					'row' => array(
-						'add' => __( 'New Row', 'siteorigin-panels' ),
-						'edit' => __( 'Row', 'siteorigin-panels' ),
-						'cellInput' => __( 'Adjust column size of column %s.', 'siteorigin-panels' ),
-						'direction' => __( 'Change column direction to the %s', 'siteorigin-panels' ),
+						'add' => esc_html__( 'New Row', 'siteorigin-panels' ),
+						'edit' => esc_html__( 'Row', 'siteorigin-panels' ),
+						'cellInput' => esc_html__( 'Adjust column size of column %s.', 'siteorigin-panels' ),
+						'direction' => esc_html__( 'Change column direction to the %s', 'siteorigin-panels' ),
 						// TRANSLATORS: Used by the Column Preset Direction button aria-label.
-						'left'      => __( 'left', 'siteorigin-panels' ),
+						'left'      => esc_html__( 'left', 'siteorigin-panels' ),
 						// TRANSLATORS: Used by the Column Preset Direction button aria-label.
-						'right'      => __( 'right', 'siteorigin-panels' ),
+						'right'      => esc_html__( 'right', 'siteorigin-panels' ),
 					),
 					'welcomeMessage' => array(
-						'addingDisabled' => __( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),
-						'oneEnabled' => __( 'Add a {{%= items[0] %}} to get started.', 'siteorigin-panels' ),
-						'twoEnabled' => __( 'Add a {{%= items[0] %}} or {{%= items[1] %}} to get started.', 'siteorigin-panels' ),
-						'threeEnabled' => __( 'Add a {{%= items[0] %}}, {{%= items[1] %}} or {{%= items[2] %}} to get started.', 'siteorigin-panels' ),
-						'addWidgetButton' => "<a href='#' class='so-tool-button so-widget-add'>" . __( 'Widget', 'siteorigin-panels' ) . '</a>',
-						'addRowButton' => "<a href='#' class='so-tool-button so-row-add'>" . __( 'Row', 'siteorigin-panels' ) . '</a>',
-						'addPrebuiltButton' => "<a href='#' class='so-tool-button so-prebuilt-add'>" . __( 'Prebuilt Layout', 'siteorigin-panels' ) . '</a>',
+						'addingDisabled' => esc_html__( 'Hmmm... Adding layout elements is not enabled. Please check if Page Builder has been configured to allow adding elements.', 'siteorigin-panels' ),
+						'oneEnabled' => esc_html__( 'Add a {{%= items[0] %}} to get started.', 'siteorigin-panels' ),
+						'twoEnabled' => esc_html__( 'Add a {{%= items[0] %}} or {{%= items[1] %}} to get started.', 'siteorigin-panels' ),
+						'threeEnabled' => esc_html__( 'Add a {{%= items[0] %}}, {{%= items[1] %}} or {{%= items[2] %}} to get started.', 'siteorigin-panels' ),
+						'addWidgetButton' => "<a href='#' class='so-tool-button so-widget-add'>" . esc_html__( 'Widget', 'siteorigin-panels' ) . '</a>',
+						'addRowButton' => "<a href='#' class='so-tool-button so-row-add'>" . esc_html__( 'Row', 'siteorigin-panels' ) . '</a>',
+						'addPrebuiltButton' => "<a href='#' class='so-tool-button so-prebuilt-add'>" . esc_html__( 'Prebuilt Layout', 'siteorigin-panels' ) . '</a>',
 						'docsMessage' => sprintf(
-							__( 'Read our %s if you need help.', 'siteorigin-panels' ),
-							"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . __( 'documentation', 'siteorigin-panels' ) . '</a>'
+							esc_html__( 'Read our %s if you need help.', 'siteorigin-panels' ),
+							"<a href='https://siteorigin.com/page-builder/documentation/' target='_blank' rel='noopener noreferrer'>" . esc_html__( 'documentation', 'siteorigin-panels' ) . '</a>'
 						),
 					),
 				),
@@ -536,25 +535,25 @@ class SiteOrigin_Panels_Admin {
 					) ),
 					'flash_swf_url'       => esc_url( includes_url( 'js/plupload/plupload.flash.swf' ) ),
 					'silverlight_xap_url' => esc_url( includes_url( 'js/plupload/plupload.silverlight.xap' ) ),
-					'filter_title'        => __( 'Page Builder layouts', 'siteorigin-panels' ),
-					'error_message'       => __( 'Error uploading or importing file.', 'siteorigin-panels' ),
+					'filter_title'        => esc_html__( 'Page Builder layouts', 'siteorigin-panels' ),
+					'error_message'       => esc_html__( 'Error uploading or importing file.', 'siteorigin-panels' ),
 				),
 				'wpColorPickerOptions'      => apply_filters( 'siteorigin_panels_wpcolorpicker_options', array() ),
 				'prebuiltDefaultScreenshot' => esc_url( siteorigin_panels_url( 'css/images/prebuilt-default.png' ) ),
 				'loadOnAttach'              => $load_on_attach,
 				'siteoriginWidgetRegex'     => str_replace( '*+', '*', get_shortcode_regex( array( 'siteorigin_widget' ) ) ),
 				'forms'                   => array(
-					'loadingFailed' => __( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
+					'loadingFailed' => esc_html__( 'Unknown error. Failed to load the form. Please check your internet connection, contact your web site administrator, or try again later.', 'siteorigin-panels' ),
 				),
 				'row_color' => array(
 					'migrations' => apply_filters( 'siteorigin_panels_admin_row_colors_migration', array(
-						1 => __( 'soft-blue', 'siteorigin-panels' ),
-						2 => __( 'soft-red', 'siteorigin-panels' ),
-						3 => __( 'grayish-violet', 'siteorigin-panels' ),
-						4 => __( 'lime-green', 'siteorigin-panels' ),
-						5 => __( 'desaturated-yellow', 'siteorigin-panels' ),
+						1 => esc_html__( 'soft-blue', 'siteorigin-panels' ),
+						2 => esc_html__( 'soft-red', 'siteorigin-panels' ),
+						3 => esc_html__( 'grayish-violet', 'siteorigin-panels' ),
+						4 => esc_html__( 'lime-green', 'siteorigin-panels' ),
+						5 => esc_html__( 'desaturated-yellow', 'siteorigin-panels' ),
 					) ),
-					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', __( 'soft-blue', 'siteorigin-panels' ) ),
+					'default' => apply_filters( 'siteorigin_panels_admin_row_colors_default', esc_html__( 'soft-blue', 'siteorigin-panels' ) ),
 				),
 			) );
 
@@ -1920,5 +1919,19 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		return $post_states;
+	}
+
+	/**
+	 * Recursively escapes text to prevent HTML entities from being rendered.
+	 *
+	 * @param mixed $text The text to be escaped.
+	 * @return mixed The escaped text or array.
+	 */
+	private function escape_text_recursive( $text ) {
+		if ( is_array( $text ) ) {
+			return array_map( array( $this, 'escape_text_recursive' ), $text );
+		} else {
+			return esc_html( $text );
+		}
 	}
 }
