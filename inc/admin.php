@@ -359,15 +359,7 @@ class SiteOrigin_Panels_Admin {
 
 			$user = wp_get_current_user();
 
-			$tabs = apply_filters( 'siteorigin_panels_widget_dialog_tabs', array(
-				0 => array(
-					'title'  => __( 'All Widgets', 'siteorigin-panels' ),
-					'filter' => array(
-						'installed' => true,
-						'groups'    => '',
-					),
-				),
-			) );
+			$tabs = apply_filters( 'siteorigin_panels_widget_dialog_tabs', array() );
 			$tabs = array_map( function ( $tab ) {
 				$tab['title'] = esc_html( $tab['title'] );
 				$tab['filter']['groups'] = self::escape_text_recursive( $tab['filter']['groups'] );
