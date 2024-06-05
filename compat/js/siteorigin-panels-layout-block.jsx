@@ -382,25 +382,40 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 	}
 } );
 
-( ( jQuery ) => {
-	// Resolve Block Editor warning for SO Layout Block.
-	let unsubscribe = null;
-	unsubscribe = wp.data.subscribe( () => {
-		let isEditorReady = false;
-
+jQuery( function() {
+	const isEditorReady = function() {
+		let editorState = false;
 		if ( wp.data.select( 'core/block-editor' ) ) {
-			isEditorReady = wp.data.select( 'core/block-editor' ).hasInserterItems();
-		} else if( wp.data.select( 'core/editor' ) ) {
-			isEditorReady = wp.data.select( 'core/editor' ).__unstableIsEditorReady();
+			editorState = wp.data.select( 'core/block-editor' ).hasInserterItems();
+		} else if ( wp.data.select( 'core/editor' ) ) {
+			editorState = wp.data.select( 'core/editor' ).__unstableIsEditorReady();
 		}
+		return editorState;
+	}
 
-		if ( isEditorReady && unsubscribe ) {
+	// Resolve Block Editor warning for SO Layout Block.
+	var unsubscribe = null;
+	unsubscribe = wp.data.subscribe( function() {
+		if ( isEditorReady() && unsubscribe ) {
 			unsubscribe();
-			setTimeout( function () {
-				jQuery( '.wp-block[data-type="siteorigin-panels/layout-block"].has-warning .block-editor-warning__action .components-button' ).trigger( 'click' );
+			setTimeout( function() {
+			jQuery( '.wp-block[data-type="siteorigin-panels/layout-block"].has-warning .block-editor-warning__action .components-button' ).trigger( 'click' );
 			}, 250 );
 		}
 	} );
+
+	// It's possible the above attempt may fail.
+	// So to prevent a situation where the button will still appear,
+	// do an additional check every 1.5s until it's unlikely there are
+	// any buttons are present.
+	var checkInterval = setInterval( function() {
+		if ( isEditorReady() ) {
+			return;
+		}
+		jQuery( '.wp-block[data-type="siteorigin-panels/layout-block"].has-warning .block-editor-warning__action .components-button' ).trigger( 'click' );
+		clearInterval( checkInterval );
+	}, 1500 );
+
 
 	if ( window.soPanelsBlockEditorAdmin.showAddButton ) {
 		jQuery( () => {
@@ -443,8 +458,7 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 			}, 100 );
 		} );
 	}
-
-} )( jQuery );
+} );
 
 // Detect preview mode changes, and trigger resize.
 jQuery( document ).on( 'click', '.block-editor-post-preview__button-resize', function( e ) {
