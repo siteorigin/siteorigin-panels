@@ -9,7 +9,7 @@ module.exports = Backbone.View.extend( {
 	builder: false,
 	className: 'so-panels-dialog-wrapper',
 	dialogClass: '',
-	dialogIcon: '',
+	dialogIcon: 'add-widget',
 	parentDialog: false,
 	dialogOpen: false,
 	editableLabel: false,
