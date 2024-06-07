@@ -66,9 +66,9 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 	setupPanels() {
 		// Should we set up panels?
-		if ( ! this.state.editing || this.state.panelsInitialized ) {
+		if ( this.state.panelsInitialized ) {
 			return;
-		  }
+		}
 
 		var $panelsContainer = jQuery( this.panelsContainer.current );
 
@@ -231,6 +231,12 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 		let switchToEditing = () => {
 			this.setState( { editing: true } );
+
+			const _this = this;
+
+			setTimeout( function() {
+				_this.builderView.trigger( 'builder_resize' );
+			} );
 		}
 
 		let switchToPreview = () => {
