@@ -56,15 +56,15 @@ function (_wp$element$Component) {
   var _super = _createSuper(SiteOriginPanelsLayoutBlock);
 
   function SiteOriginPanelsLayoutBlock(props) {
-    var _this;
+    var _this2;
 
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
-    _this = _super.call(this, props);
+    _this2 = _super.call(this, props);
     var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
     var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
     var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
-    _this.state = {
+    _this2.state = {
       editing: editMode,
       loadingPreview: !editMode,
       previewHtml: '',
@@ -72,10 +72,10 @@ function (_wp$element$Component) {
       pendingPreviewRequest: false,
       panelsInitialized: false
     };
-    _this.panelsContainer = wp.element.createRef();
-    _this.previewContainer = wp.element.createRef();
-    _this.fetchPreviewTimer;
-    return _this;
+    _this2.panelsContainer = wp.element.createRef();
+    _this2.previewContainer = wp.element.createRef();
+    _this2.fetchPreviewTimer;
+    return _this2;
   }
 
   _createClass(SiteOriginPanelsLayoutBlock, [{
@@ -130,10 +130,10 @@ function (_wp$element$Component) {
   }, {
     key: "setupPanels",
     value: function setupPanels() {
-      var _this2 = this;
+      var _this3 = this;
 
       // Should we set up panels?
-      if (!this.state.editing || this.state.panelsInitialized) {
+      if (this.state.panelsInitialized) {
         return;
       }
 
@@ -153,15 +153,15 @@ function (_wp$element$Component) {
       var panelsData = JSON.parse(JSON.stringify(jQuery.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
 
       var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
-        if (typeof _this2.props.onRowOrWidgetMouseDown === 'function') {
-          _this2.props.onRowOrWidgetMouseDown();
+        if (typeof _this3.props.onRowOrWidgetMouseDown === 'function') {
+          _this3.props.onRowOrWidgetMouseDown();
         }
 
         var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
           jQuery(document).off('mouseup', rowOrWidgetMouseUp);
 
-          if (typeof _this2.props.onRowOrWidgetMouseUp === 'function') {
-            _this2.props.onRowOrWidgetMouseUp();
+          if (typeof _this3.props.onRowOrWidgetMouseUp === 'function') {
+            _this3.props.onRowOrWidgetMouseUp();
           }
         };
 
@@ -169,18 +169,18 @@ function (_wp$element$Component) {
       };
 
       this.builderView.on('row_added', function () {
-        _this2.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.on('widget_added', function () {
-        _this2.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this2.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+        _this3.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.render().attach({
         container: $panelsContainer
@@ -214,16 +214,16 @@ function (_wp$element$Component) {
       };
 
       this.builderView.on('content_change', function () {
-        var newPanelsData = _this2.builderView.getData();
+        var newPanelsData = _this3.builderView.getData();
 
-        _this2.panelsDataChanged = !SiteOriginIsPanelsEqual(panelsData, newPanelsData);
+        _this3.panelsDataChanged = !SiteOriginIsPanelsEqual(panelsData, newPanelsData);
 
-        if (_this2.panelsDataChanged) {
-          if (_this2.props.onContentChange && typeof _this2.props.onContentChange === 'function') {
-            _this2.props.onContentChange(newPanelsData);
+        if (_this3.panelsDataChanged) {
+          if (_this3.props.onContentChange && typeof _this3.props.onContentChange === 'function') {
+            _this3.props.onContentChange(newPanelsData);
           }
 
-          _this2.setState({
+          _this3.setState({
             loadingPreview: true,
             previewHtml: ''
           });
@@ -243,7 +243,7 @@ function (_wp$element$Component) {
   }, {
     key: "fetchPreview",
     value: function fetchPreview(props) {
-      var _this3 = this;
+      var _this4 = this;
 
       if (!this.isStillMounted) {
         return;
@@ -261,7 +261,7 @@ function (_wp$element$Component) {
           panelsData: JSON.stringify(panelsData)
         }
       }).then(function (preview) {
-        if (!_this3.isStillMounted) {
+        if (!_this4.isStillMounted) {
           return;
         }
 
@@ -269,8 +269,8 @@ function (_wp$element$Component) {
           jQuery(document).trigger('panels_setup_preview');
         }, 1000);
 
-        if (fetchRequest === _this3.currentFetchRequest && preview) {
-          _this3.setState({
+        if (fetchRequest === _this4.currentFetchRequest && preview) {
+          _this4.setState({
             previewHtml: preview,
             loadingPreview: false,
             previewInitialized: false,
@@ -283,19 +283,24 @@ function (_wp$element$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
       var panelsData = this.props.panelsData;
 
       var switchToEditing = function switchToEditing() {
-        _this4.setState({
+        _this5.setState({
           editing: true
+        });
+
+        var _this = _this5;
+        setTimeout(function () {
+          _this.builderView.trigger('builder_resize');
         });
       };
 
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
-          _this4.setState({
+          _this5.setState({
             editing: false
           });
         }
