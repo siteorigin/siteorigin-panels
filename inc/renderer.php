@@ -676,9 +676,9 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				if ( is_array( $value ) ) {
-					$style_wrapper .= $name . '="' . esc_attr( implode( ' ', array_unique( $value ) ) ) . '" ';
+					$style_wrapper .= sanitize_key( $name ) . '="' . esc_attr( implode( ' ', array_unique( $value ) ) ) . '" ';
 				} else {
-					$style_wrapper .= $name . '="' . esc_attr( $value ) . '" ';
+					$style_wrapper .= sanitize_key( $name ) . '="' . esc_attr( $value ) . '" ';
 				}
 			}
 			$style_wrapper .= '>';
@@ -810,7 +810,7 @@ class SiteOrigin_Panels_Renderer {
 		$before_widget = '<div ';
 
 		foreach ( $attributes as $k => $v ) {
-			$before_widget .= esc_attr( $k ) . '="' . esc_attr( $v ) . '" ';
+			$before_widget .= sanitize_key( $k ) . '="' . esc_attr( $v ) . '" ';
 		}
 		$before_widget .= '>';
 
@@ -1010,11 +1010,11 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array  $attributes The attributes for the HTML element.
 	 */
 	private function render_element( $tag, $attributes ) {
-		echo '<' . esc_html( $tag );
+		echo '<' . sanitize_key( $tag );
 
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
-				echo ' ' . esc_html( $name ) . '="' . esc_attr( $value ) . '" ';
+				echo ' ' . sanitize_key( $name ) . '="' . esc_attr( $value ) . '" ';
 			}
 		}
 		echo '>';
