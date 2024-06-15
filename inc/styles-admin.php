@@ -345,8 +345,17 @@ class SiteOrigin_Panels_Styles_Admin {
 					type="number"
 					name="<?php echo esc_attr( $field_name ); ?>"
 					value="<?php echo esc_attr( $current ); ?>" class="widefat"
-					/>
 					<?php
+					if ( isset( $field['min'] ) ) {
+						echo ' min="' . esc_attr( (int) $field['min'] ) . '"';
+					}
+
+					if ( isset( $field['max'] ) ) {
+						echo ' max="' . esc_attr( (int) $field['max'] ) . '"';
+					}
+					?>
+				/>
+				<?php
 				break;
 
 			case 'checkbox' :
@@ -630,6 +639,19 @@ class SiteOrigin_Panels_Styles_Admin {
 
 				case 'url' :
 					$return[ $k ] = esc_url_raw( $styles[ $k ] );
+					break;
+
+				case 'number' :
+					$return[ $k ] = (float) $styles[ $k ];
+
+					if ( isset( $field['min'] ) && $return[ $k ] < $field['min'] ) {
+						$return[ $k ] = (float) $field['min'];
+					}
+
+					if ( isset( $field['max'] ) && $return[ $k ] > $field['max'] ) {
+						$return[ $k ] = (float) $field['max'];
+					}
+
 					break;
 
 				case 'measurement' :
