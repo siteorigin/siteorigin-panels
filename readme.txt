@@ -121,6 +121,15 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.17 – 15 June 2024 =
+* Layout Builder: Default the modal icon to "Cog".
+* Layouts Block: Added an additional check for clearing potential block errors.
+* Row Overlays: Resolved a potential Column/Widget video content overlap.
+* Row Cell Preview: Adjusted the percentage symbol placement.
+* Updated escaping functions to use translatable versions where needed.
+* Updated SiteOrigin Installer.
+* Number Style Field: Added min/max support.
+
 = 2.29.16 – 13 May 2024 =
 * Adjusted Add Widget modal sidebar link order and display.
 * Restored WP Events Manager compatibility.
