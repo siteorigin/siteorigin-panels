@@ -201,6 +201,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		foreach ( $widgets as $widgetName => $widgetData ) {
 			if (
 				isset( $widgetData['groups'] ) &&
+				is_array( $widgetData['groups'] ) &&
 				in_array( 'recommended', $widgetData['groups'] )
 			) {
 				$recommendedWidgets[ $widgetName ] = $widgetData;
