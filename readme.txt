@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.18 – 29 June 2024 =
+* Improved attribute name handling.
+* Layout Block: Improved preview updating.
+* Widget Groups: Resolved a potential `TypeError`.
+* Vantage Compatibility: Resolved a potential `TypeError`.
+
 = 2.29.17 – 15 June 2024 =
 * Layout Builder: Default the modal icon to "Cog".
 * Layouts Block: Added an additional check for clearing potential block errors.

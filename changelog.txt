@@ -1,5 +1,44 @@
 == Changelog ==
 
+= 2.29.18 – 29 June 2024 =
+* Improved attribute name handling.
+* Layout Block: Improved preview updating.
+* Widget Groups: Resolved a potential `TypeError`.
+* Vantage Compatibility: Resolved a potential `TypeError`.
+
+= 2.29.17 – 15 June 2024 =
+* Layout Builder: Default the modal icon to "Cog".
+* Layouts Block: Added an additional check for clearing potential block errors.
+* Row Overlays: Resolved a potential Column/Widget video content overlap.
+* Row Cell Preview: Adjusted the percentage symbol placement.
+* Updated escaping functions to use translatable versions where needed.
+* Updated SiteOrigin Installer.
+* Number Style Field: Added min/max support.
+
+= 2.29.16 – 13 May 2024 =
+* Adjusted Add Widget modal sidebar link order and display.
+* Restored WP Events Manager compatibility.
+* Resolved fallback shortcode decoding issue.
+* Added Layout Directory caching for better performance.
+* Increased required PHP version to `7.0.0`.
+* Developer: Improved `panelsOptions` translation handling.
+
+= 2.29.15 – 27 April 2024 =
+* Layout Block: Further improvements to preview functionality and performance.
+* Admin Area: Update to ensure Classic Editor notice is translatable.
+
+= 2.29.14 – 26 April 2024 =
+* Layout Block: Restored preview functionality.
+
+= 2.29.13 – 21 April 2024 =
+* Rank Math SEO Compatibility: Resolved dependency error.
+
+= 2.29.12 – 19 April 2024 =
+* Layout Block: Improved preview.
+* Layout Block: Fix repeated rendering when switching to editor.
+* Layout Block: Restored data integration for SEO content analysis.
+* Post Content Widget: Added "Content" option.
+
 = 2.29.11 – 31 March 2024 =
 * Post Content Widget: Fixed post featured image output.
 * Post Content Widget: Remove unused content and improved title output.
