@@ -1010,7 +1010,7 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array  $attributes The attributes for the HTML element.
 	 */
 	private function render_element( $tag, $attributes ) {
-		echo '<' . $thi->sanitize_attribute_key( $tag );
+		echo '<' . esc_html( $tag );
 
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
