@@ -1231,7 +1231,11 @@ class SiteOrigin_Panels_Renderer {
 		return siteorigin_panels_url( 'css/front-flex' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' );
 	}
 
-	function sanitize_attribute_key( $attr ) {
+	function sanitize_attribute_key( $attr = null ) {
+		if ( empty( $attr ) ) {
+			return 'invalid-attribute';
+		}
+
 		$attr = sanitize_key( strtolower( $attr ) );
 
 		// "On" prefixed attributes are too risky to allow.
