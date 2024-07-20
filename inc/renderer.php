@@ -676,9 +676,9 @@ class SiteOrigin_Panels_Renderer {
 				}
 
 				if ( is_array( $value ) ) {
-					$style_wrapper .= sanitize_key( $name ) . '="' . esc_attr( implode( ' ', array_unique( $value ) ) ) . '" ';
+					$style_wrapper .= $this->sanitize_attribute_key( $name ) . '="' . esc_attr( implode( ' ', array_unique( $value ) ) ) . '" ';
 				} else {
-					$style_wrapper .= sanitize_key( $name ) . '="' . esc_attr( $value ) . '" ';
+					$style_wrapper .= $this->sanitize_attribute_key( $name ) . '="' . esc_attr( $value ) . '" ';
 				}
 			}
 			$style_wrapper .= '>';
@@ -810,7 +810,7 @@ class SiteOrigin_Panels_Renderer {
 		$before_widget = '<div ';
 
 		foreach ( $attributes as $k => $v ) {
-			$before_widget .= sanitize_key( $k ) . '="' . esc_attr( $v ) . '" ';
+			$before_widget .= $this->sanitize_attribute_key( $k ) . '="' . esc_attr( $v ) . '" ';
 		}
 		$before_widget .= '>';
 
@@ -1010,11 +1010,11 @@ class SiteOrigin_Panels_Renderer {
 	 * @param array  $attributes The attributes for the HTML element.
 	 */
 	private function render_element( $tag, $attributes ) {
-		echo '<' . sanitize_key( $tag );
+		echo '<' . esc_html( $tag );
 
 		foreach ( $attributes as $name => $value ) {
 			if ( $value ) {
-				echo ' ' . sanitize_key( $name ) . '="' . esc_attr( $value ) . '" ';
+				echo ' ' . $this->sanitize_attribute_key( $name ) . '="' . esc_attr( $value ) . '" ';
 			}
 		}
 		echo '>';
@@ -1231,4 +1231,21 @@ class SiteOrigin_Panels_Renderer {
 		return siteorigin_panels_url( 'css/front-flex' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' );
 	}
 
+	function sanitize_attribute_key( $attr = null ) {
+		if ( empty( $attr ) ) {
+			return 'invalid-attribute';
+		}
+
+		$attr = sanitize_key( strtolower( $attr ) );
+
+		// "On" prefixed attributes are too risky to allow.
+		if (
+			empty( $attr ) ||
+			strpos( $attr, 'on' ) === 0
+		) {
+			return 'invalid-attribute';
+		};
+
+		return $attr;
+	}
 }
