@@ -809,7 +809,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			if ( empty( $v ) ) {
 				continue;
 			}
-			$shortcode_attr[] = esc_html( $k ) . '="' . esc_attr( $v ) . '"';
+			$shortcode_attr[] = sanitize_key( $k ) . '="' . esc_attr( $v ) . '"';
 		}
 
 		echo do_shortcode( '[gallery ' . implode( ' ', $shortcode_attr ) . ']' );

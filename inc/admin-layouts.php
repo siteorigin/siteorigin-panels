@@ -255,6 +255,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 
 			$cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num );
+
 			if ( empty( $search ) && ! empty( $cache ) ) {
 				$return = $cache;
 			} else {
@@ -265,7 +266,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
-				$response = wp_remote_get( esc_url( $url ) );
+				$response = wp_remote_get( esc_url_raw( $url ) );
 
 				if (
 					! is_wp_error( $response ) &&

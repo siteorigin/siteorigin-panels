@@ -189,9 +189,6 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			return;
 		}
 
-		// If we don't have panelsData yet, fetch it from PB directly.
-		var panelsData = props.panelsData === null ? this.builderView.getData() : props.panelsData;
-
 		this.setState( {
 			previewInitialized: false,
 		} );
@@ -200,7 +197,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			url: window.soPanelsBlockEditorAdmin.previewUrl,
 			data: {
 				action: 'so_panels_layout_block_preview',
-				panelsData: JSON.stringify( panelsData ),
+				panelsData: JSON.stringify( this.builderView.getData() ),
 			}
 		} )
 		.then( ( preview ) => {
@@ -354,7 +351,11 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 							panelsAttributes.contentPreview = content.preview;
 						}
 
-						setAttributes( panelsAttributes );
+						setAttributes( {
+							contentPreview: panelsAttributes.contentPreview,
+							panelsData: panelsAttributes.panelsData,
+							previewInitialized: false,
+						} );
 
 						if ( ! isNewWPBlockEditor ) {
 							wp.data.dispatch( 'core/editor' ).unlockPostSaving();
