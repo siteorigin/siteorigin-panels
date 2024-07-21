@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.29.19 – 21 July June 2024 =
+* Further improvements for attribute name handling.
+* Layout Directory: Resolved an issue with fetching page two.
+
 = 2.29.18 – 29 June 2024 =
 * Improved attribute name handling.
 * Layout Block: Improved preview updating.
