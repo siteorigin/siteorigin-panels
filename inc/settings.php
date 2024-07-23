@@ -226,10 +226,16 @@ class SiteOrigin_Panels_Settings {
 	 * Add the Page Builder settings page
 	 */
 	public function add_settings_page() {
-		$page = add_options_page( esc_html( 'SiteOrigin Page Builder', 'siteorigin-panels' ), esc_html( 'Page Builder', 'siteorigin-panels' ), 'manage_options', 'siteorigin_panels', array(
-			$this,
-			'display_settings_page',
-		) );
+		$page = add_options_page(
+			esc_html__( 'SiteOrigin Page Builder', 'siteorigin-panels' ),
+			esc_html__( 'Page Builder', 'siteorigin-panels' ),
+			'manage_options',
+			'siteorigin_panels',
+			array(
+				$this,
+				'display_settings_page',
+			)
+		);
 		add_action( 'load-' . $page, array( $this, 'add_help_tab' ) );
 		add_action( 'load-' . $page, array( $this, 'save_settings' ) );
 	}
@@ -253,7 +259,7 @@ class SiteOrigin_Panels_Settings {
 
 		$screen->add_help_tab( array(
 			'id'      => 'panels-help-tab',
-			'title'   => esc_html( 'Page Builder Settings', 'siteorigin-panels' ),
+			'title'   => esc_html__( 'Page Builder Settings', 'siteorigin-panels' ),
 			'content' => $content,
 		) );
 	}

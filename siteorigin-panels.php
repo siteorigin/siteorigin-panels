@@ -682,6 +682,9 @@ class SiteOrigin_Panels {
 		if ( empty( $active_version ) || $active_version !== SITEORIGIN_PANELS_VERSION ) {
 			do_action( 'siteorigin_panels_version_changed' );
 			update_option( 'siteorigin_panels_active_version', SITEORIGIN_PANELS_VERSION );
+
+			// Clear layout directory cache after update to account for bug in versions 2.29.18 and below.
+			delete_transient( 'siteorigin_panels_layouts_directory_siteorigin_page_2' );
 		}
 	}
 

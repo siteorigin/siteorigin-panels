@@ -236,12 +236,13 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 			$return['max_num_pages'] = 1;
 		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
-			// Directories are cached for an hour so check to see if there's one stored for this type.
 			$directory_id = str_replace( 'directory-', '', $type );
-			// $cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id );
-			// if ( ! empty( $cache ) ) {
-			// 	$return = $cache;
-			// } else {
+			// Check if we previously cached this directory result.
+
+			$cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num );
+			if ( empty( $search ) && ! empty( $cache ) ) {
+				$return = $cache;
+			} else {
 				$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
 
 				// This is a query of the prebuilt layout directory
@@ -260,7 +261,8 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
-				$response = wp_remote_get( esc_url( $url ) );
+				$response = wp_remote_get( esc_url_raw( $url ) );
+
 				if (
 					! is_wp_error( $response ) &&
 					is_array( $response ) &&
@@ -296,7 +298,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 					}
 					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id, $results, 3600 );
 				}
-			// }
+			}
 			$no_search_title = true;
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
 			// Check that the user can view the given page types

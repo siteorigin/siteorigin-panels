@@ -800,16 +800,27 @@ class SiteOrigin_Panels_Styles {
 	}
 
 	public static function generate_background_style( $style, & $css = array(), $general_css = false ) {
-		if ( ! empty( $style['background'] ) ) {
+		$has_overlay = self::has_overlay( array(
+			'style' => $style
+		) );
+
+		if (
+			$has_overlay &&
+			! empty( $style['background'] ) &&
+			(
+				! empty( $style['background_image_attachment'] ) ||
+				! empty( $style['background_image_attachment_fallback'] )
+			)
+		) {
 			$css[ 'background-color' ] = $style['background'];
 		}
 
-		if (
-			$general_css && self::has_overlay( array(
-				'style' => $style
-			) )
-		) {
+		if ( $general_css && $has_overlay ) {
 			return $css;
+		}
+
+		if ( ! empty( $style['background'] ) ) {
+			$css[ 'background-color' ] = $style['background'];
 		}
 
 		if (

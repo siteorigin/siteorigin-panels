@@ -1873,9 +1873,9 @@
 						}
 
 						.preview-cell-unit {
-							left: 8px;
+							left: 10px;
 							position: absolute;
-							top: -2.5px;
+							top: -1.5px;
 							z-index: 1;
 							line-height: 1;
 						}
@@ -1890,25 +1890,22 @@
 						.preview-cell-weight-input,
 						.preview-cell-unit {
 							color: #5e6d72;
+							font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
 							font-size: 17px;
 							font-weight: bold;
-						}
-
-						.preview-cell-weight-input[type="text"] {
-							padding-right: 22px;
 						}
 
 						.preview-cell-weight-input[type="number"] {
 							z-index: 2;
 						}
 
-						.preview-cell-weight {
-							padding: 10px 22px 10px 5px;
-
+						.preview-cell-weight,
+						.preview-cell-weight-input[type="text"] {
+							padding: 10px 31px 10px 0;
 						}
 
-						.preview-cell-weight-input {
-							padding: 10px 5px;
+						.preview-cell-weight-input[type="number"] {
+							padding: 10px 13px 10px 5px;
 						}
 
 						.preview-cell-weight,
@@ -1920,7 +1917,7 @@
 							margin: -0.95em 0 0 -40px;
 							overflow: hidden;
 							position: absolute;
-							text-align: center;
+							text-align: right;
 							width: 80px;
 
 							&:hover {

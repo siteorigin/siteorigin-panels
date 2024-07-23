@@ -39,7 +39,7 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 					echo preg_replace(
 						'/1\{ *(.*?) *\}/',
 						'<a href="' . esc_url( get_the_permalink( $post ) ) . '">$1</a>',
-						esc_html( 'Home page updated. 1{View page}.', 'siteorigin-panels' )
+						esc_html__( 'Home page updated. 1{View page}.', 'siteorigin-panels' )
 					);
 					?>
 				</p>
