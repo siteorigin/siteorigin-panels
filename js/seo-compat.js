@@ -38,7 +38,7 @@ jQuery(function($){
 		}
 
 		const soBlock = data.match(
-			/<!--\s*wp:siteorigin-panels\/layout-block[\s\S]*?wp-block-siteorigin-panels-layout-block"}\s*\/-->/g
+			/<!--\s*wp:siteorigin-panels\/layout-block[\s\S]*?\/-->/g
 		);
 
 		// Replace any found SO Layout blocks with the rendered contents.
