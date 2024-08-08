@@ -1,6 +1,6 @@
 /* global jQuery, YoastSEO, _, panelsOptions */
 
-jQuery(function($){
+jQuery( function( $ ) {
 
 
 	var SiteOriginSeoCompat = function() {
@@ -17,7 +17,7 @@ jQuery(function($){
 	};
 
 	function isBlockEditorPanelsEnabled() {
-		return typeof window.soPanelsBuilderView !== 'undefined' && $blockEditorPage.length > 0;
+		return typeof window.soPanelsBuilderView !== 'undefined' && $( '.block-editor-page' ).length;
 	}
 
 	function isClassicEditorPanelsEnabled() {
@@ -29,11 +29,12 @@ jQuery(function($){
 			return data;
 		}
 
-		if ( isClassicEditorPanelsEnabled && ! isBlockEditorPanelsEnabled ) {
-			return SiteOriginSeoCompat.prototype.contentModification( data );
+		if ( isClassicEditorPanelsEnabled() && ! isBlockEditorPanelsEnabled() ) {
+			data = SiteOriginSeoCompat.prototype.contentModification( data );
+			return data;
 		}
 
-		if ( ! isBlockEditorPanelsEnabled ) {
+		if ( ! isBlockEditorPanelsEnabled() ) {
 			return data;
 		}
 
@@ -52,12 +53,13 @@ jQuery(function($){
 	}
 
 	SiteOriginSeoCompat.prototype.contentModification = function( data ) {
+		const isBlockEditor = isBlockEditorPanelsEnabled();
 		// Check if the editor has Page Builder Enabled before proceeding.
 		if (
 			window.soPanelsBuilderView === undefined ||
 			(
-				! isClassicEditorPanelsEnabled &&
-				! isBlockEditorPanelsEnabled
+				! isClassicEditorPanelsEnabled() &&
+				! isBlockEditor
 			)
 		) {
 			return;
@@ -114,4 +116,4 @@ jQuery(function($){
 			}
 		);
 	}
-});
+} );
