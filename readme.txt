@@ -121,7 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
-= 2.29.19 – 21 July June 2024 =
+= 2.29.20 – 08 August 2024 =
+* Rank Math: Resolved content analysis issue when multiple blocks in use.
+
+= 2.29.19 – 21 July 2024 =
 * Further improvements for attribute name handling.
 * Layout Directory: Resolved an issue with fetching page two.
 
