@@ -92,19 +92,13 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				foreach ( $files as $file ) {
+					// Ensure file is a JSON file.
 					if ( function_exists( 'mime_content_type' ) ) {
-						// get file mime type
 						$mime_type = mime_content_type( $file );
-
-						// Valid if text files.
-
-						// Valid if text or json file.
-						$valid_file_type = strpos( $mime_type, '/json' ) || strpos( $mime_type, 'text/' ) > -1;
+						$valid_file_type = strpos( $mime_type, '/json' ) !== false;
 					} else {
-						// If `mime_content_type` isn't available, just check file extension.
+						// Can't check MIME. Check extension.
 						$ext = pathinfo( $file, PATHINFO_EXTENSION );
-
-						// skip files which don't have a `.json` extension.
 						$valid_file_type = ! empty( $ext ) && $ext === 'json';
 					}
 
