@@ -64,6 +64,17 @@ class SiteOrigin_Panels_Admin_Layouts {
 	}
 
 	/**
+	 * Determines if file has a JSON extension.
+	 *
+	 * @param string $file File path.
+	 * @return bool True if JSON, false otherwise.
+	 */
+	private static function check_file_ext( $file ) {
+		$ext = pathinfo( $file, PATHINFO_EXTENSION );
+		return ! empty( $ext ) && $ext === 'json';
+	}
+
+	/**
 	 * Looks through local folders in the active theme and any others filtered in by theme and plugins, to find JSON
 	 * prebuilt layouts.
 	 */
@@ -92,14 +103,19 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				foreach ( $files as $file ) {
-					// Ensure file is a JSON file.
+					$valid_file_type = false;
 					if ( function_exists( 'mime_content_type' ) ) {
 						$mime_type = mime_content_type( $file );
 						$valid_file_type = strpos( $mime_type, '/json' ) !== false;
+
+						if ( ! $valid_file_type ) {
+							// It could have the wrong MIME type. Check for text/plain, and if it is, check the extension.
+							$valid_file_type = strpos( $mime_type, 'text/plain' ) !== false &&
+								self::check_file_ext( $file );
+						}
 					} else {
 						// Can't check MIME. Check extension.
-						$ext = pathinfo( $file, PATHINFO_EXTENSION );
-						$valid_file_type = ! empty( $ext ) && $ext === 'json';
+						$valid_file_type = self::check_file_ext( $file );
 					}
 
 					if ( ! $valid_file_type ) {
