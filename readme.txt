@@ -121,6 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.21 – 17 September 2024 =
+* Prebuilt Local Layouts: Resolved a potential error.
+* Prebuilt Local Layouts: Restricted layout files to JSON.
+
 = 2.29.20 – 08 August 2024 =
 * Rank Math: Resolved content analysis issue when multiple blocks in use.
 
