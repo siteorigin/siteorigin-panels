@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.29.22 – 30 September 2024 =
+* Layout Block: Removed content filter attributes from the front-end.
+
 = 2.29.21 – 17 September 2024 =
 * Prebuilt Local Layouts: Resolved a potential error.
 * Prebuilt Local Layouts: Restricted layout files to JSON.
