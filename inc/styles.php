@@ -276,6 +276,7 @@ class SiteOrigin_Panels_Styles {
 			'group'       => 'design',
 			'default'     => '1px',
 			'priority'    => 11,
+			'multiple'    => true,
 		);
 
 		$fields['border_radius'] = array(

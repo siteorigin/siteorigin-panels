@@ -3,6 +3,7 @@
 class SiteOrigin_Panels_Renderer {
 	private $inline_css;
 	private $container;
+	private $side = array( 'top', 'right', 'bottom', 'left' );
 
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
@@ -620,7 +621,17 @@ class SiteOrigin_Panels_Renderer {
 			}
 
 			if ( ! empty( $style['border_color'] ) ) {
-				$attributes['style'] .= 'border: ' . ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'] . ';';
+				$border_thickness = ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px 1px 1px 1px';
+
+				// Does this have legacy border thickness?
+				if ( strpos( $border_thickness, ' ' ) === false ) {
+					$attributes['style'] .= 'border: ' . $border_thickness . ' solid ' . $style['border_color'] . ';';
+				} else {
+					$border_thickness_split = explode( ' ', $border_thickness );
+					foreach ( $border_thickness_split as $i => $border_thickness_part ) {
+						$attributes['style'] .= 'border-' . $this->side[ $i ] . ': ' . $border_thickness_part . ' solid ' . $style['border_color'] .';';
+					}
+				}
 			}
 		}
 
