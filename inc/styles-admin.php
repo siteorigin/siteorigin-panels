@@ -701,14 +701,15 @@ class SiteOrigin_Panels_Styles_Admin {
 					break;
 
 				case 'multi-select' :
-					if (
-						! empty( $styles[ $k ] ) &&
-						is_array( $styles[ $k ] )
-					) {
-						foreach ( $styles[ $k ] as $selected ) {
-							if ( isset( $field['options'][ $selected ] ) ) {
-								$return[ $k ][ $selected ] = $selected;
+					if ( ! empty( $styles[ $k ] ) ) {
+						if ( is_array( $styles[ $k ] ) ) {
+							foreach ( $styles[ $k ] as $selected ) {
+								if ( isset( $field['options'][ $selected ] ) ) {
+									$return[ $k ][ $selected ] = $selected;
+								}
 							}
+						} elseif ( isset( $field['options'][ $styles[ $k ] ] ) ) {
+							$return[ $k ][ $styles[ $k ] ] = $styles[ $k ];
 						}
 					}
 
