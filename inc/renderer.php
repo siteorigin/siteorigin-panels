@@ -98,6 +98,15 @@ class SiteOrigin_Panels_Renderer {
 				), array(
 					'position' => 'relative',
 				) );
+
+				// Prevent display issue with fixed backgrounds on iOS.
+				if ( $row['style']['background_display'] === 'fixed' ) {
+					$css->add_row_css( $post_id, $ri, array(
+						'.panel-has-overlay > .panel-row-style > .panel-background-overlay',
+					), array(
+						'background-attachment' => 'scroll !important',
+					), $panels_tablet_width );
+				}
 			}
 
 			if ( empty( $row['cells'] ) ) {
@@ -243,6 +252,21 @@ class SiteOrigin_Panels_Renderer {
 								'position' => 'relative',
 							)
 						);
+
+						// Prevent display issue with fixed backgrounds on iOS.
+						if ( $widget['panels_info']['style']['background_display'] === 'fixed' ) {
+							$css->add_widget_css(
+								$post_id,
+								$ri,
+								$ci,
+								$wi,
+								'.panel-has-overlay > .panel-widget-style > .panel-background-overlay',
+								array(
+									'background-attachment' => 'scroll !important',
+								),
+								$panels_tablet_width
+							);
+						}
 					}
 				}
 			}
