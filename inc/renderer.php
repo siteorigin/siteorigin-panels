@@ -159,6 +159,15 @@ class SiteOrigin_Panels_Renderer {
 					$css->add_cell_css( $post_id, $ri, $ci, '', array(
 						'position' => 'relative',
 					) );
+
+						// Prevent display issue with fixed backgrounds on iOS.
+					if ( $cell['style']['background_display'] === 'fixed' ) {
+						$css->add_cell_css( $post_id, $ri, $ci, array(
+							'.panel-has-overlay > .panel-cell-style > .panel-background-overlay',
+						), array(
+							'background-attachment' => 'scroll !important',
+						), $panels_tablet_width );
+					}
 				}
 
 				// Add in any widget specific CSS
