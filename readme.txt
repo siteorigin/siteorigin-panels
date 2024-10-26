@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.30.0 – 26 October 2024 =
+* Image Overlay: Prevent iOS fixed background display issues.
+* Styles Settings: Converted Border Thickness to a multi-measurement field.
+* Styles Settings: Ensured color picker field and clear button are on a dedicated line.
+
 = 2.29.22 – 30 September 2024 =
 * Layout Block: Removed content filter attributes from the front-end.
 
