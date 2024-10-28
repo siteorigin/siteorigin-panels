@@ -756,7 +756,6 @@
 	.siteorigin-panels-builder {
 
 		.so-builder-container {
-			background: #fff;
 			padding-top: 0;
 		}
 
@@ -908,6 +907,11 @@
 
 		ul {
 			list-style: none;
+		}
+
+		// Prevent display issues when the editor has a darker background`.
+		.so-builder-container {
+			background: #fff;
 		}
 	}
 }
