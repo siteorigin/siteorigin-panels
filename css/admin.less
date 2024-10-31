@@ -908,6 +908,24 @@
 		ul {
 			list-style: none;
 		}
+
+		// Prevent display issues when the editor has a darker background.
+		.so-builder-container {
+			background: #fff;
+
+			.so-row-container {
+				padding: 0 15px 20px;
+			}
+
+			a:not(.so-tool-button):not([class^="so-row-"]) {
+				color: #2271b1;
+
+				&:hover,
+				&:focus {
+					color: #1e1e1e;
+				}
+			}
+		}
 	}
 }
 
