@@ -1210,6 +1210,11 @@
 				color: #666;
 			}
 		}
+
+		// Don't leave space for navigation if they're not present.
+		&:has(.so-nav) h3.so-title {
+			margin: 0 50px;
+		}
 	}
 
 	.so-toolbar {
