@@ -98,11 +98,26 @@ function (_wp$element$Component) {
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
+      var _this3 = this;
+
       this.isStillMounted = false;
+      this.panelsInitialized = false;
 
       if (this.builderView) {
         this.builderView.off('content_change');
+        this.builderView = null; // Remove builder from global builder list.
+
+        if (typeof window.soPanelsBuilderView !== 'undefined') {
+          window.soPanelsBuilderView = window.soPanelsBuilderView.filter(function (view) {
+            return view !== _this3.builderView;
+          });
+        }
       }
+
+      this.panelsContainer = null;
+      this.previewContainer = null;
+      this.fetchPreviewTimer = null;
+      this.state = null;
     }
   }, {
     key: "componentDidUpdate",
@@ -130,7 +145,7 @@ function (_wp$element$Component) {
   }, {
     key: "setupPanels",
     value: function setupPanels() {
-      var _this3 = this;
+      var _this4 = this;
 
       // Should we set up panels?
       if (this.state.panelsInitialized) {
@@ -153,15 +168,15 @@ function (_wp$element$Component) {
       var panelsData = JSON.parse(JSON.stringify(jQuery.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
 
       var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
-        if (typeof _this3.props.onRowOrWidgetMouseDown === 'function') {
-          _this3.props.onRowOrWidgetMouseDown();
+        if (typeof _this4.props.onRowOrWidgetMouseDown === 'function') {
+          _this4.props.onRowOrWidgetMouseDown();
         }
 
         var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
           jQuery(document).off('mouseup', rowOrWidgetMouseUp);
 
-          if (typeof _this3.props.onRowOrWidgetMouseUp === 'function') {
-            _this3.props.onRowOrWidgetMouseUp();
+          if (typeof _this4.props.onRowOrWidgetMouseUp === 'function') {
+            _this4.props.onRowOrWidgetMouseUp();
           }
         };
 
@@ -169,18 +184,18 @@ function (_wp$element$Component) {
       };
 
       this.builderView.on('row_added', function () {
-        _this3.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
 
-        _this3.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
 
-        _this3.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this3.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.on('widget_added', function () {
-        _this3.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
 
-        _this3.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+        _this4.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
       });
       this.builderView.render().attach({
         container: $panelsContainer
@@ -214,16 +229,16 @@ function (_wp$element$Component) {
       };
 
       this.builderView.on('content_change', function () {
-        var newPanelsData = _this3.builderView.getData();
+        var newPanelsData = _this4.builderView.getData();
 
-        _this3.panelsDataChanged = !SiteOriginIsPanelsEqual(panelsData, newPanelsData);
+        _this4.panelsDataChanged = !SiteOriginIsPanelsEqual(panelsData, newPanelsData);
 
-        if (_this3.panelsDataChanged) {
-          if (_this3.props.onContentChange && typeof _this3.props.onContentChange === 'function') {
-            _this3.props.onContentChange(newPanelsData);
+        if (_this4.panelsDataChanged) {
+          if (_this4.props.onContentChange && typeof _this4.props.onContentChange === 'function') {
+            _this4.props.onContentChange(newPanelsData);
           }
 
-          _this3.setState({
+          _this4.setState({
             loadingPreview: true,
             previewHtml: ''
           });
@@ -243,7 +258,7 @@ function (_wp$element$Component) {
   }, {
     key: "fetchPreview",
     value: function fetchPreview(props) {
-      var _this4 = this;
+      var _this5 = this;
 
       if (!this.isStillMounted) {
         return;
@@ -259,7 +274,7 @@ function (_wp$element$Component) {
           panelsData: JSON.stringify(this.builderView.getData())
         }
       }).then(function (preview) {
-        if (!_this4.isStillMounted) {
+        if (!_this5.isStillMounted) {
           return;
         }
 
@@ -267,8 +282,8 @@ function (_wp$element$Component) {
           jQuery(document).trigger('panels_setup_preview');
         }, 1000);
 
-        if (fetchRequest === _this4.currentFetchRequest && preview) {
-          _this4.setState({
+        if (fetchRequest === _this5.currentFetchRequest && preview) {
+          _this5.setState({
             previewHtml: preview,
             loadingPreview: false,
             previewInitialized: false,
@@ -281,16 +296,16 @@ function (_wp$element$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       var panelsData = this.props.panelsData;
 
       var switchToEditing = function switchToEditing() {
-        _this5.setState({
+        _this6.setState({
           editing: true
         });
 
-        var _this = _this5;
+        var _this = _this6;
         setTimeout(function () {
           _this.builderView.trigger('builder_resize');
         });
@@ -298,7 +313,7 @@ function (_wp$element$Component) {
 
       var switchToPreview = function switchToPreview() {
         if (panelsData) {
-          _this5.setState({
+          _this6.setState({
             editing: false
           });
         }

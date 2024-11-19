@@ -37,9 +37,22 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 	componentWillUnmount() {
 		this.isStillMounted = false;
+		this.panelsInitialized = false;
+
 		if ( this.builderView ) {
 			this.builderView.off( 'content_change' );
+			this.builderView = null;
+
+			// Remove builder from global builder list.
+			if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
+				window.soPanelsBuilderView = window.soPanelsBuilderView.filter( view => view !== this.builderView );
+			}
 		}
+
+		this.panelsContainer = null;
+		this.previewContainer = null;
+		this.fetchPreviewTimer = null;
+		this.state = null;
 	}
 
 	componentDidUpdate( prevProps ) {
