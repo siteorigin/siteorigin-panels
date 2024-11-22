@@ -458,6 +458,10 @@ module.exports = Backbone.View.extend( {
 			$border_color.find( '.wp-picker-clear' ).on( 'click', soBorderVisibility );
 		}
 
+		if ( typeof $.fn.select2 == 'function' ) {
+			this.$( '.so-select2' ).select2();
+		}
+
 		// Allow other plugins to setup custom fields.
 		$( document ).trigger( 'setup_style_fields', this );
 	}
