@@ -908,6 +908,24 @@
 		ul {
 			list-style: none;
 		}
+
+		// Prevent display issues when the editor has a darker background.
+		.so-builder-container {
+			background: #fff;
+
+			.so-row-container {
+				padding: 0 15px 20px;
+			}
+
+			a:not(.so-tool-button):not([class^="so-row-"]) {
+				color: #2271b1;
+
+				&:hover,
+				&:focus {
+					color: #1e1e1e;
+				}
+			}
+		}
 	}
 }
 
@@ -1159,6 +1177,7 @@
 		}
 
 		.so-title-bar-buttons {
+			display: flex;
 			position: absolute;
 			right: 0;
 			top: 0;
@@ -1190,6 +1209,11 @@
 
 				color: #666;
 			}
+		}
+
+		// Don't leave space for navigation if they're not present.
+		&:has(.so-nav) h3.so-title {
+			margin: 0 50px;
 		}
 	}
 
@@ -2508,6 +2532,14 @@
 						border-left: 1px solid #8c8f94;
 						height: 28px;
 					}
+				}
+			}
+
+			.select2-container {
+				width: 100% !important;
+
+				.select2-container .select2-selection__choice__remove {
+					height: 100%;
 				}
 			}
 		}
