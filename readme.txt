@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.0 – 22 November 2024 =
+* Styles Fields: Added `multi-select`.
+* Admin Interface: Styling improvements to the Edit Row modal.
+* Layouts Block: General styling improvements and fixes.
+
 = 2.30.0 – 26 October 2024 =
 * Image Overlay: Prevent iOS fixed background display issues.
 * Styles Settings: Converted Border Thickness to a multi-measurement field.
