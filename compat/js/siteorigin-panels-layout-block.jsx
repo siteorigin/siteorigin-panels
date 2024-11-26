@@ -24,8 +24,8 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 			panelsInitialized: false,
 		};
 
-		// Depending on when this function is called, we need to update the state
-		// differently.
+		// Depending on when this function is called, we need to update the
+		// state differently.
 		if ( newState ) {
 			this.state = { ...this.initialState };
 		} else {
@@ -35,7 +35,6 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 	componentDidMount() {
 		this.isStillMounted = true;
-
 		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		}
@@ -109,9 +108,9 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 		var config = {
 			editorType: 'standalone',
-	        loadLiveEditor: false,
-	        postId: window.soPanelsBlockEditorAdmin.postId,
-	        editorPreview: window.soPanelsBlockEditorAdmin.liveEditor,
+			loadLiveEditor: false,
+			postId: window.soPanelsBlockEditorAdmin.postId,
+			editorPreview: window.soPanelsBlockEditorAdmin.liveEditor,
 		};
 
 		var builderModel = new panels.model.builder();
@@ -193,8 +192,8 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 
 		this.builderView.on( 'content_change', () => {
 			const newPanelsData = this.builderView.getData();
-			this.panelsDataChanged = ! SiteOriginIsPanelsEqual( panelsData, newPanelsData );
 
+			this.panelsDataChanged = ! SiteOriginIsPanelsEqual( panelsData, newPanelsData );
 			if ( this.panelsDataChanged ) {
 				if (
 					this.props.onContentChange &&

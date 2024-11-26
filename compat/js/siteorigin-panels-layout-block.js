@@ -91,8 +91,8 @@ function (_wp$element$Component) {
         previewInitialized: !editMode,
         pendingPreviewRequest: false,
         panelsInitialized: false
-      }; // Depending on when this function is called, we need to update the state
-      // differently.
+      }; // Depending on when this function is called, we need to update the
+      // state differently.
 
       if (newState) {
         this.state = _objectSpread({}, this.initialState);
