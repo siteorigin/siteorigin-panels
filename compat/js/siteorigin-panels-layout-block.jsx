@@ -202,7 +202,10 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 				) {
 					this.props.onContentChange( newPanelsData );
 				}
-				this.setState( { loadingPreview: true, previewHtml: '' } );
+				this.setState( {
+					loadingPreview: true,
+					previewHtml: ''
+				} );
 			}
 		} );
 
@@ -248,11 +251,18 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 				preview
 			) {
 				this.setState( {
-					previewHtml: preview,
-					loadingPreview: false,
-            		previewInitialized: false,
-            		pendingPreviewRequest: false,
-				} );
+						previewHtml: preview,
+					},
+					// Wait until previewHTML has finished updating to cut
+					// down on the chance of nothing being rendered.
+					() => {
+						this.setState( {
+							loadingPreview: false,
+							previewInitialized: false,
+							pendingPreviewRequest: false,
+						} );
+					}
+				);
 			}
 		} );
 		return fetchRequest;
