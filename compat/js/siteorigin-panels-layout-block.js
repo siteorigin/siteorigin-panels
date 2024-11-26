@@ -1,5 +1,11 @@
 "use strict";
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -61,38 +67,46 @@ function (_wp$element$Component) {
     _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
     _this2 = _super.call(this, props);
-    var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
-    var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
-    var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
-    _this2.state = {
-      editing: editMode,
-      loadingPreview: !editMode,
-      previewHtml: '',
-      previewInitialized: !editMode,
-      pendingPreviewRequest: false,
-      panelsInitialized: false
-    };
+
+    _this2.initializeState(props);
+
     _this2.panelsContainer = wp.element.createRef();
     _this2.previewContainer = wp.element.createRef();
-    _this2.fetchPreviewTimer;
+    _this2.fetchPreviewTimer = null;
+    _this2.currentFetchRequest = null;
     return _this2;
   }
 
   _createClass(SiteOriginPanelsLayoutBlock, [{
+    key: "initializeState",
+    value: function initializeState(props) {
+      var newState = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
+      var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
+      var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
+      this.initialState = {
+        editing: editMode,
+        loadingPreview: true,
+        previewHtml: '',
+        previewInitialized: !editMode,
+        pendingPreviewRequest: false,
+        panelsInitialized: false
+      }; // Depending on when this function is called, we need to update the state
+      // differently.
+
+      if (newState) {
+        this.state = _objectSpread({}, this.initialState);
+      } else {
+        this.setState(_objectSpread({}, this.initialState));
+      }
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.isStillMounted = true;
 
       if (!this.state.panelsInitialized) {
         this.setupPanels();
-      }
-
-      if (!this.previewInitialized) {
-        clearTimeout(this.fetchPreviewTimer);
-        var current = this;
-        this.fetchPreviewTimer = setTimeout(function () {
-          current.fetchPreview(current.props);
-        }, 1000);
       }
     }
   }, {
@@ -101,30 +115,42 @@ function (_wp$element$Component) {
       var _this3 = this;
 
       this.isStillMounted = false;
-      this.panelsInitialized = false;
 
       if (this.builderView) {
-        this.builderView.off('content_change');
-        this.builderView = null; // Remove builder from global builder list.
-
+        // Remove builder from global builder list.
         if (typeof window.soPanelsBuilderView !== 'undefined') {
           window.soPanelsBuilderView = window.soPanelsBuilderView.filter(function (view) {
             return view !== _this3.builderView;
           });
         }
+
+        delete this.builderView;
       }
 
-      this.panelsContainer = null;
-      this.previewContainer = null;
-      this.fetchPreviewTimer = null;
-      this.state = null;
+      if (this.currentFetchRequest && typeof this.currentFetchRequest.abort === 'function') {
+        this.currentFetchRequest.abort();
+      }
+
+      clearTimeout(this.fetchPreviewTimer);
+
+      if (this.panelsContainer) {
+        jQuery(this.panelsContainer.current).empty();
+      }
+
+      if (this.previewContainer) {
+        jQuery(this.previewContainer.current).empty();
+      }
+
+      this.initializeState(this.props, false);
     }
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      if (!this.state.panelsInitialized) {
-        this.setupPanels();
-      } else if (this.state.loadingPreview) {
+      if (!this.isStillMounted || !this.state.panelsInitialized) {
+        return;
+      }
+
+      if (this.state.loadingPreview) {
         if (!this.state.pendingPreviewRequest) {
           this.setState({
             pendingPreviewRequest: true
@@ -147,8 +173,7 @@ function (_wp$element$Component) {
     value: function setupPanels() {
       var _this4 = this;
 
-      // Should we set up panels?
-      if (this.state.panelsInitialized) {
+      if (this.state.panelsInitialized || !this.isStillMounted) {
         return;
       }
 
@@ -284,10 +309,15 @@ function (_wp$element$Component) {
 
         if (fetchRequest === _this5.currentFetchRequest && preview) {
           _this5.setState({
-            previewHtml: preview,
-            loadingPreview: false,
-            previewInitialized: false,
-            pendingPreviewRequest: false
+            previewHtml: preview
+          }, // Wait until previewHTML has finished updating to cut
+          // down on the chance of nothing being rendered.
+          function () {
+            _this5.setState({
+              loadingPreview: false,
+              previewInitialized: false,
+              pendingPreviewRequest: false
+            });
           });
         }
       });

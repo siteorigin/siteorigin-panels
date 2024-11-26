@@ -2,21 +2,35 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	constructor( props ) {
 		super( props );
 
+		this.initializeState( props );
+
+		this.panelsContainer = wp.element.createRef();
+		this.previewContainer = wp.element.createRef();
+		this.fetchPreviewTimer = null;
+		this.currentFetchRequest = null;
+	}
+
+	initializeState(props, newState = true) {
 		const hasPanelsData = typeof props.panelsData === 'object' && Object.keys( props.panelsData ).length > 0;
 		const isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
 		const editMode = hasPanelsData === true ? isDefaultModeEdit : true;
 
-		this.state = {
+		this.initialState = {
 			editing: editMode,
-			loadingPreview: ! editMode,
+			loadingPreview: true,
 			previewHtml: '',
 			previewInitialized: ! editMode,
 			pendingPreviewRequest: false,
 			panelsInitialized: false,
 		};
-		this.panelsContainer = wp.element.createRef();
-		this.previewContainer = wp.element.createRef();
-		this.fetchPreviewTimer;
+
+		// Depending on when this function is called, we need to update the state
+		// differently.
+		if ( newState ) {
+			this.state = { ...this.initialState };
+		} else {
+			this.setState( { ...this.initialState } );
+		}
 	}
 
 	componentDidMount() {
@@ -25,41 +39,50 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 		if ( ! this.state.panelsInitialized ) {
 			this.setupPanels();
 		}
-
-		if ( ! this.previewInitialized ) {
-			clearTimeout( this.fetchPreviewTimer );
-			var current = this;
-			this.fetchPreviewTimer = setTimeout( function() {
-				current.fetchPreview( current.props );
-			}, 1000 );
-		}
 	}
 
 	componentWillUnmount() {
 		this.isStillMounted = false;
-		this.panelsInitialized = false;
 
 		if ( this.builderView ) {
-			this.builderView.off( 'content_change' );
-			this.builderView = null;
-
 			// Remove builder from global builder list.
 			if ( typeof window.soPanelsBuilderView !== 'undefined' ) {
 				window.soPanelsBuilderView = window.soPanelsBuilderView.filter( view => view !== this.builderView );
 			}
+
+			delete this.builderView;
 		}
 
-		this.panelsContainer = null;
-		this.previewContainer = null;
-		this.fetchPreviewTimer = null;
-		this.state = null;
+		if (
+			this.currentFetchRequest &&
+			typeof this.currentFetchRequest.abort === 'function'
+		) {
+			this.currentFetchRequest.abort();
+		}
+
+		clearTimeout( this.fetchPreviewTimer );
+
+		if ( this.panelsContainer ) {
+			jQuery( this.panelsContainer.current ).empty();
+		}
+
+		if ( this.previewContainer ) {
+			jQuery( this.previewContainer.current ).empty();
+		}
+
+		this.initializeState(
+			this.props,
+			false
+		);
 	}
 
 	componentDidUpdate( prevProps ) {
-		if ( ! this.state.panelsInitialized ) {
-			this.setupPanels();
-		} else if ( this.state.loadingPreview ) {
-        	if ( ! this.state.pendingPreviewRequest ) {
+		if ( ! this.isStillMounted || ! this.state.panelsInitialized ) {
+			return;
+		}
+
+		if ( this.state.loadingPreview ) {
+			if ( ! this.state.pendingPreviewRequest ) {
 				this.setState({
 					pendingPreviewRequest: true,
 				} );
@@ -68,7 +91,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 				this.fetchPreviewTimer = setTimeout( function() {
 					current.fetchPreview( current.props );
 				}, 1000 );
-        	}
+			}
 		} else if ( ! this.state.previewInitialized ) {
 			jQuery( document ).trigger( 'panels_setup_preview' );
 			this.setState( {
@@ -78,8 +101,7 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	setupPanels() {
-		// Should we set up panels?
-		if ( this.state.panelsInitialized ) {
+		if ( this.state.panelsInitialized || ! this.isStillMounted ) {
 			return;
 		}
 
