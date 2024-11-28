@@ -2538,8 +2538,18 @@
 			.select2-container {
 				width: 100% !important;
 
-				.select2-container .select2-selection__choice__remove {
+				.select2-search--inline {
+					margin-bottom: 0;
+				}
+
+				.select2-selection__choice__remove {
 					height: 100%;
+
+					span {
+						display: inline-block;
+						margin-top: 8px;
+						transform: translateY(-50%);
+					}
 				}
 			}
 		}
