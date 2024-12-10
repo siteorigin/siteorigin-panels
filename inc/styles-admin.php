@@ -562,6 +562,12 @@ class SiteOrigin_Panels_Styles_Admin {
 		if ( ! empty( $panels_data['grids'] ) ) {
 			// The rows
 			for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
+				if ( ! empty( $panels_data['grids'][ $i ]['label'] ) ) {
+					$panels_data['grids'][ $i ]['label'] = sanitize_text_field(
+						$panels_data['grids'][ $i ]['label']
+					);
+				}
+
 				if ( empty( $panels_data['grids'][ $i ]['style'] ) ) {
 					continue;
 				}

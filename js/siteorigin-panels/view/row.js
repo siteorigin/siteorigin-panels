@@ -58,7 +58,7 @@ module.exports = Backbone.View.extend( {
 
 		this.setElement( this.template( {
 			rowColorLabel: rowColorLabel,
-			rowLabel: rowLabel
+			rowLabel: _.escape( rowLabel )
 		} ) );
 		this.$el.data( 'view', this );
 
@@ -225,11 +225,13 @@ module.exports = Backbone.View.extend( {
 	},
 
 	onLabelChange: function( model, text ) {
-		if ( this.$('.so-row-label').length == 0 ) {
-			this.$( '.so-row-toolbar' ).prepend( '<h3 class="so-row-label">' + text + '</h3>' );
-		} else {
-			this.$('.so-row-label').text( text );
+		if ( this.$( '.so-row-label' ).length == 0 ) {
+			this.$( '.so-row-toolbar' ).prepend(
+				'<h3 class="so-row-label"></h3>'
+			);
 		}
+
+		this.$( '.so-row-label' ).text( text );
 	},
 
 	/**
