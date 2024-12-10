@@ -57,7 +57,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		this.setElement( this.template( {
-			rowColorLabel: rowColorLabel,
+			rowColorLabel: _.escape( rowColorLabel ),
 			rowLabel: _.escape( rowLabel )
 		} ) );
 		this.$el.data( 'view', this );
