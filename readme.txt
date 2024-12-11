@@ -121,6 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.1 – 11 December 2024 =
+* Layouts Block: Prevented double toolbar when in development mode.
+* Improved row, cell, and widget attribute handling.
+
 = 2.31.0 – 22 November 2024 =
 * Styles Fields: Added `multi-select`.
 * Admin Interface: Styling improvements to the Edit Row modal.
