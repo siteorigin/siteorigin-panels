@@ -1,5 +1,26 @@
 == Changelog ==
 
+= 2.31.1 – 11 December 2024 =
+* Layouts Block: Prevented double toolbar when in development mode.
+* Improved row, cell, and widget attribute handling.
+
+= 2.31.0 – 22 November 2024 =
+* Styles Fields: Added `multi-select`.
+* Admin Interface: Styling improvements to the Edit Row modal.
+* Layouts Block: General styling improvements and fixes.
+
+= 2.30.0 – 26 October 2024 =
+* Image Overlay: Prevent iOS fixed background display issues.
+* Styles Settings: Converted Border Thickness to a multi-measurement field.
+* Styles Settings: Ensured color picker field and clear button are on a dedicated line.
+
+= 2.29.22 – 30 September 2024 =
+* Layout Block: Removed content filter attributes from the front-end.
+
+= 2.29.21 – 17 September 2024 =
+* Prebuilt Local Layouts: Resolved a potential error.
+* Prebuilt Local Layouts: Restricted layout files to JSON.
+
 = 2.29.20 – 08 August 2024 =
 * Rank Math: Resolved content analysis issue when multiple blocks in use.
 

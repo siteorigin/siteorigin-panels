@@ -552,9 +552,20 @@ class SiteOrigin_Panels_Styles_Admin {
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			// Sanitize the widgets
 			for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {
+				if ( empty( $panels_data['widgets'][ $i ]['panels_info'] ) ) {
+					continue;
+				}
+
+				if ( ! empty( $panels_data['widgets'][ $i ]['panels_info']['label'] ) ) {
+					$panels_data['widgets'][ $i ]['panels_info']['label'] = sanitize_text_field(
+						$panels_data['widgets'][ $i ]['panels_info']['label']
+					);
+				}
+
 				if ( empty( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
 					continue;
 				}
+
 				$panels_data['widgets'][ $i ]['panels_info']['style'] = $this->sanitize_style_fields( 'widget', $panels_data['widgets'][ $i ]['panels_info']['style'] );
 			}
 		}
@@ -562,6 +573,12 @@ class SiteOrigin_Panels_Styles_Admin {
 		if ( ! empty( $panels_data['grids'] ) ) {
 			// The rows
 			for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
+				if ( ! empty( $panels_data['grids'][ $i ]['label'] ) ) {
+					$panels_data['grids'][ $i ]['label'] = sanitize_text_field(
+						$panels_data['grids'][ $i ]['label']
+					);
+				}
+
 				if ( empty( $panels_data['grids'][ $i ]['style'] ) ) {
 					continue;
 				}
