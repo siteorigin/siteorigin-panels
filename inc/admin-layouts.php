@@ -305,9 +305,22 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 			}
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
-			// Check that the user can view the given page types
-			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
+			$post_type = str_replace( 'clone_', '', $type );
+			$post_types_editable_by_user = SiteOrigin_Panels_Admin_Layouts::single()->post_types();
 
+			// Can the user edit posts from this post type?
+			if (
+				empty( $post_type ) ||
+				empty( $post_types_editable_by_user ) ||
+				! in_array(
+					$post_type,
+					$post_types_editable_by_user
+				)
+			) {
+				return;
+			}
+
+			$post_type = get_post_type_object( $post_type );
 			if ( empty( $post_type ) ) {
 				return;
 			}
@@ -576,5 +589,31 @@ class SiteOrigin_Panels_Admin_Layouts {
 		), $layout_data );
 
 		return $layout_data;
+	}
+
+	/**
+	 * Get the post types that the current user can edit.
+	 *
+	 * This function retrieves the post types specified in the
+	 * SiteOrigin Panels settings. It then filters out post types that the
+	 * current user does not have permission to edit.
+	 *
+	 * @return array The post types that the current user can edit.
+	 */
+	public function post_types() {
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		if ( empty( $post_types ) ) {
+			return array();
+		}
+
+		foreach ( $post_types as $id => $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
+				unset( $post_types[ $id ] );
+			}
+		}
+
+		return $post_types;
 	}
 }

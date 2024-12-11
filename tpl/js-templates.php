@@ -436,7 +436,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				}
 				$tabs['import'] = __( 'Import/Export', 'siteorigin-panels' );
 
-				$post_types = siteorigin_panels_setting( 'post-types' );
+				$post_types = SiteOrigin_Panels_Admin_Layouts::single()->post_types();
 				foreach( $post_types as $post_type ) {
 					$type = get_post_type_object( $post_type );
 					if ( empty( $type ) ) {
