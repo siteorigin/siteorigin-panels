@@ -1,0 +1,34 @@
+{
+	"features": {
+		"networking": true
+	},
+	"preferredVersions": {
+		"php": "latest",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "installTheme",
+			"themeData": {
+				"resource": "wordpress.org/themes",
+				"slug": "vantage"
+			},
+			"options": {
+				"activate": true,
+				"importStarterContent": true
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "siteorigin-panels"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	],
+	"login": true,
+	"landingPage": "/wp-admin/admin.php?page=siteorigin_panels"
+}
