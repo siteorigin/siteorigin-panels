@@ -390,10 +390,7 @@ class SiteOrigin_Panels_Styles_Admin {
 						<option
 							value="<?php echo esc_attr( $k ); ?>"
 							<?php echo isset( $values[ $k ] ) ? 'selected' : ''; ?>
-						>
-							<?php echo esc_html( $v ); ?>
-						</option>
-
+						><?php echo esc_html( $v ); ?></option>
 					<?php } ?>
 				</select>
 				<?php
