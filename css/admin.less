@@ -2538,8 +2538,29 @@
 			.select2-container {
 				width: 100% !important;
 
-				.select2-container .select2-selection__choice__remove {
+				.select2-selection--multiple {
+					align-items: center;
+					display: flex;
+					padding: 0;
+				}
+
+				.select2-selection__rendered {
+					margin: 0;
+					padding: 0;
+				}
+
+				.select2-search__field {
+					margin-top: 0;
+				}
+
+				.select2-selection__choice__remove {
 					height: 100%;
+
+					span {
+						display: inline-block;
+						margin-top: 8px;
+						transform: translateY(-50%);
+					}
 				}
 			}
 		}
