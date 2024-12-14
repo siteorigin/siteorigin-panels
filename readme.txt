@@ -121,6 +121,10 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.2 – 14 December 2024 =
+* Improved post type handling.
+* Select2: Improved input alignment.
+
 = 2.31.1 – 11 December 2024 =
 * Layouts Block: Prevented double toolbar when in development mode.
 * Improved row, cell, and widget attribute handling.
