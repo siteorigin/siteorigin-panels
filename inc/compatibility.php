@@ -110,5 +110,10 @@ class SiteOrigin_Panels_Compatibility {
 		if ( defined( 'PAGELAYER_VERSION' ) ) {
 			SiteOrigin_Panels_Compat_Pagelayer::single();
 		}
+
+		// Compatibility with Popup Maker.
+		if ( class_exists( 'PUM_Site' )) {
+			require_once $this->compat_path . 'popup-maker.php';
+		}
 	}
 }
