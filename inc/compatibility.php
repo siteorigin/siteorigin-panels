@@ -5,7 +5,7 @@
 class SiteOrigin_Panels_Compatibility {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'plugins_loaded', array( $this, 'init' ), 100 );
+		add_action( 'init', array( $this, 'init' ), 100 );
 	}
 
 	public static function single() {
