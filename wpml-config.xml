@@ -435,4 +435,7 @@
       </fields-in-item>
     </widget>
   </siteorigin-widgets>
+  <custom-fields>
+    <custom-field action="ignore">panels_data</custom-field>
+  </custom-fields>
 </wpml-config>
