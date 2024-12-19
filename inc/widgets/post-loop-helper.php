@@ -47,13 +47,13 @@ class SiteOrigin_Panels_Widgets_PostLoop_Helper extends SiteOrigin_Widget {
 				),
 				'more' => array(
 					'type' => 'checkbox',
-					'label' => __( 'More link', 'so-widgets-bundle' ),
+					'label' => __( 'More link', 'siteorigin-panels' ),
 					'description' => __( 'If the template supports it, cut posts and display the more link.', 'siteorigin-panels' ),
 					'default' => false,
 				),
 				'posts' => array(
 					'type' => 'posts',
-					'label' => __( 'Posts query', 'so-widgets-bundle' ),
+					'label' => __( 'Posts query', 'siteorigin-panels' ),
 					'hide' => true,
 				),
 			)
