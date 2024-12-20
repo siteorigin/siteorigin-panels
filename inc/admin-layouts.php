@@ -8,6 +8,12 @@
 class SiteOrigin_Panels_Admin_Layouts {
 	const LAYOUT_URL = 'https://layouts.siteorigin.com/';
 
+	const VALID_MIME_TYPES = array(
+		'application/json',
+		'text/plain',
+		'text/html',
+	);
+
 	public function __construct() {
 		// Filter all the available external layout directories.
 		add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_directories' ), 8 );
@@ -64,6 +70,29 @@ class SiteOrigin_Panels_Admin_Layouts {
 	}
 
 	/**
+	 * Check if the file has a valid MIME type.
+	 *
+	 * This method checks if the given file has a valid MIME type. It first verifies
+	 * if the `mime_content_type` function exists. If it doesn't, it returns true
+	 * as it can't check the MIME type due to server settings.
+	 * If the function exists, it retrieves the MIME type of the file and checks
+	 * if it is in the list of valid MIME types.
+	 *
+	 * @param string $file The file path to check.
+	 *
+	 * @return bool True if the file has a valid MIME type, false otherwise.
+	 */
+	private static function check_file_mime( $file ) {
+		if ( ! function_exists( 'mime_content_type' ) ) {
+			// Can't check mime type due to server settings.
+			return true;
+		}
+
+		$mime_type = mime_content_type( $file );
+		return in_array( $mime_type, self::VALID_MIME_TYPES );
+	}
+
+	/**
 	 * Determines if file has a JSON extension.
 	 *
 	 * @param string $file File path.
@@ -103,22 +132,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				foreach ( $files as $file ) {
-					$valid_file_type = false;
-					if ( function_exists( 'mime_content_type' ) ) {
-						$mime_type = mime_content_type( $file );
-						$valid_file_type = strpos( $mime_type, '/json' ) !== false;
-
-						if ( ! $valid_file_type ) {
-							// It could have the wrong MIME type. Check for text/plain, and if it is, check the extension.
-							$valid_file_type = strpos( $mime_type, 'text/plain' ) !== false &&
-								self::check_file_ext( $file );
-						}
-					} else {
-						// Can't check MIME. Check extension.
-						$valid_file_type = self::check_file_ext( $file );
-					}
-
-					if ( ! $valid_file_type ) {
+					// Check the file.
+					if (
+						! self::check_file_mime( $file ) ||
+						! self::check_file_ext( $file )
+					) {
 						continue;
 					}
 
@@ -609,7 +627,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 		foreach ( $post_types as $id => $post_type ) {
 			$post_type_object = get_post_type_object( $post_type );
 
-			if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
+			if (
+				empty( $post_type_object ) ||
+				! current_user_can( $post_type_object->cap->edit_posts )
+			) {
 				unset( $post_types[ $id ] );
 			}
 		}

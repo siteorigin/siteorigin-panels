@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.3 – 20 December 2024 =
+* WPML: Improved compatibility by excluding `panels_data` field from automatic translation handling.
+* Prebuilt Layouts: Added text/html to accepted mime types for layout exports.
+* Added compatibility with Popup Maker to ensure correct layout rendering in popups.
+* Row Labels: Improved handling and display consistency.
+
 = 2.31.2 – 14 December 2024 =
 * Improved post type handling.
 * Select2: Improved input alignment.

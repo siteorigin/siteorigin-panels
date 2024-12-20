@@ -1,11 +1,5 @@
 <wpml-config>
   <built-with-page-builder>/\[siteorigin_widget.*\]/</built-with-page-builder>
-  <admin-texts>
-    <key name="so_widget_settings[SiteOrigin_Widget_GoogleMap_Widget]">
-      <key name="map_consent_btn_text" />
-      <key name="map_consent_notice" />
-    </key>
-  </admin-texts>
   <gutenberg-blocks>
     <gutenberg-block type="siteorigin-panels/layout-block" translate="1">
       <key name="panelsData">
@@ -308,11 +302,6 @@
         <field type="Feature more URL" editor_type="LINK">more_url</field>
       </fields-in-item>
     </widget>
-    <widget name="SiteOrigin_Widget_GoogleMap_Widget">
-      <fields-in-item items_of="markers>marker_positions">
-        <field type="Map marker info" editor_type="VISUAL">info</field>
-      </fields-in-item>
-    </widget>
     <widget name="SiteOrigin_Widget_Headline_Widget">
       <fields>
         <field type="Headline text">headline>text</field>
@@ -445,10 +434,8 @@
         <field type="Feature hover text">hover</field>
       </fields-in-item>
     </widget>
-    <widget name="SiteOrigin_Widget_GoogleMap_Widget">
-      <fields-in-item items_of="markers>marker_positions">
-        <field type="Map marker info" editor_type="VISUAL">info</field>
-      </fields-in-item>
-    </widget>
   </siteorigin-widgets>
+  <custom-fields>
+    <custom-field action="ignore">panels_data</custom-field>
+  </custom-fields>
 </wpml-config>

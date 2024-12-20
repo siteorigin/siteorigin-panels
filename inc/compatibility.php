@@ -3,9 +3,12 @@
  * Compatibility class SiteOrigin Page Builder.
  */
 class SiteOrigin_Panels_Compatibility {
+	private $compat_path;
+
 	public function __construct() {
+		$this->compat_path = plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/';
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'plugins_loaded', array( $this, 'init' ), 100 );
+		add_action( 'init', array( $this, 'init' ), 100 );
 	}
 
 	public static function single() {
@@ -17,7 +20,7 @@ class SiteOrigin_Panels_Compatibility {
 	public function admin_init() {
 		// SEO analysis compatibility.
 		if ( defined( 'WPSEO_FILE' ) || defined( 'RANK_MATH_VERSION' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/seo.php';
+			require_once $this->compat_path . 'seo.php';
 		}
 
 		// Compatibility with ACF.
@@ -32,7 +35,7 @@ class SiteOrigin_Panels_Compatibility {
 	public function init() {
 		// Compatibility with Widget Options.
 		if ( class_exists( 'WP_Widget_Options' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/widget-options.php';
+			require_once $this->compat_path . 'widget-options.php';
 		}
 
 		// Compatibility with Yoast plugins.
@@ -40,27 +43,27 @@ class SiteOrigin_Panels_Compatibility {
 			defined( 'WPSEO_FILE' ) ||
 			function_exists( 'yoast_wpseo_video_seo_init' )
 		) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/yoast.php';
+			require_once $this->compat_path . 'yoast.php';
 		}
 
 		// Compatibility with Rank Math.
 		if ( class_exists( 'RankMath' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/rank-math.php';
+			require_once $this->compat_path . 'rank-math.php';
 		}
 
 		// Compatibility with AMP plugin.
 		if ( is_admin() && function_exists( 'amp_bootstrap_plugin' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/amp.php';
+			require_once $this->compat_path . 'amp.php';
 		}
 
 		// Compatibility with Gravity Forms.
 		if ( class_exists( 'GFCommon' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/gravity-forms.php';
+			require_once $this->compat_path . 'gravity-forms.php';
 		}
 
 		// Compatibility with Yikes Custom Product Tabs.
 		if ( class_exists( 'YIKES_Custom_Product_Tabs' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/yikes.php';
+			require_once $this->compat_path . 'yikes.php';
 		}
 
 		// Compatibility with WP Rocket and WP Rocket LazyLoad.
@@ -75,22 +78,22 @@ class SiteOrigin_Panels_Compatibility {
 		}
 
 		if ( apply_filters( 'siteorigin_lazyload_compat', $load_lazy_load_compat ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/lazy-load-backgrounds.php';
+			require_once $this->compat_path . 'lazy-load-backgrounds.php';
 		}
 
 		// Compatibility with Jetpack.
 		if ( class_exists( 'Jetpack' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/jetpack.php';
+			require_once $this->compat_path . 'jetpack.php';
 		}
 
 		// Compatibility with Polylang.
 		if ( class_exists( 'Polylang' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/polylang.php';
+			require_once $this->compat_path . 'polylang.php';
 		}
 
 		// Compatibility with SeoPress.
 		if ( defined( 'SEOPRESS_VERSION' ) ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/seopress.php';
+			require_once $this->compat_path . 'seopress.php';
 		}
 
 		// Compatibility with WP Event Manager.
@@ -100,12 +103,17 @@ class SiteOrigin_Panels_Compatibility {
 
 		// Compatibility with Vantage.
 		if ( get_template() == 'vantage' ) {
-			require_once plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/vantage.php';
+			require_once $this->compat_path . 'vantage.php';
 		}
 
 		// Compatibility with Pagelayer.
 		if ( defined( 'PAGELAYER_VERSION' ) ) {
 			SiteOrigin_Panels_Compat_Pagelayer::single();
+		}
+
+		// Compatibility with Popup Maker.
+		if ( class_exists( 'PUM_Site' )) {
+			require_once $this->compat_path . 'popup-maker.php';
 		}
 	}
 }
