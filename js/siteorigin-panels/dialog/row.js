@@ -49,6 +49,7 @@ module.exports = panels.view.dialog.extend({
 
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
+		'change .row-set-form .so-row-field': 'changeCellTotal',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
 
@@ -183,10 +184,6 @@ module.exports = panels.view.dialog.extend({
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
 		}
-
-		this.$( 'input.so-row-field' ).on( 'keyup', function() {
-			$(this).trigger('change');
-		});
 
 		return this;
 	},
