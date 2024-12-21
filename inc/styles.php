@@ -676,14 +676,14 @@ class SiteOrigin_Panels_Styles {
 				?>
 				<div
 					class="panel-background-overlay"
-					<?php if ( ! empty( $styles ) ) { ?>
-						style="
-						<?php
+					<?php
+					if ( ! empty( $styles ) ) {
+						$style_attr = '';
 						foreach ( $styles as $p => $v ) {
-							esc_attr_e( $p . ':' . $v . ';' );
+							$style_attr .= $p . ':' . $v . ';';
 						}
 						?>
-						"
+						style="<?php echo esc_attr( $style_attr ); ?>"
 					<?php } ?>
 				>
 					<?php echo apply_filters( 'siteorigin_panels_overlay_content', '', $context, ! empty( $custom_overlay ) ); ?>

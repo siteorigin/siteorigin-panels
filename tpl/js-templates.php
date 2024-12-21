@@ -110,8 +110,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								foreach ( $row_colors as $id => $color ) {
 									$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
 									?>
-									<div data-color-label="<?php esc_attr_e( $name ); ?>"
-										class="<?php esc_attr_e( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php esc_attr_e( $name ); ?>' ) print(' so-row-color-selected'); %}}"
+									<div data-color-label="<?php echo esc_attr( $name ); ?>"
+										class="<?php esc_attr_e( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
 									></div>
 								<?php } ?>
 							</li>
@@ -450,7 +450,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				foreach ( $tabs as $id => $tab ) {
 					?>
 					<li>
-						<a href="#<?php esc_attr_e( $id ); ?>"><?php echo esc_html( $tab ); ?></a>
+						<a href="#<?php echo esc_attr( $id ); ?>">
+							<?php echo esc_html( $tab ); ?>
+						</a>
 					</li>
 					<?php
 				}
