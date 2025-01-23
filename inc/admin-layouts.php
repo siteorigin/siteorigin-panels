@@ -283,11 +283,17 @@ class SiteOrigin_Panels_Admin_Layouts {
 				return false;
 			}
 
-			$cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num );
+			// If the user isn't searching, check if we have a cached
+			// version of the results.
+			if ( empty( $search ) ) {
+				$cache = get_transient( 'siteorigin_panels_layouts_directory_cache_' . $directory_id .'_page_' . $page_num );
 
-			if ( empty( $search ) && ! empty( $cache ) ) {
-				$return = $cache;
-			} else {
+				if ( ! empty( $cache ) ) {
+					$return = $cache;
+				}
+			}
+
+			if ( empty( $return['items'] ) ) {
 				$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
 
 				if ( ! empty( $directory['args'] ) && is_array( $directory['args'] ) ) {
@@ -319,7 +325,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 					}
 
 					$return['max_num_pages'] = $results['max_num_pages'];
-					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num, $return, 86400 );
+
+					// If the user isn't searching, cache the results.
+					if ( empty( $search ) ) {
+						set_transient( 'siteorigin_panels_layouts_directory_cache_' . $directory_id .'_page_' . $page_num, $return, 86400 );
+					}
 				}
 			}
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
