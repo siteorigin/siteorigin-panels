@@ -116,6 +116,11 @@ class SiteOrigin_Panels_Compatibility {
 		if ( class_exists( 'PUM_Site' )) {
 			require_once $this->compat_path . 'popup-maker.php';
 		}
+
+		// Compatibility with Events Manager.
+		if ( defined( 'EM_VERSION' ) ) {
+			require_once $this->compat_path . 'events-manager.php';
+		}
 	}
 
 	public function widgets_init() {
