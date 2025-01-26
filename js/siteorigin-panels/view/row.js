@@ -291,7 +291,7 @@ module.exports = Backbone.View.extend( {
 			var originalText = $$.html();
 
 			$$.addClass( 'so-confirmed' ).html(
-				'<span class="dashicons dashicons-yes"></span>' + panelsOptions.loc.dropdown_confirm
+				panelsOptions.loc.dropdown_confirm
 			);
 
 			setTimeout( function () {
