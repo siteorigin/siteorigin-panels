@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 2.31.4 – 02 February 2025 =
+* Added Compatibility for Events Manager.
+* AIOSEO: Loaded plugin widgets.
+* Refactored SEO plugin compatibility and restored Yoast Block Editor content parsing.
+* Layout Directory: Resolved incorrect empty search after search query.
+* WPML: Adjusted editor labels for the WPML 4.7 release.
+
 = 2.31.3 – 20 December 2024 =
 * WPML: Improved compatibility by excluding `panels_data` field from automatic translation handling.
 * Prebuilt Layouts: Added text/html to accepted mime types for layout exports.
