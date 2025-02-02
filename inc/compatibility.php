@@ -7,8 +7,9 @@ class SiteOrigin_Panels_Compatibility {
 
 	public function __construct() {
 		$this->compat_path = plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'compat/';
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'init', array( $this, 'init' ), 100 );
+		add_action( 'admin_init', array( $this, 'admin_init' ), 10, 0 );
+		add_action( 'init', array( $this, 'init' ), 100, 0 );
+		add_action( 'widgets_init', array( $this, 'widgets_init' ), 1, 0 );
 	}
 
 	public static function single() {
@@ -114,6 +115,18 @@ class SiteOrigin_Panels_Compatibility {
 		// Compatibility with Popup Maker.
 		if ( class_exists( 'PUM_Site' )) {
 			require_once $this->compat_path . 'popup-maker.php';
+		}
+
+		// Compatibility with Events Manager.
+		if ( defined( 'EM_VERSION' ) ) {
+			require_once $this->compat_path . 'events-manager.php';
+		}
+	}
+
+	public function widgets_init() {
+		// Compatibility for All in One SEO.
+		if ( function_exists( 'aioseo' ) ) {
+			require_once $this->compat_path . 'aioseo.php';
 		}
 	}
 }

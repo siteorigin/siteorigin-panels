@@ -161,7 +161,9 @@ class SiteOrigin_Panels_Styles_Admin {
 			?>
 			<div class="style-section-wrapper">
 				<div class="style-section-head" tabindex="0">
-					<h4><?php esc_html_e( $group['name'] ); ?></h4>
+					<h4>
+						<?php echo esc_html( $group['name'] ); ?>
+					</h4>
 				</div>
 				<div class="style-section-fields" style="display: none">
 					<?php
@@ -173,7 +175,7 @@ class SiteOrigin_Panels_Styles_Admin {
 							<div class="style-field-wrapper so-field-<?php echo esc_attr( $field_id ); ?>">
 								<?php if ( ! empty( $field['name'] ) ) { ?>
 									<label>
-										<?php esc_html_e( $field['name'] ); ?>
+										<?php echo esc_html( $field['name'] ); ?>
 									</label>
 								<?php } ?>
 								<div
@@ -235,8 +237,9 @@ class SiteOrigin_Panels_Styles_Admin {
 				<select
 					class="measurement-unit measurement-unit-<?php echo ! empty( $field['multiple'] ) ? 'multiple' : 'single'; ?>">
 					<?php foreach ( $this->measurements_list() as $measurement ) { ?>
-						<option
-							value="<?php echo esc_attr( $measurement ); ?>"><?php esc_html_e( $measurement ); ?></option>
+						<option value="<?php echo esc_attr( $measurement ); ?>">
+							<?php echo esc_html( $measurement ); ?>
+						</option>
 					<?php } ?>
 				</select>
 				<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>"
@@ -317,12 +320,19 @@ class SiteOrigin_Panels_Styles_Admin {
 				?>
 				<select name="<?php echo esc_attr( $field_name ); ?>">
 					<?php foreach ( $sizes as $size_name => $size_config ) { ?>
-						<?php $sizing_label = ! empty( $size_config['width'] ) && is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : ''; ?>
+						<?php
+						$sizing_label = ! empty( $size_config['width'] ) && is_numeric( $size_config['width'] ) ? ' (' . $size_config['width'] . 'x' . $size_config['height'] . ')' : '';
+						?>
 						<option
 							value="<?php echo esc_attr( $size_name ); ?>"
 							<?php selected( $current, $size_name ); ?>
 						>
-							<?php esc_html_e( ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) . $sizing_label ); ?>
+							<?php
+							echo esc_html(
+								ucwords( preg_replace( '/[-_]/', ' ', $size_name ) ) .
+								$sizing_label
+							);
+							?>
 						</option>
 					<?php } ?>
 				</select>
@@ -363,7 +373,9 @@ class SiteOrigin_Panels_Styles_Admin {
 				?>
 				<label class="so-checkbox-label">
 					<input type="checkbox" name="<?php echo esc_attr( $field_name ); ?>" <?php checked( $current ); ?> />
-					<?php esc_html_e( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
+					<?php
+					echo esc_html( isset( $field['label'] ) ? $field['label'] : __( 'Enabled', 'siteorigin-panels' ) );
+					?>
 				</label>
 				<?php
 				break;
@@ -373,7 +385,11 @@ class SiteOrigin_Panels_Styles_Admin {
 				<select name="<?php echo esc_attr( $field_name ); ?>">
 					<?php foreach ( $field['options'] as $k => $v ) { ?>
 						<option
-							value="<?php echo esc_attr( $k ); ?>" <?php selected( $current, $k ); ?>><?php esc_html_e( $v ); ?></option>
+							value="<?php echo esc_attr( $k ); ?>"
+							<?php selected( $current, $k ); ?>
+						>
+							<?php echo esc_html( $v ); ?>
+						</option>
 					<?php } ?>
 				</select>
 				<?php
@@ -403,9 +419,13 @@ class SiteOrigin_Panels_Styles_Admin {
 				foreach ( $field['options'] as $k => $v ) {
 					?>
 					<label for="<?php echo esc_attr( $radio_id . '-' . $k ); ?>">
-						<input type="radio" name="<?php echo esc_attr( $radio_id ); ?>"
-					       id="<?php echo esc_attr( $radio_id . '-' . $k ); ?>"
-					       value="<?php echo esc_attr( $k ); ?>" <?php checked( $k, $current ); ?>> <?php esc_html_e( $v ); ?>
+						<input
+							type="radio"
+							name="<?php echo esc_attr( $radio_id ); ?>"
+							id="<?php echo esc_attr( $radio_id . '-' . $k ); ?>"
+							value="<?php echo esc_attr( $k ); ?>" <?php checked( $k, $current ); ?>
+						>
+						<?php echo esc_html( $v ); ?>
 					</label>
 					<?php
 				}
@@ -413,17 +433,24 @@ class SiteOrigin_Panels_Styles_Admin {
 
 			case 'textarea' :
 			case 'code' :
-				?><textarea type="text" name="<?php echo esc_attr( $field_name ); ?>"
-				            class="widefat <?php if ( $field['type'] == 'code' ) {
-				            	echo 'so-field-code';
-				            } ?>" rows="4"><?php echo esc_textarea( stripslashes( $current ) ); ?></textarea><?php
+				?><textarea
+					type="text"
+					name="<?php echo esc_attr( $field_name ); ?>"
+					class="widefat <?php if ( $field['type'] == 'code' ) {
+						echo 'so-field-code';
+					} ?>"
+					rows="4"
+				><?php
+				echo esc_textarea( stripslashes( $current ) );
+				?></textarea>
+				<?php
 				break;
 
 			case 'toggle' :
 				$current = (bool) $current;
-				?>
 
-				<?php esc_html_e( isset( $field['label'] ) ? $field['label'] : '' ); ?>
+				echo esc_html( isset( $field['label'] ) ? $field['label'] : '' );
+				?>
 				<label class="so-toggle-switch">
 					<input class="so-toggle-switch-input" type="checkbox" <?php checked( $current ); ?> name="<?php echo esc_attr( $field_name ); ?>">
 					<span class="so-toggle-switch-label" data-on="<?php esc_attr_e( 'On', 'siteorigin-panels' ); ?>" data-off="<?php esc_attr_e( 'Off', 'siteorigin-panels' ); ?>"></span>
@@ -437,7 +464,7 @@ class SiteOrigin_Panels_Styles_Admin {
 							<div class="style-field-wrapper so-field-<?php echo esc_attr( $sub_field_id ); ?>">
 								<?php if ( ! empty( $sub_field['name'] ) ) { ?>
 									<label>
-										<?php esc_html_e( $sub_field['name'] ); ?>
+										<?php echo esc_html( $sub_field['name'] ); ?>
 									</label>
 								<?php } ?>
 								<div
