@@ -3,6 +3,10 @@ if ( ! function_exists( 'em_content' ) ) {
 	return;
 }
 
+if ( ! apply_filters( 'siteorigin_panels_compat_events_manager', true ) ) {
+	return;
+}
+
 $em_pb_removed = false;
 
 /**
