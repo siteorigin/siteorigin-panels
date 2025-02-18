@@ -193,7 +193,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				$instance[ $field_id ] = false;
 			}
 
-			?><p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_html( $field_args['label'] ); ?></label><?php
+			?><p><label for="<?php echo esc_attr( esc_attr( $this->get_field_id( $field_id ) ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label><?php
 
 			if ( $field_args['type'] != 'checkbox' ) {
 				echo '<br />';
@@ -221,7 +221,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 						class="widefat"
 						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
 						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
-						rows="<?php echo (int) $field_args['height']; ?>"
+						rows="<?php echo esc_attr( (int) $field_args['height'] ); ?>"
 					><?php echo esc_textarea( $instance[ $field_id ] ); ?></textarea>
 					<?php
 					break;
@@ -233,7 +233,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 						class="small-text"
 						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
 						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
-						value="<?php echo (float) $instance[ $field_id ]; ?>"
+						value="<?php echo esc_attr( (float) $instance[ $field_id ] ); ?>"
 					/>
 					<?php
 					break;
@@ -243,8 +243,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<input
 						type="checkbox"
 						class="small-text"
-						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
-						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
+						id="<?php echo esc_attr( esc_attr( $this->get_field_id( $field_id ) ) ); ?>"
+						name="<?php echo esc_attr( esc_attr( $this->get_field_name( $field_id ) ) ); ?>"
 						<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
 					/>
 					<?php
@@ -973,7 +973,7 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 		}
 
 		echo $args['before_widget'];
-		?><div class="siteorigin-fitvids"><?php echo $embed->run_shortcode( '[embed]' . $instance['video'] . '[/embed]' ); ?></div><?php
+		?><div class="siteorigin-fitvids"><?php echo $embed->run_shortcode( '[embed]' . wp_kses_post( $instance['video'] ) . '[/embed]' ); ?></div><?php
 		echo $args['after_widget'];
 	}
 
@@ -991,8 +991,8 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'video' ); ?>"><?php esc_html_e( 'Video', 'siteorigin-panels' ); ?></label>
-			<input type="text" class="widefat" name="<?php echo $this->get_field_name( 'video' ); ?>" id="<?php echo $this->get_field_id( 'video' ); ?>" value="<?php echo esc_attr( $instance['video'] ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'video' ) ); ?>"><?php esc_html_e( 'Video', 'siteorigin-panels' ); ?></label>
+			<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'video' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'video' ) ); ?>" value="<?php echo esc_attr( $instance['video'] ); ?>" />
 		</p>
 		<?php
 	}
@@ -1032,9 +1032,9 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 
 		echo $args['before_widget'];
 		echo wp_video_shortcode( array(
-			'src' => $instance['url'],
-			'poster' => $instance['poster'],
-			'autoplay' => $instance['autoplay'],
+			'src' => esc_url( $instance['url'] ),
+			'poster' => esc_attr( $instance['poster'] ),
+			'autoplay' => esc_attr( $instance['autoplay'] ),
 		) );
 		echo $args['after_widget'];
 	}
@@ -1058,17 +1058,17 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'url' ); ?>"><?php esc_html_e( 'Video URL', 'siteorigin-panels' ); ?></label>
-			<input id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['url'] ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'url' ) ); ?>"><?php esc_html_e( 'Video URL', 'siteorigin-panels' ); ?></label>
+			<input id="<?php echo esc_attr( $this->get_field_id( 'url' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'url' ) ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['url'] ); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'poster' ); ?>"><?php esc_html_e( 'Poster URL', 'siteorigin-panels' ); ?></label>
-			<input id="<?php echo $this->get_field_id( 'poster' ); ?>" name="<?php echo $this->get_field_name( 'poster' ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['poster'] ); ?>" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'poster' ) ); ?>"><?php esc_html_e( 'Poster URL', 'siteorigin-panels' ); ?></label>
+			<input id="<?php echo esc_attr( $this->get_field_id( 'poster' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'poster' ) ); ?>" type="text" class="widefat" value="<?php echo esc_attr( esc_attr( $instance['poster'] ) ); ?>" />
 			<small class="description"><?php esc_html_e( 'An image that displays before the video starts playing.', 'siteorigin-panels' ); ?></small>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'autoplay' ); ?>">
-				<input id="<?php echo $this->get_field_id( 'autoplay' ); ?>" name="<?php echo $this->get_field_name( 'autoplay' ); ?>" type="checkbox" value="1" <?php checked( $instance['autoplay'] ); ?> />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'autoplay' ) ); ?>">
+				<input id="<?php echo esc_attr( $this->get_field_id( 'autoplay' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'autoplay' ) ); ?>" type="checkbox" value="1" <?php checked( $instance['autoplay'] ); ?> />
 				<?php esc_html_e( 'Auto Play Video', 'siteorigin-panels' ); ?>
 			</label>
 		</p>
