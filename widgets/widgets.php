@@ -818,7 +818,58 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 	}
 
 	public function update( $new, $old ) {
-		return $new;
+		if ( empty( $new ) ) {
+			return $new;
+		}
+
+		$saved_data = array();
+
+		if ( ! empty( $new['ids'] ) ) {
+			// Are there multiple images?
+			if ( strpos( $new['ids'], ',' ) !== false ) {
+				$new['ids'] = explode( ',', $new['ids'] );
+				$new['ids'] = array_filter( $new['ids'], 'intval' );
+				$saved_data['ids'] = implode( ',', $new['ids'] );
+			} else {
+				$saved_data['ids'] = intval( $new['ids'] );
+			}
+		}
+
+		if ( ! empty( $new['type'] ) ) {
+			$saved_data['type'] = sanitize_text_field( $new['type'] );
+		}
+
+		$saved_data['columns'] = (int) $new['columns'];
+
+		if ( ! empty( $new['size'] ) ) {
+			global $_wp_additional_image_sizes;
+
+			$core_sizes = array(
+				'thumbnail' => true,
+				'medium' => true,
+				'large' => true,
+				'full' => true,
+			);
+
+			$valid_sizes = array_merge( $core_sizes, $_wp_additional_image_sizes );
+
+			$saved_data['size'] = array_key_exists( $new['size'], $valid_sizes ) ?
+				sanitize_text_field( $new['size'] ) :
+				'';
+		}
+
+		if ( ! empty( $new['link'] ) ) {
+			$valid_link_types = array(
+				'file',
+				'none',
+			);
+
+			$saved_data['link'] = in_array( $new['link'], $valid_link_types ) ?
+				sanitize_text_field( $new['link'] ) :
+				'';
+		}
+
+		return $saved_data;
 	}
 
 	public function form( $instance ) {
@@ -923,6 +974,9 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 			'href' => '',
 		) );
 
+		$new['src'] = esc_url( $new['src'] );
+		$new['href'] = esc_url( $new['href'] );
+
 		return $new;
 	}
 
@@ -998,7 +1052,11 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 	}
 
 	public function update( $new, $old ) {
-		$new['video'] = str_replace( 'https://', 'http://', $new['video'] );
+
+		if ( ! empty( $new['video'] ) ) {
+			$new['video'] = str_replace( 'https://', 'http://', $new['video'] );
+			$new['video'] = esc_url( $new['video'] );
+		}
 
 		return $new;
 	}
