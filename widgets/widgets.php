@@ -193,7 +193,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				$instance[ $field_id ] = false;
 			}
 
-			?><p><label for="<?php echo esc_attr( esc_attr( $this->get_field_id( $field_id ) ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label><?php
+			?><p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label><?php
 
 			if ( $field_args['type'] != 'checkbox' ) {
 				echo '<br />';
@@ -243,8 +243,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<input
 						type="checkbox"
 						class="small-text"
-						id="<?php echo esc_attr( esc_attr( $this->get_field_id( $field_id ) ) ); ?>"
-						name="<?php echo esc_attr( esc_attr( $this->get_field_name( $field_id ) ) ); ?>"
+						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
+						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
 						<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
 					/>
 					<?php
@@ -1121,7 +1121,7 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 		</p>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'poster' ) ); ?>"><?php esc_html_e( 'Poster URL', 'siteorigin-panels' ); ?></label>
-			<input id="<?php echo esc_attr( $this->get_field_id( 'poster' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'poster' ) ); ?>" type="text" class="widefat" value="<?php echo esc_attr( esc_attr( $instance['poster'] ) ); ?>" />
+			<input id="<?php echo esc_attr( $this->get_field_id( 'poster' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'poster' ) ); ?>" type="text" class="widefat" value="<?php echo esc_attr( $instance['poster'] ); ?>" />
 			<small class="description"><?php esc_html_e( 'An image that displays before the video starts playing.', 'siteorigin-panels' ); ?></small>
 		</p>
 		<p>
