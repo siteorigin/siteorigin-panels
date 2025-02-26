@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 2.31.5 – 26 February 2025 =
+* Improved Legacy Bundled Widget handling.
+* Removed `wp_targeted_link_rel` from preview generation.
+* Added `siteorigin_panels_compat_events_manager` filter to disable Events Manager compatibility.
+
 = 2.31.4 – 02 February 2025 =
 * Added Compatibility for Events Manager.
 * AIOSEO: Loaded plugin widgets.
