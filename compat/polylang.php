@@ -1,11 +1,9 @@
 <?php
 /**
- * When Polylang duplicates a post, copy over panels_data if it exists.
+ * Ensure that SiteOrigin Panels data is included in Polylang's post meta copy.
  */
 function siteorigin_polylang_include_panels_data( $keys, $sync ) {
-	if ( ! $sync ) {
-		$keys[] = 'panels_data';
-	}
+	$keys[] = 'panels_data';
 
 	return $keys;
 }
