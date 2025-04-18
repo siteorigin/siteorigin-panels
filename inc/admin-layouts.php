@@ -528,7 +528,34 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 		}
 
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = $this->close_all_containers( $panels_data['widgets'] );
+		}
+
 		wp_send_json_success( $panels_data );
+	}
+
+	/**
+	 * Recursively close all containers in the widget.
+	 *
+	 * @param array $widget The widget data.
+	 *
+	 * @return array The widget data with all fields closed.
+	 */
+	private function close_all_containers( $widget ) {
+		foreach( $widget as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$widget[ $key ] = $this->close_all_containers( $value );
+				continue;
+			}
+
+			// If the key is `so_field_container_state`, set it to true.
+			if ( $key === 'so_field_container_state' ) {
+				$widget[ $key ] = 'closed';
+			}
+		}
+
+		return $widget;
 	}
 
 	/**
@@ -556,6 +583,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = $this->close_all_containers( $panels_data['widgets'] );
+		}
+
 		echo wp_json_encode( $panels_data );
 		wp_die();
 	}
