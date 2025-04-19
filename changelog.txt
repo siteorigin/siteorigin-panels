@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 2.31.6 – 19 April 2025 =
+* Import: Closed all containers in imported layouts to ensure consistent layout rendering.
+
 = 2.31.5 – 26 February 2025 =
 * Improved Legacy Bundled Widget handling.
 * Removed `wp_targeted_link_rel` from preview generation.
@@ -752,7 +755,7 @@
 * Better compatibility with Yoast SEO.
 * Row Cell options: Prevent Yoast from resizing fields.
 * Added `panels_data` filter to `generate_css`.
-* Don’t hide the upload UI before initializing it.
+* Don't hide the upload UI before initializing it.
 * Fix collapse order in legacy layout.
 * Clear SO widgets' id and timestamp metadata when cloning a PB Page.
 * Fix layout imports in Edge.
@@ -1191,3 +1194,6 @@
 == Upgrade Notice ==
 
 Page Builder 2.0 is a major update. Please ensure that you backup your database before updating from a 1.x version. Updating from 1.x to 2.0 is a smooth transition, but it's always better to have a backup.
+
+= 2.31.6 – 19 April 2025 =
+* Import: Closed all containers in imported layouts to ensure consistent layout rendering.

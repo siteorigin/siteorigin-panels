@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.6 – 19 April 2025 =
+* Import: Closed all containers in imported layouts to ensure consistent layout rendering.
+
 = 2.31.5 – 26 February 2025 =
 * Improved Legacy Bundled Widget handling.
 * Removed `wp_targeted_link_rel` from preview generation.
