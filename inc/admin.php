@@ -331,7 +331,7 @@ class SiteOrigin_Panels_Admin {
 				'4.1.0-rc.0'
 			);
 
-			wp_register_style(
+			wp_enqueue_style(
 				'select2',
 				siteorigin_panels_url( 'css/lib/select2' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
 				array(),

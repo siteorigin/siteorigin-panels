@@ -118,7 +118,8 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		const title = _.escape( this.model.getWidgetField( 'title' ) );
+		const rawTitle = this.model.getWidgetField( 'title' );
+		const title = _.escape( rawTitle ).replace( /&quot;/g, '"' );
 		this.$( '.so-title .widget-name' ).text( title );
 		this.$( '.so-edit-title' ).val( title );
 

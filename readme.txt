@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, website builder, responsive design, drag and drop, visual editor
 Requires at least: 4.7
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.0.0
 Stable tag: trunk
 Build time: unbuilt
@@ -120,6 +120,10 @@ Page Builder is compatible with the vast majority of third-party plugins and wid
 SiteOrigin offers a single premium plugin that enhances and extends Page Builder, the Widgets Bundle, SiteOrigin CSS and all of our free themes. Find out more about [SiteOrigin Premium](https://siteorigin.com/downloads/premium/) and the powerful addons it offers.
 
 == Changelog ==
+
+= 2.31.7 – 01 May 2025 =
+* Fixed an issue with encoded quotes when editing widget titles.
+* Resolved Select2 CSS not outputting correctly.
 
 = 2.31.6 – 19 April 2025 =
 * Import: Closed all containers in imported layouts to ensure consistent layout rendering.
