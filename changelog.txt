@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.31.7 – 01 May 2025 =
+* Fixed an issue with encoded quotes when editing widget titles.
+* Resolved Select2 CSS not outputting correctly.
+
 = 2.31.6 – 19 April 2025 =
 * Import: Closed all containers in imported layouts to ensure consistent layout rendering.
 
