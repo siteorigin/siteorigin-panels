@@ -399,7 +399,7 @@ class SiteOrigin_Panels_Styles_Admin {
 				wp_enqueue_script( 'select2' );
 				wp_enqueue_style( 'select2' );
 
-				$values = ! empty( $current ) ? array_flip( $current ) : array();
+				$values = ! empty( $current ) && is_array( $current) ? array_flip( $current ) : array();
 				?>
 				<select name="<?php echo esc_attr( $field_name ); ?>" class="so-select2" multiple>
 					<?php foreach ( $field['options'] as $k => $v ) { ?>
