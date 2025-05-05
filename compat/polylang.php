@@ -107,12 +107,12 @@ class SiteOrigin_Panels_Compat_Polylang {
 	 * @return array Modified list of meta keys to copy.
 	 */
 	public function copy_panels_data( $keys, $sync, $from, $to, $lang ) {
-		if ( ! $sync ) {
-			return $keys;
-		}
-
 		if ( $this->is_sync_enabled( $from, $to, $lang ) ) {
 			$keys[] = 'panels_data';
+		} else {
+			// To avoid potential syncing issues, we need to make sure that
+			// 'panels_data' is not included in the keys to copy.
+			$keys = array_diff( $keys, array( 'panels_data' ) );
 		}
 
 		return $keys;
