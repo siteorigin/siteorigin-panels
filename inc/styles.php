@@ -924,7 +924,7 @@ class SiteOrigin_Panels_Styles {
 					}
 				}
 			} else {
-				// Fallback. Use a single border value for all sides
+				// Fallback. Use a single border value for all sides.
 				$css['border'] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
 			}
 		}
