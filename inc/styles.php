@@ -913,7 +913,20 @@ class SiteOrigin_Panels_Styles {
 		self::generate_background_style( $style, $css, true );
 
 		if ( ! empty( $style['border_color'] ) && ! siteorigin_panels_setting( 'inline-styles' ) ) {
-			$css['border'] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
+			// Check if border thickness is set to a single value or multiple values.
+			if ( ! empty( $style['border_thickness'] ) && strpos( $style['border_thickness'], ' ' ) !== false ) {
+				$borders = explode( ' ', $style['border_thickness'] );
+				$sides = array( 'top', 'right', 'bottom', 'left' );
+
+				foreach ( $sides as $i => $side ) {
+					if ( $borders[ $i ] !== '0px' ) {
+						$css[ "border-$side" ] = $borders[ $i ] . ' solid ' . $style['border_color'];
+					}
+				}
+			} else {
+				// Fallback. Use a single border value for all sides.
+				$css['border'] = ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'];
+			}
 		}
 
 		if ( ! empty( $style['font_color'] ) ) {
