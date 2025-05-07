@@ -89,7 +89,7 @@ class SiteOrigin_Panels_Compatibility {
 
 		// Compatibility with Polylang.
 		if ( class_exists( 'Polylang' ) ) {
-			require_once $this->compat_path . 'polylang.php';
+			SiteOrigin_Panels_Compat_Polylang::single();
 		}
 
 		// Compatibility with SeoPress.
