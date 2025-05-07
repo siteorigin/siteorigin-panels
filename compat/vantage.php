@@ -22,7 +22,7 @@ function siteorigin_panels_vantage_full_width_stretch( $data, $post_id ) {
 		return $data;
 	}
 
-	foreach( $data['grids'] as $grid_id => $grid ) {
+	foreach ( $data['grids'] as $grid_id => $grid ) {
 		if (
 			! empty( $grid['style']['row_stretch'] ) &&
 			(

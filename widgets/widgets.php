@@ -1,6 +1,6 @@
 <?php
 // Include all the basic widgets
-include plugin_dir_path( __FILE__ ) . '/less/functions.php';
+require plugin_dir_path( __FILE__ ) . '/less/functions.php';
 
 /**
  * Include all the widget files and register their widgets
@@ -66,7 +66,7 @@ function origin_widgets_footer_css() {
 	global $origin_widgets_generated_css;
 
 	if ( ! empty( $origin_widgets_generated_css ) ) {
-		echo "<style>";
+		echo '<style>';
 
 		foreach ( $origin_widgets_generated_css as $id => $css ) {
 			if ( empty( $css ) ) {
@@ -193,13 +193,15 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				$instance[ $field_id ] = false;
 			}
 
-			?><p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label><?php
+			?>
+			<p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label>
+			<?php
 
 			if ( $field_args['type'] != 'checkbox' ) {
 				echo '<br />';
 			}
 
-			switch( $field_args['type'] ) {
+			switch ( $field_args['type'] ) {
 				case 'text':
 					?>
 					<input
@@ -245,7 +247,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 						class="small-text"
 						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
 						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>"
-						<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
+					<?php checked( ! empty( $instance[ $field_id ] ) ); ?>
 					/>
 					<?php
 					break;
@@ -255,7 +257,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 					<select
 						id="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"
 						name="<?php echo esc_attr( $this->get_field_name( $field_id ) ); ?>">
-						<?php foreach ( $field_args['options'] as $k => $v ) { ?>
+					<?php foreach ( $field_args['options'] as $k => $v ) { ?>
 							<option
 								value="<?php echo esc_attr( $k ); ?>"
 								<?php selected( $instance[ $field_id ], $k ); ?>
@@ -293,7 +295,8 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 				<select name="<?php echo esc_attr( $this->get_field_name( 'origin_style' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'origin_style' ) ); ?>">
 					<?php
 					foreach ( $this->get_styles() as $style_id => $style_info ) {
-						$presets = $this->get_style_presets( $style_id ); ?>
+						$presets = $this->get_style_presets( $style_id );
+						?>
 						<?php if ( ! empty( $presets ) ) { ?>
 							<?php foreach ( $presets as $preset_id => $preset ) { ?>
 								<option value="<?php echo esc_attr( $style_id . ':' . $preset_id ); ?>" <?php selected( $style_id . ':' . $preset_id, $instance['origin_style'] ); ?>>
@@ -321,10 +324,14 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'origin_style_' . $id ) ); ?>"><?php printf( __( '%s Style', 'siteorigin-panels' ), $sub[0] ); ?></label>
 				<select name="<?php echo esc_attr( $this->get_field_name( 'origin_style_' . $id ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'origin_style_' . $id ) ); ?>">
-					<?php foreach ( $the_widget->get_styles() as $style_id => $style_info ) {
-						$presets = $the_widget->get_style_presets( $style_id ); ?>
-						<?php if ( ! empty( $presets ) ) {
-							foreach ( $presets as $preset_id => $preset ) { ?>
+					<?php
+					foreach ( $the_widget->get_styles() as $style_id => $style_info ) {
+						$presets = $the_widget->get_style_presets( $style_id );
+						?>
+						<?php
+						if ( ! empty( $presets ) ) {
+							foreach ( $presets as $preset_id => $preset ) {
+								?>
 								<option value="<?php echo esc_attr( $style_id . ':' . $preset_id ); ?>" <?php selected( $style_id . ':' . $preset_id, $instance['origin_style_' . $id] ); ?>>
 									<?php echo esc_html( $style_info['Name'] . ' - ' . ucwords( str_replace( '_', ' ', $preset_id ) ) ); ?>
 								</option>
@@ -417,18 +424,25 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 			$this->enqueue_scripts();
 		}
 
-		$widget_classes = apply_filters( 'siteorigin_widgets_classes', array(
-			'origin-widget',
-			'origin-widget-' . $this->origin_id,
-			'origin-widget-' . $this->origin_id . '-' . $style . '-' . $preset,
-		), $instance );
-
-		if ( method_exists( $this, 'widget_classes' ) ) {
-			$widget_classes = $this->widget_classes( array(
+		$widget_classes = apply_filters(
+			'siteorigin_widgets_classes',
+			array(
 				'origin-widget',
 				'origin-widget-' . $this->origin_id,
 				'origin-widget-' . $this->origin_id . '-' . $style . '-' . $preset,
-			), $instance );
+			),
+			$instance
+		);
+
+		if ( method_exists( $this, 'widget_classes' ) ) {
+			$widget_classes = $this->widget_classes(
+				array(
+					'origin-widget',
+					'origin-widget-' . $this->origin_id,
+					'origin-widget-' . $this->origin_id . '-' . $style . '-' . $preset,
+				),
+				$instance
+			);
 		}
 
 		echo $args['before_widget'];
@@ -438,9 +452,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		echo $args['after_widget'];
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Extra functions specific to a SiteOrigin widget.
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * A sub widget is a widget that's style is required by this widget
@@ -587,7 +599,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		if ( empty( $this->styles ) ) {
 			// We can add extra paths here
 			foreach ( $this->get_widget_paths() as $path ) {
-				if ( !is_dir( $path ) ) {
+				if ( ! is_dir( $path ) ) {
 					continue;
 				}
 
@@ -637,16 +649,20 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		foreach ( $paths as $path ) {
 			$filename = $path . '/' . $this->origin_id . '/styles/' . sanitize_file_name( $name ) . '.less';
 
-			if ( !file_exists( $filename ) ) {
+			if ( ! file_exists( $filename ) ) {
 				continue;
 			}
 
-			$data = get_file_data( $filename, array(
-				'Name' => 'Name',
-				'Template' => 'Template',
-				'Author' => 'Author',
-				'Author URI' => 'Author URI',
-			), 'origin_widget' );
+			$data = get_file_data(
+				$filename,
+				array(
+					'Name' => 'Name',
+					'Template' => 'Template',
+					'Author' => 'Author',
+					'Author URI' => 'Author URI',
+				),
+				'origin_widget'
+			);
 
 			return $data;
 		}
@@ -760,7 +776,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 		$query = wp_parse_args( $query_args['additional'], $query );
 
 		// Add the sticky posts if required
-		switch( $query_args['sticky'] ) {
+		switch ( $query_args['sticky'] ) {
 			case 'ignore':
 				$query['ignore_sticky_posts'] = 1;
 				break;
@@ -790,6 +806,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
  * Class SiteOrigin_Panels_Widgets_Gallery
  */
 class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
+
 	public function __construct() {
 		parent::__construct(
 			'siteorigin-panels-gallery',
@@ -877,13 +894,16 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 
 		$types = apply_filters( 'siteorigin_panels_gallery_types', array() );
 
-		$instance = wp_parse_args( $instance, array(
-			'ids' => '',
-			'size' => apply_filters( 'siteorigin_panels_gallery_default_size', '' ),
-			'type' => apply_filters( 'siteorigin_panels_gallery_default_type', '' ),
-			'columns' => 3,
-			'link' => '',
-		) );
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'ids' => '',
+				'size' => apply_filters( 'siteorigin_panels_gallery_default_size', '' ),
+				'type' => apply_filters( 'siteorigin_panels_gallery_default_type', '' ),
+				'columns' => 3,
+				'link' => '',
+			)
+		);
 
 		?>
 		<p>
@@ -903,8 +923,10 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 				<option value="medium" <?php selected( 'medium', $instance['size'] ); ?>><?php esc_html_e( 'Medium', 'siteorigin-panels' ); ?></option>
 				<option value="thumbnail" <?php selected( 'thumbnail', $instance['size'] ); ?>><?php esc_html_e( 'Thumbnail', 'siteorigin-panels' ); ?></option>
 				<option value="full" <?php selected( 'full', $instance['size'] ); ?>><?php esc_html_e( 'Full', 'siteorigin-panels' ); ?></option>
-				<?php if ( ! empty( $_wp_additional_image_sizes ) ) {
-					foreach ( $_wp_additional_image_sizes as $name => $info ) { ?>
+				<?php
+				if ( ! empty( $_wp_additional_image_sizes ) ) {
+					foreach ( $_wp_additional_image_sizes as $name => $info ) {
+						?>
 						<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $name, $instance['size'] ); ?>><?php echo esc_html( $name ); ?></option>
 					<?php } ?>
 				<?php } ?>
@@ -930,7 +952,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
 			</select>
 		</p>
 
-	<?php
+		<?php
 	}
 }
 
@@ -940,6 +962,7 @@ class SiteOrigin_Panels_Widgets_Gallery extends WP_Widget {
  * Class SiteOrigin_Panels_Widgets_Image
  */
 class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
+
 	public function __construct() {
 		parent::__construct(
 			'siteorigin-panels-image',
@@ -969,10 +992,13 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 	}
 
 	public function update( $new, $old ) {
-		$new = wp_parse_args( $new, array(
-			'src' => '',
-			'href' => '',
-		) );
+		$new = wp_parse_args(
+			$new,
+			array(
+				'src' => '',
+				'href' => '',
+			)
+		);
 
 		$new['src'] = esc_url( $new['src'] );
 		$new['href'] = esc_url( $new['href'] );
@@ -981,10 +1007,13 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 	}
 
 	public function form( $instance ) {
-		$instance = wp_parse_args( $instance, array(
-			'src' => '',
-			'href' => '',
-		) );
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'src' => '',
+				'href' => '',
+			)
+		);
 
 		?>
 		<p>
@@ -995,7 +1024,7 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
 			<label for="<?php echo esc_attr( $this->get_field_id( 'href' ) ); ?>"><?php esc_html_e( 'Destination URL', 'siteorigin-panels' ); ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'href' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'href' ) ); ?>" value="<?php echo esc_attr( $instance['href'] ); ?>" />
 		</p>
-	<?php
+		<?php
 	}
 }
 
@@ -1003,6 +1032,7 @@ class SiteOrigin_Panels_Widgets_Image extends WP_Widget {
  * A widget that lets you embed video.
  */
 class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
+
 	public function __construct() {
 		parent::__construct(
 			'siteorigin-panels-embedded-video',
@@ -1027,7 +1057,9 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 		}
 
 		echo $args['before_widget'];
-		?><div class="siteorigin-fitvids"><?php echo $embed->run_shortcode( '[embed]' . wp_kses_post( $instance['video'] ) . '[/embed]' ); ?></div><?php
+		?>
+		<div class="siteorigin-fitvids"><?php echo $embed->run_shortcode( '[embed]' . wp_kses_post( $instance['video'] ) . '[/embed]' ); ?></div>
+		<?php
 		echo $args['after_widget'];
 	}
 
@@ -1039,9 +1071,12 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 	 * @return string|void
 	 */
 	public function form( $instance ) {
-		$instance = wp_parse_args( $instance, array(
-			'video' => '',
-		) );
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'video' => '',
+			)
+		);
 
 		?>
 		<p>
@@ -1063,6 +1098,7 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 }
 
 class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
+
 	public function __construct() {
 		parent::__construct(
 			'siteorigin-panels-video',
@@ -1078,22 +1114,27 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 			return;
 		}
 
-		if ( !function_exists( 'wp_video_shortcode' ) ) {
+		if ( ! function_exists( 'wp_video_shortcode' ) ) {
 			return;
 		}
 
-		$instance = wp_parse_args( $instance, array(
-			'url' => '',
-			'poster' => '',
-			'autoplay' => false,
-		) );
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'url' => '',
+				'poster' => '',
+				'autoplay' => false,
+			)
+		);
 
 		echo $args['before_widget'];
-		echo wp_video_shortcode( array(
-			'src' => esc_url( $instance['url'] ),
-			'poster' => esc_attr( $instance['poster'] ),
-			'autoplay' => esc_attr( $instance['autoplay'] ),
-		) );
+		echo wp_video_shortcode(
+			array(
+				'src' => esc_url( $instance['url'] ),
+				'poster' => esc_attr( $instance['poster'] ),
+				'autoplay' => esc_attr( $instance['autoplay'] ),
+			)
+		);
 		echo $args['after_widget'];
 	}
 
@@ -1106,13 +1147,16 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 	}
 
 	public function form( $instance ) {
-		$instance = wp_parse_args( $instance, array(
-			'url' => '',
-			'poster' => '',
-			'skin' => 'siteorigin',
-			'ratio' => 1.777,
-			'autoplay' => false,
-		) );
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'url' => '',
+				'poster' => '',
+				'skin' => 'siteorigin',
+				'ratio' => 1.777,
+				'autoplay' => false,
+			)
+		);
 
 		?>
 		<p>
@@ -1130,7 +1174,7 @@ class SiteOrigin_Panels_Widgets_Video extends WP_Widget {
 				<?php esc_html_e( 'Auto Play Video', 'siteorigin-panels' ); ?>
 			</label>
 		</p>
-	<?php
+		<?php
 	}
 }
 
@@ -1147,14 +1191,17 @@ function siteorigin_panels_video_shortcode( $atts ) {
 	 * @var string $poster
 	 * @var string $skin
 	 */
-	$instance = shortcode_atts( array(
-		'url' => '',
-		'src' => '',
-		'poster' => '',
-		'skin' => 'siteorigin',
-		'ratio' => 1.777,
-		'autoplay' => 0,
-	), $atts );
+	$instance = shortcode_atts(
+		array(
+			'url' => '',
+			'src' => '',
+			'poster' => '',
+			'skin' => 'siteorigin',
+			'ratio' => 1.777,
+			'autoplay' => 0,
+		),
+		$atts
+	);
 
 	if ( ! empty( $instance['src'] ) ) {
 		$instance['url'] = $instance['src'];

@@ -1,6 +1,5 @@
 <?php
 
 return array(
-	'clean' => array(
-	),
+	'clean' => array(),
 );
