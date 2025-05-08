@@ -54,6 +54,5 @@ function siteorigin_panels_event_manager_loop_end() {
 	if ( $em_pb_removed ) {
 		remove_filter( 'siteorigin_panels_filter_content_enabled', '__return_false' );
 	}
-
 }
-add_action( 'loop_end' , 'siteorigin_panels_event_manager_loop_end' );
+add_action( 'loop_end', 'siteorigin_panels_event_manager_loop_end' );

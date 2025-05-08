@@ -8,22 +8,22 @@ function siteorigin_panels_seopress_compat( $content ) {
 
 			// To help with consistent results, we strip out certain elements.
 			if ( class_exists( 'DOMDocument' ) && class_exists( 'DOMXPath' ) ) {
-				$whitelist = [
+				$whitelist = array(
 					'p', 'a', 'img', 'caption', 'br',
 					'blockquote', 'cite', 'em', 'strong', 'i', 'b', 'q',
 					'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-					'ul', 'ol', 'li', 'table', 'tr', 'th', 'td'
-				];
+					'ul', 'ol', 'li', 'table', 'tr', 'th', 'td',
+				);
 				$dom = new DOMDocument();
 				$dom->loadHTML( $content );
-			
+
 				$xpath = new DOMXPath( $dom );
 				$elements = $xpath->query( '//iframe | //script | //style | //link' );
 				foreach ( $elements as $element ) {
 					$element->parentNode->removeChild( $element );
 				}
 				$dom->removeChild( $dom->doctype );
-			
+
 				// Remove elements that are not in the whitelist.
 				$elements = $xpath->query( '//*' );
 				foreach ( $elements as $element ) {
@@ -35,7 +35,7 @@ function siteorigin_panels_seopress_compat( $content ) {
 						$element->parentNode->replaceChild( $content, $element );
 					}
 				}
-			
+
 				$content = $dom->saveHTML();
 			}
 		}

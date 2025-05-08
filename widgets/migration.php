@@ -10,7 +10,7 @@
 function siteorigin_panels_legacy_widget_migration( $panels_data ) {
 	if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
 		foreach ( $panels_data['widgets'] as &$widget ) {
-			switch( $widget['panels_info']['class'] ) {
+			switch ( $widget['panels_info']['class'] ) {
 				case 'SiteOrigin_Panels_Widgets_Gallery':
 					$shortcode = '[gallery ';
 
@@ -31,15 +31,18 @@ function siteorigin_panels_legacy_widget_migration( $panels_data ) {
 					break;
 
 				case 'SiteOrigin_Panels_Widgets_Image':
-
 					if ( class_exists( 'SiteOrigin_Panels_Widgets_Image' ) ) {
 						ob_start();
-						the_widget( 'SiteOrigin_Panels_Widgets_Image', $widget, array(
-							'before_widget' => '',
-							'after_widget' => '',
-							'before_title' => '',
-							'after_title' => '',
-						) );
+						the_widget(
+							'SiteOrigin_Panels_Widgets_Image',
+							$widget,
+							array(
+								'before_widget' => '',
+								'after_widget' => '',
+								'before_title' => '',
+								'after_title' => '',
+							)
+						);
 
 						$widget = array(
 							'title' => '',
