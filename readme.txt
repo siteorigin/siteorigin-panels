@@ -121,6 +121,12 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.31.8 – 12 May 2025 =
+* Border Styles: Improved handling of multiple border values.
+* Multi-select: Fixed type error in field handling.
+* Polylang: Delayed compatibility code to prevent WPML config conflict.
+* Code Quality: Updated PHPCS configuration.
+
 = 2.31.7 – 01 May 2025 =
 * Fixed an issue with encoded quotes when editing widget titles.
 * Resolved Select2 CSS not outputting correctly.

@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.31.8 – 12 May 2025 =
+* Border Styles: Improved handling of multiple border values.
+* Multi-select: Fixed type error in field handling.
+* Polylang: Delayed compatibility code to prevent WPML config conflict.
+* Code Quality: Updated PHPCS configuration.
+
 = 2.31.7 – 01 May 2025 =
 * Fixed an issue with encoded quotes when editing widget titles.
 * Resolved Select2 CSS not outputting correctly.
@@ -171,7 +177,7 @@
 = 2.27.1 - 09 November 2023 =
 * Renamed "Cell" to "Column" throughout the codebase for improved clarity and consistency.
 * Updated the "Tested up to" version in the readme.txt file from 6.3 to 6.4.
-* Rewrote the usage of Lodash functions in the `siteorigin-panels-layout-block.js` file for better performance and code readability.
+* Rewritten the usage of Lodash functions in the `siteorigin-panels-layout-block.js` file for better performance and code readability.
 * Updated the Installer by changing the subproject commit.
 
 = 2.27.0 - 02 November 2023 =
