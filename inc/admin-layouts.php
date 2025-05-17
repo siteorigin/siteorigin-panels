@@ -234,9 +234,9 @@ class SiteOrigin_Panels_Admin_Layouts {
 		// Get any layouts that the current user could edit.
 		header( 'content-type: application/json' );
 
-$type     = ! empty( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : 'directory-siteorigin';
-$search   = ! empty( $_REQUEST['search'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) : '';
-$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
+		$type = ! empty( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : 'directory-siteorigin';
+		$search = ! empty( $_REQUEST['search'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) : '';
+		$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
 		$return = array(
 			'title' => '',
@@ -425,40 +425,40 @@ $page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 	/**
 	 * Ajax handler to get an individual prebuilt layout
 	 */
-       public function action_get_prebuilt_layout() {
-               $type      = isset( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : '';
-               $layout_id = isset( $_REQUEST['lid'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['lid'] ) ) : '';
+	public function action_get_prebuilt_layout() {
+		$type = isset( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : '';
+		$layout_id = isset( $_REQUEST['lid'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['lid'] ) ) : '';
 
-               if ( empty( $type ) ) {
-                       wp_die();
-               }
+		if ( empty( $type ) ) {
+			wp_die();
+		}
 
-               if ( empty( $layout_id ) ) {
-                       wp_die();
-               }
+		if ( empty( $layout_id ) ) {
+			wp_die();
+		}
 
-               if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
-                       wp_die();
-               }
+		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+			wp_die();
+		}
 
 		header( 'content-type: application/json' );
 		$panels_data = array();
 		$raw_panels_data = false;
 
-               if ( $type == 'prebuilt' ) {
+		if ( $type == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			if (
-                               ! is_numeric( $layout_id ) &&
-                               empty( $layouts[ $layout_id ] )
-                       ) {
+				! is_numeric( $layout_id ) &&
+				empty( $layouts[ $layout_id ] )
+			) {
 				wp_send_json_error( array(
 					'error'   => true,
 					'message' => __( 'Missing layout ID or no such layout exists', 'siteorigin-panels' ),
 				) );
 			}
 
-                       $layout = $layouts[ $layout_id ];
+			$layout = $layouts[ $layout_id ];
 
 			// Fix the format of this layout
 			if ( ! empty( $layout[ 'filename' ] ) ) {
@@ -473,7 +473,7 @@ $page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 			}
 
 			// A theme or plugin could use this to change the data in the layout
-                       $panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $layout_id );
+			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $layout_id );
 
 			// Remove all the layout specific attributes
 			if ( isset( $panels_data['name'] ) ) {
@@ -489,14 +489,14 @@ $page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 			}
 
 			$raw_panels_data = true;
-               } elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
-                       $directory_id = str_replace( 'directory-', '', $type );
+		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
+			$directory_id = str_replace( 'directory-', '', $type );
 
 			$directories = $this->get_directories();
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
 			if ( ! empty( $directory ) ) {
-                               $url = $directory[ 'url' ] . 'layout/' . urlencode( $layout_id ) . '/?action=download';
+				$url = $directory[ 'url' ] . 'layout/' . urlencode( $layout_id ) . '/?action=download';
 
 				if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
 					$url = add_query_arg( $directory[ 'args' ], $url );
@@ -515,8 +515,8 @@ $page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 				}
 			}
 			$raw_panels_data = true;
-               } elseif ( current_user_can( 'edit_post', $layout_id ) ) {
-                       $panels_data = get_post_meta( $layout_id, 'panels_data', true );
+		} elseif ( current_user_can( 'edit_post', $layout_id ) ) {
+			$panels_data = get_post_meta( $layout_id, 'panels_data', true );
 
 			// Clear id and timestamp for SO widgets to prevent 'newer content version' notification in widget forms.
 			foreach ( $panels_data['widgets'] as &$widget ) {

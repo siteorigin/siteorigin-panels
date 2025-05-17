@@ -126,7 +126,7 @@ class SiteOrigin_Panels {
 	}
 
 	public static function is_legacy_browser() {
-$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+		$agent = ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 
 		if ( empty( $agent ) ) {
 			return false;
