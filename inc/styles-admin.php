@@ -40,7 +40,7 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$post_id = empty( $_REQUEST['postId'] ) ? 0 : intval( $_REQUEST['postId'] );
+		$post_id = empty( $_REQUEST['postId'] ) ? 0 : (int) $_REQUEST['postId'];
 		$args = ! empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true ) : array();
 
 		$current = apply_filters(
