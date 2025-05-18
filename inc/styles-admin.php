@@ -30,7 +30,7 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$type = isset( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : '';
+		$type = isset( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : '';
 
 		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
 			wp_die(

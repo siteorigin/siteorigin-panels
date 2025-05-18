@@ -39,7 +39,7 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 			$plugin['slug'] = sanitize_text_field( wp_unslash( $_GET['plugin'] ) ); // Plugin slug
 
 			if ( ! empty( $_GET['plugin_source'] ) ) {
-				$plugin['source'] = esc_url_raw( wp_unslash( $_GET['plugin_source'] ) );
+				$plugin['source'] = esc_url_raw( $_GET['plugin_source'] );
 			} else {
 				$plugin['source'] = false;
 			}

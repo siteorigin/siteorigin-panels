@@ -234,7 +234,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		// Get any layouts that the current user could edit.
 		header( 'content-type: application/json' );
 
-		$type = ! empty( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : 'directory-siteorigin';
+		$type = ! empty( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : 'directory-siteorigin';
 		$search = ! empty( $_REQUEST['search'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) : '';
 		$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
@@ -426,7 +426,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 * Ajax handler to get an individual prebuilt layout
 	 */
 	public function action_get_prebuilt_layout() {
-		$type = isset( $_REQUEST['type'] ) ? sanitize_key( wp_unslash( $_REQUEST['type'] ) ) : '';
+		$type = isset( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : '';
 		$layout_id = isset( $_REQUEST['lid'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['lid'] ) ) : '';
 
 		if ( empty( $type ) ) {
