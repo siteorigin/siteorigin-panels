@@ -35,11 +35,11 @@ class SiteOrigin_Panels_Admin_Widgets_Bundle {
 		if ( isset( $_GET[ sanitize_key( 'plugin' ) ] ) && ( isset( $_GET[ sanitize_key( 'siteorigin-pa-install' ) ] ) && 'install-plugin' == $_GET[ sanitize_key( 'siteorigin-pa-install' ) ] ) && current_user_can( 'install_plugins' ) ) {
 			check_admin_referer( 'siteorigin-pa-install' );
 
-			$plugin['name'] = $_GET['plugin_name']; // Plugin name
-			$plugin['slug'] = $_GET['plugin']; // Plugin slug
+			$plugin['name'] = sanitize_text_field( wp_unslash( $_GET['plugin_name'] ) ); // Plugin name
+			$plugin['slug'] = sanitize_text_field( wp_unslash( $_GET['plugin'] ) ); // Plugin slug
 
 			if ( ! empty( $_GET['plugin_source'] ) ) {
-				$plugin['source'] = $_GET['plugin_source'];
+				$plugin['source'] = esc_url_raw( $_GET['plugin_source'] );
 			} else {
 				$plugin['source'] = false;
 			}

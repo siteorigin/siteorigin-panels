@@ -1,6 +1,6 @@
 <?php
 function siteorigin_panels_seopress_compat( $content ) {
-	$id = empty( $_GET['post'] ) ? $_GET['post_id'] : $_GET['post'];
+	$id = empty( $_GET['post'] ) ? (int) $_GET['post_id'] : (int) $_GET['post'];
 	if ( ! empty( $id ) ) {
 		$page_builder_data = get_post_meta( $id, 'panels_data', true );
 		if ( ! empty( $page_builder_data ) ) {

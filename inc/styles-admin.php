@@ -30,7 +30,7 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$type = $_REQUEST['type'];
+		$type = isset( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : '';
 
 		if ( ! in_array( $type, array( 'row', 'cell', 'widget' ) ) ) {
 			wp_die(
@@ -40,12 +40,12 @@ class SiteOrigin_Panels_Styles_Admin {
 			);
 		}
 
-		$post_id = empty( $_REQUEST['postId'] ) ? 0 : $_REQUEST['postId'];
+		$post_id = empty( $_REQUEST['postId'] ) ? 0 : (int) $_REQUEST['postId'];
 		$args = ! empty( $_POST['args'] ) ? json_decode( stripslashes( $_POST['args'] ), true ) : array();
 
 		$current = apply_filters(
 			'siteorigin_panels_general_current_styles',
-			isset( $_REQUEST['style'] ) ? $_REQUEST['style'] : array(),
+			isset( $_REQUEST['style'] ) ? wp_unslash( $_REQUEST['style'] ) : array(),
 			$post_id,
 			$type,
 			$args
