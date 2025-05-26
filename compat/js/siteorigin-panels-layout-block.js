@@ -238,8 +238,13 @@ function (_wp$element$Component) {
           return true;
         }
 
-        if (!newPanelsData || !oldPanelsData || _typeof(newPanelsData) !== 'object' && _typeof(oldPanelsData) !== 'object') {
+        if (!newPanelsData || !oldPanelsData) {
           return newPanelsData === oldPanelsData;
+        } // If neither newPanelsData nor oldPanelsData are objects, assume they're not the same.
+
+
+        if (_typeof(newPanelsData) !== 'object' || _typeof(oldPanelsData) !== 'object') {
+          return false;
         }
 
         var keys = Object.keys(newPanelsData);
