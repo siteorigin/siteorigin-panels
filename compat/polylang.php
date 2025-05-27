@@ -42,13 +42,13 @@ class SiteOrigin_Panels_Compat_Polylang {
 		}
 
 		$language_data = maybe_unserialize( $terms[0]->description );
-		$sync_data = $language_data['sync'];
 
 		// If there's no sync data, there's nothing to sync.
 		if ( empty( $language_data['sync'] ) || ! is_array( $language_data['sync'] ) ) {
 			return $this->pll_language_cache[ $post_id ] = array();
 		}
 
+		$sync_data = $language_data['sync'];
 		unset( $language_data['sync'] );
 
 		return $this->pll_language_cache[ $post_id ] = array(
