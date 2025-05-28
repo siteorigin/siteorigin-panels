@@ -239,6 +239,14 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 6,
 		);
 
+		$fields['background_image_alt'] = array(
+			'name'        => __( 'Background Image Alt', 'siteorigin-panels' ),
+			'type'        => 'text',
+			'group'       => 'design',
+			'priority'    => 7,
+			'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+		);
+
 		$fields['background_display'] = array(
 			'name'        => __( 'Background Image Display', 'siteorigin-panels' ),
 			'type'        => 'select',
@@ -266,14 +274,6 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'slider',
 			'group'       => 'design',
 			'priority'    => 9,
-		);
-
-		$fields['background_image_alt'] = array(
-			'name'        => __( 'Background Image Alt', 'siteorigin-panels' ),
-			'type'        => 'text',
-			'group'       => 'design',
-			'priority'    => 9,
-			'description' => __( 'Placeholder.', 'siteorigin-panels' ),
 		);
 
 		$fields['border_color'] = array(
