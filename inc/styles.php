@@ -244,7 +244,7 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'text',
 			'group'       => 'design',
 			'priority'    => 7,
-			'description' => __( 'Placeholder.', 'siteorigin-panels' ),
+			'description' => __( 'Leave empty for decorative images.', 'siteorigin-panels' ),
 		);
 
 		$fields['background_display'] = array(
