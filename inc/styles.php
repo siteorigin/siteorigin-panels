@@ -240,7 +240,7 @@ class SiteOrigin_Panels_Styles {
 		);
 
 		$fields['background_image_alt'] = array(
-			'name'        => __( 'Background Image Alt', 'siteorigin-panels' ),
+			'name'        => __( 'Background Image Alt Text', 'siteorigin-panels' ),
 			'type'        => 'text',
 			'group'       => 'design',
 			'priority'    => 7,
