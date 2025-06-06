@@ -56,6 +56,11 @@ class SiteOrigin_Panels_Styles {
 			add_filter( 'siteorigin_panels_inside_cell_before', array( $this, 'add_parallax' ), 10, 2 );
 			add_filter( 'siteorigin_panels_inside_widget_before', array( $this, 'add_parallax' ), 10, 2 );
 		}
+
+		// Background Alt Text.
+		add_action( 'siteorigin_panels_inside_row_before', array( $this, 'maybe_add_background_alt' ), 10, 2 );
+		add_action( 'siteorigin_panels_inside_cell_before', array( $this, 'maybe_add_background_alt' ), 10, 2 );
+		add_action( 'siteorigin_panels_inside_widget_before', array( $this, 'maybe_add_background_alt' ), 10, 2 );
 	}
 
 	public static function single() {
@@ -232,6 +237,14 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'image',
 			'group'       => 'design',
 			'priority'    => 6,
+		);
+
+		$fields['background_image_alt'] = array(
+			'name'        => __( 'Background Image Alt Text', 'siteorigin-panels' ),
+			'type'        => 'text',
+			'group'       => 'design',
+			'priority'    => 7,
+			'description' => __( 'Leave empty for decorative images.', 'siteorigin-panels' ),
 		);
 
 		$fields['background_display'] = array(
@@ -1403,5 +1416,57 @@ class SiteOrigin_Panels_Styles {
 
 			return ! empty( $matches ) ? $matches : false;
 		}
+	}
+
+	/**
+	 * If the current context has a background image and alt text set,
+	 * add the alt text inside and before the context's HTML.
+	 *
+	 * @param string $before The HTML before the context.
+	 * @param array $context An array containing the the current context's data.
+	 *
+	 * @return string The modified HTML with the background alt text added if applicable.
+	 *
+	 */
+	public function maybe_add_background_alt( $before, $context ) {
+		if ( empty( $context['style'] ) ) {
+			return $before;
+		}
+
+		// Does this context have a background image set?
+		if (
+			empty( $context['style']['background_image_attachment'] ) &&
+			empty( $context['style']['background_image_attachment_fallback'] )
+		) {
+			return $before;
+		}
+
+		// Is alt text set?
+		if ( empty( $context['style']['background_image_alt'] ) ) {
+			return $before;
+		}
+
+		// Work out the current context type.
+		switch( current_filter() ) {
+			case 'siteorigin_panels_inside_row_before':
+				$context_type = 'row';
+				break;
+			case 'siteorigin_panels_inside_cell_before':
+				$context_type = 'cell';
+				break;
+			case 'siteorigin_panels_inside_widget_before':
+				$context_type = 'widget';
+				break;
+			default:
+				$context_type = '';
+				break;
+		}
+
+		// Add the background alt text.
+		$before .= "<div class='so-panels-background-alt so-sr-only $context_type'>";
+		$before .= esc_html( $context['style']['background_image_alt'] );
+		$before .= '</div>';
+
+		return $before;
 	}
 }
