@@ -1307,6 +1307,18 @@
 					.button-primary.so-saveinline {
 						border-bottom-right-radius: 0;
 						border-top-right-radius: 0;
+						margin-right: -1px;
+					}
+					
+					.button-secondary.button-primary.so-mode {
+						border-bottom-left-radius: 0;
+						border-top-left-radius: 0;
+						border-left: 1px solid rgba(0, 0, 0, 0.1);
+						
+						// Prevent JavaScript from hiding this button when switching modes.
+						&.so-mode {
+							display: flex !important;
+						}
 					}
 
 					.so-mode {
