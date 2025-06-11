@@ -417,7 +417,7 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
         toggleSelection = _ref.toggleSelection;
 
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
-      if (_typeof(newPanelsData.widgets) === 'object' && Object.keys(newPanelsData.widgets).length > 0) {
+      if (newPanelsData.widgets !== null && _typeof(newPanelsData.widgets) === 'object' && Object.keys(newPanelsData.widgets).length > 0) {
         // Send panelsData to server for sanitization.
         var isNewWPBlockEditor = jQuery('.widgets-php').length;
 

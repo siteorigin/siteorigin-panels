@@ -371,8 +371,9 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 		let onLayoutBlockContentChange = ( newPanelsData ) => {
 
 			if (
-				typeof newPanelsData.widgets === 'object' &&
-				Object.keys( newPanelsData.widgets ).length > 0
+				newPanelsData.widgets !== null && 
+			    typeof newPanelsData.widgets === 'object' &&
+			    Object.keys( newPanelsData.widgets ).length > 0
 			) {
 				// Send panelsData to server for sanitization.
 				var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
