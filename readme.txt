@@ -121,6 +121,14 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.32.0 – 13 June 2025 =
+* Background Image: Added Alt Text setting for improved accessibility.
+* Layout Block: Added additional PanelsData check and prevented potential JavaScript null quirk.
+* Layout Builder: Fixed potential object.keys issue when removing all blocks.
+* Polylang: Prevented undefined sync warning.
+* Improved security with enhanced parameter sanitization across admin features.
+* Code Quality: Updated WordPress PHP Coding Standards compliance.
+
 = 2.31.8 – 12 May 2025 =
 * Border Styles: Improved handling of multiple border values.
 * Multi-select: Fixed type error in field handling.
