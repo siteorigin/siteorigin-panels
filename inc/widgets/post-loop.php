@@ -89,10 +89,13 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	}
 
 	private static function is_legacy_widget_block_preview() {
-		return isset( $_GET['legacy-widget-preview'] ) && (
-			$_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-postloop' ||
-			$_GET['legacy-widget-preview']['idBase'] == 'siteorigin-panels-builder'
-		);
+		if ( empty( $_GET['legacy-widget-preview'] ) ) {
+			return false;
+		}
+
+		$id_base = isset( $_GET['legacy-widget-preview']['idBase'] ) ? sanitize_key( wp_unslash( $_GET['legacy-widget-preview']['idBase'] ) ) : '';
+
+		return 'siteorigin-panels-postloop' === $id_base || 'siteorigin-panels-builder' === $id_base;
 	}
 
 	private static function is_layout_block_preview() {
@@ -172,7 +175,7 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 						isset( $_GET[ 'page-' . self::$current_pagination_id ] ) &&
 						is_numeric( $_GET[ 'page-' . self::$current_pagination_id ] )
 					) {
-						$query_args['paged'] = $_GET[ 'page-' . self::$current_pagination_id ];
+						$query_args['paged'] = (int) $_GET[ 'page-' . self::$current_pagination_id ];
 					}
 				}
 			} else {
