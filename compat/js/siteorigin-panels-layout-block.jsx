@@ -11,7 +11,10 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	initializeState(props, newState = true) {
-		const hasPanelsData = typeof props.panelsData === 'object' && Object.keys( props.panelsData ).length > 0;
+		const hasPanelsData = props.panelsData &&
+			typeof props.panelsData === 'object' &&
+			Object.keys( props.panelsData ).length > 0;
+			
 		const isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
 		const editMode = hasPanelsData === true ? isDefaultModeEdit : true;
 
@@ -169,15 +172,16 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 				return true;
 			}
 
-			if (
-				! newPanelsData ||
-				! oldPanelsData ||
-				(
-					typeof newPanelsData !== 'object' &&
-					typeof oldPanelsData !== 'object'
-				)
-			) {
+			if ( ! newPanelsData || ! oldPanelsData ) {
 				return newPanelsData === oldPanelsData;
+			}
+
+			// If neither newPanelsData nor oldPanelsData are objects, assume they're not the same.
+			if (
+				typeof( newPanelsData ) !== 'object' ||
+				typeof( oldPanelsData ) !== 'object'
+			) {
+				return false;
 			}
 
 			var keys = Object.keys( newPanelsData );
@@ -370,8 +374,9 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 		let onLayoutBlockContentChange = ( newPanelsData ) => {
 
 			if (
-				typeof newPanelsData.widgets === 'object' &&
-				Object.keys( newPanelsData.widgets ).length > 0
+				newPanelsData.widgets !== null && 
+			    typeof newPanelsData.widgets === 'object' &&
+			    Object.keys( newPanelsData.widgets ).length > 0
 			) {
 				// Send panelsData to server for sanitization.
 				var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
