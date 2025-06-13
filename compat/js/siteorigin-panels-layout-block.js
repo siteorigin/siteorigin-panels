@@ -81,7 +81,7 @@ function (_wp$element$Component) {
     key: "initializeState",
     value: function initializeState(props) {
       var newState = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
+      var hasPanelsData = props.panelsData && _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
       var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
       var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
       this.initialState = {
