@@ -11,7 +11,10 @@ class SiteOriginPanelsLayoutBlock extends wp.element.Component {
 	}
 
 	initializeState(props, newState = true) {
-		const hasPanelsData = typeof props.panelsData === 'object' && Object.keys( props.panelsData ).length > 0;
+		const hasPanelsData = props.panelsData &&
+			typeof props.panelsData === 'object' &&
+			Object.keys( props.panelsData ).length > 0;
+			
 		const isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
 		const editMode = hasPanelsData === true ? isDefaultModeEdit : true;
 
