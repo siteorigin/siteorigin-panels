@@ -99,7 +99,7 @@ module.exports = panels.view.dialog.extend( {
 
 		this.on( 'open_dialog_complete', function() {
 			// If the title isn't visible, focus the first input.
-			const focusTarget = this.$( '.so-title' ).first();
+			const focusTarget = this.$( '.so-title-editable' );
 			if ( focusTarget.length ) {
 				focusTarget.trigger( 'focus' );
 			} else {
