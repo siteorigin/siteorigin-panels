@@ -293,7 +293,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 				<input type="button" class="button-primary so-close" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 
 				<span
-					class="button-secondary dashicons so-mode"
+					class="button-primary so-button-mode dashicons so-mode"
 					tabindex="0"
 					aria-label="<?php esc_attr_e( 'Access Modes', 'siteorigin-panels' ); ?>"
 					role="button"
@@ -381,7 +381,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					<input type="button" class="button-primary so-save" tabindex="0" value="<?php esc_attr_e( 'Done', 'siteorigin-panels' ); ?>" />
 
 					<span
-						class="button-secondary dashicons so-mode"
+						class="button-primary so-button-mode dashicons so-mode"
 						tabindex="0"
 						aria-label="<?php esc_html_e( 'Access Modes', 'siteorigin-panels' ); ?>"
 						role="button"
