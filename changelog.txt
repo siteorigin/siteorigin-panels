@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 2.32.1 – 29 June 2025 =
+* Mode Switcher: Restored mobile CSS hide functionality for improved responsive behavior.
+* Mode Switcher: Removed legacy CSS and moved .so-mode to .so-toolbar for cleaner structure.
+* Widget Dialog: Removed focus delay and improved default field handling for better user experience.
+* Fixed button secondary color scheme inheritance for consistent styling.
+* Fixed widget editable title class for proper functionality.
+* Resolved LESS linting issues for improved code quality.
+
 = 2.32.0 – 13 June 2025 =
 * Background Image: Added Alt Text setting for improved accessibility.
 * Layout Block: Added additional PanelsData check and prevented potential JavaScript null quirk.
