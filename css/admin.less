@@ -445,7 +445,7 @@
 							}
 
 							&:focus .title .actions a,
-							&:focus-within .title .actions a, {
+							&:focus-within .title .actions a {
 								display: inline-block;
 							}
 
@@ -746,8 +746,6 @@
 	opacity: 0.9;
 	pointer-events: none;
 	border: 1px solid rgba( 0,0,0,0.35 ) !important;
-
-	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
 
 // CSS for Layout Builder, Layout Form Field, and other instances of PB inside of widgets.
@@ -1233,6 +1231,10 @@
 		border-top: 1px solid @border_color;
 		z-index: 100002; // 1 more than the rest to ensure dropdowns etc appear above the other content.
 
+		.so-mode {
+			display: none;
+		}
+
 		.so-status {
 			float: left;
 			padding-top: 6px;
@@ -1290,13 +1292,6 @@
 
 			}
 
-			@media (max-width: 980px) {
-
-				.so-mode.button-secondary.so-mode {
-					display: none;
-				}
-			}
-
 			@media (min-width: 980px) {
 
 				.save-buttons {
@@ -1307,6 +1302,18 @@
 					.button-primary.so-saveinline {
 						border-bottom-right-radius: 0;
 						border-top-right-radius: 0;
+						margin-right: -1px;
+					}
+					
+					.so-button-mode {
+						border-bottom-left-radius: 0;
+						border-top-left-radius: 0;
+						border-left: 1px solid rgba(0, 0, 0, 0.1);
+						
+						// Prevent JavaScript from hiding this button when switching modes.
+						&.so-mode {
+							display: flex !important;
+						}
 					}
 
 					.so-mode {
