@@ -1297,63 +1297,66 @@
 				.save-buttons {
 					display: flex;
 
-					.button-primary.so-close,
-					.button-primary.so-save,
-					.button-primary.so-saveinline {
-						border-bottom-right-radius: 0;
-						border-top-right-radius: 0;
-						margin-right: -1px;
-					}
-					
-					.so-button-mode {
-						border-bottom-left-radius: 0;
-						border-top-left-radius: 0;
-						border-left: 1px solid rgba(0, 0, 0, 0.1);
+					&:has(.so-button-mode ) {
+
+						.button-primary.so-close,
+						.button-primary.so-save,
+						.button-primary.so-saveinline {
+							border-bottom-right-radius: 0;
+							border-top-right-radius: 0;
+							margin-right: -1px;
+						}
 						
-						// Prevent JavaScript from hiding this button when switching modes.
-						&.so-mode {
-							display: flex !important;
-						}
-					}
-
-					.so-mode {
-						align-items: center;
-						border-bottom-left-radius: 0;
-						border-top-left-radius: 0;
-						display: flex;
-						justify-content: center;
-
-						&:before {
-							content: "\f11c";
-							height: auto;
-							line-height: 0;
-							transform: rotate(90deg);
-						}
-
-						.dashicons {
-						}
-					}
-
-					.so-mode-list {
-						background: #fff;
-						border: 1px solid #ededed;
-						font-size: 12px;
-						position: absolute;
-						right: 14px;
-						top: -49%;
-
-						li {
-							cursor: pointer;
-							padding: 6px 8px;
-							margin: 0;
-
-							&:hover {
-								background: #f5f5f5;
+						.so-button-mode {
+							border-bottom-left-radius: 0;
+							border-top-left-radius: 0;
+							border-left: 1px solid rgba(0, 0, 0, 0.1);
+							
+							// Prevent JavaScript from hiding this button when switching modes.
+							&.so-mode {
+								display: flex !important;
 							}
 						}
 
-						.so-close-mode {
-							border-top: 1px solid #f5f5f5;
+						.so-mode {
+							align-items: center;
+							border-bottom-left-radius: 0;
+							border-top-left-radius: 0;
+							display: flex;
+							justify-content: center;
+
+							&:before {
+								content: "\f11c";
+								height: auto;
+								line-height: 0;
+								transform: rotate(90deg);
+							}
+
+							.dashicons {
+							}
+						}
+
+						.so-mode-list {
+							background: #fff;
+							border: 1px solid #ededed;
+							font-size: 12px;
+							position: absolute;
+							right: 14px;
+							top: -49%;
+
+							li {
+								cursor: pointer;
+								padding: 6px 8px;
+								margin: 0;
+
+								&:hover {
+									background: #f5f5f5;
+								}
+							}
+
+							.so-close-mode {
+								border-top: 1px solid #f5f5f5;
+							}
 						}
 					}
 				}
