@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, website builder, responsive design, drag and drop, visual editor
 Requires at least: 4.7
-Tested up to: 6.6
+Tested up to: 6.8
 Requires PHP: 7.0.0
 Stable tag: trunk
 Build time: unbuilt
@@ -121,7 +121,82 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
-= 2.29.19 – 21 July June 2024 =
+= 2.32.1 – 29 June 2025 =
+* Mode Switcher: Restored mobile CSS hide functionality for improved responsive behavior.
+* Mode Switcher: Removed legacy CSS and moved .so-mode to .so-toolbar for cleaner structure.
+* Widget Dialog: Removed focus delay and improved default field handling for better user experience.
+* Fixed button secondary color scheme inheritance for consistent styling.
+* Fixed widget editable title class for proper functionality.
+* Resolved LESS linting issues for improved code quality.
+
+= 2.32.0 – 13 June 2025 =
+* Background Image: Added Alt Text setting for improved accessibility.
+* Layout Block: Added additional PanelsData check and prevented potential JavaScript null quirk.
+* Layout Builder: Fixed potential object.keys issue when removing all blocks.
+* Polylang: Prevented undefined sync warning.
+* Improved security with enhanced parameter sanitization across admin features.
+* Code Quality: Updated WordPress PHP Coding Standards compliance.
+
+= 2.31.8 – 12 May 2025 =
+* Border Styles: Improved handling of multiple border values.
+* Multi-select: Fixed type error in field handling.
+* Polylang: Improved compatibility with WPML by loading translation features only when needed.
+* Code Quality: Updated PHPCS configuration.
+
+= 2.31.7 – 01 May 2025 =
+* Fixed an issue with encoded quotes when editing widget titles.
+* Resolved Select2 CSS not outputting correctly.
+
+= 2.31.6 – 19 April 2025 =
+* Import: Closed all containers in imported layouts to ensure consistent layout rendering.
+
+= 2.31.5 – 26 February 2025 =
+* Improved Legacy Bundled Widget handling.
+* Removed `wp_targeted_link_rel` from preview generation.
+* Added `siteorigin_panels_compat_events_manager` filter to disable Events Manager compatibility.
+
+= 2.31.4 – 02 February 2025 =
+* Added Compatibility for Events Manager.
+* AIOSEO: Loaded plugin widgets.
+* Refactored SEO plugin compatibility and restored Yoast Block Editor content parsing.
+* Layout Directory: Resolved incorrect empty search after search query.
+* WPML: Adjusted editor labels for the WPML 4.7 release.
+
+= 2.31.3 – 20 December 2024 =
+* WPML: Improved compatibility by excluding `panels_data` field from automatic translation handling.
+* Prebuilt Layouts: Added text/html to accepted mime types for layout exports.
+* Added compatibility with Popup Maker to ensure correct layout rendering in popups.
+* Row Labels: Improved handling and display consistency.
+
+= 2.31.2 – 14 December 2024 =
+* Improved post type handling.
+* Select2: Improved input alignment.
+
+= 2.31.1 – 11 December 2024 =
+* Layouts Block: Prevented double toolbar when in development mode.
+* Improved row, cell, and widget attribute handling.
+
+= 2.31.0 – 22 November 2024 =
+* Styles Fields: Added `multi-select`.
+* Admin Interface: Styling improvements to the Edit Row modal.
+* Layouts Block: General styling improvements and fixes.
+
+= 2.30.0 – 26 October 2024 =
+* Image Overlay: Prevent iOS fixed background display issues.
+* Styles Settings: Converted Border Thickness to a multi-measurement field.
+* Styles Settings: Ensured color picker field and clear button are on a dedicated line.
+
+= 2.29.22 – 30 September 2024 =
+* Layout Block: Removed content filter attributes from the front-end.
+
+= 2.29.21 – 17 September 2024 =
+* Prebuilt Local Layouts: Resolved a potential error.
+* Prebuilt Local Layouts: Restricted layout files to JSON.
+
+= 2.29.20 – 08 August 2024 =
+* Rank Math: Resolved content analysis issue when multiple blocks in use.
+
+= 2.29.19 – 21 July 2024 =
 * Further improvements for attribute name handling.
 * Layout Directory: Resolved an issue with fetching page two.
 

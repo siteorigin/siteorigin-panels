@@ -445,7 +445,7 @@
 							}
 
 							&:focus .title .actions a,
-							&:focus-within .title .actions a, {
+							&:focus-within .title .actions a {
 								display: inline-block;
 							}
 
@@ -746,8 +746,6 @@
 	opacity: 0.9;
 	pointer-events: none;
 	border: 1px solid rgba( 0,0,0,0.35 ) !important;
-
-	.siteorigin-panels-builder.so-rows-container.so-row-container.so-cells.cell.widgets-container.so-widget;
 }
 
 // CSS for Layout Builder, Layout Form Field, and other instances of PB inside of widgets.
@@ -907,6 +905,24 @@
 
 		ul {
 			list-style: none;
+		}
+
+		// Prevent display issues when the editor has a darker background.
+		.so-builder-container {
+			background: #fff;
+
+			.so-row-container {
+				padding: 0 15px 20px;
+			}
+
+			a:not(.so-tool-button):not([class^="so-row-"]) {
+				color: #2271b1;
+
+				&:hover,
+				&:focus {
+					color: #1e1e1e;
+				}
+			}
 		}
 	}
 }
@@ -1159,6 +1175,7 @@
 		}
 
 		.so-title-bar-buttons {
+			display: flex;
 			position: absolute;
 			right: 0;
 			top: 0;
@@ -1191,6 +1208,11 @@
 				color: #666;
 			}
 		}
+
+		// Don't leave space for navigation if they're not present.
+		&:has(.so-nav) h3.so-title {
+			margin: 0 50px;
+		}
 	}
 
 	.so-toolbar {
@@ -1208,6 +1230,10 @@
 		background-color: #fafafa;
 		border-top: 1px solid @border_color;
 		z-index: 100002; // 1 more than the rest to ensure dropdowns etc appear above the other content.
+
+		.so-mode {
+			display: none;
+		}
 
 		.so-status {
 			float: left;
@@ -1266,63 +1292,71 @@
 
 			}
 
-			@media (max-width: 980px) {
-
-				.so-mode.button-secondary.so-mode {
-					display: none;
-				}
-			}
-
 			@media (min-width: 980px) {
 
 				.save-buttons {
 					display: flex;
 
-					.button-primary.so-close,
-					.button-primary.so-save,
-					.button-primary.so-saveinline {
-						border-bottom-right-radius: 0;
-						border-top-right-radius: 0;
-					}
+					&:has(.so-button-mode ) {
 
-					.so-mode {
-						align-items: center;
-						border-bottom-left-radius: 0;
-						border-top-left-radius: 0;
-						display: flex;
-						justify-content: center;
-
-						&:before {
-							content: "\f11c";
-							height: auto;
-							line-height: 0;
-							transform: rotate(90deg);
+						.button-primary.so-close,
+						.button-primary.so-save,
+						.button-primary.so-saveinline {
+							border-bottom-right-radius: 0;
+							border-top-right-radius: 0;
+							margin-right: -1px;
 						}
-
-						.dashicons {
-						}
-					}
-
-					.so-mode-list {
-						background: #fff;
-						border: 1px solid #ededed;
-						font-size: 12px;
-						position: absolute;
-						right: 14px;
-						top: -49%;
-
-						li {
-							cursor: pointer;
-							padding: 6px 8px;
-							margin: 0;
-
-							&:hover {
-								background: #f5f5f5;
+						
+						.so-button-mode {
+							border-bottom-left-radius: 0;
+							border-top-left-radius: 0;
+							border-left: 1px solid rgba(0, 0, 0, 0.1);
+							
+							// Prevent JavaScript from hiding this button when switching modes.
+							&.so-mode {
+								display: flex !important;
 							}
 						}
 
-						.so-close-mode {
-							border-top: 1px solid #f5f5f5;
+						.so-mode {
+							align-items: center;
+							border-bottom-left-radius: 0;
+							border-top-left-radius: 0;
+							display: flex;
+							justify-content: center;
+
+							&:before {
+								content: "\f11c";
+								height: auto;
+								line-height: 0;
+								transform: rotate(90deg);
+							}
+
+							.dashicons {
+							}
+						}
+
+						.so-mode-list {
+							background: #fff;
+							border: 1px solid #ededed;
+							font-size: 12px;
+							position: absolute;
+							right: 14px;
+							top: -49%;
+
+							li {
+								cursor: pointer;
+								padding: 6px 8px;
+								margin: 0;
+
+								&:hover {
+									background: #f5f5f5;
+								}
+							}
+
+							.so-close-mode {
+								border-top: 1px solid #f5f5f5;
+							}
 						}
 					}
 				}
@@ -2541,6 +2575,18 @@
 					height: 30px;
 				}
 
+				.wp-picker-open + .wp-picker-input-wrap {
+					display: flex;
+
+					> label {
+						flex: 2;
+					}
+
+					.wp-color-picker {
+						width: 100%;
+					}
+				}
+
 				.wp-picker-clear {
 					margin-left: 6px;
 					min-height: 30px;
@@ -2552,6 +2598,35 @@
 					.wp-color-result-text {
 						border-left: 1px solid #8c8f94;
 						height: 28px;
+					}
+				}
+			}
+
+			.select2-container {
+				width: 100% !important;
+
+				.select2-selection--multiple {
+					align-items: center;
+					display: flex;
+					padding: 0;
+				}
+
+				.select2-selection__rendered {
+					margin: 0;
+					padding: 0;
+				}
+
+				.select2-search__field {
+					margin-top: 0;
+				}
+
+				.select2-selection__choice__remove {
+					height: 100%;
+
+					span {
+						display: inline-block;
+						margin-top: 8px;
+						transform: translateY(-50%);
 					}
 				}
 			}

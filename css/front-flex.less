@@ -48,23 +48,17 @@
 	right: 0;
 	bottom: 0;
 	left: 0;
-
-	.panel-grid-cell > &,
-	.panel-cell-style > &,
-	.so-panel > &,
-	.panel-widget-style > & {
-		z-index: -1;
-	}
+	z-index: -1;
 }
 
-// Prevent content appearing behind the overlay.
+// Layer content above the overlay, and prevent the overlay from exceeding width.
 .panel-has-overlay {
-	&,
-	.panel-grid-cell {
-		position: relative;
-	}
 
-	&.so-panel {
+	.panel-row-style,
+	.panel-cell-style,
+	.panel-widget-style {
+		overflow: hidden;
+		position: relative;
 		z-index: 1;
 	}
 }
@@ -110,4 +104,13 @@ body.siteorigin-panels-before-js:not(.siteorigin-panels-css-container) {
 		padding-right: 1000px !important;
 		padding-left: 1000px !important;
 	}
+}
+
+.so-sr-only {
+	height :1px;
+	left: -10000px;
+	overflow: hidden;
+	position: absolute;
+	top: auto;
+	width: 1px;
 }

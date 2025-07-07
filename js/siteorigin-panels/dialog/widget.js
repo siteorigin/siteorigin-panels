@@ -76,26 +76,35 @@ module.exports = panels.view.dialog.extend( {
 		} );
 
 		this.on( 'edit_label', function ( text ) {
-			// If text is set to default value, just clear it.
-			if ( text === panelsOptions.widgets[ this.model.get( 'class' ) ][ 'title' ] ) {
-				text = '';
-			}
-			this.model.set( 'label', text );
-			if ( _.isEmpty( text ) ) {
-				this.$( '.so-title' ).text( this.model.getWidgetField( 'title' ) );
-			}
-		}.bind( this ) );
+
+				// If text is set to default value, just clear it.
+				if ( text === panelsOptions.widgets[ this.model.get( 'class' ) ]['title']) {
+					text = '';
+				} else {
+					// Sanitize  widget label.
+					const $tempDiv = $( '<div></div>' ).text( text );
+					text = $tempDiv.text();
+				}
+
+				this.model.set( 'label', text );
+
+				if ( _.isEmpty( text ) ) {
+					this.$( '.so-title' ).text(
+						_.escape(
+							this.model.getWidgetField( 'title' )
+						)
+					);
+				}
+			}.bind( this ) );
 
 		this.on( 'open_dialog_complete', function() {
-			// The form isn't always ready when this event fires.
-			setTimeout( function() {
-				var focusTarget = $( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first();
-				if ( focusTarget.length ) {
-					focusTarget.trigger( 'focus' );
-				} else {
-					$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
-				}
-			}, 1250 )
+			// If the title isn't visible, focus the first input.
+			const focusTarget = this.$( '.so-title-editable' );
+			if ( focusTarget.length ) {
+				focusTarget.trigger( 'focus' );
+			} else {
+				this.$( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first().trigger( 'focus' );
+			}
 		} );
 	},
 
@@ -107,8 +116,9 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		var title = this.model.getWidgetField( 'title' );
-		this.$( '.so-title .widget-name' ).html( title );
+		const rawTitle = this.model.getWidgetField( 'title' );
+		const title = _.escape( rawTitle ).replace( /&quot;/g, '"' );
+		this.$( '.so-title .widget-name' ).text( title );
 		this.$( '.so-edit-title' ).val( title );
 
 		if( ! this.builder.supports( 'addWidget' ) ) {

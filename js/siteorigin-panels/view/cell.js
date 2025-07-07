@@ -19,8 +19,8 @@ module.exports = Backbone.View.extend( {
 	 */
 	render: function () {
 		var templateArgs = {
-			weight: this.model.get( 'weight' ),
-			totalWeight: this.row.model.get('cells').totalWeight()
+			weight: _.escape( this.model.get( 'weight' ) ),
+			totalWeight: _.escape( this.row.model.get( 'cells' ).totalWeight() )
 		};
 
 		this.setElement( this.template( templateArgs ) );

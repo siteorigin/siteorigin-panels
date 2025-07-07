@@ -165,7 +165,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		if ( defined( 'WOOCOMMERCE_VERSION' ) ) {
 			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
-				'title'  => __( 'WooCommerce', 'woocommerce' ),
+				'title'  => __( 'WooCommerce', 'siteorigin-panels' ),
 				'filter' => array(
 					'groups' => array( 'woocommerce' ),
 				),
@@ -176,7 +176,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		if ( defined( 'JETPACK__VERSION' ) ) {
 			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
-				'title'  => __( 'Jetpack', 'jetpack' ),
+				'title'  => __( 'Jetpack', 'siteorigin-panels' ),
 				'filter' => array(
 					'groups' => array( 'jetpack' ),
 				),
@@ -187,7 +187,7 @@ class SiteOrigin_Panels_Admin_Widget_Dialog {
 		if ( function_exists( 'bbpress' ) ) {
 			$tabs[] = array(
 				// TRANSLATORS: The name of WordPress plugin
-				'title'  => __( 'BBPress', 'bbpress' ),
+				'title'  => __( 'BBPress', 'siteorigin-panels' ),
 				'filter' => array(
 					'groups' => array( 'bbpress' ),
 				),

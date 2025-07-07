@@ -19,9 +19,11 @@
 	<ul class="settings-nav">
 		<?php
 		foreach ( $settings_fields as $section_id => $section ) {
-			?><li><a href="#<?php echo esc_attr( $section_id ); ?>"><?php echo esc_html( $section['title'] ); ?></a></li><?php
-		}
 			?>
+			<li><a href="#<?php echo esc_attr( $section_id ); ?>"><?php echo esc_html( $section['title'] ); ?></a></li>
+			<?php
+		}
+		?>
 		<li><a href="#welcome"><?php esc_html_e( 'Welcome', 'siteorigin-panels' ); ?></a></li>
 	</ul>
 
@@ -50,18 +52,25 @@
 
 									if ( ! empty( $field['description'] ) ) {
 										?>
-										<small class="description" data-keywords="<?php if ( ! empty( $field['keywords'] ) ) {
+										<small class="description" data-keywords="
+										<?php
+										if ( ! empty( $field['keywords'] ) ) {
 											echo esc_attr( $field['keywords'] );
-										} ?>">
+										}
+										?>
+										">
 											<?php
-											echo wp_kses( $field['description'], array(
-												'a' => array(
-													'href' => array(),
-													'title' => array(),
-												),
-												'em' => array(),
-												'strong' => array(),
-											) );
+											echo wp_kses(
+												$field['description'],
+												array(
+													'a' => array(
+														'href' => array(),
+														'title' => array(),
+													),
+													'em' => array(),
+													'strong' => array(),
+												)
+											);
 											?>
 										</small>
 									<?php } ?>
@@ -73,12 +82,12 @@
 					</tbody>
 				</table>
 			</div>
-			<?php
+				<?php
 			}
 			?>
 
 			<div id="panels-settings-section-welcome" class="panels-settings-section" data-section="welcome">
-				<?php include plugin_dir_path( __FILE__ ) . 'welcome.php'; ?>
+				<?php require plugin_dir_path( __FILE__ ) . 'welcome.php'; ?>
 			</div>
 
 		</div>

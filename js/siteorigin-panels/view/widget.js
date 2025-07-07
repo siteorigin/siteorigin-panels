@@ -38,9 +38,9 @@ module.exports = Backbone.View.extend( {
 		options = _.extend( {'loadForm': false}, options );
 
 		this.setElement( this.template( {
-			title: this.model.getWidgetField( 'title' ),
+			title: _.escape( this.model.getWidgetField( 'title' ) ),
 			description: this.model.getTitle(),
-			widget_class: this.model.attributes.class
+			widget_class: _.escape( this.model.attributes.class )
 		} ) );
 
 		this.$el.data( 'view', this );

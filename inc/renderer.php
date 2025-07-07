@@ -3,6 +3,7 @@
 class SiteOrigin_Panels_Renderer {
 	private $inline_css;
 	private $container;
+	private $side = array( 'top', 'right', 'bottom', 'left' );
 
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 1 );
@@ -97,6 +98,15 @@ class SiteOrigin_Panels_Renderer {
 				), array(
 					'position' => 'relative',
 				) );
+
+				// Prevent display issue with fixed backgrounds on iOS.
+				if ( $row['style']['background_display'] === 'fixed' ) {
+					$css->add_row_css( $post_id, $ri, array(
+						'.panel-has-overlay > .panel-row-style > .panel-background-overlay',
+					), array(
+						'background-attachment' => 'scroll !important',
+					), $panels_tablet_width );
+				}
 			}
 
 			if ( empty( $row['cells'] ) ) {
@@ -149,6 +159,15 @@ class SiteOrigin_Panels_Renderer {
 					$css->add_cell_css( $post_id, $ri, $ci, '', array(
 						'position' => 'relative',
 					) );
+
+						// Prevent display issue with fixed backgrounds on iOS.
+					if ( $cell['style']['background_display'] === 'fixed' ) {
+						$css->add_cell_css( $post_id, $ri, $ci, array(
+							'.panel-has-overlay > .panel-cell-style > .panel-background-overlay',
+						), array(
+							'background-attachment' => 'scroll !important',
+						), $panels_tablet_width );
+					}
 				}
 
 				// Add in any widget specific CSS
@@ -242,6 +261,21 @@ class SiteOrigin_Panels_Renderer {
 								'position' => 'relative',
 							)
 						);
+
+						// Prevent display issue with fixed backgrounds on iOS.
+						if ( $widget['panels_info']['style']['background_display'] === 'fixed' ) {
+							$css->add_widget_css(
+								$post_id,
+								$ri,
+								$ci,
+								$wi,
+								'.panel-has-overlay > .panel-widget-style > .panel-background-overlay',
+								array(
+									'background-attachment' => 'scroll !important',
+								),
+								$panels_tablet_width
+							);
+						}
 					}
 				}
 			}
@@ -620,7 +654,17 @@ class SiteOrigin_Panels_Renderer {
 			}
 
 			if ( ! empty( $style['border_color'] ) ) {
-				$attributes['style'] .= 'border: ' . ( ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px' ) . ' solid ' . $style['border_color'] . ';';
+				$border_thickness = ! empty( $style['border_thickness'] ) ? $style['border_thickness'] : '1px 1px 1px 1px';
+
+				// Does this have legacy border thickness?
+				if ( strpos( $border_thickness, ' ' ) === false ) {
+					$attributes['style'] .= 'border: ' . $border_thickness . ' solid ' . $style['border_color'] . ';';
+				} else {
+					$border_thickness_split = explode( ' ', $border_thickness );
+					foreach ( $border_thickness_split as $i => $border_thickness_part ) {
+						$attributes['style'] .= 'border-' . $this->side[ $i ] . ': ' . $border_thickness_part . ' solid ' . $style['border_color'] .';';
+					}
+				}
 			}
 		}
 

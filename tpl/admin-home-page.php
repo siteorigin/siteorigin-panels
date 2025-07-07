@@ -31,8 +31,10 @@ $builder_supports = apply_filters( 'siteorigin_panels_builder_supports', array()
 			<?php } ?>
 		</h2>
 
-		<?php if ( isset( $_POST['_sopanels_home_nonce'] ) && wp_verify_nonce( $_POST['_sopanels_home_nonce'], 'save' ) ) {
-			global $post; ?>
+		<?php
+		if ( isset( $_POST['_sopanels_home_nonce'] ) && wp_verify_nonce( $_POST['_sopanels_home_nonce'], 'save' ) ) {
+			global $post;
+			?>
 			<div id="message" class="updated">
 				<p>
 					<?php
