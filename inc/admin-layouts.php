@@ -565,13 +565,17 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 				$response = wp_remote_get( $url );
 
-				if ( $response['response']['code'] == 200 ) {
-					// For now, we'll just pretend to load this
+				if ( is_wp_error( $response ) ) {
+					wp_send_json_error( array(
+						'error'   => true,
+						'message' => 'WordPress error: ' . $response->get_error_message(),
+					) );
+				} elseif ( $response['response']['code'] == 200 ) {
 					$panels_data = json_decode( $response['body'], true );
 				} else {
 					wp_send_json_error( array(
 						'error'   => true,
-						'message' => __( 'There was a problem fetching the layout. Please try again later.', 'siteorigin-panels' ),
+						'message' => 'HTTP Error ' . $response['response']['code'] . ': There was a problem fetching the layout. Please try again later.',
 					) );
 				}
 			}
