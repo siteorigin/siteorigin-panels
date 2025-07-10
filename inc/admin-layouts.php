@@ -282,7 +282,10 @@ class SiteOrigin_Panels_Admin_Layouts {
 				$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
 
 				// This is a query of the prebuilt layout directory
-				$query = array();
+				$query = array(
+					'search' => $search,
+					'page' => $page_num,
+				);
 				$directories = $this->get_directories();
 				$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
