@@ -313,13 +313,26 @@ class SiteOrigin_Panels_Admin_Layouts {
 							$item['id'] = esc_html( $item['slug'] );
 							$item['type'] = esc_html( $type );
 
-							if ( ! empty( $item['access'] ) ) {
-								$item['access'] = esc_html( $item['access'] );
-								$item['category'] = esc_html( $item['category'] );
-								$niches = ( empty( $item['niches'] ) ? '' : ' ' . implode( ' ', json_decode( $item['niches'] ) ) );
-								$item['niches'] = esc_html( $niches );
-								$item['class'] = esc_html( $item['category'] ) . ( empty( $item['niches'] ) ? '' : ' ' . esc_html( $niches ) );
+							// Always process category and niche classes for filtering.
+							$item['access'] = ! empty( $item['access'] ) ? esc_html( $item['access'] ) : '';
+							
+							// Convert category and niche names to CSS class format.
+							if ( ! empty( $item['category'] ) ) {
+								$item['category'] = 'so-' . sanitize_title( $item['category'] );
 							}
+							
+							if ( ! empty( $item['niches'] ) ) {
+								$niche_names = json_decode( $item['niches'] );
+								if ( is_array( $niche_names ) ) {
+									$formatted_niches = array_map( function( $niche ) {
+										return 'so-' . sanitize_title( $niche );
+									}, $niche_names );
+									$item['niches'] = ' ' . implode( ' ', $formatted_niches );
+								}
+							}
+							
+							// Set the CSS class to be the category + niches.
+							$item['class'] = trim( $item['category'] . ( ! empty( $item['niches'] ) ? $item['niches'] : '' ) );
 
 							if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
 								$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
@@ -330,8 +343,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 						}
 
 						if ( ! empty( $results['niches'] ) ) {
-							$return['niches'] = $this->escape_results( $results['niches'] );
-							$return['categories'] = $this->escape_results( $results['categories'] );
+							// Convert the categories and niches to the expected format for filtering.
+							// The layout-viewer returns them as slug => name, but we need to format them.
+							// so the filter buttons work with the CSS classes
+							$return['niches'] = $this->format_filter_terms( $results['niches'] );
+							$return['categories'] = $this->format_filter_terms( $results['categories'] );
 						}
 					}
 
@@ -424,6 +440,23 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$escaped_values[ $escaped_key ] = $escaped_value;
 		}
 		return $escaped_values;
+	}
+
+	/**
+	 * Format filter terms for category/niche filtering.
+	 * Converts from layout-viewer format (slug => name) to filtering format.
+	 *
+	 * @param array $terms The terms array from layout-viewer API.
+	 * @return array Formatted terms for filtering.
+	 */
+	private function format_filter_terms( $terms = array() ) {
+		$formatted_terms = array();
+		foreach ( $terms as $slug => $name ) {
+			// The layout-viewer API returns slug => name where slug already has 'so-' prefix.
+			// Use the slug as-is since it already matches the CSS classes on layout items.
+			$formatted_terms[ $slug ] = esc_html( $name );
+		}
+		return $formatted_terms;
 	}
 
 	private function delete_file( $file ) {
