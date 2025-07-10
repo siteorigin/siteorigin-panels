@@ -616,7 +616,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		header( 'content-type: application/json' );
 		header( "Content-Disposition: attachment; filename=$filename.json" );
 
-		echo wp_json_encode( $export_data );
+		echo wp_json_encode( $decoded_export_data );
 
 		wp_die();
 	}
