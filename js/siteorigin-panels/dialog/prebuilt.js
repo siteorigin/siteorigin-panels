@@ -347,23 +347,25 @@ module.exports = panels.view.dialog.extend( {
 
 
 		if ( this.activeFilter.length ) {
-			this.$( '.so-directory-items-wrapper' ).find( this.activeFilter ).addClass( 'so-filter' );
-
+			var matchedItems = this.$( '.so-directory-items-wrapper' ).find( this.activeFilter );
+			matchedItems.addClass( 'so-filter' );
 		}
 
 		this.updatePagination();
 
+		var visibleItems = this.$( '.so-directory-item' ).filter(':visible');
+
 		this.$( '.so-directory-items' ).toggleClass(
 			'so-empty',
-			! this.$( '.so-directory-item' ).filter(':visible' ).length
+			! visibleItems.length
 		);
 	},
 
 	getItems: function() {
 		if ( this.activeFilter.length ) {
-			return this.$( '.so-directory-items-wrapper .so-filter:not(.so-search-hidden)' );
+			return this.$( '.so-directory-items-wrapper' ).find( '.so-filter' );
 		} else {
-			return this.$( '.so-directory-items-wrapper .so-directory-item:not(.so-search-hidden)' );
+			return this.$( '.so-directory-items-wrapper .so-directory-item' );
 		}
 	},
 
