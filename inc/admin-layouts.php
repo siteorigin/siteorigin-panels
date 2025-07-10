@@ -266,13 +266,9 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$return['max_num_pages'] = 1;
 		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
 			$directory_id = str_replace( 'directory-', '', $type );
-			// Check if we previously cached this directory result.
-
-			// If the user isn't searching, check if we have a cached
-			// version of the results.
+			// If the user isn't searching, check if we have a cached version of the results.
 			if ( empty( $search ) ) {
 				$cache = get_transient( 'siteorigin_panels_layouts_directory_cache_' . $directory_id .'_page_' . $page_num );
-
 				if ( ! empty( $cache ) ) {
 					$return = $cache;
 				}
@@ -421,7 +417,9 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$return['title'] .= __( ' - Results For:', 'siteorigin-panels' ) . ' <em>' . esc_html( $search ) . '</em>';
 		}
 
-		echo wp_json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
+		$return = apply_filters( 'siteorigin_panels_layouts_result', $return, $type );
+		
+		echo wp_json_encode( $return );
 
 		wp_die();
 	}
