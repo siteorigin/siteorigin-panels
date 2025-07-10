@@ -510,7 +510,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 							<?php _e( 'All Categories', 'siteorigin-panels' ); ?>
 						</li>
 
-						{{% _.each( categories, function( id, name ) { %}}
+						{{% _.each( categories, function( name, id ) { %}}
 						<li class="so-directory-items-filter-category" data-filter=".{{%- id %}}">
 							{{%- name %}}
 						</li>
@@ -527,7 +527,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					</span>
 
 					<ul>
-						{{% _.each( niches, function( id, name ) { %}}
+						{{% _.each( niches, function( name, id ) { %}}
 							<li class="so-directory-items-filter-niche" data-filter=".{{%- id %}}">
 								{{%- name %}}
 							</li>
