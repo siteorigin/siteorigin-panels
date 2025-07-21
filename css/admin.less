@@ -2151,10 +2151,63 @@
 				flex-flow: row wrap;
 			}
 
+			.so-directory-items-filters {
+				display: flex;
+				gap: 24px;
+
+				& > div {
+					display: flex;
+				}
+
+				ul {
+					margin: 0;
+				}
+
+				span,
+				li {
+					display: inline-block;
+					padding: 5px 7.5px;
+				}
+
+				span {
+					font-weight: 600;
+				}
+
+				li {
+					cursor: pointer;
+					text-decoration: underline;
+					text-transform: capitalize;
+
+					&:focus,
+					&:hover {
+						background: #f3f3f3;
+						text-decoration: none;
+					}
+
+					&.so-active-filter {
+						background: #f3f3f3;
+						cursor: default;
+						text-decoration: none;
+					}
+				}
+			}
+
 			// For a list of directory items
 			.so-directory-items {
 
+				&.so-empty {
+
+					.so-no-results {
+						display: block;
+					}
+
+					.so-directory-pages {
+						display: none;
+					}
+				}
+
 				.so-no-results {
+					display: none;
 					margin: 20px 0;
 					padding: 0 5px;
 				}
@@ -2163,6 +2216,10 @@
 
 					.box-sizing(border-box);
 					padding: 6px;
+
+					&.so-hidden {
+						display: none;
+					}
 
 					.so-directory-item-wrapper {
 						display: flex;
