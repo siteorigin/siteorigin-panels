@@ -8,9 +8,10 @@ module.exports = panels.view.dialog.extend( {
 	dialogClass: 'so-panels-dialog-prebuilt-layouts',
 	dialogIcon: 'layouts',
 
-	layoutCache: {},
 	currentTab: false,
 	directoryPage: 1,
+	itemsPer: 16,
+	activeFilter: [],
 
 	events: {
 		'click .so-close': 'closeDialog',
@@ -18,9 +19,16 @@ module.exports = panels.view.dialog.extend( {
 		'click .so-content .layout': 'layoutClickHandler',
 		'keyup .so-sidebar-search': 'searchHandler',
 
-		// The directory items
+		// The directory items.
 		'click .so-screenshot, .so-title': 'directoryItemClickHandler',
 		'keyup .so-directory-item': 'clickTitleOnEnter',
+
+		// Filtering.
+		'click .so-directory-items-filter-categories li': 'filterCategory',
+		'click .so-directory-items-filter-niches li': 'filterNiches',
+
+		'click .so-previous': 'previousPage',
+		'click .so-next': 'nextPage',
 	},
 
 	clickTitleOnEnter: function( e ) {
@@ -189,7 +197,7 @@ module.exports = panels.view.dialog.extend( {
 			if ( $( '.block-editor-page' ).length ) {
 				var currentBlockPosition = thisView.getCurrentBlockPosition();
 				if ( currentBlockPosition >= 0 ) {
-					panelsData.name += '-' + currentBlockPosition; 
+					panelsData.name += '-' + currentBlockPosition;
 				}
 			}
 			$$.find( 'input[name="panels_export_data"]' ).val( JSON.stringify( panelsData ) );
@@ -203,7 +211,7 @@ module.exports = panels.view.dialog.extend( {
 	getCurrentBlockPosition: function() {
 		var selectedBlockClientId = wp.data.select( 'core/block-editor' ).getSelectedBlockClientId();
 		return wp.data.select( 'core/block-editor' ).getBlocks().findIndex( function ( block ) {
-		  return block.clientId === selectedBlockClientId;
+			return block.clientId === selectedBlockClientId;
 		} );
 	},
 
@@ -226,7 +234,7 @@ module.exports = panels.view.dialog.extend( {
 			type = 'directory-siteorigin';
 		}
 
-		if ( type.match('^directory-') && ! panelsOptions.directory_enabled ) {
+		if ( type.match( '^directory-' ) && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
 			c.find( '.so-panels-enable-directory' ).on( 'click', function( e ) {
@@ -253,9 +261,9 @@ module.exports = panels.view.dialog.extend( {
 			panelsOptions.ajaxurl,
 			{
 				action: 'so_panels_layouts_query',
-				search: search,
 				page: page,
 				type: type,
+				search: search,
 				builderType: this.builder.config.builderType,
 			},
 			function ( data ) {
@@ -267,25 +275,37 @@ module.exports = panels.view.dialog.extend( {
 				// Add the directory items
 				c.removeClass( 'so-panels-loading' ).html( thisView.directoryTemplate( data ) );
 
-				// Lets setup the next and previous buttons
-				var prev = c.find( '.so-previous' ), next = c.find( '.so-next' );
-
-				if ( page <= 1 ) {
-					prev.addClass( 'button-disabled' );
+				// Depending on the active type, we need to handle things slightly differently.
+				if ( type.match( '^directory-' ) ) {
+					thisView.directoryPage = page;
+					thisView.updatePagination();
 				} else {
-					prev.on( 'click', function( e ) {
-						e.preventDefault();
-						thisView.displayLayoutDirectory( search, page - 1, thisView.currentTab );
-					} );
+					// Lets setup the next and previous buttons
+					var prev = c.find( '.so-previous' ), next = c.find( '.so-next' );
+
+					if ( page <= 1 ) {
+						prev.addClass( 'button-disabled' );
+					} else {
+						prev.on( 'click', function( e ) {
+							e.preventDefault();
+							thisView.displayLayoutDirectory( search, page - 1, thisView.currentTab );
+						} );
+					}
+
+					if ( page === data.max_num_pages || data.max_num_pages === 0 ) {
+						next.addClass( 'button-disabled' );
+					} else {
+						next.on( 'click', function( e ) {
+							e.preventDefault();
+							thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
+						} );
+					}
+
+					thisView.$( '.so-directory-items' ).toggleClass( 'so-empty', ! data.items.length );
 				}
 
-				if ( page === data.max_num_pages || data.max_num_pages === 0 ) {
-					next.addClass( 'button-disabled' );
-				} else {
-					next.on( 'click', function( e ) {
-						e.preventDefault();
-						thisView.displayLayoutDirectory( search, page + 1, thisView.currentTab );
-					} );
+				if ( page <= 1 ) {
+					c.find( '.so-previous' ).addClass( 'button-disabled' );
 				}
 
 				// Handle nice preloading of the screenshots
@@ -310,6 +330,83 @@ module.exports = panels.view.dialog.extend( {
 			},
 			'json'
 		);
+	},
+
+	filterLayouts: function() {
+		this.directoryPage = 1;
+		this.$( '.so-directory-item ' ).removeClass( 'so-filter' );
+
+		var category = this.$( '.so-directory-items-filter-categories li.so-active-filter' ).data( 'filter' );
+		var niches = this.$( '.so-directory-items-filter-niches li.so-active-filter' ).map( function() {
+		  return $( this ).data( 'filter' );
+		} ).get();
+
+		this.activeFilter = category + niches.map( function( filter ) {
+			return filter;
+		} ).join( '' );
+
+
+		if ( this.activeFilter.length ) {
+			var matchedItems = this.$( '.so-directory-items-wrapper' ).find( this.activeFilter );
+			matchedItems.addClass( 'so-filter' );
+		}
+
+		this.updatePagination();
+
+		var visibleItems = this.$( '.so-directory-item' ).filter(':visible');
+
+		this.$( '.so-directory-items' ).toggleClass(
+			'so-empty',
+			! visibleItems.length
+		);
+	},
+
+	getItems: function() {
+		if ( this.activeFilter.length ) {
+			return this.$( '.so-directory-items-wrapper' ).find( '.so-filter' );
+		} else {
+			return this.$( '.so-directory-items-wrapper .so-directory-item' );
+		}
+	},
+
+	updatePagination: function() {
+		var $items = this.getItems();
+
+		// Hide any items not on the current page.
+		var startIndex = ( this.directoryPage - 1 ) * this.itemsPer;
+		var endIndex = startIndex + this.itemsPer;
+
+		this.$( '.so-directory-items-wrapper .so-directory-item' ).addClass( 'so-hidden' );
+		$items.slice( startIndex, endIndex ).removeClass( 'so-hidden' );
+
+		this.$( '.so-previous' ).toggleClass( 'button-disabled', this.directoryPage === 1 );
+		this.$( '.so-next' ).toggleClass( 'button-disabled', this.directoryPage === Math.ceil( $items.length / this.itemsPer ) );
+	},
+
+	previousPage: function() {
+		if (this.directoryPage > 1) {
+			this.directoryPage--;
+			this.updatePagination();
+		}
+	},
+
+	nextPage: function() {
+		var numPages = Math.ceil( this.getItems().length / this.itemsPer );
+		if ( this.directoryPage < numPages ) {
+			this.directoryPage++;
+			this.updatePagination();
+		}
+	},
+
+	filterCategory: function( e ) {
+		this.$( '.so-directory-items-filter-categories li.so-active-filter' ).removeClass( 'so-active-filter' );
+		$( e.target ).addClass( 'so-active-filter' );
+		this.filterLayouts();
+	},
+
+	filterNiches: function( e ) {
+		$( e.target ).toggleClass( 'so-active-filter' );
+		this.filterLayouts();
 	},
 
 	/**
@@ -406,12 +503,47 @@ module.exports = panels.view.dialog.extend( {
 		return deferredLayout.promise();
 	},
 
+	filterByTitle: function( title ) {
+
+		if ( title === '' ) {
+			this.$( '.so-directory-items-wrapper .so-directory-item' ).removeClass( 'so-hidden so-search-hidden' );
+		} else {
+			this.$( '.so-directory-items' ).removeClass( 'so-search-hidden' );
+			var $items = this.getItems();
+
+			$items.each( function() {
+				let $$ = $( this );
+				let found = $$.find( '.so-title' ).text().toLowerCase().includes( title );
+
+				if ( found && $$.hasClass( 'so-hidden' ) ) {
+					$$.removeClass( 'so-hidden so-search-hidden' )
+				} else if ( ! found ) {
+					$$.addClass( 'so-hidden so-search-hidden' );
+				}
+			} );
+
+		}
+
+		// Show or hide the no results message.
+		this.$( '.so-directory-items' ).toggleClass(
+			'so-empty',
+			! this.$('.so-directory-items-wrapper .so-directory-item:not(.so-hidden)').length
+		);
+
+		this.updatePagination();
+	},
+
 	/**
 	 * Handle an update to the search
 	 */
 	searchHandler: function ( e ) {
 		if ( e.keyCode === 13 ) {
-			this.displayLayoutDirectory( $( e.currentTarget ).val(), 1, this.currentTab );
+			var search = $( e.currentTarget ).val().toLowerCase();
+			if ( this.currentTab.match( '^directory-' ) ) {
+				this.filterByTitle( search );
+			} else {
+				this.displayLayoutDirectory( search, 1, this.currentTab );
+			}
 		}
 	},
 

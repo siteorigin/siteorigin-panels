@@ -181,8 +181,9 @@
       <fields>
         <field type="Image: Title">title</field>
         <field type="Image: Caption">caption</field>
-        <field type="Image: URL" editor_type="LINK">url</field>
-      </fields>
+        <field type="Image: Alt">alt</field>
+        <field type="Image: Link URL" editor_type="LINK">link_url</field>
+	  </fields>
     </widget>
     <widget name="WP_Widget_Meta">
       <fields>
