@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.33.0 – 29 July 2025 =
+* Layout Directory: Added category and niche filtering, search functionality, and pagination support.
+* Mode Switcher: Hidden when parent dialog exists for cleaner interface.
+* WPML: Updated configuration for improved compatibility.
+
 = 2.32.1 – 29 June 2025 =
 * Mode Switcher: Restored mobile CSS hide functionality for improved responsive behavior.
 * Mode Switcher: Removed legacy CSS and moved .so-mode to .so-toolbar for cleaner structure.
