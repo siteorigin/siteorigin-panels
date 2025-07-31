@@ -548,9 +548,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			{{% _.each( items, function( item ) { %}}
 				<div
 					class="so-directory-item
-					{{% if ( typeof item.class != 'undefined' ) { %}}
-						{{%- item.class %}}"
-					{{% } %}}
+					{{% if ( typeof item.class != 'undefined' ) {
+						%}}{{%- item.class %}}{{%
+					} %}}"
 
 					data-layout-id="{{%- item.id %}}"
 					data-layout-type="{{%- item.type %}}"
