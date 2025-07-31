@@ -485,6 +485,13 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 * Ajax handler to get an individual prebuilt layout
 	 */
 	public function action_get_prebuilt_layout() {
+		if (
+			empty( $_REQUEST['_panelsnonce'] ) ||
+			! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' )
+		) {
+			wp_die();
+		}
+
 		$type = isset( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : '';
 		$layout_id = isset( $_REQUEST['lid'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['lid'] ) ) : '';
 
@@ -493,10 +500,6 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 
 		if ( empty( $layout_id ) ) {
-			wp_die();
-		}
-
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
 			wp_die();
 		}
 
