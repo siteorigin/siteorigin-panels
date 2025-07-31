@@ -389,10 +389,13 @@ module.exports = panels.view.dialog.extend( {
 	updatePagination: function() {
 		var $items = this.getItems();
 
-		// Hide any items not on the current page.
-		var startIndex = ( this.directoryPage - 1 ) * this.itemsPer;
-		var endIndex = startIndex + this.itemsPer;
+		const startIndex = this.isLayoutDirectory() ?
+			this.directoryPage - 1 :
+			( this.directoryPage - 1 ) * this.itemsPer;
 
+		const endIndex = startIndex + this.itemsPer;
+
+		// Hide any items not on the current page.
 		this.$( '.so-directory-items-wrapper .so-directory-item' ).addClass( 'so-hidden' );
 		$items.slice( startIndex, endIndex ).removeClass( 'so-hidden' );
 
@@ -407,18 +410,47 @@ module.exports = panels.view.dialog.extend( {
 		return this.currentTab.match( '^directory-' );
 	},
 
+	/**
+	 * Update the layout directory interface with the new search value and page.
+	 *
+	 * @param {string} directoryPath - The path to the layout directory.
+	 * @param {Object} config - Configuration options for the update.
+	 * @returns {boolean} - Returns true if the update was successful, otherwise false.
+	 */
+	updateLayoutDirectory: function() {
+		if ( ! this.isLayoutDirectory() ) {
+			return false;
+		}
+
+		const searchVal = this.$( '.so-sidebar-search' ).val().toLowerCase();
+		this.displayLayoutDirectory(
+			searchVal,
+			this.directoryPage,
+			this.currentTab
+		);
+
+		return true;
+	},
+
 	previousPage: function() {
 		if (this.directoryPage > 1) {
 			this.directoryPage--;
-			this.updatePagination();
+
+			if ( ! this.updateLayoutDirectory() ) {
+				this.updatePagination();
+			}
 		}
 	},
 
 	nextPage: function() {
-		var numPages = Math.ceil( this.getItems().length / this.itemsPer );
-		if ( this.directoryPage < numPages ) {
+		const maxPages = this.contextualMaxPages();
+
+		if ( this.directoryPage < maxPages ) {
 			this.directoryPage++;
-			this.updatePagination();
+
+			if ( ! this.updateLayoutDirectory() ) {
+				this.updatePagination();
+			}
 		}
 	},
 
