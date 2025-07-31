@@ -10,6 +10,7 @@ module.exports = panels.view.dialog.extend( {
 
 	currentTab: false,
 	directoryPage: 1,
+	maxPages: 1,
 	itemsPer: 16,
 	activeFilter: [],
 
@@ -234,7 +235,7 @@ module.exports = panels.view.dialog.extend( {
 			type = 'directory-siteorigin';
 		}
 
-		if ( type.match( '^directory-' ) && ! panelsOptions.directory_enabled ) {
+		if ( this.isLayoutDirectory() && ! panelsOptions.directory_enabled ) {
 			// Display the button to enable the prebuilt layout
 			c.removeClass( 'so-panels-loading' ).html( $( '#siteorigin-panels-directory-enable' ).html() );
 			c.find( '.so-panels-enable-directory' ).on( 'click', function( e ) {
@@ -278,6 +279,7 @@ module.exports = panels.view.dialog.extend( {
 				// Depending on the active type, we need to handle things slightly differently.
 				if ( type.match( '^directory-' ) ) {
 					thisView.directoryPage = page;
+					thisView.maxPages = data.max_num_pages;
 					thisView.updatePagination();
 				} else {
 					// Lets setup the next and previous buttons
@@ -369,32 +371,86 @@ module.exports = panels.view.dialog.extend( {
 		}
 	},
 
+	/**
+	 * Get the maximum number of pages for the current context.
+	 *
+	 * @param {*} $items An optional jQuery collection of items to calculate the maximum pages for.
+	 * @returns int The maximum number of pages based on the items and items per page.
+	 */
+	contextualMaxPages: function( $items = null ) {
+		if ( $items === null ) {
+			$items = this.getItems();
+		}
+
+		const contextualMaxPages = Math.ceil( $items.length / this.itemsPer );
+		return contextualMaxPages > this.maxPages ? contextualMaxPages : this.maxPages;
+	},
+
 	updatePagination: function() {
 		var $items = this.getItems();
 
-		// Hide any items not on the current page.
-		var startIndex = ( this.directoryPage - 1 ) * this.itemsPer;
-		var endIndex = startIndex + this.itemsPer;
+		const startIndex = this.isLayoutDirectory() ?
+			this.directoryPage - 1 :
+			( this.directoryPage - 1 ) * this.itemsPer;
 
+		const endIndex = startIndex + this.itemsPer;
+
+		// Hide any items not on the current page.
 		this.$( '.so-directory-items-wrapper .so-directory-item' ).addClass( 'so-hidden' );
 		$items.slice( startIndex, endIndex ).removeClass( 'so-hidden' );
 
 		this.$( '.so-previous' ).toggleClass( 'button-disabled', this.directoryPage === 1 );
-		this.$( '.so-next' ).toggleClass( 'button-disabled', this.directoryPage === Math.ceil( $items.length / this.itemsPer ) );
+		this.$( '.so-next' ).toggleClass(
+			'button-disabled',
+			this.directoryPage === this.contextualMaxPages( $items )
+		);
+	},
+
+	isLayoutDirectory: function() {
+		return this.currentTab.match( '^directory-' );
+	},
+
+	/**
+	 * Update the layout directory interface with the new search value and page.
+	 *
+	 * @param {string} directoryPath - The path to the layout directory.
+	 * @param {Object} config - Configuration options for the update.
+	 * @returns {boolean} - Returns true if the update was successful, otherwise false.
+	 */
+	updateLayoutDirectory: function() {
+		if ( ! this.isLayoutDirectory() ) {
+			return false;
+		}
+
+		const searchVal = this.$( '.so-sidebar-search' ).val().toLowerCase();
+		this.displayLayoutDirectory(
+			searchVal,
+			this.directoryPage,
+			this.currentTab
+		);
+
+		return true;
 	},
 
 	previousPage: function() {
 		if (this.directoryPage > 1) {
 			this.directoryPage--;
-			this.updatePagination();
+
+			if ( ! this.updateLayoutDirectory() ) {
+				this.updatePagination();
+			}
 		}
 	},
 
 	nextPage: function() {
-		var numPages = Math.ceil( this.getItems().length / this.itemsPer );
-		if ( this.directoryPage < numPages ) {
+		const maxPages = this.contextualMaxPages();
+
+		if ( this.directoryPage < maxPages ) {
 			this.directoryPage++;
-			this.updatePagination();
+
+			if ( ! this.updateLayoutDirectory() ) {
+				this.updatePagination();
+			}
 		}
 	},
 
@@ -503,47 +559,13 @@ module.exports = panels.view.dialog.extend( {
 		return deferredLayout.promise();
 	},
 
-	filterByTitle: function( title ) {
-
-		if ( title === '' ) {
-			this.$( '.so-directory-items-wrapper .so-directory-item' ).removeClass( 'so-hidden so-search-hidden' );
-		} else {
-			this.$( '.so-directory-items' ).removeClass( 'so-search-hidden' );
-			var $items = this.getItems();
-
-			$items.each( function() {
-				let $$ = $( this );
-				let found = $$.find( '.so-title' ).text().toLowerCase().includes( title );
-
-				if ( found && $$.hasClass( 'so-hidden' ) ) {
-					$$.removeClass( 'so-hidden so-search-hidden' )
-				} else if ( ! found ) {
-					$$.addClass( 'so-hidden so-search-hidden' );
-				}
-			} );
-
-		}
-
-		// Show or hide the no results message.
-		this.$( '.so-directory-items' ).toggleClass(
-			'so-empty',
-			! this.$('.so-directory-items-wrapper .so-directory-item:not(.so-hidden)').length
-		);
-
-		this.updatePagination();
-	},
-
 	/**
 	 * Handle an update to the search
 	 */
 	searchHandler: function ( e ) {
 		if ( e.keyCode === 13 ) {
 			var search = $( e.currentTarget ).val().toLowerCase();
-			if ( this.currentTab.match( '^directory-' ) ) {
-				this.filterByTitle( search );
-			} else {
-				this.displayLayoutDirectory( search, 1, this.currentTab );
-			}
+			this.displayLayoutDirectory( search, 1, this.currentTab );
 		}
 	},
 
