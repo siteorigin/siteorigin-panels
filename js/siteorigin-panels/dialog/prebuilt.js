@@ -10,6 +10,7 @@ module.exports = panels.view.dialog.extend( {
 
 	currentTab: false,
 	directoryPage: 1,
+	maxPages: 1,
 	itemsPer: 16,
 	activeFilter: [],
 
@@ -278,6 +279,7 @@ module.exports = panels.view.dialog.extend( {
 				// Depending on the active type, we need to handle things slightly differently.
 				if ( type.match( '^directory-' ) ) {
 					thisView.directoryPage = page;
+					thisView.maxPages = data.max_num_pages;
 					thisView.updatePagination();
 				} else {
 					// Lets setup the next and previous buttons
@@ -369,6 +371,21 @@ module.exports = panels.view.dialog.extend( {
 		}
 	},
 
+	/**
+	 * Get the maximum number of pages for the current context.
+	 *
+	 * @param {*} $items An optional jQuery collection of items to calculate the maximum pages for.
+	 * @returns int The maximum number of pages based on the items and items per page.
+	 */
+	contextualMaxPages: function( $items = null ) {
+		if ( $items === null ) {
+			$items = this.getItems();
+		}
+
+		const contextualMaxPages = Math.ceil( $items.length / this.itemsPer );
+		return contextualMaxPages > this.maxPages ? contextualMaxPages : this.maxPages;
+	},
+
 	updatePagination: function() {
 		var $items = this.getItems();
 
@@ -380,7 +397,10 @@ module.exports = panels.view.dialog.extend( {
 		$items.slice( startIndex, endIndex ).removeClass( 'so-hidden' );
 
 		this.$( '.so-previous' ).toggleClass( 'button-disabled', this.directoryPage === 1 );
-		this.$( '.so-next' ).toggleClass( 'button-disabled', this.directoryPage === Math.ceil( $items.length / this.itemsPer ) );
+		this.$( '.so-next' ).toggleClass(
+			'button-disabled',
+			this.directoryPage === this.contextualMaxPages( $items )
+		);
 	},
 
 	isLayoutDirectory: function() {
