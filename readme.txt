@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.33.1 – 31 July 2025 =
+* Layout Directory: Fixed pagination and search functionality.
+* Layouts: Fixed an issue with cloning layouts.
+* Layouts: Improved security by checking nonce earlier when fetching prebuilt layouts.
+
 = 2.33.0 – 29 July 2025 =
 * Layout Directory: Added category and niche filtering, search functionality, and pagination support.
 * Mode Switcher: Hidden when parent dialog exists for cleaner interface.
