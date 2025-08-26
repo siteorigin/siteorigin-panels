@@ -73,6 +73,7 @@ module.exports = {
             '!readme.md',                                    // Ignore the readme.md file. It is for the github repo.
             '!{js/siteorigin-panels,js/siteorigin-panels/**}',
             '!inc/installer/inc/github-plugin-updater.php',  // Exclude Installer Standalone Updater.
+            '!.wordpress-org',                               // Exclude WordPress.org specific code.
         ]
     },
     i18n: {
