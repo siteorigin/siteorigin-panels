@@ -1,34 +1,36 @@
 {
-	"features": {
-		"networking": true
-	},
-	"preferredVersions": {
-		"php": "latest",
-		"wp": "latest"
-	},
-	"steps": [
-		{
-			"step": "installTheme",
-			"themeData": {
-				"resource": "wordpress.org/themes",
-				"slug": "vantage"
-			},
-			"options": {
-				"activate": true,
-				"importStarterContent": true
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "siteorigin-panels"
-			},
-			"options": {
-				"activate": true
-			}
-		}
-	],
-	"login": true,
-	"landingPage": "/wp-admin/admin.php?page=siteorigin_panels"
+  "features": {
+    "networking": true
+  },
+  "preferredVersions": {
+    "php": "latest",
+    "wp": "latest"
+  },
+  "plugins": [
+    "siteorigin-panels",
+    "so-widgets-bundle"
+  ],
+  "steps": [
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "wordpress.org/themes",
+        "slug": "siteorigin-snapshot"
+      },
+      "options": {
+        "activate": true,
+        "importStarterContent": true
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; delete_transient( 'siteorigin_panels_activation_welcome' );"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; wp_insert_post(['post_title' => 'SiteOrigin Page Builder Test Layout!','post_content' => '<!-- wp:siteorigin-panels/layout-block /-->', 'post_status' => 'publish', 'post_type' => 'page',]);"
+    }
+  ],
+  "login": true,
+  "landingPage": "/wp-admin/post.php?post=4&action=edit"
 }
