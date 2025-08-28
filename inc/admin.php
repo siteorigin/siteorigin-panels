@@ -331,7 +331,7 @@ class SiteOrigin_Panels_Admin {
 				'4.1.0-rc.0'
 			);
 
-			wp_register_style(
+			wp_enqueue_style(
 				'select2',
 				siteorigin_panels_url( 'css/lib/select2' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
 				array(),
@@ -1260,9 +1260,6 @@ class SiteOrigin_Panels_Admin {
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
 		$return = SiteOrigin_Panels::renderer()->render( (int) $post_id, false, $panels_data );
 
-		if ( function_exists( 'wp_targeted_link_rel' ) && is_array( $return ) ) {
-			$return = wp_targeted_link_rel( $return );
-		}
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
 
 		return $return;

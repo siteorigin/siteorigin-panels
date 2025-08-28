@@ -8,6 +8,12 @@
 class SiteOrigin_Panels_Admin_Layouts {
 	const LAYOUT_URL = 'https://layouts.siteorigin.com/';
 
+	const VALID_MIME_TYPES = array(
+		'application/json',
+		'text/plain',
+		'text/html',
+	);
+
 	public function __construct() {
 		// Filter all the available external layout directories.
 		add_filter( 'siteorigin_panels_external_layout_directories', array( $this, 'filter_directories' ), 8 );
@@ -64,6 +70,29 @@ class SiteOrigin_Panels_Admin_Layouts {
 	}
 
 	/**
+	 * Check if the file has a valid MIME type.
+	 *
+	 * This method checks if the given file has a valid MIME type. It first verifies
+	 * if the `mime_content_type` function exists. If it doesn't, it returns true
+	 * as it can't check the MIME type due to server settings.
+	 * If the function exists, it retrieves the MIME type of the file and checks
+	 * if it is in the list of valid MIME types.
+	 *
+	 * @param string $file The file path to check.
+	 *
+	 * @return bool True if the file has a valid MIME type, false otherwise.
+	 */
+	private static function check_file_mime( $file ) {
+		if ( ! function_exists( 'mime_content_type' ) ) {
+			// Can't check mime type due to server settings.
+			return true;
+		}
+
+		$mime_type = mime_content_type( $file );
+		return in_array( $mime_type, self::VALID_MIME_TYPES );
+	}
+
+	/**
 	 * Determines if file has a JSON extension.
 	 *
 	 * @param string $file File path.
@@ -103,22 +132,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 				}
 
 				foreach ( $files as $file ) {
-					$valid_file_type = false;
-					if ( function_exists( 'mime_content_type' ) ) {
-						$mime_type = mime_content_type( $file );
-						$valid_file_type = strpos( $mime_type, '/json' ) !== false;
-
-						if ( ! $valid_file_type ) {
-							// It could have the wrong MIME type. Check for text/plain, and if it is, check the extension.
-							$valid_file_type = strpos( $mime_type, 'text/plain' ) !== false &&
-								self::check_file_ext( $file );
-						}
-					} else {
-						// Can't check MIME. Check extension.
-						$valid_file_type = self::check_file_ext( $file );
-					}
-
-					if ( ! $valid_file_type ) {
+					// Check the file.
+					if (
+						! self::check_file_mime( $file ) ||
+						! self::check_file_ext( $file )
+					) {
 						continue;
 					}
 
@@ -216,9 +234,9 @@ class SiteOrigin_Panels_Admin_Layouts {
 		// Get any layouts that the current user could edit.
 		header( 'content-type: application/json' );
 
-		$type = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'directory-siteorigin';
-		$search = ! empty( $_REQUEST['search'] ) ? trim( strtolower( $_REQUEST['search'] ) ) : '';
-		$page_num = ! empty( $_REQUEST['page'] ) ? (int) $_REQUEST['page'] : 1;
+		$type = ! empty( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : 'directory-siteorigin';
+		$search = ! empty( $_REQUEST['search'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) : '';
+		$page_num = ! empty( $_REQUEST['page'] ) ? intval( $_REQUEST['page'] ) : 1;
 
 		$return = array(
 			'title' => '',
@@ -247,33 +265,33 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 			$return['max_num_pages'] = 1;
 		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
-			$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
-
-			// This is a query of the prebuilt layout directory
-			$query = array();
-
-			if ( ! empty( $search ) ) {
-				$query['search'] = $search;
-			}
-			$query['page'] = $page_num;
-
 			$directory_id = str_replace( 'directory-', '', $type );
-			$directories = $this->get_directories();
-			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
-
-			if ( empty( $directory ) ) {
-				return false;
+			// If the user isn't searching, check if we have a cached version of the results.
+			if ( empty( $search ) ) {
+				$cache = get_transient( 'siteorigin_panels_layouts_directory_cache_' . $directory_id .'_page_' . $page_num );
+				if ( ! empty( $cache ) ) {
+					$return = $cache;
+				}
 			}
 
-			$cache = get_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num );
+			if ( empty( $return['items'] ) ) {
+				$return['title'] = __( 'Layouts Directory', 'siteorigin-panels' );
 
-			if ( empty( $search ) && ! empty( $cache ) ) {
-				$return = $cache;
-			} else {
+				// This is a query of the prebuilt layout directory
+				$query = array(
+					'search' => $search,
+					'page' => $page_num,
+				);
+				$directories = $this->get_directories();
+				$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
+
+				if ( empty( $directory ) ) {
+					return false;
+				}
 				$url = add_query_arg( $query, $directory[ 'url' ] . 'wp-admin/admin-ajax.php?action=query_layouts' );
 
-				if ( ! empty( $directory['args'] ) && is_array( $directory['args'] ) ) {
-					$url = add_query_arg( $directory['args'], $url );
+				if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
+					$url = add_query_arg( $directory[ 'args' ], $url );
 				}
 
 				$url = apply_filters( 'siteorigin_panels_layouts_directory_url', $url );
@@ -291,6 +309,27 @@ class SiteOrigin_Panels_Admin_Layouts {
 							$item['id'] = esc_html( $item['slug'] );
 							$item['type'] = esc_html( $type );
 
+							// Always process category and niche classes for filtering.
+							$item['access'] = ! empty( $item['access'] ) ? esc_html( $item['access'] ) : '';
+							
+							// Convert category and niche names to CSS class format.
+							if ( ! empty( $item['category'] ) ) {
+								$item['category'] = 'so-' . sanitize_title( $item['category'] );
+							}
+							
+							if ( ! empty( $item['niches'] ) ) {
+								$niche_names = json_decode( $item['niches'] );
+								if ( is_array( $niche_names ) ) {
+									$formatted_niches = array_map( function( $niche ) {
+										return 'so-' . sanitize_title( $niche );
+									}, $niche_names );
+									$item['niches'] = ' ' . implode( ' ', $formatted_niches );
+								}
+							}
+							
+							// Set the CSS class to be the category + niches.
+							$item['class'] = trim( $item['category'] . ( ! empty( $item['niches'] ) ? $item['niches'] : '' ) );
+
 							if ( empty( $item['screenshot'] ) && ! empty( $item['preview'] ) ) {
 								$preview_url = add_query_arg( 'screenshot', 'true', $item[ 'preview' ] );
 								$item['screenshot'] = esc_url( 'https://s.wordpress.com/mshots/v1/' . urlencode( $preview_url ) . '?w=700' );
@@ -298,16 +337,42 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 							$return['items'][] = $item;
 						}
+
+						if ( ! empty( $results['niches'] ) ) {
+							// Convert the categories and niches to the expected format for filtering.
+							// The layout-viewer returns them as slug => name, but we need to format them.
+							// so the filter buttons work with the CSS classes
+							$return['niches'] = $this->format_filter_terms( $results['niches'] );
+							$return['categories'] = $this->format_filter_terms( $results['categories'] );
+						}
 					}
 
 					$return['max_num_pages'] = $results['max_num_pages'];
-					set_transient( 'siteorigin_panels_layouts_directory_' . $directory_id .'_page_' . $page_num, $return, 86400 );
+
+					// If the user isn't searching, cache the results.
+					if ( empty( $search ) ) {
+						set_transient( 'siteorigin_panels_layouts_directory_cache_' . $directory_id .'_page_' . $page_num, $return, 86400 );
+					}
 				}
 			}
+			$no_search_title = true;
 		} elseif ( strpos( $type, 'clone_' ) !== false ) {
-			// Check that the user can view the given page types
-			$post_type = get_post_type_object( str_replace( 'clone_', '', $type ) );
+			$post_type = str_replace( 'clone_', '', $type );
+			$post_types_editable_by_user = SiteOrigin_Panels_Admin_Layouts::single()->post_types();
 
+			// Can the user edit posts from this post type?
+			if (
+				empty( $post_type ) ||
+				empty( $post_types_editable_by_user ) ||
+				! in_array(
+					$post_type,
+					$post_types_editable_by_user
+				)
+			) {
+				return;
+			}
+
+			$post_type = get_post_type_object( $post_type );
 			if ( empty( $post_type ) ) {
 				return;
 			}
@@ -348,13 +413,48 @@ class SiteOrigin_Panels_Admin_Layouts {
 		}
 
 		// Add the search part to the title
-		if ( ! empty( $search ) ) {
+		if ( ! empty( $search ) && empty( $no_search_title ) ) {
 			$return['title'] .= __( ' - Results For:', 'siteorigin-panels' ) . ' <em>' . esc_html( $search ) . '</em>';
 		}
 
-		echo wp_json_encode( apply_filters( 'siteorigin_panels_layouts_result', $return, $type ) );
+		$return = apply_filters( 'siteorigin_panels_layouts_result', $return, $type );
+		
+		echo wp_json_encode( $return );
 
 		wp_die();
+	}
+
+	/**
+	 * Escapes the keys and values of an array using the `esc_html` function.
+	 *
+	 * @param array $results The array to escape.
+	 * @return array The escaped array.
+	 */
+	private function escape_results( $results = array() ) {
+		$escaped_values = array();
+		foreach ( $results as $key => $value ) {
+			$escaped_key = esc_html( $key );
+			$escaped_value = esc_html( $value );
+			$escaped_values[ $escaped_key ] = $escaped_value;
+		}
+		return $escaped_values;
+	}
+
+	/**
+	 * Format filter terms for category/niche filtering.
+	 * Converts from layout-viewer format (slug => name) to filtering format.
+	 *
+	 * @param array $terms The terms array from layout-viewer API.
+	 * @return array Formatted terms for filtering.
+	 */
+	private function format_filter_terms( $terms = array() ) {
+		$formatted_terms = array();
+		foreach ( $terms as $slug => $name ) {
+			// The layout-viewer API returns slug => name where slug already has 'so-' prefix.
+			// Use the slug as-is since it already matches the CSS classes on layout items.
+			$formatted_terms[ $slug ] = esc_html( $name );
+		}
+		return $formatted_terms;
 	}
 
 	private function delete_file( $file ) {
@@ -385,15 +485,21 @@ class SiteOrigin_Panels_Admin_Layouts {
 	 * Ajax handler to get an individual prebuilt layout
 	 */
 	public function action_get_prebuilt_layout() {
-		if ( empty( $_REQUEST['type'] ) ) {
+		if (
+			empty( $_REQUEST['_panelsnonce'] ) ||
+			! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' )
+		) {
 			wp_die();
 		}
 
-		if ( ! isset( $_REQUEST['lid'] ) ) {
+		$type = isset( $_REQUEST['type'] ) ? sanitize_key( $_REQUEST['type'] ) : '';
+		$layout_id = isset( $_REQUEST['lid'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['lid'] ) ) : '';
+
+		if ( empty( $type ) ) {
 			wp_die();
 		}
 
-		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'panels_action' ) ) {
+		if ( empty( $layout_id ) ) {
 			wp_die();
 		}
 
@@ -401,12 +507,12 @@ class SiteOrigin_Panels_Admin_Layouts {
 		$panels_data = array();
 		$raw_panels_data = false;
 
-		if ( $_REQUEST['type'] == 'prebuilt' ) {
+		if ( $type == 'prebuilt' ) {
 			$layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 			if (
-				! is_numeric( $_REQUEST['lid'] ) &&
-				empty( $layouts[ $_REQUEST['lid'] ] )
+				! is_numeric( $layout_id ) &&
+				empty( $layouts[ $layout_id ] )
 			) {
 				wp_send_json_error( array(
 					'error'   => true,
@@ -414,7 +520,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 				) );
 			}
 
-			$layout = $layouts[ $_REQUEST['lid'] ];
+			$layout = $layouts[ $layout_id ];
 
 			// Fix the format of this layout
 			if ( ! empty( $layout[ 'filename' ] ) ) {
@@ -429,7 +535,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 
 			// A theme or plugin could use this to change the data in the layout
-			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $_REQUEST['lid'] );
+			$panels_data = apply_filters( 'siteorigin_panels_prebuilt_layout', $layout, $layout_id );
 
 			// Remove all the layout specific attributes
 			if ( isset( $panels_data['name'] ) ) {
@@ -445,14 +551,14 @@ class SiteOrigin_Panels_Admin_Layouts {
 			}
 
 			$raw_panels_data = true;
-		} elseif ( substr( $_REQUEST['type'], 0, 10 ) == 'directory-' ) {
-			$directory_id = str_replace( 'directory-', '', $_REQUEST['type'] );
+		} elseif ( substr( $type, 0, 10 ) == 'directory-' ) {
+			$directory_id = str_replace( 'directory-', '', $type );
 
 			$directories = $this->get_directories();
 			$directory = ! empty( $directories[ $directory_id ] ) ? $directories[ $directory_id ] : false;
 
 			if ( ! empty( $directory ) ) {
-				$url = $directory[ 'url' ] . 'layout/' . urlencode( $_REQUEST[ 'lid' ] ) . '/?action=download';
+				$url = $directory[ 'url' ] . 'layout/' . urlencode( $layout_id ) . '/?action=download';
 
 				if ( ! empty( $directory[ 'args' ] ) && is_array( $directory[ 'args' ] ) ) {
 					$url = add_query_arg( $directory[ 'args' ], $url );
@@ -460,19 +566,23 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 				$response = wp_remote_get( $url );
 
-				if ( $response['response']['code'] == 200 ) {
-					// For now, we'll just pretend to load this
+				if ( is_wp_error( $response ) ) {
+					wp_send_json_error( array(
+						'error'   => true,
+						'message' => 'WordPress error: ' . $response->get_error_message(),
+					) );
+				} elseif ( $response['response']['code'] == 200 ) {
 					$panels_data = json_decode( $response['body'], true );
 				} else {
 					wp_send_json_error( array(
 						'error'   => true,
-						'message' => __( 'There was a problem fetching the layout. Please try again later.', 'siteorigin-panels' ),
+						'message' => 'HTTP Error ' . $response['response']['code'] . ': There was a problem fetching the layout. Please try again later.',
 					) );
 				}
 			}
 			$raw_panels_data = true;
-		} elseif ( current_user_can( 'edit_post', $_REQUEST['lid'] ) ) {
-			$panels_data = get_post_meta( $_REQUEST['lid'], 'panels_data', true );
+		} elseif ( current_user_can( 'edit_post', $layout_id ) ) {
+			$panels_data = get_post_meta( $layout_id, 'panels_data', true );
 
 			// Clear id and timestamp for SO widgets to prevent 'newer content version' notification in widget forms.
 			foreach ( $panels_data['widgets'] as &$widget ) {
@@ -487,7 +597,34 @@ class SiteOrigin_Panels_Admin_Layouts {
 			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 		}
 
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = $this->close_all_containers( $panels_data['widgets'] );
+		}
+
 		wp_send_json_success( $panels_data );
+	}
+
+	/**
+	 * Recursively close all containers in the widget.
+	 *
+	 * @param array $widget The widget data.
+	 *
+	 * @return array The widget data with all fields closed.
+	 */
+	private function close_all_containers( $widget ) {
+		foreach( $widget as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$widget[ $key ] = $this->close_all_containers( $value );
+				continue;
+			}
+
+			// If the key is `so_field_container_state`, set it to true.
+			if ( $key === 'so_field_container_state' ) {
+				$widget[ $key ] = 'closed';
+			}
+		}
+
+		return $widget;
 	}
 
 	/**
@@ -515,6 +652,11 @@ class SiteOrigin_Panels_Admin_Layouts {
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
+
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = $this->close_all_containers( $panels_data['widgets'] );
+		}
+
 		echo wp_json_encode( $panels_data );
 		wp_die();
 	}
@@ -540,7 +682,7 @@ class SiteOrigin_Panels_Admin_Layouts {
 		header( 'content-type: application/json' );
 		header( "Content-Disposition: attachment; filename=$filename.json" );
 
-		echo wp_json_encode( $export_data );
+		echo wp_json_encode( $decoded_export_data );
 
 		wp_die();
 	}
@@ -576,5 +718,34 @@ class SiteOrigin_Panels_Admin_Layouts {
 		), $layout_data );
 
 		return $layout_data;
+	}
+
+	/**
+	 * Get the post types that the current user can edit.
+	 *
+	 * This function retrieves the post types specified in the
+	 * SiteOrigin Panels settings. It then filters out post types that the
+	 * current user does not have permission to edit.
+	 *
+	 * @return array The post types that the current user can edit.
+	 */
+	public function post_types() {
+		$post_types = siteorigin_panels_setting( 'post-types' );
+		if ( empty( $post_types ) ) {
+			return array();
+		}
+
+		foreach ( $post_types as $id => $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if (
+				empty( $post_type_object ) ||
+				! current_user_can( $post_type_object->cap->edit_posts )
+			) {
+				unset( $post_types[ $id ] );
+			}
+		}
+
+		return $post_types;
 	}
 }

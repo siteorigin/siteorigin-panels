@@ -404,40 +404,44 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		// Conditionally show Background related settings.
-		var $background_image = this.$( '.so-field-background_image_attachment' ),
-			$background_image_display = this.$( '.so-field-background_display' ),
-			$background_image_size = this.$( '.so-field-background_image_size' );
-			$background_image_opacity = this.$( '.so-field-background_image_opacity' );
+			const $background_image = this.$( '.so-field-background_image_attachment' );
+			const $background_image_display = this.$( '.so-field-background_display' );
+			const $background_image_size = this.$( '.so-field-background_image_size' );
+			const $background_image_opacity = this.$( '.so-field-background_image_opacity' );
+			const $background_image_alt = this.$( '.so-field-background_image_alt' );
 
-		if (
-			$background_image.length &&
-			(
-				$background_image_display.length ||
-				$background_image_size.length ||
-				$background_image_opacity.length
-			)
-		) {
-			var soBackgroundImageVisibility = function() {
-				var hasImage = $background_image.find( '[name="style[background_image_attachment]"]' );
+			if (
+				$background_image.length &&
+				(
+					$background_image_display.length ||
+					$background_image_size.length ||
+					$background_image_opacity.length ||
+					$background_image_alt.length
+				)
+			) {
+				var soBackgroundImageVisibility = function() {
+					var hasImage = $background_image.find( '[name="style[background_image_attachment]"]' );
 
-				if ( ! hasImage.val() || hasImage.val() == 0 ) {
-					hasImage = $background_image.find( '[name="style[background_image_attachment_fallback]"]' );
+					if ( ! hasImage.val() || hasImage.val() == 0 ) {
+						hasImage = $background_image.find( '[name="style[background_image_attachment_fallback]"]' );
+					}
+
+					if ( hasImage.val() && hasImage.val() != 0 ) {
+						$background_image_display.show();
+						$background_image_size.show();
+						$background_image_opacity.show();
+						$background_image_alt.show();
+					} else {
+						$background_image_display.hide();
+						$background_image_size.hide();
+						$background_image_opacity.hide();
+						$background_image_alt.hide();
+					}
 				}
-
-				if ( hasImage.val() && hasImage.val() != 0 ) {
-					$background_image_display.show();
-					$background_image_size.show();
-					$background_image_opacity.show();
-				} else {
-					$background_image_display.hide();
-					$background_image_size.hide();
-					$background_image_opacity.hide();
-				}
+				soBackgroundImageVisibility();
+				$background_image.find( '[name="style[background_image_attachment]"], [name="style[background_image_attachment_fallback]"]' ).on( 'change', soBackgroundImageVisibility );
+				$background_image.find( '.remove-image' ).on( 'click', soBackgroundImageVisibility );
 			}
-			soBackgroundImageVisibility();
-			$background_image.find( '[name="style[background_image_attachment]"], [name="style[background_image_attachment_fallback]"]' ).on( 'change', soBackgroundImageVisibility );
-			$background_image.find( '.remove-image' ).on( 'click', soBackgroundImageVisibility );
-		}
 
 		// Conditionally show Border related settings.
 		var $border_color = this.$( '.so-field-border_color' ),

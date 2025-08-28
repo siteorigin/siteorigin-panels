@@ -98,15 +98,13 @@ module.exports = panels.view.dialog.extend( {
 			}.bind( this ) );
 
 		this.on( 'open_dialog_complete', function() {
-			// The form isn't always ready when this event fires.
-			setTimeout( function() {
-				var focusTarget = $( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first();
-				if ( focusTarget.length ) {
-					focusTarget.trigger( 'focus' );
-				} else {
-					$( '.so-panels-dialog-wrapper .so-title' ).trigger( 'focus' );
-				}
-			}, 1250 )
+			// If the title isn't visible, focus the first input.
+			const focusTarget = this.$( '.so-title-editable' );
+			if ( focusTarget.length ) {
+				focusTarget.trigger( 'focus' );
+			} else {
+				this.$( '.so-content .siteorigin-widget-field-repeater-item-top, .so-content input, .so-content select' ).first().trigger( 'focus' );
+			}
 		} );
 	},
 
@@ -118,7 +116,8 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-widget' ).html(), {} ) );
 		this.loadForm();
 
-		const title = _.escape( this.model.getWidgetField( 'title' ) );
+		const rawTitle = this.model.getWidgetField( 'title' );
+		const title = _.escape( rawTitle ).replace( /&quot;/g, '"' );
 		this.$( '.so-title .widget-name' ).text( title );
 		this.$( '.so-edit-title' ).val( title );
 

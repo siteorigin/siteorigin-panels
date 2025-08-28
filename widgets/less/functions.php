@@ -8,7 +8,7 @@
  * @return array|bool
  */
 function origin_widgets_less_lum_change( $args, $type = 'darken' ) {
-	if ( !class_exists( 'SiteOrigin_Color_Object' ) ) {
+	if ( ! class_exists( 'SiteOrigin_Color_Object' ) ) {
 		include plugin_dir_path( __FILE__ ) . '../lib/color.php';
 	}
 

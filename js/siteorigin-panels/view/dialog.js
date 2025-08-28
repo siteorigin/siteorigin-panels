@@ -148,6 +148,9 @@ module.exports = Backbone.View.extend( {
 				this.parentDialog.dialog.openDialog();
 			}.bind(this) );
 			this.$( '.so-title-bar .so-title' ).before( dialogParent );
+
+			// Remove the Mode Button in dialogs that have a parent dialog.
+			this.$el.find( '.so-button-mode' ).remove();
 		}
 
 		if( this.$( '.so-title-bar .so-title-editable' ).length ) {

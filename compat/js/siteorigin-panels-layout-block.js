@@ -81,7 +81,7 @@ function (_wp$element$Component) {
     key: "initializeState",
     value: function initializeState(props) {
       var newState = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var hasPanelsData = _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
+      var hasPanelsData = props.panelsData && _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
       var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
       var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
       this.initialState = {
@@ -238,8 +238,13 @@ function (_wp$element$Component) {
           return true;
         }
 
-        if (!newPanelsData || !oldPanelsData || _typeof(newPanelsData) !== 'object' && _typeof(oldPanelsData) !== 'object') {
+        if (!newPanelsData || !oldPanelsData) {
           return newPanelsData === oldPanelsData;
+        } // If neither newPanelsData nor oldPanelsData are objects, assume they're not the same.
+
+
+        if (_typeof(newPanelsData) !== 'object' || _typeof(oldPanelsData) !== 'object') {
+          return false;
         }
 
         var keys = Object.keys(newPanelsData);
@@ -412,7 +417,7 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
         toggleSelection = _ref.toggleSelection;
 
     var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
-      if (_typeof(newPanelsData.widgets) === 'object' && Object.keys(newPanelsData.widgets).length > 0) {
+      if (newPanelsData.widgets !== null && _typeof(newPanelsData.widgets) === 'object' && Object.keys(newPanelsData.widgets).length > 0) {
         // Send panelsData to server for sanitization.
         var isNewWPBlockEditor = jQuery('.widgets-php').length;
 

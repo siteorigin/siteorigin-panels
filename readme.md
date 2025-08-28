@@ -1,14 +1,21 @@
 # [Page Builder by SiteOrigin](https://siteorigin.com/page-builder/)
 
-This is the official development for SiteOrigin's Page Builder plugin. You can browse the source and take a look at what we're working on. We welcome issue reports and pull requests. 
+Development repository for Page Builder by SiteOrigin, a drag and drop page builder for creating responsive, column-based content using widgets.
 
-Changes here are pushed to our [plugin page](https://wordpress.org/plugins/siteorigin-panels/) on WordPress.org. This is where you should download stable releases.
+* **Stable Releases:** Download from the [WordPress.org plugin page](https://wordpress.org/plugins/siteorigin-panels/).
+
+## Contributing
+
+You can contribute via issue reports and pull requests.
 
 ## Support
 
-If you have a support question, please, post on the [SiteOrigin support forums](https://siteorigin.com/thread/).
+We offer two support tiers:
+
+1.  **Free Tier (Forum):** Please post questions and support requests on the [SiteOrigin Support Forum](https://siteorigin.com/thread/). All threads receive a reply from our team.
+2.  **Premium Tier (Email):** If you have an active **SiteOrigin Premium** license, please email [support@siteorigin.com](mailto:support@siteorigin.com) for priority assistance.
 
 ## Documentation
 
-* [User Documentation](https://siteorigin.com/page-builder/documentation/).
-* [Developer Documentation](https://siteorigin.com/docs/page-builder/).
+* [User Documentation](https://siteorigin.com/page-builder/documentation/)
+* [Developer Documentation](https://siteorigin.com/docs/page-builder/)
