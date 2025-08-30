@@ -72,7 +72,7 @@ module.exports = {
             '!readme.txt',                                   // Not the readme.txt file. It is copied by the 'version' task.
             '!readme.md',                                    // Ignore the readme.md file. It is for the github repo.
             '!{js/siteorigin-panels,js/siteorigin-panels/**}',
-            '!.wordpress-org',                               // Exclude WordPress.org specific code.
+            '!{.wordpress-org,.wordpress-org/**}',           // Exclude WordPress.org specific code.
             '!{inc/installer/github-updater,inc/installer/github-updater/**}', // Exclude Installer GitHub Updater directory.
         ]
     },
