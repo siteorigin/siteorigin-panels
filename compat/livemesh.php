@@ -10,8 +10,8 @@
  * @param mixed  $value     The new value being saved to the lsow_settings option.
  * @param string $option    The name of the option being updated (should be 'lsow_settings').
 */
-function lsow_settings_updated( $old_value, $value, $option ) {
+function siteorigin_panels_lsow_settings_update( $old_value, $value, $option ) {
 	delete_transient( 'siteorigin_panels_widgets' );
 	delete_transient( 'siteorigin_panels_widget_dialog_tabs' );
 }
-add_action( 'update_option_lsow_settings', 'lsow_settings_updated', 10, 3 );
+add_action( 'update_option_lsow_settings', 'siteorigin_panels_lsow_settings_update', 10, 3 );
