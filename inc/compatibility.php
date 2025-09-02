@@ -31,6 +31,11 @@ class SiteOrigin_Panels_Compatibility {
 		) {
 			SiteOrigin_Panels_Compat_ACF_Widgets::single();
 		}
+
+		// Compatibility with Livemesh SiteOrigin Widgets.
+		if ( defined( 'LSOW_VERSION' ) ) {
+			require_once $this->compat_path . 'livemesh.php';
+		}
 	}
 
 	public function init() {

@@ -121,6 +121,11 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.33.2 – 02 September 2025 =
+* Livemesh Compat: Added SiteOrigin Widgets compatibility.
+* Added Blueprint.json for WP.org Live Preview functionality.
+* Build Config: Updated WordPress.org asset exclusion path.
+
 = 2.33.1 – 31 July 2025 =
 * Layout Directory: Fixed pagination and search functionality.
 * Layouts: Fixed an issue with cloning layouts.
