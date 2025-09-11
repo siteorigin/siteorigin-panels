@@ -323,20 +323,25 @@ class SiteOrigin_Panels_Admin {
 				true
 			);
 
-			wp_register_script(
-				'select2',
-				esc_url( siteorigin_panels_url( 'js/lib/select2' . SITEORIGIN_PANELS_JS_SUFFIX . '.js'
-				) ),
-				array( 'jquery' ),
-				'4.1.0-rc.0'
-			);
+			if (
+				! wp_script_is( 'select2', 'registered' ) &&
+				! wp_script_is( 'select2', 'enqueued' )
+			) {
+				wp_register_script(
+					'select2',
+					esc_url( siteorigin_panels_url( 'js/lib/select2' . SITEORIGIN_PANELS_JS_SUFFIX . '.js'
+					) ),
+					array( 'jquery' ),
+					'4.1.0-rc.0'
+				);
 
-			wp_enqueue_style(
-				'select2',
-				siteorigin_panels_url( 'css/lib/select2' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
-				array(),
-				'4.1.0-rc.0'
-			);
+				wp_enqueue_style(
+					'select2',
+					siteorigin_panels_url( 'css/lib/select2' . SITEORIGIN_PANELS_CSS_SUFFIX . '.css' ),
+					array(),
+					'4.1.0-rc.0'
+				);
+			}
 
 			// Media is required for row styles.
 			wp_enqueue_media();
