@@ -38,6 +38,10 @@ module.exports = function ( config, force ) {
 		// Save panels data when we close the dialog, if we're in a dialog
 		var dialog = $$.closest( '.so-panels-dialog-wrapper' ).data( 'view' );
 		if ( ! _.isUndefined( dialog ) ) {
+			// Refresh the panelsData when the dialog is initially opened to
+			// prevent triggering unexpected change notifications.
+			builderModel.refreshPanelsData();
+			
 			dialog.on( 'close_dialog', function () {
 				builderModel.refreshPanelsData();
 			} );
