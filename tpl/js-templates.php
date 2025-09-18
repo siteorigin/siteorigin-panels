@@ -111,7 +111,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 									$name = ! empty( $color['name'] ) ? sanitize_title( $color['name'] ) : $id;
 									?>
 									<div data-color-label="<?php echo esc_attr( $name ); ?>"
-										class="<?php esc_attr_e( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
+										class="<?php echo esc_attr( 'so-row-color so-row-color-' . $name ); ?>{{% if( rowColorLabel == '<?php echo esc_attr( $name ); ?>' ) print(' so-row-color-selected'); %}}"
 									></div>
 								<?php } ?>
 							</li>
