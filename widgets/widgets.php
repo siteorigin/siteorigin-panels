@@ -194,7 +194,7 @@ abstract class SiteOrigin_Panels_Widget extends WP_Widget {
 			}
 
 			?>
-			<p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_attr( esc_html( $field_args['label'] ) ); ?></label>
+			<p><label for="<?php echo esc_attr( $this->get_field_id( $field_id ) ); ?>"><?php echo esc_html( $field_args['label'] ); ?></label>
 			<?php
 
 			if ( $field_args['type'] != 'checkbox' ) {
