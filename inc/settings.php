@@ -613,7 +613,7 @@ class SiteOrigin_Panels_Settings {
 				<label class="widefat">
 					<input name="<?php echo esc_attr( $field_name ); ?>"
 						type="checkbox" <?php checked( ! empty( $value ) ); ?> />
-					<?php esc_html_e( ! empty( $field['checkbox_text'] ) ? $field['checkbox_text'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
+					<?php echo esc_html( ! empty( $field['checkbox_text'] ) ? $field['checkbox_text'] : __( 'Enabled', 'siteorigin-panels' ) ); ?>
 				</label>
 				<?php
 				break;
