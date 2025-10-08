@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.33.3 – 07 October 2025 =
+* Accessibility: Improved the screen-reader-only helper to prevent visible text flashes.
+* Builder Widget: Refreshed panels data when opening nested dialogs to avoid unexpected change notices.
+* Localization: Corrected escaping in admin settings and widget field templates so translated labels render as expected.
+* Select2: Prevented duplicate script registration and raised the dropdown z-index to keep the picker usable in dialogs.
+
 = 2.33.2 – 02 September 2025 =
 * Livemesh Compat: Added SiteOrigin Widgets compatibility.
 * Added Blueprint.json for WP.org Live Preview functionality.
