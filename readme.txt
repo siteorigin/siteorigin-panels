@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.33.4 – 03 December 2025 =
+* Updated Tested up to tag.
+
 = 2.33.3 – 07 October 2025 =
 * Accessibility: Improved the screen-reader-only helper to prevent visible text flashes.
 * Builder Widget: Refreshed panels data when opening nested dialogs to avoid unexpected change notices.
