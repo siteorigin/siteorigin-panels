@@ -413,6 +413,7 @@ class SiteOrigin_Panels_Admin {
 					$contextual_actions[ $context ][ $action_id ] = array(
 						'title' => sanitize_text_field( $action['title'] ),
 						'confirm' => ! empty( $action['confirm'] ),
+						'priority' => isset( $action['priority'] ) ? (int) $action['priority'] : 50,
 					);
 				}
 			}
