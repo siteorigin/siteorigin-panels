@@ -446,6 +446,11 @@ module.exports = Backbone.View.extend( {
 			actions.delete = { title: panelsOptions.loc.contextual.row_delete, confirm: true };
 		}
 
+		var contextualActions = panelsOptions.contextual && panelsOptions.contextual.actions && panelsOptions.contextual.actions.row
+			? panelsOptions.contextual.actions.row
+			: {};
+		actions = _.extend( actions, contextualActions );
+
 		if( ! _.isEmpty( actions ) ) {
 			menu.addSection(
 				'row-actions',
@@ -470,6 +475,17 @@ module.exports = Backbone.View.extend( {
 							break;
 						case 'delete':
 							this.visualDestroyModel();
+							break;
+						default:
+							if ( panels.events && panels.events.trigger ) {
+								panels.events.trigger( 'contextual_menu_action', {
+									context: 'row',
+									action: c,
+									view: this,
+									model: this.model,
+									builder: this.builder
+								} );
+							}
 							break;
 					}
 				}.bind( this )

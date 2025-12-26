@@ -387,6 +387,36 @@ class SiteOrigin_Panels_Admin {
 				return $tab;
 			}, $tabs );
 
+			$contextual_actions = apply_filters(
+				'siteorigin_panels_contextual_menu_actions',
+				array(
+					'row' => array(),
+					'widget' => array(),
+				)
+			);
+
+			$contextual_actions = is_array( $contextual_actions ) ? $contextual_actions : array();
+			$allowed_contexts = array( 'row', 'widget', 'cell', 'builder' );
+			$contextual_actions = array_intersect_key( $contextual_actions, array_flip( $allowed_contexts ) );
+			foreach ( $allowed_contexts as $context ) {
+				if ( empty( $contextual_actions[ $context ] ) || ! is_array( $contextual_actions[ $context ] ) ) {
+					$contextual_actions[ $context ] = array();
+					continue;
+				}
+
+				foreach ( $contextual_actions[ $context ] as $action_id => $action ) {
+					if ( empty( $action['title'] ) ) {
+						unset( $contextual_actions[ $context ][ $action_id ] );
+						continue;
+					}
+
+					$contextual_actions[ $context ][ $action_id ] = array(
+						'title' => sanitize_text_field( $action['title'] ),
+						'confirm' => ! empty( $action['confirm'] ),
+					);
+				}
+			}
+
 			$load_on_attach = siteorigin_panels_setting( 'load-on-attach' ) || isset( $_GET['siteorigin-page-builder'] );
 			wp_localize_script( 'so-panels-admin', 'panelsOptions', array(
 				'user'                      => ! empty( $user ) ? $user->ID : 0,
@@ -419,6 +449,7 @@ class SiteOrigin_Panels_Admin {
 						'SiteOrigin_Widget_Image_Widget',
 						'SiteOrigin_Panels_Widgets_Layout',
 					) ),
+					'actions' => $contextual_actions,
 				),
 
 				// General localization messages

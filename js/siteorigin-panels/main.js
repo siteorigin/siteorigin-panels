@@ -12,6 +12,7 @@ var panels = {};
 // Store everything globally
 window.panels = panels;
 window.siteoriginPanels = panels;
+panels.events = _.extend( {}, Backbone.Events );
 
 // Helpers
 panels.helpers = {};
