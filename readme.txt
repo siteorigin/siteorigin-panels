@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.33.5 – 07 January 2026 =
+* Added contextual menu action hooks for row and widget menus.
+
 = 2.33.4 – 03 December 2025 =
 * Updated Tested up to tag.
 
