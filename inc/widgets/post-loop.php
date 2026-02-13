@@ -560,9 +560,32 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 * @return bool
 	 */
 	public function validate_template_file( $filename ) {
-		return validate_file( $filename ) == 0 &&
-			substr( $filename, -4 ) == '.php' &&
+		return self::is_valid_template_name( $filename ) &&
 			self::locate_template( $filename ) != '';
+	}
+
+	/**
+	 * Check if a template name is safe to resolve.
+	 *
+	 * @param mixed $template_name Template to validate.
+	 *
+	 * @return bool
+	 */
+	private static function is_valid_template_name( $template_name ) {
+		if ( ! is_string( $template_name ) ) {
+			return false;
+		}
+
+		$template_name = trim( wp_normalize_path( $template_name ) );
+
+		if ( '' === $template_name || false !== strpos( $template_name, "\0" ) ) {
+			return false;
+		}
+
+		$template_name = ltrim( $template_name, '/' );
+
+		return validate_file( $template_name ) === 0 &&
+			substr( strtolower( $template_name ), -4 ) === '.php';
 	}
 
 	/**
@@ -575,13 +598,25 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	 */
 	public static function locate_template( $template_names, $load = false, $require_once = true ) {
 		$located = '';
+		$plugins_dir = trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) );
 
 		foreach ( (array) $template_names as $template_name ) {
+			if ( ! self::is_valid_template_name( $template_name ) ) {
+				continue;
+			}
+
+			$template_name = ltrim( trim( wp_normalize_path( $template_name ) ), '/' );
 			$located = locate_template( $template_name, false );
 
-			if ( ! $located && file_exists( WP_PLUGIN_DIR . '/' . $template_name ) ) {
+			$plugin_template = wp_normalize_path( WP_PLUGIN_DIR . '/' . $template_name );
+
+			if (
+				! $located &&
+				strpos( $plugin_template, $plugins_dir ) === 0 &&
+				file_exists( $plugin_template )
+			) {
 				// Template added by a plugin
-				$located = WP_PLUGIN_DIR . '/' . $template_name;
+				$located = $plugin_template;
 			}
 		}
 
