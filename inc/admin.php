@@ -275,7 +275,37 @@ class SiteOrigin_Panels_Admin {
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
 				}
-				wp_update_post( $post );
+				$copy_content_fire_after_hooks = true;
+
+				// Events Manager validates event data in wp_insert_post_data and can force
+				// draft during our internal post_content sync. Bypass that pass for EM events.
+				if (
+					defined( 'EM_VERSION' ) &&
+					in_array( get_post_type( $post_id ), array( 'event', 'event-recurring' ), true )
+				) {
+					global $wpdb;
+					$copy_content_fire_after_hooks = false;
+					$wpdb->update(
+						$wpdb->posts,
+						array(
+							'post_content'      => $post->post_content,
+							'post_modified'     => current_time( 'mysql' ),
+							'post_modified_gmt' => current_time( 'mysql', true ),
+						),
+						array(
+							'ID' => $post->ID,
+						),
+						array( '%s', '%s', '%s' ),
+						array( '%d' )
+					);
+					clean_post_cache( $post->ID );
+				} else {
+					$copy_content_update_args = array(
+						'ID'           => $post->ID,
+						'post_content' => $post->post_content,
+					);
+					wp_update_post( $copy_content_update_args, false, $copy_content_fire_after_hooks );
+				}
 			}
 		} else {
 			// There are no widgets or rows, so delete the panels data.
