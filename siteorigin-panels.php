@@ -336,11 +336,17 @@ class SiteOrigin_Panels {
 
 		// Check if this post has panels_data.
 		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
+			$original_post = $post;
+
 			$panel_content = SiteOrigin_Panels::renderer()->render(
 				$post_id,
 				// Add CSS if this is not the main single post, this is handled by add_single_css.
 				$preview || $post_id !== get_queried_object_id()
 			);
+
+			// Some widgets call wp_reset_postdata() while rendering and can alter global $post.
+			// Restore it so downstream the_content filters still receive the current post context.
+			$post = $original_post;
 
 			if ( ! empty( $panel_content ) ) {
 				$content = $panel_content;
