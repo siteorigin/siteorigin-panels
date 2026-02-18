@@ -1907,17 +1907,18 @@
 						}
 
 						.preview-cell-unit {
-							left: 10px;
-							position: absolute;
-							top: -1.5px;
-							z-index: 1;
+							cursor: pointer;
+							display: inline-block;
 							line-height: 1;
+							margin-left: 2px;
 						}
 
 						.preview-cell-container {
 							left: 50%;
 							position: absolute;
 							top: 50%;
+							.transform( translate( -50%, -50% ) );
+							width: 80px;
 						}
 
 						.preview-cell-weight,
@@ -1935,11 +1936,11 @@
 
 						.preview-cell-weight,
 						.preview-cell-weight-input[type="text"] {
-							padding: 10px 31px 10px 0;
+							padding: 10px 0;
 						}
 
 						.preview-cell-weight-input[type="number"] {
-							padding: 10px 13px 10px 5px;
+							padding: 10px 0;
 						}
 
 						.preview-cell-weight,
@@ -1948,15 +1949,25 @@
 							border: 1px solid #d0d0d0;
 							cursor: pointer;
 							line-height: 1.4em !important;
-							margin: -0.95em 0 0 -40px;
+							margin: 0;
 							overflow: hidden;
-							position: absolute;
-							text-align: right;
+							position: relative;
+							text-align: center;
 							width: 80px;
 
 							&:hover {
 								background: #f6f6f6;
 							}
+						}
+
+						.preview-cell-weight {
+							align-items: center;
+							display: flex;
+							justify-content: center;
+						}
+
+						.preview-cell-weight-value {
+							display: inline-block;
 						}
 
 						.preview-cell-weight-input {

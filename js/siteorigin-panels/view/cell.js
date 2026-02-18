@@ -204,10 +204,10 @@ module.exports = Backbone.View.extend( {
 					);
 
 				$( this ).data( 'newCellClone' ).css( 'width', containerWidth * ncw + 'px'  )
-					.find( '.preview-cell-weight' ).html( Math.round( ncw * 1000 ) / 10 );
+					.find( '.preview-cell-weight-value' ).text( Math.round( ncw * 1000 ) / 10 );
 
 				$( this ).data( 'prevCellClone' ).css( 'width', containerWidth * pcw + 'px' )
-					.find( '.preview-cell-weight' ).html( Math.round( pcw * 1000 ) / 10 );
+					.find( '.preview-cell-weight-value' ).text( Math.round( pcw * 1000 ) / 10 );
 			},
 			stop: function ( e, ui ) {
 				// Remove the clones

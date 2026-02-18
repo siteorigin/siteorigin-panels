@@ -55,7 +55,14 @@ module.exports = panels.view.dialog.extend({
 
 		// If user clicks the column size indicator, focus the field.
 		'click .preview-cell-unit ': function( e ) {
-			$( e.target ).next().trigger( 'focus' );
+			var $weight = $( e.target ).closest( '.preview-cell-weight' );
+			var $weightInput = $weight.siblings( '.preview-cell-weight-input:visible' );
+			if ( $weightInput.length ) {
+				$weightInput.first().trigger( 'focus' );
+				return;
+			}
+
+			$weight.trigger( 'focus' );
 		},
 
 		'keyup .cell-resize-direction': function( e ) {
@@ -336,10 +343,10 @@ module.exports = panels.view.dialog.extend({
 							);
 
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
-							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
+							.find( '.preview-cell-weight-value' ).text( Math.round( ncw * 1000 ) / 10 );
 
 						$( this ).data( 'prevCellClone' ).css( 'width', rowPreview.width() * pcw + 'px' )
-							.find('.preview-cell-weight').html(Math.round(pcw * 1000) / 10);
+							.find( '.preview-cell-weight-value' ).text( Math.round( pcw * 1000 ) / 10 );
 					},
 					stop: function (e, ui) {
 						// Remove the clones
@@ -483,7 +490,7 @@ module.exports = panels.view.dialog.extend({
 						max="${ maxSize }"
 						aria-label="${ label }"
 					/>` )
-						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
+						.val( parseFloat( $$.find( '.preview-cell-weight-value' ).text() ) ).insertAfter( $$ )
 						.on( 'focus', function() {
 							clearTimeout( timeout );
 							$( this ).attr( 'type', 'number' );
@@ -616,7 +623,7 @@ module.exports = panels.view.dialog.extend({
 			var cell = thisDialog.row.cells.at(i);
 			$(el)
 				.css('width', cell.get('weight') * 100 + "%")
-				.find('.preview-cell-weight').html(Math.round(cell.get('weight') * 1000) / 10);
+				.find( '.preview-cell-weight-value' ).text( Math.round( cell.get('weight') * 1000 ) / 10 );
 		});
 	},
 
@@ -646,7 +653,7 @@ module.exports = panels.view.dialog.extend({
 	updateActiveCellClass: function() {
 		$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
 		var activeCellRatio = this.$( '.preview-cell-weight' ).map( function() {
-			return Math.trunc( Number( $( this ).text() ) );
+			return Math.trunc( Number( $( this ).find( '.preview-cell-weight-value' ).text() ) );
 		} ).get();
 
 		var cellsCount = this.getCurrentCellCount();
@@ -770,10 +777,11 @@ module.exports = panels.view.dialog.extend({
 				this.$( '.preview-cell' ).each( function( i, el ) {
 					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
 					var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
+					var $previewCellWeightValue = $previewCellWeight.find( '.preview-cell-weight-value' );
 					// To prevent a jump, don't animate cells that haven't changed size.
-					if ( parseInt( $previewCellWeight.text() ) != width ) {
+					if ( parseFloat( $previewCellWeightValue.text() ) != width ) {
 						$( el ).animate( { 'width': width + "%" }, 250 );
-						$previewCellWeight.html( width );
+						$previewCellWeightValue.text( width );
 					}
 				} );
 

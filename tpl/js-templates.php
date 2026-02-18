@@ -406,8 +406,9 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	<div class="preview-cell" style="width: {{%- weight*100 %}}%">
 		<div class="preview-cell-in">
 			<div class="preview-cell-container">
-				<span class="preview-cell-unit">%</span>
-				<div class="preview-cell-weight" tabIndex="0">{{% print( Math.round( weight * 1000 ) / 10 ) %}}</div>
+				<div class="preview-cell-weight" tabIndex="0">
+					<span class="preview-cell-weight-value">{{% print( Math.round( weight * 1000 ) / 10 ) %}}</span><span class="preview-cell-unit">%</span>
+				</div>
 			</div>
 		</div>
 	</div>
