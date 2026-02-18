@@ -8,6 +8,7 @@ if ( ! apply_filters( 'siteorigin_panels_compat_events_manager', true ) ) {
 }
 
 $em_pb_removed = false;
+$siteorigin_panels_em_is_duplicating = false;
 
 /**
  * Disable Page Builder for Events Manager post types.
@@ -56,3 +57,77 @@ function siteorigin_panels_event_manager_loop_end() {
 	}
 }
 add_action( 'loop_end', 'siteorigin_panels_event_manager_loop_end' );
+
+/**
+ * Flag Events Manager duplication so we can avoid unsafe SQL inserts for panels_data.
+ *
+ * Events Manager duplicates post meta with a raw SQL insert statement. If Page Builder
+ * content contains quotes, the insert can fail. We skip panels_data in that query and
+ * copy it safely after duplication completes.
+ *
+ * @return void
+ */
+function siteorigin_panels_event_manager_duplicate_pre() {
+	global $siteorigin_panels_em_is_duplicating;
+	$siteorigin_panels_em_is_duplicating = true;
+}
+add_action( 'em_event_duplicate_pre', 'siteorigin_panels_event_manager_duplicate_pre' );
+
+/**
+ * Remove Page Builder data from Events Manager's raw SQL duplication payload.
+ *
+ * @param array $event_meta Event post meta.
+ *
+ * @return array
+ */
+function siteorigin_panels_event_manager_filter_duplicate_meta( $event_meta ) {
+	global $siteorigin_panels_em_is_duplicating;
+
+	if ( ! $siteorigin_panels_em_is_duplicating || ! is_array( $event_meta ) ) {
+		return $event_meta;
+	}
+
+	unset( $event_meta['panels_data'] );
+
+	return $event_meta;
+}
+add_filter( 'em_event_get_event_meta', 'siteorigin_panels_event_manager_filter_duplicate_meta' );
+
+/**
+ * Copy Page Builder data to the duplicated event using safe WordPress APIs.
+ *
+ * @param mixed $duplicated_event The duplicated event object, or false on failure.
+ * @param mixed $source_event     The original source event object.
+ *
+ * @return mixed
+ */
+function siteorigin_panels_event_manager_duplicate_copy_panels_data( $duplicated_event, $source_event ) {
+	global $siteorigin_panels_em_is_duplicating;
+	$siteorigin_panels_em_is_duplicating = false;
+
+	if (
+		empty( $duplicated_event ) ||
+		! is_object( $duplicated_event ) ||
+		! is_object( $source_event ) ||
+		empty( $duplicated_event->post_id ) ||
+		empty( $source_event->post_id )
+	) {
+		return $duplicated_event;
+	}
+
+	$source_panels_data = get_post_meta( (int) $source_event->post_id, 'panels_data', true );
+
+	if ( empty( $source_panels_data ) ) {
+		delete_post_meta( (int) $duplicated_event->post_id, 'panels_data' );
+		return $duplicated_event;
+	}
+
+	if ( is_callable( array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) ) {
+		$source_panels_data = map_deep( $source_panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) );
+	}
+
+	update_post_meta( (int) $duplicated_event->post_id, 'panels_data', $source_panels_data );
+
+	return $duplicated_event;
+}
+add_filter( 'em_event_duplicate', 'siteorigin_panels_event_manager_duplicate_copy_panels_data', 10, 2 );
