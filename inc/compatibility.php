@@ -126,6 +126,11 @@ class SiteOrigin_Panels_Compatibility {
 		if ( defined( 'EM_VERSION' ) ) {
 			require_once $this->compat_path . 'events-manager.php';
 		}
+
+		// Compatibility with Ditty.
+		if ( defined( 'DITTY_VERSION' ) ) {
+			require_once $this->compat_path . 'ditty.php';
+		}
 	}
 
 	public function widgets_init() {
