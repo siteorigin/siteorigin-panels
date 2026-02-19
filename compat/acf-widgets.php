@@ -42,6 +42,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 	 */
 	public function store_acf_widget_fields_instance( $the_widget, $instance ) {
 		if ( ! empty( $instance['acf'] ) ) {
+			$fields = array();
 			$field_groups = acf_get_field_groups( array(
 				'widget' => $the_widget->id_base,
 			) );
@@ -70,15 +71,15 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 		$fields = acf_get_store( 'so_fields' );
 		$instance = acf_get_store( 'so_widget_instance' );
 
-		if ( ! empty( $fields ) ) {
+		if ( ! empty( $fields ) && ! empty( $instance ) ) {
 			foreach ( $fields->data as $field ) {
 				if (
-					$widget_field['type'] != 'repeater' ||
+					$widget_field['type'] != 'repeater' &&
 					$widget_field['type'] != 'checkbox'
 				) {
 					if (
 						$field['key'] == $widget_field['key'] &&
-						! empty( $instance->data[ $field['key'] ] )
+						array_key_exists( $field['key'], $instance->data )
 					) {
 						return $instance->data[ $field['key'] ];
 					}
@@ -87,6 +88,8 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 				}
 			}
 		}
+
+		return $value;
 	}
 
 	/**
@@ -112,7 +115,7 @@ class SiteOrigin_Panels_Compat_ACF_Widgets {
 			}
 		}
 
-		if ( $fields != '' ) {
+		if ( $fields !== '' && $fields !== null ) {
 			return $fields;
 		}
 	}
