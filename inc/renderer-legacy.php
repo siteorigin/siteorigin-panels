@@ -111,10 +111,14 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 				'padding' => 0,
 			), $panels_mobile_width );
 
-			// Hide empty cells on mobile
-			$css->add_row_css( $post_id, false, ' .panel-grid-cell-empty', array(
-				'display' => 'none',
-			), $panels_mobile_width );
+			// Hide empty columns on mobile unless "Display Empty Columns With Background" is enabled.
+			if ( ! siteorigin_panels_setting( 'display-empty-rows-with-background' ) ) {
+				foreach ( $layout_data as $ri => $row ) {
+					$css->add_row_css( $post_id, $ri, ' .panel-grid-cell-empty', array(
+						'display' => 'none',
+					), $panels_mobile_width );
+				}
+			}
 
 			// Hide empty cells on mobile
 			$css->add_row_css( $post_id, false, ' .panel-grid-cell-mobile-last', array(
