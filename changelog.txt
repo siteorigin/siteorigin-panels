@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 2.34.0 – 21 February 2026 =
+* ACF: Improved widget compatibility for array return format.
+* AIOSEO, Layout Block: Prevented the AIOSEO SiteOrigin integration from loading in the Layout Block editor.
+* Events Manager: Fixed query context handling and duplication processing to prevent duplicate output and preserve Page Builder data.
+* Security: Hardened post loop template resolution to prevent local file inclusion risks.
+* WooCommerce: Prevented Shop page content from leaking into Terms and Conditions content rendering.
+* Added a setting to display empty columns with backgrounds in responsive layouts.
+
 = 2.33.5 – 07 January 2026 =
 * Added contextual menu action hooks for row and widget menus.
 
