@@ -23,7 +23,7 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return bool
 	 */
-	protected function is_empty_row( $row ) {
+	private function is_empty_row( $row ) {
 		if ( empty( $row['cells'] ) || ! is_array( $row['cells'] ) ) {
 			return true;
 		}
@@ -44,7 +44,7 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return bool
 	 */
-	protected function row_has_background( $row ) {
+	private function row_has_background( $row ) {
 		if ( empty( $row['style'] ) || ! is_array( $row['style'] ) ) {
 			return false;
 		}
@@ -63,7 +63,7 @@ class SiteOrigin_Panels_Renderer {
 	 *
 	 * @return bool
 	 */
-	protected function should_display_empty_background_row( $row ) {
+	private function should_display_empty_background_row( $row ) {
 		return (
 			siteorigin_panels_setting( 'display-empty-rows-with-background' ) &&
 			$this->is_empty_row( $row ) &&
