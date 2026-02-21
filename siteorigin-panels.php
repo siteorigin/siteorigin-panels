@@ -307,7 +307,7 @@ class SiteOrigin_Panels {
 	 * @filter woocommerce_format_content
 	 */
 	public function generate_woocommerce_content( $content ) {
-		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+		if ( self::should_use_woocommerce_shop_page_id() ) {
 			return $this->generate_post_content( $content );
 		}
 
@@ -333,7 +333,6 @@ class SiteOrigin_Panels {
 		}
 
 		$post_id = $this->get_post_id();
-
 		// Check if this post has panels_data.
 		if ( get_post_meta( $post_id, 'panels_data', true ) ) {
 			$original_post = $post;
@@ -499,7 +498,7 @@ class SiteOrigin_Panels {
 	public function get_post_id() {
 		$post_id = get_the_ID();
 
-		if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+		if ( self::should_use_woocommerce_shop_page_id() ) {
 			$post_id = wc_get_page_id( 'shop' );
 		}
 		global $preview;
@@ -513,6 +512,25 @@ class SiteOrigin_Panels {
 		}
 
 		return $post_id;
+	}
+
+	/**
+	 * Should we use the configured WooCommerce Shop page ID as the current post ID.
+	 *
+	 * This is intentionally strict because some WooCommerce rendering contexts can invoke content
+	 * filters while processing non-Shop content.
+	 */
+	public static function should_use_woocommerce_shop_page_id() {
+		if ( ! class_exists( 'WooCommerce' ) || ! is_shop() ) {
+			return false;
+		}
+
+		$shop_page_id = wc_get_page_id( 'shop' );
+		if ( empty( $shop_page_id ) ) {
+			return false;
+		}
+
+		return (int) get_queried_object_id() === (int) $shop_page_id;
 	}
 
 	/**
