@@ -520,7 +520,7 @@ class SiteOrigin_Panels {
 		}
 
 		$shop_page_id = wc_get_page_id( 'shop' );
-		if ( empty( $shop_page_id ) || $shop_page_id <= 0 ) {
+		if ( empty( $shop_page_id ) ) {
 			return false;
 		}
 
