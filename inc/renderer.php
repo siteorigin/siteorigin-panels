@@ -17,6 +17,61 @@ class SiteOrigin_Panels_Renderer {
 	}
 
 	/**
+	 * Determine whether the current row contains no widgets.
+	 *
+	 * @param array $row The row data.
+	 *
+	 * @return bool
+	 */
+	private function is_empty_row( $row ) {
+		if ( empty( $row['cells'] ) || ! is_array( $row['cells'] ) ) {
+			return true;
+		}
+
+		foreach ( $row['cells'] as $cell ) {
+			if ( ! empty( $cell['widgets'] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Determine whether the current row has a background style set.
+	 *
+	 * @param array $row The row data.
+	 *
+	 * @return bool
+	 */
+	private function row_has_background( $row ) {
+		if ( empty( $row['style'] ) || ! is_array( $row['style'] ) ) {
+			return false;
+		}
+
+		return (
+			! empty( $row['style']['background'] ) ||
+			! empty( $row['style']['background_image_attachment'] ) ||
+			! empty( $row['style']['background_image_attachment_fallback'] )
+		);
+	}
+
+	/**
+	 * Determine whether an empty row with a background should remain visible.
+	 *
+	 * @param array $row The row data.
+	 *
+	 * @return bool
+	 */
+	private function should_display_empty_background_row( $row ) {
+		return (
+			siteorigin_panels_setting( 'display-empty-rows-with-background' ) &&
+			$this->is_empty_row( $row ) &&
+			$this->row_has_background( $row )
+		);
+	}
+
+	/**
 	 * Add CSS that needs to go inline.
 	 */
 	public function add_inline_css( $post_id, $css ) {
@@ -91,6 +146,7 @@ class SiteOrigin_Panels_Renderer {
 			// Filter the bottom margin for this row with the arguments
 			$panels_margin_bottom = apply_filters( 'siteorigin_panels_css_row_margin_bottom', $settings['margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
 			$panels_mobile_margin_bottom = apply_filters( 'siteorigin_panels_css_row_mobile_margin_bottom', $settings['row-mobile-margin-bottom'] . 'px', $row, $ri, $panels_data, $post_id );
+			$display_empty_background_row = $this->should_display_empty_background_row( $row );
 
 			if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
 				$css->add_row_css( $post_id, $ri, array(
@@ -420,10 +476,14 @@ class SiteOrigin_Panels_Renderer {
 				'padding' => 0,
 			), $panels_mobile_width );
 
-			// Hide empty cells on mobile
-			$css->add_row_css( $post_id, false, ' .panel-grid-cell-empty', array(
-				'display' => 'none',
-			), $panels_mobile_width );
+			// Hide empty columns on mobile unless "Display Empty Columns With Background" is enabled.
+			if ( ! siteorigin_panels_setting( 'display-empty-rows-with-background' ) ) {
+				foreach ( $layout_data as $ri => $row ) {
+					$css->add_row_css( $post_id, $ri, ' .panel-grid-cell-empty', array(
+						'display' => 'none',
+					), $panels_mobile_width );
+				}
+			}
 
 			// Hide empty cells on mobile
 			$css->add_row_css( $post_id, false, ' .panel-grid-cell-mobile-last', array(
@@ -505,7 +565,7 @@ class SiteOrigin_Panels_Renderer {
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 
-			if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+			if ( SiteOrigin_Panels::should_use_woocommerce_shop_page_id() ) {
 				$post_id = wc_get_page_id( 'shop' );
 			}
 		}
@@ -761,7 +821,7 @@ class SiteOrigin_Panels_Renderer {
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 
-			if ( class_exists( 'WooCommerce' ) && is_shop() ) {
+			if ( SiteOrigin_Panels::should_use_woocommerce_shop_page_id() ) {
 				$post_id = wc_get_page_id( 'shop' );
 			}
 		}
@@ -1081,6 +1141,9 @@ class SiteOrigin_Panels_Renderer {
 
 		$row_classes = array( 'panel-grid' );
 		$row_classes[] = ! empty( $row_style_wrapper ) ? 'panel-has-style' : 'panel-no-style';
+		if ( $this->should_display_empty_background_row( $row ) ) {
+			$row_classes[] = 'panel-empty-row-has-background';
+		}
 
 		if ( SiteOrigin_Panels_Styles::single()->has_overlay( $row ) ) {
 			$row_classes[] = 'panel-has-overlay';

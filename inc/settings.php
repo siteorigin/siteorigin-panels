@@ -174,6 +174,7 @@ class SiteOrigin_Panels_Settings {
 		$defaults['mobile-cell-margin']          = $mobile_cell_margin;
 		$defaults['widget-mobile-margin-bottom'] = '';
 		$defaults['margin-bottom-last-row']      = false;
+		$defaults['display-empty-rows-with-background'] = false;
 		$defaults['margin-sides']                = 30;
 		$defaults['full-width-container']        = 'body';
 		$defaults['output-css-header']           = 'auto';
@@ -500,6 +501,12 @@ class SiteOrigin_Panels_Settings {
 			'type'        => 'checkbox',
 			'label'       => __( 'Last Row With Margin', 'siteorigin-panels' ),
 			'description' => __( 'Allow margin below the last row.', 'siteorigin-panels' ),
+		);
+
+		$fields['layout']['fields']['display-empty-rows-with-background'] = array(
+			'type'        => 'checkbox',
+			'label'       => __( 'Display Empty Columns With Background', 'siteorigin-panels' ),
+			'description' => __( 'Display empty columns when a column background color or image is set.', 'siteorigin-panels' ),
 		);
 
 		$fields['layout']['fields']['mobile-cell-margin'] = array(
