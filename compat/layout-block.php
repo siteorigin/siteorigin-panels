@@ -42,7 +42,26 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	public function enqueue_layout_block_editor_assets() {
-		if ( SiteOrigin_Panels_Admin::is_block_editor() || is_customize_preview() ) {
+		$is_block_editor = SiteOrigin_Panels_Admin::is_block_editor();
+
+		if ( $is_block_editor || is_customize_preview() ) {
+			if ( $is_block_editor && function_exists( 'aioseo' ) ) {
+				$aioseo = aioseo();
+				if (
+					is_object( $aioseo ) &&
+					isset( $aioseo->standalone ) &&
+					is_object( $aioseo->standalone ) &&
+					isset( $aioseo->standalone->pageBuilderIntegrations ) &&
+					is_array( $aioseo->standalone->pageBuilderIntegrations ) &&
+					isset( $aioseo->standalone->pageBuilderIntegrations['siteorigin'] ) &&
+					is_object( $aioseo->standalone->pageBuilderIntegrations['siteorigin'] )
+				) {
+					remove_action(
+						'siteorigin_panel_enqueue_admin_scripts',
+						array( $aioseo->standalone->pageBuilderIntegrations['siteorigin'], 'enqueue' )
+					);
+				}
+			}
 			$panels_admin = SiteOrigin_Panels_Admin::single();
 			$panels_admin->enqueue_admin_scripts();
 			$panels_admin->enqueue_admin_styles();
