@@ -530,6 +530,17 @@ class SiteOrigin_Panels {
 			return false;
 		}
 
+		// The shop is a product archive request, even when loop internals shift the queried object.
+		if ( is_post_type_archive( 'product' ) ) {
+			return true;
+		}
+
+		// Fall back to the actual post being filtered for contexts where queried object is unstable.
+		global $post;
+		if ( ! empty( $post ) && (int) $post->ID === (int) $shop_page_id ) {
+			return true;
+		}
+
 		return (int) get_queried_object_id() === (int) $shop_page_id;
 	}
 
