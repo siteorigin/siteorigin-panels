@@ -51,6 +51,22 @@ class SiteOrigin_Panels_Admin_Layouts {
 			);
 		}
 
+		if ( apply_filters( 'siteorigin_panels_premium_layouts_enabled', false ) ) {
+			$directories['siteorigin-premium'] = array(
+				// The title of the premium layouts directory in the sidebar.
+				'title' => __( 'Premium Layouts', 'siteorigin-panels' ),
+				// The URL of the directory.
+				'url'   => self::LAYOUT_URL,
+				// Any additional arguments to pass to the layouts server.
+				'args'  => apply_filters(
+					'siteorigin_panels_premium_layouts_directory_args',
+					array(
+						'access' => 'premium',
+					)
+				),
+			);
+		}
+
 		return $directories;
 	}
 
