@@ -40,6 +40,10 @@ class SiteOrigin_Panels_Compat_Admin_Asset_Conflicts {
 		);
 
 		foreach ( $this->sanitize_handles( $style_handles ) as $handle ) {
+			if ( ! $this->is_style_available_for_dequeue( $handle ) ) {
+				continue;
+			}
+
 			if ( wp_style_is( $handle, 'enqueued' ) ) {
 				$removed['styles'][] = $handle;
 			}
@@ -47,13 +51,47 @@ class SiteOrigin_Panels_Compat_Admin_Asset_Conflicts {
 		}
 
 		foreach ( $this->sanitize_handles( $script_handles ) as $handle ) {
+			if ( ! $this->is_script_available_for_dequeue( $handle ) ) {
+				continue;
+			}
+
 			if ( wp_script_is( $handle, 'enqueued' ) ) {
 				$removed['scripts'][] = $handle;
 			}
 			wp_dequeue_script( $handle );
 		}
 
-		$GLOBALS['SITEORIGIN_PANELS_ADMIN_COMPAT']['removed'] = $removed;
+		$GLOBALS['SiteOrigin_Panels_Compat_Admin_Asset_Conflicts'] = array(
+			'removed' => $removed,
+		);
+	}
+
+	/**
+	 * Check whether a style handle exists in a dequeueable state.
+	 *
+	 * @param string $handle Style handle.
+	 *
+	 * @return bool
+	 */
+	private function is_style_available_for_dequeue( $handle ) {
+		return
+			wp_style_is( $handle, 'registered' ) ||
+			wp_style_is( $handle, 'enqueued' ) ||
+			wp_style_is( $handle, 'queue' );
+	}
+
+	/**
+	 * Check whether a script handle exists in a dequeueable state.
+	 *
+	 * @param string $handle Script handle.
+	 *
+	 * @return bool
+	 */
+	private function is_script_available_for_dequeue( $handle ) {
+		return
+			wp_script_is( $handle, 'registered' ) ||
+			wp_script_is( $handle, 'enqueued' ) ||
+			wp_script_is( $handle, 'queue' );
 	}
 
 	/**
