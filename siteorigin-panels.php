@@ -75,7 +75,6 @@ class SiteOrigin_Panels {
 
 		// We need to generate fresh post content.
 		add_filter( 'the_content', array( $this, 'generate_post_content' ) );
-		add_filter( 'woocommerce_format_content', array( $this, 'generate_woocommerce_content' ), 10, 2 );
 		add_filter( 'wp_enqueue_scripts', array( $this, 'generate_post_css' ) );
 
 		// Remove the default excerpt function.
@@ -300,60 +299,6 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 * Generate post content for WooCommerce shop page if it's using a PB layout.
-	 *
-	 * @param string $content     Formatted content.
-	 * @param string $raw_content Raw content before WooCommerce formatting.
-	 *
-	 * @return string
-	 *
-	 * @filter woocommerce_format_content
-	 */
-	public function generate_woocommerce_content( $content, $_raw_content = '' ) {
-		if ( ! self::is_woocommerce_shop_description_context() ) {
-			return $content;
-		}
-
-		$shop_page_id = wc_get_page_id( 'shop' );
-		if ( empty( $shop_page_id ) ) {
-			return $content;
-		}
-
-		$shop_page = get_post( $shop_page_id );
-		if ( empty( $shop_page ) ) {
-			return $content;
-		}
-
-		global $post;
-		$original_post = $post;
-
-		// Ensure downstream content checks run against the Shop page context.
-		$post = $shop_page;
-		$content = $this->generate_post_content( $content );
-		$post = $original_post;
-
-		return $content;
-	}
-
-	/**
-	 * Is WooCommerce currently rendering the Shop page archive description.
-	 *
-	 * Mirrors WooCommerce's own archive description conditions to avoid
-	 * intercepting unrelated `wc_format_content()` calls (e.g. checkout TOS).
-	 *
-	 * @return bool
-	 */
-	private static function is_woocommerce_shop_description_context() {
-		return (
-			class_exists( 'WooCommerce' ) &&
-			doing_action( 'woocommerce_archive_description' ) &&
-			! is_search() &&
-			is_post_type_archive( 'product' ) &&
-			in_array( absint( get_query_var( 'paged' ) ), array( 0, 1 ), true )
-		);
-	}
-
-	/**
 	 * Generate post content for the current post.
 	 *
 	 * @return string
@@ -560,21 +505,7 @@ class SiteOrigin_Panels {
 	 * filters while processing non-Shop content.
 	 */
 	public static function should_use_woocommerce_shop_page_id() {
-		if ( ! class_exists( 'WooCommerce' ) || ! is_shop() ) {
-			return false;
-		}
-
-		$shop_page_id = wc_get_page_id( 'shop' );
-		if ( empty( $shop_page_id ) ) {
-			return false;
-		}
-
-		// The shop is a product archive request, even when loop internals shift the queried object.
-		if ( is_post_type_archive( 'product' ) ) {
-			return true;
-		}
-
-		return (int) get_queried_object_id() === (int) $shop_page_id;
+		return SiteOrigin_Panels_Compat_WooCommerce::should_use_shop_page_id();
 	}
 
 	/**

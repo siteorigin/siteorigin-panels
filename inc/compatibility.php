@@ -126,6 +126,11 @@ class SiteOrigin_Panels_Compatibility {
 		if ( defined( 'EM_VERSION' ) ) {
 			require_once $this->compat_path . 'events-manager.php';
 		}
+
+		// Compatibility with WooCommerce.
+		if ( class_exists( 'WooCommerce' ) ) {
+			SiteOrigin_Panels_Compat_WooCommerce::single();
+		}
 	}
 
 	public function widgets_init() {
