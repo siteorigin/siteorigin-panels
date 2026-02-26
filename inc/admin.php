@@ -284,21 +284,7 @@ class SiteOrigin_Panels_Admin {
 				);
 
 				if ( $copy_content_update_method === 'direct_db' ) {
-					global $wpdb;
-					$wpdb->update(
-						$wpdb->posts,
-						array(
-							'post_content'      => $post->post_content,
-							'post_modified'     => current_time( 'mysql' ),
-							'post_modified_gmt' => current_time( 'mysql', true ),
-						),
-						array(
-							'ID' => $post->ID,
-						),
-						array( '%s', '%s', '%s' ),
-						array( '%d' )
-					);
-					clean_post_cache( $post->ID );
+					$this->copy_content_update_post_direct_db( $post );
 				} else {
 					$copy_content_update_args = array(
 						'ID'           => $post->ID,
@@ -322,6 +308,32 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$this->in_save_post = false;
+	}
+
+	/**
+	 * Update post content directly in the posts table and clear cache.
+	 *
+	 * @param WP_Post $post Post to update.
+	 *
+	 * @return void
+	 */
+	private function copy_content_update_post_direct_db( $post ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_content'      => $post->post_content,
+				'post_modified'     => current_time( 'mysql' ),
+				'post_modified_gmt' => current_time( 'mysql', true ),
+			),
+			array(
+				'ID' => $post->ID,
+			),
+			array( '%s', '%s', '%s' ),
+			array( '%d' )
+		);
+		clean_post_cache( $post->ID );
 	}
 
 	/*
