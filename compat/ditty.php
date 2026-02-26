@@ -3,6 +3,19 @@
  * Compatibility with Ditty.
  */
 class SiteOrigin_Panels_Compat_Ditty {
+	/**
+	 * Internal compatibility state for debugging.
+	 *
+	 * @var array
+	 */
+	private $compat_state = array(
+		'hits'    => array(),
+		'removed' => array(
+			'styles'  => array(),
+			'scripts' => array(),
+		),
+	);
+
 	public function __construct() {
 		add_filter( 'siteorigin_panels_the_widget_html', array( $this, 'admin_widget_render_compat' ), 10, 3 );
 		add_filter( 'siteorigin_panels_admin_conflict_style_handles', array( $this, 'admin_style_handles' ) );
@@ -45,10 +58,7 @@ class SiteOrigin_Panels_Compat_Ditty {
 			return $widget_html;
 		}
 
-		if ( empty( $GLOBALS['SITEORIGIN_PANELS_DITTY_COMPAT'] ) ) {
-			$GLOBALS['SITEORIGIN_PANELS_DITTY_COMPAT'] = array( 'hits' => array() );
-		}
-		$GLOBALS['SITEORIGIN_PANELS_DITTY_COMPAT']['hits'][] = array(
+		$this->compat_state['hits'][] = array(
 			'id_base'   => $the_widget->id_base,
 			'widget_id' => ! empty( $args['widget_id'] ) ? $args['widget_id'] : '',
 		);
