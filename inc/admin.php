@@ -275,7 +275,23 @@ class SiteOrigin_Panels_Admin {
 					$post->post_content .= $post_css;
 					$post->post_content .= '</style>';
 				}
-				wp_update_post( $post );
+				$copy_content_update_method = apply_filters(
+					'siteorigin_panels_copy_content_update_method',
+					'wp_update_post',
+					$post,
+					$post_id,
+					$panels_data
+				);
+
+				if ( $copy_content_update_method === 'direct_db' ) {
+					$this->copy_content_update_post_direct_db( $post );
+				} else {
+					$copy_content_update_args = array(
+						'ID'           => $post->ID,
+						'post_content' => $post->post_content,
+					);
+					wp_update_post( $copy_content_update_args, false, true );
+				}
 			}
 		} else {
 			// There are no widgets or rows, so delete the panels data.
@@ -292,6 +308,32 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$this->in_save_post = false;
+	}
+
+	/**
+	 * Update post content directly in the posts table and clear cache.
+	 *
+	 * @param WP_Post $post Post to update.
+	 *
+	 * @return void
+	 */
+	private function copy_content_update_post_direct_db( $post ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_content'      => $post->post_content,
+				'post_modified'     => current_time( 'mysql' ),
+				'post_modified_gmt' => current_time( 'mysql', true ),
+			),
+			array(
+				'ID' => $post->ID,
+			),
+			array( '%s', '%s', '%s' ),
+			array( '%d' )
+		);
+		clean_post_cache( $post->ID );
 	}
 
 	/*

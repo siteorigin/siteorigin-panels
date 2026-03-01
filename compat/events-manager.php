@@ -24,6 +24,26 @@ class SiteOrigin_Panels_Compat_Events_Manager {
 		add_action( 'em_event_duplicate_pre', array( $this, 'duplicate_pre' ) );
 		add_filter( 'em_event_get_event_meta', array( $this, 'filter_duplicate_meta' ) );
 		add_filter( 'em_event_duplicate', array( $this, 'duplicate_copy_panels_data' ), 10, 2 );
+		add_filter( 'siteorigin_panels_copy_content_update_method', array( $this, 'copy_content_update_method' ), 10, 4 );
+	}
+
+	/**
+	 * Events Manager can force event status to draft during wp_update_post content sync.
+	 * Use a direct post_content update for Events Manager post types in this context.
+	 *
+	 * @param string $method      Update method.
+	 * @param object $post        Post object.
+	 * @param int    $post_id     Post ID.
+	 * @param array  $panels_data Panels data.
+	 *
+	 * @return string
+	 */
+	public function copy_content_update_method( $method, $post, $post_id, $panels_data ) {
+		if ( in_array( get_post_type( $post_id ), array( 'event', 'event-recurring' ), true ) ) {
+			return 'direct_db';
+		}
+
+		return $method;
 	}
 
 	/**
