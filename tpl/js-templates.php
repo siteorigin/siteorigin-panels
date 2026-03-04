@@ -333,13 +333,20 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="content">
 
-			<div class="row-set-form">
-				<div class="row-cell-column">
-					<?php
-					esc_html_e( 'Column Count:', 'siteorigin-panels' );
-					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
-					?>
-				</div>
+				<div class="row-set-form">
+					<div class="row-cell-column">
+						<?php
+						esc_html_e( 'Column Count:', 'siteorigin-panels' );
+						$column_count_input = apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
+						?>
+						<div class="so-row-count-control">
+							<?php echo $column_count_input; ?>
+							<div class="so-row-count-stepper">
+								<button type="button" class="so-row-count-step so-row-count-step-up" tabindex="-1">+</button>
+								<button type="button" class="so-row-count-step so-row-count-step-down" tabindex="-1">&minus;</button>
+							</div>
+						</div>
+					</div>
 
 				<div class="cell-resize-container">
 					<span class="cell-resize-label">

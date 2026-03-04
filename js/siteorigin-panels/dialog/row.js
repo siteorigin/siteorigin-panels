@@ -50,6 +50,7 @@ module.exports = panels.view.dialog.extend({
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'change .row-set-form .so-row-field': 'changeCellTotal',
+		'click .row-set-form .so-row-count-step': 'adjustCellCount',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
 
@@ -699,6 +700,25 @@ module.exports = panels.view.dialog.extend({
 
 	getCurrentCellCount: function() {
 		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
+	adjustCellCount: function( e ) {
+		e.preventDefault();
+		var $input = this.$( '.row-set-form input[name="cells"].so-row-field' ).first();
+		if ( ! $input.length ) {
+			return;
+		}
+
+		var currentValue = parseInt( $input.val(), 10 );
+		if ( _.isNaN( currentValue ) ) {
+			currentValue = this.row && this.row.cells ? this.row.cells.length : 1;
+		}
+
+		var delta = $( e.currentTarget ).hasClass( 'so-row-count-step-up' ) ? 1 : -1;
+		var nextValue = Math.max( 1, Math.min( 12, currentValue + delta ) );
+		$input.val( nextValue );
+
+		this.changeCellTotal();
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {

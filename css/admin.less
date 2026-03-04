@@ -1713,7 +1713,7 @@
 				}
 
 				.row-cell-column input {
-					width: 58px;
+					width: 100%;
 				}
 
 				button {
@@ -1726,6 +1726,59 @@
 
 				.row-cell-column {
 					flex: 1;
+
+					.so-row-count-control {
+						display: inline-block;
+						position: relative;
+						width: 58px;
+					}
+
+					.so-row-count-stepper {
+						align-items: center;
+						background: #f6f6f6;
+						border-radius: 3px;
+						display: flex;
+						flex-direction: column;
+						height: calc( 100% - 2px );
+						justify-content: center;
+						position: absolute;
+						right: 1px;
+						top: 1px;
+						width: 18px;
+						z-index: 3;
+					}
+
+					.so-row-count-step {
+						align-items: center;
+						background: transparent;
+						border: 0;
+						color: #5e6d72;
+						cursor: pointer;
+						display: inline-flex;
+						font-size: 12px;
+						font-weight: bold;
+						height: 50%;
+						justify-content: center;
+						line-height: 1;
+						margin: 0;
+						padding: 0;
+						width: 100%;
+
+						&:hover {
+							color: #1d2327;
+						}
+					}
+
+					.so-row-field {
+						-moz-appearance: textfield;
+						padding-right: 18px;
+
+						&::-webkit-outer-spin-button,
+						&::-webkit-inner-spin-button {
+							-webkit-appearance: none;
+							margin: 0;
+						}
+					}
 				}
 
 				.cell-resize-container {
