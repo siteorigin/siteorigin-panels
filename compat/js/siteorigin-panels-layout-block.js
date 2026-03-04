@@ -131,9 +131,19 @@ function SiteOriginPanelsLayoutBlock(props) {
   }, []); // Setup the panels builder on mount; tear it down on unmount.
 
   wp.element.useEffect(function () {
-    isMountedRef.current = true; // ownerDocument resolves to the iframe document when the editor is iframed (WP 6.3+/7.0).
+    isMountedRef.current = true; // Resolve iframe document and whether script/content run inside an iframe.
 
     var iframeDoc = panelsContainer.current.ownerDocument;
+    var isScriptInIframe = window.self !== window.top;
+    var isContentInIframe = iframeDoc !== window.document;
+    var soDocument = iframeDoc; // Block native HTML5 dragstart so the Block Editor doesn't intercept panel drags.
+
+    var onContainerDragStart = function onContainerDragStart(e) {
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    panelsContainer.current.addEventListener('dragstart', onContainerDragStart);
     var $panelsContainer = jQuery(panelsContainer.current);
     var config = {
       editorType: 'standalone',
@@ -149,21 +159,24 @@ function SiteOriginPanelsLayoutBlock(props) {
 
     var initialPanelsData = JSON.parse(JSON.stringify(jQuery.extend({}, panelsData))); // Disable block selection while dragging rows or widgets.
 
-    var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
+    var rowOrWidgetMouseDown = function rowOrWidgetMouseDown(e) {
+      // toggleSelection(false) tells the block editor to not start its own drag-selection
+      // handling. Do NOT stopPropagation here — jQuery UI sortable binds its mousedown
+      // handler on the sortable container (an ancestor), so stopping propagation would
+      // prevent jQuery UI from ever seeing the event and starting the drag.
       if (typeof onRowOrWidgetMouseDownRef.current === 'function') {
         onRowOrWidgetMouseDownRef.current();
       }
 
       var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
-        // Use iframeDoc: mouseup fires inside the iframe, not on the parent document.
-        jQuery(iframeDoc).off('mouseup', rowOrWidgetMouseUp);
+        jQuery(soDocument).off('mouseup', rowOrWidgetMouseUp);
 
         if (typeof onRowOrWidgetMouseUpRef.current === 'function') {
           onRowOrWidgetMouseUpRef.current();
         }
       };
 
-      jQuery(iframeDoc).on('mouseup', rowOrWidgetMouseUp);
+      jQuery(soDocument).on('mouseup', rowOrWidgetMouseUp);
     };
 
     builderViewRef.current.on('row_added', function () {
@@ -199,10 +212,47 @@ function SiteOriginPanelsLayoutBlock(props) {
       window.soPanelsBuilderView = [];
     }
 
-    window.soPanelsBuilderView.push(builderViewRef.current);
+    window.soPanelsBuilderView.push(builderViewRef.current); // If in an iframe, patch jQuery UI instances so their document/window use iframeDoc.
+
+    if (isContentInIframe || isScriptInIframe) {
+      var iframeWindow = iframeDoc.defaultView;
+
+      var patchJQueryUIDocuments = function patchJQueryUIDocuments() {
+        if (!builderViewRef.current) {
+          return;
+        }
+
+        builderViewRef.current.$('.so-rows-container, .widgets-container').each(function () {
+          var inst = jQuery(this).sortable('instance');
+
+          if (inst && inst.document && inst.document[0] !== iframeDoc) {
+            inst.document = jQuery(iframeDoc);
+            inst.window = jQuery(iframeWindow);
+          }
+        });
+        builderViewRef.current.$('.resize-handle').each(function () {
+          var inst = jQuery(this).draggable('instance');
+
+          if (inst && inst.document && inst.document[0] !== iframeDoc) {
+            inst.document = jQuery(iframeDoc);
+            inst.window = jQuery(iframeWindow);
+          }
+        });
+      }; // Patch initial instances after first render.
+
+
+      setTimeout(patchJQueryUIDocuments, 0); // Re-patch whenever a new row or widget is added (new instances are created).
+
+      builderViewRef.current.on('row_added widget_added', patchJQueryUIDocuments);
+    }
+
     setPanelsInitialized(true);
     return function () {
       isMountedRef.current = false;
+
+      if (panelsContainer.current) {
+        panelsContainer.current.removeEventListener('dragstart', onContainerDragStart);
+      }
 
       if (builderViewRef.current) {
         // Remove builder from global builder list.
