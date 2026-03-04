@@ -704,7 +704,13 @@ module.exports = panels.view.dialog.extend({
 
 	adjustCellCount: function( e ) {
 		e.preventDefault();
-		var $input = this.$( '.row-set-form input[name="cells"].so-row-field' ).first();
+		var $control = $( e.currentTarget ).closest( '.so-row-count-control' );
+		var $input = $control.find( 'input[name="cells"].so-row-field' ).first();
+
+		if ( ! $input.length ) {
+			$input = this.$( '.row-set-form input[name="cells"].so-row-field' ).first();
+		}
+
 		if ( ! $input.length ) {
 			return;
 		}

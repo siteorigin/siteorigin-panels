@@ -1729,14 +1729,15 @@
 
 					.so-row-count-control {
 						display: inline-block;
+						overflow: hidden;
 						position: relative;
 						width: 58px;
+						border-radius: 3px;
 					}
 
 					.so-row-count-stepper {
 						align-items: center;
 						background: #f6f6f6;
-						border-radius: 3px;
 						display: flex;
 						flex-direction: column;
 						height: calc( 100% - 2px );
@@ -1746,6 +1747,7 @@
 						top: 1px;
 						width: 18px;
 						z-index: 3;
+						overflow: hidden;
 					}
 
 					.so-row-count-step {
@@ -1763,6 +1765,8 @@
 						margin: 0;
 						padding: 0;
 						width: 100%;
+						margin-top: 0;
+						border-radius: 0;
 
 						&:hover {
 							color: #1d2327;
@@ -1772,6 +1776,8 @@
 					.so-row-field {
 						-moz-appearance: textfield;
 						padding-right: 18px;
+						border-radius: 3px;
+						margin: 0;
 
 						&::-webkit-outer-spin-button,
 						&::-webkit-inner-spin-button {
