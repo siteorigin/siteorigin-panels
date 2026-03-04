@@ -3,6 +3,16 @@
  * Generic admin asset conflict handling for Page Builder screens.
  */
 class SiteOrigin_Panels_Compat_Admin_Asset_Conflicts {
+	/**
+	 * Removed asset handles for debugging.
+	 *
+	 * @var array
+	 */
+	public $removed = array(
+		'styles'  => array(),
+		'scripts' => array(),
+	);
+
 	public static function single() {
 		static $single;
 
@@ -61,9 +71,7 @@ class SiteOrigin_Panels_Compat_Admin_Asset_Conflicts {
 			wp_dequeue_script( $handle );
 		}
 
-		$GLOBALS['SiteOrigin_Panels_Compat_Admin_Asset_Conflicts'] = array(
-			'removed' => $removed,
-		);
+		$this->removed = $removed;
 	}
 
 	/**
