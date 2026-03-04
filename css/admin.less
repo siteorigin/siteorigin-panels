@@ -1726,18 +1726,22 @@
 
 				.row-cell-column {
 					flex: 1;
+					display: flex;
+					align-items: center;
+					gap: 8px;
 
 					.so-row-count-control {
 						display: inline-block;
 						overflow: hidden;
 						position: relative;
 						width: 58px;
-						border-radius: 3px;
+						border-radius: 0;
 					}
 
 					.so-row-count-stepper {
 						align-items: center;
 						background: #f6f6f6;
+						border-radius: 0;
 						display: flex;
 						flex-direction: column;
 						height: calc( 100% - 2px );
@@ -1776,7 +1780,7 @@
 					.so-row-field {
 						-moz-appearance: textfield;
 						padding-right: 18px;
-						border-radius: 3px;
+						border-radius: 0;
 						margin: 0;
 
 						&::-webkit-outer-spin-button,
