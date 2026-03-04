@@ -402,17 +402,30 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 	</div>
 </script>
 
-<script type="text/template" id="siteorigin-panels-dialog-row-cell-preview">
-	<div class="preview-cell" style="width: {{%- weight*100 %}}%">
-		<div class="preview-cell-in">
-			<div class="preview-cell-container">
-				<div class="preview-cell-weight" tabIndex="0">
-					<span class="preview-cell-weight-value">{{% print( Math.round( weight * 1000 ) / 10 ) %}}</span><span class="preview-cell-unit">%</span>
+	<script type="text/template" id="siteorigin-panels-dialog-row-cell-preview">
+		<div class="preview-cell" style="width: {{%- weight*100 %}}%">
+			<div class="preview-cell-in">
+				<div class="preview-cell-container">
+					<div class="preview-cell-weight-control">
+						<div class="preview-cell-weight-field">
+							<input
+								type="text"
+								inputmode="decimal"
+								class="preview-cell-weight-input no-user-interacted"
+								value="{{% print( Math.round( weight * 1000 ) / 10 ) %}}"
+								min="1"
+								tabIndex="0"
+							/>
+							<div class="preview-cell-stepper">
+								<button type="button" class="preview-cell-step preview-cell-step-up" tabindex="-1">+</button>
+								<button type="button" class="preview-cell-step preview-cell-step-down" tabindex="-1">&minus;</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-</script>
+	</script>
 
 <script type="text/template" id="siteorigin-panels-dialog-prebuilt">
 	<div class="dialog-data">
