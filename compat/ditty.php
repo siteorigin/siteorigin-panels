@@ -18,7 +18,9 @@ class SiteOrigin_Panels_Compat_Ditty {
 
 	public function __construct() {
 		add_filter( 'siteorigin_panels_the_widget_html', array( $this, 'admin_widget_render_compat' ), 10, 3 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_builder_screen_assets' ), 1000 );
+		add_filter( 'siteorigin_panels_admin_conflict_style_handles', array( $this, 'admin_style_handles' ) );
+		add_filter( 'siteorigin_panels_admin_conflict_script_handles', array( $this, 'admin_script_handles' ) );
+		add_filter( 'siteorigin_panels_admin_conflict_excluded_screen_matchers', array( $this, 'excluded_screen_matchers' ) );
 	}
 
 	/**
@@ -66,108 +68,78 @@ class SiteOrigin_Panels_Compat_Ditty {
 	}
 
 	/**
-	 * Check if current admin screen is a SiteOrigin builder screen outside Ditty admin.
+	 * Register Ditty styles for generic admin conflict handling.
 	 *
-	 * @param string $hook_suffix Admin hook suffix.
+	 * @param array $handles Existing conflict handles.
 	 *
-	 * @return bool
+	 * @return array
 	 */
-	private function is_siteorigin_builder_screen( $hook_suffix ) {
-		if (
-			! is_admin() ||
-			! class_exists( 'SiteOrigin_Panels_Admin' ) ||
-			! SiteOrigin_Panels_Admin::is_admin() ||
-			! function_exists( 'get_current_screen' )
-		) {
-			return false;
-		}
+	public function admin_style_handles( $handles ) {
+		$handles = array_merge(
+			(array) $handles,
+			(array) apply_filters(
+				'siteorigin_panels_ditty_admin_style_handles',
+				array(
+					'ditty-displays',
+					'ditty-admin',
+					'ditty-admin-old',
+					'ditty-settings',
+					'ditty-editor',
+					'ditty-editor-init',
+					'ditty-news-ticker',
+					'ditty-news-ticker-font',
+					'ditty-fontawesome',
+					'ditty-display-cache',
+				)
+			)
+		);
 
-		$screen = get_current_screen();
-		if ( empty( $screen ) ) {
-			return false;
-		}
-
-		$screen_id = ! empty( $screen->id ) ? (string) $screen->id : '';
-		$post_type = ! empty( $screen->post_type ) ? (string) $screen->post_type : '';
-
-		// Do not interfere with Ditty's own admin screens.
-		if (
-			false !== strpos( $screen_id, 'ditty' ) ||
-			false !== strpos( $post_type, 'ditty' ) ||
-			false !== strpos( (string) $hook_suffix, 'ditty' )
-		) {
-			return false;
-		}
-
-		return true;
+		return $handles;
 	}
 
 	/**
-	 * Dequeue Ditty assets on SiteOrigin builder admin screens to avoid UI conflicts.
+	 * Register Ditty scripts for generic admin conflict handling.
 	 *
-	 * @param string $hook_suffix Admin hook suffix.
+	 * @param array $handles Existing conflict handles.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function dequeue_builder_screen_assets( $hook_suffix ) {
-		if ( ! $this->is_siteorigin_builder_screen( $hook_suffix ) ) {
-			return;
-		}
-
-		$style_handles = apply_filters(
-			'siteorigin_panels_ditty_admin_style_handles',
-			array(
-				'ditty-displays',
-				'ditty-admin',
-				'ditty-admin-old',
-				'ditty-settings',
-				'ditty-editor',
-				'ditty-editor-init',
-				'ditty-news-ticker',
-				'ditty-news-ticker-font',
-				'ditty-fontawesome',
-				'ditty-display-cache',
+	public function admin_script_handles( $handles ) {
+		$handles = array_merge(
+			(array) $handles,
+			(array) apply_filters(
+				'siteorigin_panels_ditty_admin_script_handles',
+				array(
+					'ditty',
+					'ditty-display-cache',
+					'ditty-slider',
+					'ditty-helpers',
+					'ditty-admin',
+					'ditty-settings',
+					'ditty-editor-init',
+					'ditty-editor',
+					'ditty-display-editor',
+					'ditty-layout-editor',
+					'ditty-fields',
+					'ditty-news-ticker',
+				)
 			)
 		);
 
-		$script_handles = apply_filters(
-			'siteorigin_panels_ditty_admin_script_handles',
-			array(
-				'ditty',
-				'ditty-display-cache',
-				'ditty-slider',
-				'ditty-helpers',
-				'ditty-admin',
-				'ditty-settings',
-				'ditty-editor-init',
-				'ditty-editor',
-				'ditty-display-editor',
-				'ditty-layout-editor',
-				'ditty-fields',
-				'ditty-news-ticker',
-			)
-		);
+		return $handles;
+	}
 
-		$removed = array(
-			'styles'  => array(),
-			'scripts' => array(),
-		);
+	/**
+	 * Exclude Ditty admin screens from generic admin conflict handling.
+	 *
+	 * @param array $matchers Existing screen matchers.
+	 *
+	 * @return array
+	 */
+	public function excluded_screen_matchers( $matchers ) {
+		$matchers = array_merge( (array) $matchers, array( 'ditty' ) );
 
-		foreach ( $style_handles as $handle ) {
-			if ( wp_style_is( $handle, 'enqueued' ) ) {
-				$removed['styles'][] = $handle;
-			}
-			wp_dequeue_style( $handle );
-		}
-
-		foreach ( $script_handles as $handle ) {
-			if ( wp_script_is( $handle, 'enqueued' ) ) {
-				$removed['scripts'][] = $handle;
-			}
-			wp_dequeue_script( $handle );
-		}
-
-		$this->compat_state['removed'] = $removed;
+		return $matchers;
 	}
 }
 
