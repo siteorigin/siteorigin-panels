@@ -80,6 +80,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					'wp-blocks',
 					'wp-i18n',
 					'wp-element',
+					'wp-block-editor',
 					'wp-components',
 					'wp-compose',
 					'wp-data',
