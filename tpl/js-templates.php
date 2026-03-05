@@ -338,9 +338,12 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 							<?php
 							$column_count_input = apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
 							?>
+							<span class="so-row-count-label"><?php esc_html_e( 'Column Count:', 'siteorigin-panels' ); ?></span>
 							<div class="so-row-count-control">
-								<label>
-									<?php esc_html_e( 'Column Count:', 'siteorigin-panels' ); ?>
+								<label class="so-row-count-input-label">
+									<span class="screen-reader-text">
+										<?php esc_html_e( 'Column Count', 'siteorigin-panels' ); ?>
+									</span>
 									<?php echo $column_count_input; ?>
 								</label>
 								<span class="screen-reader-text">
