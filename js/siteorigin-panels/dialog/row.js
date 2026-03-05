@@ -186,6 +186,8 @@ module.exports = panels.view.dialog.extend({
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
 		}
 
+		this.$( 'input[name="cells"].so-row-field' ).attr( 'aria-live', 'polite' );
+
 		return this;
 	},
 
