@@ -1,391 +1,331 @@
 "use strict";
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) {
-  function isNativeReflectConstruct() {
-    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-    if (Reflect.construct.sham) return false;
-    if (typeof Proxy === "function") return true;
-
-    try {
-      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
-      return true;
-    } catch (e) {
-      return false;
-    }
+/**
+ * Checks if two panels data objects are equal.
+ * @param {Object} newPanelsData - The new panels data object.
+ * @param {Object} oldPanelsData - The old panels data object.
+ * @returns {boolean} - Returns true if the two panels data objects are equal, otherwise false.
+ */
+function SiteOriginIsPanelsEqual(newPanelsData, oldPanelsData) {
+  if (newPanelsData === oldPanelsData) {
+    return true;
   }
 
-  return function () {
-    var Super = _getPrototypeOf(Derived),
-        result;
+  if (!newPanelsData || !oldPanelsData) {
+    return newPanelsData === oldPanelsData;
+  } // If neither newPanelsData nor oldPanelsData are objects, assume they're not the same.
 
-    if (isNativeReflectConstruct()) {
-      var NewTarget = _getPrototypeOf(this).constructor;
 
-      result = Reflect.construct(Super, arguments, NewTarget);
-    } else {
-      result = Super.apply(this, arguments);
-    }
+  if (_typeof(newPanelsData) !== 'object' || _typeof(oldPanelsData) !== 'object') {
+    return false;
+  }
 
-    return _possibleConstructorReturn(this, result);
-  };
+  var keys = Object.keys(newPanelsData);
+
+  if (keys.length !== Object.keys(oldPanelsData).length) {
+    return false;
+  }
+
+  return keys.every(function (k) {
+    return SiteOriginIsPanelsEqual(newPanelsData[k], oldPanelsData[k]);
+  });
 }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+function SiteOriginPanelsLayoutBlock(props) {
+  var editing = props.editing,
+      panelsData = props.panelsData,
+      onContentChange = props.onContentChange,
+      onRowOrWidgetMouseDown = props.onRowOrWidgetMouseDown,
+      onRowOrWidgetMouseUp = props.onRowOrWidgetMouseUp; // State
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+  var _wp$element$useState = wp.element.useState(true),
+      _wp$element$useState2 = _slicedToArray(_wp$element$useState, 2),
+      loadingPreview = _wp$element$useState2[0],
+      setLoadingPreview = _wp$element$useState2[1];
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+  var _wp$element$useState3 = wp.element.useState(''),
+      _wp$element$useState4 = _slicedToArray(_wp$element$useState3, 2),
+      previewHtml = _wp$element$useState4[0],
+      setPreviewHtml = _wp$element$useState4[1];
 
-var SiteOriginPanelsLayoutBlock =
-/*#__PURE__*/
-function (_wp$element$Component) {
-  _inherits(SiteOriginPanelsLayoutBlock, _wp$element$Component);
+  var _wp$element$useState5 = wp.element.useState(!editing),
+      _wp$element$useState6 = _slicedToArray(_wp$element$useState5, 2),
+      previewInitialized = _wp$element$useState6[0],
+      setPreviewInitialized = _wp$element$useState6[1];
 
-  var _super = _createSuper(SiteOriginPanelsLayoutBlock);
+  var _wp$element$useState7 = wp.element.useState(false),
+      _wp$element$useState8 = _slicedToArray(_wp$element$useState7, 2),
+      pendingPreviewRequest = _wp$element$useState8[0],
+      setPendingPreviewRequest = _wp$element$useState8[1];
 
-  function SiteOriginPanelsLayoutBlock(props) {
-    var _this2;
+  var _wp$element$useState9 = wp.element.useState(false),
+      _wp$element$useState10 = _slicedToArray(_wp$element$useState9, 2),
+      panelsInitialized = _wp$element$useState10[0],
+      setPanelsInitialized = _wp$element$useState10[1]; // DOM and instance refs
 
-    _classCallCheck(this, SiteOriginPanelsLayoutBlock);
 
-    _this2 = _super.call(this, props);
+  var panelsContainer = wp.element.useRef(null);
+  var previewContainer = wp.element.useRef(null);
+  var builderViewRef = wp.element.useRef(null);
+  var fetchPreviewTimer = wp.element.useRef(null);
+  var currentFetchRequest = wp.element.useRef(null);
+  var isMountedRef = wp.element.useRef(false); // Keep prop callbacks current so the mount-only setup effect always calls the latest version.
 
-    _this2.initializeState(props);
+  var onContentChangeRef = wp.element.useRef(onContentChange);
+  var onRowOrWidgetMouseDownRef = wp.element.useRef(onRowOrWidgetMouseDown);
+  var onRowOrWidgetMouseUpRef = wp.element.useRef(onRowOrWidgetMouseUp);
+  wp.element.useEffect(function () {
+    onContentChangeRef.current = onContentChange;
+  }, [onContentChange]);
+  wp.element.useEffect(function () {
+    onRowOrWidgetMouseDownRef.current = onRowOrWidgetMouseDown;
+  }, [onRowOrWidgetMouseDown]);
+  wp.element.useEffect(function () {
+    onRowOrWidgetMouseUpRef.current = onRowOrWidgetMouseUp;
+  }, [onRowOrWidgetMouseUp]); // Fetch a preview from the server and update state.
 
-    _this2.panelsContainer = wp.element.createRef();
-    _this2.previewContainer = wp.element.createRef();
-    _this2.fetchPreviewTimer = null;
-    _this2.currentFetchRequest = null;
-    return _this2;
-  }
-
-  _createClass(SiteOriginPanelsLayoutBlock, [{
-    key: "initializeState",
-    value: function initializeState(props) {
-      var newState = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var hasPanelsData = props.panelsData && _typeof(props.panelsData) === 'object' && Object.keys(props.panelsData).length > 0;
-      var isDefaultModeEdit = window.soPanelsBlockEditorAdmin.defaultMode === 'edit';
-      var editMode = hasPanelsData === true ? isDefaultModeEdit : true;
-      this.initialState = {
-        editing: editMode,
-        loadingPreview: true,
-        previewHtml: '',
-        previewInitialized: !editMode,
-        pendingPreviewRequest: false,
-        panelsInitialized: false
-      }; // Depending on when this function is called, we need to update the
-      // state differently.
-
-      if (newState) {
-        this.state = _objectSpread({}, this.initialState);
-      } else {
-        this.setState(_objectSpread({}, this.initialState));
-      }
+  var fetchPreview = wp.element.useCallback(function () {
+    if (!isMountedRef.current) {
+      return;
     }
-  }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.isStillMounted = true;
 
-      if (!this.state.panelsInitialized) {
-        this.setupPanels();
+    setPreviewInitialized(false); // Capture the iframe document now so the deferred trigger uses the correct context.
+
+    var iframeDoc = panelsContainer.current ? panelsContainer.current.ownerDocument : document;
+    var fetchRequest = jQuery.post({
+      url: window.soPanelsBlockEditorAdmin.previewUrl,
+      data: {
+        action: 'so_panels_layout_block_preview',
+        panelsData: JSON.stringify(builderViewRef.current.getData())
       }
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      var _this3 = this;
-
-      this.isStillMounted = false;
-
-      if (this.builderView) {
-        // Remove builder from global builder list.
-        if (typeof window.soPanelsBuilderView !== 'undefined') {
-          window.soPanelsBuilderView = window.soPanelsBuilderView.filter(function (view) {
-            return view !== _this3.builderView;
-          });
-        }
-
-        delete this.builderView;
-      }
-
-      if (this.currentFetchRequest && typeof this.currentFetchRequest.abort === 'function') {
-        this.currentFetchRequest.abort();
-      }
-
-      clearTimeout(this.fetchPreviewTimer);
-
-      if (this.panelsContainer) {
-        jQuery(this.panelsContainer.current).empty();
-      }
-
-      if (this.previewContainer) {
-        jQuery(this.previewContainer.current).empty();
-      }
-
-      this.initializeState(this.props, false);
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      if (!this.isStillMounted || !this.state.panelsInitialized) {
+    }).then(function (preview) {
+      if (!isMountedRef.current) {
         return;
+      } // Wait until previewHTML has finished updating to cut
+      // down on the chance of nothing being rendered.
+
+
+      setTimeout(function () {
+        jQuery(iframeDoc).trigger('panels_setup_preview');
+      }, 1000);
+
+      if (fetchRequest === currentFetchRequest.current && preview) {
+        setPreviewHtml(preview);
+        setLoadingPreview(false);
+        setPreviewInitialized(false);
+        setPendingPreviewRequest(false);
+      }
+    });
+    currentFetchRequest.current = fetchRequest;
+    return fetchRequest;
+  }, []); // Setup the panels builder on mount; tear it down on unmount.
+
+  wp.element.useEffect(function () {
+    isMountedRef.current = true; // Resolve iframe document and whether script/content run inside an iframe.
+
+    var iframeDoc = panelsContainer.current.ownerDocument;
+    var isScriptInIframe = window.self !== window.top;
+    var isContentInIframe = iframeDoc !== window.document;
+    var soDocument = iframeDoc; // Block native HTML5 dragstart so the Block Editor doesn't intercept panel drags.
+
+    var onContainerDragStart = function onContainerDragStart(e) {
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    panelsContainer.current.addEventListener('dragstart', onContainerDragStart);
+    var $panelsContainer = jQuery(panelsContainer.current);
+    var config = {
+      editorType: 'standalone',
+      loadLiveEditor: false,
+      postId: window.soPanelsBlockEditorAdmin.postId,
+      editorPreview: window.soPanelsBlockEditorAdmin.liveEditor
+    };
+    var builderModel = new panels.model.builder();
+    builderViewRef.current = new panels.view.builder({
+      model: builderModel,
+      config: config
+    }); // Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
+
+    var initialPanelsData = JSON.parse(JSON.stringify(jQuery.extend({}, panelsData))); // Disable block selection while dragging rows or widgets.
+
+    var rowOrWidgetMouseDown = function rowOrWidgetMouseDown(e) {
+      // toggleSelection(false) tells the block editor to not start its own drag-selection
+      // handling. Do NOT stopPropagation here — jQuery UI sortable binds its mousedown
+      // handler on the sortable container (an ancestor), so stopping propagation would
+      // prevent jQuery UI from ever seeing the event and starting the drag.
+      if (typeof onRowOrWidgetMouseDownRef.current === 'function') {
+        onRowOrWidgetMouseDownRef.current();
       }
 
-      if (this.state.loadingPreview) {
-        if (!this.state.pendingPreviewRequest) {
-          this.setState({
-            pendingPreviewRequest: true
-          });
-          clearTimeout(this.fetchPreviewTimer);
-          var current = this;
-          this.fetchPreviewTimer = setTimeout(function () {
-            current.fetchPreview(current.props);
-          }, 1000);
+      var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
+        jQuery(soDocument).off('mouseup', rowOrWidgetMouseUp);
+
+        if (typeof onRowOrWidgetMouseUpRef.current === 'function') {
+          onRowOrWidgetMouseUpRef.current();
         }
-      } else if (!this.state.previewInitialized) {
-        jQuery(document).trigger('panels_setup_preview');
-        this.setState({
-          previewInitialized: true
-        });
-      }
-    }
-  }, {
-    key: "setupPanels",
-    value: function setupPanels() {
-      var _this4 = this;
-
-      if (this.state.panelsInitialized || !this.isStillMounted) {
-        return;
-      }
-
-      var $panelsContainer = jQuery(this.panelsContainer.current);
-      var config = {
-        editorType: 'standalone',
-        loadLiveEditor: false,
-        postId: window.soPanelsBlockEditorAdmin.postId,
-        editorPreview: window.soPanelsBlockEditorAdmin.liveEditor
-      };
-      var builderModel = new panels.model.builder();
-      this.builderView = new panels.view.builder({
-        model: builderModel,
-        config: config
-      }); // Make sure panelsData is defined and clone so that we don't alter the underlying attribute.
-
-      var panelsData = JSON.parse(JSON.stringify(jQuery.extend({}, this.props.panelsData))); // Disable block selection while dragging rows or widgets.
-
-      var rowOrWidgetMouseDown = function rowOrWidgetMouseDown() {
-        if (typeof _this4.props.onRowOrWidgetMouseDown === 'function') {
-          _this4.props.onRowOrWidgetMouseDown();
-        }
-
-        var rowOrWidgetMouseUp = function rowOrWidgetMouseUp() {
-          jQuery(document).off('mouseup', rowOrWidgetMouseUp);
-
-          if (typeof _this4.props.onRowOrWidgetMouseUp === 'function') {
-            _this4.props.onRowOrWidgetMouseUp();
-          }
-        };
-
-        jQuery(document).on('mouseup', rowOrWidgetMouseUp);
       };
 
-      this.builderView.on('row_added', function () {
-        _this4.builderView.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
+      jQuery(soDocument).on('mouseup', rowOrWidgetMouseUp);
+    };
 
-        _this4.builderView.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
+    builderViewRef.current.on('row_added', function () {
+      builderViewRef.current.$('.so-row-move').off('mousedown', rowOrWidgetMouseDown);
+      builderViewRef.current.$('.so-row-move').on('mousedown', rowOrWidgetMouseDown);
+      builderViewRef.current.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+      builderViewRef.current.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+    });
+    builderViewRef.current.on('widget_added', function () {
+      builderViewRef.current.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
+      builderViewRef.current.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
+    });
+    builderViewRef.current.render().attach({
+      container: $panelsContainer
+    }).setData(initialPanelsData);
+    builderViewRef.current.trigger('builder_resize');
+    builderViewRef.current.on('content_change', function () {
+      var newPanelsData = builderViewRef.current.getData();
 
-        _this4.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
-
-        _this4.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
-      });
-      this.builderView.on('widget_added', function () {
-        _this4.builderView.$('.so-widget').off('mousedown', rowOrWidgetMouseDown);
-
-        _this4.builderView.$('.so-widget').on('mousedown', rowOrWidgetMouseDown);
-      });
-      this.builderView.render().attach({
-        container: $panelsContainer
-      }).setData(panelsData);
-      this.builderView.trigger('builder_resize');
-      /**
-       * Checks if two panels data objects are equal.
-       * @param {Object} newPanelsData - The new panels data object.
-       * @param {Object} oldPanelsData - The old panels data object.
-       * @returns {boolean} - Returns true if the two panels data objects are equal, otherwise false.
-       */
-
-      var SiteOriginIsPanelsEqual = function SiteOriginIsPanelsEqual(newPanelsData, oldPanelsData) {
-        if (newPanelsData === oldPanelsData) {
-          return true;
+      if (!SiteOriginIsPanelsEqual(initialPanelsData, newPanelsData)) {
+        if (typeof onContentChangeRef.current === 'function') {
+          onContentChangeRef.current(newPanelsData);
         }
 
-        if (!newPanelsData || !oldPanelsData) {
-          return newPanelsData === oldPanelsData;
-        } // If neither newPanelsData nor oldPanelsData are objects, assume they're not the same.
-
-
-        if (_typeof(newPanelsData) !== 'object' || _typeof(oldPanelsData) !== 'object') {
-          return false;
-        }
-
-        var keys = Object.keys(newPanelsData);
-
-        if (keys.length !== Object.keys(oldPanelsData).length) {
-          return false;
-        }
-
-        return keys.every(function (k) {
-          return SiteOriginIsPanelsEqual(newPanelsData[k], oldPanelsData[k]);
-        });
-      };
-
-      this.builderView.on('content_change', function () {
-        var newPanelsData = _this4.builderView.getData();
-
-        _this4.panelsDataChanged = !SiteOriginIsPanelsEqual(panelsData, newPanelsData);
-
-        if (_this4.panelsDataChanged) {
-          if (_this4.props.onContentChange && typeof _this4.props.onContentChange === 'function') {
-            _this4.props.onContentChange(newPanelsData);
-          }
-
-          _this4.setState({
-            loadingPreview: true,
-            previewHtml: ''
-          });
-        }
-      });
-      jQuery(document).trigger('panels_setup', this.builderView);
-
-      if (typeof window.soPanelsBuilderView == 'undefined') {
-        window.soPanelsBuilderView = [];
+        setLoadingPreview(true);
+        setPreviewHtml('');
       }
+    }); // Use iframeDoc so panels scripts inside the iframe receive the setup event.
 
-      window.soPanelsBuilderView.push(this.builderView);
-      this.setState({
-        panelsInitialized: true
-      });
+    jQuery(iframeDoc).trigger('panels_setup', builderViewRef.current);
+
+    if (typeof window.soPanelsBuilderView === 'undefined') {
+      window.soPanelsBuilderView = [];
     }
-  }, {
-    key: "fetchPreview",
-    value: function fetchPreview(props) {
-      var _this5 = this;
 
-      if (!this.isStillMounted) {
-        return;
-      }
+    window.soPanelsBuilderView.push(builderViewRef.current); // If in an iframe, patch jQuery UI instances so their document/window use iframeDoc.
 
-      this.setState({
-        previewInitialized: false
-      });
-      var fetchRequest = this.currentFetchRequest = jQuery.post({
-        url: window.soPanelsBlockEditorAdmin.previewUrl,
-        data: {
-          action: 'so_panels_layout_block_preview',
-          panelsData: JSON.stringify(this.builderView.getData())
-        }
-      }).then(function (preview) {
-        if (!_this5.isStillMounted) {
+    if (isContentInIframe || isScriptInIframe) {
+      var iframeWindow = iframeDoc.defaultView;
+
+      var patchJQueryUIDocuments = function patchJQueryUIDocuments() {
+        if (!builderViewRef.current) {
           return;
         }
 
-        setTimeout(function () {
-          jQuery(document).trigger('panels_setup_preview');
-        }, 1000);
+        builderViewRef.current.$('.so-rows-container, .widgets-container').each(function () {
+          var inst = jQuery(this).sortable('instance');
 
-        if (fetchRequest === _this5.currentFetchRequest && preview) {
-          _this5.setState({
-            previewHtml: preview
-          }, // Wait until previewHTML has finished updating to cut
-          // down on the chance of nothing being rendered.
-          function () {
-            _this5.setState({
-              loadingPreview: false,
-              previewInitialized: false,
-              pendingPreviewRequest: false
-            });
+          if (inst && inst.document && inst.document[0] !== iframeDoc) {
+            inst.document = jQuery(iframeDoc);
+            inst.window = jQuery(iframeWindow);
+          }
+        });
+        builderViewRef.current.$('.resize-handle').each(function () {
+          var inst = jQuery(this).draggable('instance');
+
+          if (inst && inst.document && inst.document[0] !== iframeDoc) {
+            inst.document = jQuery(iframeDoc);
+            inst.window = jQuery(iframeWindow);
+          }
+        });
+      }; // Patch initial instances after first render.
+
+
+      setTimeout(patchJQueryUIDocuments, 0); // Re-patch whenever a new row or widget is added (new instances are created).
+
+      builderViewRef.current.on('row_added widget_added', patchJQueryUIDocuments);
+    }
+
+    setPanelsInitialized(true);
+    return function () {
+      isMountedRef.current = false;
+
+      if (panelsContainer.current) {
+        panelsContainer.current.removeEventListener('dragstart', onContainerDragStart);
+      }
+
+      if (builderViewRef.current) {
+        // Remove builder from global builder list.
+        if (typeof window.soPanelsBuilderView !== 'undefined') {
+          window.soPanelsBuilderView = window.soPanelsBuilderView.filter(function (view) {
+            return view !== builderViewRef.current;
           });
+        }
+
+        builderViewRef.current = null;
+      }
+
+      if (currentFetchRequest.current && typeof currentFetchRequest.current.abort === 'function') {
+        currentFetchRequest.current.abort();
+      }
+
+      clearTimeout(fetchPreviewTimer.current);
+
+      if (panelsContainer.current) {
+        jQuery(panelsContainer.current).empty();
+      }
+
+      if (previewContainer.current) {
+        jQuery(previewContainer.current).empty();
+      }
+    };
+  }, []); // Schedule a preview fetch or fire setup when preview loading state changes.
+
+  wp.element.useEffect(function () {
+    if (!panelsInitialized) {
+      return;
+    }
+
+    if (loadingPreview) {
+      if (!pendingPreviewRequest) {
+        setPendingPreviewRequest(true);
+        clearTimeout(fetchPreviewTimer.current);
+        fetchPreviewTimer.current = setTimeout(function () {
+          return fetchPreview();
+        }, 1000);
+      }
+    } else if (!previewInitialized) {
+      var iframeDoc = panelsContainer.current ? panelsContainer.current.ownerDocument : document;
+      jQuery(iframeDoc).trigger('panels_setup_preview');
+      setPreviewInitialized(true);
+    }
+  }, [loadingPreview, panelsInitialized, pendingPreviewRequest, previewInitialized, fetchPreview]); // Trigger a layout recalculation whenever we switch back into edit mode.
+
+  wp.element.useEffect(function () {
+    if (editing && builderViewRef.current) {
+      setTimeout(function () {
+        if (builderViewRef.current) {
+          builderViewRef.current.trigger('builder_resize');
         }
       });
-      return fetchRequest;
     }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this6 = this;
-
-      var panelsData = this.props.panelsData;
-
-      var switchToEditing = function switchToEditing() {
-        _this6.setState({
-          editing: true
-        });
-
-        var _this = _this6;
-        setTimeout(function () {
-          _this.builderView.trigger('builder_resize');
-        });
-      };
-
-      var switchToPreview = function switchToPreview() {
-        if (panelsData) {
-          _this6.setState({
-            editing: false
-          });
-        }
-      };
-
-      return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
-        label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
-      }, this.state.editing ? React.createElement(wp.components.ToolbarButton, {
-        icon: "visibility",
-        className: "components-icon-button components-toolbar__control",
-        label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
-        onClick: switchToPreview
-      }) : React.createElement(wp.components.ToolbarButton, {
-        icon: "edit",
-        className: "components-icon-button components-toolbar__control",
-        label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
-        onClick: switchToEditing
-      }))), React.createElement("div", {
-        key: "layout-block",
-        className: "siteorigin-panels-layout-block-container",
-        ref: this.panelsContainer,
-        hidden: !this.state.editing
-      }), React.createElement("div", {
-        key: "preview",
-        className: "so-panels-block-layout-preview-container",
-        hidden: this.state.editing
-      }, this.state.loadingPreview ? React.createElement("div", {
-        className: "so-panels-spinner-container"
-      }, React.createElement("span", null, React.createElement(wp.components.Spinner, null))) : React.createElement("div", {
-        className: "so-panels-raw-html-container",
-        ref: this.previewContainer
-      }, React.createElement(wp.element.RawHTML, null, this.state.previewHtml))));
-    }
-  }]);
-
-  return SiteOriginPanelsLayoutBlock;
-}(wp.element.Component);
+  }, [editing]);
+  return React.createElement(wp.element.Fragment, null, React.createElement("div", {
+    key: "layout-block",
+    className: "siteorigin-panels-layout-block-container",
+    ref: panelsContainer,
+    hidden: !editing
+  }), React.createElement("div", {
+    key: "preview",
+    className: "so-panels-block-layout-preview-container",
+    hidden: editing
+  }, loadingPreview ? React.createElement("div", {
+    className: "so-panels-spinner-container"
+  }, React.createElement("span", null, React.createElement(wp.components.Spinner, null))) : React.createElement("div", {
+    className: "so-panels-raw-html-container",
+    ref: previewContainer
+  }, React.createElement(wp.element.RawHTML, null, previewHtml))));
+}
 
 var hasLayoutCategory = wp.blocks.getCategories().some(function (category) {
   return category.slug === 'layout';
@@ -411,12 +351,30 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
       type: 'string'
     }
   },
+  apiVersion: 3,
   edit: function edit(_ref) {
     var attributes = _ref.attributes,
         setAttributes = _ref.setAttributes,
         toggleSelection = _ref.toggleSelection;
+    var blockProps = wp.blockEditor.useBlockProps(); // Derive the initial editing state once.
 
-    var onLayoutBlockContentChange = function onLayoutBlockContentChange(newPanelsData) {
+    var hasPanelsData = attributes.panelsData && _typeof(attributes.panelsData) === 'object' && Object.keys(attributes.panelsData).length > 0;
+    var initialEditing = hasPanelsData ? window.soPanelsBlockEditorAdmin.defaultMode === 'edit' : true;
+
+    var _wp$element$useState11 = wp.element.useState(initialEditing),
+        _wp$element$useState12 = _slicedToArray(_wp$element$useState11, 2),
+        editing = _wp$element$useState12[0],
+        setEditing = _wp$element$useState12[1];
+
+    var switchToEditing = wp.element.useCallback(function () {
+      setEditing(true);
+    }, []);
+    var switchToPreview = wp.element.useCallback(function () {
+      if (attributes.panelsData) {
+        setEditing(false);
+      }
+    }, [attributes.panelsData]);
+    var onLayoutBlockContentChange = wp.element.useCallback(function (newPanelsData) {
       if (newPanelsData.widgets !== null && _typeof(newPanelsData.widgets) === 'object' && Object.keys(newPanelsData.widgets).length > 0) {
         // Send panelsData to server for sanitization.
         var isNewWPBlockEditor = jQuery('.widgets-php').length;
@@ -456,22 +414,32 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
           contentPreview: null
         });
       }
-    };
-
-    var disableSelection = function disableSelection() {
+    }, [setAttributes]);
+    var disableSelection = wp.element.useCallback(function () {
       toggleSelection(false);
-    };
-
-    var enableSelection = function enableSelection() {
+    }, [toggleSelection]);
+    var enableSelection = wp.element.useCallback(function () {
       toggleSelection(true);
-    };
-
-    return React.createElement(SiteOriginPanelsLayoutBlock, {
+    }, [toggleSelection]);
+    return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
+      label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+    }, editing ? React.createElement(wp.components.ToolbarButton, {
+      icon: "visibility",
+      className: "components-icon-button components-toolbar__control",
+      label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
+      onClick: switchToPreview
+    }) : React.createElement(wp.components.ToolbarButton, {
+      icon: "edit",
+      className: "components-icon-button components-toolbar__control",
+      label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
+      onClick: switchToEditing
+    }))), React.createElement("div", blockProps, React.createElement(SiteOriginPanelsLayoutBlock, {
+      editing: editing,
       panelsData: attributes.panelsData,
       onContentChange: onLayoutBlockContentChange,
       onRowOrWidgetMouseDown: disableSelection,
       onRowOrWidgetMouseUp: enableSelection
-    });
+    })));
   }
 });
 jQuery(function () {

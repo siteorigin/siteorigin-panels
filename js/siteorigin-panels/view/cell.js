@@ -104,13 +104,17 @@ module.exports = Backbone.View.extend( {
 				}
 			},
 			helper: function ( e, el ) {
+				// Append to the iframe body when inside an iframed editor, otherwise admin body.
+				var targetBody = ( el[0].ownerDocument !== document )
+					? el[0].ownerDocument.body
+					: document.body;
 				var helper = el.clone()
 					.css( {
 						'width': el.outerWidth() + 'px',
 						'z-index': 10000,
 						'position': 'fixed'
 					} )
-					.addClass( 'widget-being-dragged' ).appendTo( 'body' );
+					.addClass( 'widget-being-dragged' ).appendTo( targetBody );
 
 				// Center the helper to the mouse cursor.
 				if ( el.outerWidth() > 720 ) {
