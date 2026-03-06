@@ -482,7 +482,7 @@ class SiteOrigin_Panels {
 	public function get_post_id() {
 		$post_id = get_the_ID();
 
-		if ( self::should_use_woocommerce_shop_page_id() ) {
+		if ( SiteOrigin_Panels_Compat_WooCommerce::should_use_shop_page_id() ) {
 			$post_id = wc_get_page_id( 'shop' );
 		}
 		global $preview;
@@ -496,16 +496,6 @@ class SiteOrigin_Panels {
 		}
 
 		return $post_id;
-	}
-
-	/**
-	 * Should we use the configured WooCommerce Shop page ID as the current post ID.
-	 *
-	 * This is intentionally strict because some WooCommerce rendering contexts can invoke content
-	 * filters while processing non-Shop content.
-	 */
-	public static function should_use_woocommerce_shop_page_id() {
-		return SiteOrigin_Panels_Compat_WooCommerce::should_use_shop_page_id();
 	}
 
 	/**
