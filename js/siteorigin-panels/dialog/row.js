@@ -719,37 +719,11 @@ module.exports = panels.view.dialog.extend({
 
 		var delta = $( e.currentTarget ).hasClass( 'so-row-count-step-up' ) ? 1 : -1;
 		var input = $input.get( 0 );
-		var minValue = parseInt( $input.attr( 'min' ), 10 );
-		var maxValue = parseInt( $input.attr( 'max' ), 10 );
-
-		if ( input && typeof input.stepUp === 'function' && typeof input.stepDown === 'function' ) {
-			if ( delta > 0 ) {
-				input.stepUp();
-			} else {
-				input.stepDown();
-			}
+		if ( delta > 0 ) {
+			input.stepUp();
 		} else {
-			var currentValue = parseInt( $input.val(), 10 );
-			if ( _.isNaN( currentValue ) ) {
-				currentValue = this.row && this.row.cells ? this.row.cells.length : 1;
-			}
-			$input.val( currentValue + delta );
+			input.stepDown();
 		}
-
-		var nextValue = parseInt( $input.val(), 10 );
-		if ( _.isNaN( nextValue ) ) {
-			nextValue = this.row && this.row.cells ? this.row.cells.length : 1;
-		}
-
-		if ( ! _.isNaN( minValue ) ) {
-			nextValue = Math.max( minValue, nextValue );
-		}
-
-		if ( ! _.isNaN( maxValue ) ) {
-			nextValue = Math.min( maxValue, nextValue );
-		}
-
-		$input.val( nextValue );
 
 		this.changeCellTotal();
 	},
