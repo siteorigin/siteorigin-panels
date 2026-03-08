@@ -133,6 +133,11 @@ class SiteOrigin_Panels_Compatibility {
 			require_once $this->compat_path . 'events-manager.php';
 		}
 
+		// Compatibility with WooCommerce.
+		if ( class_exists( 'WooCommerce' ) ) {
+			SiteOrigin_Panels_Compat_WooCommerce::single();
+		}
+
 		// Compatibility with Ditty.
 		if ( defined( 'DITTY_VERSION' ) ) {
 			require_once $this->compat_path . 'ditty.php';
