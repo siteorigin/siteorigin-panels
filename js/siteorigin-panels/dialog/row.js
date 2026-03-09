@@ -50,6 +50,7 @@ module.exports = panels.view.dialog.extend({
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'change .row-set-form .so-row-field': 'changeCellTotal',
+		'click .row-set-form .so-row-count-step': 'adjustCellCount',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
 
@@ -179,6 +180,8 @@ module.exports = panels.view.dialog.extend({
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
 		}
+
+		this.$( 'input[name="cells"].so-row-field' ).attr( 'aria-live', 'polite' );
 
 		return this;
 	},
@@ -707,6 +710,30 @@ module.exports = panels.view.dialog.extend({
 
 	getCurrentCellCount: function() {
 		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
+	adjustCellCount: function( e ) {
+		e.preventDefault();
+		var $control = $( e.currentTarget ).closest( '.so-row-count-control' );
+		var $input = $control.find( 'input[name="cells"].so-row-field' ).first();
+
+		if ( ! $input.length ) {
+			$input = this.$( '.row-set-form input[name="cells"].so-row-field' ).first();
+		}
+
+		if ( ! $input.length ) {
+			return;
+		}
+
+		var delta = $( e.currentTarget ).hasClass( 'so-row-count-step-up' ) ? 1 : -1;
+		var input = $input.get( 0 );
+		if ( delta > 0 ) {
+			input.stepUp();
+		} else {
+			input.stepDown();
+		}
+
+		this.changeCellTotal();
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {

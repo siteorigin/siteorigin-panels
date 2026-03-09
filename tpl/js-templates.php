@@ -333,13 +333,28 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 
 		<div class="content">
 
-			<div class="row-set-form">
-				<div class="row-cell-column">
-					<?php
-					esc_html_e( 'Column Count:', 'siteorigin-panels' );
-					echo apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" class="so-row-field" value="2" />' );
-					?>
-				</div>
+					<div class="row-set-form" role="group" aria-label="<?php esc_attr_e( 'Column count controls', 'siteorigin-panels' ); ?>">
+						<div class="row-cell-column">
+							<?php
+							$column_count_input = apply_filters( 'siteorigin_panels_row_column_count_input', '<input type="number" min="1" max="12" name="cells" id="so-row-count-input" class="so-row-field" value="2" />' );
+							?>
+							<label class="so-row-count-label" for="so-row-count-input"><?php esc_html_e( 'Column Count:', 'siteorigin-panels' ); ?></label>
+							<div class="so-row-count-control">
+								<label class="so-row-count-input-label">
+									<span class="screen-reader-text">
+										<?php esc_html_e( 'Column Count', 'siteorigin-panels' ); ?>
+									</span>
+									<?php echo $column_count_input; ?>
+								</label>
+								<span class="screen-reader-text">
+									<?php esc_html_e( 'Use arrow keys or type a number between 1 and 12.', 'siteorigin-panels' ); ?>
+								</span>
+								<div class="so-row-count-stepper">
+									<button type="button" class="so-row-count-step so-row-count-step-up">+</button>
+									<button type="button" class="so-row-count-step so-row-count-step-down">&minus;</button>
+								</div>
+							</div>
+						</div>
 
 				<div class="cell-resize-container">
 					<span class="cell-resize-label">
@@ -417,8 +432,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								tabIndex="0"
 							/>
 							<div class="preview-cell-stepper">
-								<button type="button" class="preview-cell-step preview-cell-step-up" tabindex="-1">+</button>
-								<button type="button" class="preview-cell-step preview-cell-step-down" tabindex="-1">&minus;</button>
+								<button type="button" class="preview-cell-step preview-cell-step-up">+</button>
+								<button type="button" class="preview-cell-step preview-cell-step-down">&minus;</button>
 							</div>
 						</div>
 					</div>
