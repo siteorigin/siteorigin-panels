@@ -476,6 +476,7 @@ module.exports = panels.view.dialog.extend({
 						max: maxSize,
 						'aria-label': label,
 					} )
+					.data( 'initialWeight', $( this ).val() )
 					.on( 'focus', function() {
 						clearTimeout( timeout );
 						// Disable the draggable while entering values.
@@ -516,7 +517,18 @@ module.exports = panels.view.dialog.extend({
 							resizeCells( parent );
 						}
 					} )
-					.on( 'blur', resizeCells )
+					.on( 'blur', function() {
+						// Only trigger resize if the value actually changed to avoid
+						// unnecessary DOM regeneration that causes visual movement.
+						var current = $( this ).val();
+						var initial = $( this ).data( 'initialWeight' );
+						if ( current !== initial && ! $( this ).hasClass( 'no-user-interacted' ) ) {
+							resizeCells();
+						} else {
+							// Re-enable drag handles without rebuilding the preview.
+							thisDialog.$( '.resize-handle' ).css( 'pointer-events', '' ).draggable( 'enable' );
+						}
+					} )
 					.on( 'click', function () {
 						$( this ).trigger( 'select' );
 					} );

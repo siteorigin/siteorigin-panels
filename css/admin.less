@@ -1983,6 +1983,7 @@
 						}
 
 						.preview-cell-weight-field {
+							overflow: hidden;
 							position: relative;
 							width: 80px;
 						}
@@ -1990,11 +1991,12 @@
 						.preview-cell-stepper {
 							align-items: center;
 							background: #f6f6f6;
-							border-radius: 3px;
+							border-radius: 0;
 							display: flex;
 							flex-direction: column;
 							height: calc( 100% - 2px );
 							justify-content: center;
+							overflow: hidden;
 							position: absolute;
 							right: 1px;
 							top: 1px;
@@ -2006,6 +2008,7 @@
 							align-items: center;
 							background: transparent;
 							border: 0;
+							border-radius: 0;
 							color: #5e6d72;
 							cursor: pointer;
 							display: inline-flex;
@@ -2025,10 +2028,11 @@
 
 						.preview-cell-weight-input {
 							-moz-appearance: textfield;
+							.box-sizing( border-box );
 							.box-shadow( none );
 							background: #fff;
 							border: 1px solid #d0d0d0;
-							border-radius: 3px;
+							border-radius: 0;
 							color: #5e6d72;
 							cursor: pointer;
 							font-family: Arial,Helvetica Neue,Helvetica,sans-serif;

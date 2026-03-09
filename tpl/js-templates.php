@@ -421,7 +421,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 		<div class="preview-cell" style="width: {{%- weight*100 %}}%">
 			<div class="preview-cell-in">
 				<div class="preview-cell-container">
-					<div class="preview-cell-weight-control">
+					<div class="preview-cell-weight-control" role="group" aria-label="<?php esc_attr_e( 'Column width controls', 'siteorigin-panels' ); ?>">
 						<div class="preview-cell-weight-field">
 							<input
 								type="text"
@@ -432,8 +432,8 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 								tabIndex="0"
 							/>
 							<div class="preview-cell-stepper">
-								<button type="button" class="preview-cell-step preview-cell-step-up">+</button>
-								<button type="button" class="preview-cell-step preview-cell-step-down">&minus;</button>
+								<button type="button" class="preview-cell-step preview-cell-step-up" aria-label="<?php esc_attr_e( 'Increase column width', 'siteorigin-panels' ); ?>">+</button>
+								<button type="button" class="preview-cell-step preview-cell-step-down" aria-label="<?php esc_attr_e( 'Decrease column width', 'siteorigin-panels' ); ?>">&minus;</button>
 							</div>
 						</div>
 					</div>
