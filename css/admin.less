@@ -1,5 +1,7 @@
 @import "mixins";
 
+@wp_system_font_stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
 @font-face {
 	font-family: 'siteorigin-panels-icons';
 	src: url('icons/panels-icons.eot');
@@ -900,7 +902,7 @@
 		&,
 		h4,
 		ul {
-			font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
+			font-family: @wp_system_font_stack;
 		}
 
 		ul {
@@ -3435,7 +3437,7 @@
 		input,
 		a {
 			color: #3c434a;
-			font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+			font-family: @wp_system_font_stack;
 			font-size: 13px;
 			line-height: 1.4;
 		}
@@ -3460,7 +3462,7 @@
 			box-shadow: none;
 			color: #2c3338;
 			cursor: pointer;
-			font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+			font-family: @wp_system_font_stack;
 			font-size: 14px;
 			line-height: 2;
 			min-height: 30px;
