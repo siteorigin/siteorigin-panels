@@ -892,44 +892,43 @@
 	}
 }
 
-.wp-customizer,
-.block-editor-page {
-	// Styles for PB in block editor.
-	.siteorigin-panels-layout-block-container {
-		font-size: 13px;
-		line-height: 1.4em;
+// Styles for PB in block editor.
+// Not nested under .block-editor-page because the Layout Block renders
+// inside an iframe whose body may not carry that class.
+.siteorigin-panels-layout-block-container {
+	font-size: 13px;
+	line-height: 1.4em;
 
-		&,
-		h4,
-		ul,
-		label,
-		input,
-		select,
-		textarea,
-		button,
-		a {
-			font-family: @wp_system_font_stack;
+	&,
+	h4,
+	ul,
+	label,
+	input,
+	select,
+	textarea,
+	button,
+	a {
+		font-family: @wp_system_font_stack;
+	}
+
+	ul {
+		list-style: none;
+	}
+
+	// Prevent display issues when the editor has a darker background.
+	.so-builder-container {
+		background: #fff;
+
+		.so-row-container {
+			padding: 0 15px 20px;
 		}
 
-		ul {
-			list-style: none;
-		}
+		a:not(.so-tool-button):not([class^="so-row-"]) {
+			color: #2271b1;
 
-		// Prevent display issues when the editor has a darker background.
-		.so-builder-container {
-			background: #fff;
-
-			.so-row-container {
-				padding: 0 15px 20px;
-			}
-
-			a:not(.so-tool-button):not([class^="so-row-"]) {
-				color: #2271b1;
-
-				&:hover,
-				&:focus {
-					color: #1e1e1e;
-				}
+			&:hover,
+			&:focus {
+				color: #1e1e1e;
 			}
 		}
 	}
