@@ -2929,6 +2929,19 @@
 	}
 }
 
+// Ensure widget forms inside dialogs use the WP system font stack.
+.so-panels-dialog .so-content .siteorigin-widget-content {
+	&,
+	label,
+	input,
+	select,
+	.siteorigin-widget-field,
+	.button,
+	a {
+		font-family: @wp_system_font_stack;
+	}
+}
+
 .so-panels-live-editor {
 	@live_editor_width: 360px;
 
