@@ -44,7 +44,37 @@ module.exports = {
 		jQuery( document ).one( 'heartbeat-tick', function( event, data ) {
 			jQuery( '.so-saveinline' ).removeAttr( 'disabled' )
 		} );
-		wp.autosave.server.triggerSave()
+
+		if ( ! this.attemptToSave() ) {
+			console.warn( 'Unable to save post.' );
+		}
 	},
+
+	/**
+	 * Attempt to save the current post using the best available mechanism.
+	 *
+	 * @return {boolean} True if a save was dispatched, false if no save mechanism was found.
+	 */
+	attemptToSave: function() {
+		if ( typeof wp === 'undefined' ) {
+			return false;
+		}
+
+		// Block Editor.
+		if ( wp.data && wp.data.select( 'core/editor' ) ) {
+			if ( ! wp.data.select( 'core/editor' ).isSavingPost() ) {
+				wp.data.dispatch( 'core/editor' ).savePost();
+			}
+			return true;
+		}
+
+		// Classic Editor, and older versions of the Block Editor.
+		if ( wp.autosave && wp.autosave.server ) {
+			wp.autosave.server.triggerSave();
+			return true;
+		}
+
+		return false;
+	}
 
 }

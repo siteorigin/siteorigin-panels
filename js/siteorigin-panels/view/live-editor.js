@@ -43,7 +43,7 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		this.setElement( this.template() );
 		this.$el.hide();
-		
+
 		if ( $( '#submitdiv #save-post' ).length > 0 ) {
 			var $saveButton = this.$el.find( '.live-editor-save' );
 			$saveButton.text( $saveButton.data( 'save' ) );
@@ -124,18 +124,16 @@ module.exports = Backbone.View.extend( {
 			// The live editor requires a saved draft post, so we'll create one for auto-draft posts
 			var thisView = this;
 
-			if ( wp.autosave ) {
-				// Set a temporary post title so the autosave triggers properly
-				if( $('#title[name="post_title"]' ).val() === '' ) {
-					$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
-				}
-
-				$( document ).one( 'heartbeat-tick.autosave', function(){
-					thisView.autoSaved = true;
-					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
-				} );
-				wp.autosave.server.triggerSave();
+			// Set a temporary post title so the autosave triggers properly
+			if( $('#title[name="post_title"]' ).val() === '' ) {
+				$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
 			}
+
+			$( document ).one( 'heartbeat-tick.autosave', function(){
+				thisView.autoSaved = true;
+				thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+			} );
+			panels.helpers.utils.saveHeartbeat( thisView );
 		}
 	},
 
@@ -169,8 +167,7 @@ module.exports = Backbone.View.extend( {
 	 */
 	closeAndSave: function(){
 		this.close( false );
-		// Finds the submit input for saving without publishing draft posts.
-		$( '#submitdiv input[type="submit"][name="save"], .editor-post-publish-button, .edit-widgets-header__actions .is-primary' )[0].click();
+		panels.helpers.utils.saveHeartbeat( this );
 	},
 
 	/**
