@@ -927,6 +927,13 @@
 	}
 }
 
+// Reserve space for Gutenberg's selected ring so selection state changes
+// don't overlap the Layout Block UI when the block toolbar is in topbar.
+.block-editor-block-list__block.wp-block-siteorigin-panels-layout-block .siteorigin-panels-layout-block-container {
+	box-sizing: border-box;
+	padding: 2px;
+}
+
 .so-panels-dialog,
 .block-editor-page,
 .wp-customizer {

@@ -434,23 +434,21 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 		return (
 			<wp.element.Fragment>
 				<wp.blockEditor.BlockControls>
-				<wp.components.Toolbar label={ wp.i18n.__( 'Page Builder Mode.', 'siteorigin-panels' ) }>
+				<wp.components.ToolbarGroup label={ wp.i18n.__( 'Page Builder Mode Controls', 'siteorigin-panels' ) }>
 					{ editing ? (
-					<wp.components.ToolbarButton
-						icon="visibility"
-						className="components-icon-button components-toolbar__control"
-						label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
-						onClick={ switchToPreview }
-					/>
+						<wp.components.ToolbarButton
+							icon="visibility"
+							label={ wp.i18n.__( 'Preview layout.', 'siteorigin-panels' ) }
+							onClick={ switchToPreview }
+						/>
 					) : (
-					<wp.components.ToolbarButton
-						icon="edit"
-						className="components-icon-button components-toolbar__control"
-						label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
-						onClick={ switchToEditing }
-					/>
+						<wp.components.ToolbarButton
+							icon="edit"
+							label={ wp.i18n.__( 'Edit layout.', 'siteorigin-panels' ) }
+							onClick={ switchToEditing }
+						/>
 					) }
-				</wp.components.Toolbar>
+				</wp.components.ToolbarGroup>
 				</wp.blockEditor.BlockControls>
 				<div { ...blockProps }>
 					<SiteOriginPanelsLayoutBlock
