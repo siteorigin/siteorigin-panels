@@ -160,6 +160,10 @@ module.exports = Backbone.View.extend( {
 			this.dialog = new panels.dialog.builder();
 			this.dialog.builder = this;
 		} else {
+			this.menu.setContext( {
+				container: options.container
+			} );
+
 			// Attach this in the standard way
 			this.$el.appendTo( options.container );
 			this.metabox = options.container.closest( '.postbox' );

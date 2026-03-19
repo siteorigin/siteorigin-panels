@@ -15,18 +15,82 @@ module.exports = Backbone.View.extend( {
 	 * Intialize the context menu
 	 */
 	initialize: function () {
+		this.contextDocument = document;
+		this.contextWindow = window;
 		this.listenContextMenu();
 		this.render();
 		this.attach();
+	},
+
+	getEventNamespace: function () {
+		return '.siteoriginPanelsMenu' + this.cid;
+	},
+
+	getContextDocument: function () {
+		return this.contextDocument || document;
+	},
+
+	getContextWindow: function () {
+		var contextDocument = this.getContextDocument();
+		return this.contextWindow || contextDocument.defaultView || window;
+	},
+
+	getInteractionWindows: function () {
+		var interactionWindows = [ this.getContextWindow() ];
+
+		if ( window !== interactionWindows[ 0 ] ) {
+			interactionWindows.push( window );
+		}
+
+		return interactionWindows;
+	},
+
+	setContext: function( options ) {
+		options = options || {};
+
+		var contextDocument = options.document;
+		if (
+			! contextDocument &&
+			options.container &&
+			options.container.length &&
+			options.container[ 0 ]
+		) {
+			contextDocument = options.container[ 0 ].ownerDocument;
+		}
+
+		if ( ! contextDocument ) {
+			contextDocument = this.getContextDocument();
+		}
+
+		var contextWindow = options.window || contextDocument.defaultView || window;
+
+		if (
+			this.contextDocument === contextDocument &&
+			this.contextWindow === contextWindow
+		) {
+			return this;
+		}
+
+		this.closeMenu();
+		this.unlistenContextMenu();
+
+		this.contextDocument = contextDocument;
+		this.contextWindow = contextWindow;
+
+		this.attach();
+		this.listenContextMenu();
+
+		return this;
 	},
 
 	/**
 	 * Listen for the right click context menu
 	 */
 	listenContextMenu: function () {
-		var thisView = this;
+		var thisView = this,
+			eventNamespace = 'contextmenu' + this.getEventNamespace();
 
-		$( window ).on( 'contextmenu', function ( e ) {
+		$( this.getContextDocument() ).on( eventNamespace, function ( e ) {
 			if ( thisView.active && ! thisView.isOverEl( thisView.$el, e ) ) {
 				thisView.closeMenu();
 				thisView.active = false;
@@ -55,12 +119,22 @@ module.exports = Backbone.View.extend( {
 		} );
 	},
 
+	unlistenContextMenu: function() {
+		var eventNamespace = this.getEventNamespace();
+		$( this.getContextDocument() ).off( 'contextmenu' + eventNamespace );
+
+		_.each( this.getInteractionWindows(), function( interactionWindow ) {
+			$( interactionWindow ).off( 'keyup' + eventNamespace );
+			$( interactionWindow ).off( 'click' + eventNamespace );
+		} );
+	},
+
 	render: function () {
 		this.setElement( this.wrapperTemplate() );
 	},
 
 	attach: function () {
-		this.$el.appendTo( 'body' );
+		this.$el.appendTo( this.getContextDocument().body );
 	},
 
 	/**
@@ -69,26 +143,32 @@ module.exports = Backbone.View.extend( {
 	 * @param position
 	 */
 	openMenu: function ( position ) {
+		var $contextWindow = $( this.getContextWindow() ),
+			eventNamespace = this.getEventNamespace(),
+			thisView = this;
+
 		this.trigger( 'open_menu' );
 
 		// Start listening for situations when we should close the menu
-		$( window ).on( 'keyup', {menu: this}, this.keyboardListen );
-		$( window ).on( 'click', {menu: this}, this.clickOutsideListen );
+		_.each( this.getInteractionWindows(), function( interactionWindow ) {
+			$( interactionWindow ).on( 'keyup' + eventNamespace, {menu: thisView}, thisView.keyboardListen );
+			$( interactionWindow ).on( 'click' + eventNamespace, {menu: thisView}, thisView.clickOutsideListen );
+		} );
 
 		// Set the maximum height of the menu
-		this.$el.css( 'max-height', $( window ).height() - 20 );
+		this.$el.css( 'max-height', $contextWindow.height() - 20 );
 
 		// Correct the left position
-		if ( position.left + this.$el.outerWidth() + 10 >= $( window ).width() ) {
-			position.left = $( window ).width() - this.$el.outerWidth() - 10;
+		if ( position.left + this.$el.outerWidth() + 10 >= $contextWindow.width() ) {
+			position.left = $contextWindow.width() - this.$el.outerWidth() - 10;
 		}
 		if ( position.left <= 0 ) {
 			position.left = 10;
 		}
 
 		// Check top position
-		if ( position.top + this.$el.outerHeight() - $( window ).scrollTop() + 10 >= $( window ).height() ) {
-			position.top = $( window ).height() + $( window ).scrollTop() - this.$el.outerHeight() - 10;
+		if ( position.top + this.$el.outerHeight() - $contextWindow.scrollTop() + 10 >= $contextWindow.height() ) {
+			position.top = $contextWindow.height() + $contextWindow.scrollTop() - this.$el.outerHeight() - 10;
 		}
 		if ( position.left <= 0 ) {
 			position.left = 10;
@@ -103,11 +183,15 @@ module.exports = Backbone.View.extend( {
 	},
 
 	closeMenu: function () {
+		var eventNamespace = this.getEventNamespace();
+
 		this.trigger( 'close_menu' );
 
 		// Stop listening for situations when we should close the menu
-		$( window ).off( 'keyup', this.keyboardListen );
-		$( window ).off( 'click', this.clickOutsideListen );
+		_.each( this.getInteractionWindows(), function( interactionWindow ) {
+			$( interactionWindow ).off( 'keyup' + eventNamespace, this.keyboardListen );
+			$( interactionWindow ).off( 'click' + eventNamespace, this.clickOutsideListen );
+		}, this );
 
 		this.active = false;
 		this.$el.empty().hide();
