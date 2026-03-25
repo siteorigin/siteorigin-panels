@@ -124,16 +124,18 @@ module.exports = Backbone.View.extend( {
 			// The live editor requires a saved draft post, so we'll create one for auto-draft posts
 			var thisView = this;
 
-			// Set a temporary post title so the autosave triggers properly
-			if( $('#title[name="post_title"]' ).val() === '' ) {
-				$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
-			}
+			if ( wp.autosave ) {
+				// Set a temporary post title so the autosave triggers properly
+				if( $('#title[name="post_title"]' ).val() === '' ) {
+					$('#title[name="post_title"]' ).val( panelsOptions.loc.draft ).trigger('keydown');
+				}
 
-			$( document ).one( 'heartbeat-tick.autosave', function(){
-				thisView.autoSaved = true;
-				thisView.refreshPreview( thisView.builder.model.getPanelsData() );
-			} );
-			panels.helpers.utils.saveHeartbeat( thisView );
+				$( document ).one( 'heartbeat-tick.autosave', function(){
+					thisView.autoSaved = true;
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				} );
+				wp.autosave.server.triggerSave();
+			}
 		}
 	},
 
@@ -167,7 +169,17 @@ module.exports = Backbone.View.extend( {
 	 */
 	closeAndSave: function(){
 		this.close( false );
-		panels.helpers.utils.saveHeartbeat( this );
+
+		if ( panels.helpers.utils.shouldUseBlockEditorSave( this ) ) {
+			panels.helpers.utils.saveBlockEditor( this, function() {} );
+			return;
+		}
+
+		// Finds the submit input for saving without publishing draft posts.
+		var saveButton = $( '#submitdiv input[type="submit"][name="save"], .editor-post-publish-button, .edit-widgets-header__actions .is-primary' )[0];
+		if ( saveButton ) {
+			saveButton.click();
+		}
 	},
 
 	/**

@@ -198,7 +198,16 @@ function SiteOriginPanelsLayoutBlock(props) {
 
       if (!SiteOriginIsPanelsEqual(initialPanelsData, newPanelsData)) {
         if (typeof onContentChangeRef.current === 'function') {
-          onContentChangeRef.current(newPanelsData);
+          var pendingContentChange = onContentChangeRef.current(newPanelsData);
+
+          if (pendingContentChange && typeof pendingContentChange.then === 'function') {
+            builderViewRef.current.pendingContentChange = pendingContentChange;
+            pendingContentChange["finally"](function () {
+              if (builderViewRef.current && builderViewRef.current.pendingContentChange === pendingContentChange) {
+                builderViewRef.current.pendingContentChange = null;
+              }
+            });
+          }
         }
 
         setLoadingPreview(true);
@@ -383,37 +392,49 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
           wp.data.dispatch('core/editor').lockPostSaving();
         }
 
-        jQuery.post(panelsOptions.ajaxurl, {
-          action: 'so_panels_builder_content_json',
-          panels_data: JSON.stringify(newPanelsData),
-          post_id: !isNewWPBlockEditor ? wp.data.select("core/editor").getCurrentPostId() : ''
-        }, function (content) {
-          var panelsAttributes = {};
+        return new Promise(function (resolve, reject) {
+          jQuery.post(panelsOptions.ajaxurl, {
+            action: 'so_panels_builder_content_json',
+            panels_data: JSON.stringify(newPanelsData),
+            post_id: !isNewWPBlockEditor ? wp.data.select("core/editor").getCurrentPostId() : ''
+          }).done(function (content) {
+            var panelsAttributes = {};
 
-          if (content.sanitized_panels_data !== '') {
-            panelsAttributes.panelsData = content.sanitized_panels_data;
-          }
+            if (content.sanitized_panels_data !== '') {
+              panelsAttributes.panelsData = content.sanitized_panels_data;
+            }
 
-          if (content.preview !== '') {
-            panelsAttributes.contentPreview = content.preview;
-          }
+            if (content.preview !== '') {
+              panelsAttributes.contentPreview = content.preview;
+            }
 
-          setAttributes({
-            contentPreview: panelsAttributes.contentPreview,
-            panelsData: panelsAttributes.panelsData,
-            previewInitialized: false
+            setAttributes({
+              contentPreview: panelsAttributes.contentPreview,
+              panelsData: panelsAttributes.panelsData,
+              previewInitialized: false
+            });
+            setTimeout(function () {
+              if (!isNewWPBlockEditor) {
+                wp.data.dispatch('core/editor').unlockPostSaving();
+              }
+
+              resolve(content);
+            }, 0);
+          }).fail(function (jqXHR, textStatus, errorThrown) {
+            if (!isNewWPBlockEditor) {
+              wp.data.dispatch('core/editor').unlockPostSaving();
+            }
+
+            reject(errorThrown || textStatus);
           });
-
-          if (!isNewWPBlockEditor) {
-            wp.data.dispatch('core/editor').unlockPostSaving();
-          }
-        });
-      } else {
-        setAttributes({
-          panelsData: null,
-          contentPreview: null
         });
       }
+
+      setAttributes({
+        panelsData: null,
+        contentPreview: null
+      });
+      return Promise.resolve();
     }, [setAttributes]);
     var disableSelection = wp.element.useCallback(function () {
       toggleSelection(false);
