@@ -116,6 +116,9 @@ module.exports = Backbone.View.extend( {
 		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
+		this.builder.menu.setContext( {
+			container: this.$( '.so-live-editor-builder' )
+		} );
 		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
 		this.builder.trigger( 'builder_resize' );
 
@@ -160,6 +163,9 @@ module.exports = Backbone.View.extend( {
 
 		// Move the builder back to its original container
 		this.builder.$el.appendTo( this.originalContainer );
+		this.builder.menu.setContext( {
+			container: this.originalContainer
+		} );
 		this.builder.$( '.so-tool-button.so-live-editor' ).show();
 		this.builder.trigger( 'builder_resize' );
 	},
