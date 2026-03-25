@@ -35,7 +35,7 @@ module.exports = Backbone.View.extend( {
 		return this.contextWindow || contextDocument.defaultView || window;
 	},
 
-	getInteractionWindows: function () {
+	getOutsideClickWindows: function () {
 		var interactionWindows = [ this.getContextWindow() ];
 
 		if ( window !== interactionWindows[ 0 ] ) {
@@ -120,11 +120,12 @@ module.exports = Backbone.View.extend( {
 	},
 
 	unlistenContextMenu: function() {
-		var eventNamespace = this.getEventNamespace();
+		var eventNamespace = this.getEventNamespace(),
+			contextWindow = this.getContextWindow();
 		$( this.getContextDocument() ).off( 'contextmenu' + eventNamespace );
+		$( contextWindow ).off( 'keyup' + eventNamespace );
 
-		_.each( this.getInteractionWindows(), function( interactionWindow ) {
-			$( interactionWindow ).off( 'keyup' + eventNamespace );
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
 			$( interactionWindow ).off( 'click' + eventNamespace );
 		} );
 	},
@@ -150,8 +151,9 @@ module.exports = Backbone.View.extend( {
 		this.trigger( 'open_menu' );
 
 		// Start listening for situations when we should close the menu
-		_.each( this.getInteractionWindows(), function( interactionWindow ) {
-			$( interactionWindow ).on( 'keyup' + eventNamespace, {menu: thisView}, thisView.keyboardListen );
+		$( this.getContextWindow() ).on( 'keyup' + eventNamespace, {menu: thisView}, thisView.keyboardListen );
+
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
 			$( interactionWindow ).on( 'click' + eventNamespace, {menu: thisView}, thisView.clickOutsideListen );
 		} );
 
@@ -183,13 +185,15 @@ module.exports = Backbone.View.extend( {
 	},
 
 	closeMenu: function () {
-		var eventNamespace = this.getEventNamespace();
+		var eventNamespace = this.getEventNamespace(),
+			contextWindow = this.getContextWindow();
 
 		this.trigger( 'close_menu' );
 
 		// Stop listening for situations when we should close the menu
-		_.each( this.getInteractionWindows(), function( interactionWindow ) {
-			$( interactionWindow ).off( 'keyup' + eventNamespace, this.keyboardListen );
+		$( contextWindow ).off( 'keyup' + eventNamespace, this.keyboardListen );
+
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
 			$( interactionWindow ).off( 'click' + eventNamespace, this.clickOutsideListen );
 		}, this );
 
