@@ -937,6 +937,13 @@
 			}
 		}
 	}
+
+}
+
+// Reserve space for Gutenberg's selected ring so selection state changes don't shift toolbar layout.
+.block-editor-block-list__block.wp-block-siteorigin-panels-layout-block .siteorigin-panels-layout-block-container {
+	box-sizing: border-box;
+	padding: 2px;
 }
 
 .so-panels-dialog,

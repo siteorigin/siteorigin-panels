@@ -421,16 +421,14 @@ wp.blocks.registerBlockType('siteorigin-panels/layout-block', {
     var enableSelection = wp.element.useCallback(function () {
       toggleSelection(true);
     }, [toggleSelection]);
-    return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.Toolbar, {
-      label: wp.i18n.__('Page Builder Mode.', 'siteorigin-panels')
+    return React.createElement(wp.element.Fragment, null, React.createElement(wp.blockEditor.BlockControls, null, React.createElement(wp.components.ToolbarGroup, {
+      label: wp.i18n.__('Page Builder Mode Controls', 'siteorigin-panels')
     }, editing ? React.createElement(wp.components.ToolbarButton, {
       icon: "visibility",
-      className: "components-icon-button components-toolbar__control",
       label: wp.i18n.__('Preview layout.', 'siteorigin-panels'),
       onClick: switchToPreview
     }) : React.createElement(wp.components.ToolbarButton, {
       icon: "edit",
-      className: "components-icon-button components-toolbar__control",
       label: wp.i18n.__('Edit layout.', 'siteorigin-panels'),
       onClick: switchToEditing
     }))), React.createElement("div", blockProps, React.createElement(SiteOriginPanelsLayoutBlock, {
