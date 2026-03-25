@@ -37,6 +37,10 @@ module.exports = Backbone.View.extend( {
 	/**
 	 * Initialize the builder
 	 */
+	getEventNamespace: function () {
+		return '.siteoriginPanelsBuilder' + this.cid;
+	},
+
 	initialize: function ( options ) {
 		var builder = this;
 
@@ -94,11 +98,12 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model.get( 'rows' ), 'add', this.onAddRow );
 
 		// Reflow the entire builder when ever the
-		$( window ).on( 'resize', function( e ) {
+		this._onWindowResize = function( e ) {
 			if ( e.target === window ) {
 				builder.trigger( 'builder_resize' );
 			}
-		} );
+		};
+		$( window ).on( 'resize' + this.getEventNamespace(), this._onWindowResize );
 
 		// When the data changes in the model, store it in the field
 		this.listenTo( this.model, 'change:data load_panels_data', this.storeModelData );
@@ -115,7 +120,7 @@ module.exports = Backbone.View.extend( {
 
 		// Create the context menu for this builder
 		this.menu = new panels.utils.menu( {} );
-		this.listenTo( this.menu, 'activate_context', this.activateContextMenu )
+		this.listenTo( this.menu, 'activate_context', this.activateContextMenu );
 
 		if ( this.config.loadOnAttach ) {
 			this.on( 'builder_attached_to_editor', function () {
@@ -221,6 +226,28 @@ module.exports = Backbone.View.extend( {
 		welcomeMessageContainer.find( '.so-message-wrapper' ).html( msgHTML );
 
 		return this;
+	},
+
+	remove: function() {
+		if ( this.menu ) {
+			this.menu.remove();
+			this.menu = null;
+		}
+
+		if ( this._onWindowResize ) {
+			$( window ).off( 'resize' + this.getEventNamespace(), this._onWindowResize );
+			this._onWindowResize = null;
+		}
+
+		if ( !_.isNull( this.rowsSortable ) ) {
+			try {
+				this.rowsSortable.sortable( 'destroy' );
+			}
+			catch ( err ) {}
+			this.rowsSortable = null;
+		}
+
+		return Backbone.View.prototype.remove.call( this );
 	},
 
 	/**
@@ -957,9 +984,10 @@ module.exports = Backbone.View.extend( {
 	 */
 	activateContextMenu: function ( e, menu ) {
 		var builder = this;
+		var containsTarget = $.contains( builder.$el.get( 0 ), e.target );
 
 		// Only run this if the event target is a descendant of this builder's DOM element.
-		if ( $.contains( builder.$el.get( 0 ), e.target ) ) {
+		if ( containsTarget ) {
 			// Get the element we're currently hovering over
 			var over = $( [] )
 			.add( builder.$( '.so-panels-welcome-message:visible' ) )

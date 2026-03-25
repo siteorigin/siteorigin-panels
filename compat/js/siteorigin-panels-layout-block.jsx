@@ -239,6 +239,7 @@ function SiteOriginPanelsLayoutBlock( props ) {
 						view => view !== builderViewRef.current
 					);
 				}
+				builderViewRef.current.remove();
 				builderViewRef.current = null;
 			}
 

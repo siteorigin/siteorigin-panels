@@ -262,6 +262,7 @@ function SiteOriginPanelsLayoutBlock(props) {
           });
         }
 
+        builderViewRef.current.remove();
         builderViewRef.current = null;
       }
 
