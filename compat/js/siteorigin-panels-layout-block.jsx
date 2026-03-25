@@ -285,6 +285,10 @@ function SiteOriginPanelsLayoutBlock( props ) {
 	// Trigger a layout recalculation whenever we switch back into edit mode.
 	wp.element.useEffect( () => {
 		if ( editing && builderViewRef.current ) {
+			builderViewRef.current.menu.setContext( {
+				container: jQuery( panelsContainer.current )
+			} );
+
 			setTimeout( () => {
 				if ( builderViewRef.current ) {
 					builderViewRef.current.trigger( 'builder_resize' );
