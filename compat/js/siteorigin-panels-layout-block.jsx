@@ -175,16 +175,30 @@ function SiteOriginPanelsLayoutBlock( props ) {
 
 		builderViewRef.current.trigger( 'builder_resize' );
 
-		builderViewRef.current.on( 'content_change', () => {
-			const newPanelsData = builderViewRef.current.getData();
+			builderViewRef.current.on( 'content_change', () => {
+				const newPanelsData = builderViewRef.current.getData();
 
-			if ( ! SiteOriginIsPanelsEqual( initialPanelsData, newPanelsData ) ) {
-				if ( typeof onContentChangeRef.current === 'function' ) {
-					onContentChangeRef.current( newPanelsData );
+				if ( ! SiteOriginIsPanelsEqual( initialPanelsData, newPanelsData ) ) {
+					if ( typeof onContentChangeRef.current === 'function' ) {
+						const pendingContentChange = onContentChangeRef.current( newPanelsData );
+						if (
+							pendingContentChange &&
+							typeof pendingContentChange.then === 'function'
+						) {
+							builderViewRef.current.pendingContentChange = pendingContentChange;
+							pendingContentChange.finally( () => {
+								if (
+									builderViewRef.current &&
+									builderViewRef.current.pendingContentChange === pendingContentChange
+								) {
+									builderViewRef.current.pendingContentChange = null;
+								}
+							} );
+						}
+					}
+					setLoadingPreview( true );
+					setPreviewHtml( '' );
 				}
-				setLoadingPreview( true );
-				setPreviewHtml( '' );
-			}
 		} );
 
 		// Use iframeDoc so panels scripts inside the iframe receive the setup event.
@@ -375,53 +389,65 @@ wp.blocks.registerBlockType( 'siteorigin-panels/layout-block', {
 			}
 		}, [ attributes.panelsData ] );
 
-		const onLayoutBlockContentChange = wp.element.useCallback( ( newPanelsData ) => {
+			const onLayoutBlockContentChange = wp.element.useCallback( ( newPanelsData ) => {
+				if (
+					newPanelsData.widgets !== null &&
+				    typeof newPanelsData.widgets === 'object' &&
+				    Object.keys( newPanelsData.widgets ).length > 0
+				) {
+					// Send panelsData to server for sanitization.
+					var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
+					if ( ! isNewWPBlockEditor ) {
+						wp.data.dispatch( 'core/editor' ).lockPostSaving();
+					}
 
-			if (
-				newPanelsData.widgets !== null &&
-			    typeof newPanelsData.widgets === 'object' &&
-			    Object.keys( newPanelsData.widgets ).length > 0
-			) {
-				// Send panelsData to server for sanitization.
-				var isNewWPBlockEditor = jQuery( '.widgets-php' ).length;
-				if ( ! isNewWPBlockEditor ) {
-					wp.data.dispatch( 'core/editor' ).lockPostSaving();
+					return new Promise( ( resolve, reject ) => {
+						jQuery.post(
+							panelsOptions.ajaxurl,
+							{
+								action: 'so_panels_builder_content_json',
+								panels_data: JSON.stringify( newPanelsData ),
+								post_id: ! isNewWPBlockEditor ? wp.data.select("core/editor").getCurrentPostId() : ''
+							}
+						)
+						.done( function( content ) {
+							let panelsAttributes = {};
+							if ( content.sanitized_panels_data !== '' ) {
+								panelsAttributes.panelsData = content.sanitized_panels_data;
+							}
+							if ( content.preview !== '' ) {
+								panelsAttributes.contentPreview = content.preview;
+							}
+
+							setAttributes( {
+								contentPreview: panelsAttributes.contentPreview,
+								panelsData: panelsAttributes.panelsData,
+								previewInitialized: false,
+							} );
+
+							setTimeout( function() {
+								if ( ! isNewWPBlockEditor ) {
+									wp.data.dispatch( 'core/editor' ).unlockPostSaving();
+								}
+								resolve( content );
+							}, 0 );
+						} )
+						.fail( function( jqXHR, textStatus, errorThrown ) {
+							if ( ! isNewWPBlockEditor ) {
+								wp.data.dispatch( 'core/editor' ).unlockPostSaving();
+							}
+							reject( errorThrown || textStatus );
+						} );
+					} );
 				}
 
-				jQuery.post(
-					panelsOptions.ajaxurl,
-					{
-						action: 'so_panels_builder_content_json',
-						panels_data: JSON.stringify( newPanelsData ),
-						post_id: ! isNewWPBlockEditor ? wp.data.select("core/editor").getCurrentPostId() : ''
-					},
-					function( content ) {
-						let panelsAttributes = {};
-						if ( content.sanitized_panels_data !== '' ) {
-							panelsAttributes.panelsData = content.sanitized_panels_data;
-						}
-						if ( content.preview !== '' ) {
-							panelsAttributes.contentPreview = content.preview;
-						}
-
-						setAttributes( {
-							contentPreview: panelsAttributes.contentPreview,
-							panelsData: panelsAttributes.panelsData,
-							previewInitialized: false,
-						} );
-
-						if ( ! isNewWPBlockEditor ) {
-							wp.data.dispatch( 'core/editor' ).unlockPostSaving();
-						}
-					}
-				);
-			} else {
 				setAttributes( {
 					panelsData: null,
 					contentPreview: null,
 				} );
-			}
-		}, [ setAttributes ] );
+
+				return Promise.resolve();
+			}, [ setAttributes ] );
 
 		const disableSelection = wp.element.useCallback( () => {
 			toggleSelection( false );
