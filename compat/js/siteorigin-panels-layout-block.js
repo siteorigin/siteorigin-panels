@@ -271,6 +271,7 @@ function SiteOriginPanelsLayoutBlock(props) {
           });
         }
 
+        builderViewRef.current.remove();
         builderViewRef.current = null;
       }
 
@@ -312,6 +313,9 @@ function SiteOriginPanelsLayoutBlock(props) {
 
   wp.element.useEffect(function () {
     if (editing && builderViewRef.current) {
+      builderViewRef.current.menu.setContext({
+        container: jQuery(panelsContainer.current)
+      });
       setTimeout(function () {
         if (builderViewRef.current) {
           builderViewRef.current.trigger('builder_resize');

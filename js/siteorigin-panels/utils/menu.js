@@ -15,18 +15,179 @@ module.exports = Backbone.View.extend( {
 	 * Intialize the context menu
 	 */
 	initialize: function () {
+		this.contextDocument = document;
+		this.contextWindow = window;
 		this.listenContextMenu();
 		this.render();
 		this.attach();
+	},
+
+	getEventNamespace: function () {
+		return '.siteoriginPanelsMenu' + this.cid;
+	},
+
+	getContextDocument: function () {
+		return this.contextDocument || document;
+	},
+
+	getContextWindow: function () {
+		var contextDocument = this.getContextDocument();
+		return this.contextWindow || contextDocument.defaultView || window;
+	},
+
+	getRenderWindow: function () {
+		var renderWindow = this.getContextWindow();
+
+		try {
+			if ( renderWindow.top && renderWindow.top.document ) {
+				renderWindow = renderWindow.top;
+			}
+		}
+		catch ( err ) {}
+
+		return renderWindow;
+	},
+
+	getRenderDocument: function () {
+		var renderWindow = this.getRenderWindow();
+		return renderWindow.document || document;
+	},
+
+	getUniqueWindows: function( windows ) {
+		var uniqueWindows = [];
+
+		_.each( windows, function( candidateWindow ) {
+			if ( candidateWindow && uniqueWindows.indexOf( candidateWindow ) === -1 ) {
+				uniqueWindows.push( candidateWindow );
+			}
+		} );
+
+		return uniqueWindows;
+	},
+
+	getOutsideClickWindows: function () {
+		return this.getUniqueWindows( [
+			this.getContextWindow(),
+			this.getRenderWindow(),
+			window
+		] );
+	},
+
+	getKeyupWindows: function () {
+		return this.getUniqueWindows( [
+			this.getContextWindow(),
+			this.getRenderWindow()
+		] );
+	},
+
+	getPositionForRenderWindow: function( position ) {
+		var renderWindow = this.getRenderWindow();
+		var contextWindow = this.getContextWindow();
+		var translatedPosition = {
+			left: position.left,
+			top: position.top
+		};
+
+		if ( renderWindow === contextWindow ) {
+			return translatedPosition;
+		}
+
+		if ( contextWindow.frameElement ) {
+			var frameRect = contextWindow.frameElement.getBoundingClientRect();
+			var renderScrollLeft = $( renderWindow ).scrollLeft();
+			var renderScrollTop = $( renderWindow ).scrollTop();
+			var contextScrollLeft = $( contextWindow ).scrollLeft();
+			var contextScrollTop = $( contextWindow ).scrollTop();
+			var clientLeft = _.isNumber( position.clientX ) ? position.clientX : position.left - contextScrollLeft;
+			var clientTop = _.isNumber( position.clientY ) ? position.clientY : position.top - contextScrollTop;
+
+			translatedPosition.left = frameRect.left + renderScrollLeft + clientLeft;
+			translatedPosition.top = frameRect.top + renderScrollTop + clientTop;
+		}
+
+		return translatedPosition;
+	},
+
+	getEventPositionForElement: function( el, event ) {
+		var element = el && el[ 0 ] ? el[ 0 ] : null;
+		var targetDocument = element && element.ownerDocument ? element.ownerDocument : document;
+		var targetWindow = targetDocument.defaultView || window;
+		var eventDocument = event && event.target && event.target.ownerDocument ? event.target.ownerDocument : targetDocument;
+		var eventWindow = eventDocument.defaultView || window;
+		var position = {
+			left: event.pageX,
+			top: event.pageY
+		};
+
+		if ( eventWindow === targetWindow ) {
+			return position;
+		}
+
+		if ( eventWindow.frameElement && targetWindow === this.getRenderWindow() ) {
+			return this.getPositionForRenderWindow( {
+				left: event.pageX,
+				top: event.pageY,
+				clientX: event.clientX,
+				clientY: event.clientY
+			} );
+		}
+
+		if ( targetWindow.frameElement && eventWindow === this.getRenderWindow() ) {
+			var frameRect = targetWindow.frameElement.getBoundingClientRect();
+
+			position.left = event.clientX - frameRect.left + $( targetWindow ).scrollLeft();
+			position.top = event.clientY - frameRect.top + $( targetWindow ).scrollTop();
+		}
+
+		return position;
+	},
+
+	setContext: function( options ) {
+		options = options || {};
+
+		var contextDocument = options.document;
+		if (
+			! contextDocument &&
+			options.container &&
+			options.container.length &&
+			options.container[ 0 ]
+		) {
+			contextDocument = options.container[ 0 ].ownerDocument;
+		}
+
+		if ( ! contextDocument ) {
+			contextDocument = this.getContextDocument();
+		}
+
+		var contextWindow = options.window || contextDocument.defaultView || window;
+
+		if (
+			this.contextDocument === contextDocument &&
+			this.contextWindow === contextWindow
+		) {
+			return this;
+		}
+
+		this.closeMenu();
+		this.unlistenContextMenu();
+
+		this.contextDocument = contextDocument;
+		this.contextWindow = contextWindow;
+
+		this.attach();
+		this.listenContextMenu();
+
+		return this;
 	},
 
 	/**
 	 * Listen for the right click context menu
 	 */
 	listenContextMenu: function () {
-		var thisView = this;
+		var thisView = this,
+			eventNamespace = 'contextmenu' + this.getEventNamespace();
 
-		$( window ).on( 'contextmenu', function ( e ) {
+		$( this.getContextDocument() ).on( eventNamespace, function ( e ) {
 			if ( thisView.active && ! thisView.isOverEl( thisView.$el, e ) ) {
 				thisView.closeMenu();
 				thisView.active = false;
@@ -49,9 +210,22 @@ module.exports = Backbone.View.extend( {
 
 				thisView.openMenu( {
 					left: e.pageX,
-					top: e.pageY
+					top: e.pageY,
+					clientX: e.clientX,
+					clientY: e.clientY
 				} );
 			}
+		} );
+	},
+
+	unlistenContextMenu: function() {
+		var eventNamespace = this.getEventNamespace(),
+			contextWindow = this.getContextWindow();
+		$( this.getContextDocument() ).off( 'contextmenu' + eventNamespace );
+		$( contextWindow ).off( 'keyup' + eventNamespace );
+
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
+			$( interactionWindow ).off( 'click' + eventNamespace );
 		} );
 	},
 
@@ -60,7 +234,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	attach: function () {
-		this.$el.appendTo( 'body' );
+		this.$el.appendTo( this.getRenderDocument().body );
 	},
 
 	/**
@@ -69,26 +243,37 @@ module.exports = Backbone.View.extend( {
 	 * @param position
 	 */
 	openMenu: function ( position ) {
+		var $renderWindow = $( this.getRenderWindow() ),
+			eventNamespace = this.getEventNamespace(),
+			thisView = this;
+
+		position = this.getPositionForRenderWindow( position );
+
 		this.trigger( 'open_menu' );
 
 		// Start listening for situations when we should close the menu
-		$( window ).on( 'keyup', {menu: this}, this.keyboardListen );
-		$( window ).on( 'click', {menu: this}, this.clickOutsideListen );
+		_.each( this.getKeyupWindows(), function( interactionWindow ) {
+			$( interactionWindow ).on( 'keyup' + eventNamespace, {menu: thisView}, thisView.keyboardListen );
+		} );
+
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
+			$( interactionWindow ).on( 'click' + eventNamespace, {menu: thisView}, thisView.clickOutsideListen );
+		} );
 
 		// Set the maximum height of the menu
-		this.$el.css( 'max-height', $( window ).height() - 20 );
+		this.$el.css( 'max-height', $renderWindow.height() - 20 );
 
 		// Correct the left position
-		if ( position.left + this.$el.outerWidth() + 10 >= $( window ).width() ) {
-			position.left = $( window ).width() - this.$el.outerWidth() - 10;
+		if ( position.left + this.$el.outerWidth() + 10 >= $renderWindow.width() + $renderWindow.scrollLeft() ) {
+			position.left = $renderWindow.width() + $renderWindow.scrollLeft() - this.$el.outerWidth() - 10;
 		}
 		if ( position.left <= 0 ) {
 			position.left = 10;
 		}
 
 		// Check top position
-		if ( position.top + this.$el.outerHeight() - $( window ).scrollTop() + 10 >= $( window ).height() ) {
-			position.top = $( window ).height() + $( window ).scrollTop() - this.$el.outerHeight() - 10;
+		if ( position.top + this.$el.outerHeight() + 10 >= $renderWindow.height() + $renderWindow.scrollTop() ) {
+			position.top = $renderWindow.height() + $renderWindow.scrollTop() - this.$el.outerHeight() - 10;
 		}
 		if ( position.left <= 0 ) {
 			position.left = 10;
@@ -103,14 +288,28 @@ module.exports = Backbone.View.extend( {
 	},
 
 	closeMenu: function () {
+		var eventNamespace = this.getEventNamespace();
+
 		this.trigger( 'close_menu' );
 
 		// Stop listening for situations when we should close the menu
-		$( window ).off( 'keyup', this.keyboardListen );
-		$( window ).off( 'click', this.clickOutsideListen );
+		_.each( this.getKeyupWindows(), function( interactionWindow ) {
+			$( interactionWindow ).off( 'keyup' + eventNamespace, this.keyboardListen );
+		}, this );
+
+		_.each( this.getOutsideClickWindows(), function( interactionWindow ) {
+			$( interactionWindow ).off( 'click' + eventNamespace, this.clickOutsideListen );
+		}, this );
 
 		this.active = false;
 		this.$el.empty().hide();
+	},
+
+	remove: function() {
+		this.closeMenu();
+		this.unlistenContextMenu();
+
+		return Backbone.View.prototype.remove.call( this );
 	},
 
 	/**
@@ -304,6 +503,7 @@ module.exports = Backbone.View.extend( {
 	 * @param event
 	 */
 	isOverEl: function ( el, event ) {
+		var eventPosition = this.getEventPositionForElement( el, event );
 		var elPos = [
 			[el.offset().left, el.offset().top],
 			[el.offset().left + el.outerWidth(), el.offset().top + el.outerHeight()]
@@ -311,8 +511,8 @@ module.exports = Backbone.View.extend( {
 
 		// Return if this event is over the given element
 		return (
-			event.pageX >= elPos[0][0] && event.pageX <= elPos[1][0] &&
-			event.pageY >= elPos[0][1] && event.pageY <= elPos[1][1]
+			eventPosition.left >= elPos[0][0] && eventPosition.left <= elPos[1][0] &&
+			eventPosition.top >= elPos[0][1] && eventPosition.top <= elPos[1][1]
 		);
 	}
 
