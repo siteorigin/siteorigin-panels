@@ -43,7 +43,7 @@ module.exports = Backbone.View.extend( {
 	render: function () {
 		this.setElement( this.template() );
 		this.$el.hide();
-		
+
 		if ( $( '#submitdiv #save-post' ).length > 0 ) {
 			var $saveButton = this.$el.find( '.live-editor-save' );
 			$saveButton.text( $saveButton.data( 'save' ) );
@@ -116,6 +116,9 @@ module.exports = Backbone.View.extend( {
 		// Move the builder view into the Live Editor
 		this.originalContainer = this.builder.$el.parent();
 		this.builder.$el.appendTo( this.$( '.so-live-editor-builder' ) );
+		this.builder.menu.setContext( {
+			container: this.$( '.so-live-editor-builder' )
+		} );
 		this.builder.$( '.so-tool-button.so-live-editor' ).hide();
 		this.builder.trigger( 'builder_resize' );
 
@@ -160,6 +163,9 @@ module.exports = Backbone.View.extend( {
 
 		// Move the builder back to its original container
 		this.builder.$el.appendTo( this.originalContainer );
+		this.builder.menu.setContext( {
+			container: this.originalContainer
+		} );
 		this.builder.$( '.so-tool-button.so-live-editor' ).show();
 		this.builder.trigger( 'builder_resize' );
 	},
@@ -169,8 +175,17 @@ module.exports = Backbone.View.extend( {
 	 */
 	closeAndSave: function(){
 		this.close( false );
+
+		if ( panels.helpers.utils.shouldUseBlockEditorSave( this ) ) {
+			panels.helpers.utils.saveBlockEditor( this, function() {} );
+			return;
+		}
+
 		// Finds the submit input for saving without publishing draft posts.
-		$( '#submitdiv input[type="submit"][name="save"], .editor-post-publish-button, .edit-widgets-header__actions .is-primary' )[0].click();
+		var saveButton = $( '#submitdiv input[type="submit"][name="save"], .editor-post-publish-button, .edit-widgets-header__actions .is-primary' )[0];
+		if ( saveButton ) {
+			saveButton.click();
+		}
 	},
 
 	/**

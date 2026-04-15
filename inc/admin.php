@@ -286,11 +286,22 @@ class SiteOrigin_Panels_Admin {
 				if ( $copy_content_update_method === 'direct_db' ) {
 					$this->copy_content_update_post_direct_db( $post );
 				} else {
+					// Prevent slug modification during content-only update.
+					// wp_update_post triggers the full wp_insert_post pipeline,
+					// where filters from other plugins (e.g. WPML) can corrupt
+					// the post slug. Lock it to the current value.
+					$slug_lock = static function( $override, $slug, $id ) use ( $post ) {
+						return $id === $post->ID ? $slug : $override;
+					};
+					add_filter( 'pre_wp_unique_post_slug', $slug_lock, 1, 3 );
+
 					$copy_content_update_args = array(
 						'ID'           => $post->ID,
 						'post_content' => $post->post_content,
 					);
 					wp_update_post( $copy_content_update_args, false, true );
+
+					remove_filter( 'pre_wp_unique_post_slug', $slug_lock, 1 );
 				}
 			}
 		} else {

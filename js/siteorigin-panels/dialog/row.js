@@ -50,13 +50,9 @@ module.exports = panels.view.dialog.extend({
 		// Changing the row.
 		'click .row-set-form .so-row-field': 'changeCellTotal',
 		'change .row-set-form .so-row-field': 'changeCellTotal',
+		'click .row-set-form .so-row-count-step': 'adjustCellCount',
 		'click .cell-resize-sizing span': 'changeCellRatio',
 		'click .cell-resize-direction ': 'changeSizeDirection',
-
-		// If user clicks the column size indicator, focus the field.
-		'click .preview-cell-unit ': function( e ) {
-			$( e.target ).next().trigger( 'focus' );
-		},
 
 		'keyup .cell-resize-direction': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e, true );
@@ -184,6 +180,8 @@ module.exports = panels.view.dialog.extend({
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
 		}
+
+		this.$( 'input[name="cells"].so-row-field' ).attr( 'aria-live', 'polite' );
 
 		return this;
 	},
@@ -336,10 +334,10 @@ module.exports = panels.view.dialog.extend({
 							);
 
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
-							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
+							.find( '.preview-cell-weight-input' ).val( Math.round( ncw * 1000 ) / 10 );
 
 						$( this ).data( 'prevCellClone' ).css( 'width', rowPreview.width() * pcw + 'px' )
-							.find('.preview-cell-weight').html(Math.round(pcw * 1000) / 10);
+							.find( '.preview-cell-weight-input' ).val( Math.round( pcw * 1000 ) / 10 );
 					},
 					stop: function (e, ui) {
 						// Remove the clones
@@ -382,154 +380,179 @@ module.exports = panels.view.dialog.extend({
 
 			}.bind(this));
 
-			newCell.find( '.preview-cell-weight' ).on( 'click', function( ci ) {
+			var resizeCells = function( refocusIndex = false ) {
+				timeout = setTimeout( function() {
+					var rowPreviewInputs = rowPreview.find( '.preview-cell-weight-input' );
+					// If there are no weight inputs, then skip this.
+					if ( rowPreviewInputs.length === 0 ) {
+						return false;
+					}
 
-				// Disable the draggable while entering values.
-				thisDialog.$( '.resize-handle' ).css( 'pointer-event', 'none' ).draggable( 'disable' );
+					var rowWeights = [],
+						rowChanged = [],
+						changedSum = 0,
+						unchangedSum = 0;
 
-				var resizeCells = function( refocusIndex = false ) {
-					timeout = setTimeout( function() {
-						var rowPreviewInputs = rowPreview.find( '.preview-cell-weight-input' );
-						// If there are no weight inputs, then skip this.
-						if ( rowPreviewInputs.length === 0 ) {
-							return false;
+					rowPreviewInputs.each( function( i, el ) {
+						var val = parseFloat( $( el ).val() );
+						if ( isNaN( val ) ) {
+							val = 1 / thisDialog.row.cells.length;
+						} else {
+							val = Math.round( val * 10 ) / 1000;
 						}
 
-						var rowWeights = [],
-							rowChanged = [],
-							changedSum = 0,
-							unchangedSum = 0;
+						// Check within 3 decimal points.
+						var changed = ! $( el ).hasClass( 'no-user-interacted' );
 
-						rowPreviewInputs.each( function( i, el ) {
-							var val = parseFloat( $( el ).val() );
-							if ( isNaN( val ) ) {
-								val = 1 / thisDialog.row.cells.length;
-							} else {
-								val = Math.round( val * 10 ) / 1000;
+						rowWeights.push( val );
+						rowChanged.push( changed );
+
+						if ( changed ) {
+							changedSum += val;
+						} else {
+							unchangedSum += val;
+						}
+					} );
+
+					if ( changedSum > 0 && unchangedSum > 0 && 1 - changedSum > 0 ) {
+						// Balance out the unchanged rows to occupy the weight left over by the changed sum.
+						for ( var i = 0; i < rowWeights.length; i++ ) {
+							if ( ! rowChanged[ i ] ) {
+								rowWeights[ i ] = (
+										rowWeights[ i ] / unchangedSum
+									) * (
+										1 - changedSum
+									);
 							}
+						}
+					}
 
-							// Check within 3 decimal points.
-							var changed = ! $( el ).hasClass( 'no-user-interacted' );
+					// Last check to ensure total weight is 1.
+					var sum = _.reduce( rowWeights, function ( memo, num ) {
+						return memo + num;
+					} );
 
-							rowWeights.push( val );
-							rowChanged.push( changed );
+					rowWeights = rowWeights.map( function( w ) {
+						return w / sum;
+					} );
 
-							if ( changed ) {
-								changedSum += val;
-							} else {
-								unchangedSum += val;
-							}
+					// Set the new cell weights and regenerate the preview.
+					if ( Math.min.apply( Math, rowWeights ) > 0.01 ) {
+						thisDialog.row.cells.each( function( cell, i ) {
+							cell.set( 'weight', rowWeights[ i ] );
 						} );
+					}
 
-						if ( changedSum > 0 && unchangedSum > 0 && 1 - changedSum > 0 ) {
-							// Balance out the unchanged rows to occupy the weight left over by the changed sum.
-							for ( var i = 0; i < rowWeights.length; i++ ) {
-								if ( ! rowChanged[ i ] ) {
-									rowWeights[ i ] = (
-											rowWeights[ i ] / unchangedSum
-										) * (
-											1 - changedSum
-										);
+					// Now lets animate the cells into their new widths.
+					rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
+						var cellWeight = thisDialog.row.cells.at( i ).get( 'weight');
+						$( el ).animate( { 'width': Math.round( cellWeight * 1000 ) / 10 + "%" }, 250 );
+						$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
+					});
+
+					setTimeout( function() {
+						// So the draggable handle is not hidden.
+						thisDialog.regenerateRowPreview();
+
+						if ( typeof refocusIndex === 'number' ) {
+							var $refocusInput = thisDialog.$( '.row-preview .preview-cell-weight-input' ).eq( refocusIndex );
+							if ( $refocusInput.length ) {
+								$refocusInput.focus().select();
+							}
+						}
+					}, 260 );
+
+				}, 100 );
+			}
+
+			newCell.find( '.preview-cell-weight-input' ).each( function( ci ) {
+				var columnId = ci + 1;
+				var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
+				var label = panelsOptions.loc.row.cellInput.replace( '%s', columnId );
+
+				$( this )
+					.attr( {
+						id: 'column-' + columnId,
+						max: maxSize,
+						'aria-label': label,
+					} )
+					.data( 'initialWeight', $( this ).val() )
+					.on( 'focus', function() {
+						clearTimeout( timeout );
+						// Disable the draggable while entering values.
+						thisDialog.$( '.resize-handle' ).css( 'pointer-events', 'none' ).draggable( 'disable' );
+					} )
+					.on( 'keyup', function( e ) {
+						if ( e.keyCode !== 9 ) {
+							// Only register the interaction if the user didn't press tab.
+							$( this ).removeClass( 'no-user-interacted' );
+						}
+
+						// Enter is pressed.
+						if ( e.keyCode === 13 ) {
+							e.preventDefault();
+							resizeCells();
+						}
+
+						// Up or down is pressed.
+						if ( e.keyCode === 38 || e.keyCode === 40 ) {
+							e.preventDefault();
+							var currentVal = parseFloat( $( this ).val() );
+							var maxVal = parseFloat( $( this ).attr( 'max' ) );
+
+							if ( ! isNaN( currentVal ) ) {
+								var nextVal = e.keyCode === 38 ? currentVal + 1 : currentVal - 1;
+								if ( nextVal < 1 ) {
+									nextVal = 1;
 								}
+								if ( ! isNaN( maxVal ) && nextVal > maxVal ) {
+									nextVal = maxVal;
+								}
+								$( this ).val( nextVal ).removeClass( 'no-user-interacted' );
 							}
+
+							// During the row regeneration, the inputs are removed and re-added so we need the id to refocus.
+							var parent = $( e.target ).parents( '.preview-cell' ).index();
+
+							resizeCells( parent );
 						}
-
-						// Last check to ensure total weight is 1.
-						var sum = _.reduce( rowWeights, function ( memo, num ) {
-							return memo + num;
-						} );
-
-						rowWeights = rowWeights.map( function( w ) {
-							return w / sum;
-						} );
-
-						// Set the new cell weights and regenerate the preview.
-						if ( Math.min.apply( Math, rowWeights ) > 0.01 ) {
-							thisDialog.row.cells.each( function( cell, i ) {
-								cell.set( 'weight', rowWeights[ i ] );
-							} );
+					} )
+					.on( 'blur', function() {
+						// Only trigger resize if the value actually changed to avoid
+						// unnecessary DOM regeneration that causes visual movement.
+						var current = $( this ).val();
+						var initial = $( this ).data( 'initialWeight' );
+						if ( current !== initial && ! $( this ).hasClass( 'no-user-interacted' ) ) {
+							resizeCells();
+						} else {
+							// Re-enable drag handles without rebuilding the preview.
+							thisDialog.$( '.resize-handle' ).css( 'pointer-events', '' ).draggable( 'enable' );
 						}
-
-						// Now lets animate the cells into their new widths.
-						rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
-							var cellWeight = thisDialog.row.cells.at( i ).get( 'weight');
-							$( el ).animate( { 'width': Math.round( cellWeight * 1000 ) / 10 + "%" }, 250 );
-							$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
-						});
-
-						setTimeout( function() {
-							if ( typeof refocusIndex === 'number' ) {
-								rowPreviewInputs.get( refocusIndex ).focus();
-							}
-
-							// So the draggable handle is not hidden.
-							thisDialog.regenerateRowPreview.bind( thisDialog )
-						}, 260 );
-
-					}, 100 );
-				}
-
-				rowPreview.find( '.preview-cell-weight' ).each( function( ci ) {
-					var columnId = ci + 1;
-					var $$ = jQuery( this ).hide();
-					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
-					var label = panelsOptions.loc.row.cellInput.replace( '%s', columnId );
-
-					$( `<input
-						type="number"
-						class="preview-cell-weight-input no-user-interacted"
-						id="column-${ columnId }"
-						min="1"
-						max="${ maxSize }"
-						aria-label="${ label }"
-					/>` )
-						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
-						.on( 'focus', function() {
-							clearTimeout( timeout );
-							$( this ).attr( 'type', 'number' );
-						} )
-						.on( 'keyup', function( e ) {
-							if ( e.keyCode !== 9 ) {
-								// Only register the interaction if the user didn't press tab.
-								$( this ).removeClass( 'no-user-interacted' );
-							}
-
-							// Enter is pressed.
-							if ( e.keyCode === 13 ) {
-								e.preventDefault();
-								resizeCells();
-							}
-
-							// Up or down is pressed.
-							if ( e.keyCode === 38 || e.keyCode === 40 ) {
-								e.preventDefault();
-								// During the row regeneration, the inputs are removed and re-added so we need the id to refocus.
-								var parent = $( e.target ).parents( '.preview-cell' ).index();
-
-								resizeCells( parent );
-							}
-						} )
-						.on( 'blur', resizeCells )
-						.on( 'click', function () {
-							// If the input is already focused, the user has clicked a step.
-							if ( $( this ).is( ':focus' ) ) {
-								resizeCells();
-							}
-							$( this ).trigger( 'select' );
-						} );
-				} );
-
-				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
-
-				// When the field blurs, we convert the inputs to text to prevent an overlap with the step counter with the percentage.
-				rowPreview.find( '.preview-cell-weight-input' ).on( 'blur', function() {
-					rowPreview.find( '.preview-cell-weight-input' ).attr( 'type', 'text' );
-				} );
+					} )
+					.on( 'click', function () {
+						$( this ).trigger( 'select' );
+					} );
 			} );
 
-			// When a user tabs to  one of the column previews, switch all of them to inputs.
-			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
-				$( e.target ).trigger( 'click' );
+			newCell.find( '.preview-cell-step' ).on( 'click', function() {
+				var $input = $( this ).closest( '.preview-cell-weight-control' ).find( '.preview-cell-weight-input' );
+				var currentVal = parseFloat( $input.val() );
+
+				if ( isNaN( currentVal ) ) {
+					return;
+				}
+
+				var newVal = $( this ).hasClass( 'preview-cell-step-up' )
+					? currentVal + 1
+					: currentVal - 1;
+
+				if ( newVal < 1 ) {
+					return;
+				}
+
+				$input.val( newVal ).removeClass( 'no-user-interacted' );
+				var parent = $input.parents( '.preview-cell' ).index();
+				resizeCells( parent );
 			} );
 
 		}, this);
@@ -616,7 +639,7 @@ module.exports = panels.view.dialog.extend({
 			var cell = thisDialog.row.cells.at(i);
 			$(el)
 				.css('width', cell.get('weight') * 100 + "%")
-				.find('.preview-cell-weight').html(Math.round(cell.get('weight') * 1000) / 10);
+				.find( '.preview-cell-weight-input' ).val( Math.round( cell.get('weight') * 1000 ) / 10 );
 		});
 	},
 
@@ -645,8 +668,8 @@ module.exports = panels.view.dialog.extend({
 
 	updateActiveCellClass: function() {
 		$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
-		var activeCellRatio = this.$( '.preview-cell-weight' ).map( function() {
-			return Math.trunc( Number( $( this ).text() ) );
+		var activeCellRatio = this.$( '.preview-cell-weight-input' ).map( function() {
+			return Math.trunc( Number( $( this ).val() ) );
 		} ).get();
 
 		var cellsCount = this.getCurrentCellCount();
@@ -699,6 +722,30 @@ module.exports = panels.view.dialog.extend({
 
 	getCurrentCellCount: function() {
 		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
+	adjustCellCount: function( e ) {
+		e.preventDefault();
+		var $control = $( e.currentTarget ).closest( '.so-row-count-control' );
+		var $input = $control.find( 'input[name="cells"].so-row-field' ).first();
+
+		if ( ! $input.length ) {
+			$input = this.$( '.row-set-form input[name="cells"].so-row-field' ).first();
+		}
+
+		if ( ! $input.length ) {
+			return;
+		}
+
+		var delta = $( e.currentTarget ).hasClass( 'so-row-count-step-up' ) ? 1 : -1;
+		var input = $input.get( 0 );
+		if ( delta > 0 ) {
+			input.stepUp();
+		} else {
+			input.stepDown();
+		}
+
+		this.changeCellTotal();
 	},
 
 	changeCellTotal: function ( cellRatio = 0 ) {
@@ -769,11 +816,11 @@ module.exports = panels.view.dialog.extend({
 				// // Now lets animate the cells into their new widths
 				this.$( '.preview-cell' ).each( function( i, el ) {
 					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
-					var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
+					var $input = $( el ).find( '.preview-cell-weight-input' );
 					// To prevent a jump, don't animate cells that haven't changed size.
-					if ( parseInt( $previewCellWeight.text() ) != width ) {
+					if ( parseFloat( $input.val() ) != width ) {
 						$( el ).animate( { 'width': width + "%" }, 250 );
-						$previewCellWeight.html( width );
+						$input.val( width );
 					}
 				} );
 
