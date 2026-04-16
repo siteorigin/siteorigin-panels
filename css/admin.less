@@ -947,6 +947,25 @@
 	padding: 2px;
 }
 
+// Force the WP system font on SO dialogs regardless of host chrome (Customizer,
+// block editor, classic editor). Scoped to .so-panels-dialog only so it does
+// not cross-product into unrelated host UI such as Customizer controls.
+.so-panels-dialog {
+	&,
+	label,
+	input,
+	select,
+	textarea,
+	button,
+	.button,
+	h3,
+	h4,
+	p,
+	a {
+		font-family: @wp_system_font_stack;
+	}
+}
+
 .so-panels-dialog,
 .block-editor-page,
 .wp-customizer {
@@ -961,20 +980,6 @@
 	@border_color: #d8d8d8;
 
 	-webkit-text-size-adjust: none;
-
-	&,
-	label,
-	input,
-	select,
-	textarea,
-	button,
-	.button,
-	h3,
-	h4,
-	p,
-	a {
-		font-family: @wp_system_font_stack;
-	}
 
 	.so-overlay, .so-content, .so-title-bar, .so-toolbar, .so-left-sidebar, .so-right-sidebar {
 		z-index: 100001;
