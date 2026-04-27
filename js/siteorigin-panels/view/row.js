@@ -228,6 +228,7 @@ module.exports = Backbone.View.extend( {
 
 		this.$( '.so-cells .cell' ).each( function () {
 			cell = $( this );
+			if ( ! cell.data( 'view' ) ) { return; } // skip orphan/clone cells
 
 			$( this ).css(
 				'width',
