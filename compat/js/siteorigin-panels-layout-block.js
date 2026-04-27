@@ -252,7 +252,7 @@ function SiteOriginPanelsLayoutBlock(props) {
 
       setTimeout(patchJQueryUIDocuments, 0); // Re-patch whenever a new row or widget is added (new instances are created).
 
-      builderViewRef.current.on('row_added widget_added', patchJQueryUIDocuments);
+      builderViewRef.current.on('row_added widget_added content_change', patchJQueryUIDocuments);
     }
 
     setPanelsInitialized(true);
