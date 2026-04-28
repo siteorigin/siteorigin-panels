@@ -226,6 +226,13 @@ function SiteOriginPanelsLayoutBlock( props ) {
 					setLoadingPreview( true );
 					setPreviewHtml( '' );
 				}
+
+				// Widget previews can re-render on content_change; re-measure after the next layout.
+				requestAnimationFrame( () => {
+					if ( builderViewRef.current ) {
+						builderViewRef.current.trigger( 'builder_resize' );
+					}
+				} );
 		} );
 
 		// Use iframeDoc so panels scripts inside the iframe receive the setup event.
