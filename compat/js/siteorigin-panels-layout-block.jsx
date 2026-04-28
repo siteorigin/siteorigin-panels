@@ -175,6 +175,33 @@ function SiteOriginPanelsLayoutBlock( props ) {
 
 		builderViewRef.current.trigger( 'builder_resize' );
 
+		// Re-fire builder_resize after iframe layout has actually settled so that
+		// resizeRow() measures cell heights against a stable layout instead of the
+		// natural unstyled stack height.
+		const settleResize = () => {
+			if ( builderViewRef.current ) {
+				builderViewRef.current.trigger( 'builder_resize' );
+			}
+		};
+
+		// Re-fire once the iframe document is fully loaded.
+		if ( iframeDoc.readyState === 'complete' ) {
+			requestAnimationFrame( () => requestAnimationFrame( settleResize ) );
+		} else {
+			const onIframeReady = () => {
+				if ( iframeDoc.readyState === 'complete' ) {
+					iframeDoc.removeEventListener( 'readystatechange', onIframeReady );
+					requestAnimationFrame( () => requestAnimationFrame( settleResize ) );
+				}
+			};
+			iframeDoc.addEventListener( 'readystatechange', onIframeReady );
+		}
+
+		// Re-fire once web fonts have loaded (font swaps change widget heights).
+		if ( iframeDoc.fonts && iframeDoc.fonts.ready && typeof iframeDoc.fonts.ready.then === 'function' ) {
+			iframeDoc.fonts.ready.then( settleResize ).catch( () => {} );
+		}
+
 			builderViewRef.current.on( 'content_change', () => {
 				const newPanelsData = builderViewRef.current.getData();
 
