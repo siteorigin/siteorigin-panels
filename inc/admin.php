@@ -260,7 +260,7 @@ class SiteOrigin_Panels_Admin {
 
 				SiteOrigin_Panels_Post_Content_Filters::add_filters();
 				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-				$post_content = SiteOrigin_Panels::renderer()->render( $layout_id, false, $panels_data );
+				$post_content = $this->render_and_restore_post_globals( $layout_id, false, $panels_data );
 				$post_css = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $panels_data );
 				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
@@ -1359,11 +1359,46 @@ class SiteOrigin_Panels_Admin {
 
 	public function generate_panels_preview( $post_id, $panels_data ) {
 		$GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] = true;
-		$return = SiteOrigin_Panels::renderer()->render( (int) $post_id, false, $panels_data );
+		$return = $this->render_and_restore_post_globals( (int) $post_id, false, $panels_data );
 
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_PREVIEW_RENDER' ] );
 
 		return $return;
+	}
+
+	private function render_and_restore_post_globals( $post_id = false, $enqueue_css = true, $panels_data = false, & $layout_data = array(), $is_preview = false ) {
+		$post_globals = array(
+			'post',
+			'id',
+			'authordata',
+			'currentday',
+			'currentmonth',
+			'page',
+			'pages',
+			'multipage',
+			'more',
+			'numpages',
+		);
+		$original_globals = array();
+
+		foreach ( $post_globals as $global_name ) {
+			$original_globals[ $global_name ] = array(
+				'exists' => array_key_exists( $global_name, $GLOBALS ),
+				'value' => array_key_exists( $global_name, $GLOBALS ) ? $GLOBALS[ $global_name ] : null,
+			);
+		}
+
+		try {
+			return SiteOrigin_Panels::renderer()->render( $post_id, $enqueue_css, $panels_data, $layout_data, $is_preview );
+		} finally {
+			foreach ( $original_globals as $global_name => $global_value ) {
+				if ( $global_value['exists'] ) {
+					$GLOBALS[ $global_name ] = $global_value['value'];
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+		}
 	}
 
 	/**
@@ -1400,7 +1435,7 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content.
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		echo SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
+		echo $this->render_and_restore_post_globals( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
@@ -1452,7 +1487,7 @@ class SiteOrigin_Panels_Admin {
 		// Create a version of the builder data for post content.
 		SiteOrigin_Panels_Post_Content_Filters::add_filters();
 		$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-		$return['post_content'] = SiteOrigin_Panels::renderer()->render( (int) $_POST['post_id'], false, $panels_data );
+		$return['post_content'] = $this->render_and_restore_post_globals( (int) $_POST['post_id'], false, $panels_data );
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 		unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
 
@@ -1530,7 +1565,7 @@ class SiteOrigin_Panels_Admin {
 			// We need this to get our widgets bundle to add it's styles inline for previews.
 			add_filter( 'siteorigin_widgets_is_preview', '__return_true' );
 		}
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data, $layout_data );
+		$rendered_layout = $this->render_and_restore_post_globals( $builder_id, true, $panels_data, $layout_data );
 		ob_start();
 
 		// Need to explicitly call `siteorigin_widget_print_styles` because Gutenberg previews don't render a full version of the front end,
