@@ -175,6 +175,33 @@ function SiteOriginPanelsLayoutBlock( props ) {
 
 		builderViewRef.current.trigger( 'builder_resize' );
 
+		// Re-fire builder_resize after iframe layout has actually settled so that
+		// resizeRow() measures cell heights against a stable layout instead of the
+		// natural unstyled stack height.
+		const settleResize = () => {
+			if ( builderViewRef.current ) {
+				builderViewRef.current.trigger( 'builder_resize' );
+			}
+		};
+
+		// Re-fire once the iframe document is fully loaded.
+		if ( iframeDoc.readyState === 'complete' ) {
+			requestAnimationFrame( () => requestAnimationFrame( settleResize ) );
+		} else {
+			const onIframeReady = () => {
+				if ( iframeDoc.readyState === 'complete' ) {
+					iframeDoc.removeEventListener( 'readystatechange', onIframeReady );
+					requestAnimationFrame( () => requestAnimationFrame( settleResize ) );
+				}
+			};
+			iframeDoc.addEventListener( 'readystatechange', onIframeReady );
+		}
+
+		// Re-fire once web fonts have loaded (font swaps change widget heights).
+		if ( iframeDoc.fonts && iframeDoc.fonts.ready && typeof iframeDoc.fonts.ready.then === 'function' ) {
+			iframeDoc.fonts.ready.then( settleResize ).catch( () => {} );
+		}
+
 			builderViewRef.current.on( 'content_change', () => {
 				const newPanelsData = builderViewRef.current.getData();
 
@@ -199,6 +226,13 @@ function SiteOriginPanelsLayoutBlock( props ) {
 					setLoadingPreview( true );
 					setPreviewHtml( '' );
 				}
+
+				// Widget previews can re-render on content_change; re-measure after the next layout.
+				requestAnimationFrame( () => {
+					if ( builderViewRef.current ) {
+						builderViewRef.current.trigger( 'builder_resize' );
+					}
+				} );
 		} );
 
 		// Use iframeDoc so panels scripts inside the iframe receive the setup event.
@@ -234,7 +268,7 @@ function SiteOriginPanelsLayoutBlock( props ) {
 			// Patch initial instances after first render.
 			setTimeout( patchJQueryUIDocuments, 0 );
 			// Re-patch whenever a new row or widget is added (new instances are created).
-			builderViewRef.current.on( 'row_added widget_added', patchJQueryUIDocuments );
+			builderViewRef.current.on( 'row_added widget_added content_change', patchJQueryUIDocuments );
 		}
 
 		setPanelsInitialized( true );

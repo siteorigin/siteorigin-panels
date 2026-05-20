@@ -192,7 +192,39 @@ function SiteOriginPanelsLayoutBlock(props) {
     builderViewRef.current.render().attach({
       container: $panelsContainer
     }).setData(initialPanelsData);
-    builderViewRef.current.trigger('builder_resize');
+    builderViewRef.current.trigger('builder_resize'); // Re-fire builder_resize after iframe layout has actually settled so that
+    // resizeRow() measures cell heights against a stable layout instead of the
+    // natural unstyled stack height.
+
+    var settleResize = function settleResize() {
+      if (builderViewRef.current) {
+        builderViewRef.current.trigger('builder_resize');
+      }
+    }; // Re-fire once the iframe document is fully loaded.
+
+
+    if (iframeDoc.readyState === 'complete') {
+      requestAnimationFrame(function () {
+        return requestAnimationFrame(settleResize);
+      });
+    } else {
+      var onIframeReady = function onIframeReady() {
+        if (iframeDoc.readyState === 'complete') {
+          iframeDoc.removeEventListener('readystatechange', onIframeReady);
+          requestAnimationFrame(function () {
+            return requestAnimationFrame(settleResize);
+          });
+        }
+      };
+
+      iframeDoc.addEventListener('readystatechange', onIframeReady);
+    } // Re-fire once web fonts have loaded (font swaps change widget heights).
+
+
+    if (iframeDoc.fonts && iframeDoc.fonts.ready && typeof iframeDoc.fonts.ready.then === 'function') {
+      iframeDoc.fonts.ready.then(settleResize)["catch"](function () {});
+    }
+
     builderViewRef.current.on('content_change', function () {
       var newPanelsData = builderViewRef.current.getData();
 
@@ -212,7 +244,14 @@ function SiteOriginPanelsLayoutBlock(props) {
 
         setLoadingPreview(true);
         setPreviewHtml('');
-      }
+      } // Widget previews can re-render on content_change; re-measure after the next layout.
+
+
+      requestAnimationFrame(function () {
+        if (builderViewRef.current) {
+          builderViewRef.current.trigger('builder_resize');
+        }
+      });
     }); // Use iframeDoc so panels scripts inside the iframe receive the setup event.
 
     jQuery(iframeDoc).trigger('panels_setup', builderViewRef.current);
@@ -252,7 +291,7 @@ function SiteOriginPanelsLayoutBlock(props) {
 
       setTimeout(patchJQueryUIDocuments, 0); // Re-patch whenever a new row or widget is added (new instances are created).
 
-      builderViewRef.current.on('row_added widget_added', patchJQueryUIDocuments);
+      builderViewRef.current.on('row_added widget_added content_change', patchJQueryUIDocuments);
     }
 
     setPanelsInitialized(true);
