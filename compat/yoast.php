@@ -41,6 +41,12 @@ if ( defined( 'WPSEO_FILE' ) ) {
 			extension_loaded( 'xml' ) &&
 			class_exists( 'DOMDocument' )
 		) {
+			$post = get_post( $post_id );
+
+			if ( empty( $post ) ) {
+				return $images;
+			}
+
 			$content = SiteOrigin_Panels::renderer()->render(
 				$post_id,
 				false
@@ -55,9 +61,23 @@ if ( defined( 'WPSEO_FILE' ) ) {
 				$src = $img->getAttribute( 'src' );
 
 				if ( ! empty( $src ) && $src == esc_url( $src ) ) {
-					$images[] = array(
-						'src'   => $src,
+					$src = apply_filters( 'wpseo_xml_sitemap_img_src', $src, $post );
+
+					$image = apply_filters(
+						'wpseo_xml_sitemap_img',
+						array(
+							'src' => $src,
+						),
+						$post
 					);
+
+					if (
+						is_array( $image ) &&
+						! empty( $image['src'] ) &&
+						is_string( $image['src'] )
+					) {
+						$images[] = $image;
+					}
 				}
 			}
 		}
