@@ -224,6 +224,7 @@ module.exports = Backbone.View.extend( {
 		var height = 0,
 			cellWidth = 0,
 			iconsShown = false,
+			measured = false,
 			cell;
 
 		this.$( '.so-cells .cell' ).each( function () {
@@ -236,6 +237,9 @@ module.exports = Backbone.View.extend( {
 			);
 
 			cellWidth = cell.width();
+			if ( cellWidth > 0 ) {
+				measured = true;
+			}
 			// Ensure this widget is large enough to allow for actions to appear.
 			if ( cellWidth < 215 ) {
 				cell.addClass( 'so-show-icon' );
@@ -257,7 +261,8 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		// Resize all the grids and cell wrappers
-		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', Math.max( height, 63 ) + 'px' );
+		var finalMinHeight = measured ? Math.max( height, 63 ) : 63;
+		this.$( '.so-cells .cell-wrapper' ).css( 'min-height', finalMinHeight + 'px' );
 		// If action icons are visible in any cell, give the container a special class.
 		if ( iconsShown ) {
 			this.$( '.so-cells' ).addClass( 'so-action-icons' );
