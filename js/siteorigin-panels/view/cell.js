@@ -165,7 +165,7 @@ module.exports = Backbone.View.extend( {
 				// Set the containment to the cell parent
 				previousCell = cellView.$el.prev().data( 'view' );
 				if ( _.isUndefined( previousCell ) ) {
-					return;
+					return false;
 				}
 
 				// Create the clone for the current cell
@@ -194,6 +194,10 @@ module.exports = Backbone.View.extend( {
 				} );
 			},
 			drag: function ( e, ui ) {
+				var nClone = $( this ).data( 'newCellClone' );
+				var pClone = $( this ).data( 'prevCellClone' );
+				if ( ! previousCell || ! nClone || ! pClone ) { return; }
+
 				// Calculate the new cell and previous cell widths as a percent
 				var containerWidth = cellView.row.$el.width() + 10;
 				var ncw = cellView.model.get( 'weight' ) - (
@@ -207,16 +211,21 @@ module.exports = Backbone.View.extend( {
 					) / containerWidth
 					);
 
-				$( this ).data( 'newCellClone' ).css( 'width', containerWidth * ncw + 'px'  )
+				nClone.css( 'width', containerWidth * ncw + 'px'  )
 					.find( '.preview-cell-weight-input' ).val( Math.round( ncw * 1000 ) / 10 );
 
-				$( this ).data( 'prevCellClone' ).css( 'width', containerWidth * pcw + 'px' )
+				pClone.css( 'width', containerWidth * pcw + 'px' )
 					.find( '.preview-cell-weight-input' ).val( Math.round( pcw * 1000 ) / 10 );
 			},
 			stop: function ( e, ui ) {
+				var nClone = $( this ).data( 'newCellClone' );
+				var pClone = $( this ).data( 'prevCellClone' );
+				if ( ! previousCell || ! nClone || ! pClone ) { return; }
+
 				// Remove the clones
-				$( this ).data( 'newCellClone' ).remove();
-				$( this ).data( 'prevCellClone' ).remove();
+				nClone.remove();
+				pClone.remove();
+				$( this ).removeData( [ 'newCellClone', 'prevCellClone' ] );
 
 				var containerWidth = cellView.row.$el.width() + 10;
 				var ncw = cellView.model.get( 'weight' ) - (
