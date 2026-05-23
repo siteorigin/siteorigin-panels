@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.34.3 – 22 May 2026 =
+* Style Fields: Restored input and select sizing in Page Builder style settings.
+
 = 2.34.2 – 20 May 2026 =
 * Code Tab: Fixed the widget dialog font family regression.
 * Customizer: Fixed dialog font family scoping to prevent Dashicons conflicts.
