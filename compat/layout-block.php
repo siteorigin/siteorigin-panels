@@ -184,6 +184,28 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
+		/**
+		 * Filter a single Layout Block's panels_data before its widgets are processed,
+		 * allowing an AI-generated layout to be supplied or transformed.
+		 *
+		 * Block-editor counterpart of the classic-editor `siteorigin_panels_ai_layout_pre_save`
+		 * filter (see inc/admin.php). Public API — premium-addon-facing. This fires PER LAYOUT
+		 * BLOCK (a post may contain several), carrying only that block's panels_data. Whatever a
+		 * consumer returns is re-sanitized through process_raw_widgets() below, so returned
+		 * widgets are NEVER trusted raw (mirrors the §3 guarantee on the classic path).
+		 *
+		 * Because this is the single sanitize chokepoint every Layout Block passes through, it
+		 * runs on BOTH the save path (server_side_validation → sanitize_block) and the render
+		 * path (render_layout_block / maybe_generate_layout_block_css). Keep consumers idempotent;
+		 * a no-op filter leaves the block unchanged.
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
+		 */
+		$panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
+
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
