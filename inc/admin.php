@@ -241,6 +241,30 @@ class SiteOrigin_Panels_Admin {
 			false
 		);
 
+		/**
+		 * Filter the layout about to be saved, allowing an AI-generated layout to be
+		 * supplied or transformed before persistence.
+		 *
+		 * Public API — premium-addon-facing. Whatever a consumer returns here is
+		 * re-sanitized through process_raw_widgets() below, so returned widgets are
+		 * NEVER trusted raw.
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array   $panels_data Canonical panels_data to be saved.
+		 * @param WP_Post $post        The post being saved.
+		 * @param int     $post_id     The post ID.
+		 */
+		$panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
+
+		// Re-sanitize: anything supplied/transformed above must traverse process_raw_widgets().
+		$panels_data['widgets'] = $this->process_raw_widgets(
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+			false
+		);
+
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
 			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
@@ -248,6 +272,23 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+
+		/**
+		 * Fires with the fully-sanitized canonical panels_data immediately before it
+		 * is persisted.
+		 *
+		 * Public API — premium-addon-facing. AI consumers may observe the final
+		 * layout being saved. Read-only; to transform a layout before save use the
+		 * `siteorigin_panels_ai_layout_pre_save` filter.
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array   $panels_data Final canonical panels_data being saved.
+		 * @param WP_Post $post        The post being saved.
+		 * @param int     $post_id     The post ID.
+		 */
+		do_action( 'siteorigin_panels_ai_layout_saved_pre', $panels_data, $post, $post_id );
 
 		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
 			// Use `update_metadata` instead of `update_post_meta` to prevent saving to parent post when it's a revision, e.g. preview.
