@@ -41,9 +41,37 @@ class SiteOrigin_Panels_Abilities {
 	}
 
 	public function __construct() {
+		// Categories must be registered on the categories-init hook, BEFORE the
+		// abilities-init hook (an ability references its category at registration).
+		add_action( 'wp_abilities_api_categories_init', array( $this, 'register_ability_category' ) );
+
 		// Abilities must be registered on the documented init hook; registering
 		// outside it triggers _doing_it_wrong() and the registration fails.
 		add_action( 'wp_abilities_api_init', array( $this, 'register_abilities' ) );
+	}
+
+	/**
+	 * Register the Page Builder ability category.
+	 *
+	 * Groups the paired layout abilities for client-side discoverability (matching
+	 * the AIOSEO precedent). Guarded for environments without the Abilities API,
+	 * same as register_abilities(), so core never fatals on WP < 6.9.
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 */
+	public function register_ability_category() {
+		if ( ! function_exists( 'wp_register_ability_category' ) ) {
+			return;
+		}
+
+		wp_register_ability_category(
+			'siteorigin-panels',
+			array(
+				'label'       => __( 'Page Builder by SiteOrigin', 'siteorigin-panels' ),
+				'description' => __( 'Read and update SiteOrigin Page Builder layouts.', 'siteorigin-panels' ),
+			)
+		);
 	}
 
 	/**
@@ -66,6 +94,7 @@ class SiteOrigin_Panels_Abilities {
 			array(
 				'label'               => __( 'Get Page Builder layout', 'siteorigin-panels' ),
 				'description'         => __( "Reads a post's canonical Page Builder layout data. Returns layouts from both classic (meta-stored) and Layout Block storage; the 'source' field reports which storage path(s) supplied data.", 'siteorigin-panels' ),
+				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -106,6 +135,7 @@ class SiteOrigin_Panels_Abilities {
 			array(
 				'label'               => __( 'Update Page Builder layout', 'siteorigin-panels' ),
 				'description'         => __( "Writes a post's classic (meta-stored) Page Builder layout. The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. Layout Block (block-stored) layouts are NOT supported yet: for those posts the ability declines the write and reports source 'block'.", 'siteorigin-panels' ),
+				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
