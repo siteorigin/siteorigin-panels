@@ -108,6 +108,13 @@ if ( ! function_exists( 'wp_register_ability_category' ) ) {
 	}
 }
 
+// The abilities block walk delegates to SiteOrigin_Panels_AI_Exposure for the
+// single shared qualifying-block walk; load it so this test is self-sufficient
+// regardless of test execution order.
+if ( ! class_exists( 'SiteOrigin_Panels_AI_Exposure' ) ) {
+	require __DIR__ . '/../inc/ai-exposure.php';
+}
+
 if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
 	require __DIR__ . '/../inc/abilities.php';
 }
@@ -129,6 +136,13 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
+
+		// Safe defaults the shared block walk + update routing touch. Individual
+		// tests override these with Functions\when() as needed.
+		Functions\when( 'apply_filters' )->alias( fn( $tag, $value ) => $value );
+		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'serialize_blocks' )->alias( fn( $blocks ) => $blocks );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -344,6 +358,168 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertFalse( $result['updated'] );
 		$this->assertSame( 'block-ambiguous', $result['source'] );
 		$this->assertStringContainsString( '0-1', $result['message'] );
+	}
+
+	// --- Regression: get/write index walks must agree (Blocking #1) ----------
+
+	/**
+	 * If a siteorigin_panels_data filter empties one structurally-qualifying block,
+	 * BOTH read_layouts() and the targeted write must skip it identically, so an
+	 * index emitted by get always resolves to the SAME block in the write. This is
+	 * the highest-risk invariant of the slice; before the walk unification, the
+	 * write counted the emptied block and the index targeted the wrong one.
+	 */
+	public function test_get_and_write_indices_agree_when_a_filter_empties_a_block() {
+		// Three structurally-qualifying blocks at parse-keys 0,1,2. A filter empties
+		// the MIDDLE one (key 1). Qualifying order then becomes: key0 -> index 0,
+		// key2 -> index 1. So block_index 1 must write parse-key 2, never key 1.
+		$blocks = array(
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'A', 'widgets' => array() ) ) ),
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'B', 'widgets' => array() ) ) ),
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'C', 'widgets' => array() ) ) ),
+		);
+
+		$post = (object) array( 'ID' => 21, 'post_content' => 'three blocks' );
+		Functions\when( 'get_post' )->justReturn( $post );
+		Functions\when( 'parse_blocks' )->justReturn( $blocks );
+		// Filter empties block B (the structurally-qualifying middle one).
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data' && isset( $value['id'] ) && $value['id'] === 'B' ) {
+					return array();
+				}
+
+				return $value;
+			}
+		);
+
+		// What does read_layouts() emit? B must be skipped; A=0, C=1.
+		$read = SiteOrigin_Panels_AI_Exposure::single()->read_layouts( 21 );
+		$block_entries = array_values(
+			array_filter( $read['layouts'], fn( $l ) => $l['storage'] === 'block' )
+		);
+		$this->assertCount( 2, $block_entries, 'Emptied block must not be surfaced.' );
+		$this->assertSame( 'A', $block_entries[0]['panels_data']['id'] );
+		$this->assertSame( 0, $block_entries[0]['block_index'] );
+		$this->assertSame( 'C', $block_entries[1]['panels_data']['id'] );
+		$this->assertSame( 1, $block_entries[1]['block_index'] );
+
+		// Now write block_index 1. It MUST land on C (parse-key 2), not B (key 1).
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 21,
+				'panels_data' => array( 'widgets' => array( 'new-for-C' ) ),
+				'block_index' => 1,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 1, $result['block_index'] );
+
+		$written = $saved['post_content'];
+		// Parse-key 2 (C) received the sanitized layout.
+		$this->assertSame(
+			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			$written[2]['attrs']['panelsData']['widgets'],
+			'block_index 1 must write parse-key 2 (C), not the emptied middle block.'
+		);
+		// The emptied middle block (parse-key 1, B) must be byte-identical.
+		$this->assertSame( 'B', $written[1]['attrs']['panelsData']['id'] );
+		$this->assertSame( array(), $written[1]['attrs']['panelsData']['widgets'] );
+	}
+
+	// --- Mixed post: block_index:null writes the meta layout (Required #3) ----
+
+	public function test_mixed_post_no_index_writes_meta_not_block() {
+		// Post has BOTH a meta layout and a Layout Block. With no block_index, the
+		// write must honor the meta entry layout-get advertises (block_index:null),
+		// i.e. write meta and leave the block alone.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 31, 'post_content' => 'has a block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'meta-old' ) ) );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = array( $post_id, $key, $value );
+
+				return true;
+			}
+		);
+		// The block path must NOT run.
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( 'meta-new' ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertNotNull( $persisted, 'Meta layout must be written on a mixed post with no index.' );
+		// Classic sanitize shape: old widgets passed through (arg1 not false here).
+		$this->assertSame( array( 'meta-old' ), Abilities_AdminSpy::$instance->process_args[1] );
+	}
+
+	public function test_mixed_post_with_index_writes_targeted_block() {
+		// Same mixed post, but block_index:0 explicitly targets the block.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 31, 'post_content' => 'has a block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'meta-old' ) ) );
+		Functions\expect( 'update_post_meta' )->never();
+
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( 'block-new' ) ),
+				'block_index' => 0,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertSame( 0, $result['block_index'] );
+		$this->assertNotNull( $saved, 'Block must be written when an index is given.' );
+	}
+
+	// --- No silent success on a failed block save (Required #4) ---------------
+
+	public function test_block_write_reports_failure_when_update_does_not_persist() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 41, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		// wp_update_post fails (returns 0).
+		Functions\when( 'wp_update_post' )->justReturn( 0 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 41,
+				'panels_data' => array( 'widgets' => array() ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'], 'A failed save must not report updated:true.' );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
 	}
 
 	// --- layout-update: meta path persists sanitized data --------------------
