@@ -245,6 +245,9 @@ class SiteOrigin_Panels_Abilities {
 		// save uses (admin.php save_post), mirroring its argument shape.
 		$admin           = SiteOrigin_Panels_Admin::single();
 		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
+		// get_post_meta() can return a non-array scalar (e.g. '') — normalize so the
+		// ['widgets'] read below is explicit and future-proof.
+		$old_panels_data = is_array( $old_panels_data ) ? $old_panels_data : array();
 
 		$panels_data['widgets'] = $admin->process_raw_widgets(
 			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
