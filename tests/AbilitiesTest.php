@@ -86,6 +86,28 @@ if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin' ) ) {
 	}
 }
 
+/*
+ * Real-function stubs for the Abilities API. register_abilities() / the category
+ * registration guard on function_exists(); Brain Monkey cannot satisfy a
+ * function_exists() check, so we define these as genuine functions that capture
+ * each registration into globals for the registration-shape test to inspect.
+ */
+if ( ! function_exists( 'wp_register_ability' ) ) {
+	function wp_register_ability( $id, $args ) {
+		$GLOBALS['abilities_registered'][ $id ] = $args;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_register_ability_category' ) ) {
+	function wp_register_ability_category( $id, $args ) {
+		$GLOBALS['ability_categories_registered'][ $id ] = $args;
+
+		return true;
+	}
+}
+
 if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
 	require __DIR__ . '/../inc/abilities.php';
 }
@@ -104,6 +126,9 @@ class AbilitiesTest extends SiteOriginTests {
 
 		Abilities_AdminSpy::$instance  = new Abilities_AdminSpy();
 		Abilities_StylesSpy::$instance = new Abilities_StylesSpy();
+
+		$GLOBALS['abilities_registered']           = array();
+		$GLOBALS['ability_categories_registered']  = array();
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -250,5 +275,50 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// Mirrors admin.php: old widgets arg is false when there is no prior layout.
 		$this->assertFalse( Abilities_AdminSpy::$instance->process_args[1] );
+	}
+
+	// --- Registration shape (locks the public surface) -----------------------
+
+	public function test_registers_exactly_the_two_locked_abilities() {
+		$this->abilities()->register_abilities();
+
+		$registered = $GLOBALS['abilities_registered'];
+
+		$this->assertSame(
+			array( 'siteorigin-panels/layout-get', 'siteorigin-panels/layout-update' ),
+			array_keys( $registered ),
+			'Exactly the two locked ability ids must be registered.'
+		);
+	}
+
+	public function test_layout_get_registration_meta_and_category() {
+		$this->abilities()->register_abilities();
+
+		$get = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
+
+		$this->assertTrue( $get['meta']['show_in_rest'] );
+		$this->assertTrue( $get['meta']['readonly'], 'layout-get must be readonly.' );
+		$this->assertSame( 'siteorigin-panels', $get['category'] );
+	}
+
+	public function test_layout_update_registration_meta_and_category() {
+		$this->abilities()->register_abilities();
+
+		$update = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
+
+		$this->assertTrue( $update['meta']['show_in_rest'] );
+		$this->assertArrayNotHasKey(
+			'readonly',
+			$update['meta'],
+			'layout-update must NOT be marked readonly.'
+		);
+		$this->assertSame( 'siteorigin-panels', $update['category'] );
+	}
+
+	public function test_registers_the_ability_category() {
+		$this->abilities()->register_ability_category();
+
+		$this->assertArrayHasKey( 'siteorigin-panels', $GLOBALS['ability_categories_registered'] );
+		$this->assertArrayHasKey( 'label', $GLOBALS['ability_categories_registered']['siteorigin-panels'] );
 	}
 }
