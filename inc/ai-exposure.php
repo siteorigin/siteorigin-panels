@@ -138,8 +138,15 @@ class SiteOrigin_Panels_AI_Exposure {
 	 *
 	 * Shared read source for the REST route AND the Abilities API
 	 * `siteorigin-panels/layout-get` ability, so both consumers see byte-identical
-	 * data. Returns the committed `{ post_id, source, layouts }` shape, or a
-	 * WP_Error when the post does not exist.
+	 * data. Returns `{ post_id, source, layouts }`, or a WP_Error when the post
+	 * does not exist.
+	 *
+	 * Each `layouts` entry is a LABELLED object so a consumer can identify and
+	 * target a specific storage location for a follow-up write:
+	 *   { storage: 'meta'|'block', block_index: int|null, panels_data: {...canonical...} }
+	 * The classic/meta layout is `block_index: null`; each qualifying Layout Block
+	 * gets its 0-based ordinal in document order (see the index walk below). This
+	 * index is the LOCKED selector `layout-update` accepts as `block_index`.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
@@ -163,12 +170,16 @@ class SiteOrigin_Panels_AI_Exposure {
 		$layouts = array();
 		$source  = 'none';
 
-		// Meta-stored (classic builder).
+		// Meta-stored (classic builder). The classic layout has no block index.
 		$meta = get_post_meta( $post_id, 'panels_data', true );
 		if ( ! empty( $meta ) ) {
 			$meta = apply_filters( 'siteorigin_panels_data', $meta, $post_id );
 			if ( ! empty( $meta ) ) {
-				$layouts[] = $meta;
+				$layouts[] = array(
+					'storage'     => 'meta',
+					'block_index' => null,
+					'panels_data' => $meta,
+				);
 				$source    = 'meta';
 			}
 		}
@@ -179,7 +190,13 @@ class SiteOrigin_Panels_AI_Exposure {
 			: 'siteorigin-panels/layout-block';
 
 		$has_block_layout = false;
-		$blocks           = parse_blocks( $post->post_content );
+		// 0-based ordinal of a QUALIFYING Layout Block in document order. This must
+		// be derived identically by the targeted block write in
+		// SiteOrigin_Panels_Abilities::write_block_layout(); if the two walks ever
+		// diverge, an update silently targets the wrong block. The counter therefore
+		// increments ONLY on the branch that pushes a qualifying block below.
+		$block_index = 0;
+		$blocks      = parse_blocks( $post->post_content );
 		if ( ! empty( $blocks ) ) {
 			foreach ( $blocks as $block ) {
 				if (
@@ -193,8 +210,13 @@ class SiteOrigin_Panels_AI_Exposure {
 
 				$block_layout = apply_filters( 'siteorigin_panels_data', $block['attrs']['panelsData'], $post_id );
 				if ( ! empty( $block_layout ) ) {
-					$layouts[]        = $block_layout;
+					$layouts[] = array(
+						'storage'     => 'block',
+						'block_index' => $block_index,
+						'panels_data' => $block_layout,
+					);
 					$has_block_layout = true;
+					$block_index++;
 				}
 			}
 		}
@@ -206,7 +228,8 @@ class SiteOrigin_Panels_AI_Exposure {
 		return array(
 			'post_id' => $post_id,
 			'source'  => $source,  // 'meta' | 'block' | 'mixed' | 'none'
-			'layouts' => $layouts, // array of canonical panels_data documents
+			// Each entry: { storage:'meta'|'block', block_index:int|null, panels_data:{...} }.
+			'layouts' => $layouts,
 		);
 	}
 }
