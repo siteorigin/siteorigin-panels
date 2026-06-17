@@ -100,6 +100,171 @@ class SiteOrigin_Panels_Abilities {
 				),
 			)
 		);
+
+		wp_register_ability(
+			'siteorigin-panels/layout-update',
+			array(
+				'label'               => __( 'Update Page Builder layout', 'siteorigin-panels' ),
+				'description'         => __( "Writes a post's classic (meta-stored) Page Builder layout. The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. Layout Block (block-stored) layouts are NOT supported yet: for those posts the ability declines the write and reports source 'block'.", 'siteorigin-panels' ),
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_id'     => array(
+							'type'        => 'integer',
+							'description' => __( 'Post ID of the layout to update.', 'siteorigin-panels' ),
+							'minimum'     => 1,
+						),
+						'panels_data' => array(
+							'type'        => 'object',
+							'description' => __( 'Canonical panels_data to persist (widgets, grids, grid_cells).', 'siteorigin-panels' ),
+						),
+					),
+					'required'             => array( 'post_id', 'panels_data' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'post_id' => array( 'type' => 'integer' ),
+						'updated' => array( 'type' => 'boolean' ),
+						'source'  => array(
+							'type' => 'string',
+							'enum' => array( 'meta', 'block', 'unsupported' ),
+						),
+						'message' => array( 'type' => 'string' ),
+					),
+				),
+				'permission_callback' => array( $this, 'layout_update_permission' ),
+				'execute_callback'    => array( $this, 'layout_update' ),
+				'meta'                => array(
+					'show_in_rest' => true,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Permission check for siteorigin-panels/layout-update.
+	 *
+	 * Authorization, not just authentication: the caller must be able to edit the
+	 * target post to update its layout (mirrors the read seam's check).
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 *
+	 * @param array $input Ability input — expects post_id.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function layout_update_permission( $input ) {
+		$post_id = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'siteorigin_panels_cannot_update_layout',
+				__( 'Sorry, you are not allowed to update this layout.', 'siteorigin-panels' )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Execute siteorigin-panels/layout-update.
+	 *
+	 * Persists a classic (meta-stored) layout only. The incoming layout MUST
+	 * traverse process_raw_widgets() before persist — the same §3 guarantee every
+	 * other write path enforces; ability input is never trusted raw. Block-stored
+	 * layouts are declined explicitly rather than half-writing post_content.
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 *
+	 * @param array $input Ability input — expects post_id and panels_data.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function layout_update( $input ) {
+		$post_id     = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
+		$panels_data = isset( $input['panels_data'] ) && is_array( $input['panels_data'] ) ? $input['panels_data'] : array();
+
+		$post = get_post( $post_id );
+
+		if ( empty( $post ) ) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'unsupported',
+				'message' => __( 'Layout not found.', 'siteorigin-panels' ),
+			);
+		}
+
+		// Block-stored layouts are not writable by this ability yet — decline,
+		// do not half-write. A full block write (serialize_blocks across multiple
+		// blocks) is a deliberately separate future slice.
+		if ( $this->post_has_layout_block( $post ) ) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'block',
+				'message' => __( 'This post stores its layout in a Layout Block; block-stored layouts are not writable by this ability yet. Only classic (meta-stored) layouts can be updated.', 'siteorigin-panels' ),
+			);
+		}
+
+		// Meta (classic) path. Re-sanitize through the SAME sanitizer the classic
+		// save uses (admin.php save_post), mirroring its argument shape.
+		$admin           = SiteOrigin_Panels_Admin::single();
+		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
+
+		$panels_data['widgets'] = $admin->process_raw_widgets(
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+			false
+		);
+
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+
+		update_post_meta( $post_id, 'panels_data', $panels_data );
+
+		return array(
+			'post_id' => $post_id,
+			'updated' => true,
+			'source'  => 'meta',
+		);
+	}
+
+	/**
+	 * Whether a post stores its layout in a Layout Block.
+	 *
+	 * Reuses the same block-name walk as the read seam so detection stays
+	 * consistent across read and write.
+	 *
+	 * @param WP_Post $post The post to inspect.
+	 *
+	 * @return bool
+	 */
+	protected function post_has_layout_block( $post ) {
+		$block_name = class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
+			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
+			: 'siteorigin-panels/layout-block';
+
+		$blocks = parse_blocks( $post->post_content );
+		if ( empty( $blocks ) ) {
+			return false;
+		}
+
+		foreach ( $blocks as $block ) {
+			if (
+				! empty( $block['blockName'] ) &&
+				$block['blockName'] === $block_name &&
+				! empty( $block['attrs'] ) &&
+				! empty( $block['attrs']['panelsData'] )
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
