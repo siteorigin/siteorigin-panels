@@ -267,9 +267,64 @@ class SiteOrigin_Panels_Abilities {
 	}
 
 	/**
+	 * The registered Layout Block name (with a stable fallback).
+	 *
+	 * @return string
+	 */
+	protected function layout_block_name() {
+		return class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
+			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
+			: 'siteorigin-panels/layout-block';
+	}
+
+	/**
+	 * Whether a block is a QUALIFYING Layout Block.
+	 *
+	 * "Qualifying" = blockName matches the Layout Block AND it carries non-empty
+	 * panelsData. This is the EXACT same test read_layouts() uses to assign
+	 * block_index; get and update MUST agree, or an update targets the wrong block.
+	 *
+	 * @param array  $block      A single parse_blocks() entry.
+	 * @param string $block_name The Layout Block name.
+	 *
+	 * @return bool
+	 */
+	protected function is_qualifying_layout_block( $block, $block_name ) {
+		return (
+			! empty( $block['blockName'] ) &&
+			$block['blockName'] === $block_name &&
+			! empty( $block['attrs'] ) &&
+			! empty( $block['attrs']['panelsData'] )
+		);
+	}
+
+	/**
+	 * Count the qualifying Layout Blocks in a post, top-level, document order.
+	 *
+	 * @param WP_Post $post The post to inspect.
+	 *
+	 * @return int
+	 */
+	protected function count_layout_blocks( $post ) {
+		$block_name = $this->layout_block_name();
+		$blocks     = parse_blocks( $post->post_content );
+		$count      = 0;
+
+		if ( ! empty( $blocks ) ) {
+			foreach ( $blocks as $block ) {
+				if ( $this->is_qualifying_layout_block( $block, $block_name ) ) {
+					$count++;
+				}
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Whether a post stores its layout in a Layout Block.
 	 *
-	 * Reuses the same block-name walk as the read seam so detection stays
+	 * Reuses the same qualifying walk as the read seam so detection stays
 	 * consistent across read and write.
 	 *
 	 * @param WP_Post $post The post to inspect.
@@ -277,27 +332,72 @@ class SiteOrigin_Panels_Abilities {
 	 * @return bool
 	 */
 	protected function post_has_layout_block( $post ) {
-		$block_name = class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
-			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
-			: 'siteorigin-panels/layout-block';
+		return $this->count_layout_blocks( $post ) > 0;
+	}
 
-		$blocks = parse_blocks( $post->post_content );
-		if ( empty( $blocks ) ) {
-			return false;
-		}
+	/**
+	 * Write a sanitized layout into a specific qualifying Layout Block.
+	 *
+	 * Targets the block whose 0-based ordinal among QUALIFYING Layout Blocks (in
+	 * document order, top-level only) equals $block_index — the SAME index
+	 * read_layouts() emits, derived by the SAME qualifying walk, so get and update
+	 * never disagree about which block a given index means.
+	 *
+	 * §3: the incoming layout is re-sanitized through the SAME path a Layout Block
+	 * save uses (process_raw_widgets( $widgets, false, true ) + sanitize_all()),
+	 * mirroring compat/layout-block.php::sanitize_panels_data(); AI input is never
+	 * persisted raw. Only the target block's panelsData is replaced — every other
+	 * block is left byte-identical — then post_content is re-serialized and saved.
+	 *
+	 * @param WP_Post $post        The post to write to.
+	 * @param int     $block_index 0-based qualifying-block ordinal to target.
+	 * @param array   $panels_data Canonical panels_data to persist into that block.
+	 *
+	 * @return int|WP_Error Matched block index on success; WP_Error 'block_index_not_found'
+	 *                      when no qualifying block has that index.
+	 */
+	protected function write_block_layout( $post, $block_index, $panels_data ) {
+		$block_name = $this->layout_block_name();
+		$blocks     = parse_blocks( $post->post_content );
+		$current    = 0;
+		$target_key = null;
 
-		foreach ( $blocks as $block ) {
-			if (
-				! empty( $block['blockName'] ) &&
-				$block['blockName'] === $block_name &&
-				! empty( $block['attrs'] ) &&
-				! empty( $block['attrs']['panelsData'] )
-			) {
-				return true;
+		foreach ( $blocks as $key => $block ) {
+			if ( ! $this->is_qualifying_layout_block( $block, $block_name ) ) {
+				continue;
 			}
+
+			if ( $current === $block_index ) {
+				$target_key = $key;
+				break;
+			}
+
+			$current++;
 		}
 
-		return false;
+		if ( $target_key === null ) {
+			return new WP_Error( 'block_index_not_found', __( 'Requested block index not found.', 'siteorigin-panels' ) );
+		}
+
+		// §3 — re-sanitize through the SAME path block saves use. Never trust raw.
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets(
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+			false,
+			true
+		);
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+
+		// Replace ONLY the target block's panelsData; all other blocks untouched.
+		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
+
+		wp_update_post(
+			array(
+				'ID'           => $post->ID,
+				'post_content' => serialize_blocks( $blocks ),
+			)
+		);
+
+		return $block_index;
 	}
 
 	/**
