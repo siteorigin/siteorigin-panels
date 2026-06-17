@@ -124,6 +124,32 @@ class SiteOrigin_Panels_AI_Exposure {
 	 */
 	public function get_layout( $request ) {
 		$post_id = (int) $request['id'];
+		$result  = $this->read_layouts( $post_id );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Read the canonical panels_data for a post across BOTH storage paths.
+	 *
+	 * Shared read source for the REST route AND the Abilities API
+	 * `siteorigin-panels/layout-get` ability, so both consumers see byte-identical
+	 * data. Returns the committed `{ post_id, source, layouts }` shape, or a
+	 * WP_Error when the post does not exist.
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 *
+	 * @param int $post_id Post ID of the layout to read.
+	 *
+	 * @return array{post_id:int,source:string,layouts:array}|WP_Error
+	 */
+	public function read_layouts( $post_id ) {
+		$post_id = (int) $post_id;
 		$post    = get_post( $post_id );
 
 		if ( empty( $post ) ) {
@@ -177,12 +203,10 @@ class SiteOrigin_Panels_AI_Exposure {
 			$source = ( $source === 'meta' ) ? 'mixed' : 'block';
 		}
 
-		return rest_ensure_response(
-			array(
-				'post_id' => $post_id,
-				'source'  => $source,  // 'meta' | 'block' | 'mixed' | 'none'
-				'layouts' => $layouts, // array of canonical panels_data documents
-			)
+		return array(
+			'post_id' => $post_id,
+			'source'  => $source,  // 'meta' | 'block' | 'mixed' | 'none'
+			'layouts' => $layouts, // array of canonical panels_data documents
 		);
 	}
 }
