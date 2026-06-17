@@ -9,9 +9,9 @@
  *   - siteorigin-panels/layout-get     (readonly) — reads a post's canonical
  *                                       panels_data across classic + block storage.
  *   - siteorigin-panels/layout-update  (write)    — persists a classic/meta-stored
- *                                       layout through the same sanitizer the
- *                                       classic save uses. Block-stored layouts are
- *                                       not writable in this slice and are declined.
+ *                                       layout, OR a specific block-stored Layout
+ *                                       Block selected by block_index, through the
+ *                                       same sanitizer the corresponding save uses.
  *
  * Core ships ZERO AI vendor logic: no API keys, model calls, or prompts. An
  * ability here is capability registration against existing sanitized seams —
@@ -93,7 +93,7 @@ class SiteOrigin_Panels_Abilities {
 			'siteorigin-panels/layout-get',
 			array(
 				'label'               => __( 'Get Page Builder layout', 'siteorigin-panels' ),
-				'description'         => __( "Reads a post's canonical Page Builder layout data. Returns layouts from both classic (meta-stored) and Layout Block storage; the 'source' field reports which storage path(s) supplied data.", 'siteorigin-panels' ),
+				'description'         => __( "Reads a post's canonical Page Builder layout data. Returns layouts from both classic (meta-stored) and Layout Block storage; the 'source' field reports which storage path(s) supplied data. Each layouts entry is labelled with its storage ('meta' or 'block') and block_index (null for the classic layout; the 0-based ordinal among Layout Blocks otherwise). Pass that block_index to layout-update to write a specific Layout Block.", 'siteorigin-panels' ),
 				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -117,7 +117,19 @@ class SiteOrigin_Panels_Abilities {
 						),
 						'layouts' => array(
 							'type'  => 'array',
-							'items' => array( 'type' => 'object' ),
+							'items' => array(
+								'type'       => 'object',
+								'properties' => array(
+									'storage'     => array(
+										'type' => 'string',
+										'enum' => array( 'meta', 'block' ),
+									),
+									'block_index' => array(
+										'type' => array( 'integer', 'null' ),
+									),
+									'panels_data' => array( 'type' => 'object' ),
+								),
+							),
 						),
 					),
 				),
@@ -134,7 +146,7 @@ class SiteOrigin_Panels_Abilities {
 			'siteorigin-panels/layout-update',
 			array(
 				'label'               => __( 'Update Page Builder layout', 'siteorigin-panels' ),
-				'description'         => __( "Writes a post's classic (meta-stored) Page Builder layout. The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. Layout Block (block-stored) layouts are NOT supported yet: for those posts the ability declines the write and reports source 'block'.", 'siteorigin-panels' ),
+				'description'         => __( "Writes a post's Page Builder layout — either the classic (meta-stored) layout, or a specific block-stored Layout Block selected by block_index (the 0-based index from layout-get). The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. When a post has multiple Layout Blocks, block_index is required; if it is missing or out of range the call declines as 'block-ambiguous' rather than guessing.", 'siteorigin-panels' ),
 				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -148,6 +160,11 @@ class SiteOrigin_Panels_Abilities {
 							'type'        => 'object',
 							'description' => __( 'Canonical panels_data to persist (widgets, grids, grid_cells).', 'siteorigin-panels' ),
 						),
+						'block_index' => array(
+							'type'        => 'integer',
+							'description' => __( 'For block-stored posts, the 0-based index (from layout-get) of the Layout Block to write. Optional for a single-block post (defaults to 0); required when the post has multiple Layout Blocks. Ignored for classic/meta posts.', 'siteorigin-panels' ),
+							'minimum'     => 0,
+						),
 					),
 					'required'             => array( 'post_id', 'panels_data' ),
 					'additionalProperties' => false,
@@ -155,13 +172,14 @@ class SiteOrigin_Panels_Abilities {
 				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'post_id' => array( 'type' => 'integer' ),
-						'updated' => array( 'type' => 'boolean' ),
-						'source'  => array(
+						'post_id'     => array( 'type' => 'integer' ),
+						'updated'     => array( 'type' => 'boolean' ),
+						'source'      => array(
 							'type' => 'string',
-							'enum' => array( 'meta', 'block', 'unsupported' ),
+							'enum' => array( 'meta', 'block', 'block-ambiguous', 'unsupported' ),
 						),
-						'message' => array( 'type' => 'string' ),
+						'block_index' => array( 'type' => 'integer' ),
+						'message'     => array( 'type' => 'string' ),
 					),
 				),
 				'permission_callback' => array( $this, 'layout_update_permission' ),
@@ -202,21 +220,24 @@ class SiteOrigin_Panels_Abilities {
 	/**
 	 * Execute siteorigin-panels/layout-update.
 	 *
-	 * Persists a classic (meta-stored) layout only. The incoming layout MUST
-	 * traverse process_raw_widgets() before persist — the same §3 guarantee every
-	 * other write path enforces; ability input is never trusted raw. Block-stored
-	 * layouts are declined explicitly rather than half-writing post_content.
+	 * Persists either a classic (meta-stored) layout or a specific block-stored
+	 * Layout Block, selected by the 0-based `block_index` from layout-get. The
+	 * incoming layout MUST traverse process_raw_widgets() before persist — the same
+	 * §3 guarantee every other write path enforces; ability input is never trusted
+	 * raw. When a post has multiple Layout Blocks and no (or an out-of-range) index
+	 * is given, the call declines as ambiguous rather than guessing.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
 	 *
-	 * @param array $input Ability input — expects post_id and panels_data.
+	 * @param array $input Ability input — expects post_id, panels_data; optional block_index.
 	 *
 	 * @return array|WP_Error
 	 */
 	public function layout_update( $input ) {
 		$post_id     = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
 		$panels_data = isset( $input['panels_data'] ) && is_array( $input['panels_data'] ) ? $input['panels_data'] : array();
+		$block_index = isset( $input['block_index'] ) && is_numeric( $input['block_index'] ) ? (int) $input['block_index'] : null;
 
 		$post = get_post( $post_id );
 
@@ -229,16 +250,10 @@ class SiteOrigin_Panels_Abilities {
 			);
 		}
 
-		// Block-stored layouts are not writable by this ability yet — decline,
-		// do not half-write. A full block write (serialize_blocks across multiple
-		// blocks) is a deliberately separate future slice.
-		if ( $this->post_has_layout_block( $post ) ) {
-			return array(
-				'post_id' => $post_id,
-				'updated' => false,
-				'source'  => 'block',
-				'message' => __( 'This post stores its layout in a Layout Block; block-stored layouts are not writable by this ability yet. Only classic (meta-stored) layouts can be updated.', 'siteorigin-panels' ),
-			);
+		// Block-stored: write the targeted Layout Block (never guess on ambiguity).
+		$block_count = $this->count_layout_blocks( $post );
+		if ( $block_count > 0 ) {
+			return $this->update_block_layout( $post, $block_count, $block_index, $panels_data );
 		}
 
 		// Meta (classic) path. Re-sanitize through the SAME sanitizer the classic
@@ -263,6 +278,75 @@ class SiteOrigin_Panels_Abilities {
 			'post_id' => $post_id,
 			'updated' => true,
 			'source'  => 'meta',
+		);
+	}
+
+	/**
+	 * Resolve which Layout Block to write, then write it.
+	 *
+	 * Selection rules (never guess on ambiguity):
+	 *  - exactly ONE block: block_index defaults to 0; a non-zero index is declined.
+	 *  - MORE THAN ONE block: block_index is REQUIRED and must be in range; a missing
+	 *    or out-of-range index is declined as 'block-ambiguous' with the valid range.
+	 *
+	 * @param WP_Post  $post        The post being written.
+	 * @param int      $block_count Number of qualifying Layout Blocks in the post.
+	 * @param int|null $block_index Caller-supplied index, or null when omitted.
+	 * @param array    $panels_data Canonical panels_data to persist.
+	 *
+	 * @return array The layout-update result array.
+	 */
+	protected function update_block_layout( $post, $block_count, $block_index, $panels_data ) {
+		$max_index = $block_count - 1;
+
+		if ( $block_count === 1 ) {
+			if ( $block_index !== null && $block_index !== 0 ) {
+				return array(
+					'post_id' => (int) $post->ID,
+					'updated' => false,
+					'source'  => 'block',
+					'message' => __( 'This post has a single Layout Block; block_index must be 0 or omitted.', 'siteorigin-panels' ),
+				);
+			}
+
+			$block_index = 0;
+		} else {
+			// More than one block — an explicit, in-range index is mandatory.
+			if ( $block_index === null || $block_index < 0 || $block_index > $max_index ) {
+				return array(
+					'post_id' => (int) $post->ID,
+					'updated' => false,
+					'source'  => 'block-ambiguous',
+					'message' => sprintf(
+						/* translators: %s: valid block_index range, e.g. "0-2". */
+						__( 'This post has multiple Layout Blocks; a valid block_index is required. Valid indices: %s.', 'siteorigin-panels' ),
+						'0-' . $max_index
+					),
+				);
+			}
+		}
+
+		$written = $this->write_block_layout( $post, $block_index, $panels_data );
+
+		if ( is_wp_error( $written ) ) {
+			// Index validated above; treat any miss defensively as ambiguous.
+			return array(
+				'post_id' => (int) $post->ID,
+				'updated' => false,
+				'source'  => 'block-ambiguous',
+				'message' => sprintf(
+					/* translators: %s: valid block_index range, e.g. "0-2". */
+					__( 'Requested block_index could not be resolved. Valid indices: %s.', 'siteorigin-panels' ),
+					'0-' . $max_index
+				),
+			);
+		}
+
+		return array(
+			'post_id'     => (int) $post->ID,
+			'updated'     => true,
+			'source'      => 'block',
+			'block_index' => $written,
 		);
 	}
 
