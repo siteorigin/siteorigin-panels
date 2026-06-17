@@ -221,11 +221,16 @@ class SiteOrigin_Panels_Abilities {
 	 * Execute siteorigin-panels/layout-update.
 	 *
 	 * Persists either a classic (meta-stored) layout or a specific block-stored
-	 * Layout Block, selected by the 0-based `block_index` from layout-get. The
-	 * incoming layout MUST traverse process_raw_widgets() before persist — the same
-	 * §3 guarantee every other write path enforces; ability input is never trusted
-	 * raw. When a post has multiple Layout Blocks and no (or an out-of-range) index
-	 * is given, the call declines as ambiguous rather than guessing.
+	 * Layout Block. Routing mirrors exactly what layout-get advertises:
+	 *  - `block_index` omitted (null) AND the post has a meta layout → write meta.
+	 *    This honors the `{ storage:'meta', block_index:null }` entry layout-get
+	 *    surfaces, so a mixed (meta + block) post can still update its meta layout.
+	 *  - otherwise, if the post has Layout Block(s) → write the targeted block
+	 *    (block_index resolved against the SAME shared walk; ambiguity is declined,
+	 *    never guessed).
+	 *  - otherwise (no blocks) → meta path.
+	 * The incoming layout MUST traverse process_raw_widgets() before persist — the
+	 * same §3 guarantee every other write path enforces; input is never trusted raw.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
@@ -250,16 +255,41 @@ class SiteOrigin_Panels_Abilities {
 			);
 		}
 
+		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
+		$has_meta_layout = ! empty( $old_panels_data );
+
+		// No block_index given AND a meta layout exists → write meta. This covers
+		// the pure-classic post and honors the meta entry layout-get advertises on
+		// a mixed post (so its classic layout stays writable).
+		if ( $block_index === null && $has_meta_layout ) {
+			return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
+		}
+
 		// Block-stored: write the targeted Layout Block (never guess on ambiguity).
 		$block_count = $this->count_layout_blocks( $post );
 		if ( $block_count > 0 ) {
 			return $this->update_block_layout( $post, $block_count, $block_index, $panels_data );
 		}
 
-		// Meta (classic) path. Re-sanitize through the SAME sanitizer the classic
-		// save uses (admin.php save_post), mirroring its argument shape.
-		$admin           = SiteOrigin_Panels_Admin::single();
-		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
+		// No blocks present → meta path (creates/updates the classic layout).
+		return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
+	}
+
+	/**
+	 * Write the classic (meta-stored) layout.
+	 *
+	 * Re-sanitizes through the SAME sanitizer the classic save uses (admin.php
+	 * save_post), mirroring its argument shape. §3: input is never persisted raw.
+	 *
+	 * @param int   $post_id         The post to write to.
+	 * @param array $panels_data     Incoming canonical panels_data.
+	 * @param mixed $old_panels_data Existing meta value (any scalar/array from get_post_meta).
+	 *
+	 * @return array The layout-update result array.
+	 */
+	protected function update_meta_layout( $post_id, $panels_data, $old_panels_data ) {
+		$admin = SiteOrigin_Panels_Admin::single();
+
 		// get_post_meta() can return a non-array scalar (e.g. '') — normalize so the
 		// ['widgets'] read below is explicit and future-proof.
 		$old_panels_data = is_array( $old_panels_data ) ? $old_panels_data : array();
@@ -329,7 +359,20 @@ class SiteOrigin_Panels_Abilities {
 		$written = $this->write_block_layout( $post, $block_index, $panels_data );
 
 		if ( is_wp_error( $written ) ) {
-			// Index validated above; treat any miss defensively as ambiguous.
+			// A genuine save failure: index was valid but the post update did not
+			// persist. Report a non-silent block failure (not ambiguity).
+			if ( $written->get_error_code() === 'block_write_failed' ) {
+				return array(
+					'post_id' => (int) $post->ID,
+					'updated' => false,
+					'source'  => 'block',
+					'message' => __( 'The layout could not be saved.', 'siteorigin-panels' ),
+				);
+			}
+
+			// 'block_index_not_found' is purely defensive: after the get/write walk
+			// unification an in-range index always resolves, so this is effectively
+			// unreachable here. Treat any residual miss as ambiguous with the range.
 			return array(
 				'post_id' => (int) $post->ID,
 				'updated' => false,
@@ -351,65 +394,35 @@ class SiteOrigin_Panels_Abilities {
 	}
 
 	/**
-	 * The registered Layout Block name (with a stable fallback).
+	 * The ordered qualifying Layout Block layouts for a post.
 	 *
-	 * @return string
+	 * Delegates to the SINGLE shared walk on SiteOrigin_Panels_AI_Exposure so the
+	 * count, the index layout-get emits, and the write target are all derived
+	 * identically (including the post-`siteorigin_panels_data`-filter emptiness
+	 * test). This is what guarantees a chosen block_index can never resolve to a
+	 * different block between get and update.
+	 *
+	 * @param WP_Post $post The post to inspect.
+	 *
+	 * @return array Ordered list of { block_index, block_key, panels_data }.
 	 */
-	protected function layout_block_name() {
-		return class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
-			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
-			: 'siteorigin-panels/layout-block';
+	protected function qualifying_block_layouts( $post ) {
+		return SiteOrigin_Panels_AI_Exposure::single()->get_qualifying_block_layouts( $post );
 	}
 
 	/**
-	 * Whether a block is a QUALIFYING Layout Block.
-	 *
-	 * "Qualifying" = blockName matches the Layout Block AND it carries non-empty
-	 * panelsData. This is the EXACT same test read_layouts() uses to assign
-	 * block_index; get and update MUST agree, or an update targets the wrong block.
-	 *
-	 * @param array  $block      A single parse_blocks() entry.
-	 * @param string $block_name The Layout Block name.
-	 *
-	 * @return bool
-	 */
-	protected function is_qualifying_layout_block( $block, $block_name ) {
-		return (
-			! empty( $block['blockName'] ) &&
-			$block['blockName'] === $block_name &&
-			! empty( $block['attrs'] ) &&
-			! empty( $block['attrs']['panelsData'] )
-		);
-	}
-
-	/**
-	 * Count the qualifying Layout Blocks in a post, top-level, document order.
+	 * Count the qualifying Layout Blocks in a post.
 	 *
 	 * @param WP_Post $post The post to inspect.
 	 *
 	 * @return int
 	 */
 	protected function count_layout_blocks( $post ) {
-		$block_name = $this->layout_block_name();
-		$blocks     = parse_blocks( $post->post_content );
-		$count      = 0;
-
-		if ( ! empty( $blocks ) ) {
-			foreach ( $blocks as $block ) {
-				if ( $this->is_qualifying_layout_block( $block, $block_name ) ) {
-					$count++;
-				}
-			}
-		}
-
-		return $count;
+		return count( $this->qualifying_block_layouts( $post ) );
 	}
 
 	/**
 	 * Whether a post stores its layout in a Layout Block.
-	 *
-	 * Reuses the same qualifying walk as the read seam so detection stays
-	 * consistent across read and write.
 	 *
 	 * @param WP_Post $post The post to inspect.
 	 *
@@ -422,10 +435,11 @@ class SiteOrigin_Panels_Abilities {
 	/**
 	 * Write a sanitized layout into a specific qualifying Layout Block.
 	 *
-	 * Targets the block whose 0-based ordinal among QUALIFYING Layout Blocks (in
-	 * document order, top-level only) equals $block_index — the SAME index
-	 * read_layouts() emits, derived by the SAME qualifying walk, so get and update
-	 * never disagree about which block a given index means.
+	 * Targets the block whose 0-based ordinal among QUALIFYING Layout Blocks equals
+	 * $block_index — resolved from the SAME shared walk read_layouts() labels with,
+	 * so get and update never disagree about which block an index means. The walk
+	 * returns each block's original parse_blocks() key, so we mutate exactly that
+	 * block.
 	 *
 	 * §3: the incoming layout is re-sanitized through the SAME path a Layout Block
 	 * save uses (process_raw_widgets( $widgets, false, true ) + sanitize_all()),
@@ -438,25 +452,18 @@ class SiteOrigin_Panels_Abilities {
 	 * @param array   $panels_data Canonical panels_data to persist into that block.
 	 *
 	 * @return int|WP_Error Matched block index on success; WP_Error 'block_index_not_found'
-	 *                      when no qualifying block has that index.
+	 *                      when no qualifying block has that index, or 'block_write_failed'
+	 *                      when the post update did not persist.
 	 */
 	protected function write_block_layout( $post, $block_index, $panels_data ) {
-		$block_name = $this->layout_block_name();
-		$blocks     = parse_blocks( $post->post_content );
-		$current    = 0;
+		$qualifying = $this->qualifying_block_layouts( $post );
+
 		$target_key = null;
-
-		foreach ( $blocks as $key => $block ) {
-			if ( ! $this->is_qualifying_layout_block( $block, $block_name ) ) {
-				continue;
-			}
-
-			if ( $current === $block_index ) {
-				$target_key = $key;
+		foreach ( $qualifying as $entry ) {
+			if ( $entry['block_index'] === $block_index ) {
+				$target_key = $entry['block_key'];
 				break;
 			}
-
-			$current++;
 		}
 
 		if ( $target_key === null ) {
@@ -471,15 +478,24 @@ class SiteOrigin_Panels_Abilities {
 		);
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
-		// Replace ONLY the target block's panelsData; all other blocks untouched.
+		// Re-parse and replace ONLY the target block's panelsData (the walk's
+		// block_key indexes this same parse_blocks() array); all other blocks
+		// untouched.
+		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
 
-		wp_update_post(
+		$result = wp_update_post(
 			array(
 				'ID'           => $post->ID,
 				'post_content' => serialize_blocks( $blocks ),
-			)
+			),
+			true
 		);
+
+		// No silent success: wp_update_post returns 0 or a WP_Error on failure.
+		if ( empty( $result ) || is_wp_error( $result ) ) {
+			return new WP_Error( 'block_write_failed', __( 'The layout could not be saved.', 'siteorigin-panels' ) );
+		}
 
 		return $block_index;
 	}
