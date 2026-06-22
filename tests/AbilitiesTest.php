@@ -108,6 +108,41 @@ if ( ! function_exists( 'wp_register_ability_category' ) ) {
 	}
 }
 
+/*
+ * Real wp_slash()/wp_unslash() so a stubbed wp_update_post can mirror core's
+ * unslashing (wp_insert_post runs wp_unslash on its input). This is what lets the
+ * slashing regression test observe the bug the production wp_slash() guards
+ * against: pre-fix the content reaches wp_update_post unslashed and the stub's
+ * wp_unslash() then strips the JSON-escape backslashes; post-fix it is slashed
+ * and survives the round-trip. Mirrors core's add_magic_quotes/stripslashes_deep.
+ */
+if ( ! function_exists( 'wp_slash' ) ) {
+	function wp_slash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_slash', $value );
+		}
+
+		return is_string( $value ) ? addcslashes( $value, "'\"\\" ) : $value;
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_unslash', $value );
+		}
+
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+// The abilities block walk delegates to SiteOrigin_Panels_AI_Exposure for the
+// single shared qualifying-block walk; load it so this test is self-sufficient
+// regardless of test execution order.
+if ( ! class_exists( 'SiteOrigin_Panels_AI_Exposure' ) ) {
+	require __DIR__ . '/../inc/ai-exposure.php';
+}
+
 if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
 	require __DIR__ . '/../inc/abilities.php';
 }
@@ -129,6 +164,13 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
+
+		// Safe defaults the shared block walk + update routing touch. Individual
+		// tests override these with Functions\when() as needed.
+		Functions\when( 'apply_filters' )->alias( fn( $tag, $value ) => $value );
+		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'serialize_blocks' )->alias( fn( $blocks ) => $blocks );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -178,34 +220,436 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertArrayHasKey( 'message', $result );
 	}
 
-	// --- layout-update: block-stored declined --------------------------------
+	// --- layout-update: block-stored writes (Phase 2c) -----------------------
 
-	public function test_update_block_stored_post_is_declined_without_write() {
-		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => '<!-- block -->' ) );
-		Functions\when( 'parse_blocks' )->justReturn(
+	/**
+	 * Build a parse_blocks() return for $n qualifying Layout Blocks, optionally
+	 * interleaved with a non-layout block to prove indices count qualifying only.
+	 *
+	 * @param int  $n             Number of qualifying Layout Blocks.
+	 * @param bool $interleave    Insert a core/paragraph before the blocks.
+	 *
+	 * @return array
+	 */
+	private function layout_blocks( int $n, bool $interleave = false ): array {
+		$blocks = array();
+
+		if ( $interleave ) {
+			$blocks[] = array( 'blockName' => 'core/paragraph', 'attrs' => array() );
+		}
+
+		for ( $i = 0; $i < $n; $i++ ) {
+			$blocks[] = array(
+				'blockName' => 'siteorigin-panels/layout-block',
+				'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'existing-' . $i ) ) ),
+			);
+		}
+
+		return $blocks;
+	}
+
+	public function test_update_single_block_no_index_writes_block_zero() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 7, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
+
+		// update_post_meta MUST NOT run on the block path; wp_update_post MUST.
+		Functions\expect( 'update_post_meta' )->never();
+		$saved = null;
+		Functions\when( 'serialize_blocks' )->alias( fn( $blocks ) => $blocks );
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
 			array(
-				array(
-					'blockName' => 'siteorigin-panels/layout-block',
-					'attrs'     => array( 'panelsData' => array( 'widgets' => array() ) ),
-				),
+				'post_id'     => 7,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
 			)
 		);
 
-		// update_post_meta MUST NOT be called on the block path.
-		Functions\expect( 'update_post_meta' )->never();
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertSame( 0, $result['block_index'] );
+
+		// §3: block save path uses process_raw_widgets( $widgets, false, true ).
+		$args = Abilities_AdminSpy::$instance->process_args;
+		$this->assertNotNull( $args, 'Block write must run process_raw_widgets().' );
+		$this->assertFalse( $args[1], 'Block sanitize passes old_widgets = false.' );
+		$this->assertTrue( $args[2], 'Block sanitize passes escape_classes = true.' );
+
+		// The written block carries the SANITIZER output, not raw input.
+		$this->assertSame(
+			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			$saved['post_content'][0]['attrs']['panelsData']['widgets']
+		);
+	}
+
+	public function test_update_single_block_nonzero_index_declines() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 7, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\expect( 'wp_update_post' )->never();
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 7,
 				'panels_data' => array( 'widgets' => array() ),
+				'block_index' => 1,
 			)
 		);
 
 		$this->assertFalse( $result['updated'] );
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertArrayHasKey( 'message', $result );
-		// Sanitizer must not have run for a declined write.
-		$this->assertNull( Abilities_AdminSpy::$instance->process_args );
+		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No sanitize on a declined write.' );
+	}
+
+	public function test_update_multi_block_targets_requested_index_only() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 9, 'post_content' => 'two blocks' ) );
+		// Interleave a non-layout block to prove index counts qualifying blocks only.
+		$blocks = $this->layout_blocks( 2, true );
+		Functions\when( 'parse_blocks' )->justReturn( $blocks );
+		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
+		Functions\when( 'serialize_blocks' )->alias( fn( $b ) => $b );
+
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 9,
+				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'block_index' => 1,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertSame( 1, $result['block_index'] );
+
+		// Layout block_index 1 == array key 2 (paragraph at 0, block0 at 1, block1 at 2).
+		$written = $saved['post_content'];
+		$this->assertSame(
+			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			$written[2]['attrs']['panelsData']['widgets'],
+			'Targeted block (index 1) must receive the sanitized layout.'
+		);
+		// Block index 0 (array key 1) must be byte-identical to its original.
+		$this->assertSame(
+			array( 'existing-0' ),
+			$written[1]['attrs']['panelsData']['widgets'],
+			'Untargeted block must be left unchanged.'
+		);
+	}
+
+	public function test_update_multi_block_missing_index_is_ambiguous() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 9, 'post_content' => 'two blocks' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 2 ) );
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 9,
+				'panels_data' => array( 'widgets' => array() ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'block-ambiguous', $result['source'] );
+		$this->assertStringContainsString( '0-1', $result['message'], 'Message lists the valid index range.' );
+		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No sanitize on an ambiguous decline.' );
+	}
+
+	public function test_update_multi_block_out_of_range_index_is_ambiguous() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 9, 'post_content' => 'two blocks' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 2 ) );
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 9,
+				'panels_data' => array( 'widgets' => array() ),
+				'block_index' => 5,
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'block-ambiguous', $result['source'] );
+		$this->assertStringContainsString( '0-1', $result['message'] );
+	}
+
+	// --- Regression: get/write index walks must agree (Blocking #1) ----------
+
+	/**
+	 * If a siteorigin_panels_data filter empties one structurally-qualifying block,
+	 * BOTH read_layouts() and the targeted write must skip it identically, so an
+	 * index emitted by get always resolves to the SAME block in the write. This is
+	 * the highest-risk invariant of the slice; before the walk unification, the
+	 * write counted the emptied block and the index targeted the wrong one.
+	 */
+	public function test_get_and_write_indices_agree_when_a_filter_empties_a_block() {
+		// Three structurally-qualifying blocks at parse-keys 0,1,2. A filter empties
+		// the MIDDLE one (key 1). Qualifying order then becomes: key0 -> index 0,
+		// key2 -> index 1. So block_index 1 must write parse-key 2, never key 1.
+		$blocks = array(
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'A', 'widgets' => array() ) ) ),
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'B', 'widgets' => array() ) ) ),
+			array( 'blockName' => 'siteorigin-panels/layout-block', 'attrs' => array( 'panelsData' => array( 'id' => 'C', 'widgets' => array() ) ) ),
+		);
+
+		$post = (object) array( 'ID' => 21, 'post_content' => 'three blocks' );
+		Functions\when( 'get_post' )->justReturn( $post );
+		Functions\when( 'parse_blocks' )->justReturn( $blocks );
+		// Filter empties block B (the structurally-qualifying middle one).
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data' && isset( $value['id'] ) && $value['id'] === 'B' ) {
+					return array();
+				}
+
+				return $value;
+			}
+		);
+
+		// What does read_layouts() emit? B must be skipped; A=0, C=1.
+		$read = SiteOrigin_Panels_AI_Exposure::single()->read_layouts( 21 );
+		$block_entries = array_values(
+			array_filter( $read['layouts'], fn( $l ) => $l['storage'] === 'block' )
+		);
+		$this->assertCount( 2, $block_entries, 'Emptied block must not be surfaced.' );
+		$this->assertSame( 'A', $block_entries[0]['panels_data']['id'] );
+		$this->assertSame( 0, $block_entries[0]['block_index'] );
+		$this->assertSame( 'C', $block_entries[1]['panels_data']['id'] );
+		$this->assertSame( 1, $block_entries[1]['block_index'] );
+
+		// Now write block_index 1. It MUST land on C (parse-key 2), not B (key 1).
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 21,
+				'panels_data' => array( 'widgets' => array( 'new-for-C' ) ),
+				'block_index' => 1,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 1, $result['block_index'] );
+
+		$written = $saved['post_content'];
+		// Parse-key 2 (C) received the sanitized layout.
+		$this->assertSame(
+			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			$written[2]['attrs']['panelsData']['widgets'],
+			'block_index 1 must write parse-key 2 (C), not the emptied middle block.'
+		);
+		// The emptied middle block (parse-key 1, B) must be byte-identical.
+		$this->assertSame( 'B', $written[1]['attrs']['panelsData']['id'] );
+		$this->assertSame( array(), $written[1]['attrs']['panelsData']['widgets'] );
+	}
+
+	// --- Mixed post: block_index:null writes the meta layout (Required #3) ----
+
+	public function test_mixed_post_no_index_writes_meta_not_block() {
+		// Post has BOTH a meta layout and a Layout Block. With no block_index, the
+		// write must honor the meta entry layout-get advertises (block_index:null),
+		// i.e. write meta and leave the block alone.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 31, 'post_content' => 'has a block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'meta-old' ) ) );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = array( $post_id, $key, $value );
+
+				return true;
+			}
+		);
+		// The block path must NOT run.
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( 'meta-new' ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertNotNull( $persisted, 'Meta layout must be written on a mixed post with no index.' );
+		// Classic sanitize shape: old widgets passed through (arg1 not false here).
+		$this->assertSame( array( 'meta-old' ), Abilities_AdminSpy::$instance->process_args[1] );
+	}
+
+	public function test_mixed_post_with_index_writes_targeted_block() {
+		// Same mixed post, but block_index:0 explicitly targets the block.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 31, 'post_content' => 'has a block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'meta-old' ) ) );
+		Functions\expect( 'update_post_meta' )->never();
+
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $args ) use ( &$saved ) {
+				$saved = $args;
+
+				return $args['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( 'block-new' ) ),
+				'block_index' => 0,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertSame( 0, $result['block_index'] );
+		$this->assertNotNull( $saved, 'Block must be written when an index is given.' );
+	}
+
+	// --- No silent success on a failed block save (Required #4) ---------------
+
+	public function test_block_write_reports_failure_when_update_does_not_persist() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 41, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		// wp_update_post fails (returns 0).
+		Functions\when( 'wp_update_post' )->justReturn( 0 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 41,
+				'panels_data' => array( 'widgets' => array() ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'], 'A failed save must not report updated:true.' );
+		$this->assertSame( 'block', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	// --- Regression: block write must slash for wp_update_post ----------------
+
+	/**
+	 * Locks the slashing contract for block writes. wp_update_post()/
+	 * wp_insert_post() run wp_unslash() on their input, and serialize_blocks()
+	 * JSON-encodes attrs so a '<' becomes the escape < (backslash + u003c). If
+	 * the content reaches wp_update_post() UNslashed, core's unslashing strips that
+	 * backslash and the stored markup corrupts to the literal "u003c...".
+	 *
+	 * The wp_update_post stub here MIRRORS core by wp_unslash()-ing its captured
+	 * input; we then assert the persisted block content still round-trips to the
+	 * ORIGINAL markup. Pre-fix (no wp_slash in write_block_layout) the backslash is
+	 * stripped and this FAILS; post-fix (content slashed first) it PASSES.
+	 */
+	public function test_block_write_slashes_so_markup_survives_unslashing() {
+		$original_html = '<h2>Hello</h2>';
+
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 51, 'post_content' => 'one block' ) );
+
+		// One existing qualifying block to target.
+		Functions\when( 'parse_blocks' )->alias(
+			function ( $content ) {
+				// Decode our own serialized form on the round-trip read; otherwise
+				// return the single empty qualifying block being written into.
+				if ( is_string( $content ) && strpos( $content, '__SER__:' ) === 0 ) {
+					return json_decode( substr( $content, 8 ), true );
+				}
+
+				return array(
+					array(
+						'blockName' => 'siteorigin-panels/layout-block',
+						'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'placeholder' ) ) ),
+					),
+				);
+			}
+		);
+
+		// Faithful serialize: JSON-encode with core's tag escaping so '<' becomes
+		// the backslash escape < — exactly the bytes wp_unslash would attack.
+		Functions\when( 'serialize_blocks' )->alias(
+			fn( $blocks ) => '__SER__:' . json_encode( $blocks, JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP )
+		);
+
+		// Admin spy normally replaces widgets with a fixed 'Cleaned' set (no markup),
+		// which would hide the '<' under test. For THIS test, make the sanitizer
+		// preserve the incoming markup so the serialized content actually carries <.
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return $widgets; // preserve markup verbatim for the slashing assertion
+			}
+		};
+
+		// Mirror core: wp_update_post unslashes its input before persisting.
+		$persisted_content = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $postarr ) use ( &$persisted_content ) {
+				$unslashed         = wp_unslash( $postarr );
+				$persisted_content = $unslashed['post_content'];
+
+				return $unslashed['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 51,
+				'block_index' => 0,
+				'panels_data' => array(
+					'widgets' => array(
+						array( 'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ), 'content' => $original_html ),
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+
+		// After core-style unslashing, the JSON escape must still carry its
+		// backslash (\\u003c / \\u003C), never the corrupted bare u003c. Case-
+		// insensitive: PHP's JSON tag escaping may emit either case.
+		$this->assertMatchesRegularExpression(
+			'/\\\\u003c/i',
+			$persisted_content,
+			'Persisted content must keep the JSON-escape backslash (production must wp_slash before wp_update_post).'
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/"u003c/i',
+			$persisted_content,
+			'Bare "u003c" means the backslash was stripped by core unslashing — content corrupted.'
+		);
+
+		// And the block must round-trip back to the ORIGINAL markup.
+		$persisted_blocks = parse_blocks( $persisted_content );
+		$this->assertSame(
+			$original_html,
+			$persisted_blocks[0]['attrs']['panelsData']['widgets'][0]['content'],
+			'Block widget markup must survive the write/unslash round-trip intact.'
+		);
 	}
 
 	// --- layout-update: meta path persists sanitized data --------------------
@@ -313,6 +757,23 @@ class AbilitiesTest extends SiteOriginTests {
 			'layout-update must NOT be marked readonly.'
 		);
 		$this->assertSame( 'siteorigin-panels', $update['category'] );
+
+		// Phase 2c contract: block_index input + block-ambiguous output source.
+		$this->assertArrayHasKey(
+			'block_index',
+			$update['input_schema']['properties'],
+			'layout-update must accept block_index input.'
+		);
+		$this->assertContains(
+			'block-ambiguous',
+			$update['output_schema']['properties']['source']['enum'],
+			'layout-update output source enum must include block-ambiguous.'
+		);
+		$this->assertArrayHasKey(
+			'block_index',
+			$update['output_schema']['properties'],
+			'layout-update must echo block_index in output.'
+		);
 	}
 
 	public function test_registers_the_ability_category() {

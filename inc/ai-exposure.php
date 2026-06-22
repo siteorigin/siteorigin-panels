@@ -138,8 +138,15 @@ class SiteOrigin_Panels_AI_Exposure {
 	 *
 	 * Shared read source for the REST route AND the Abilities API
 	 * `siteorigin-panels/layout-get` ability, so both consumers see byte-identical
-	 * data. Returns the committed `{ post_id, source, layouts }` shape, or a
-	 * WP_Error when the post does not exist.
+	 * data. Returns `{ post_id, source, layouts }`, or a WP_Error when the post
+	 * does not exist.
+	 *
+	 * Each `layouts` entry is a LABELLED object so a consumer can identify and
+	 * target a specific storage location for a follow-up write:
+	 *   { storage: 'meta'|'block', block_index: int|null, panels_data: {...canonical...} }
+	 * The classic/meta layout is `block_index: null`; each qualifying Layout Block
+	 * gets its 0-based ordinal in document order (see the index walk below). This
+	 * index is the LOCKED selector `layout-update` accepts as `block_index`.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
@@ -163,50 +170,123 @@ class SiteOrigin_Panels_AI_Exposure {
 		$layouts = array();
 		$source  = 'none';
 
-		// Meta-stored (classic builder).
+		// Meta-stored (classic builder). The classic layout has no block index.
 		$meta = get_post_meta( $post_id, 'panels_data', true );
 		if ( ! empty( $meta ) ) {
 			$meta = apply_filters( 'siteorigin_panels_data', $meta, $post_id );
 			if ( ! empty( $meta ) ) {
-				$layouts[] = $meta;
+				$layouts[] = array(
+					'storage'     => 'meta',
+					'block_index' => null,
+					'panels_data' => $meta,
+				);
 				$source    = 'meta';
 			}
 		}
 
 		// Block-stored (Layout Block). A post can contain multiple layout blocks.
-		$block_name = class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
-			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
-			: 'siteorigin-panels/layout-block';
-
-		$has_block_layout = false;
-		$blocks           = parse_blocks( $post->post_content );
-		if ( ! empty( $blocks ) ) {
-			foreach ( $blocks as $block ) {
-				if (
-					empty( $block['blockName'] ) ||
-					$block['blockName'] !== $block_name ||
-					empty( $block['attrs'] ) ||
-					empty( $block['attrs']['panelsData'] )
-				) {
-					continue;
-				}
-
-				$block_layout = apply_filters( 'siteorigin_panels_data', $block['attrs']['panelsData'], $post_id );
-				if ( ! empty( $block_layout ) ) {
-					$layouts[]        = $block_layout;
-					$has_block_layout = true;
-				}
-			}
+		// The block_index emitted here MUST match the targeted write in
+		// SiteOrigin_Panels_Abilities; both derive from the SAME shared walk below
+		// (get_qualifying_block_layouts), so an index can never resolve to a
+		// different block between get and update.
+		$block_layouts = $this->get_qualifying_block_layouts( $post );
+		foreach ( $block_layouts as $entry ) {
+			$layouts[] = array(
+				'storage'     => 'block',
+				'block_index' => $entry['block_index'],
+				'panels_data' => $entry['panels_data'],
+			);
 		}
 
-		if ( $has_block_layout ) {
+		if ( ! empty( $block_layouts ) ) {
 			$source = ( $source === 'meta' ) ? 'mixed' : 'block';
 		}
 
 		return array(
 			'post_id' => $post_id,
 			'source'  => $source,  // 'meta' | 'block' | 'mixed' | 'none'
-			'layouts' => $layouts, // array of canonical panels_data documents
+			// Each entry: { storage:'meta'|'block', block_index:int|null, panels_data:{...} }.
+			'layouts' => $layouts,
 		);
+	}
+
+	/**
+	 * The registered Layout Block name (with a stable fallback).
+	 *
+	 * Single source of truth for the block-name resolution shared by the read
+	 * labeller and the Abilities API targeted write.
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 *
+	 * @return string
+	 */
+	public function layout_block_name() {
+		return class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' )
+			? SiteOrigin_Panels_Compat_Layout_Block::BLOCK_NAME
+			: 'siteorigin-panels/layout-block';
+	}
+
+	/**
+	 * The canonical ordered list of qualifying Layout Block layouts for a post.
+	 *
+	 * THE single walk that defines `block_index`. A block "qualifies" when it is a
+	 * Layout Block with non-empty `attrs.panelsData` AND, after the public
+	 * `siteorigin_panels_data` filter runs, still yields a non-empty layout — the
+	 * exact same emptiness test the read path applies. `block_index` is the 0-based
+	 * ordinal among these qualifying blocks in document order.
+	 *
+	 * Both `read_layouts()` (labelling) and
+	 * `SiteOrigin_Panels_Abilities::write_block_layout()` (targeting) consume THIS
+	 * method, so the count, the emitted index, and the write target are always
+	 * derived identically — a filter that empties a structurally-qualifying block
+	 * skips it in BOTH, and no index ever resolves to a different block.
+	 *
+	 * @since {NEXT_VERSION}
+	 * @api
+	 *
+	 * @param WP_Post $post The post to inspect.
+	 *
+	 * @return array<int,array{block_index:int,block_key:int|string,panels_data:array}>
+	 *         Ordered list; `block_key` is the original parse_blocks() array key so a
+	 *         writer can mutate the exact block this index refers to.
+	 */
+	public function get_qualifying_block_layouts( $post ) {
+		$block_name = $this->layout_block_name();
+		$post_id    = isset( $post->ID ) ? (int) $post->ID : 0;
+		$qualifying = array();
+		$blocks     = parse_blocks( $post->post_content );
+		$index      = 0;
+
+		if ( empty( $blocks ) ) {
+			return $qualifying;
+		}
+
+		foreach ( $blocks as $key => $block ) {
+			if (
+				empty( $block['blockName'] ) ||
+				$block['blockName'] !== $block_name ||
+				empty( $block['attrs'] ) ||
+				empty( $block['attrs']['panelsData'] )
+			) {
+				continue;
+			}
+
+			$block_layout = apply_filters( 'siteorigin_panels_data', $block['attrs']['panelsData'], $post_id );
+			if ( empty( $block_layout ) ) {
+				// Post-filter empty — the read path skips this and assigns it no
+				// index, so the write path must skip it identically.
+				continue;
+			}
+
+			$qualifying[] = array(
+				'block_index' => $index,
+				'block_key'   => $key,
+				'panels_data' => $block_layout,
+			);
+			$index++;
+		}
+
+		return $qualifying;
 	}
 }

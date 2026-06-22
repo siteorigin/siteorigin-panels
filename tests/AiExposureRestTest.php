@@ -77,9 +77,12 @@ class AiExposure_RequestStub implements ArrayAccess {
  * Unit tests for SiteOrigin_Panels_AI_Exposure.
  *
  * Asserts the committed, read-only REST response contract:
- *   { post_id, source: "meta"|"block"|"mixed"|"none", layouts: array<panels_data> }
- * and the permission/404 behaviour. These mirror inc/ai-exposure.php exactly;
- * the production code is frozen and must not change to fit a test.
+ *   { post_id, source: "meta"|"block"|"mixed"|"none",
+ *     layouts: [ { storage:"meta"|"block", block_index:int|null, panels_data:{...} } ] }
+ * (Phase 2c revised each `layouts` entry from a bare panels_data array to a
+ * labelled object carrying storage + block_index.) Also asserts permission/404
+ * behaviour. These mirror inc/ai-exposure.php exactly; the production code is
+ * frozen and must not change to fit a test.
  */
 class AiExposureRestTest extends SiteOriginTests {
 	private function request( int $id ): AiExposure_RequestStub {
@@ -141,7 +144,7 @@ class AiExposureRestTest extends SiteOriginTests {
 	public function test_source_meta() {
 		$meta = array( 'grids' => array( array() ), 'widgets' => array() );
 
-		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => '' ) );
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 5, 'post_content' => '' ) );
 		Functions\when( 'get_post_meta' )->justReturn( $meta );
 		Functions\when( 'parse_blocks' )->justReturn( array() );
 		$this->stub_panels_data_filter();
@@ -153,14 +156,17 @@ class AiExposureRestTest extends SiteOriginTests {
 		$this->assertSame( 5, $result['post_id'] );
 		$this->assertSame( 'meta', $result['source'] );
 		$this->assertCount( 1, $result['layouts'] );
-		$this->assertSame( $meta, $result['layouts'][0] );
+		$this->assertSame(
+			array( 'storage' => 'meta', 'block_index' => null, 'panels_data' => $meta ),
+			$result['layouts'][0]
+		);
 	}
 
 	public function test_source_block() {
 		$block_layout = array( 'grids' => array( array() ), 'widgets' => array( 'block-widget' ) );
 
 		Functions\when( 'get_post' )->justReturn(
-			(object) array( 'post_content' => '<!-- wp:siteorigin-panels/layout-block --><!-- /wp:siteorigin-panels/layout-block -->' )
+			(object) array( 'ID' => 7, 'post_content' => '<!-- wp:siteorigin-panels/layout-block --><!-- /wp:siteorigin-panels/layout-block -->' )
 		);
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 		Functions\when( 'parse_blocks' )->justReturn(
@@ -180,7 +186,10 @@ class AiExposureRestTest extends SiteOriginTests {
 		$this->assertSame( 7, $result['post_id'] );
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertCount( 1, $result['layouts'] );
-		$this->assertSame( $block_layout, $result['layouts'][0] );
+		$this->assertSame(
+			array( 'storage' => 'block', 'block_index' => 0, 'panels_data' => $block_layout ),
+			$result['layouts'][0]
+		);
 	}
 
 	public function test_source_mixed() {
@@ -188,7 +197,7 @@ class AiExposureRestTest extends SiteOriginTests {
 		$block_layout = array( 'grids' => array( array() ), 'widgets' => array( 'block-widget' ) );
 
 		Functions\when( 'get_post' )->justReturn(
-			(object) array( 'post_content' => '<!-- wp:siteorigin-panels/layout-block /-->' )
+			(object) array( 'ID' => 9, 'post_content' => '<!-- wp:siteorigin-panels/layout-block /-->' )
 		);
 		Functions\when( 'get_post_meta' )->justReturn( $meta );
 		Functions\when( 'parse_blocks' )->justReturn(
@@ -207,13 +216,19 @@ class AiExposureRestTest extends SiteOriginTests {
 
 		$this->assertSame( 'mixed', $result['source'] );
 		$this->assertCount( 2, $result['layouts'] );
-		// Code order: meta first, then block.
-		$this->assertSame( $meta, $result['layouts'][0] );
-		$this->assertSame( $block_layout, $result['layouts'][1] );
+		// Code order: meta first (block_index null), then block (block_index 0).
+		$this->assertSame(
+			array( 'storage' => 'meta', 'block_index' => null, 'panels_data' => $meta ),
+			$result['layouts'][0]
+		);
+		$this->assertSame(
+			array( 'storage' => 'block', 'block_index' => 0, 'panels_data' => $block_layout ),
+			$result['layouts'][1]
+		);
 	}
 
 	public function test_source_none() {
-		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => '' ) );
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 11, 'post_content' => '' ) );
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 		Functions\when( 'parse_blocks' )->justReturn( array() );
 		$this->stub_panels_data_filter();
@@ -232,7 +247,7 @@ class AiExposureRestTest extends SiteOriginTests {
 		$layout_b = array( 'grids' => array(), 'widgets' => array( 'b' ) );
 
 		Functions\when( 'get_post' )->justReturn(
-			(object) array( 'post_content' => 'two blocks' )
+			(object) array( 'ID' => 13, 'post_content' => 'two blocks' )
 		);
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 		Functions\when( 'parse_blocks' )->justReturn(
@@ -259,7 +274,15 @@ class AiExposureRestTest extends SiteOriginTests {
 
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertCount( 2, $result['layouts'] );
-		$this->assertSame( $layout_a, $result['layouts'][0] );
-		$this->assertSame( $layout_b, $result['layouts'][1] );
+		// The non-layout core/paragraph between them must NOT advance block_index:
+		// indices are the 0-based ordinal among QUALIFYING layout blocks only.
+		$this->assertSame(
+			array( 'storage' => 'block', 'block_index' => 0, 'panels_data' => $layout_a ),
+			$result['layouts'][0]
+		);
+		$this->assertSame(
+			array( 'storage' => 'block', 'block_index' => 1, 'panels_data' => $layout_b ),
+			$result['layouts'][1]
+		);
 	}
 }
