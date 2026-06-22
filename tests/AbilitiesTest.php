@@ -108,6 +108,34 @@ if ( ! function_exists( 'wp_register_ability_category' ) ) {
 	}
 }
 
+/*
+ * Real wp_slash()/wp_unslash() so a stubbed wp_update_post can mirror core's
+ * unslashing (wp_insert_post runs wp_unslash on its input). This is what lets the
+ * slashing regression test observe the bug the production wp_slash() guards
+ * against: pre-fix the content reaches wp_update_post unslashed and the stub's
+ * wp_unslash() then strips the JSON-escape backslashes; post-fix it is slashed
+ * and survives the round-trip. Mirrors core's add_magic_quotes/stripslashes_deep.
+ */
+if ( ! function_exists( 'wp_slash' ) ) {
+	function wp_slash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_slash', $value );
+		}
+
+		return is_string( $value ) ? addcslashes( $value, "'\"\\" ) : $value;
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_unslash', $value );
+		}
+
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
 // The abilities block walk delegates to SiteOrigin_Panels_AI_Exposure for the
 // single shared qualifying-block walk; load it so this test is self-sufficient
 // regardless of test execution order.
@@ -520,6 +548,108 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertFalse( $result['updated'], 'A failed save must not report updated:true.' );
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	// --- Regression: block write must slash for wp_update_post ----------------
+
+	/**
+	 * Locks the slashing contract for block writes. wp_update_post()/
+	 * wp_insert_post() run wp_unslash() on their input, and serialize_blocks()
+	 * JSON-encodes attrs so a '<' becomes the escape < (backslash + u003c). If
+	 * the content reaches wp_update_post() UNslashed, core's unslashing strips that
+	 * backslash and the stored markup corrupts to the literal "u003c...".
+	 *
+	 * The wp_update_post stub here MIRRORS core by wp_unslash()-ing its captured
+	 * input; we then assert the persisted block content still round-trips to the
+	 * ORIGINAL markup. Pre-fix (no wp_slash in write_block_layout) the backslash is
+	 * stripped and this FAILS; post-fix (content slashed first) it PASSES.
+	 */
+	public function test_block_write_slashes_so_markup_survives_unslashing() {
+		$original_html = '<h2>Hello</h2>';
+
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 51, 'post_content' => 'one block' ) );
+
+		// One existing qualifying block to target.
+		Functions\when( 'parse_blocks' )->alias(
+			function ( $content ) {
+				// Decode our own serialized form on the round-trip read; otherwise
+				// return the single empty qualifying block being written into.
+				if ( is_string( $content ) && strpos( $content, '__SER__:' ) === 0 ) {
+					return json_decode( substr( $content, 8 ), true );
+				}
+
+				return array(
+					array(
+						'blockName' => 'siteorigin-panels/layout-block',
+						'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'placeholder' ) ) ),
+					),
+				);
+			}
+		);
+
+		// Faithful serialize: JSON-encode with core's tag escaping so '<' becomes
+		// the backslash escape < — exactly the bytes wp_unslash would attack.
+		Functions\when( 'serialize_blocks' )->alias(
+			fn( $blocks ) => '__SER__:' . json_encode( $blocks, JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP )
+		);
+
+		// Admin spy normally replaces widgets with a fixed 'Cleaned' set (no markup),
+		// which would hide the '<' under test. For THIS test, make the sanitizer
+		// preserve the incoming markup so the serialized content actually carries <.
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return $widgets; // preserve markup verbatim for the slashing assertion
+			}
+		};
+
+		// Mirror core: wp_update_post unslashes its input before persisting.
+		$persisted_content = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $postarr ) use ( &$persisted_content ) {
+				$unslashed         = wp_unslash( $postarr );
+				$persisted_content = $unslashed['post_content'];
+
+				return $unslashed['ID'];
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 51,
+				'block_index' => 0,
+				'panels_data' => array(
+					'widgets' => array(
+						array( 'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ), 'content' => $original_html ),
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+
+		// After core-style unslashing, the JSON escape must still carry its
+		// backslash (\\u003c / \\u003C), never the corrupted bare u003c. Case-
+		// insensitive: PHP's JSON tag escaping may emit either case.
+		$this->assertMatchesRegularExpression(
+			'/\\\\u003c/i',
+			$persisted_content,
+			'Persisted content must keep the JSON-escape backslash (production must wp_slash before wp_update_post).'
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/"u003c/i',
+			$persisted_content,
+			'Bare "u003c" means the backslash was stripped by core unslashing — content corrupted.'
+		);
+
+		// And the block must round-trip back to the ORIGINAL markup.
+		$persisted_blocks = parse_blocks( $persisted_content );
+		$this->assertSame(
+			$original_html,
+			$persisted_blocks[0]['attrs']['panelsData']['widgets'][0]['content'],
+			'Block widget markup must survive the write/unslash round-trip intact.'
+		);
 	}
 
 	// --- layout-update: meta path persists sanitized data --------------------
