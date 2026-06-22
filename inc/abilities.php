@@ -484,10 +484,15 @@ class SiteOrigin_Panels_Abilities {
 		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
 
+		// wp_update_post()/wp_insert_post() run wp_unslash() on their input, so the
+		// content MUST be slashed first — otherwise the backslash in every JSON
+		// escape that serialize_blocks() produces (e.g. < for '<') is stripped,
+		// corrupting all markup in the stored block attributes. Core's own REST
+		// controller slashes for the same reason.
 		$result = wp_update_post(
 			array(
 				'ID'           => $post->ID,
-				'post_content' => serialize_blocks( $blocks ),
+				'post_content' => wp_slash( serialize_blocks( $blocks ) ),
 			),
 			true
 		);
