@@ -3,6 +3,11 @@
     <testsuites>
         <testsuite name="SiteOrigin Panels AI Exposure Tests">
             <directory>./tests</directory>
+            <!-- The copy-content parity suite needs the REAL SiteOrigin_Panels_Admin
+                 loaded first (it asserts the extracted copy_content_to_post()), which
+                 conflicts with AbilitiesTest's Admin shim. It runs separately via
+                 phpunit-copy-content.xml. -->
+            <exclude>./tests/copy-content</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
