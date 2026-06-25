@@ -1082,31 +1082,44 @@ class SiteOrigin_Panels_Admin {
 
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 
-			if ( ! empty( $info['raw'] ) || $force ) {
-				$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
+			// Always run the widget's own update() when its class resolves to a
+			// widget exposing one. The client-controlled $info['raw'] flag (and the
+			// $force argument) must NOT decide whether sanitization runs: an attacker
+			// who omits the raw flag would otherwise persist unsanitized markup,
+			// bypassing the widget's update() (e.g. WP_Widget_Custom_HTML's
+			// wp_kses_post() carve-out for users lacking unfiltered_html). See the
+			// stored-XSS fix for panels_data.
+			$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
 
-				if ( ! empty( $the_widget ) &&
-					 method_exists( $the_widget, 'update' ) ) {
-					if (
-						! empty( $old_widgets_by_id ) &&
-						! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) &&
-						! empty( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] )
-					) {
-						$old_widget = $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ];
-					} else {
-						$old_widget = $widget;
-					}
-
-					/** @var WP_Widget $the_widget */
-					$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
-					$instance = $the_widget->update( $widget, $old_widget );
-					$instance = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
-
-					$widget = $instance;
-
-					unset( $info['raw'] );
+			if ( ! empty( $the_widget ) &&
+				 method_exists( $the_widget, 'update' ) ) {
+				if (
+					! empty( $old_widgets_by_id ) &&
+					! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) &&
+					! empty( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] )
+				) {
+					$old_widget = $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ];
+				} else {
+					$old_widget = $widget;
 				}
+
+				/** @var WP_Widget $the_widget */
+				$instance = $the_widget->update( $widget, $old_widget );
+				$instance = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
+
+				$widget = $instance;
+			} elseif ( ! current_user_can( 'unfiltered_html' ) ) {
+				// Defense in depth: the widget class did not resolve to something with
+				// an update() method, so its own sanitizer cannot run. For users
+				// lacking unfiltered_html, recursively wp_kses_post() every string
+				// field so unsanitized markup can never be persisted, even for an
+				// unknown or missing widget class.
+				$widget = self::kses_deep( $widget );
 			}
+
+			// The raw flag is only ever a transient editor hint and must never be
+			// persisted, regardless of which branch above ran.
+			unset( $info['raw'] );
 
 			if ( $escape_classes ) {
 				// Escaping for namespaced widgets.
@@ -1117,6 +1130,32 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		return $widgets;
+	}
+
+	/**
+	 * Recursively run wp_kses_post() over every string leaf of a value.
+	 *
+	 * Used as a defense-in-depth fallback in process_raw_widgets() for widget
+	 * instances whose class cannot be resolved to a widget with an update()
+	 * method, ensuring unprivileged users can never persist unsanitized markup.
+	 *
+	 * @param mixed $value Scalar or (nested) array to sanitize.
+	 * @return mixed The sanitized value, preserving structure.
+	 */
+	private static function kses_deep( $value ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				$value[ $key ] = self::kses_deep( $item );
+			}
+
+			return $value;
+		}
+
+		if ( is_string( $value ) ) {
+			return wp_kses_post( $value );
+		}
+
+		return $value;
 	}
 
 	private function column_sizes_round( $size ) {
