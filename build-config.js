@@ -82,7 +82,9 @@ module.exports = {
             '**/*.php',                         // All the PHP files.
             '!tmp/**/*.php',                    // Ignore tmp/ and contents
             '!dist/**/*.php',                   // Ignore dist/ and contents
-            '!tests/**/*.php'                   // Ignore tests/ — no translatable strings, and modern PHP syntax breaks gulp-wp-pot's bundled php-parser.
+            '!tests/**/*.php',                  // Ignore tests/ — no translatable strings, and modern PHP syntax breaks gulp-wp-pot's bundled php-parser.
+            '!vendor/**/*.php',                 // Composer deps: modern PHP breaks gulp-wp-pot's php-parser.
+            '!node_modules/**/*.php'            // Never scan node deps for translatable strings.
         ],
     },
 };
