@@ -8,6 +8,24 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Widget stub whose update() sanitizes its content the way a real
+ * capability-gated widget (e.g. WP_Widget_Custom_HTML) would. Declared as a
+ * named class (rather than an anonymous class) so the file stays parseable by
+ * older PHP parsers in the build toolchain.
+ */
+class SavePostRawFlagSanitizingWidgetStub {
+	public function update( $new, $old ) {
+		$new['content'] = preg_replace(
+			'/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i',
+			'',
+			(string) $new['content']
+		);
+
+		return $new;
+	}
+}
+
+/**
  * Regression test locking the stored-XSS fix in
  * SiteOrigin_Panels_Admin::process_raw_widgets().
  *
@@ -21,6 +39,13 @@ use PHPUnit\Framework\TestCase;
  * base class / phpunit.xml / composer PSR-4 autoload referenced by the plan live
  * on the feature/ai-exposure-phase1-tests branch and are NOT present on this
  * branch. See the "Open question for next agent" note in docs/plans/current.md.
+ *
+ * Build-toolchain note: the i18n .pot extraction (gulp-wp-pot) is the real reason
+ * tests/ is now excluded from that scan in build-config.js — its bundled
+ * php-parser cannot parse modern PHP. To minimise that surface this file avoids
+ * arrow functions and anonymous classes. The `: void` return types on
+ * setUp()/tearDown() are intentionally kept because PHPUnit 12 requires them; the
+ * file is no longer scanned by the parser, so they are safe.
  */
 class SavePostRawFlagSanitizationTest extends TestCase {
 	use MockeryPHPUnitIntegration;
@@ -95,21 +120,10 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 	}
 
 	/**
-	 * A widget stub whose update() sanitizes its content the way a real
-	 * capability-gated widget (e.g. WP_Widget_Custom_HTML) would.
+	 * Return a fresh sanitizing widget stub instance.
 	 */
 	private function sanitizing_widget_stub() {
-		return new class() {
-			public function update( $new, $old ) {
-				$new['content'] = preg_replace(
-					'/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i',
-					'',
-					(string) $new['content']
-				);
-
-				return $new;
-			}
-		};
+		return new SavePostRawFlagSanitizingWidgetStub();
 	}
 
 	private const PAYLOAD = '<img src=x onerror=alert(1)>';
@@ -118,7 +132,10 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 	// --- Core defect: no `raw` key, $force = false, must still sanitize. -----
 
 	public function test_widget_without_raw_flag_is_still_updated() {
-		\SiteOrigin_Panels::$instance_resolver = fn() => $this->sanitizing_widget_stub();
+		$stub = $this->sanitizing_widget_stub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
 		Functions\when( 'current_user_can' )->justReturn( false );
 
 		$widgets = array(
@@ -135,7 +152,10 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 	}
 
 	public function test_raw_false_is_ignored_and_widget_still_updated() {
-		\SiteOrigin_Panels::$instance_resolver = fn() => $this->sanitizing_widget_stub();
+		$stub = $this->sanitizing_widget_stub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
 		Functions\when( 'current_user_can' )->justReturn( false );
 
 		$widgets = array(
@@ -154,7 +174,9 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 	// --- Fallback branch: unresolved class + no unfiltered_html. -------------
 
 	public function test_unresolved_class_is_kses_filtered_for_unprivileged_user() {
-		\SiteOrigin_Panels::$instance_resolver = fn() => null;
+		\SiteOrigin_Panels::$instance_resolver = function () {
+			return null;
+		};
 		Functions\when( 'current_user_can' )->justReturn( false );
 
 		$widgets = array(
@@ -171,7 +193,9 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 	}
 
 	public function test_unresolved_class_passes_through_for_privileged_user() {
-		\SiteOrigin_Panels::$instance_resolver = fn() => null;
+		\SiteOrigin_Panels::$instance_resolver = function () {
+			return null;
+		};
 		Functions\when( 'current_user_can' )->justReturn( true );
 
 		$widgets = array(
