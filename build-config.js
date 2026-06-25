@@ -49,6 +49,7 @@ module.exports = {
 	css: {
 		src: [
 			'css/**/*.css',
+			'!css/**/*.min.css',   // Don't re-minify already-built .min.css into .min.min.css
 		],
 	},
 	bust : {
