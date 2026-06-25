@@ -2,6 +2,7 @@ lang/*
 languages/*
 .DS_Store
 *.min.js
+*.min.css
 node_modules/
 dist/
 /tmp
