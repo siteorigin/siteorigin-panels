@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.34.4 – 25 June 2026 =
+* Lazy Load: Skipped lazy-load tagging on the style wrapper when an overlay is present to prevent duplicate images.
+* Visual Styles: Matched color picker controls to 28px for consistent sizing.
+* Restored post globals after admin and preview renders to prevent loop variables leaking into the page.
+* Always sanitize widget data on save to harden against stored cross-site scripting.
+
 = 2.34.3 – 22 May 2026 =
 * Style Fields: Restored input and select sizing in Page Builder style settings.
 

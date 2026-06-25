@@ -34,7 +34,8 @@ wp_enqueue_style(
 				) {
 					$data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $data['widgets'], false, false );
 				}
-				echo siteorigin_panels_render( 'l' . md5( serialize( $data ) ), true, $data );
+				$builder_id = 'l' . md5( serialize( $data ) );
+				echo SiteOrigin_Panels_Admin::render_and_restore_post_globals( $builder_id, true, $data );
 			}
 			?>
 		</div><!-- .entry-content -->
