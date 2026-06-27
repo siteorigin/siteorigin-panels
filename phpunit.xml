@@ -8,6 +8,11 @@
                  conflicts with AbilitiesTest's Admin shim. It runs separately via
                  phpunit-copy-content.xml. -->
             <exclude>./tests/copy-content</exclude>
+            <!-- The save-post sanitization suite (develop's stored-XSS fix tests) also
+                 needs the REAL SiteOrigin_Panels_Admin and defines its own SiteOrigin_Panels
+                 stub, incompatible in-process with both the AbilitiesTest shim and the
+                 copy-content stub. It runs separately via phpunit-save-post.xml. -->
+            <exclude>./tests/save-post</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

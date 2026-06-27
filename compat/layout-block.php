@@ -151,7 +151,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			SiteOrigin_Panels_Post_Content_Filters::add_filters( true );
 		}
 
-		$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, ! $is_editing, $panels_data );
+		if ( $is_editing || ! $this->return_layout ) {
+			$rendered_layout = SiteOrigin_Panels_Admin::render_and_restore_post_globals( $builder_id, ! $is_editing, $panels_data );
+		} else {
+			$rendered_layout = SiteOrigin_Panels::renderer()->render( $builder_id, true, $panels_data );
+		}
 
 		if ( $is_editing ) {
 			SiteOrigin_Panels_Post_Content_Filters::remove_filters( true );

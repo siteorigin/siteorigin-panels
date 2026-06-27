@@ -11,7 +11,8 @@
   "scripts": {
     "test": [
       "phpunit",
-      "phpunit -c phpunit-copy-content.xml"
+      "phpunit -c phpunit-copy-content.xml",
+      "phpunit -c phpunit-save-post.xml"
     ]
   }
 }

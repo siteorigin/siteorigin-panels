@@ -9,7 +9,11 @@ function siteorigin_apply_lazy_load_attributes( $attributes, $style ) {
 		! empty( $style['background_display'] ) &&
 		! empty( $style['background_image_attachment'] ) &&
 		$style['background_display'] != 'parallax' &&
-		$style['background_display'] != 'parallax-original'
+		$style['background_display'] != 'parallax-original' &&
+		// When there's an overlay, the image is painted (and lazy loaded) on the
+		// overlay div only. Tagging the style div here would let the lazy loader
+		// re-add the image the plugin deliberately strips, defeating the opacity.
+		! SiteOrigin_Panels_Styles::has_overlay( array( 'style' => $style ) )
 	) {
 		$url = SiteOrigin_Panels_Styles::get_attachment_image_src( $style['background_image_attachment'], 'full' );
 
