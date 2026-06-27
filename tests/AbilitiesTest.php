@@ -38,6 +38,8 @@ if ( ! class_exists( 'WP_Error' ) ) {
 class Abilities_AdminSpy {
 	public static $instance;
 	public $process_args = null;
+	public $copy_content_args = null;
+	public $save_guard_used = false;
 
 	public static function single() {
 		return self::$instance;
@@ -49,6 +51,21 @@ class Abilities_AdminSpy {
 		// Simulate a cleaned widget set so tests can assert persisted data is the
 		// sanitizer output, not raw input.
 		return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+	}
+
+	// Mirrors SiteOrigin_Panels_Admin::with_save_guard(): just runs the callback,
+	// recording that the guard wrapper was used around the copy-content refresh.
+	public function with_save_guard( $callback ) {
+		$this->save_guard_used = true;
+
+		return $callback();
+	}
+
+	// Mirrors SiteOrigin_Panels_Admin::copy_content_to_post(): records the args so
+	// the meta-write tests can assert the copy-content refresh was invoked with the
+	// final sanitized layout.
+	public function copy_content_to_post( $post, $post_id, $panels_data ) {
+		$this->copy_content_args = array( $post, $post_id, $panels_data );
 	}
 }
 
@@ -719,6 +736,58 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// Mirrors admin.php: old widgets arg is false when there is no prior layout.
 		$this->assertFalse( Abilities_AdminSpy::$instance->process_args[1] );
+	}
+
+	// --- copy-content parity on the meta write (guarded) ----------------------
+
+	public function test_meta_write_refreshes_copy_content_guarded_with_final_layout() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 14, 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'old' ) ) );
+		Functions\when( 'update_post_meta' )->justReturn( true );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 14,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertSame( 'meta', $result['source'] );
+
+		// The copy-content refresh ran, wrapped in the save guard.
+		$this->assertTrue( Abilities_AdminSpy::$instance->save_guard_used, 'copy-content refresh must run inside with_save_guard().' );
+		$copy_args = Abilities_AdminSpy::$instance->copy_content_args;
+		$this->assertNotNull( $copy_args, 'copy_content_to_post() must be called on the meta path.' );
+		$this->assertSame( 14, $copy_args[1], 'copy_content_to_post() receives the post id.' );
+
+		// It must receive the FINAL sanitized layout (the sanitizer output), not raw input.
+		$this->assertSame(
+			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			$copy_args[2]['widgets'],
+			'copy_content_to_post() must render the sanitized panels_data, never raw input.'
+		);
+	}
+
+	public function test_block_write_does_not_refresh_copy_content() {
+		// Block-stored write must NOT invoke copy-content (block layouts render dynamically).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 15, 'post_content' => 'block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
+		Functions\when( 'serialize_blocks' )->alias( fn( $b ) => $b );
+		Functions\when( 'wp_update_post' )->justReturn( 15 );
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 15,
+				'panels_data' => array( 'widgets' => array( 'w' ) ),
+			)
+		);
+
+		$this->assertNull(
+			Abilities_AdminSpy::$instance->copy_content_args,
+			'Block writes must not trigger the copy-content refresh.'
+		);
 	}
 
 	// --- Registration shape (locks the public surface) -----------------------

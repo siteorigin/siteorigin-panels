@@ -7,5 +7,11 @@
   "require-dev": {
     "brain/monkey": "~2.6.2",
     "phpunit/phpunit": "^12.2"
+  },
+  "scripts": {
+    "test": [
+      "phpunit",
+      "phpunit -c phpunit-copy-content.xml"
+    ]
   }
 }

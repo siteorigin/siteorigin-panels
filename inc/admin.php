@@ -294,57 +294,7 @@ class SiteOrigin_Panels_Admin {
 			// Use `update_metadata` instead of `update_post_meta` to prevent saving to parent post when it's a revision, e.g. preview.
 			update_metadata( 'post', $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
-			if ( siteorigin_panels_setting( 'copy-content' ) ) {
-				// Store a version of the HTML in post_content
-				$post_parent_id = wp_is_post_revision( $post_id );
-				$layout_id = ( ! empty( $post_parent_id ) ) ? $post_parent_id : $post_id;
-
-				SiteOrigin_Panels_Post_Content_Filters::add_filters();
-				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-				$post_content = SiteOrigin_Panels::renderer()->render( $layout_id, false, $panels_data );
-				$post_css = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $panels_data );
-				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
-
-				// Update the post_content.
-				$post->post_content = $post_content;
-
-				if ( siteorigin_panels_setting( 'copy-styles' ) ) {
-					$post->post_content .= "\n\n";
-					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
-					$post->post_content .= '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
-					$post->post_content .= $post_css;
-					$post->post_content .= '</style>';
-				}
-				$copy_content_update_method = apply_filters(
-					'siteorigin_panels_copy_content_update_method',
-					'wp_update_post',
-					$post,
-					$post_id,
-					$panels_data
-				);
-
-				if ( $copy_content_update_method === 'direct_db' ) {
-					$this->copy_content_update_post_direct_db( $post );
-				} else {
-					// Prevent slug modification during content-only update.
-					// wp_update_post triggers the full wp_insert_post pipeline,
-					// where filters from other plugins (e.g. WPML) can corrupt
-					// the post slug. Lock it to the current value.
-					$slug_lock = static function( $override, $slug, $id ) use ( $post ) {
-						return $id === $post->ID ? $slug : $override;
-					};
-					add_filter( 'pre_wp_unique_post_slug', $slug_lock, 1, 3 );
-
-					$copy_content_update_args = array(
-						'ID'           => $post->ID,
-						'post_content' => $post->post_content,
-					);
-					wp_update_post( $copy_content_update_args, false, true );
-
-					remove_filter( 'pre_wp_unique_post_slug', $slug_lock, 1 );
-				}
-			}
+			$this->copy_content_to_post( $post, $post_id, $panels_data );
 		} else {
 			// There are no widgets or rows, so delete the panels data.
 			delete_post_meta( $post_id, 'panels_data' );
@@ -360,6 +310,106 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$this->in_save_post = false;
+	}
+
+	/**
+	 * Render the canonical layout into the post_content mirror and persist it.
+	 *
+	 * Extracted verbatim from save_post() so the same logic can refresh the
+	 * `copy-content` HTML mirror from any write path (e.g. the layout-update
+	 * ability), not just an editor save. Internally gated on the `copy-content`
+	 * setting, so it is a no-op when copy-content is off.
+	 *
+	 * The HTML is rendered from the FINAL canonical $panels_data (already
+	 * sanitized by the caller); raw input must never be rendered here. Preserves
+	 * the revision-parent layout id, the copy-styles CSS append, the
+	 * `siteorigin_panels_copy_content_update_method` filter, and the slug-lock.
+	 *
+	 * Callers that may re-enter save_post() via wp_update_post() should wrap this
+	 * in with_save_guard() so $in_save_post is set during the persist.
+	 *
+	 * @param WP_Post $post        Mutable post snapshot (get_post()); its post_content is set here.
+	 * @param int     $post_id     Post ID (drives revision detection and filter args).
+	 * @param array   $panels_data Final canonical, already-sanitized layout to render.
+	 *
+	 * @return void
+	 */
+	public function copy_content_to_post( $post, $post_id, $panels_data ) {
+		if ( siteorigin_panels_setting( 'copy-content' ) ) {
+			// Store a version of the HTML in post_content
+			$post_parent_id = wp_is_post_revision( $post_id );
+			$layout_id = ( ! empty( $post_parent_id ) ) ? $post_parent_id : $post_id;
+
+			SiteOrigin_Panels_Post_Content_Filters::add_filters();
+			$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+			$post_content = SiteOrigin_Panels::renderer()->render( $layout_id, false, $panels_data );
+			$post_css = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $panels_data );
+			SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+			unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+
+			// Update the post_content.
+			$post->post_content = $post_content;
+
+			if ( siteorigin_panels_setting( 'copy-styles' ) ) {
+				$post->post_content .= "\n\n";
+				$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
+				$post->post_content .= '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
+				$post->post_content .= $post_css;
+				$post->post_content .= '</style>';
+			}
+			$copy_content_update_method = apply_filters(
+				'siteorigin_panels_copy_content_update_method',
+				'wp_update_post',
+				$post,
+				$post_id,
+				$panels_data
+			);
+
+			if ( $copy_content_update_method === 'direct_db' ) {
+				$this->copy_content_update_post_direct_db( $post );
+			} else {
+				// Prevent slug modification during content-only update.
+				// wp_update_post triggers the full wp_insert_post pipeline,
+				// where filters from other plugins (e.g. WPML) can corrupt
+				// the post slug. Lock it to the current value.
+				$slug_lock = static function( $override, $slug, $id ) use ( $post ) {
+					return $id === $post->ID ? $slug : $override;
+				};
+				add_filter( 'pre_wp_unique_post_slug', $slug_lock, 1, 3 );
+
+				$copy_content_update_args = array(
+					'ID'           => $post->ID,
+					'post_content' => $post->post_content,
+				);
+				wp_update_post( $copy_content_update_args, false, true );
+
+				remove_filter( 'pre_wp_unique_post_slug', $slug_lock, 1 );
+			}
+		}
+	}
+
+	/**
+	 * Run a callback with the save_post re-entrancy guard ($in_save_post) set.
+	 *
+	 * copy_content_to_post() may call wp_update_post(), which re-fires save_post().
+	 * Wrapping the call in this guard makes save_post() early-return during the
+	 * nested update, exactly as it does for the editor's own copy-content write.
+	 * The PRIOR guard value is preserved and restored (not forced to false), so
+	 * nesting inside an existing save is safe.
+	 *
+	 * @param callable $callback Work to run while $in_save_post is true.
+	 *
+	 * @return mixed The callback's return value.
+	 */
+	public function with_save_guard( $callback ) {
+		$previous = $this->in_save_post;
+		$this->in_save_post = true;
+
+		try {
+			return $callback();
+		} finally {
+			$this->in_save_post = $previous;
+		}
 	}
 
 	/**

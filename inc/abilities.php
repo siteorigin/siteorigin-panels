@@ -304,6 +304,23 @@ class SiteOrigin_Panels_Abilities {
 
 		update_post_meta( $post_id, 'panels_data', $panels_data );
 
+		// Refresh the copy-content post_content mirror through the SAME code a human
+		// editor save uses, so on copy-content sites this programmatic write is not
+		// stale until the next save. No-op when the copy-content setting is off.
+		// Guarded: copy_content_to_post() may call wp_update_post(), which re-fires
+		// save_post(); with_save_guard() sets/restores $in_save_post so that nested
+		// save early-returns exactly as it does for the editor's own copy write.
+		// NOT called for block writes (write_block_layout) — block layouts render
+		// dynamically and have no stale post_content mirror.
+		$post = get_post( $post_id );
+		if ( ! empty( $post ) ) {
+			$admin->with_save_guard(
+				function () use ( $admin, $post, $post_id, $panels_data ) {
+					$admin->copy_content_to_post( $post, $post_id, $panels_data );
+				}
+			);
+		}
+
 		return array(
 			'post_id' => $post_id,
 			'updated' => true,
