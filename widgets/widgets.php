@@ -1088,7 +1088,9 @@ class SiteOrigin_Panels_Widgets_EmbeddedVideo extends WP_Widget {
 
 	public function update( $new, $old ) {
 
-		if ( ! empty( $new['video'] ) ) {
+		// Only rewrite the video when it actually changed, so an untouched
+		// widget's stored value stays byte-identical across saves.
+		if ( ! empty( $new['video'] ) && ( empty( $old['video'] ) || $new['video'] !== $old['video'] ) ) {
 			$new['video'] = str_replace( 'https://', 'http://', $new['video'] );
 			$new['video'] = esc_url( $new['video'] );
 		}
