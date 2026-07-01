@@ -121,6 +121,9 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.34.5 – 01 July 2026 =
+* Embedded Video: Preserved the stored video value on save when unchanged, so untouched widgets are no longer rewritten.
+
 = 2.34.4 – 25 June 2026 =
 * Lazy Load: Skipped lazy-load tagging on the style wrapper when an overlay is present to prevent duplicate images.
 * Visual Styles: Matched color picker controls to 28px for consistent sizing.
