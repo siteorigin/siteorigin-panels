@@ -67,6 +67,7 @@ module.exports = {
             'inc/installer/js/*js',                          // Include Installer JS.
             '!widgets/**/styles/*.css',                      // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',               // Ignore node_modules/ and contents
+            '!{docs,docs/**}',                               // Ignore docs/ (internal plans/research, never shipped)
             '!{tmp,tmp/**}',                                 // Ignore dist/ and contents
             '!{vendor,vendor/**}',                           // Ignore composer files. We're not using any in release.
             '!siteorigin-panels.php',                        // Not the base plugin file. It is copied by the 'version' task.
