@@ -132,6 +132,23 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 		$panels_data = $attributes['panelsData'];
 		$panels_data = $this->sanitize_panels_data( $panels_data );
+		if ( ! $this->return_layout ) {
+			// Save-time validation: current_user_can() runs in the real
+			// save-time request context (the author's session), which is the
+			// only place capability-gated sanitization is meaningful.
+			if ( ! current_user_can( 'unfiltered_html' ) ) {
+				// Floor: the signature must not depend on any individual
+				// field/widget sanitizer being "healthy" this request (some
+				// SiteOrigin Widgets Bundle field sanitizers can silently pass
+				// through unvalidated when their options registry isn't
+				// hydrated on a given request — see so-widgets-bundle PR
+				// #2316). wp_kses_post() needs no hydrated registry and is
+				// idempotent, so it's a safe universal floor independent of
+				// that failure mode.
+				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+			}
+			$panels_data['sanitize_signature'] = $this->sign_panels_data( $panels_data );
+		}
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
 
 		// Support for custom CSS classes
