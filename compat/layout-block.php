@@ -131,11 +131,26 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			'</div>';
 		}
 		$panels_data = $attributes['panelsData'];
-		$panels_data = $this->sanitize_panels_data( $panels_data );
-		if ( ! $this->return_layout ) {
-			// Save-time validation: current_user_can() runs in the real
-			// save-time request context (the author's session), which is the
-			// only place capability-gated sanitization is meaningful.
+		if ( $this->return_layout ) {
+			// Normal render (front-end or editor preview): trust only data
+			// carrying a valid save-time signature. Skips BOTH
+			// process_raw_widgets()'s update() calls AND sanitize_all() — never
+			// re-execute sanitizers against their own stored output; this
+			// codebase has repeatedly found that unsafe (see so-widgets-bundle
+			// PR #2316: posts field wiped to array(), multiple-media PHP 8
+			// TypeError, select/icon/font fields reset valid values to default —
+			// all from re-running sanitizers against already-sanitized stored
+			// data). The trusted path is safe specifically BECAUSE it never
+			// re-executes anything, not because re-running would be a no-op.
+			$panels_data = $this->prepare_render_panels_data( $panels_data );
+		} else {
+			// Save-time validation (sanitize_block()): strict, capability-gated,
+			// sanitize then sign.
+			$panels_data = $this->sanitize_panels_data( $panels_data );
+
+			// current_user_can() runs in the real save-time request context
+			// (the author's session), which is the only place capability-gated
+			// sanitization is meaningful.
 			if ( ! current_user_can( 'unfiltered_html' ) ) {
 				// Floor: the signature must not depend on any individual
 				// field/widget sanitizer being "healthy" this request (some
@@ -212,6 +227,34 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
 		return $panels_data;
+	}
+
+	/**
+	 * Prepare panels_data for rendering, trusting only validly-signed data.
+	 *
+	 * @param array $panels_data Panels data from the stored block attribute.
+	 * @return array
+	 */
+	private function prepare_render_panels_data( $panels_data ) {
+		if ( $this->verify_panels_data( $panels_data ) ) {
+			// Verified: this exact array is the persisted output of a
+			// save-time sanitize run. Structural processing only (class
+			// resolution, panels_info assembly, raw-flag strip) — do NOT
+			// call update() or sanitize_all() again. process_raw_widgets()'s
+			// $trusted param skips the update()/kses_deep sanitize branches
+			// while keeping class resolution, escape_classes, and raw-flag
+			// unset intact.
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
+				->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
+			return $panels_data; // sanitize_all() deliberately NOT called here
+		}
+
+		// Unsigned, tampered, or pre-existing content with no signature yet:
+		// exactly today's strict path. Never sign here — this call can run
+		// with an admin VIEWER's capabilities over content an unprivileged
+		// AUTHOR supplied, and signing in this branch would launder attacker
+		// content as trusted.
+		return $this->sanitize_panels_data( $panels_data );
 	}
 
 	/**
