@@ -337,7 +337,10 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				continue;
 			}
 
-			$panels_data = $this->sanitize_panels_data( $panels_data );
+			// Use the same trust/strict classification as render_layout_block()'s
+			// render branch so the CSS generated here matches the HTML rendered
+			// for the same panels_data on the same request.
+			$panels_data = $this->prepare_render_panels_data( $panels_data );
 			$builder_id = isset( $block['attrs']['builder_id'] ) ? $block['attrs']['builder_id'] : 'gb' . get_the_ID() . '-' . md5( serialize( $panels_data ) ) . '-';
 
 			SiteOrigin_Panels::renderer()->render(
