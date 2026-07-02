@@ -188,10 +188,49 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
+		// Strip any inbound signature so a client-forged 'sanitize_signature'
+		// key can never survive into what gets processed or later re-signed.
+		unset( $panels_data['sanitize_signature'] );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
 		return $panels_data;
+	}
+
+	/**
+	 * Compute the HMAC signature certifying that $panels_data is the exact
+	 * output of a save-time capability-gated sanitize run.
+	 *
+	 * @param array $panels_data Sanitized panels data (any existing signature
+	 *                           key is ignored).
+	 * @return string HMAC-SHA256 hex digest.
+	 */
+	private function sign_panels_data( $panels_data ) {
+		unset( $panels_data['sanitize_signature'] );
+		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
+		// security-tightening changes to sanitization semantics, NEVER for
+		// idempotency/bugfix changes. A bump invalidates every existing
+		// signature, falling all previously-signed content back to strict
+		// re-sanitization until each post is individually re-saved by its real
+		// author (no safe bulk/cron re-signing exists, because capability-gated
+		// sanitization is only meaningful under the real author's session).
+		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
+		return hash_hmac( 'sha256', $version . '|' . wp_json_encode( $panels_data ), wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * Verify that $panels_data carries a valid save-time signature.
+	 *
+	 * Fails closed: any missing, malformed, or non-matching signature returns
+	 * false, sending the caller down the strict sanitize path.
+	 *
+	 * @param array $panels_data Panels data possibly carrying 'sanitize_signature'.
+	 * @return bool
+	 */
+	private function verify_panels_data( $panels_data ) {
+		return ! empty( $panels_data['sanitize_signature'] )
+			&& is_string( $panels_data['sanitize_signature'] )
+			&& hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] );
 	}
 
 	public function override_container( $container ) {
