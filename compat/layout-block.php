@@ -131,7 +131,39 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			'</div>';
 		}
 		$panels_data = $attributes['panelsData'];
-		$panels_data = $this->sanitize_panels_data( $panels_data );
+		if ( $this->return_layout ) {
+			// Normal render (front-end or editor preview): trust only data
+			// carrying a valid save-time signature. Skips BOTH
+			// process_raw_widgets()'s update() calls AND sanitize_all() — never
+			// re-execute sanitizers against their own stored output; this
+			// codebase has repeatedly found that unsafe (see so-widgets-bundle
+			// PR #2316: posts field wiped to array(), multiple-media PHP 8
+			// TypeError, select/icon/font fields reset valid values to default —
+			// all from re-running sanitizers against already-sanitized stored
+			// data). The trusted path is safe specifically BECAUSE it never
+			// re-executes anything, not because re-running would be a no-op.
+			$panels_data = $this->prepare_render_panels_data( $panels_data );
+		} else {
+			// Save-time validation (sanitize_block()): strict, capability-gated,
+			// sanitize then sign.
+			$panels_data = $this->sanitize_panels_data( $panels_data );
+
+			// current_user_can() runs in the real save-time request context
+			// (the author's session), which is the only place capability-gated
+			// sanitization is meaningful.
+			if ( ! current_user_can( 'unfiltered_html' ) ) {
+				// Floor: the signature must not depend on any individual
+				// field/widget sanitizer being "healthy" this request (some
+				// SiteOrigin Widgets Bundle field sanitizers can silently pass
+				// through unvalidated when their options registry isn't
+				// hydrated on a given request — see so-widgets-bundle PR
+				// #2316). wp_kses_post() needs no hydrated registry and is
+				// idempotent, so it's a safe universal floor independent of
+				// that failure mode.
+				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+			}
+			$panels_data['sanitize_signature'] = $this->sign_panels_data( $panels_data );
+		}
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
 
 		// Support for custom CSS classes
@@ -188,10 +220,77 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
+		// Strip any inbound signature so a client-forged 'sanitize_signature'
+		// key can never survive into what gets processed or later re-signed.
+		unset( $panels_data['sanitize_signature'] );
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
 		return $panels_data;
+	}
+
+	/**
+	 * Prepare panels_data for rendering, trusting only validly-signed data.
+	 *
+	 * @param array $panels_data Panels data from the stored block attribute.
+	 * @return array
+	 */
+	private function prepare_render_panels_data( $panels_data ) {
+		if ( $this->verify_panels_data( $panels_data ) ) {
+			// Verified: this exact array is the persisted output of a
+			// save-time sanitize run. Structural processing only (class
+			// resolution, panels_info assembly, raw-flag strip) — do NOT
+			// call update() or sanitize_all() again. process_raw_widgets()'s
+			// $trusted param skips the update()/kses_deep sanitize branches
+			// while keeping class resolution, escape_classes, and raw-flag
+			// unset intact.
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
+				->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
+			return $panels_data; // sanitize_all() deliberately NOT called here
+		}
+
+		// Unsigned, tampered, or pre-existing content with no signature yet:
+		// exactly today's strict path. Never sign here — this call can run
+		// with an admin VIEWER's capabilities over content an unprivileged
+		// AUTHOR supplied, and signing in this branch would launder attacker
+		// content as trusted.
+		return $this->sanitize_panels_data( $panels_data );
+	}
+
+	/**
+	 * Compute the HMAC signature certifying that $panels_data is the exact
+	 * output of a save-time capability-gated sanitize run.
+	 *
+	 * @param array $panels_data Sanitized panels data (any existing signature
+	 *                           key is ignored).
+	 * @return string HMAC-SHA256 hex digest.
+	 */
+	private function sign_panels_data( $panels_data ) {
+		unset( $panels_data['sanitize_signature'] );
+		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
+		// security-tightening changes to sanitization semantics, NEVER for
+		// idempotency/bugfix changes. A bump invalidates every existing
+		// signature, falling all previously-signed content back to strict
+		// re-sanitization until each post is individually re-saved by its real
+		// author (no safe bulk/cron re-signing exists, because capability-gated
+		// sanitization is only meaningful under the real author's session).
+		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
+		return hash_hmac( 'sha256', $version . '|' . wp_json_encode( $panels_data ), wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * Verify that $panels_data carries a valid save-time signature.
+	 *
+	 * Fails closed: any missing, malformed, or non-matching signature returns
+	 * false, sending the caller down the strict sanitize path.
+	 *
+	 * @param array $panels_data Panels data possibly carrying 'sanitize_signature'.
+	 * @return bool
+	 */
+	private function verify_panels_data( $panels_data ) {
+		return ! empty( $panels_data['sanitize_signature'] )
+			&& is_string( $panels_data['sanitize_signature'] )
+			&& hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] );
 	}
 
 	public function override_container( $container ) {
@@ -238,7 +337,10 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				continue;
 			}
 
-			$panels_data = $this->sanitize_panels_data( $panels_data );
+			// Use the same trust/strict classification as render_layout_block()'s
+			// render branch so the CSS generated here matches the HTML rendered
+			// for the same panels_data on the same request.
+			$panels_data = $this->prepare_render_panels_data( $panels_data );
 			$builder_id = isset( $block['attrs']['builder_id'] ) ? $block['attrs']['builder_id'] : 'gb' . get_the_ID() . '-' . md5( serialize( $panels_data ) ) . '-';
 
 			SiteOrigin_Panels::renderer()->render(
