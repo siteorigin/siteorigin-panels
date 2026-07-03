@@ -33,6 +33,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		foreach ( $post_types as $post_type ) {
 			add_action( 'rest_pre_insert_' . $post_type, array( $this, 'server_side_validation' ), 10, 2 );
 		}
+
+		// Reusable blocks (wp_block posts) are never controlled by the
+		// 'post-types' setting above — that setting toggles which post types
+		// SHOW the Layout Block in their editor, not which saved content
+		// requires validation. A Layout Block embedded in a reusable block can
+		// end up rendered inside ANY post type via block-reuse, so wp_block
+		// saves must always be validated regardless of site configuration.
+		// wp_block is a REST-enabled ('show_in_rest' => true) built-in post
+		// type using WP_REST_Blocks_Controller (extends WP_REST_Posts_Controller
+		// without overriding prepare_item_for_database()), so
+		// rest_pre_insert_wp_block fires through the identical mechanism as
+		// rest_pre_insert_post/rest_pre_insert_page.
+		add_action( 'rest_pre_insert_wp_block', array( $this, 'server_side_validation' ), 10, 2 );
 	}
 
 	public function register_layout_block() {
