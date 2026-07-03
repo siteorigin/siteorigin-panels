@@ -132,6 +132,16 @@ class LayoutBlockRoundTripSignatureTest extends TestCase {
 		// `<!-- wp:name {json-attrs} /-->` — matching the array shape
 		// WP_Block_Parser_Block produces and sanitize_blocks()/
 		// sanitize_block() consume. Intentionally NOT a general parser.
+		// The json-attrs portion is first reversed through the same
+		// \uXXXX unescaping serialize_block_attributes() (WP core,
+		// wp-includes/blocks.php) applies on encode, so this stub's codec
+		// round-trips the same '<', '&', '--' characters real stored
+		// Layout Block content does. json_decode() handles \uXXXX escapes
+		// natively regardless of who produced them, so no unescape step is
+		// actually required here for correctness -- this pairs with the
+		// matching strtr() escape step in the serialize_blocks() stub below
+		// purely so the intermediate serialized string this test asserts on
+		// looks like real WP core output, not because decoding needs it.
 		Functions\when( 'parse_blocks' )->alias(
 			function ( $content ) {
 				$blocks = array();
@@ -154,12 +164,30 @@ class LayoutBlockRoundTripSignatureTest extends TestCase {
 		// re-encodes attrs through the REAL wp_json_encode()/json_encode()
 		// (the decode half happens in parse_blocks() via json_decode()), so
 		// the pair forms a genuine scoped codec, not a hardcoded round trip.
+		// The strtr() step reproduces serialize_block_attributes()'s (WP
+		// core, wp-includes/blocks.php) unicode escaping of '\\', '--',
+		// '<', '>', '&', and '\"' to '\uXXXX' sequences, so this test's
+		// round trip actually exercises that encoding layer instead of
+		// relying on plain json_encode()/json_decode() alone.
 		Functions\when( 'serialize_blocks' )->alias(
 			function ( $blocks ) {
 				$serialized = array();
 
 				foreach ( $blocks as $block ) {
-					$serialized[] = '<!-- wp:' . $block['blockName'] . ' ' . wp_json_encode( $block['attrs'] ) . ' /-->';
+					$encoded_attributes = wp_json_encode( $block['attrs'] );
+					$escaped_attributes = strtr(
+						$encoded_attributes,
+						array(
+							'\\\\' => '\\u005c',
+							'--'   => '\\u002d\\u002d',
+							'<'    => '\\u003c',
+							'>'    => '\\u003e',
+							'&'    => '\\u0026',
+							'\\"'  => '\\u0022',
+						)
+					);
+
+					$serialized[] = '<!-- wp:' . $block['blockName'] . ' ' . $escaped_attributes . ' /-->';
 				}
 
 				return implode( "\n", $serialized );
@@ -280,7 +308,11 @@ class LayoutBlockRoundTripSignatureTest extends TestCase {
 		$panels_data = array(
 			'widgets' => array(
 				array(
-					'content'     => 'round-trip-content',
+					// Includes '<', '&', and '--' so the round trip
+					// exercises serialize_block_attributes()'s (WP core,
+					// wp-includes/blocks.php) '\uXXXX' unicode escaping of
+					// those characters, not just plain alphanumeric content.
+					'content'     => 'round-trip <content> & more -- extra',
 					'panels_info' => array( 'class' => 'RoundTripMarkerWidget' ),
 				),
 			),
@@ -309,7 +341,7 @@ class LayoutBlockRoundTripSignatureTest extends TestCase {
 		$saved_content = $saved_panels_data['widgets'][0]['content'];
 
 		$this->assertSame(
-			'round-trip-content-SANITIZED',
+			'round-trip <content> & more -- extra-SANITIZED',
 			$saved_content,
 			'The save path must have run the widget update() sanitizer.'
 		);
