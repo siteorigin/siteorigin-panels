@@ -301,9 +301,51 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * @return bool
 	 */
 	private function verify_panels_data( $panels_data ) {
-		return ! empty( $panels_data['sanitize_signature'] )
-			&& is_string( $panels_data['sanitize_signature'] )
-			&& hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] );
+		if ( empty( $panels_data['sanitize_signature'] ) ) {
+			// Case (a): no signature at all. Expected/normal for legacy
+			// content saved before this scheme existed, or content from a
+			// still-unvalidated save surface. Not itself suspicious, so this
+			// logs only when debugging is explicitly enabled.
+			$this->maybe_log_signature_failure( 'missing' );
+			return false;
+		}
+
+		if ( ! is_string( $panels_data['sanitize_signature'] )
+			|| ! hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] )
+		) {
+			// Case (b): a signature IS present but does not verify. Suggests
+			// tampering, a version bump, a salt rotation, OR canonicalization
+			// drift (e.g. a widget update() output containing a JSON-object
+			// value like stdClass, which round-trips as '{}' -> '[]' through
+			// wp_json_encode()/json_decode(), silently and permanently
+			// breaking that post's signature with no other visible signal).
+			$this->maybe_log_signature_failure( 'invalid' );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Log a signature verification failure when WP_DEBUG is enabled. Never
+	 * outputs anything to the page — error_log() only, matching this
+	 * codebase's absence of any prior debug-logging convention (no existing
+	 * error_log()/WP_DEBUG usage was found anywhere in this plugin, so this
+	 * establishes the minimal standard WordPress pattern for future use).
+	 *
+	 * @param string $reason 'missing' or 'invalid'.
+	 */
+	private function maybe_log_signature_failure( $reason ) {
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
+		error_log( sprintf(
+			'[SiteOrigin Panels] Layout Block render signature verification failed (%s). Falling back to strict sanitization for this render.',
+			$reason === 'invalid'
+				? 'signature present but did not verify — possible tampering, version/salt rotation, or JSON canonicalization drift'
+				: 'no signature present — expected for legacy or not-yet-validated content'
+		) );
 	}
 
 	public function override_container( $container ) {
