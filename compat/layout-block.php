@@ -300,10 +300,24 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 *
 	 * @param array $panels_data Sanitized panels data (any existing signature
 	 *                           key is ignored).
-	 * @return string HMAC-SHA256 hex digest.
+	 * @return string|false HMAC-SHA256 hex digest, or false if wp_json_encode()
+	 *                      of $panels_data failed.
 	 */
 	private function sign_panels_data( $panels_data ) {
 		unset( $panels_data['sanitize_signature'] );
+
+		// wp_json_encode() can return false (malformed UTF-8, resource refs,
+		// depth exceeded). Without this guard, false would silently coerce to
+		// '' in the concatenation below, producing a "valid-looking" signature
+		// over "$version|" that is NOT tied to the real content. Fail closed
+		// instead: a false return here stores an empty/false signature at the
+		// save-time call site (which verify_panels_data() treats as 'missing')
+		// and is treated as a failed verification at the verify call site.
+		$encoded = wp_json_encode( $panels_data );
+		if ( false === $encoded ) {
+			return false;
+		}
+
 		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
 		// security-tightening changes to sanitization semantics, NEVER for
 		// idempotency/bugfix changes. A bump invalidates every existing
@@ -312,7 +326,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// author (no safe bulk/cron re-signing exists, because capability-gated
 		// sanitization is only meaningful under the real author's session).
 		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
-		return hash_hmac( 'sha256', $version . '|' . wp_json_encode( $panels_data ), wp_salt( 'auth' ) );
+		return hash_hmac( 'sha256', $version . '|' . $encoded, wp_salt( 'auth' ) );
 	}
 
 	/**
@@ -334,8 +348,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return false;
 		}
 
+		// sign_panels_data() returns false when wp_json_encode() fails; passing
+		// that to hash_equals() would throw a PHP 8 TypeError (non-string
+		// $known_string) — an uncaught fatal on the render path. Capture and
+		// type-check it first: an UNVERIFIABLE signature (content that fails to
+		// re-encode) is the same fail-closed class as an invalid one.
+		$computed_signature = $this->sign_panels_data( $panels_data );
+
 		if ( ! is_string( $panels_data['sanitize_signature'] )
-			|| ! hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] )
+			|| ! is_string( $computed_signature )
+			|| ! hash_equals( $computed_signature, $panels_data['sanitize_signature'] )
 		) {
 			// Case (b): a signature IS present but does not verify. Suggests
 			// tampering, a version bump, a salt rotation, OR canonicalization
