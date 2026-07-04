@@ -46,6 +46,30 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// rest_pre_insert_wp_block fires through the identical mechanism as
 		// rest_pre_insert_post/rest_pre_insert_page.
 		add_action( 'rest_pre_insert_wp_block', array( $this, 'server_side_validation' ), 10, 2 );
+
+		// Block-based widget areas store Block-widget content (including any
+		// embedded Layout Block) in the widget_block OPTION, written via
+		// WP_Widget::save_settings() -> update_option( 'widget_block', ... ) —
+		// never through wp_insert_post()/rest_pre_insert_*. Every write path
+		// (classic widgets.php, Customizer, REST widgets controller) funnels
+		// through that same update_option() call, so the option-specific
+		// pre_update_option_widget_block filter is the single hook needed to
+		// sanitize-and-sign Layout Blocks on this surface. Signing here lets
+		// widget-area Layout Blocks render via the trusted path (fixing the
+		// blank-embed regression for this surface) and applies the save-time
+		// kses floor for admins lacking unfiltered_html (e.g. multisite).
+		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
+
+		// Supplemental (NOT a replacement for the rest_pre_insert_* hooks
+		// above): wp_insert_post_data fires for EVERY wp_insert_post()/
+		// wp_update_post() caller — XML-RPC, importers, WP-CLI, cron, direct
+		// calls — none of which pass through the REST hooks. On REST-driven
+		// saves both hooks legitimately co-fire; validate_post_data() dedupes
+		// by verifying each Layout Block's existing signature first and only
+		// sanitizing blocks that have NOT already been validated, avoiding the
+		// documented double-sanitization mutation risk (so-widgets-bundle PR
+		// #2316).
+		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
 	}
 
 	public function register_layout_block() {
@@ -276,10 +300,24 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 *
 	 * @param array $panels_data Sanitized panels data (any existing signature
 	 *                           key is ignored).
-	 * @return string HMAC-SHA256 hex digest.
+	 * @return string|false HMAC-SHA256 hex digest, or false if wp_json_encode()
+	 *                      of $panels_data failed.
 	 */
 	private function sign_panels_data( $panels_data ) {
 		unset( $panels_data['sanitize_signature'] );
+
+		// wp_json_encode() can return false (malformed UTF-8, resource refs,
+		// depth exceeded). Without this guard, false would silently coerce to
+		// '' in the concatenation below, producing a "valid-looking" signature
+		// over "$version|" that is NOT tied to the real content. Fail closed
+		// instead: a false return here stores an empty/false signature at the
+		// save-time call site (which verify_panels_data() treats as 'missing')
+		// and is treated as a failed verification at the verify call site.
+		$encoded = wp_json_encode( $panels_data );
+		if ( false === $encoded ) {
+			return false;
+		}
+
 		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
 		// security-tightening changes to sanitization semantics, NEVER for
 		// idempotency/bugfix changes. A bump invalidates every existing
@@ -288,7 +326,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// author (no safe bulk/cron re-signing exists, because capability-gated
 		// sanitization is only meaningful under the real author's session).
 		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
-		return hash_hmac( 'sha256', $version . '|' . wp_json_encode( $panels_data ), wp_salt( 'auth' ) );
+		return hash_hmac( 'sha256', $version . '|' . $encoded, wp_salt( 'auth' ) );
 	}
 
 	/**
@@ -310,8 +348,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return false;
 		}
 
+		// sign_panels_data() returns false when wp_json_encode() fails; passing
+		// that to hash_equals() would throw a PHP 8 TypeError (non-string
+		// $known_string) — an uncaught fatal on the render path. Capture and
+		// type-check it first: an UNVERIFIABLE signature (content that fails to
+		// re-encode) is the same fail-closed class as an invalid one.
+		$computed_signature = $this->sign_panels_data( $panels_data );
+
 		if ( ! is_string( $panels_data['sanitize_signature'] )
-			|| ! hash_equals( $this->sign_panels_data( $panels_data ), $panels_data['sanitize_signature'] )
+			|| ! is_string( $computed_signature )
+			|| ! hash_equals( $computed_signature, $panels_data['sanitize_signature'] )
 		) {
 			// Case (b): a signature IS present but does not verify. Suggests
 			// tampering, a version bump, a salt rotation, OR canonicalization
@@ -423,6 +469,163 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$prepared_post->post_content = serialize_blocks( $blocks );
 
 		return $prepared_post;
+	}
+
+	/**
+	 * Validate and sign any Layout Block content embedded in a block-based
+	 * widget area's stored instances before the `widget_block` option is
+	 * written. Fires on EVERY save path for this option (classic widgets.php,
+	 * Customizer, REST) via the option-specific `pre_update_option_widget_block`
+	 * filter.
+	 *
+	 * No unslash/reslash handling is needed here (unlike validate_post_data()):
+	 * WP_Widget::update_callback() already runs stripslashes_deep() on the
+	 * instance before the option write, so this handler receives unslashed data.
+	 *
+	 * @param array $value Proposed new `widget_block` option value (numeric
+	 *                     widget-instance keys plus '_multiwidget').
+	 * @return array The (possibly modified) value to actually persist.
+	 */
+	public function validate_widget_block_option( $value ) {
+		if ( empty( $value ) || ! is_array( $value ) ) {
+			// Fail-closed means "do nothing to make things worse," not
+			// "invent structure that isn't there."
+			return $value;
+		}
+
+		foreach ( $value as $number => &$instance ) {
+			if ( $number === '_multiwidget' ) {
+				// Bookkeeping flag, not a widget instance.
+				continue;
+			}
+
+			if (
+				! is_array( $instance ) ||
+				empty( $instance['content'] ) ||
+				! is_string( $instance['content'] )
+			) {
+				// Nothing to sanitize for this instance.
+				continue;
+			}
+
+			$blocks = parse_blocks( $instance['content'] );
+			if ( empty( $blocks ) ) {
+				continue;
+			}
+
+			foreach ( $blocks as &$block ) {
+				$block = $this->sanitize_blocks( $block );
+			}
+			unset( $block );
+
+			$instance['content'] = serialize_blocks( $blocks );
+		}
+		unset( $instance );
+
+		return $value;
+	}
+
+	/**
+	 * Supplemental save-time validation for post saves that do not go through
+	 * the REST API (XML-RPC, direct wp_insert_post()/wp_update_post() calls,
+	 * importers, classic non-block-editor saves). Skips 'revision' post-type
+	 * rows (covers both plain revisions and autosaves). For any Layout Block
+	 * found, skips re-sanitizing blocks whose panelsData ALREADY carries a
+	 * valid signature (verify_panels_data() === true) to avoid redundant
+	 * double-sanitization on REST-driven saves where rest_pre_insert_{type}
+	 * already validated the content earlier in the same request.
+	 *
+	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * @return array The (possibly modified) $data to actually persist.
+	 */
+	public function validate_post_data( $data ) {
+		if ( ! empty( $data['post_type'] ) && $data['post_type'] === 'revision' ) {
+			// Revisions AND autosaves are both nested wp_insert_post() calls
+			// with post_type 'revision', fired on the same request as the
+			// parent post's own save. Revision rows are never independently
+			// rendered by render_layout_block(), so skipping them loses no
+			// coverage — only avoids redundant work.
+			return $data;
+		}
+
+		if ( empty( $data['post_content'] ) ) {
+			return $data;
+		}
+
+		// Slashing contract: $data['post_content'] arrives SLASHED at this
+		// filter (wp_insert_post() only unslashes AFTER wp_insert_post_data
+		// returns — wp-includes/post.php). Parsing the slashed string would
+		// leave every Layout Block's panelsData JSON undecodable (escaped
+		// quotes), which would (a) make verify_panels_data() always fail,
+		// defeating the dedup below, and (b) cause serialize_blocks() to write
+		// back attrs-wiped blocks — silently DELETING panelsData. Unslash
+		// before parsing, re-slash before writing back so this field matches
+		// the slashed shape of its $data siblings. NOTE: this asymmetry versus
+		// validate_widget_block_option() is intentional — that handler
+		// receives already-unslashed data (WP_Widget::update_callback() runs
+		// stripslashes_deep() upstream); this one does not.
+		$content = wp_unslash( $data['post_content'] );
+
+		$blocks = parse_blocks( $content );
+		if ( empty( $blocks ) ) {
+			return $data;
+		}
+
+		// Cheap presence check: most post saves contain no Layout Block at
+		// all — bail before any sanitize/serialize work.
+		$has_layout_block = false;
+		foreach ( $blocks as $block ) {
+			if ( $this->find_layout_block( $block ) ) {
+				$has_layout_block = true;
+				break;
+			}
+		}
+
+		if ( ! $has_layout_block ) {
+			return $data;
+		}
+
+		foreach ( $blocks as &$block ) {
+			$block = $this->sanitize_blocks_if_unverified( $block );
+		}
+		unset( $block );
+
+		$data['post_content'] = wp_slash( serialize_blocks( $blocks ) );
+
+		return $data;
+	}
+
+	/**
+	 * Dedup-aware variant of sanitize_blocks(): consults verify_panels_data()
+	 * first and only sanitizes Layout Blocks that do NOT already carry a valid
+	 * signature. A verifying block is already-validated output from earlier in
+	 * this same request (the rest_pre_insert_* hooks) or from a prior save —
+	 * re-sanitizing it would risk the documented double-sanitization mutation
+	 * bug (so-widgets-bundle PR #2316) for no security benefit. Mirrors
+	 * sanitize_blocks()'s recursion shape; reuses sanitize_block() and
+	 * verify_panels_data() unmodified.
+	 *
+	 * @param array $block A single parsed block.
+	 * @return array The (possibly sanitized) block.
+	 */
+	private function sanitize_blocks_if_unverified( $block ) {
+		if (
+			! empty( $block['blockName'] ) &&
+			$block['blockName'] === 'siteorigin-panels/layout-block' &&
+			! empty( $block['attrs'] ) &&
+			! empty( $block['attrs']['panelsData'] ) &&
+			! $this->verify_panels_data( $block['attrs']['panelsData'] )
+		) {
+			$block = $this->sanitize_block( $block );
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $i => $inner ) {
+				$block['innerBlocks'][ $i ] = $this->sanitize_blocks_if_unverified( $inner );
+			}
+		}
+
+		return $block;
 	}
 
 	public function sanitize_blocks( $block ) {
