@@ -46,6 +46,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// rest_pre_insert_wp_block fires through the identical mechanism as
 		// rest_pre_insert_post/rest_pre_insert_page.
 		add_action( 'rest_pre_insert_wp_block', array( $this, 'server_side_validation' ), 10, 2 );
+
+		// Block-based widget areas store Block-widget content (including any
+		// embedded Layout Block) in the widget_block OPTION, written via
+		// WP_Widget::save_settings() -> update_option( 'widget_block', ... ) —
+		// never through wp_insert_post()/rest_pre_insert_*. Every write path
+		// (classic widgets.php, Customizer, REST widgets controller) funnels
+		// through that same update_option() call, so the option-specific
+		// pre_update_option_widget_block filter is the single hook needed to
+		// sanitize-and-sign Layout Blocks on this surface. Signing here lets
+		// widget-area Layout Blocks render via the trusted path (fixing the
+		// blank-embed regression for this surface) and applies the save-time
+		// kses floor for admins lacking unfiltered_html (e.g. multisite).
+		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
 	}
 
 	public function register_layout_block() {
@@ -423,6 +436,60 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$prepared_post->post_content = serialize_blocks( $blocks );
 
 		return $prepared_post;
+	}
+
+	/**
+	 * Validate and sign any Layout Block content embedded in a block-based
+	 * widget area's stored instances before the `widget_block` option is
+	 * written. Fires on EVERY save path for this option (classic widgets.php,
+	 * Customizer, REST) via the option-specific `pre_update_option_widget_block`
+	 * filter.
+	 *
+	 * No unslash/reslash handling is needed here (unlike validate_post_data()):
+	 * WP_Widget::update_callback() already runs stripslashes_deep() on the
+	 * instance before the option write, so this handler receives unslashed data.
+	 *
+	 * @param array $value Proposed new `widget_block` option value (numeric
+	 *                     widget-instance keys plus '_multiwidget').
+	 * @return array The (possibly modified) value to actually persist.
+	 */
+	public function validate_widget_block_option( $value ) {
+		if ( empty( $value ) || ! is_array( $value ) ) {
+			// Fail-closed means "do nothing to make things worse," not
+			// "invent structure that isn't there."
+			return $value;
+		}
+
+		foreach ( $value as $number => &$instance ) {
+			if ( $number === '_multiwidget' ) {
+				// Bookkeeping flag, not a widget instance.
+				continue;
+			}
+
+			if (
+				! is_array( $instance ) ||
+				empty( $instance['content'] ) ||
+				! is_string( $instance['content'] )
+			) {
+				// Nothing to sanitize for this instance.
+				continue;
+			}
+
+			$blocks = parse_blocks( $instance['content'] );
+			if ( empty( $blocks ) ) {
+				continue;
+			}
+
+			foreach ( $blocks as &$block ) {
+				$block = $this->sanitize_blocks( $block );
+			}
+			unset( $block );
+
+			$instance['content'] = serialize_blocks( $blocks );
+		}
+		unset( $instance );
+
+		return $value;
 	}
 
 	public function sanitize_blocks( $block ) {
