@@ -59,6 +59,17 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// blank-embed regression for this surface) and applies the save-time
 		// kses floor for admins lacking unfiltered_html (e.g. multisite).
 		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
+
+		// Supplemental (NOT a replacement for the rest_pre_insert_* hooks
+		// above): wp_insert_post_data fires for EVERY wp_insert_post()/
+		// wp_update_post() caller — XML-RPC, importers, WP-CLI, cron, direct
+		// calls — none of which pass through the REST hooks. On REST-driven
+		// saves both hooks legitimately co-fire; validate_post_data() dedupes
+		// by verifying each Layout Block's existing signature first and only
+		// sanitizing blocks that have NOT already been validated, avoiding the
+		// documented double-sanitization mutation risk (so-widgets-bundle PR
+		// #2316).
+		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
 	}
 
 	public function register_layout_block() {
@@ -490,6 +501,109 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		unset( $instance );
 
 		return $value;
+	}
+
+	/**
+	 * Supplemental save-time validation for post saves that do not go through
+	 * the REST API (XML-RPC, direct wp_insert_post()/wp_update_post() calls,
+	 * importers, classic non-block-editor saves). Skips 'revision' post-type
+	 * rows (covers both plain revisions and autosaves). For any Layout Block
+	 * found, skips re-sanitizing blocks whose panelsData ALREADY carries a
+	 * valid signature (verify_panels_data() === true) to avoid redundant
+	 * double-sanitization on REST-driven saves where rest_pre_insert_{type}
+	 * already validated the content earlier in the same request.
+	 *
+	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * @return array The (possibly modified) $data to actually persist.
+	 */
+	public function validate_post_data( $data ) {
+		if ( ! empty( $data['post_type'] ) && $data['post_type'] === 'revision' ) {
+			// Revisions AND autosaves are both nested wp_insert_post() calls
+			// with post_type 'revision', fired on the same request as the
+			// parent post's own save. Revision rows are never independently
+			// rendered by render_layout_block(), so skipping them loses no
+			// coverage — only avoids redundant work.
+			return $data;
+		}
+
+		if ( empty( $data['post_content'] ) ) {
+			return $data;
+		}
+
+		// Slashing contract: $data['post_content'] arrives SLASHED at this
+		// filter (wp_insert_post() only unslashes AFTER wp_insert_post_data
+		// returns — wp-includes/post.php). Parsing the slashed string would
+		// leave every Layout Block's panelsData JSON undecodable (escaped
+		// quotes), which would (a) make verify_panels_data() always fail,
+		// defeating the dedup below, and (b) cause serialize_blocks() to write
+		// back attrs-wiped blocks — silently DELETING panelsData. Unslash
+		// before parsing, re-slash before writing back so this field matches
+		// the slashed shape of its $data siblings. NOTE: this asymmetry versus
+		// validate_widget_block_option() is intentional — that handler
+		// receives already-unslashed data (WP_Widget::update_callback() runs
+		// stripslashes_deep() upstream); this one does not.
+		$content = wp_unslash( $data['post_content'] );
+
+		$blocks = parse_blocks( $content );
+		if ( empty( $blocks ) ) {
+			return $data;
+		}
+
+		// Cheap presence check: most post saves contain no Layout Block at
+		// all — bail before any sanitize/serialize work.
+		$has_layout_block = false;
+		foreach ( $blocks as $block ) {
+			if ( $this->find_layout_block( $block ) ) {
+				$has_layout_block = true;
+				break;
+			}
+		}
+
+		if ( ! $has_layout_block ) {
+			return $data;
+		}
+
+		foreach ( $blocks as &$block ) {
+			$block = $this->sanitize_blocks_if_unverified( $block );
+		}
+		unset( $block );
+
+		$data['post_content'] = wp_slash( serialize_blocks( $blocks ) );
+
+		return $data;
+	}
+
+	/**
+	 * Dedup-aware variant of sanitize_blocks(): consults verify_panels_data()
+	 * first and only sanitizes Layout Blocks that do NOT already carry a valid
+	 * signature. A verifying block is already-validated output from earlier in
+	 * this same request (the rest_pre_insert_* hooks) or from a prior save —
+	 * re-sanitizing it would risk the documented double-sanitization mutation
+	 * bug (so-widgets-bundle PR #2316) for no security benefit. Mirrors
+	 * sanitize_blocks()'s recursion shape; reuses sanitize_block() and
+	 * verify_panels_data() unmodified.
+	 *
+	 * @param array $block A single parsed block.
+	 * @return array The (possibly sanitized) block.
+	 */
+	private function sanitize_blocks_if_unverified( $block ) {
+		if (
+			! empty( $block['blockName'] ) &&
+			$block['blockName'] === 'siteorigin-panels/layout-block' &&
+			! empty( $block['attrs'] ) &&
+			! empty( $block['attrs']['panelsData'] ) &&
+			! $this->verify_panels_data( $block['attrs']['panelsData'] )
+		) {
+			$block = $this->sanitize_block( $block );
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $i => $inner ) {
+				$block['innerBlocks'][ $i ] = $this->sanitize_blocks_if_unverified( $inner );
+			}
+		}
+
+		return $block;
 	}
 
 	public function sanitize_blocks( $block ) {
