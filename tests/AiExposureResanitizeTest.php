@@ -11,24 +11,30 @@ use Brain\Monkey\Functions;
  * SiteOrigin_Panels_Admin::save_post() — a large method gated by nonce,
  * capability and $_POST that calls many collaborators. Booting all of
  * save_post() under Brain Monkey is brittle and low value, so this test does
- * NOT execute save_post(). Instead it reproduces the EXACT two-statement slice
- * from production (inc/admin.php:259-266):
+ * NOT execute save_post(). Instead it reproduces the EXACT production slice
+ * from inc/admin.php (the AI pre-save filter + CONDITIONAL re-sanitize):
  *
- *     $panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
- *     $panels_data['widgets'] = $this->process_raw_widgets(
- *         ! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
- *         ! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
- *         false
- *     );
+ *     $filtered_panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
+ *     if ( $filtered_panels_data !== $panels_data ) {
+ *         $panels_data = $filtered_panels_data;
+ *         $panels_data['widgets'] = $this->process_raw_widgets(
+ *             ! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+ *             ! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+ *             false
+ *         );
+ *     }
  *
- * and asserts the security guarantee: whatever the
- * `siteorigin_panels_ai_layout_pre_save` filter returns is passed through
- * process_raw_widgets() BEFORE persist — AI-supplied widgets are never trusted
- * raw. If inc/admin.php:259-266 ever changes, update this test to match.
+ * and asserts two guarantees:
+ *  (1) §3 security — whenever the filter CHANGES the layout, the result is passed
+ *      through process_raw_widgets() before persist (AI output never trusted raw);
+ *  (2) idempotency — when no filter is attached (or it returns the layout
+ *      unchanged), the second sanitize pass is SKIPPED, so widget update()
+ *      sanitizers are not double-run on every classic save.
+ * If the production slice changes, update this test to match.
  */
 class AiExposureResanitizeTest extends SiteOriginTests {
 	/**
-	 * Reproduce the production slice (admin.php:259-266).
+	 * Reproduce the production slice (the conditional re-sanitize in save_post()).
 	 *
 	 * @param array    $panels_data     Incoming panels_data.
 	 * @param array    $old_panels_data Previously-stored panels_data.
@@ -36,18 +42,20 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 	 * @param int      $post_id         Post ID passed to the filter.
 	 * @param callable $sanitizer       Stand-in for $this->process_raw_widgets().
 	 *
-	 * @return array The panels_data after filter + re-sanitization.
+	 * @return array The panels_data after filter + (conditional) re-sanitization.
 	 */
 	private function run_pre_save_slice( array $panels_data, array $old_panels_data, $post, int $post_id, callable $sanitizer ): array {
-		// Production line 259.
-		$panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
+		$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
 
-		// Production lines 262-266 — same argument shape as the first pass at :238-242.
-		$panels_data['widgets'] = $sanitizer(
-			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
-			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
-			false
-		);
+		// Re-sanitize ONLY when the filter changed the layout — same as production.
+		if ( $filtered_panels_data !== $panels_data ) {
+			$panels_data = $filtered_panels_data;
+			$panels_data['widgets'] = $sanitizer(
+				! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+				false
+			);
+		}
 
 		return $panels_data;
 	}
@@ -102,6 +110,36 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 		$this->assertNotContains( $hostile_widget, $result['widgets'] );
 	}
 
+	public function test_no_op_filter_skips_the_sanitizer() {
+		$post    = (object) array( 'ID' => 5 );
+		$post_id = 5;
+
+		$incoming        = array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'Safe_Widget' ) ) ) );
+		$old_panels_data = array( 'widgets' => array() );
+
+		// No-op filter (the default no-consumer case): returns its layout unchanged.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				return $value;
+			}
+		);
+
+		$sanitizer_called = false;
+		$sanitizer        = function ( ...$args ) use ( &$sanitizer_called ) {
+			$sanitizer_called = true;
+
+			return $args[0];
+		};
+
+		$result = $this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer );
+
+		// Idempotency guarantee: with no filter change, the second sanitize pass
+		// MUST NOT run (widget update() sanitizers are not guaranteed idempotent).
+		$this->assertFalse( $sanitizer_called, 'process_raw_widgets() must not run a second time when the AI filter leaves the layout unchanged.' );
+		// The layout is persisted unchanged (already sanitized by the first pass).
+		$this->assertSame( $incoming, $result );
+	}
+
 	public function test_sanitizer_called_with_production_argument_shape() {
 		$post    = (object) array( 'ID' => 7 );
 		$post_id = 7;
@@ -110,9 +148,14 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 		$old_widgets     = array( 'old-widget' );
 		$old_panels_data = array( 'widgets' => $old_widgets );
 
-		// No-op filter — returns its layout unchanged.
+		// Filter that CHANGES the layout (appends a marker widget) so the
+		// conditional re-sanitize branch runs.
 		Functions\when( 'apply_filters' )->alias(
 			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_ai_layout_pre_save' ) {
+					$value['widgets'][] = 'marker-widget';
+				}
+
 				return $value;
 			}
 		);
@@ -126,9 +169,8 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 
 		$this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer );
 
-		// Mirrors admin.php:262-266 exactly:
-		//   arg0 = current widgets, arg1 = old widgets (or false), arg2 = false.
-		$this->assertSame( array( 'incoming-widget' ), $received_args[0] );
+		// arg0 = current (filtered) widgets, arg1 = old widgets (or false), arg2 = false.
+		$this->assertSame( array( 'incoming-widget', 'marker-widget' ), $received_args[0] );
 		$this->assertSame( $old_widgets, $received_args[1] );
 		$this->assertFalse( $received_args[2] );
 	}
@@ -140,8 +182,13 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 		$incoming        = array( 'widgets' => array( 'incoming-widget' ) );
 		$old_panels_data = array(); // No previous widgets.
 
+		// Filter that CHANGES the layout so the re-sanitize branch runs.
 		Functions\when( 'apply_filters' )->alias(
 			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_ai_layout_pre_save' ) {
+					$value['widgets'][] = 'marker-widget';
+				}
+
 				return $value;
 			}
 		);
@@ -155,7 +202,7 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 
 		$this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer );
 
-		// admin.php:264 — `! empty( $old_panels_data['widgets'] ) ? ... : false`.
+		// old widgets arg is false when there is no prior layout.
 		$this->assertFalse( $received_args[1] );
 	}
 }
