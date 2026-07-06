@@ -17,7 +17,7 @@
  *   {
  *     "post_id": int,
  *     "source":  "meta" | "block" | "mixed" | "none",
- *     "layouts": array<panels_data>   // array of canonical panels_data documents
+ *     "layouts": [ { "storage": "meta"|"block", "block_index": int|null, "panels_data": {...} }, ... ]
  *   }
  *
  * @since {NEXT_VERSION}
