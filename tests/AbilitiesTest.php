@@ -246,6 +246,8 @@ class AbilitiesTest extends SiteOriginTests {
 		// Emulator off by default (mirrors the copy-content suite pattern); the
 		// emulator-parity test overrides this.
 		Functions\when( 'siteorigin_panels_setting' )->justReturn( false );
+		// No untargetable Layout Block by default; the nested-block test overrides.
+		Functions\when( 'has_block' )->justReturn( false );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -935,6 +937,84 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertTrue( $result['updated'] );
 		$this->assertSame( 'meta', $result['source'] );
 		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	public function test_untargetable_nested_layout_block_declines_instead_of_meta_write() {
+		// Post whose only Layout Block is nested inside a core/group — the
+		// top-level walk finds zero qualifying blocks, and there is no meta layout.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 40, 'post_content' => 'group with nested layout block' ) );
+		Functions\when( 'parse_blocks' )->justReturn(
+			array(
+				array(
+					'blockName' => 'core/group',
+					'attrs'     => array(),
+					'innerBlocks' => array(
+						array(
+							'blockName' => 'siteorigin-panels/layout-block',
+							'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'nested' ) ) ),
+						),
+					),
+				),
+			)
+		);
+		Functions\when( 'get_post_meta' )->justReturn( '' );      // no meta layout
+		Functions\when( 'has_block' )->justReturn( true );        // a Layout Block IS present (nested)
+
+		// Must NOT write meta OR block — decline instead.
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 40,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	public function test_plain_post_with_no_blocks_still_takes_meta_path() {
+		// No blocks at all, has_block false, no meta → existing meta-create behaviour.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 41, 'post_content' => '' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'has_block' )->justReturn( false );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = true;
+
+				return true;
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 41,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertTrue( $persisted, 'plain post must still write meta.' );
+	}
+
+	public function test_read_layouts_skips_parse_blocks_on_empty_content() {
+		// Empty post_content → get_qualifying_block_layouts must early-return and
+		// never call parse_blocks (which the WP<5.0 guard also protects against).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 42, 'post_content' => '' ) );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\expect( 'parse_blocks' )->never();
+
+		$result = SiteOrigin_Panels_AI_Exposure::single()->read_layouts( 42 );
+
+		$this->assertSame( 'none', $result['source'] );
+		$this->assertSame( array(), $result['layouts'] );
 	}
 
 	public function test_update_meta_path_old_widgets_false_when_no_previous_layout() {

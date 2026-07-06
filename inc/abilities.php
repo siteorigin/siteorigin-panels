@@ -271,6 +271,25 @@ class SiteOrigin_Panels_Abilities {
 			return $this->update_block_layout( $post, $block_count, $block_index, $panels_data );
 		}
 
+		// No TARGETABLE top-level block, but the post visibly contains a Layout
+		// Block the walk could not target (nested inside a container block, or with
+		// empty panelsData). Decline: writing a classic meta layout here would
+		// create a NEW competing layout while the untargetable block keeps
+		// rendering — duplicate content. (A mixed post with a real meta layout was
+		// already handled by the block_index === null && has_meta branch above; a
+		// post with a qualifying top-level block took the block path above.)
+		if (
+			function_exists( 'has_block' ) &&
+			has_block( SiteOrigin_Panels_AI_Exposure::single()->layout_block_name(), $post )
+		) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'unsupported',
+				'message' => __( 'This post contains Layout Block(s) that cannot be targeted (nested inside another block, or without layout data). Writing a classic layout here could create duplicate content.', 'siteorigin-panels' ),
+			);
+		}
+
 		// No blocks present → meta path (creates/updates the classic layout).
 		return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
 	}
