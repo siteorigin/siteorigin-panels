@@ -278,8 +278,13 @@ class SiteOrigin_Panels_Abilities {
 	/**
 	 * Write the classic (meta-stored) layout.
 	 *
-	 * Re-sanitizes through the SAME sanitizer the classic save uses (admin.php
-	 * save_post), mirroring its argument shape. §3: input is never persisted raw.
+	 * Mirrors the persist semantics of the classic save (admin.php save_post):
+	 * re-sanitizes via process_raw_widgets(), runs the sidebars-emulator when
+	 * enabled, applies the public siteorigin_panels_data_pre_save filter, and —
+	 * like save_post — DELETES the meta when the sanitized layout has no widgets
+	 * and no grids (rather than persisting an empty layout). §3: input is never
+	 * persisted raw; the value is double-slashed because update_post_meta()
+	 * wp_unslash()es its input.
 	 *
 	 * @param int   $post_id         The post to write to.
 	 * @param array $panels_data     Incoming canonical panels_data.
@@ -289,6 +294,10 @@ class SiteOrigin_Panels_Abilities {
 	 */
 	protected function update_meta_layout( $post_id, $panels_data, $old_panels_data ) {
 		$admin = SiteOrigin_Panels_Admin::single();
+
+		// Fetch the post up-front so it can be passed to the pre-save filter and
+		// reused for the copy-content refresh.
+		$post = get_post( $post_id );
 
 		// get_post_meta() can return a non-array scalar (e.g. '') — normalize so the
 		// ['widgets'] read below is explicit and future-proof.
@@ -300,7 +309,31 @@ class SiteOrigin_Panels_Abilities {
 			false
 		);
 
+		// Sidebars-emulator parity (admin.php save_post): generate sidebar widget IDs
+		// when the setting is on, between sanitize passes.
+		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
+			$panels_data['widgets'] = SiteOrigin_Panels_Sidebars_Emulator::single()->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
+		}
+
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+
+		// Apply the same public pre-save filter save_post applies, so third-party
+		// pre-save transforms run on ability writes too.
+		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+
+		// Empty-layout parity (admin.php save_post): a layout with no widgets and no
+		// grids means "clear the layout" — delete the meta rather than storing an
+		// empty layout, and skip the copy-content refresh.
+		if ( empty( $panels_data['widgets'] ) && empty( $panels_data['grids'] ) ) {
+			delete_post_meta( $post_id, 'panels_data' );
+
+			return array(
+				'post_id' => $post_id,
+				'updated' => true,
+				'source'  => 'meta',
+				'message' => __( 'Layout cleared.', 'siteorigin-panels' ),
+			);
+		}
 
 		// update_post_meta() wp_unslash()es its input, so backslashes (e.g. a
 		// namespaced widget class 'SiteOrigin\Widget\Foo', or content like C:\path)
@@ -315,7 +348,6 @@ class SiteOrigin_Panels_Abilities {
 		// save early-returns exactly as it does for the editor's own copy write.
 		// NOT called for block writes (write_block_layout) — block layouts render
 		// dynamically and have no stale post_content mirror.
-		$post = get_post( $post_id );
 		if ( ! empty( $post ) ) {
 			$admin->with_save_guard(
 				function () use ( $admin, $post, $post_id, $panels_data ) {

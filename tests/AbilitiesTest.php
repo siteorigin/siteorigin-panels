@@ -109,6 +109,34 @@ if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin' ) ) {
 	}
 }
 
+/**
+ * Spyable stand-in for SiteOrigin_Panels_Sidebars_Emulator::single()
+ * ->generate_sidebar_widget_ids(). Tags each widget so tests can prove the
+ * emulator output is what gets persisted.
+ */
+class Abilities_EmulatorSpy {
+	public static $instance;
+	public $called = false;
+
+	public static function single() {
+		return self::$instance;
+	}
+
+	public function generate_sidebar_widget_ids( $widgets, $post_id ) {
+		$this->called = true;
+
+		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged' ) ) );
+	}
+}
+
+if ( ! class_exists( 'SiteOrigin_Panels_Sidebars_Emulator' ) ) {
+	class SiteOrigin_Panels_Sidebars_Emulator {
+		public static function single() {
+			return Abilities_EmulatorSpy::single();
+		}
+	}
+}
+
 /*
  * Real-function stubs for the Abilities API. register_abilities() / the category
  * registration guard on function_exists(); Brain Monkey cannot satisfy a
@@ -202,8 +230,9 @@ class AbilitiesTest extends SiteOriginTests {
 	protected function setUp(): void {
 		parent::setUp();
 
-		Abilities_AdminSpy::$instance  = new Abilities_AdminSpy();
-		Abilities_StylesSpy::$instance = new Abilities_StylesSpy();
+		Abilities_AdminSpy::$instance    = new Abilities_AdminSpy();
+		Abilities_StylesSpy::$instance   = new Abilities_StylesSpy();
+		Abilities_EmulatorSpy::$instance = new Abilities_EmulatorSpy();
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
@@ -214,6 +243,9 @@ class AbilitiesTest extends SiteOriginTests {
 		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 		Functions\when( 'serialize_blocks' )->alias( fn( $blocks ) => $blocks );
+		// Emulator off by default (mirrors the copy-content suite pattern); the
+		// emulator-parity test overrides this.
+		Functions\when( 'siteorigin_panels_setting' )->justReturn( false );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -800,6 +832,109 @@ class AbilitiesTest extends SiteOriginTests {
 			$persisted['widgets'][0]['text'],
 			'Backslash-bearing content must survive the meta write.'
 		);
+	}
+
+	public function test_meta_write_runs_sidebars_emulator_when_enabled() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		// Emulator ON (only) — everything else off.
+		Functions\when( 'siteorigin_panels_setting' )->alias(
+			fn( $key ) => $key === 'sidebars-emulator'
+		);
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 30,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertTrue( Abilities_EmulatorSpy::$instance->called, 'sidebars emulator must run when the setting is on.' );
+		// The emulator output is what gets persisted (tagged widget).
+		$this->assertSame( 'EmulatorTagged', $persisted['widgets'][0]['panels_info']['class'] );
+	}
+
+	public function test_meta_write_applies_data_pre_save_filter() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// A pre-save filter transforms the layout; its output must be persisted.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data_pre_save' ) {
+					$value['pre_save_marker'] = 'ran';
+				}
+
+				return $value;
+			}
+		);
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertSame( 'ran', $persisted['pre_save_marker'] ?? null, 'siteorigin_panels_data_pre_save output must be persisted.' );
+	}
+
+	public function test_meta_write_of_empty_layout_deletes_meta() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// Sanitizer returns an EMPTY widget set → empty layout (no widgets, no grids).
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return array();
+			}
+		};
+
+		$deleted = null;
+		Functions\when( 'delete_post_meta' )->alias(
+			function ( $post_id, $key ) use ( &$deleted ) {
+				$deleted = array( $post_id, $key );
+
+				return true;
+			}
+		);
+		// Persisting must NOT happen for an empty layout.
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 32,
+				'panels_data' => array( 'widgets' => array() ),
+			)
+		);
+
+		$this->assertSame( array( 32, 'panels_data' ), $deleted, 'empty layout must delete panels_data meta.' );
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
 	}
 
 	public function test_update_meta_path_old_widgets_false_when_no_previous_layout() {
