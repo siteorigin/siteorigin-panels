@@ -74,6 +74,12 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 		public static function single() {
 			return Abilities_AdminSpy::single();
 		}
+
+		// Mirrors the real SiteOrigin_Panels_Admin::double_slash_string() so the
+		// meta-write slashing (map_deep + this callback) runs in tests.
+		public static function double_slash_string( $value ) {
+			return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
+		}
 	}
 }
 
@@ -150,6 +156,26 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 		}
 
 		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+// Core map_deep() polyfill so map_deep( $data, [Admin, 'double_slash_string'] )
+// actually runs in the meta-slashing regression test. Mirrors core's recursion.
+if ( ! function_exists( 'map_deep' ) ) {
+	function map_deep( $value, $callback ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $index => $item ) {
+				$value[ $index ] = map_deep( $item, $callback );
+			}
+		} elseif ( is_object( $value ) ) {
+			foreach ( get_object_vars( $value ) as $property_name => $property_value ) {
+				$value->$property_name = map_deep( $property_value, $callback );
+			}
+		} else {
+			$value = call_user_func( $callback, $value );
+		}
+
+		return $value;
 	}
 }
 
@@ -719,6 +745,61 @@ class AbilitiesTest extends SiteOriginTests {
 			'Persisted widgets must be the sanitizer output, not raw ability input.'
 		);
 		$this->assertNotContains( $hostile, $persisted[2]['widgets'] );
+	}
+
+	public function test_meta_write_double_slashes_so_backslashes_survive_unslashing() {
+		// update_post_meta() wp_unslash()es its input; without the production
+		// map_deep(double_slash_string) wrap, backslashes in stored widget data
+		// (e.g. a namespaced class 'SiteOrigin\Widget\Foo', or 'C:\path') are
+		// silently stripped. This mirrors the block-path slashing regression test.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// Sanitizer returns widgets that legitimately contain single backslashes.
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return array(
+					array(
+						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo' ),
+						'text'        => 'C:\\path\\to\\file',
+					),
+				);
+			}
+		};
+
+		// Mirror core: update_post_meta() unslashes its input before persisting.
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 21,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		// After core-style unslashing, the single backslashes must remain intact —
+		// proving the value was double-slashed before update_post_meta.
+		$this->assertNotNull( $persisted );
+		$this->assertSame(
+			'SiteOrigin\\Widget\\Foo',
+			$persisted['widgets'][0]['panels_info']['class'],
+			'Namespaced widget class must keep its backslashes through the meta write.'
+		);
+		$this->assertSame(
+			'C:\\path\\to\\file',
+			$persisted['widgets'][0]['text'],
+			'Backslash-bearing content must survive the meta write.'
+		);
 	}
 
 	public function test_update_meta_path_old_widgets_false_when_no_previous_layout() {

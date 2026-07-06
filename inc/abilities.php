@@ -302,7 +302,10 @@ class SiteOrigin_Panels_Abilities {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
-		update_post_meta( $post_id, 'panels_data', $panels_data );
+		// update_post_meta() wp_unslash()es its input, so backslashes (e.g. a
+		// namespaced widget class 'SiteOrigin\Widget\Foo', or content like C:\path)
+		// must be double-slashed first — same as save_post() and the home-page save.
+		update_post_meta( $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
 		// Refresh the copy-content post_content mirror through the SAME code a human
 		// editor save uses, so on copy-content sites this programmatic write is not
