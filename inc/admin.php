@@ -245,9 +245,9 @@ class SiteOrigin_Panels_Admin {
 		 * Filter the layout about to be saved, allowing an AI-generated layout to be
 		 * supplied or transformed before persistence.
 		 *
-		 * Public API — premium-addon-facing. Whatever a consumer returns here is
-		 * re-sanitized through process_raw_widgets() below, so returned widgets are
-		 * NEVER trusted raw.
+		 * Public API — premium-addon-facing. Whenever a consumer changes the
+		 * layout here, the result is re-sanitized through process_raw_widgets()
+		 * below, so returned widgets are NEVER trusted raw.
 		 *
 		 * @since {NEXT_VERSION}
 		 * @api
@@ -256,14 +256,23 @@ class SiteOrigin_Panels_Admin {
 		 * @param WP_Post $post        The post being saved.
 		 * @param int     $post_id     The post ID.
 		 */
-		$panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
+		$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
 
-		// Re-sanitize: anything supplied/transformed above must traverse process_raw_widgets().
-		$panels_data['widgets'] = $this->process_raw_widgets(
-			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
-			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
-			false
-		);
+		// Re-sanitize ONLY when a consumer changed the layout: anything supplied or
+		// transformed by the filter must traverse process_raw_widgets() before
+		// persist (§3 — AI output is never trusted raw). When no filter is attached,
+		// or it returned the layout unchanged, the second pass MUST be skipped:
+		// widget update() sanitizers are not guaranteed idempotent, so an
+		// unconditional double-run corrupts non-idempotent widget fields on every
+		// classic save (and fires widget_update_callback twice per widget).
+		if ( $filtered_panels_data !== $panels_data ) {
+			$panels_data = $filtered_panels_data;
+			$panels_data['widgets'] = $this->process_raw_widgets(
+				! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+				false
+			);
+		}
 
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();

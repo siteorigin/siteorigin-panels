@@ -74,6 +74,12 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 		public static function single() {
 			return Abilities_AdminSpy::single();
 		}
+
+		// Mirrors the real SiteOrigin_Panels_Admin::double_slash_string() so the
+		// meta-write slashing (map_deep + this callback) runs in tests.
+		public static function double_slash_string( $value ) {
+			return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
+		}
 	}
 }
 
@@ -99,6 +105,34 @@ if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin' ) ) {
 	class SiteOrigin_Panels_Styles_Admin {
 		public static function single() {
 			return Abilities_StylesSpy::single();
+		}
+	}
+}
+
+/**
+ * Spyable stand-in for SiteOrigin_Panels_Sidebars_Emulator::single()
+ * ->generate_sidebar_widget_ids(). Tags each widget so tests can prove the
+ * emulator output is what gets persisted.
+ */
+class Abilities_EmulatorSpy {
+	public static $instance;
+	public $called = false;
+
+	public static function single() {
+		return self::$instance;
+	}
+
+	public function generate_sidebar_widget_ids( $widgets, $post_id ) {
+		$this->called = true;
+
+		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged' ) ) );
+	}
+}
+
+if ( ! class_exists( 'SiteOrigin_Panels_Sidebars_Emulator' ) ) {
+	class SiteOrigin_Panels_Sidebars_Emulator {
+		public static function single() {
+			return Abilities_EmulatorSpy::single();
 		}
 	}
 }
@@ -153,6 +187,26 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 	}
 }
 
+// Core map_deep() polyfill so map_deep( $data, [Admin, 'double_slash_string'] )
+// actually runs in the meta-slashing regression test. Mirrors core's recursion.
+if ( ! function_exists( 'map_deep' ) ) {
+	function map_deep( $value, $callback ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $index => $item ) {
+				$value[ $index ] = map_deep( $item, $callback );
+			}
+		} elseif ( is_object( $value ) ) {
+			foreach ( get_object_vars( $value ) as $property_name => $property_value ) {
+				$value->$property_name = map_deep( $property_value, $callback );
+			}
+		} else {
+			$value = call_user_func( $callback, $value );
+		}
+
+		return $value;
+	}
+}
+
 // The abilities block walk delegates to SiteOrigin_Panels_AI_Exposure for the
 // single shared qualifying-block walk; load it so this test is self-sufficient
 // regardless of test execution order.
@@ -176,8 +230,9 @@ class AbilitiesTest extends SiteOriginTests {
 	protected function setUp(): void {
 		parent::setUp();
 
-		Abilities_AdminSpy::$instance  = new Abilities_AdminSpy();
-		Abilities_StylesSpy::$instance = new Abilities_StylesSpy();
+		Abilities_AdminSpy::$instance    = new Abilities_AdminSpy();
+		Abilities_StylesSpy::$instance   = new Abilities_StylesSpy();
+		Abilities_EmulatorSpy::$instance = new Abilities_EmulatorSpy();
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
@@ -188,6 +243,11 @@ class AbilitiesTest extends SiteOriginTests {
 		Functions\when( 'is_wp_error' )->alias( fn( $thing ) => $thing instanceof WP_Error );
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 		Functions\when( 'serialize_blocks' )->alias( fn( $blocks ) => $blocks );
+		// Emulator off by default (mirrors the copy-content suite pattern); the
+		// emulator-parity test overrides this.
+		Functions\when( 'siteorigin_panels_setting' )->justReturn( false );
+		// No untargetable Layout Block by default; the nested-block test overrides.
+		Functions\when( 'has_block' )->justReturn( false );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -719,6 +779,242 @@ class AbilitiesTest extends SiteOriginTests {
 			'Persisted widgets must be the sanitizer output, not raw ability input.'
 		);
 		$this->assertNotContains( $hostile, $persisted[2]['widgets'] );
+	}
+
+	public function test_meta_write_double_slashes_so_backslashes_survive_unslashing() {
+		// update_post_meta() wp_unslash()es its input; without the production
+		// map_deep(double_slash_string) wrap, backslashes in stored widget data
+		// (e.g. a namespaced class 'SiteOrigin\Widget\Foo', or 'C:\path') are
+		// silently stripped. This mirrors the block-path slashing regression test.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// Sanitizer returns widgets that legitimately contain single backslashes.
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return array(
+					array(
+						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo' ),
+						'text'        => 'C:\\path\\to\\file',
+					),
+				);
+			}
+		};
+
+		// Mirror core: update_post_meta() unslashes its input before persisting.
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 21,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		// After core-style unslashing, the single backslashes must remain intact —
+		// proving the value was double-slashed before update_post_meta.
+		$this->assertNotNull( $persisted );
+		$this->assertSame(
+			'SiteOrigin\\Widget\\Foo',
+			$persisted['widgets'][0]['panels_info']['class'],
+			'Namespaced widget class must keep its backslashes through the meta write.'
+		);
+		$this->assertSame(
+			'C:\\path\\to\\file',
+			$persisted['widgets'][0]['text'],
+			'Backslash-bearing content must survive the meta write.'
+		);
+	}
+
+	public function test_meta_write_runs_sidebars_emulator_when_enabled() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		// Emulator ON (only) — everything else off.
+		Functions\when( 'siteorigin_panels_setting' )->alias(
+			fn( $key ) => $key === 'sidebars-emulator'
+		);
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 30,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertTrue( Abilities_EmulatorSpy::$instance->called, 'sidebars emulator must run when the setting is on.' );
+		// The emulator output is what gets persisted (tagged widget).
+		$this->assertSame( 'EmulatorTagged', $persisted['widgets'][0]['panels_info']['class'] );
+	}
+
+	public function test_meta_write_applies_data_pre_save_filter() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// A pre-save filter transforms the layout; its output must be persisted.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data_pre_save' ) {
+					$value['pre_save_marker'] = 'ran';
+				}
+
+				return $value;
+			}
+		);
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertSame( 'ran', $persisted['pre_save_marker'] ?? null, 'siteorigin_panels_data_pre_save output must be persisted.' );
+	}
+
+	public function test_meta_write_of_empty_layout_deletes_meta() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		// Sanitizer returns an EMPTY widget set → empty layout (no widgets, no grids).
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return array();
+			}
+		};
+
+		$deleted = null;
+		Functions\when( 'delete_post_meta' )->alias(
+			function ( $post_id, $key ) use ( &$deleted ) {
+				$deleted = array( $post_id, $key );
+
+				return true;
+			}
+		);
+		// Persisting must NOT happen for an empty layout.
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 32,
+				'panels_data' => array( 'widgets' => array() ),
+			)
+		);
+
+		$this->assertSame( array( 32, 'panels_data' ), $deleted, 'empty layout must delete panels_data meta.' );
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	public function test_untargetable_nested_layout_block_declines_instead_of_meta_write() {
+		// Post whose only Layout Block is nested inside a core/group — the
+		// top-level walk finds zero qualifying blocks, and there is no meta layout.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 40, 'post_content' => 'group with nested layout block' ) );
+		Functions\when( 'parse_blocks' )->justReturn(
+			array(
+				array(
+					'blockName' => 'core/group',
+					'attrs'     => array(),
+					'innerBlocks' => array(
+						array(
+							'blockName' => 'siteorigin-panels/layout-block',
+							'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'nested' ) ) ),
+						),
+					),
+				),
+			)
+		);
+		Functions\when( 'get_post_meta' )->justReturn( '' );      // no meta layout
+		Functions\when( 'has_block' )->justReturn( true );        // a Layout Block IS present (nested)
+
+		// Must NOT write meta OR block — decline instead.
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 40,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	public function test_plain_post_with_no_blocks_still_takes_meta_path() {
+		// No blocks at all, has_block false, no meta → existing meta-create behaviour.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 41, 'post_content' => '' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'has_block' )->justReturn( false );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = true;
+
+				return true;
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 41,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertTrue( $persisted, 'plain post must still write meta.' );
+	}
+
+	public function test_read_layouts_skips_parse_blocks_on_empty_content() {
+		// Empty post_content → get_qualifying_block_layouts must early-return and
+		// never call parse_blocks (which the WP<5.0 guard also protects against).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 42, 'post_content' => '' ) );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\expect( 'parse_blocks' )->never();
+
+		$result = SiteOrigin_Panels_AI_Exposure::single()->read_layouts( 42 );
+
+		$this->assertSame( 'none', $result['source'] );
+		$this->assertSame( array(), $result['layouts'] );
 	}
 
 	public function test_update_meta_path_old_widgets_false_when_no_previous_layout() {

@@ -17,7 +17,7 @@
  *   {
  *     "post_id": int,
  *     "source":  "meta" | "block" | "mixed" | "none",
- *     "layouts": array<panels_data>   // array of canonical panels_data documents
+ *     "layouts": [ { "storage": "meta"|"block", "block_index": int|null, "panels_data": {...} }, ... ]
  *   }
  *
  * @since {NEXT_VERSION}
@@ -242,6 +242,13 @@ class SiteOrigin_Panels_AI_Exposure {
 	 * derived identically — a filter that empties a structurally-qualifying block
 	 * skips it in BOTH, and no index ever resolves to a different block.
 	 *
+	 * TOP-LEVEL ONLY: the walk inspects only top-level `parse_blocks()` output.
+	 * Layout Blocks nested inside a container block (Group / Columns) do NOT
+	 * qualify and are not targetable in Phase 1 (a recursive, path-keyed walk is
+	 * backlog). `parse_blocks()` exists only from WP 5.0, so when it is
+	 * unavailable (or the post has no content) this returns an empty list rather
+	 * than fataling.
+	 *
 	 * @since {NEXT_VERSION}
 	 * @api
 	 *
@@ -255,8 +262,16 @@ class SiteOrigin_Panels_AI_Exposure {
 		$block_name = $this->layout_block_name();
 		$post_id    = isset( $post->ID ) ? (int) $post->ID : 0;
 		$qualifying = array();
-		$blocks     = parse_blocks( $post->post_content );
 		$index      = 0;
+
+		// parse_blocks() only exists from WP 5.0; bail (no block layouts) when it is
+		// unavailable or there is nothing to parse, keeping the REST route safe on
+		// WP 4.7–4.9.
+		if ( ! function_exists( 'parse_blocks' ) || empty( $post->post_content ) ) {
+			return $qualifying;
+		}
+
+		$blocks = parse_blocks( $post->post_content );
 
 		if ( empty( $blocks ) ) {
 			return $qualifying;
