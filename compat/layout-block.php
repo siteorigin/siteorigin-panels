@@ -181,14 +181,52 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// re-executes anything, not because re-running would be a no-op.
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 		} else {
+			/**
+			 * Filter a single Layout Block's panels_data before it is sanitized and
+			 * signed, allowing an AI-generated layout to be supplied or transformed.
+			 *
+			 * Block-editor counterpart of the classic-editor
+			 * `siteorigin_panels_ai_layout_pre_save` filter (see inc/admin.php).
+			 * Public API — premium-addon-facing. Fires PER LAYOUT BLOCK (a post may
+			 * contain several), carrying only that block's panels_data.
+			 *
+			 * SAVE-TIME ONLY: this fires once per block on every save surface that
+			 * reaches the sanitize chokepoint — REST save validation
+			 * (`rest_pre_insert_*` → server_side_validation()), block widget areas
+			 * (`pre_update_option_widget_block` → validate_widget_block_option()),
+			 * the `wp_insert_post_data` safety net (validate_post_data()), and AI
+			 * ability block writes (sanitize_block_untrusted()). It never fires at
+			 * render: signed content renders via the trusted path, and the unsigned
+			 * strict fallback deliberately does not re-fire save-time transforms.
+			 *
+			 * Whatever a consumer returns is re-sanitized through
+			 * sanitize_panels_data() below, so returned widgets are NEVER trusted
+			 * raw. A layout CHANGED by this filter is additionally passed through
+			 * the kses floor regardless of the author's `unfiltered_html`
+			 * capability — AI-transformed output is prompt-injectable no matter
+			 * whose credential carries the request. Non-array returns are ignored.
+			 *
+			 * @since {NEXT_VERSION}
+			 * @api
+			 *
+			 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
+			 */
+			$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
+			$ai_changed_layout = is_array( $filtered_panels_data ) && $filtered_panels_data !== $panels_data;
+			if ( $ai_changed_layout ) {
+				$panels_data = $filtered_panels_data;
+			}
+
 			// Save-time validation (sanitize_block()): strict, capability-gated,
 			// sanitize then sign.
 			$panels_data = $this->sanitize_panels_data( $panels_data );
 
 			// current_user_can() runs in the real save-time request context
 			// (the author's session), which is the only place capability-gated
-			// sanitization is meaningful.
-			if ( ! current_user_can( 'unfiltered_html' ) ) {
+			// sanitization is meaningful. An AI-changed layout is floored
+			// unconditionally: the capability belongs to the request's author,
+			// but the content's origin is the AI transform.
+			if ( $ai_changed_layout || ! current_user_can( 'unfiltered_html' ) ) {
 				// Floor: the signature must not depend on any individual
 				// field/widget sanitizer being "healthy" this request (some
 				// SiteOrigin Widgets Bundle field sanitizers can silently pass
@@ -260,28 +298,6 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// Strip any inbound signature so a client-forged 'sanitize_signature'
 		// key can never survive into what gets processed or later re-signed.
 		unset( $panels_data['sanitize_signature'] );
-
-		/**
-		 * Filter a single Layout Block's panels_data before its widgets are processed,
-		 * allowing an AI-generated layout to be supplied or transformed.
-		 *
-		 * Block-editor counterpart of the classic-editor `siteorigin_panels_ai_layout_pre_save`
-		 * filter (see inc/admin.php). Public API — premium-addon-facing. This fires PER LAYOUT
-		 * BLOCK (a post may contain several), carrying only that block's panels_data. Whatever a
-		 * consumer returns is re-sanitized through process_raw_widgets() below, so returned
-		 * widgets are NEVER trusted raw (mirrors the §3 guarantee on the classic path).
-		 *
-		 * Because this is the single sanitize chokepoint every Layout Block passes through, it
-		 * runs on BOTH the save path (server_side_validation → sanitize_block) and the render
-		 * path (render_layout_block / maybe_generate_layout_block_css). Keep consumers idempotent;
-		 * a no-op filter leaves the block unchanged.
-		 *
-		 * @since {NEXT_VERSION}
-		 * @api
-		 *
-		 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
-		 */
-		$panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
 
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
