@@ -423,6 +423,110 @@ class LayoutBlockAiSeamTest extends TestCase {
 		$this->assertSame( 1, $stub->update_calls, 'Sanitize still runs exactly once.' );
 	}
 
+	// --- Step 3: sanitize_block_untrusted() forced floor. ----------------------
+
+	/**
+	 * THE fail-open acceptance test (Audit #1 Q2c): an AI ability write
+	 * authenticated as an admin application password passes the
+	 * `unfiltered_html` capability check, but the forced floor must still
+	 * strip the payload BEFORE signing — proven by the signature verifying
+	 * against the floored payload (a post-sign floor would break it).
+	 */
+	public function test_untrusted_chokepoint_floors_before_signing_for_capable_user() {
+		$stub = new AiSeamIdentityWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		$block = $this->layout_block();
+		$result = $block->sanitize_block_untrusted(
+			$this->block_for( array( 'widgets' => array( $this->widget( self::PAYLOAD ) ) ) )
+		);
+		$persisted = $result['attrs']['panelsData'];
+
+		$this->assertSame(
+			self::CLEANED,
+			$persisted['widgets'][0]['content'],
+			'An untrusted (AI) write must be kses-floored even when the credential has unfiltered_html.'
+		);
+		$this->assertTrue(
+			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
+			'The signature must verify against the FLOORED payload — the floor ran before signing.'
+		);
+		$this->assertSame( 1, $stub->update_calls, 'The chokepoint runs sanitize exactly once.' );
+	}
+
+	public function test_force_floor_flag_is_restored_after_untrusted_call() {
+		$stub = new AiSeamIdentityWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		$block = $this->layout_block();
+		$block->sanitize_block_untrusted(
+			$this->block_for( array( 'widgets' => array( $this->widget( 'anything' ) ) ) )
+		);
+
+		$this->assertFalse(
+			$this->read_force_floor( $block ),
+			'The forced-floor flag must be restored after the untrusted call.'
+		);
+
+		// Behavioural proof of no leak: a subsequent NORMAL save by a capable
+		// author on the same instance is not floored.
+		$result = $block->sanitize_block(
+			$this->block_for( array( 'widgets' => array( $this->widget( self::PAYLOAD ) ) ) )
+		);
+		$this->assertSame(
+			self::PAYLOAD,
+			$result['attrs']['panelsData']['widgets'][0]['content'],
+			'A normal capable-author save after an untrusted call must not inherit the forced floor.'
+		);
+	}
+
+	public function test_force_floor_flag_is_restored_when_sanitize_throws() {
+		$throwing = new AiSeamThrowingWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $throwing ) {
+			return $throwing;
+		};
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		$block = $this->layout_block();
+		$caught = null;
+
+		try {
+			$block->sanitize_block_untrusted(
+				$this->block_for(
+					array(
+						'widgets' => array(
+							array(
+								'content'     => 'boom',
+								'panels_info' => array( 'class' => 'AiSeamThrowingWidget' ),
+							),
+						),
+					)
+				)
+			);
+		} catch ( \RuntimeException $exception ) {
+			$caught = $exception;
+		}
+
+		$this->assertNotNull( $caught, 'The widget exception must propagate out of the chokepoint.' );
+		$this->assertFalse(
+			$this->read_force_floor( $block ),
+			'The forced-floor flag must be restored by finally even when sanitize throws.'
+		);
+	}
+
+	private function read_force_floor( $block ) {
+		$reflection = new \ReflectionProperty( get_class( $block ), 'force_kses_floor' );
+		$reflection->setAccessible( true );
+
+		return $reflection->getValue( $block );
+	}
+
 	/**
 	 * Closure-safe accessor for the PAYLOAD constant (PHP closures bound in
 	 * properties cannot reference self::).

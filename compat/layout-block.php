@@ -5,6 +5,18 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private $return_layout = true;
 
 	/**
+	 * When true, the save-time kses floor in render_layout_block() is applied
+	 * regardless of the author's `unfiltered_html` capability. Set/restored
+	 * only by sanitize_block_untrusted() around the chokepoint call (the same
+	 * instance-scoped discipline as $return_layout): origin-untrusted content
+	 * (AI ability writes) must never be signed unfloored, because the
+	 * capability belongs to the request's author while the content's origin
+	 * does not. Deliberately private state, not a filter — third-party code
+	 * must not be able to toggle a security floor.
+	 */
+	private $force_kses_floor = false;
+
+	/**
 	 * Get the singleton instance
 	 *
 	 * @return SiteOrigin_Panels_Compat_Layout_Block
@@ -223,10 +235,12 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 
 			// current_user_can() runs in the real save-time request context
 			// (the author's session), which is the only place capability-gated
-			// sanitization is meaningful. An AI-changed layout is floored
+			// sanitization is meaningful. Origin-untrusted content is floored
 			// unconditionally: the capability belongs to the request's author,
-			// but the content's origin is the AI transform.
-			if ( $ai_changed_layout || ! current_user_can( 'unfiltered_html' ) ) {
+			// but the content's origin is the AI (a forced-floor write via
+			// sanitize_block_untrusted(), or a layout the AI pre-save filter
+			// changed).
+			if ( $this->force_kses_floor || $ai_changed_layout || ! current_user_can( 'unfiltered_html' ) ) {
 				// Floor: the signature must not depend on any individual
 				// field/widget sanitizer being "healthy" this request (some
 				// SiteOrigin Widgets Bundle field sanitizers can silently pass
@@ -699,6 +713,37 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
 			unset( $block['attrs']['renderedLayout'] );
 		}
+		return $block;
+	}
+
+	/**
+	 * Sanitize-and-sign a Layout Block whose content origin is untrusted,
+	 * forcing the kses floor regardless of the current user's capabilities.
+	 *
+	 * Entry point for AI ability writes (see inc/abilities.php): AI output is
+	 * prompt-injectable no matter whose credential carries the request, so an
+	 * admin application password must not exempt it from the floor the way it
+	 * would exempt the author's own content. Runs the full save chokepoint —
+	 * the `siteorigin_panels_ai_block_layout_pre_save` filter, strict
+	 * sanitize, the forced floor, then signing — in one pass.
+	 *
+	 * The flag restore uses try/finally (unlike $return_layout's plain
+	 * set/restore) because it guards a security floor; if an exception did
+	 * escape, a stuck-true flag would only over-floor later saves in the same
+	 * request — fail-closed.
+	 *
+	 * @param array $block A parsed Layout Block (parse_blocks() shape).
+	 * @return array The block with sanitized, floored, signed panelsData.
+	 */
+	public function sanitize_block_untrusted( $block ) {
+		$this->force_kses_floor = true;
+
+		try {
+			$block = $this->sanitize_block( $block );
+		} finally {
+			$this->force_kses_floor = false;
+		}
+
 		return $block;
 	}
 
