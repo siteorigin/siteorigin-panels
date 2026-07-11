@@ -20,6 +20,22 @@
  *     "layouts": [ { "storage": "meta"|"block", "block_index": int|null, "panels_data": {...} }, ... ]
  *   }
  *
+ * Write contract (ability `siteorigin-panels/layout-update`, inc/abilities.php):
+ * AI content is origin-untrusted regardless of the credential carrying the
+ * request — an admin application password does not exempt it. Never passed as
+ * `$trusted = true` anywhere.
+ *   - BLOCK writes route through the compat save chokepoint
+ *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
+ *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
+ *     layered-transform interaction premium-addon consumers of that filter
+ *     must expect), then strict sanitize, then the kses floor FORCED
+ *     regardless of capability, then HMAC signing. Single sanitize pass: the
+ *     wp_insert_post_data safety net verifies the fresh signature and skips
+ *     re-sanitizing.
+ *   - META writes are strictly sanitized, unconditionally kses-floored, and
+ *     double-slashed; they are UNSIGNED by design (classic render trusts
+ *     stored meta), which is why the write-time floor is not capability-gated.
+ *
  * @since {NEXT_VERSION}
  * @api
  */
