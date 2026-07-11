@@ -378,6 +378,13 @@ class SiteOrigin_Panels_Abilities {
 	protected function update_meta_layout( $post_id, $panels_data, $old_panels_data ) {
 		$admin = SiteOrigin_Panels_Admin::single();
 
+		// Strip any inbound signature so a client-supplied or copied
+		// 'sanitize_signature' can never be persisted into meta and round-trip
+		// back out via layout-get looking like a real signature. Nothing signs or
+		// verifies meta, so this is hygiene — mirrors sanitize_panels_data()'s
+		// strip on the block path.
+		unset( $panels_data['sanitize_signature'] );
+
 		// Fetch the post up-front so it can be passed to the pre-save filter and
 		// reused for the copy-content refresh.
 		$post = get_post( $post_id );

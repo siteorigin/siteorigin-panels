@@ -1014,6 +1014,41 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertNotContains( $hostile, $persisted[2]['widgets'] );
 	}
 
+	public function test_meta_write_strips_inbound_sanitize_signature() {
+		// LOW-5: a client-supplied/copied top-level sanitize_signature must never
+		// be persisted into meta (nothing signs/verifies meta; persisting it would
+		// leak a plausible-looking signature back out via layout-get).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 12,
+				'panels_data' => array(
+					'widgets'            => array( array( 'panels_info' => array( 'class' => 'X' ) ) ),
+					'sanitize_signature' => 'forged-or-copied-signature',
+				),
+			)
+		);
+
+		$this->assertNotNull( $persisted );
+		$this->assertArrayNotHasKey(
+			'sanitize_signature',
+			$persisted,
+			'The inbound signature must be stripped before the meta write.'
+		);
+	}
+
 	public function test_meta_write_double_slashes_so_backslashes_survive_unslashing() {
 		// update_post_meta() wp_unslash()es its input; without the production
 		// map_deep(double_slash_string) wrap, backslashes in stored widget data
