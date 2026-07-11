@@ -272,6 +272,14 @@ class SiteOrigin_Panels_Admin {
 				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 				false
 			);
+
+			// Unconditional kses floor for the AI-changed layout (Audit #1 fix
+			// 1c): a layout the AI filter transformed is origin-untrusted, so
+			// the author's unfiltered_html capability must not exempt it.
+			// Applied AFTER the re-sanitize — widget update() output is what
+			// persists. The no-op path above stays unfloored: a capable
+			// author's own unchanged content keeps raw embeds.
+			$panels_data['widgets'] = self::kses_deep( $panels_data['widgets'] );
 		}
 
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
@@ -1149,10 +1157,18 @@ class SiteOrigin_Panels_Admin {
 	 * @param array $old_widgets
 	 * @param bool  $escape_classes Should the class names be escaped.
 	 * @param bool  $force
+	 * @param bool  $trusted        Legal ONLY when the caller has independently
+	 *                              verified (e.g. via HMAC signature) that $widgets is
+	 *                              the exact output of a prior call to this same
+	 *                              function under real capability-gated sanitization.
+	 *                              Never set based on inference/heuristics/call-site
+	 *                              identity alone. When true, skips update()/kses_deep
+	 *                              sanitization execution but still runs class
+	 *                              resolution, raw-flag unset, and escape_classes.
 	 *
 	 * @return array
 	 */
-	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $trusted = false ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -1191,30 +1207,37 @@ class SiteOrigin_Panels_Admin {
 			// stored-XSS fix for panels_data.
 			$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
 
-			if ( ! empty( $the_widget ) &&
-				 method_exists( $the_widget, 'update' ) ) {
-				if (
-					! empty( $old_widgets_by_id ) &&
-					! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) &&
-					! empty( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] )
-				) {
-					$old_widget = $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ];
-				} else {
-					$old_widget = $widget;
+			// $trusted = true is legal ONLY when the caller has independently
+			// verified (e.g. via HMAC signature) that $widgets is the exact output
+			// of a prior call to this same function under real capability-gated
+			// sanitization; callers must never set it based on inference,
+			// heuristics, or the identity of the calling code path alone.
+			if ( ! $trusted ) {
+				if ( ! empty( $the_widget ) &&
+					 method_exists( $the_widget, 'update' ) ) {
+					if (
+						! empty( $old_widgets_by_id ) &&
+						! empty( $widget[ 'panels_info' ][ 'widget_id' ] ) &&
+						! empty( $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ] )
+					) {
+						$old_widget = $old_widgets_by_id[ $widget[ 'panels_info' ][ 'widget_id' ] ];
+					} else {
+						$old_widget = $widget;
+					}
+
+					/** @var WP_Widget $the_widget */
+					$instance = $the_widget->update( $widget, $old_widget );
+					$instance = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
+
+					$widget = $instance;
+				} elseif ( ! current_user_can( 'unfiltered_html' ) ) {
+					// Defense in depth: the widget class did not resolve to something with
+					// an update() method, so its own sanitizer cannot run. For users
+					// lacking unfiltered_html, recursively wp_kses_post() every string
+					// field so unsanitized markup can never be persisted, even for an
+					// unknown or missing widget class.
+					$widget = self::kses_deep( $widget );
 				}
-
-				/** @var WP_Widget $the_widget */
-				$instance = $the_widget->update( $widget, $old_widget );
-				$instance = apply_filters( 'widget_update_callback', $instance, $widget, $old_widget, $the_widget );
-
-				$widget = $instance;
-			} elseif ( ! current_user_can( 'unfiltered_html' ) ) {
-				// Defense in depth: the widget class did not resolve to something with
-				// an update() method, so its own sanitizer cannot run. For users
-				// lacking unfiltered_html, recursively wp_kses_post() every string
-				// field so unsanitized markup can never be persisted, even for an
-				// unknown or missing widget class.
-				$widget = self::kses_deep( $widget );
 			}
 
 			// The raw flag is only ever a transient editor hint and must never be
@@ -1238,11 +1261,13 @@ class SiteOrigin_Panels_Admin {
 	 * Used as a defense-in-depth fallback in process_raw_widgets() for widget
 	 * instances whose class cannot be resolved to a widget with an update()
 	 * method, ensuring unprivileged users can never persist unsanitized markup.
+	 * Also used by SiteOrigin_Panels_Compat_Layout_Block as a universal
+	 * sanitization floor before signing panels_data at save time.
 	 *
 	 * @param mixed $value Scalar or (nested) array to sanitize.
 	 * @return mixed The sanitized value, preserving structure.
 	 */
-	private static function kses_deep( $value ) {
+	public static function kses_deep( $value ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
 				$value[ $key ] = self::kses_deep( $item );

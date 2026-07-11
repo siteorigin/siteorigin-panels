@@ -340,6 +340,19 @@ class SiteOrigin_Panels_Abilities {
 		// pre-save transforms run on ability writes too.
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
+		// Unconditional kses floor for the AI meta write (Audit #1 fix 1b): the
+		// whole write is AI-originated, and AI output is prompt-injectable no
+		// matter whose credential carries the request — the author's
+		// unfiltered_html capability must not exempt it. Applied AFTER sanitize
+		// and the pre-save filter (widget update() output is what persists;
+		// filter-injected content is floored too), directly at this call site:
+		// nothing signs meta, so no chokepoint flag is involved. Classic render
+		// trusts stored meta, which makes this write-time floor the only floor
+		// this surface gets.
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+		}
+
 		// Empty-layout parity (admin.php save_post): a layout with no widgets and no
 		// grids means "clear the layout" — delete the meta rather than storing an
 		// empty layout, and skip the copy-content refresh.
@@ -389,6 +402,10 @@ class SiteOrigin_Panels_Abilities {
 	 *  - exactly ONE block: block_index defaults to 0; a non-zero index is declined.
 	 *  - MORE THAN ONE block: block_index is REQUIRED and must be in range; a missing
 	 *    or out-of-range index is declined as 'block-ambiguous' with the valid range.
+	 *
+	 * The resolved write routes through the compat save chokepoint — see
+	 * write_block_layout() for the sanitize/forced-floor/sign contract and the
+	 * `siteorigin_panels_ai_block_layout_pre_save` layered-transform note.
 	 *
 	 * @param WP_Post  $post        The post being written.
 	 * @param int      $block_count Number of qualifying Layout Blocks in the post.
@@ -512,19 +529,33 @@ class SiteOrigin_Panels_Abilities {
 	 * returns each block's original parse_blocks() key, so we mutate exactly that
 	 * block.
 	 *
-	 * §3: the incoming layout is re-sanitized through the SAME path a Layout Block
-	 * save uses (process_raw_widgets( $widgets, false, true ) + sanitize_all()),
-	 * mirroring compat/layout-block.php::sanitize_panels_data(); AI input is never
-	 * persisted raw. Only the target block's panelsData is replaced — every other
-	 * block is left byte-identical — then post_content is re-serialized and saved.
+	 * §3: the incoming layout is routed through the compat save CHOKEPOINT
+	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()) — the
+	 * SAME path every Layout Block save uses: the
+	 * `siteorigin_panels_ai_block_layout_pre_save` filter, strict sanitize
+	 * (process_raw_widgets + sanitize_all), the kses floor FORCED regardless of
+	 * the credential's `unfiltered_html` capability (AI output is
+	 * origin-untrusted, whatever authenticates the request), then HMAC signing.
+	 * AI input is never persisted raw, and this is a SINGLE sanitize pass by
+	 * design: the wp_insert_post_data safety net verifies the fresh signature
+	 * and skips re-sanitizing, so widget update() never runs twice per write.
+	 *
+	 * NOTE for premium-addon authors (layered transforms): because the write
+	 * goes through the chokepoint, any consumer hooked to
+	 * `siteorigin_panels_ai_block_layout_pre_save` transforms THIS write too.
+	 *
+	 * Only the target block is replaced — every other block is left
+	 * byte-identical — then post_content is re-serialized and saved.
 	 *
 	 * @param WP_Post $post        The post to write to.
 	 * @param int     $block_index 0-based qualifying-block ordinal to target.
 	 * @param array   $panels_data Canonical panels_data to persist into that block.
 	 *
 	 * @return int|WP_Error Matched block index on success; WP_Error 'block_index_not_found'
-	 *                      when no qualifying block has that index, or 'block_write_failed'
-	 *                      when the post update did not persist.
+	 *                      when no qualifying block has that index,
+	 *                      'layout_block_unsupported' when the compat chokepoint class
+	 *                      is unavailable, or 'block_write_failed' when the post update
+	 *                      did not persist.
 	 */
 	protected function write_block_layout( $post, $block_index, $panels_data ) {
 		$qualifying = $this->qualifying_block_layouts( $post );
@@ -541,19 +572,20 @@ class SiteOrigin_Panels_Abilities {
 			return new WP_Error( 'block_index_not_found', __( 'Requested block index not found.', 'siteorigin-panels' ) );
 		}
 
-		// §3 — re-sanitize through the SAME path block saves use. Never trust raw.
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets(
-			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
-			false,
-			true
-		);
-		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+		// The chokepoint class is required to sanitize-and-sign the write. It is
+		// loaded behind function_exists( 'register_block_type' ), so mirror
+		// ai-exposure.php's class_exists guard and decline rather than fatal.
+		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' ) ) {
+			return new WP_Error( 'layout_block_unsupported', __( 'Layout Block saving is not available on this site.', 'siteorigin-panels' ) );
+		}
 
-		// Re-parse and replace ONLY the target block's panelsData (the walk's
-		// block_key indexes this same parse_blocks() array); all other blocks
-		// untouched.
+		// §3 — route the raw incoming layout through the save chokepoint with the
+		// kses floor forced (see docblock). Replace ONLY the target block (the
+		// walk's block_key indexes this same parse_blocks() array); all other
+		// blocks untouched.
 		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
+		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_untrusted( $blocks[ $target_key ] );
 
 		// wp_update_post()/wp_insert_post() run wp_unslash() on their input, so the
 		// content MUST be slashed first — otherwise the backslash in every JSON
