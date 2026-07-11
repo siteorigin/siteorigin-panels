@@ -22,29 +22,40 @@ use Brain\Monkey\Functions;
  *             ! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
  *             false
  *         );
+ *         $panels_data['widgets'] = self::kses_deep( $panels_data['widgets'] );
  *     }
  *
- * and asserts two guarantees:
+ * and asserts three guarantees:
  *  (1) §3 security — whenever the filter CHANGES the layout, the result is passed
  *      through process_raw_widgets() before persist (AI output never trusted raw);
  *  (2) idempotency — when no filter is attached (or it returns the layout
  *      unchanged), the second sanitize pass is SKIPPED, so widget update()
- *      sanitizers are not double-run on every classic save.
+ *      sanitizers are not double-run on every classic save — and the kses floor
+ *      is skipped with it (a capable author's own content keeps raw embeds);
+ *  (3) forced floor (Audit #1 fix 1c) — an AI-CHANGED layout is kses-floored
+ *      AFTER the re-sanitize, regardless of the author's capabilities.
  * If the production slice changes, update this test to match.
  */
 class AiExposureResanitizeTest extends SiteOriginTests {
 	/**
 	 * Reproduce the production slice (the conditional re-sanitize in save_post()).
 	 *
-	 * @param array    $panels_data     Incoming panels_data.
-	 * @param array    $old_panels_data Previously-stored panels_data.
-	 * @param object   $post            Post object passed to the filter.
-	 * @param int      $post_id         Post ID passed to the filter.
-	 * @param callable $sanitizer       Stand-in for $this->process_raw_widgets().
+	 * @param array         $panels_data     Incoming panels_data.
+	 * @param array         $old_panels_data Previously-stored panels_data.
+	 * @param object        $post            Post object passed to the filter.
+	 * @param int           $post_id         Post ID passed to the filter.
+	 * @param callable      $sanitizer       Stand-in for $this->process_raw_widgets().
+	 * @param callable|null $floor           Stand-in for self::kses_deep() (identity when null).
 	 *
-	 * @return array The panels_data after filter + (conditional) re-sanitization.
+	 * @return array The panels_data after filter + (conditional) re-sanitization + floor.
 	 */
-	private function run_pre_save_slice( array $panels_data, array $old_panels_data, $post, int $post_id, callable $sanitizer ): array {
+	private function run_pre_save_slice( array $panels_data, array $old_panels_data, $post, int $post_id, callable $sanitizer, ?callable $floor = null ): array {
+		if ( $floor === null ) {
+			$floor = function ( $widgets ) {
+				return $widgets;
+			};
+		}
+
 		$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
 
 		// Re-sanitize ONLY when the filter changed the layout — same as production.
@@ -55,6 +66,8 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 				false
 			);
+			// Unconditional kses floor for the AI-changed layout — same as production.
+			$panels_data['widgets'] = $floor( $panels_data['widgets'] );
 		}
 
 		return $panels_data;
@@ -131,13 +144,80 @@ class AiExposureResanitizeTest extends SiteOriginTests {
 			return $args[0];
 		};
 
-		$result = $this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer );
+		$floor_called = false;
+		$floor        = function ( $widgets ) use ( &$floor_called ) {
+			$floor_called = true;
+
+			return $widgets;
+		};
+
+		$result = $this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer, $floor );
 
 		// Idempotency guarantee: with no filter change, the second sanitize pass
 		// MUST NOT run (widget update() sanitizers are not guaranteed idempotent).
 		$this->assertFalse( $sanitizer_called, 'process_raw_widgets() must not run a second time when the AI filter leaves the layout unchanged.' );
+		// And the kses floor must be skipped with it: a capable author's own
+		// unchanged content keeps raw embeds (no #1341 regression).
+		$this->assertFalse( $floor_called, 'kses_deep() must not run when the AI filter leaves the layout unchanged.' );
 		// The layout is persisted unchanged (already sanitized by the first pass).
 		$this->assertSame( $incoming, $result );
+	}
+
+	public function test_changed_layout_is_floored_after_resanitize_regardless_of_capability() {
+		$post    = (object) array( 'ID' => 9 );
+		$post_id = 9;
+
+		$incoming        = array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'Safe_Widget' ) ) ) );
+		$old_panels_data = array( 'widgets' => array() );
+
+		// The admin-app-password framing: production consults NO capability on
+		// this floor — it is unconditional for a changed layout. current_user_can
+		// returning true must make no difference.
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		// Filter that CHANGES the layout (an AI consumer transformed it).
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_ai_layout_pre_save' ) {
+					$value['widgets'][] = array(
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ),
+						'content'     => '<img src=x onerror=alert(1)>',
+					);
+				}
+
+				return $value;
+			}
+		);
+
+		// Sanitizer passes widgets through (a permissive widget update()).
+		$sanitizer_output = null;
+		$sanitizer        = function ( ...$args ) use ( &$sanitizer_output ) {
+			$sanitizer_output = $args[0];
+
+			return $args[0];
+		};
+
+		// Floor spy records what it received and strips the handler.
+		$floor_received = null;
+		$floor          = function ( $widgets ) use ( &$floor_received ) {
+			$floor_received = $widgets;
+
+			foreach ( $widgets as $i => $widget ) {
+				if ( isset( $widget['content'] ) ) {
+					$widgets[ $i ]['content'] = preg_replace( '/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $widget['content'] );
+				}
+			}
+
+			return $widgets;
+		};
+
+		$result = $this->run_pre_save_slice( $incoming, $old_panels_data, $post, $post_id, $sanitizer, $floor );
+
+		// The floor ran, AFTER the re-sanitize (it received the sanitizer output).
+		$this->assertNotNull( $floor_received, 'kses_deep() must run on an AI-changed layout.' );
+		$this->assertSame( $sanitizer_output, $floor_received, 'The floor must receive the SANITIZER output — floor runs after re-sanitize.' );
+		// The persisted widgets are the floored set.
+		$this->assertSame( '<img src=x>', $result['widgets'][1]['content'], 'AI-changed content must be floored regardless of capability.' );
 	}
 
 	public function test_sanitizer_called_with_production_argument_shape() {

@@ -340,6 +340,19 @@ class SiteOrigin_Panels_Abilities {
 		// pre-save transforms run on ability writes too.
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
+		// Unconditional kses floor for the AI meta write (Audit #1 fix 1b): the
+		// whole write is AI-originated, and AI output is prompt-injectable no
+		// matter whose credential carries the request — the author's
+		// unfiltered_html capability must not exempt it. Applied AFTER sanitize
+		// and the pre-save filter (widget update() output is what persists;
+		// filter-injected content is floored too), directly at this call site:
+		// nothing signs meta, so no chokepoint flag is involved. Classic render
+		// trusts stored meta, which makes this write-time floor the only floor
+		// this surface gets.
+		if ( ! empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+		}
+
 		// Empty-layout parity (admin.php save_post): a layout with no widgets and no
 		// grids means "clear the layout" — delete the meta rather than storing an
 		// empty layout, and skip the copy-content refresh.

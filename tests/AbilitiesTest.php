@@ -80,6 +80,22 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 		public static function double_slash_string( $value ) {
 			return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
 		}
+
+		// Mirrors the real SiteOrigin_Panels_Admin::kses_deep() shape (recursive
+		// wp_kses_post over string leaves), with the same on*-attribute strip the
+		// other suites use to emulate wp_kses_post. Lets tests observe the
+		// unconditional meta-write kses floor.
+		public static function kses_deep( $value ) {
+			if ( is_array( $value ) ) {
+				return array_map( array( __CLASS__, 'kses_deep' ), $value );
+			}
+
+			if ( ! is_string( $value ) ) {
+				return $value;
+			}
+
+			return preg_replace( '/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $value );
+		}
 	}
 }
 
@@ -857,7 +873,10 @@ class AbilitiesTest extends SiteOriginTests {
 		Functions\when( 'parse_blocks' )->justReturn( array() );
 		Functions\when( 'get_post_meta' )->justReturn( '' );
 
-		// Sanitizer returns widgets that legitimately contain single backslashes.
+		// Sanitizer returns widgets that legitimately contain single backslashes,
+		// plus a payload-bearing content field so this test also proves the
+		// unconditional meta kses floor COMPOSES with the double-slash wrap
+		// (floor first, then slashing — both HIGH-fix behaviors intact).
 		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
 			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
 				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
@@ -866,6 +885,7 @@ class AbilitiesTest extends SiteOriginTests {
 					array(
 						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo' ),
 						'text'        => 'C:\\path\\to\\file',
+						'content'     => '<img src=x onerror=alert(1)>',
 					),
 				);
 			}
@@ -900,6 +920,63 @@ class AbilitiesTest extends SiteOriginTests {
 			'C:\\path\\to\\file',
 			$persisted['widgets'][0]['text'],
 			'Backslash-bearing content must survive the meta write.'
+		);
+		$this->assertSame(
+			'<img src=x>',
+			$persisted['widgets'][0]['content'],
+			'The unconditional meta kses floor must strip the payload while double-slashing keeps backslashes intact.'
+		);
+	}
+
+	public function test_meta_write_floors_widget_content_unconditionally() {
+		// Audit #1 fix 1b: the whole ability meta write is AI-originated, so the
+		// kses floor runs with NO capability gate at all — nothing about the
+		// requesting credential (e.g. an admin application password holding
+		// unfiltered_html) can exempt it. Nothing signs meta; this write-time
+		// floor is the only floor the classic-render surface gets.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		// The capability check passing must make no difference — production
+		// consults no capability on this path.
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				// The widget's own sanitizer let the handler through (e.g. a
+				// custom-HTML widget for an unfiltered_html author).
+				return array(
+					array(
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ),
+						'content'     => '<img src=x onerror=alert(1)>',
+					),
+				);
+			}
+		};
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 22,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame(
+			'<img src=x>',
+			$persisted['widgets'][0]['content'],
+			'AI meta writes must be kses-floored before persist regardless of the credential\'s capabilities.'
 		);
 	}
 

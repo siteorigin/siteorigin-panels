@@ -272,6 +272,14 @@ class SiteOrigin_Panels_Admin {
 				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 				false
 			);
+
+			// Unconditional kses floor for the AI-changed layout (Audit #1 fix
+			// 1c): a layout the AI filter transformed is origin-untrusted, so
+			// the author's unfiltered_html capability must not exempt it.
+			// Applied AFTER the re-sanitize — widget update() output is what
+			// persists. The no-op path above stays unfloored: a capable
+			// author's own unchanged content keeps raw embeds.
+			$panels_data['widgets'] = self::kses_deep( $panels_data['widgets'] );
 		}
 
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
