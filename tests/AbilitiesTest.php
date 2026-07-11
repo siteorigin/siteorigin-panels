@@ -110,6 +110,54 @@ if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin' ) ) {
 }
 
 /**
+ * Spyable stand-in for SiteOrigin_Panels_Compat_Layout_Block::single()
+ * ->sanitize_block_untrusted() — the compat save chokepoint block writes now
+ * route through. Records each call and the block it received (so tests can
+ * assert the RAW incoming panelsData reaches the chokepoint), and mirrors the
+ * real chokepoint's observable contract: sanitized widgets, a signature, and
+ * innerHTML removed.
+ */
+class Abilities_LayoutBlockSpy {
+	public static $instance;
+	public $untrusted_calls = 0;
+	public $received_block = null;
+
+	public static function single() {
+		return self::$instance;
+	}
+
+	public function sanitize_block_untrusted( $block ) {
+		$this->untrusted_calls++;
+		$this->received_block = $block;
+
+		$block['attrs']['panelsData']['widgets'] = array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+		$block['attrs']['panelsData']['sanitize_signature'] = 'chokepoint-signed';
+		unset( $block['innerHTML'] );
+
+		return $block;
+	}
+}
+
+/*
+ * NOTE: defining this shim makes class_exists('SiteOrigin_Panels_Compat_Layout_Block')
+ * TRUE for the whole default-suite process, so write_block_layout()'s
+ * missing-chokepoint WP_Error guard is structurally untestable here (PHP cannot
+ * undefine a class). The guard mirrors inc/ai-exposure.php's class_exists
+ * precedent; its decline branch is two lines reviewed by inspection.
+ * BLOCK_NAME must exist because the shared AI-exposure walk reads it once
+ * class_exists() is satisfied.
+ */
+if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' ) ) {
+	class SiteOrigin_Panels_Compat_Layout_Block {
+		const BLOCK_NAME = 'siteorigin-panels/layout-block';
+
+		public static function single() {
+			return Abilities_LayoutBlockSpy::single();
+		}
+	}
+}
+
+/**
  * Spyable stand-in for SiteOrigin_Panels_Sidebars_Emulator::single()
  * ->generate_sidebar_widget_ids(). Tags each widget so tests can prove the
  * emulator output is what gets persisted.
@@ -230,9 +278,10 @@ class AbilitiesTest extends SiteOriginTests {
 	protected function setUp(): void {
 		parent::setUp();
 
-		Abilities_AdminSpy::$instance    = new Abilities_AdminSpy();
-		Abilities_StylesSpy::$instance   = new Abilities_StylesSpy();
-		Abilities_EmulatorSpy::$instance = new Abilities_EmulatorSpy();
+		Abilities_AdminSpy::$instance       = new Abilities_AdminSpy();
+		Abilities_StylesSpy::$instance      = new Abilities_StylesSpy();
+		Abilities_EmulatorSpy::$instance    = new Abilities_EmulatorSpy();
+		Abilities_LayoutBlockSpy::$instance = new Abilities_LayoutBlockSpy();
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
@@ -353,16 +402,32 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertSame( 0, $result['block_index'] );
 
-		// §3: block save path uses process_raw_widgets( $widgets, false, true ).
-		$args = Abilities_AdminSpy::$instance->process_args;
-		$this->assertNotNull( $args, 'Block write must run process_raw_widgets().' );
-		$this->assertFalse( $args[1], 'Block sanitize passes old_widgets = false.' );
-		$this->assertTrue( $args[2], 'Block sanitize passes escape_classes = true.' );
+		// §3: the block write routes through the compat save chokepoint exactly
+		// once, carrying the RAW incoming panelsData (the chokepoint owns the
+		// whole filter → sanitize → forced floor → sign sequence).
+		$spy = Abilities_LayoutBlockSpy::$instance;
+		$this->assertSame( 1, $spy->untrusted_calls, 'Block write must call sanitize_block_untrusted() exactly once.' );
+		$this->assertSame(
+			array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
+			$spy->received_block['attrs']['panelsData'],
+			'The chokepoint must receive the raw incoming layout — no pre-processing in abilities code.'
+		);
 
-		// The written block carries the SANITIZER output, not raw input.
+		// The deleted inline sanitize pass must be gone: neither
+		// process_raw_widgets() nor sanitize_all() runs in abilities code on
+		// the block path (single sanitize pass, inside the chokepoint only).
+		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No inline process_raw_widgets() on the block path.' );
+		$this->assertFalse( Abilities_StylesSpy::$instance->sanitize_all_called, 'No inline sanitize_all() on the block path.' );
+
+		// The written block carries the CHOKEPOINT output — sanitized and signed.
 		$this->assertSame(
 			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
 			$saved['post_content'][0]['attrs']['panelsData']['widgets']
+		);
+		$this->assertSame(
+			'chokepoint-signed',
+			$saved['post_content'][0]['attrs']['panelsData']['sanitize_signature'],
+			'The persisted block must carry the chokepoint-produced signature.'
 		);
 	}
 
@@ -382,7 +447,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertFalse( $result['updated'] );
 		$this->assertSame( 'block', $result['source'] );
 		$this->assertArrayHasKey( 'message', $result );
-		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No sanitize on a declined write.' );
+		$this->assertSame( 0, Abilities_LayoutBlockSpy::$instance->untrusted_calls, 'No chokepoint sanitize on a declined write.' );
 	}
 
 	public function test_update_multi_block_targets_requested_index_only() {
@@ -444,7 +509,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertFalse( $result['updated'] );
 		$this->assertSame( 'block-ambiguous', $result['source'] );
 		$this->assertStringContainsString( '0-1', $result['message'], 'Message lists the valid index range.' );
-		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No sanitize on an ambiguous decline.' );
+		$this->assertSame( 0, Abilities_LayoutBlockSpy::$instance->untrusted_calls, 'No chokepoint sanitize on an ambiguous decline.' );
 	}
 
 	public function test_update_multi_block_out_of_range_index_is_ambiguous() {
@@ -670,14 +735,16 @@ class AbilitiesTest extends SiteOriginTests {
 			fn( $blocks ) => '__SER__:' . json_encode( $blocks, JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP )
 		);
 
-		// Admin spy normally replaces widgets with a fixed 'Cleaned' set (no markup),
-		// which would hide the '<' under test. For THIS test, make the sanitizer
-		// preserve the incoming markup so the serialized content actually carries <.
-		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
-			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
-				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+		// The chokepoint spy normally replaces widgets with a fixed 'Cleaned' set
+		// (no markup), which would hide the '<' under test. For THIS test, make
+		// the chokepoint preserve the incoming markup so the serialized content
+		// actually carries <.
+		Abilities_LayoutBlockSpy::$instance = new class extends Abilities_LayoutBlockSpy {
+			public function sanitize_block_untrusted( $block ) {
+				$this->untrusted_calls++;
+				$this->received_block = $block;
 
-				return $widgets; // preserve markup verbatim for the slashing assertion
+				return $block; // preserve markup verbatim for the slashing assertion
 			}
 		};
 
