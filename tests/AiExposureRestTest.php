@@ -85,6 +85,15 @@ class AiExposure_RequestStub implements ArrayAccess {
  * frozen and must not change to fit a test.
  */
 class AiExposureRestTest extends SiteOriginTests {
+	protected function setUp(): void {
+		parent::setUp();
+
+		// get_layout() now re-checks edit_post as defense in depth for direct
+		// callers; grant it by default so the source-shape tests exercise the
+		// read behavior, and let the denial test override to false.
+		Functions\when( 'current_user_can' )->justReturn( true );
+	}
+
 	private function request( int $id ): AiExposure_RequestStub {
 		return new AiExposure_RequestStub( array( 'id' => $id ) );
 	}
@@ -128,6 +137,20 @@ class AiExposureRestTest extends SiteOriginTests {
 		$result   = $exposure->get_layout_permissions_check( $this->request( 5 ) );
 
 		$this->assertTrue( $result );
+	}
+
+	public function test_get_layout_execute_denies_direct_call_without_edit_post() {
+		// LOW-7: the REST callback itself re-checks the capability, so a direct
+		// in-process caller cannot bypass the route's permission callback.
+		Functions\when( 'current_user_can' )->justReturn( false );
+		Functions\when( 'rest_authorization_required_code' )->justReturn( 403 );
+
+		$exposure = new SiteOrigin_Panels_AI_Exposure();
+		$result   = $exposure->get_layout( $this->request( 5 ) );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'rest_cannot_read_layout', $result->get_error_code() );
+		$this->assertSame( 403, $result->get_error_data()['status'] );
 	}
 
 	public function test_missing_post_returns_404() {

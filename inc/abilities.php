@@ -241,8 +241,32 @@ class SiteOrigin_Panels_Abilities {
 	 */
 	public function layout_update( $input ) {
 		$post_id     = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
-		$panels_data = isset( $input['panels_data'] ) && is_array( $input['panels_data'] ) ? $input['panels_data'] : array();
 		$block_index = isset( $input['block_index'] ) && is_numeric( $input['block_index'] ) ? (int) $input['block_index'] : null;
+
+		// Defense in depth: the ability framework already gates this via
+		// layout_update_permission(), but re-check here so a direct in-process
+		// caller (e.g. a premium addon calling this method) cannot bypass the
+		// capability. Same code/message as the permission callback.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'siteorigin_panels_cannot_update_layout',
+				__( 'Sorry, you are not allowed to update this layout.', 'siteorigin-panels' )
+			);
+		}
+
+		// Reject a present-but-wrong-type panels_data rather than silently
+		// collapsing it to array() — which on the meta path would delete the
+		// existing classic layout and report success. Absent panels_data still
+		// defaults to array() (a legitimate "clear the layout" request).
+		if ( isset( $input['panels_data'] ) && ! is_array( $input['panels_data'] ) ) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'unsupported',
+				'message' => __( 'The panels_data must be provided as an object.', 'siteorigin-panels' ),
+			);
+		}
+		$panels_data = isset( $input['panels_data'] ) ? $input['panels_data'] : array();
 
 		$post = get_post( $post_id );
 
@@ -311,8 +335,55 @@ class SiteOrigin_Panels_Abilities {
 	 *
 	 * @return array The layout-update result array.
 	 */
+	/**
+	 * Coerce every entry of $panels_data['widgets'] to an array so no object- or
+	 * scalar-shaped widget can slip past process_raw_widgets()'s
+	 * `if ( ! is_array( $widget ) ) continue;` skip (inc/admin.php) and
+	 * kses_deep()'s non-array passthrough and reach persistence unsanitized.
+	 *
+	 * Casting a stdClass widget ENTRY to an assoc array is sufficient: once the
+	 * entry is an array, process_raw_widgets() runs the widget's update() over it
+	 * and kses_deep() recurses its string leaves. kses_deep() recurses only
+	 * is_array values, so a stdClass nested INSIDE a widget (e.g. an object-valued
+	 * setting) would still be skipped by the floor — that deeper case is out of
+	 * scope here: it is not the reported finding, widget schema values are
+	 * scalars/arrays not objects, and casting arbitrarily deep risks corrupting
+	 * legitimate structures.
+	 *
+	 * Reachable only from the AI direct-caller path; classic/import/live-editor
+	 * saves receive $_POST/editor JSON already decoded to arrays.
+	 *
+	 * @param array $panels_data Incoming canonical panels_data.
+	 * @return array Panels_data with every widgets entry normalized to an array.
+	 */
+	protected function normalize_widget_entries( $panels_data ) {
+		if ( empty( $panels_data['widgets'] ) || ! is_array( $panels_data['widgets'] ) ) {
+			return $panels_data;
+		}
+
+		$normalized = array();
+		foreach ( $panels_data['widgets'] as $widget ) {
+			if ( is_object( $widget ) ) {
+				$normalized[] = (array) $widget;
+			} elseif ( is_array( $widget ) ) {
+				$normalized[] = $widget;
+			}
+			// Scalars / null are dropped: not a valid widget shape, never persisted.
+		}
+		$panels_data['widgets'] = $normalized;
+
+		return $panels_data;
+	}
+
 	protected function update_meta_layout( $post_id, $panels_data, $old_panels_data ) {
 		$admin = SiteOrigin_Panels_Admin::single();
+
+		// Strip any inbound signature so a client-supplied or copied
+		// 'sanitize_signature' can never be persisted into meta and round-trip
+		// back out via layout-get looking like a real signature. Nothing signs or
+		// verifies meta, so this is hygiene — mirrors sanitize_panels_data()'s
+		// strip on the block path.
+		unset( $panels_data['sanitize_signature'] );
 
 		// Fetch the post up-front so it can be passed to the pre-save filter and
 		// reused for the copy-content refresh.
@@ -321,6 +392,10 @@ class SiteOrigin_Panels_Abilities {
 		// get_post_meta() can return a non-array scalar (e.g. '') — normalize so the
 		// ['widgets'] read below is explicit and future-proof.
 		$old_panels_data = is_array( $old_panels_data ) ? $old_panels_data : array();
+
+		// Coerce object/scalar widget entries to arrays so none slips past the
+		// sanitizer (see normalize_widget_entries()).
+		$panels_data = $this->normalize_widget_entries( $panels_data );
 
 		$panels_data['widgets'] = $admin->process_raw_widgets(
 			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
@@ -583,6 +658,10 @@ class SiteOrigin_Panels_Abilities {
 		// kses floor forced (see docblock). Replace ONLY the target block (the
 		// walk's block_key indexes this same parse_blocks() array); all other
 		// blocks untouched.
+		// Coerce object/scalar widget entries to arrays so none slips past the
+		// sanitizer inside the chokepoint (see normalize_widget_entries()).
+		$panels_data = $this->normalize_widget_entries( $panels_data );
+
 		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
 		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_untrusted( $blocks[ $target_key ] );
@@ -649,6 +728,15 @@ class SiteOrigin_Panels_Abilities {
 	 */
 	public function layout_get( $input ) {
 		$post_id = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
+
+		// Defense in depth: the framework gates this via layout_get_permission(),
+		// but re-check so a direct in-process caller cannot bypass the capability.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'siteorigin_panels_cannot_read_layout',
+				__( 'Sorry, you are not allowed to read this layout.', 'siteorigin-panels' )
+			);
+		}
 
 		return SiteOrigin_Panels_AI_Exposure::single()->read_layouts( $post_id );
 	}

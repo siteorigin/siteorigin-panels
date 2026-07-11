@@ -41,6 +41,8 @@ class AiCallSiteArityTest extends SiteOriginTests {
 		Functions\when( 'has_block' )->justReturn( false );
 		Functions\when( 'update_post_meta' )->justReturn( true );
 		Functions\when( 'wp_update_post' )->alias( fn( $args ) => $args['ID'] );
+		// layout_update() now re-checks edit_post; grant it for these arity tests.
+		Functions\when( 'current_user_can' )->justReturn( true );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {

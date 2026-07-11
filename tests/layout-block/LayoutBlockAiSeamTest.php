@@ -518,10 +518,88 @@ class LayoutBlockAiSeamTest extends TestCase {
 			$this->read_force_floor( $block ),
 			'The forced-floor flag must be restored by finally even when sanitize throws.'
 		);
+		// MED-3: $return_layout must ALSO be restored on the exception path, so a
+		// later render in the same request is not stuck on the save branch.
+		$this->assertTrue(
+			$this->read_return_layout( $block ),
+			'$return_layout must be restored to true even when sanitize throws.'
+		);
+	}
+
+	public function test_reentrant_untrusted_call_preserves_outer_floor() {
+		// LOW-4: a consumer of the AI filter calls sanitize_block_untrusted() on a
+		// nested block from INSIDE the outer untrusted write, while the outer flag
+		// is true. The inner call must restore the flag to its PRIOR value (true),
+		// not hard false, so the OUTER write is still floored + signed against the
+		// floored payload — even with a capable credential and an unchanged outer
+		// layout (so only force_kses_floor, not $ai_changed_layout, can floor it).
+		$stub = new AiSeamIdentityWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+		Functions\when( 'current_user_can' )->justReturn( true );
+
+		$block = $this->layout_block();
+
+		// The filter fires inside the outer sanitize_block_untrusted(); on its
+		// FIRST invocation it runs a nested untrusted write (which restores the
+		// flag) and returns the outer layout UNCHANGED so the changed-layout
+		// floor cannot mask the bug. A depth guard stops the nested call — which
+		// re-enters this same filter — from recursing forever (the real re-entrancy
+		// under test is one level: outer write → filter → inner untrusted write).
+		$reentered = false;
+		$this->ai_filter_callback = function ( $panels_data ) use ( $block, &$reentered ) {
+			if ( $reentered ) {
+				return $panels_data; // inner call's filter pass: no further nesting
+			}
+			$reentered = true;
+
+			$block->sanitize_block_untrusted(
+				array(
+					'blockName'    => 'siteorigin-panels/layout-block',
+					'attrs'        => array(
+						'panelsData' => array( 'widgets' => array( array( 'content' => 'inner', 'panels_info' => array( 'class' => 'AiSeamIdentityWidget' ) ) ) ),
+						'builder_id' => 'gbinner',
+					),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '',
+					'innerContent' => array(),
+				)
+			);
+
+			return $panels_data; // outer layout unchanged
+		};
+
+		$result = $block->sanitize_block_untrusted(
+			$this->block_for( array( 'widgets' => array( $this->widget( self::PAYLOAD ) ) ) )
+		);
+		$persisted = $result['attrs']['panelsData'];
+
+		$this->assertSame(
+			self::CLEANED,
+			$persisted['widgets'][0]['content'],
+			'The OUTER untrusted write must stay floored despite the re-entrant inner call restoring the flag.'
+		);
+		$this->assertTrue(
+			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
+			'The outer signature must verify against the floored payload.'
+		);
+		// And after everything unwinds, the flag is back to its resting false.
+		$this->assertFalse(
+			$this->read_force_floor( $block ),
+			'The forced-floor flag returns to false after the outer call completes.'
+		);
 	}
 
 	private function read_force_floor( $block ) {
 		$reflection = new \ReflectionProperty( get_class( $block ), 'force_kses_floor' );
+		$reflection->setAccessible( true );
+
+		return $reflection->getValue( $block );
+	}
+
+	private function read_return_layout( $block ) {
+		$reflection = new \ReflectionProperty( get_class( $block ), 'return_layout' );
 		$reflection->setAccessible( true );
 
 		return $reflection->getValue( $block );

@@ -706,9 +706,18 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $block;
 		}
 
+		// Save/restore the PRIOR value (not hard true) via try/finally: restore
+		// keeps a thrown widget update() from leaving the flag stuck on the save
+		// branch, and preserving the prior value keeps a re-entrant sanitize_block()
+		// — reachable when the AI pre-save filter runs a nested block write — from
+		// flipping the OUTER call back to the render branch mid-save.
+		$previous_return_layout = $this->return_layout;
 		$this->return_layout = false;
-		$block['attrs'] = $this->render_layout_block( $block['attrs'] );
-		$this->return_layout = true;
+		try {
+			$block['attrs'] = $this->render_layout_block( $block['attrs'] );
+		} finally {
+			$this->return_layout = $previous_return_layout;
+		}
 		unset( $block['innerHTML'] );
 		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
 			unset( $block['attrs']['renderedLayout'] );
@@ -727,21 +736,26 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * the `siteorigin_panels_ai_block_layout_pre_save` filter, strict
 	 * sanitize, the forced floor, then signing — in one pass.
 	 *
-	 * The flag restore uses try/finally (unlike $return_layout's plain
-	 * set/restore) because it guards a security floor; if an exception did
-	 * escape, a stuck-true flag would only over-floor later saves in the same
-	 * request — fail-closed.
+	 * The flag restore uses try/finally because it guards a security floor; if
+	 * an exception did escape, a stuck-true flag would only over-floor later
+	 * saves in the same request — fail-closed. It restores the PRIOR value
+	 * rather than a hard false so a re-entrant call (a consumer of the
+	 * siteorigin_panels_ai_block_layout_pre_save filter or widget_update_callback
+	 * calling this method on a sub-layout, both of which run while the outer
+	 * flag is true) cannot clear the outer write's floor when the inner call
+	 * returns.
 	 *
 	 * @param array $block A parsed Layout Block (parse_blocks() shape).
 	 * @return array The block with sanitized, floored, signed panelsData.
 	 */
 	public function sanitize_block_untrusted( $block ) {
+		$previous = $this->force_kses_floor;
 		$this->force_kses_floor = true;
 
 		try {
 			$block = $this->sanitize_block( $block );
 		} finally {
-			$this->force_kses_floor = false;
+			$this->force_kses_floor = $previous;
 		}
 
 		return $block;

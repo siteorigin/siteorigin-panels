@@ -140,7 +140,19 @@ class SiteOrigin_Panels_AI_Exposure {
 	 */
 	public function get_layout( $request ) {
 		$post_id = (int) $request['id'];
-		$result  = $this->read_layouts( $post_id );
+
+		// Defense in depth: the route gates this via get_layout_permissions_check(),
+		// but re-check so a direct in-process caller cannot bypass the capability.
+		// Matches that callback's error shape, including the status data.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'rest_cannot_read_layout',
+				__( 'Sorry, you are not allowed to read this layout.', 'siteorigin-panels' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		$result = $this->read_layouts( $post_id );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;

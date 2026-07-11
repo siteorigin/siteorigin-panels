@@ -313,6 +313,10 @@ class AbilitiesTest extends SiteOriginTests {
 		Functions\when( 'siteorigin_panels_setting' )->justReturn( false );
 		// No untargetable Layout Block by default; the nested-block test overrides.
 		Functions\when( 'has_block' )->justReturn( false );
+		// The execute methods (layout_update/layout_get) now re-check edit_post
+		// as defense in depth for direct callers; grant it by default so the
+		// happy-path tests exercise behavior, and let the denial tests override.
+		Functions\when( 'current_user_can' )->justReturn( true );
 	}
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
@@ -320,6 +324,29 @@ class AbilitiesTest extends SiteOriginTests {
 	}
 
 	// --- Permissions ---------------------------------------------------------
+
+	public function test_layout_update_execute_denies_direct_call_without_edit_post() {
+		// LOW-7: the execute method itself must re-check the capability, so a
+		// direct in-process caller cannot bypass the permission callback.
+		Functions\when( 'current_user_can' )->justReturn( false );
+		Functions\expect( 'get_post' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array( 'post_id' => 5, 'panels_data' => array( 'widgets' => array() ) )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_cannot_update_layout', $result->get_error_code() );
+	}
+
+	public function test_layout_get_execute_denies_direct_call_without_edit_post() {
+		Functions\when( 'current_user_can' )->justReturn( false );
+
+		$result = $this->abilities()->layout_get( array( 'post_id' => 5 ) );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_cannot_read_layout', $result->get_error_code() );
+	}
 
 	public function test_layout_get_permission_denied_without_edit_post() {
 		Functions\when( 'current_user_can' )->justReturn( false );
@@ -360,6 +387,94 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertFalse( $result['updated'] );
 		$this->assertSame( 'unsupported', $result['source'] );
 		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	// --- layout-update: input validation (Audit #2 MED-1 / MED-2) ------------
+
+	public function test_object_panels_data_is_declined_and_does_not_wipe_meta() {
+		// MED-2: a present-but-non-array panels_data must be declined, NOT
+		// silently collapsed to array() (which on the meta path would delete the
+		// existing classic layout and report success).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 7, 'post_content' => 'classic' ) );
+		Functions\when( 'get_post_meta' )->justReturn( array( 'widgets' => array( 'existing' ) ) );
+		Functions\expect( 'delete_post_meta' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array( 'post_id' => 7, 'panels_data' => (object) array( 'widgets' => array() ) )
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assertArrayHasKey( 'message', $result );
+	}
+
+	public function test_object_widget_entry_is_coerced_and_sanitized_on_meta_write() {
+		// MED-1: a stdClass widget entry must be coerced to an array so it reaches
+		// the sanitizer, never persisted raw. The admin spy records what it saw.
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		$received = null;
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public $seen_widgets = null;
+
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->seen_widgets = $widgets;
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+			}
+		};
+
+		Functions\when( 'update_post_meta' )->justReturn( true );
+
+		$object_widget = (object) array(
+			'content'     => '<script>alert(1)</script>',
+			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+		);
+
+		$this->abilities()->layout_update(
+			array( 'post_id' => 9, 'panels_data' => array( 'widgets' => array( $object_widget ) ) )
+		);
+
+		$seen = Abilities_AdminSpy::$instance->seen_widgets;
+		$this->assertIsArray( $seen[0], 'The object widget entry must reach the sanitizer as an array.' );
+		$this->assertSame(
+			'<script>alert(1)</script>',
+			$seen[0]['content'],
+			'The coerced widget must carry its fields so the sanitizer can strip them — not be dropped or left an object.'
+		);
+	}
+
+	public function test_scalar_widget_entry_is_dropped_before_persist() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public $seen_widgets = null;
+
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->seen_widgets = $widgets;
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return $widgets;
+			}
+		};
+		Functions\when( 'update_post_meta' )->justReturn( true );
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 9,
+				'panels_data' => array( 'widgets' => array( 'not-a-widget', array( 'panels_info' => array( 'class' => 'Keep' ) ) ) ),
+			)
+		);
+
+		$seen = Abilities_AdminSpy::$instance->seen_widgets;
+		$this->assertCount( 1, $seen, 'The scalar widget entry must be dropped; only the valid array widget survives.' );
+		$this->assertSame( 'Keep', $seen[0]['panels_info']['class'] );
 	}
 
 	// --- layout-update: block-stored writes (Phase 2c) -----------------------
@@ -812,6 +927,41 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 	}
 
+	public function test_object_widget_entry_is_coerced_on_block_write() {
+		// MED-1 on the block path: a stdClass widget entry reaches the chokepoint
+		// as an array (the chokepoint spy records the block it received).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 7, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn(
+			array(
+				array(
+					'blockName' => 'siteorigin-panels/layout-block',
+					'attrs'     => array( 'panelsData' => array( 'widgets' => array( 'existing' ) ) ),
+				),
+			)
+		);
+		Functions\when( 'wp_update_post' )->alias( fn( $args ) => $args['ID'] );
+
+		$object_widget = (object) array(
+			'content'     => '<script>alert(1)</script>',
+			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 7,
+				'block_index' => 0,
+				'panels_data' => array( 'widgets' => array( $object_widget ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$received = Abilities_LayoutBlockSpy::$instance->received_block;
+		$this->assertIsArray(
+			$received['attrs']['panelsData']['widgets'][0],
+			'The object widget entry must reach the chokepoint as an array.'
+		);
+	}
+
 	// --- layout-update: meta path persists sanitized data --------------------
 
 	public function test_update_meta_path_sanitizes_and_persists() {
@@ -862,6 +1012,41 @@ class AbilitiesTest extends SiteOriginTests {
 			'Persisted widgets must be the sanitizer output, not raw ability input.'
 		);
 		$this->assertNotContains( $hostile, $persisted[2]['widgets'] );
+	}
+
+	public function test_meta_write_strips_inbound_sanitize_signature() {
+		// LOW-5: a client-supplied/copied top-level sanitize_signature must never
+		// be persisted into meta (nothing signs/verifies meta; persisting it would
+		// leak a plausible-looking signature back out via layout-get).
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 12,
+				'panels_data' => array(
+					'widgets'            => array( array( 'panels_info' => array( 'class' => 'X' ) ) ),
+					'sanitize_signature' => 'forged-or-copied-signature',
+				),
+			)
+		);
+
+		$this->assertNotNull( $persisted );
+		$this->assertArrayNotHasKey(
+			'sanitize_signature',
+			$persisted,
+			'The inbound signature must be stripped before the meta write.'
+		);
 	}
 
 	public function test_meta_write_double_slashes_so_backslashes_survive_unslashing() {
