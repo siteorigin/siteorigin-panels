@@ -648,7 +648,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	public function sanitize_block( $block ) {
 		if (
 			empty( $block['attrs'] ) ||
-			empty( $block['attrs']['panelsData'] )
+			empty( $block['attrs']['panelsData'] ) ||
+			! is_array( $block['attrs']['panelsData'] )
 		) {
 			return $block;
 		}
