@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 2.35.0 – 15 July 2026 =
+* Layout Block: Strengthened save-time security so widget content is verified when saved and rendered from a trusted copy, keeping embeds and other advanced content intact for all visitors.
+* Layout Block: Extended the same save-time verification to reusable blocks and block-based widget areas.
+* Recommended alongside Widgets Bundle 1.74.0 or later for full compatibility.
+
 = 2.34.5 – 01 July 2026 =
 * Embedded Video: Preserved the stored video value on save when unchanged, so untouched widgets are no longer rewritten.
 
