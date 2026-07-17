@@ -79,6 +79,8 @@ class InsertPostDataRendererStub {
  *     with panelsData intact and verifying — the case that catches the
  *     unslash/reslash bug found in plan review (case (d) alone would pass
  *     with that bug present).
+ * (f) A malformed non-array panelsData value passes through unchanged instead
+ *     of reaching array-only sanitization and causing a PHP fatal error.
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -461,5 +463,23 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 			$this->invoke( $block, 'verify_panels_data', array( $reparsed[0]['attrs']['panelsData'] ) ),
 			'The re-parsed panelsData must carry a VALID signature — content survived the slashed-input contract.'
 		);
+	}
+
+	// --- (f) Malformed panelsData does not reach array-only sanitization. ------
+
+	public function test_non_array_panels_data_passes_through_without_fatal() {
+		$content = '<!-- wp:siteorigin-panels/layout-block '
+			. json_encode( array( 'panelsData' => 'malformed', 'builder_id' => 'gbpost1' ) )
+			. ' /-->';
+		$data = array(
+			'post_type'    => 'post',
+			'post_content' => wp_slash( $content ),
+		);
+
+		$result = $this->layout_block()->validate_post_data( $data );
+		$reparsed = parse_blocks( wp_unslash( $result['post_content'] ) );
+
+		$this->assertCount( 1, $reparsed );
+		$this->assertSame( 'malformed', $reparsed[0]['attrs']['panelsData'] );
 	}
 }
