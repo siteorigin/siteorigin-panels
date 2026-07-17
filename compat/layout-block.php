@@ -162,7 +162,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	public function render_layout_block( $attributes, $content = null ) {
-		if ( empty( $attributes['panelsData'] ) ) {
+		if ( empty( $attributes['panelsData'] ) || ! is_array( $attributes['panelsData'] ) ) {
 			return '<div>' .
 			__( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
 			'</div>';
@@ -257,6 +257,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
+		if ( ! is_array( $panels_data ) ) {
+			return $panels_data;
+		}
 		// Strip any inbound signature so a client-forged 'sanitize_signature'
 		// key can never survive into what gets processed or later re-signed.
 		unset( $panels_data['sanitize_signature'] );
