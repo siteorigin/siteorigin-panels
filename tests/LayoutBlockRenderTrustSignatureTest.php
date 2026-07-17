@@ -373,4 +373,21 @@ class LayoutBlockRenderTrustSignatureTest extends TestCase {
 			'The strict path must strip the now-invalid signature key.'
 		);
 	}
+
+	// --- (x) Non-array panelsData must not fatal on the render path. ------
+
+	public function test_non_array_panels_data_render_path_does_not_fatal() {
+		$cases = array( 'malformed', 42, null, new \stdClass() );
+		foreach ( $cases as $bad ) {
+			$result = $this->layout_block()->render_layout_block( array( 'panelsData' => $bad ) );
+			$this->assertIsString( $result ); // graceful placeholder div, no fatal
+		}
+	}
+
+	// --- (y) sanitize_panels_data() passes a non-array through unchanged. ------
+
+	public function test_non_array_panels_data_sanitize_chokepoint_returns_unchanged() {
+		$result = $this->invoke( $this->layout_block(), 'sanitize_panels_data', array( 'malformed' ) );
+		$this->assertSame( 'malformed', $result );
+	}
 }
