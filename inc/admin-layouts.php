@@ -666,6 +666,16 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
+
+		// A filter may return something other than an array.
+		if ( ! is_array( $panels_data ) ) {
+			wp_send_json_error();
+		}
+
+		if ( empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = array();
+		}
+
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 
 		if ( ! empty( $panels_data['widgets'] ) ) {
