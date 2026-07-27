@@ -167,4 +167,48 @@ class DecodePanelsDataTest extends TestCase {
 			'malformed'    => array( '{"a":' ),
 		);
 	}
+
+	private function temp_upload() {
+		$file = tempnam( sys_get_temp_dir(), 'sopanels' );
+		file_put_contents( $file, 'placeholder' );
+
+		return $file;
+	}
+
+	/**
+	 * The uploaded file must be removed on every exit path, not just on
+	 * success. These three lock that contract.
+	 */
+	public function test_uploaded_file_is_deleted_on_success() {
+		$file = $this->temp_upload();
+
+		$this->decoder()->decode_panels_data(
+			json_encode( array( 'widgets' => array() ) ),
+			$file
+		);
+
+		$this->assertFileDoesNotExist( $file );
+	}
+
+	public function test_uploaded_file_is_deleted_when_payload_is_not_an_array() {
+		$file = $this->temp_upload();
+
+		try {
+			$this->decoder()->decode_panels_data( '0', $file );
+			$this->fail( 'Expected the request to be terminated.' );
+		} catch ( DecodePanelsDataDied $e ) {
+			$this->assertFileDoesNotExist( $file );
+		}
+	}
+
+	public function test_uploaded_file_is_deleted_when_json_is_invalid() {
+		$file = $this->temp_upload();
+
+		try {
+			$this->decoder()->decode_panels_data( '{"a":', $file );
+			$this->fail( 'Expected the request to be terminated.' );
+		} catch ( DecodePanelsDataDied $e ) {
+			$this->assertFileDoesNotExist( $file );
+		}
+	}
 }
