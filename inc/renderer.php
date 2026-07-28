@@ -606,6 +606,21 @@ class SiteOrigin_Panels_Renderer {
 
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, $post_id );
 
+		/**
+		 * Fires when a canonical panels_data layout has been loaded for rendering.
+		 *
+		 * Public API — premium-addon-facing. AI consumers may read this layout to
+		 * understand the page being rendered. Read-only; do not mutate $panels_data here
+		 * (use the `siteorigin_panels_data` filter for transforms).
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array      $panels_data Canonical panels_data (grids, grid_cells, widgets).
+		 * @param int|string $post_id     Post ID, or a string context token (e.g. 'home').
+		 */
+		do_action( 'siteorigin_panels_ai_layout_loaded', $panels_data, $post_id );
+
 		if ( empty( $panels_data ) || empty( $panels_data['grids'] ) ) {
 			return '';
 		}

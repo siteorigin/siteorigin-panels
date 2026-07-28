@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd">
+    <testsuites>
+        <testsuite name="SiteOrigin Panels AI Exposure Tests">
+            <directory>./tests</directory>
+            <!-- The copy-content parity suite needs the REAL SiteOrigin_Panels_Admin
+                 loaded first (it asserts the extracted copy_content_to_post()), which
+                 conflicts with AbilitiesTest's Admin shim. It runs separately via
+                 phpunit-copy-content.xml. -->
+            <exclude>./tests/copy-content</exclude>
+            <!-- The save-post sanitization suite (develop's stored-XSS fix tests) also
+                 needs the REAL SiteOrigin_Panels_Admin and defines its own SiteOrigin_Panels
+                 stub, incompatible in-process with both the AbilitiesTest shim and the
+                 copy-content stub. It runs separately via phpunit-save-post.xml. -->
+            <exclude>./tests/save-post</exclude>
+            <!-- Develop's Layout Block signature suites require the REAL
+                 SiteOrigin_Panels_Admin + SiteOrigin_Panels_Compat_Layout_Block,
+                 incompatible in-process with AbilitiesTest's Admin shim. They run
+                 separately via phpunit-layout-block.xml. -->
+            <exclude>./tests/layout-block</exclude>
+        </testsuite>
+    </testsuites>
+</phpunit>

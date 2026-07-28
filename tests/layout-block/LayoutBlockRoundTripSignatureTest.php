@@ -266,11 +266,11 @@ class LayoutBlockRoundTripSignatureTest extends TestCase {
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Admin', false ) ) {
-			require_once dirname( __DIR__ ) . '/inc/admin.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/inc/admin.php';
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block', false ) ) {
-			require_once dirname( __DIR__ ) . '/compat/layout-block.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/compat/layout-block.php';
 		}
 	}
 
