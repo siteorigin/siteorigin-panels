@@ -13,4 +13,5 @@ dist/
 /settings/admin-settings.css
 /vendor/
 /docs/
+/tasks/runs/
 .phpunit.result.cache
