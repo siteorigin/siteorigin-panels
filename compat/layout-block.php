@@ -181,16 +181,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 		$panels_data = $attributes['panelsData'];
 		if ( $this->return_layout ) {
-			// Normal render (front-end or editor preview): trust only data
-			// carrying a valid save-time signature. Skips BOTH
-			// process_raw_widgets()'s update() calls AND sanitize_all() — never
-			// re-execute sanitizers against their own stored output; this
-			// codebase has repeatedly found that unsafe (see so-widgets-bundle
-			// PR #2316: posts field wiped to array(), multiple-media PHP 8
-			// TypeError, select/icon/font fields reset valid values to default —
-			// all from re-running sanitizers against already-sanitized stored
-			// data). The trusted path is safe specifically BECAUSE it never
-			// re-executes anything, not because re-running would be a no-op.
+			// Normal render (front-end or editor preview): unconditionally
+			// structural. Skips BOTH process_raw_widgets()'s update() calls AND
+			// sanitize_all() — never re-execute sanitizers against their own
+			// stored output; this codebase has repeatedly found that unsafe
+			// (see so-widgets-bundle PR #2316: posts field wiped to array(),
+			// multiple-media PHP 8 TypeError, select/icon/font fields reset
+			// valid values to default — all from re-running sanitizers against
+			// already-sanitized stored data). Markup protection happens at
+			// save time (core kses on HTTP paths, the kses floor below on
+			// unarmed paths), never at render.
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 		} else {
 			/**
@@ -323,31 +323,59 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	/**
-	 * Prepare panels_data for rendering, trusting only validly-signed data.
+	 * Prepare panels_data for rendering — unconditionally structural.
+	 *
+	 * Structural processing only (class resolution, panels_info assembly,
+	 * raw-flag strip) — do NOT call update() or sanitize_all() here; never
+	 * re-execute sanitizers against their own stored output (see
+	 * so-widgets-bundle PR #2316). process_raw_widgets()'s $trusted param
+	 * skips the update()/kses_deep sanitize branches while keeping class
+	 * resolution, escape_classes, and raw-flag unset intact. Render never
+	 * consults a trust marker: save-time markup protection lives at the save
+	 * chokepoints (core kses on HTTP paths, the kses floor on unarmed paths).
+	 *
+	 * Kept as the single shared prep point for render (render_layout_block())
+	 * and CSS (maybe_generate_layout_block_css()) so the two never disagree
+	 * about structure.
 	 *
 	 * @param array $panels_data Panels data from the stored block attribute.
 	 * @return array
 	 */
 	private function prepare_render_panels_data( $panels_data ) {
-		if ( $this->verify_panels_data( $panels_data ) ) {
-			// Verified: this exact array is the persisted output of a
-			// save-time sanitize run. Structural processing only (class
-			// resolution, panels_info assembly, raw-flag strip) — do NOT
-			// call update() or sanitize_all() again. process_raw_widgets()'s
-			// $trusted param skips the update()/kses_deep sanitize branches
-			// while keeping class resolution, escape_classes, and raw-flag
-			// unset intact.
-			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
-				->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
-			return $panels_data; // sanitize_all() deliberately NOT called here
+		$panels_data = $this->normalize_render_fields( $panels_data );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
+			->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
+
+		return $panels_data; // sanitize_all() deliberately NOT called here
+	}
+
+	/**
+	 * Recursively normalize volatile per-save fields so nothing downstream
+	 * chokes on a malformed value: 'builder_id' is kept only when it matches
+	 * [A-Za-z0-9_-]+ (regenerated otherwise); '_sow_form_timestamp' is cast
+	 * to int.
+	 *
+	 * @param array $panels_data Panels data (or any nested array of it).
+	 * @return array
+	 */
+	private function normalize_render_fields( $panels_data ) {
+		if ( ! is_array( $panels_data ) ) {
+			return $panels_data;
 		}
 
-		// Unsigned, tampered, or pre-existing content with no signature yet:
-		// exactly today's strict path. Never sign here — this call can run
-		// with an admin VIEWER's capabilities over content an unprivileged
-		// AUTHOR supplied, and signing in this branch would launder attacker
-		// content as trusted.
-		return $this->sanitize_panels_data( $panels_data );
+		foreach ( $panels_data as $key => $value ) {
+			if ( $key === 'builder_id' ) {
+				if ( ! is_string( $value ) || ! preg_match( '/^[A-Za-z0-9_-]+$/', $value ) ) {
+					$panels_data[ $key ] = uniqid( 'gb' );
+				}
+			} elseif ( $key === '_sow_form_timestamp' ) {
+				$panels_data[ $key ] = (int) $value;
+			} elseif ( is_array( $value ) ) {
+				$panels_data[ $key ] = $this->normalize_render_fields( $value );
+			}
+		}
+
+		return $panels_data;
 	}
 
 	/**
