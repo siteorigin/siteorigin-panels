@@ -1,0 +1,775 @@
+{
+    "_provenance": {
+        "wp": "7.1-beta3",
+        "panels": "dev",
+        "sowb": true,
+        "branch": "feature\/render-trust-signature-removal",
+        "commit": "05b4184f"
+    },
+    "rows": {
+        "a_js|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "a_js|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "a_js|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "a_js|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": "contained_to_live"
+        },
+        "benign_markup|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": "contained_to_live"
+        },
+        "benign_markup|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "benign_markup|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "form|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "form|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "form|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "iframe|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "iframe|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "iframe|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "img_onerror|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "img_onerror|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "img_onerror|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "resave|SiteOrigin_Widget_Editor_Widget": {
+            "iframe_survived": false,
+            "bytes_identical": false
+        },
+        "resave|WP_Widget_Custom_HTML": {
+            "iframe_survived": false,
+            "bytes_identical": false
+        },
+        "script|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "script|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "script|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "script|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|administrator|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|administrator|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|author|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|author|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|contributor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|contributor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|editor|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|editor|WP_Widget_Custom_HTML": {
+            "can_unfiltered": true,
+            "kses_armed": false,
+            "stored_has_payload": true,
+            "rendered_out_payload": true,
+            "rendered_in_payload": true,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|unsigned_dbwrite|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "svg_onload|unsigned_dbwrite|WP_Widget_Custom_HTML": {
+            "can_unfiltered": null,
+            "kses_armed": null,
+            "stored_has_payload": true,
+            "rendered_out_payload": false,
+            "rendered_in_payload": true,
+            "viewer_variant": true,
+            "expect_change": "contained_to_live"
+        },
+        "svg_onload|user0|SiteOrigin_Widget_Editor_Widget": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        },
+        "svg_onload|user0|WP_Widget_Custom_HTML": {
+            "can_unfiltered": false,
+            "kses_armed": true,
+            "stored_has_payload": false,
+            "rendered_out_payload": false,
+            "rendered_in_payload": false,
+            "viewer_variant": false,
+            "expect_change": null
+        }
+    }
+}
