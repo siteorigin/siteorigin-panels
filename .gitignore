@@ -14,3 +14,5 @@ dist/
 /vendor/
 /docs/
 .phpunit.result.cache
+/tests/harness/snapshots/*
+!/tests/harness/snapshots/baseline.json
