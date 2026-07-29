@@ -75,11 +75,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// above): wp_insert_post_data fires for EVERY wp_insert_post()/
 		// wp_update_post() caller — XML-RPC, importers, WP-CLI, cron, direct
 		// calls — none of which pass through the REST hooks. On REST-driven
-		// saves both hooks legitimately co-fire; validate_post_data() dedupes
-		// by verifying each Layout Block's existing signature first and only
-		// sanitizing blocks that have NOT already been validated, avoiding the
-		// documented double-sanitization mutation risk (so-widgets-bundle PR
-		// #2316).
+		// saves both hooks legitimately co-fire and sanitize twice; sanitize
+		// is expected to be idempotent on its own output (non-idempotent field
+		// sanitizers are bugs in themselves — so-widgets-bundle PR #2316).
 		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
 	}
 
@@ -446,7 +444,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		foreach( $blocks as &$block ) {
-			$block = $this->sanitize_blocks( $block, true );
+			$block = $this->sanitize_blocks( $block );
 		}
 
 		$prepared_post->post_content = serialize_blocks( $blocks );
@@ -512,11 +510,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * Supplemental save-time validation for post saves that do not go through
 	 * the REST API (XML-RPC, direct wp_insert_post()/wp_update_post() calls,
 	 * importers, classic non-block-editor saves). Skips 'revision' post-type
-	 * rows (covers both plain revisions and autosaves). For any Layout Block
-	 * found, skips re-sanitizing blocks whose panelsData ALREADY carries a
-	 * valid signature (verify_panels_data() === true) to avoid redundant
-	 * double-sanitization on REST-driven saves where rest_pre_insert_{type}
-	 * already validated the content earlier in the same request.
+	 * rows (covers both plain revisions and autosaves). Every Layout Block
+	 * found is sanitized unconditionally — there is no trust marker to skip
+	 * on, and sanitize is expected to be idempotent on its own output.
 	 *
 	 * @param array $data Slashed, processed post data about to be inserted/updated.
 	 * @return array The (possibly modified) $data to actually persist.
@@ -539,8 +535,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// filter (wp_insert_post() only unslashes AFTER wp_insert_post_data
 		// returns — wp-includes/post.php). Parsing the slashed string would
 		// leave every Layout Block's panelsData JSON undecodable (escaped
-		// quotes), which would (a) make verify_panels_data() always fail,
-		// defeating the dedup below, and (b) cause serialize_blocks() to write
+		// quotes), which would cause serialize_blocks() to write
 		// back attrs-wiped blocks — silently DELETING panelsData. Unslash
 		// before parsing, re-slash before writing back so this field matches
 		// the slashed shape of its $data siblings. NOTE: this asymmetry versus
@@ -569,46 +564,13 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		foreach ( $blocks as &$block ) {
-			$block = $this->sanitize_blocks_if_unverified( $block );
+			$block = $this->sanitize_blocks( $block );
 		}
 		unset( $block );
 
 		$data['post_content'] = wp_slash( serialize_blocks( $blocks ) );
 
 		return $data;
-	}
-
-	/**
-	 * Dedup-aware variant of sanitize_blocks(): consults verify_panels_data()
-	 * first and only sanitizes Layout Blocks that do NOT already carry a valid
-	 * signature. A verifying block is already-validated output from earlier in
-	 * this same request (the rest_pre_insert_* hooks) or from a prior save —
-	 * re-sanitizing it would risk the documented double-sanitization mutation
-	 * bug (so-widgets-bundle PR #2316) for no security benefit. Mirrors
-	 * sanitize_blocks()'s recursion shape; reuses sanitize_block() and
-	 * verify_panels_data() unmodified.
-	 *
-	 * @param array $block A single parsed block.
-	 * @return array The (possibly sanitized) block.
-	 */
-	private function sanitize_blocks_if_unverified( $block ) {
-		if (
-			! empty( $block['blockName'] ) &&
-			$block['blockName'] === 'siteorigin-panels/layout-block' &&
-			! empty( $block['attrs'] ) &&
-			! empty( $block['attrs']['panelsData'] ) &&
-			! $this->verify_panels_data( $block['attrs']['panelsData'] )
-		) {
-			$block = $this->sanitize_block( $block );
-		}
-
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $i => $inner ) {
-				$block['innerBlocks'][ $i ] = $this->sanitize_blocks_if_unverified( $inner );
-			}
-		}
-
-		return $block;
 	}
 
 	public function sanitize_blocks( $block ) {
