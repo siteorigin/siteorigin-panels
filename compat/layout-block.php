@@ -9,7 +9,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * regardless of the author's `unfiltered_html` capability. Set/restored
 	 * only by sanitize_block_untrusted() around the chokepoint call (the same
 	 * instance-scoped discipline as $return_layout): origin-untrusted content
-	 * (AI ability writes) must never be signed unfloored, because the
+	 * (AI ability writes) must never be stored unfloored, because the
 	 * capability belongs to the request's author while the content's origin
 	 * does not. Deliberately private state, not a filter — third-party code
 	 * must not be able to toggle a security floor.
@@ -66,10 +66,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// (classic widgets.php, Customizer, REST widgets controller) funnels
 		// through that same update_option() call, so the option-specific
 		// pre_update_option_widget_block filter is the single hook needed to
-		// sanitize-and-sign Layout Blocks on this surface. Signing here lets
-		// widget-area Layout Blocks render via the trusted path (fixing the
-		// blank-embed regression for this surface) and applies the save-time
-		// kses floor for admins lacking unfiltered_html (e.g. multisite).
+		// sanitize Layout Blocks on this surface. Sanitizing here applies the
+		// save-time kses floor for admins lacking unfiltered_html (e.g.
+		// multisite).
 		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
 
 		// Supplemental (NOT a replacement for the rest_pre_insert_* hooks
@@ -194,8 +193,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 		} else {
 			/**
-			 * Filter a single Layout Block's panels_data before it is sanitized and
-			 * signed, allowing an AI-generated layout to be supplied or transformed.
+			 * Filter a single Layout Block's panels_data before it is sanitized,
+			 * allowing an AI-generated layout to be supplied or transformed.
 			 *
 			 * Block-editor counterpart of the classic-editor
 			 * `siteorigin_panels_ai_layout_pre_save` filter (see inc/admin.php).
@@ -208,8 +207,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			 * (`pre_update_option_widget_block` → validate_widget_block_option()),
 			 * the `wp_insert_post_data` safety net (validate_post_data()), and AI
 			 * ability block writes (sanitize_block_untrusted()). It never fires at
-			 * render: signed content renders via the trusted path, and the unsigned
-			 * strict fallback deliberately does not re-fire save-time transforms.
+			 * render: render is structural-only and deliberately does not re-fire
+			 * save-time transforms.
 			 *
 			 * Whatever a consumer returns is re-sanitized through
 			 * sanitize_panels_data() below, so returned widgets are NEVER trusted
@@ -229,8 +228,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				$panels_data = $filtered_panels_data;
 			}
 
-			// Save-time validation (sanitize_block()): strict, capability-gated,
-			// sanitize then sign.
+			// Save-time validation (sanitize_block()): strict, capability-gated
+			// sanitize.
 			$panels_data = $this->sanitize_panels_data( $panels_data );
 
 			// current_user_can() runs in the real save-time request context
@@ -241,7 +240,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// sanitize_block_untrusted(), or a layout the AI pre-save filter
 			// changed).
 			if ( $this->force_kses_floor || $ai_changed_layout || ! current_user_can( 'unfiltered_html' ) ) {
-				// Floor: the signature must not depend on any individual
+				// Floor: stored output must not depend on any individual
 				// field/widget sanitizer being "healthy" this request (some
 				// SiteOrigin Widgets Bundle field sanitizers can silently pass
 				// through unvalidated when their options registry isn't
@@ -251,7 +250,6 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				// that failure mode.
 				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
 			}
-			$panels_data['sanitize_signature'] = $this->sign_panels_data( $panels_data );
 		}
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
 
@@ -312,8 +310,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		if ( ! is_array( $panels_data ) ) {
 			return $panels_data;
 		}
-		// Strip any inbound signature so a client-forged 'sanitize_signature'
-		// key can never survive into what gets processed or later re-signed.
+		// Strip any inbound 'sanitize_signature' key (legacy trust marker from
+		// the removed signing scheme) so stale or client-forged keys age out on
+		// re-save and never persist into stored panels_data.
 		unset( $panels_data['sanitize_signature'] );
 
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
@@ -376,106 +375,6 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		return $panels_data;
-	}
-
-	/**
-	 * Compute the HMAC signature certifying that $panels_data is the exact
-	 * output of a save-time capability-gated sanitize run.
-	 *
-	 * @param array $panels_data Sanitized panels data (any existing signature
-	 *                           key is ignored).
-	 * @return string|false HMAC-SHA256 hex digest, or false if wp_json_encode()
-	 *                      of $panels_data failed.
-	 */
-	private function sign_panels_data( $panels_data ) {
-		unset( $panels_data['sanitize_signature'] );
-
-		// wp_json_encode() can return false (malformed UTF-8, resource refs,
-		// depth exceeded). Without this guard, false would silently coerce to
-		// '' in the concatenation below, producing a "valid-looking" signature
-		// over "$version|" that is NOT tied to the real content. Fail closed
-		// instead: a false return here stores an empty/false signature at the
-		// save-time call site (which verify_panels_data() treats as 'missing')
-		// and is treated as a failed verification at the verify call site.
-		$encoded = wp_json_encode( $panels_data );
-		if ( false === $encoded ) {
-			return false;
-		}
-
-		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
-		// security-tightening changes to sanitization semantics, NEVER for
-		// idempotency/bugfix changes. A bump invalidates every existing
-		// signature, falling all previously-signed content back to strict
-		// re-sanitization until each post is individually re-saved by its real
-		// author (no safe bulk/cron re-signing exists, because capability-gated
-		// sanitization is only meaningful under the real author's session).
-		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
-		return hash_hmac( 'sha256', $version . '|' . $encoded, wp_salt( 'auth' ) );
-	}
-
-	/**
-	 * Verify that $panels_data carries a valid save-time signature.
-	 *
-	 * Fails closed: any missing, malformed, or non-matching signature returns
-	 * false, sending the caller down the strict sanitize path.
-	 *
-	 * @param array $panels_data Panels data possibly carrying 'sanitize_signature'.
-	 * @return bool
-	 */
-	private function verify_panels_data( $panels_data ) {
-		if ( empty( $panels_data['sanitize_signature'] ) ) {
-			// Case (a): no signature at all. Expected/normal for legacy
-			// content saved before this scheme existed, or content from a
-			// still-unvalidated save surface. Not itself suspicious, so this
-			// logs only when debugging is explicitly enabled.
-			$this->maybe_log_signature_failure( 'missing' );
-			return false;
-		}
-
-		// sign_panels_data() returns false when wp_json_encode() fails; passing
-		// that to hash_equals() would throw a PHP 8 TypeError (non-string
-		// $known_string) — an uncaught fatal on the render path. Capture and
-		// type-check it first: an UNVERIFIABLE signature (content that fails to
-		// re-encode) is the same fail-closed class as an invalid one.
-		$computed_signature = $this->sign_panels_data( $panels_data );
-
-		if ( ! is_string( $panels_data['sanitize_signature'] )
-			|| ! is_string( $computed_signature )
-			|| ! hash_equals( $computed_signature, $panels_data['sanitize_signature'] )
-		) {
-			// Case (b): a signature IS present but does not verify. Suggests
-			// tampering, a version bump, a salt rotation, OR canonicalization
-			// drift (e.g. a widget update() output containing a JSON-object
-			// value like stdClass, which round-trips as '{}' -> '[]' through
-			// wp_json_encode()/json_decode(), silently and permanently
-			// breaking that post's signature with no other visible signal).
-			$this->maybe_log_signature_failure( 'invalid' );
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Log a signature verification failure when WP_DEBUG is enabled. Never
-	 * outputs anything to the page — error_log() only, matching this
-	 * codebase's absence of any prior debug-logging convention (no existing
-	 * error_log()/WP_DEBUG usage was found anywhere in this plugin, so this
-	 * establishes the minimal standard WordPress pattern for future use).
-	 *
-	 * @param string $reason 'missing' or 'invalid'.
-	 */
-	private function maybe_log_signature_failure( $reason ) {
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
-			return;
-		}
-
-		error_log( sprintf(
-			'[SiteOrigin Panels] Layout Block render signature verification failed (%s). Falling back to strict sanitization for this render.',
-			$reason === 'invalid'
-				? 'signature present but did not verify — possible tampering, version/salt rotation, or JSON canonicalization drift'
-				: 'no signature present — expected for legacy or not-yet-validated content'
-		) );
 	}
 
 	public function override_container( $container ) {
@@ -556,7 +455,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	/**
-	 * Validate and sign any Layout Block content embedded in a block-based
+	 * Validate any Layout Block content embedded in a block-based
 	 * widget area's stored instances before the `widget_block` option is
 	 * written. Fires on EVERY save path for this option (classic widgets.php,
 	 * Customizer, REST) via the option-specific `pre_update_option_widget_block`
@@ -758,15 +657,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	/**
-	 * Sanitize-and-sign a Layout Block whose content origin is untrusted,
-	 * forcing the kses floor regardless of the current user's capabilities.
+	 * Sanitize a Layout Block whose content origin is untrusted, forcing the
+	 * kses floor regardless of the current user's capabilities.
 	 *
 	 * Entry point for AI ability writes (see inc/abilities.php): AI output is
 	 * prompt-injectable no matter whose credential carries the request, so an
 	 * admin application password must not exempt it from the floor the way it
 	 * would exempt the author's own content. Runs the full save chokepoint —
 	 * the `siteorigin_panels_ai_block_layout_pre_save` filter, strict
-	 * sanitize, the forced floor, then signing — in one pass.
+	 * sanitize, then the forced floor — in one pass.
 	 *
 	 * The flag restore uses try/finally because it guards a security floor; if
 	 * an exception did escape, a stuck-true flag would only over-floor later
@@ -778,7 +677,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * returns.
 	 *
 	 * @param array $block A parsed Layout Block (parse_blocks() shape).
-	 * @return array The block with sanitized, floored, signed panelsData.
+	 * @return array The block with sanitized, floored panelsData.
 	 */
 	public function sanitize_block_untrusted( $block ) {
 		$previous = $this->force_kses_floor;
