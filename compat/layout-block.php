@@ -72,8 +72,10 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
 
 		// Supplemental (NOT a replacement for the rest_pre_insert_* hooks
-		// above): wp_insert_post_data fires for EVERY wp_insert_post()/
-		// wp_update_post() caller — XML-RPC, importers, WP-CLI, cron, direct
+		// above): wp_insert_post_data fires for every wp_insert_post()/
+		// wp_update_post() caller EXCEPT attachments (post.php branches
+		// attachment saves to wp_insert_attachment_data instead; core kses
+		// still floors those) — XML-RPC, importers, WP-CLI, cron, direct
 		// calls — none of which pass through the REST hooks. On REST-driven
 		// saves both hooks legitimately co-fire and sanitize twice; sanitize
 		// is expected to be idempotent on its own output (non-idempotent field
