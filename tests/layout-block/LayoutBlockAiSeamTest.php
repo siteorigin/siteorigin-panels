@@ -69,15 +69,15 @@ class AiSeamRendererStub {
  *
  * Properties locked by this test:
  * (a) The filter fires exactly ONCE per block on the save path (sanitize_block()).
- * (b) The filter NEVER fires on the render path — neither the trusted
- *     (signature-verified) short-circuit nor the unsigned strict fallback.
- * (c) A layout CHANGED by the filter is kses-floored BEFORE signing even when
- *     the request's author has `unfiltered_html` — proven by the persisted
- *     signature verifying against the FLOORED payload.
+ * (b) The filter NEVER fires on the render path — render is unconditionally
+ *     structural and never re-fires save-time transforms.
+ * (c) A layout CHANGED by the filter is kses-floored at save even when the
+ *     request's author has `unfiltered_html` — the persisted payload is the
+ *     FLOORED payload.
  * (d) A no-op filter with a capable author is NOT floored (the raw-embed path
  *     preserved by the capability gate must not regress).
  * (e) A filter returning a non-array is ignored: the original layout proceeds,
- *     unfloored for a capable author, and still signs.
+ *     unfloored for a capable author.
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -115,9 +115,7 @@ class LayoutBlockAiSeamTest extends TestCase {
 
 		// apply_filters: pass every tag's value through unchanged EXCEPT the AI
 		// block pre-save tag, which dispatches to the test's consumer callback
-		// (when set) and counts every application. The
-		// 'siteorigin_panels_sanitize_version' tag passes through its
-		// 'panels:1' default — a stable version string for signing.
+		// (when set) and counts every application.
 		$test = $this;
 		Functions\when( 'apply_filters' )->alias(
 			function ( $tag, $value = null ) use ( $test ) {
@@ -134,7 +132,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 		);
 
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
-		Functions\when( 'wp_salt' )->justReturn( 'test-salt-value' );
 
 		// render_layout_block() save-path plumbing.
 		Functions\when( 'is_wp_error' )->justReturn( false );
@@ -286,10 +283,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			$this->ai_filter_calls,
 			'The AI block pre-save filter must fire exactly once per block save.'
 		);
-		$this->assertNotEmpty(
-			$result['attrs']['panelsData']['sanitize_signature'],
-			'The save path must still sign the block.'
-		);
 	}
 
 	// --- (b) Render paths: never fires. ---------------------------------------
@@ -304,27 +297,27 @@ class LayoutBlockAiSeamTest extends TestCase {
 		$panels_data = array( 'widgets' => array( $this->widget( 'hello' ) ) );
 		$block = $this->layout_block();
 
-		// Trusted render: sign first (via the save path), reset the counter,
-		// then render-prepare the signed payload.
+		// Saved content: run the save path first, reset the counter, then
+		// render-prepare the saved payload.
 		$saved = $block->sanitize_block( $this->block_for( $panels_data ) );
 		$this->ai_filter_calls = 0;
 		$this->invoke( $block, 'prepare_render_panels_data', array( $saved['attrs']['panelsData'] ) );
 		$this->assertSame(
 			0,
 			$this->ai_filter_calls,
-			'The AI filter must not fire on the trusted (signed) render path.'
+			'The AI filter must not fire when rendering previously-saved content.'
 		);
 
-		// Unsigned strict fallback: render-prepare an unsigned payload.
+		// Never-saved content: render-prepare a raw payload directly.
 		$this->invoke( $block, 'prepare_render_panels_data', array( $panels_data ) );
 		$this->assertSame(
 			0,
 			$this->ai_filter_calls,
-			'The AI filter must not fire on the unsigned strict-fallback render path.'
+			'The AI filter must not fire on the render path for raw content either.'
 		);
 	}
 
-	// --- (c) Changed layout floored before signing, capability-independent. ---
+	// --- (c) Changed layout floored at save, capability-independent. ----------
 
 	public function test_changed_layout_is_floored_before_signing_for_capable_user() {
 		$stub = new AiSeamIdentityWidgetStub();
@@ -354,10 +347,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			$persisted['widgets'][0]['content'],
 			'An AI-changed layout must be kses-floored even when the author has unfiltered_html.'
 		);
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
-			'The signature must verify against the FLOORED payload — proving the floor ran before signing.'
-		);
 	}
 
 	// --- (d) No-op filter + capable author: not floored. ----------------------
@@ -386,10 +375,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			$persisted['widgets'][0]['content'],
 			'With no AI change, a capable author keeps raw content — the #1341 raw-embed path must not regress.'
 		);
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
-			'The unfloored payload is what gets signed for a capable author.'
-		);
 	}
 
 	// --- (e) Non-array filter output is ignored. -------------------------------
@@ -416,10 +401,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			$persisted['widgets'][0]['content'],
 			'A non-array filter return must be discarded: the original layout proceeds, unfloored for a capable author.'
 		);
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
-			'The original layout must still be signed when garbage filter output is discarded.'
-		);
 		$this->assertSame( 1, $stub->update_calls, 'Sanitize still runs exactly once.' );
 	}
 
@@ -429,8 +410,7 @@ class LayoutBlockAiSeamTest extends TestCase {
 	 * THE fail-open acceptance test (Audit #1 Q2c): an AI ability write
 	 * authenticated as an admin application password passes the
 	 * `unfiltered_html` capability check, but the forced floor must still
-	 * strip the payload BEFORE signing — proven by the signature verifying
-	 * against the floored payload (a post-sign floor would break it).
+	 * strip the payload before anything persists.
 	 */
 	public function test_untrusted_chokepoint_floors_before_signing_for_capable_user() {
 		$stub = new AiSeamIdentityWidgetStub();
@@ -449,10 +429,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			self::CLEANED,
 			$persisted['widgets'][0]['content'],
 			'An untrusted (AI) write must be kses-floored even when the credential has unfiltered_html.'
-		);
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
-			'The signature must verify against the FLOORED payload — the floor ran before signing.'
 		);
 		$this->assertSame( 1, $stub->update_calls, 'The chokepoint runs sanitize exactly once.' );
 	}
@@ -530,9 +506,9 @@ class LayoutBlockAiSeamTest extends TestCase {
 		// LOW-4: a consumer of the AI filter calls sanitize_block_untrusted() on a
 		// nested block from INSIDE the outer untrusted write, while the outer flag
 		// is true. The inner call must restore the flag to its PRIOR value (true),
-		// not hard false, so the OUTER write is still floored + signed against the
-		// floored payload — even with a capable credential and an unchanged outer
-		// layout (so only force_kses_floor, not $ai_changed_layout, can floor it).
+		// not hard false, so the OUTER write is still floored — even with a
+		// capable credential and an unchanged outer layout (so only
+		// force_kses_floor, not $ai_changed_layout, can floor it).
 		$stub = new AiSeamIdentityWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;
@@ -579,10 +555,6 @@ class LayoutBlockAiSeamTest extends TestCase {
 			self::CLEANED,
 			$persisted['widgets'][0]['content'],
 			'The OUTER untrusted write must stay floored despite the re-entrant inner call restoring the flag.'
-		);
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $persisted ) ),
-			'The outer signature must verify against the floored payload.'
 		);
 		// And after everything unwinds, the flag is back to its resting false.
 		$this->assertFalse(

@@ -62,13 +62,14 @@ class UntrustedWriteRendererStub {
  * Properties locked by this test:
  * (a) THE fail-open acceptance criterion: with a credential that HAS
  *     `unfiltered_html` (the admin-application-password scenario), a raw
- *     payload-bearing AI layout written through the chokepoint is kses-floored
- *     and signed, the wp_slash round-tripped post_content passes through the
- *     safety net BYTE-IDENTICAL (signature dedup hit), and the persisted
- *     signature verifies against the floored payload.
- * (b) The single-sanitize invariant: widget update() runs exactly ONCE across
- *     the whole write + safety-net pass — the double-update() non-idempotency
- *     hazard of the pre-slice inline sanitize is gone.
+ *     payload-bearing AI layout written through the chokepoint is kses-floored,
+ *     and the persisted payload REMAINS floored after the wp_slash round trip
+ *     through the wp_insert_post_data safety net.
+ * (b) The write chokepoint sanitizes exactly ONCE (no inline double-sanitize
+ *     in the write itself). NOTE: the safety net legitimately re-sanitizes on
+ *     the same request — the signature-gated dedup was deliberately removed;
+ *     sanitize is expected to be idempotent on its own output (the marker stub
+ *     is deliberately not, which is how the second pass is observable).
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -121,7 +122,6 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		);
 
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
-		Functions\when( 'wp_salt' )->justReturn( 'test-salt-value' );
 
 		// REAL slashing semantics — the write path slashes for wp_update_post
 		// and the safety net unslashes before parsing; identity stubs would
@@ -301,16 +301,11 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		$written_panels_data = $block['attrs']['panelsData'];
 
 		// The floor ran despite unfiltered_html === true, after the widget's
-		// own sanitizer (marker suffix present, handler stripped)...
+		// own sanitizer (marker suffix present, handler stripped).
 		$this->assertSame(
 			self::FLOORED_SANITIZED,
 			$written_panels_data['widgets'][0]['content'],
 			'The forced floor must strip the payload from a capable-credential AI write.'
-		);
-		// ...and BEFORE signing: the signature verifies against the floored data.
-		$this->assertTrue(
-			$this->invoke( $compat, 'verify_panels_data', array( $written_panels_data ) ),
-			'The signature must verify against the floored payload.'
 		);
 		$this->assertSame( 1, $stub->update_calls, 'One sanitize pass during the write.' );
 
@@ -319,36 +314,34 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		$slashed_content = wp_slash( $post_content );
 
 		// 3. The persisted post flows through the wp_insert_post_data safety
-		//    net in the same wp_update_post() call.
+		//    net in the same wp_update_post() call. With the signature dedup
+		//    removed, the safety net re-sanitizes unconditionally — the marker
+		//    stub makes that second pass observable.
 		$validated = $this->layout_block()->validate_post_data(
 			array(
 				'post_type'    => 'post',
 				'post_content' => $slashed_content,
 			)
 		);
-
-		// Dedup hit: the freshly-signed content passes through BYTE-IDENTICAL.
 		$this->assertSame(
-			$slashed_content,
-			$validated['post_content'],
-			'Freshly-signed AI write must pass the safety net byte-identical (signature dedup).'
-		);
-
-		// The single-sanitize invariant across write + safety net: update()
-		// never ran a second time.
-		$this->assertSame(
-			1,
+			2,
 			$stub->update_calls,
-			'Widget update() must run exactly once across the write and the safety net.'
+			'The safety net runs its own sanitize pass (dedup deliberately removed).'
 		);
 
-		// And what is actually persisted still carries the floored, verifying payload.
+		// And what is actually persisted still carries a floored payload: the
+		// handler payload stripped at the write chokepoint never comes back.
 		$persisted_blocks = parse_blocks( wp_unslash( $validated['post_content'] ) );
 		$persisted = $persisted_blocks[0]['attrs']['panelsData'];
-		$this->assertSame( self::FLOORED_SANITIZED, $persisted['widgets'][0]['content'] );
-		$this->assertTrue(
-			$this->invoke( $compat, 'verify_panels_data', array( $persisted ) ),
-			'The persisted payload must still verify after the slash round trip.'
+		$this->assertStringNotContainsString(
+			'onerror',
+			$persisted['widgets'][0]['content'],
+			'The persisted payload must remain floored after the slash round trip through the safety net.'
+		);
+		$this->assertStringStartsWith(
+			self::FLOORED_SANITIZED,
+			$persisted['widgets'][0]['content'],
+			'The floored write-time content survives (the safety net only re-appends the marker suffix).'
 		);
 	}
 }

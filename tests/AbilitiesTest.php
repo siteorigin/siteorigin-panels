@@ -130,8 +130,8 @@ if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin' ) ) {
  * ->sanitize_block_untrusted() — the compat save chokepoint block writes now
  * route through. Records each call and the block it received (so tests can
  * assert the RAW incoming panelsData reaches the chokepoint), and mirrors the
- * real chokepoint's observable contract: sanitized widgets, a signature, and
- * innerHTML removed.
+ * real chokepoint's observable contract: sanitized widgets and innerHTML
+ * removed.
  */
 class Abilities_LayoutBlockSpy {
 	public static $instance;
@@ -147,7 +147,6 @@ class Abilities_LayoutBlockSpy {
 		$this->received_block = $block;
 
 		$block['attrs']['panelsData']['widgets'] = array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
-		$block['attrs']['panelsData']['sanitize_signature'] = 'chokepoint-signed';
 		unset( $block['innerHTML'] );
 
 		return $block;
@@ -535,7 +534,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// §3: the block write routes through the compat save chokepoint exactly
 		// once, carrying the RAW incoming panelsData (the chokepoint owns the
-		// whole filter → sanitize → forced floor → sign sequence).
+		// whole filter → sanitize → forced floor sequence).
 		$spy = Abilities_LayoutBlockSpy::$instance;
 		$this->assertSame( 1, $spy->untrusted_calls, 'Block write must call sanitize_block_untrusted() exactly once.' );
 		$this->assertSame(
@@ -550,15 +549,10 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertNull( Abilities_AdminSpy::$instance->process_args, 'No inline process_raw_widgets() on the block path.' );
 		$this->assertFalse( Abilities_StylesSpy::$instance->sanitize_all_called, 'No inline sanitize_all() on the block path.' );
 
-		// The written block carries the CHOKEPOINT output — sanitized and signed.
+		// The written block carries the CHOKEPOINT output — sanitized.
 		$this->assertSame(
 			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
 			$saved['post_content'][0]['attrs']['panelsData']['widgets']
-		);
-		$this->assertSame(
-			'chokepoint-signed',
-			$saved['post_content'][0]['attrs']['panelsData']['sanitize_signature'],
-			'The persisted block must carry the chokepoint-produced signature.'
 		);
 	}
 
