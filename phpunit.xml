@@ -18,6 +18,12 @@
                  incompatible in-process with AbilitiesTest's Admin shim. They run
                  separately via phpunit-layout-block.xml. -->
             <exclude>./tests/layout-block</exclude>
+            <!-- The import-layout guard suite needs its own SiteOrigin_Panels_Admin
+                 spy shim (process_raw_widgets recorder), incompatible in-process with
+                 AbilitiesTest's Admin shim and with the real wp_unslash() defined by
+                 tests/AbilitiesTest.php. It runs separately via
+                 phpunit-import-layout.xml. -->
+            <exclude>./tests/import-layout</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
