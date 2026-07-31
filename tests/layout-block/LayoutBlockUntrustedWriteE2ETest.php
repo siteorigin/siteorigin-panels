@@ -459,4 +459,73 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 			'The safety net actually ran the widget update() on the un-chokepointed block.'
 		);
 	}
+
+	/**
+	 * Build a Layout Block whose panelsData is well-formed but fails
+	 * wp_json_encode() — a value nested past json's default depth of 512, the
+	 * shape reachable via nested Layout widgets or an imported layout. The
+	 * $marker distinguishes the two blocks so a memo false-hit on the shared
+	 * empty-string digest is observable.
+	 */
+	private function unencodable_block( $marker ) {
+		$deep = self::PAYLOAD;
+		for ( $i = 0; $i < 600; $i++ ) {
+			$deep = array( $deep );
+		}
+
+		return array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'marker'      => $marker,
+							'too_deep'    => $deep,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbdeep' . $marker,
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+	}
+
+	/**
+	 * False-hit guard: two DIFFERENT Layout Blocks in one request whose
+	 * panelsData both fail wp_json_encode() must NOT collide in the memo.
+	 * hash( 'sha256', false ) is the digest of '' — so without the false-encode
+	 * guard both blocks share one memo key and the second is wrongly skipped.
+	 * The second block must still be sanitized (update() runs on it).
+	 */
+	public function test_two_unencodable_blocks_do_not_false_hit_the_memo() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		// Sanity: these blocks genuinely fail to encode (else the test proves
+		// nothing about the false-encode path).
+		$this->assertFalse(
+			wp_json_encode( $this->unencodable_block( 'a' )['attrs']['panelsData'] ),
+			'Fixture precondition: panelsData must fail wp_json_encode() (depth > 512).'
+		);
+
+		// Both blocks sanitized in the same request on the same instance. Without
+		// the guard, block B false-hits A's empty-string digest and is skipped,
+		// leaving update_calls at 1.
+		$compat->sanitize_block( $this->unencodable_block( 'a' ) );
+		$compat->sanitize_block( $this->unencodable_block( 'b' ) );
+
+		$this->assertSame(
+			2,
+			$stub->update_calls,
+			'Two distinct unencodable blocks must each be sanitized — a false hit on the empty-string digest would skip the second.'
+		);
+	}
 }
