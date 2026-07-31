@@ -1,10 +1,10 @@
 {
     "_provenance": {
-        "wp": "7.1-beta3",
+        "wp": "7.0.2",
         "panels": "dev",
         "sowb": true,
-        "branch": "feature\/render-trust-signature-removal",
-        "commit": "05b4184f"
+        "branch": "develop",
+        "commit": "40120f5f"
     },
     "rows": {
         "a_js|administrator|SiteOrigin_Widget_Editor_Widget": {
