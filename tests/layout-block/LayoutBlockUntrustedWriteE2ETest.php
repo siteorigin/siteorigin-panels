@@ -314,19 +314,23 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		$slashed_content = wp_slash( $post_content );
 
 		// 3. The persisted post flows through the wp_insert_post_data safety
-		//    net in the same wp_update_post() call. With the signature dedup
-		//    removed, the safety net re-sanitizes unconditionally — the marker
-		//    stub makes that second pass observable.
-		$validated = $this->layout_block()->validate_post_data(
+		//    net in the same wp_update_post() call. The same-request memo means
+		//    the safety net recognizes this block as already sanitized earlier
+		//    this request (by the chokepoint above) and skips the second pass —
+		//    the marker stub makes the ABSENCE of a second update() observable.
+		//    Reuse the SAME instance ($compat) both hooks run on in production
+		//    (both register on the single() instance), so the request-local memo
+		//    is shared across them.
+		$validated = $compat->validate_post_data(
 			array(
 				'post_type'    => 'post',
 				'post_content' => $slashed_content,
 			)
 		);
 		$this->assertSame(
-			2,
+			1,
 			$stub->update_calls,
-			'The safety net runs its own sanitize pass (dedup deliberately removed).'
+			'update() runs exactly once per block across both save hooks in one request (same-request dedup).'
 		);
 
 		// And what is actually persisted still carries a floored payload: the
@@ -342,6 +346,117 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 			self::FLOORED_SANITIZED,
 			$persisted['widgets'][0]['content'],
 			'The floored write-time content survives (the safety net only re-appends the marker suffix).'
+		);
+	}
+
+	/**
+	 * Ordinary editor REST save (not the AI path): the block flows through
+	 * server_side_validation() (rest_pre_insert_*) then validate_post_data()
+	 * (wp_insert_post_data) in the same request, on the same instance. The
+	 * same-request memo means update() runs exactly ONCE across both hooks.
+	 */
+	public function test_editor_rest_save_runs_update_once_across_both_hooks() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$block = array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbeditor1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		// Hook 1: rest_pre_insert_* — server_side_validation sanitizes the block.
+		$prepared = new \stdClass();
+		$prepared->post_content = serialize_blocks( array( $block ) );
+		$prepared = $compat->server_side_validation( $prepared, null );
+
+		$this->assertSame( 1, $stub->update_calls, 'First hook sanitizes once.' );
+
+		// Hook 2: wp_insert_post_data — validate_post_data on the SAME instance,
+		// receiving the slashed content the first hook produced. The memo skips
+		// the second sanitize pass.
+		$compat->validate_post_data(
+			array(
+				'post_type'    => 'post',
+				'post_content' => wp_slash( $prepared->post_content ),
+			)
+		);
+
+		$this->assertSame(
+			1,
+			$stub->update_calls,
+			'update() runs exactly once per block across both REST save hooks in one request.'
+		);
+	}
+
+	/**
+	 * Safety-net integrity: a block that did NOT pass through
+	 * server_side_validation this request (a direct wp_insert_post, an importer,
+	 * cron — no rest_pre_insert_* hook) is still sanitized by validate_post_data.
+	 * The memo must not create a hole in the safety net.
+	 */
+	public function test_direct_write_block_is_still_sanitized_by_safety_net() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$block = array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbdirect1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		// No server_side_validation() this request — memo is empty. The safety
+		// net must sanitize, exactly once (not skip via a false hit).
+		$validated = $compat->validate_post_data(
+			array(
+				'post_type'    => 'post',
+				'post_content' => wp_slash( serialize_blocks( array( $block ) ) ),
+			)
+		);
+
+		$this->assertSame(
+			1,
+			$stub->update_calls,
+			'A direct-write block with no prior chokepoint pass is sanitized by the safety net.'
+		);
+
+		$persisted = parse_blocks( wp_unslash( $validated['post_content'] ) )[0]['attrs']['panelsData'];
+		$this->assertStringEndsWith(
+			'-SANITIZED',
+			$persisted['widgets'][0]['content'],
+			'The safety net actually ran the widget update() on the un-chokepointed block.'
 		);
 	}
 }
