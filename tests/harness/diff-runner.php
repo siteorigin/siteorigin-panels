@@ -18,6 +18,29 @@
  *        SOTRUST_MODE=diff wp eval-file tests/harness/diff-runner.php
  *      Emits, per matrix row, UNCHANGED / CHANGED with the before→after fields.
  *
+ * SEEDED-FLOOR GATE — expected-RED owners (recorded here because the plan file
+ * that held this list is gone; this is its only home). The gate proves the
+ * AI-write forced-floor coverage is real by deleting one term of the floor
+ * condition in compat/layout-block.php and confirming the suite goes RED. Seed
+ * patterns (delete exactly these substrings, one at a time, then restore):
+ *   Gate A — delete  `$this->force_kses_floor || `
+ *     expected RED owners:
+ *       tests/layout-block/LayoutBlockAiSeamTest.php
+ *         test_untrusted_chokepoint_floors_before_signing_for_capable_user
+ *       tests/layout-block/LayoutBlockAiSeamTest.php
+ *         test_reentrant_untrusted_call_preserves_outer_floor
+ *       tests/layout-block/LayoutBlockUntrustedWriteE2ETest.php
+ *         test_capable_credential_write_is_floored_signed_and_deduped_end_to_end
+ *   Gate B — delete  `$ai_changed_layout || `
+ *     expected RED owner:
+ *       tests/layout-block/LayoutBlockAiSeamTest.php
+ *         test_changed_layout_is_floored_before_signing_for_capable_user
+ * Run `vendor/bin/phpunit -c phpunit-layout-block.xml` after each seed; RED via
+ * the named owner = coverage intact, GREEN = coverage lost (STOP). Restore the
+ * file byte-identically (cp backup, verify with shasum) between seeds. These
+ * four method names must NOT be renamed without updating this list, or the gate
+ * false-STOPs on absence rather than on lost coverage.
+ *
  * PREDICATE (stated first, per standing rule): the gate fails when any
  * observable moves in a direction that is bad for security OR function. That is
  * a SET of directional rules, one per failure class — not the single

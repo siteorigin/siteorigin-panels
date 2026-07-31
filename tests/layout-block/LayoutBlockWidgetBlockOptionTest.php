@@ -251,7 +251,7 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 
 	// --- (b) Layout Block in a widget instance gets sanitized on option save.
 
-	public function test_unsigned_layout_block_in_widget_content_is_sanitized() {
+	public function test_layout_block_in_widget_content_is_sanitized() {
 		$stub = new WidgetBlockOptionMarkerWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;

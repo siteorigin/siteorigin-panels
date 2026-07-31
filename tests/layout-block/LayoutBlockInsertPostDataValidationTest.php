@@ -344,7 +344,7 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 
 	// --- (c) Layout Block runs the strict sanitize path exactly once. ---------
 
-	public function test_unsigned_layout_block_is_sanitized() {
+	public function test_layout_block_is_sanitized() {
 		$stub = new InsertPostDataMarkerWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;
