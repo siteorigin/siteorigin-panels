@@ -13,6 +13,7 @@ dist/
 /settings/admin-settings.css
 /vendor/
 /docs/
+/tasks/runs/
 .phpunit.result.cache
 /tests/harness/snapshots/*
 !/tests/harness/snapshots/baseline.json

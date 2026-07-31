@@ -13,7 +13,8 @@
       "phpunit",
       "phpunit -c phpunit-copy-content.xml",
       "phpunit -c phpunit-save-post.xml",
-      "phpunit -c phpunit-layout-block.xml"
+      "phpunit -c phpunit-layout-block.xml",
+      "phpunit -c phpunit-import-layout.xml"
     ]
   }
 }
