@@ -632,7 +632,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// '' — so EVERY unencodable block would share one hash and a second such
 		// block would falsely hit the memo and skip sanitization. A false encode
 		// therefore neither checks nor records: it degrades to sanitizing twice,
-		// the safe direction. (develop's sign_panels_data() guarded the same case.)
+		// the safe direction. (The same false-encode guard is required anywhere a
+		// hash of wp_json_encode() output is used as a key or identity.)
 		$incoming_encoded = wp_json_encode( $block['attrs']['panelsData'] );
 		if (
 			false !== $incoming_encoded &&

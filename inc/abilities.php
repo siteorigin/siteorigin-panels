@@ -608,12 +608,13 @@ class SiteOrigin_Panels_Abilities {
 	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()) — the
 	 * SAME path every Layout Block save uses: the
 	 * `siteorigin_panels_ai_block_layout_pre_save` filter, strict sanitize
-	 * (process_raw_widgets + sanitize_all), the kses floor FORCED regardless of
-	 * the credential's `unfiltered_html` capability (AI output is
-	 * origin-untrusted, whatever authenticates the request), then HMAC signing.
-	 * AI input is never persisted raw, and this is a SINGLE sanitize pass by
-	 * design: the wp_insert_post_data safety net verifies the fresh signature
-	 * and skips re-sanitizing, so widget update() never runs twice per write.
+	 * (process_raw_widgets + sanitize_all), and the kses floor FORCED regardless
+	 * of the credential's `unfiltered_html` capability (AI output is
+	 * origin-untrusted, whatever authenticates the request). AI input is never
+	 * persisted raw, and this is a SINGLE sanitize pass by design: the
+	 * wp_insert_post_data safety net recognizes the block as already sanitized
+	 * this request via the request-local memo in sanitize_block() and skips the
+	 * second pass, so widget update() never runs twice per write.
 	 *
 	 * NOTE for premium-addon authors (layered transforms): because the write
 	 * goes through the chokepoint, any consumer hooked to
