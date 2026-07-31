@@ -44,6 +44,19 @@ class UntrustedWriteMarkerWidgetStub {
 }
 
 /**
+ * Widget stub whose update() is a genuine no-op — returns content byte-identical.
+ * Models a capable author's own raw markup surviving their sanitize unchanged, so
+ * the same-request memo records a hash of the RAW content. That is the setup that
+ * lets a later untrusted write of identical content hit the memo (input hash ==
+ * output hash) — the exact condition of the floor-bypass defect.
+ */
+class UntrustedWriteNoopWidgetStub {
+	public function update( $new, $old ) {
+		return $new;
+	}
+}
+
+/**
  * Renderer stub standing in for SiteOrigin_Panels::renderer()'s real renderer,
  * invoked by render_layout_block()'s save branch to produce contentPreview.
  */
@@ -114,9 +127,12 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		);
 
 		// wp_kses_post(): emulate the relevant behaviour — strip on* event
-		// handler attributes carrying the XSS payload.
+		// handler attributes and <iframe> elements carrying an XSS/embed payload
+		// (real wp_kses_post() removes both for a non-unfiltered_html context).
 		Functions\when( 'wp_kses_post' )->alias(
 			function ( $value ) {
+				$value = preg_replace( '#<iframe\b[^>]*>.*?</iframe>#is', '', (string) $value );
+				$value = preg_replace( '#<iframe\b[^>]*/?>#i', '', (string) $value );
 				return preg_replace( '/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', (string) $value );
 			}
 		);
@@ -527,5 +543,97 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 			$stub->update_calls,
 			'Two distinct unencodable blocks must each be sanitized — a false hit on the empty-string digest would skip the second.'
 		);
+	}
+
+	// Content whose iframe survives a capable-author sanitize (no floor) but must
+	// be stripped by the forced floor of an untrusted write.
+	private const EMBED_PAYLOAD = '<iframe src="https://evil.example/x"></iframe><b>keep</b>';
+
+	private function embed_block() {
+		return array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::EMBED_PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbfloor1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+	}
+
+	/**
+	 * SECURITY: a capable author's sanitize_block() must not seed the same-request
+	 * memo in a way that lets a LATER untrusted write skip the forced kses floor.
+	 * A capable author's sanitize is a no-op on their own raw markup, so the memo
+	 * records a hash of that raw content; if the untrusted write of identical
+	 * content then hits the memo and returns early, the floor never runs and the
+	 * embed is stored — breaking the Audit #1 contract (AI content is floored
+	 * regardless of the credential's unfiltered_html capability).
+	 */
+	public function test_capable_sanitize_does_not_let_a_later_untrusted_write_skip_the_floor() {
+		$stub = new UntrustedWriteNoopWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		// 1. Capable author (current_user_can → true this suite) sanitizes their
+		//    own raw markup. The iframe SURVIVES — correct, they hold the
+		//    capability — and this seeds the memo with the raw content's hash.
+		$capable = $compat->sanitize_block( $this->embed_block() );
+		$this->assertStringContainsString(
+			'<iframe',
+			$capable['attrs']['panelsData']['widgets'][0]['content'],
+			'A capable author keeps their own iframe (no floor) — this is what seeds the memo.'
+		);
+
+		// 2. An untrusted write of FRESH, identical content. The forced floor MUST
+		//    strip the iframe regardless of the memo hit.
+		$untrusted = $compat->sanitize_block_untrusted( $this->embed_block() );
+		$content = $untrusted['attrs']['panelsData']['widgets'][0]['content'];
+
+		$this->assertStringNotContainsString(
+			'<iframe',
+			$content,
+			'The forced floor must strip the iframe on an untrusted write even when the same content was already sanitized by a capable author this request.'
+		);
+		$this->assertStringContainsString(
+			'keep',
+			$content,
+			'The floor strips only the disallowed markup; safe content survives.'
+		);
+	}
+
+	/**
+	 * Normal path guard: an untrusted write as the FIRST operation (empty memo)
+	 * floors as it always has. Pairs with the test above to document both
+	 * orderings and to catch a fix that silently regresses the normal path.
+	 */
+	public function test_untrusted_write_still_floors_when_memo_is_empty() {
+		$stub = new UntrustedWriteNoopWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$untrusted = $compat->sanitize_block_untrusted( $this->embed_block() );
+		$content = $untrusted['attrs']['panelsData']['widgets'][0]['content'];
+
+		$this->assertStringNotContainsString(
+			'<iframe',
+			$content,
+			'An untrusted write with an empty memo floors the iframe (the normal AI path).'
+		);
+		$this->assertStringContainsString( 'keep', $content, 'Safe content survives the floor.' );
 	}
 }
