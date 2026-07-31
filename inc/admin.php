@@ -1157,18 +1157,20 @@ class SiteOrigin_Panels_Admin {
 	 * @param array $old_widgets
 	 * @param bool  $escape_classes Should the class names be escaped.
 	 * @param bool  $force
-	 * @param bool  $trusted        Legal ONLY when the caller has independently
-	 *                              verified (e.g. via HMAC signature) that $widgets is
-	 *                              the exact output of a prior call to this same
-	 *                              function under real capability-gated sanitization.
-	 *                              Never set based on inference/heuristics/call-site
-	 *                              identity alone. When true, skips update()/kses_deep
-	 *                              sanitization execution but still runs class
-	 *                              resolution, raw-flag unset, and escape_classes.
+	 * @param bool  $structural_only When true, skip the widget update() and
+	 *                              kses_deep sanitize branches and run only the
+	 *                              structural work: class resolution, raw-flag
+	 *                              strip, and escape_classes. Render passes this
+	 *                              true for ALL stored content, because that
+	 *                              content was already sanitized at save time —
+	 *                              save-time sanitization is what protects it, not
+	 *                              any marker or verification step. (The value is
+	 *                              never re-derived from a signature or any
+	 *                              client-supplied hint; there is none.)
 	 *
 	 * @return array
 	 */
-	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $trusted = false ) {
+	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $structural_only = false ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -1207,12 +1209,12 @@ class SiteOrigin_Panels_Admin {
 			// stored-XSS fix for panels_data.
 			$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
 
-			// $trusted = true is legal ONLY when the caller has independently
-			// verified (e.g. via HMAC signature) that $widgets is the exact output
-			// of a prior call to this same function under real capability-gated
-			// sanitization; callers must never set it based on inference,
-			// heuristics, or the identity of the calling code path alone.
-			if ( ! $trusted ) {
+			// $structural_only = true skips the update()/kses_deep sanitize
+			// branches below and runs only the structural work. Render passes it
+			// true for stored content because that content was already sanitized
+			// at save time; the protection is the save-time pass, not a marker or
+			// verification of this data.
+			if ( ! $structural_only ) {
 				if ( ! empty( $the_widget ) &&
 					 method_exists( $the_widget, 'update' ) ) {
 					if (

@@ -343,8 +343,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * Structural processing only (class resolution, panels_info assembly,
 	 * raw-flag strip) — do NOT call update() or sanitize_all() here; never
 	 * re-execute sanitizers against their own stored output (see
-	 * so-widgets-bundle PR #2316). process_raw_widgets()'s $trusted param
-	 * skips the update()/kses_deep sanitize branches while keeping class
+	 * so-widgets-bundle PR #2316). process_raw_widgets()'s $structural_only
+	 * param skips the update()/kses_deep sanitize branches while keeping class
 	 * resolution, escape_classes, and raw-flag unset intact. Render never
 	 * consults a trust marker: save-time markup protection lives at the save
 	 * chokepoints (core kses on HTTP paths, the kses floor on unarmed paths).
