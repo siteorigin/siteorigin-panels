@@ -31,6 +31,10 @@
  *         test_reentrant_untrusted_call_preserves_outer_floor
  *       tests/layout-block/LayoutBlockUntrustedWriteE2ETest.php
  *         test_capable_credential_write_is_floored_signed_and_deduped_end_to_end
+ *       tests/layout-block/LayoutBlockUntrustedWriteE2ETest.php
+ *         test_capable_sanitize_does_not_let_a_later_untrusted_write_skip_the_floor
+ *       tests/layout-block/LayoutBlockUntrustedWriteE2ETest.php
+ *         test_untrusted_write_still_floors_when_memo_is_empty
  *   Gate B — delete  `$ai_changed_layout || `
  *     expected RED owner:
  *       tests/layout-block/LayoutBlockAiSeamTest.php

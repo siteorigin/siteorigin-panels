@@ -634,8 +634,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// therefore neither checks nor records: it degrades to sanitizing twice,
 		// the safe direction. (The same false-encode guard is required anywhere a
 		// hash of wp_json_encode() output is used as a key or identity.)
+		// Never consult the memo for an origin-untrusted write: sanitize_block_untrusted()
+		// sets $force_kses_floor and an untrusted write MUST always sanitize, or a
+		// memo entry seeded earlier this request (e.g. a capable author's no-op
+		// sanitize of the same raw markup) would let it skip the forced floor and
+		// store the content unfloored — an Audit #1 contract break. The OUTPUT is
+		// still recorded below unconditionally, so the wp_insert_post_data safety
+		// net that follows an untrusted write still dedups.
 		$incoming_encoded = wp_json_encode( $block['attrs']['panelsData'] );
 		if (
+			! $this->force_kses_floor &&
 			false !== $incoming_encoded &&
 			isset( $this->sanitized_this_request[ hash( 'sha256', $incoming_encoded ) ] )
 		) {
