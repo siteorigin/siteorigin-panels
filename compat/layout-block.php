@@ -625,8 +625,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// input hash here matches the output hash recorded there. Reached at
 		// every tree depth via sanitize_blocks(), so nested Layout Blocks dedup
 		// for free.
-		$incoming_hash = hash( 'sha256', wp_json_encode( $block['attrs']['panelsData'] ) );
-		if ( isset( $this->sanitized_this_request[ $incoming_hash ] ) ) {
+		//
+		// Guard on a false encode: wp_json_encode() returns false when it cannot
+		// encode (e.g. nesting past depth 512, or an unencodable value injected
+		// via a filter), and hash( 'sha256', false ) collapses to the digest of
+		// '' — so EVERY unencodable block would share one hash and a second such
+		// block would falsely hit the memo and skip sanitization. A false encode
+		// therefore neither checks nor records: it degrades to sanitizing twice,
+		// the safe direction. (develop's sign_panels_data() guarded the same case.)
+		$incoming_encoded = wp_json_encode( $block['attrs']['panelsData'] );
+		if (
+			false !== $incoming_encoded &&
+			isset( $this->sanitized_this_request[ hash( 'sha256', $incoming_encoded ) ] )
+		) {
 			return $block;
 		}
 
@@ -657,9 +668,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			! empty( $block['attrs']['panelsData'] ) &&
 			is_array( $block['attrs']['panelsData'] )
 		) {
-			$this->sanitized_this_request[
-				hash( 'sha256', wp_json_encode( $block['attrs']['panelsData'] ) )
-			] = true;
+			// Same false-encode guard as the input check: never record the
+			// digest of '' (what hash( 'sha256', false ) yields), or two
+			// unencodable blocks would collide on it and the second would skip
+			// sanitization.
+			$output_encoded = wp_json_encode( $block['attrs']['panelsData'] );
+			if ( false !== $output_encoded ) {
+				$this->sanitized_this_request[ hash( 'sha256', $output_encoded ) ] = true;
+			}
 		}
 
 		return $block;
