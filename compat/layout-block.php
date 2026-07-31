@@ -5,6 +5,22 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private $return_layout = true;
 
 	/**
+	 * Request-local set of hashes of panelsData already sanitized this request,
+	 * so the two save hooks that both fire on a single REST save (the
+	 * rest_pre_insert_* server_side_validation() and the wp_insert_post_data
+	 * validate_post_data() safety net) do not each run every widget's update()
+	 * a second time. Purely in-memory: no postmeta, option, transient, marker,
+	 * signature or salt. A hash MISS (JSON encoding differing across the
+	 * serialize_blocks -> wp_slash -> wp_unslash -> parse_blocks round trip)
+	 * just sanitizes twice, which is safe; a false HIT would require a sha256
+	 * collision. Do NOT canonicalize to force matches — that is the complexity
+	 * the trust-signature removal deliberately shed.
+	 *
+	 * @var array<string,true>
+	 */
+	private $sanitized_this_request = array();
+
+	/**
 	 * When true, the save-time kses floor in render_layout_block() is applied
 	 * regardless of the author's `unfiltered_html` capability. Set/restored
 	 * only by sanitize_block_untrusted() around the chokepoint call (the same
@@ -601,6 +617,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $block;
 		}
 
+		// Same-request dedup: if this exact panelsData was already sanitized
+		// earlier in THIS request (the rest_pre_insert_* hook), the
+		// wp_insert_post_data safety net must not run update() on it a second
+		// time. Check the INPUT here and record the OUTPUT below: on the second
+		// hook the incoming block IS the first hook's sanitized output, so the
+		// input hash here matches the output hash recorded there. Reached at
+		// every tree depth via sanitize_blocks(), so nested Layout Blocks dedup
+		// for free.
+		$incoming_hash = hash( 'sha256', wp_json_encode( $block['attrs']['panelsData'] ) );
+		if ( isset( $this->sanitized_this_request[ $incoming_hash ] ) ) {
+			return $block;
+		}
+
 		// Save/restore the PRIOR value (not hard true) via try/finally: restore
 		// keeps a thrown widget update() from leaving the flag stuck on the save
 		// branch, and preserving the prior value keeps a re-entrant sanitize_block()
@@ -617,6 +646,22 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
 			unset( $block['attrs']['renderedLayout'] );
 		}
+
+		// Record the OUTPUT: on the second hook of the same request this
+		// sanitized panelsData is what arrives as the incoming block, so hashing
+		// the output here is what the input check above will match. A re-entrant
+		// nested sanitize_block() (AI pre-save filter running a nested block
+		// write) records its own output first, then the outer records its own —
+		// the outer already passed its input check before the inner ran.
+		if (
+			! empty( $block['attrs']['panelsData'] ) &&
+			is_array( $block['attrs']['panelsData'] )
+		) {
+			$this->sanitized_this_request[
+				hash( 'sha256', wp_json_encode( $block['attrs']['panelsData'] ) )
+			] = true;
+		}
+
 		return $block;
 	}
 
