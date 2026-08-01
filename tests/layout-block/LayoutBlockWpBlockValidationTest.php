@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /*
  * Define the shared global `SiteOrigin_Panels` facade stub at FILE LOAD time.
  * PHPUnit loads every test file while building the suite, BEFORE any test
- * executes, whereas tests/LayoutBlockRenderTrustSignatureTest.php only evals
+ * executes, whereas tests/LayoutBlockRenderTrustTest.php only evals
  * its (smaller) facade inside require_classes() at setUp() time. Defining the
  * superset here therefore wins deterministically in combined runs regardless
  * of execution order, and the class_exists guard keeps coexistence a no-op
@@ -49,7 +49,7 @@ if ( ! class_exists( 'SiteOrigin_Panels', false ) ) {
  *     invocation surface for existing logic, not a parallel code path.
  *
  * NOTE: This test is intentionally self-contained, following the conventions
- * of tests/LayoutBlockRenderTrustSignatureTest.php: no shared base class,
+ * of tests/LayoutBlockRenderTrustTest.php: no shared base class,
  * phpunit.xml, or composer autoload exists on this branch. To keep the file
  * parseable by the build toolchain's bundled php-parser it avoids arrow
  * functions and anonymous classes; the `: void` return types on

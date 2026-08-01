@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /*
  * Define the shared global `SiteOrigin_Panels` facade stub at FILE LOAD time.
  * PHPUnit loads every test file while building the suite, BEFORE any test
- * executes, whereas tests/LayoutBlockRenderTrustSignatureTest.php only evals
+ * executes, whereas tests/LayoutBlockRenderTrustTest.php only evals
  * its (smaller) facade inside require_classes() at setUp() time. Defining the
  * superset here therefore wins deterministically in combined runs regardless
  * of execution order, and the class_exists guard keeps coexistence a no-op

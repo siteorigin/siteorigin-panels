@@ -26,7 +26,7 @@ use PHPUnit\Framework\TestCase;
  * functions and anonymous classes; the `: void` return types on
  * setUp()/tearDown() are required by PHPUnit 12.
  */
-class LayoutBlockRenderTrustSignatureTest extends TestCase {
+class LayoutBlockRenderTrustTest extends TestCase {
 	use MockeryPHPUnitIntegration;
 
 	protected function setUp(): void {
