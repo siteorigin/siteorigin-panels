@@ -479,7 +479,7 @@ class SiteOrigin_Panels_Abilities {
 	 *    or out-of-range index is declined as 'block-ambiguous' with the valid range.
 	 *
 	 * The resolved write routes through the compat save chokepoint — see
-	 * write_block_layout() for the sanitize/forced-floor/sign contract and the
+	 * write_block_layout() for the sanitize/forced-floor contract and the
 	 * `siteorigin_panels_ai_block_layout_pre_save` layered-transform note.
 	 *
 	 * @param WP_Post  $post        The post being written.
@@ -648,9 +648,10 @@ class SiteOrigin_Panels_Abilities {
 			return new WP_Error( 'block_index_not_found', __( 'Requested block index not found.', 'siteorigin-panels' ) );
 		}
 
-		// The chokepoint class is required to sanitize-and-sign the write. It is
-		// loaded behind function_exists( 'register_block_type' ), so mirror
-		// ai-exposure.php's class_exists guard and decline rather than fatal.
+		// The chokepoint class is required to sanitize the write and apply the
+		// forced kses floor. It is loaded behind function_exists(
+		// 'register_block_type' ), so mirror ai-exposure.php's class_exists guard
+		// and decline rather than fatal.
 		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' ) ) {
 			return new WP_Error( 'layout_block_unsupported', __( 'Layout Block saving is not available on this site.', 'siteorigin-panels' ) );
 		}

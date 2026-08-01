@@ -1164,9 +1164,11 @@ class SiteOrigin_Panels_Admin {
 	 *                              true for ALL stored content, because that
 	 *                              content was already sanitized at save time —
 	 *                              save-time sanitization is what protects it, not
-	 *                              any marker or verification step. (The value is
-	 *                              never re-derived from a signature or any
-	 *                              client-supplied hint; there is none.)
+	 *                              any marker or verification step. The caller
+	 *                              must guarantee only that: the data is stored
+	 *                              content that already passed a save-time
+	 *                              sanitize. Render passes true for all stored
+	 *                              content.
 	 *
 	 * @return array
 	 */
@@ -1264,7 +1266,7 @@ class SiteOrigin_Panels_Admin {
 	 * instances whose class cannot be resolved to a widget with an update()
 	 * method, ensuring unprivileged users can never persist unsanitized markup.
 	 * Also used by SiteOrigin_Panels_Compat_Layout_Block as a universal
-	 * sanitization floor before signing panels_data at save time.
+	 * save-time sanitization floor for panels_data.
 	 *
 	 * @param mixed $value Scalar or (nested) array to sanitize.
 	 * @return mixed The sanitized value, preserving structure.
