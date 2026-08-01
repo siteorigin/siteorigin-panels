@@ -93,9 +93,13 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// attachment saves to wp_insert_attachment_data instead; core kses
 		// still floors those) — XML-RPC, importers, WP-CLI, cron, direct
 		// calls — none of which pass through the REST hooks. On REST-driven
-		// saves both hooks legitimately co-fire and sanitize twice; sanitize
-		// is expected to be idempotent on its own output (non-idempotent field
-		// sanitizers are bugs in themselves — so-widgets-bundle PR #2316).
+		// saves both hooks still co-fire, but sanitize_block()'s same-request
+		// memo means a given block's widget update() runs once per request: the
+		// first hook records the sanitized output's hash and the second hook
+		// hits the memo and skips re-sanitizing. The exception is an
+		// origin-untrusted write (sanitize_block_untrusted() sets
+		// force_kses_floor), which always sanitizes regardless of the memo so
+		// the forced floor can never be skipped.
 		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
 	}
 
@@ -528,9 +532,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * Supplemental save-time validation for post saves that do not go through
 	 * the REST API (XML-RPC, direct wp_insert_post()/wp_update_post() calls,
 	 * importers, classic non-block-editor saves). Skips 'revision' post-type
-	 * rows (covers both plain revisions and autosaves). Every Layout Block
-	 * found is sanitized unconditionally — there is no trust marker to skip
-	 * on, and sanitize is expected to be idempotent on its own output.
+	 * rows (covers both plain revisions and autosaves). Each Layout Block found
+	 * is sanitized unless sanitize_block()'s same-request memo shows it was
+	 * already sanitized earlier this request (e.g. by the rest_pre_insert_*
+	 * hook), so the widget update() runs once per block per request. An
+	 * origin-untrusted write always sanitizes regardless of the memo.
 	 *
 	 * @param array $data Slashed, processed post data about to be inserted/updated.
 	 * @return array The (possibly modified) $data to actually persist.
