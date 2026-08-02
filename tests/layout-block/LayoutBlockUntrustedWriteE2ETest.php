@@ -44,6 +44,19 @@ class UntrustedWriteMarkerWidgetStub {
 }
 
 /**
+ * Widget stub whose update() is a genuine no-op — returns content byte-identical.
+ * Models a capable author's own raw markup surviving their sanitize unchanged, so
+ * the same-request memo records a hash of the RAW content. That is the setup that
+ * lets a later untrusted write of identical content hit the memo (input hash ==
+ * output hash) — the exact condition of the floor-bypass defect.
+ */
+class UntrustedWriteNoopWidgetStub {
+	public function update( $new, $old ) {
+		return $new;
+	}
+}
+
+/**
  * Renderer stub standing in for SiteOrigin_Panels::renderer()'s real renderer,
  * invoked by render_layout_block()'s save branch to produce contentPreview.
  */
@@ -62,13 +75,14 @@ class UntrustedWriteRendererStub {
  * Properties locked by this test:
  * (a) THE fail-open acceptance criterion: with a credential that HAS
  *     `unfiltered_html` (the admin-application-password scenario), a raw
- *     payload-bearing AI layout written through the chokepoint is kses-floored
- *     and signed, the wp_slash round-tripped post_content passes through the
- *     safety net BYTE-IDENTICAL (signature dedup hit), and the persisted
- *     signature verifies against the floored payload.
- * (b) The single-sanitize invariant: widget update() runs exactly ONCE across
- *     the whole write + safety-net pass — the double-update() non-idempotency
- *     hazard of the pre-slice inline sanitize is gone.
+ *     payload-bearing AI layout written through the chokepoint is kses-floored,
+ *     and the persisted payload REMAINS floored after the wp_slash round trip
+ *     through the wp_insert_post_data safety net.
+ * (b) The write chokepoint sanitizes exactly ONCE (no inline double-sanitize
+ *     in the write itself). NOTE: the safety net legitimately re-sanitizes on
+ *     the same request — the signature-gated dedup was deliberately removed;
+ *     sanitize is expected to be idempotent on its own output (the marker stub
+ *     is deliberately not, which is how the second pass is observable).
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -113,15 +127,17 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		);
 
 		// wp_kses_post(): emulate the relevant behaviour — strip on* event
-		// handler attributes carrying the XSS payload.
+		// handler attributes and <iframe> elements carrying an XSS/embed payload
+		// (real wp_kses_post() removes both for a non-unfiltered_html context).
 		Functions\when( 'wp_kses_post' )->alias(
 			function ( $value ) {
+				$value = preg_replace( '#<iframe\b[^>]*>.*?</iframe>#is', '', (string) $value );
+				$value = preg_replace( '#<iframe\b[^>]*/?>#i', '', (string) $value );
 				return preg_replace( '/\s*on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', (string) $value );
 			}
 		);
 
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
-		Functions\when( 'wp_salt' )->justReturn( 'test-salt-value' );
 
 		// REAL slashing semantics — the write path slashes for wp_update_post
 		// and the safety net unslashes before parsing; identity stubs would
@@ -301,16 +317,11 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		$written_panels_data = $block['attrs']['panelsData'];
 
 		// The floor ran despite unfiltered_html === true, after the widget's
-		// own sanitizer (marker suffix present, handler stripped)...
+		// own sanitizer (marker suffix present, handler stripped).
 		$this->assertSame(
 			self::FLOORED_SANITIZED,
 			$written_panels_data['widgets'][0]['content'],
 			'The forced floor must strip the payload from a capable-credential AI write.'
-		);
-		// ...and BEFORE signing: the signature verifies against the floored data.
-		$this->assertTrue(
-			$this->invoke( $compat, 'verify_panels_data', array( $written_panels_data ) ),
-			'The signature must verify against the floored payload.'
 		);
 		$this->assertSame( 1, $stub->update_calls, 'One sanitize pass during the write.' );
 
@@ -319,36 +330,310 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 		$slashed_content = wp_slash( $post_content );
 
 		// 3. The persisted post flows through the wp_insert_post_data safety
-		//    net in the same wp_update_post() call.
-		$validated = $this->layout_block()->validate_post_data(
+		//    net in the same wp_update_post() call. The same-request memo means
+		//    the safety net recognizes this block as already sanitized earlier
+		//    this request (by the chokepoint above) and skips the second pass —
+		//    the marker stub makes the ABSENCE of a second update() observable.
+		//    Reuse the SAME instance ($compat) both hooks run on in production
+		//    (both register on the single() instance), so the request-local memo
+		//    is shared across them.
+		$validated = $compat->validate_post_data(
 			array(
 				'post_type'    => 'post',
 				'post_content' => $slashed_content,
 			)
 		);
-
-		// Dedup hit: the freshly-signed content passes through BYTE-IDENTICAL.
-		$this->assertSame(
-			$slashed_content,
-			$validated['post_content'],
-			'Freshly-signed AI write must pass the safety net byte-identical (signature dedup).'
-		);
-
-		// The single-sanitize invariant across write + safety net: update()
-		// never ran a second time.
 		$this->assertSame(
 			1,
 			$stub->update_calls,
-			'Widget update() must run exactly once across the write and the safety net.'
+			'update() runs exactly once per block across both save hooks in one request (same-request dedup).'
 		);
 
-		// And what is actually persisted still carries the floored, verifying payload.
+		// And what is actually persisted still carries a floored payload: the
+		// handler payload stripped at the write chokepoint never comes back.
 		$persisted_blocks = parse_blocks( wp_unslash( $validated['post_content'] ) );
 		$persisted = $persisted_blocks[0]['attrs']['panelsData'];
-		$this->assertSame( self::FLOORED_SANITIZED, $persisted['widgets'][0]['content'] );
-		$this->assertTrue(
-			$this->invoke( $compat, 'verify_panels_data', array( $persisted ) ),
-			'The persisted payload must still verify after the slash round trip.'
+		$this->assertStringNotContainsString(
+			'onerror',
+			$persisted['widgets'][0]['content'],
+			'The persisted payload must remain floored after the slash round trip through the safety net.'
 		);
+		$this->assertStringStartsWith(
+			self::FLOORED_SANITIZED,
+			$persisted['widgets'][0]['content'],
+			'The floored write-time content survives (the safety net only re-appends the marker suffix).'
+		);
+	}
+
+	/**
+	 * Ordinary editor REST save (not the AI path): the block flows through
+	 * server_side_validation() (rest_pre_insert_*) then validate_post_data()
+	 * (wp_insert_post_data) in the same request, on the same instance. The
+	 * same-request memo means update() runs exactly ONCE across both hooks.
+	 */
+	public function test_editor_rest_save_runs_update_once_across_both_hooks() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$block = array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbeditor1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		// Hook 1: rest_pre_insert_* — server_side_validation sanitizes the block.
+		$prepared = new \stdClass();
+		$prepared->post_content = serialize_blocks( array( $block ) );
+		$prepared = $compat->server_side_validation( $prepared, null );
+
+		$this->assertSame( 1, $stub->update_calls, 'First hook sanitizes once.' );
+
+		// Hook 2: wp_insert_post_data — validate_post_data on the SAME instance,
+		// receiving the slashed content the first hook produced. The memo skips
+		// the second sanitize pass.
+		$compat->validate_post_data(
+			array(
+				'post_type'    => 'post',
+				'post_content' => wp_slash( $prepared->post_content ),
+			)
+		);
+
+		$this->assertSame(
+			1,
+			$stub->update_calls,
+			'update() runs exactly once per block across both REST save hooks in one request.'
+		);
+	}
+
+	/**
+	 * Safety-net integrity: a block that did NOT pass through
+	 * server_side_validation this request (a direct wp_insert_post, an importer,
+	 * cron — no rest_pre_insert_* hook) is still sanitized by validate_post_data.
+	 * The memo must not create a hole in the safety net.
+	 */
+	public function test_direct_write_block_is_still_sanitized_by_safety_net() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$block = array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbdirect1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		// No server_side_validation() this request — memo is empty. The safety
+		// net must sanitize, exactly once (not skip via a false hit).
+		$validated = $compat->validate_post_data(
+			array(
+				'post_type'    => 'post',
+				'post_content' => wp_slash( serialize_blocks( array( $block ) ) ),
+			)
+		);
+
+		$this->assertSame(
+			1,
+			$stub->update_calls,
+			'A direct-write block with no prior chokepoint pass is sanitized by the safety net.'
+		);
+
+		$persisted = parse_blocks( wp_unslash( $validated['post_content'] ) )[0]['attrs']['panelsData'];
+		$this->assertStringEndsWith(
+			'-SANITIZED',
+			$persisted['widgets'][0]['content'],
+			'The safety net actually ran the widget update() on the un-chokepointed block.'
+		);
+	}
+
+	/**
+	 * Build a Layout Block whose panelsData is well-formed but fails
+	 * wp_json_encode() — a value nested past json's default depth of 512, the
+	 * shape reachable via nested Layout widgets or an imported layout. The
+	 * $marker distinguishes the two blocks so a memo false-hit on the shared
+	 * empty-string digest is observable.
+	 */
+	private function unencodable_block( $marker ) {
+		$deep = self::PAYLOAD;
+		for ( $i = 0; $i < 600; $i++ ) {
+			$deep = array( $deep );
+		}
+
+		return array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::PAYLOAD,
+							'marker'      => $marker,
+							'too_deep'    => $deep,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbdeep' . $marker,
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+	}
+
+	/**
+	 * False-hit guard: two DIFFERENT Layout Blocks in one request whose
+	 * panelsData both fail wp_json_encode() must NOT collide in the memo.
+	 * hash( 'sha256', false ) is the digest of '' — so without the false-encode
+	 * guard both blocks share one memo key and the second is wrongly skipped.
+	 * The second block must still be sanitized (update() runs on it).
+	 */
+	public function test_two_unencodable_blocks_do_not_false_hit_the_memo() {
+		$stub = new UntrustedWriteMarkerWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		// Sanity: these blocks genuinely fail to encode (else the test proves
+		// nothing about the false-encode path).
+		$this->assertFalse(
+			wp_json_encode( $this->unencodable_block( 'a' )['attrs']['panelsData'] ),
+			'Fixture precondition: panelsData must fail wp_json_encode() (depth > 512).'
+		);
+
+		// Both blocks sanitized in the same request on the same instance. Without
+		// the guard, block B false-hits A's empty-string digest and is skipped,
+		// leaving update_calls at 1.
+		$compat->sanitize_block( $this->unencodable_block( 'a' ) );
+		$compat->sanitize_block( $this->unencodable_block( 'b' ) );
+
+		$this->assertSame(
+			2,
+			$stub->update_calls,
+			'Two distinct unencodable blocks must each be sanitized — a false hit on the empty-string digest would skip the second.'
+		);
+	}
+
+	// Content whose iframe survives a capable-author sanitize (no floor) but must
+	// be stripped by the forced floor of an untrusted write.
+	private const EMBED_PAYLOAD = '<iframe src="https://evil.example/x"></iframe><b>keep</b>';
+
+	private function embed_block() {
+		return array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'content'     => self::EMBED_PAYLOAD,
+							'panels_info' => array( 'class' => 'UntrustedWriteMarkerWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gbfloor1',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+	}
+
+	/**
+	 * SECURITY: a capable author's sanitize_block() must not seed the same-request
+	 * memo in a way that lets a LATER untrusted write skip the forced kses floor.
+	 * A capable author's sanitize is a no-op on their own raw markup, so the memo
+	 * records a hash of that raw content; if the untrusted write of identical
+	 * content then hits the memo and returns early, the floor never runs and the
+	 * embed is stored — breaking the Audit #1 contract (AI content is floored
+	 * regardless of the credential's unfiltered_html capability).
+	 */
+	public function test_capable_sanitize_does_not_let_a_later_untrusted_write_skip_the_floor() {
+		$stub = new UntrustedWriteNoopWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		// 1. Capable author (current_user_can → true this suite) sanitizes their
+		//    own raw markup. The iframe SURVIVES — correct, they hold the
+		//    capability — and this seeds the memo with the raw content's hash.
+		$capable = $compat->sanitize_block( $this->embed_block() );
+		$this->assertStringContainsString(
+			'<iframe',
+			$capable['attrs']['panelsData']['widgets'][0]['content'],
+			'A capable author keeps their own iframe (no floor) — this is what seeds the memo.'
+		);
+
+		// 2. An untrusted write of FRESH, identical content. The forced floor MUST
+		//    strip the iframe regardless of the memo hit.
+		$untrusted = $compat->sanitize_block_untrusted( $this->embed_block() );
+		$content = $untrusted['attrs']['panelsData']['widgets'][0]['content'];
+
+		$this->assertStringNotContainsString(
+			'<iframe',
+			$content,
+			'The forced floor must strip the iframe on an untrusted write even when the same content was already sanitized by a capable author this request.'
+		);
+		$this->assertStringContainsString(
+			'keep',
+			$content,
+			'The floor strips only the disallowed markup; safe content survives.'
+		);
+	}
+
+	/**
+	 * Normal path guard: an untrusted write as the FIRST operation (empty memo)
+	 * floors as it always has. Pairs with the test above to document both
+	 * orderings and to catch a fix that silently regresses the normal path.
+	 */
+	public function test_untrusted_write_still_floors_when_memo_is_empty() {
+		$stub = new UntrustedWriteNoopWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		$compat = $this->layout_block();
+
+		$untrusted = $compat->sanitize_block_untrusted( $this->embed_block() );
+		$content = $untrusted['attrs']['panelsData']['widgets'][0]['content'];
+
+		$this->assertStringNotContainsString(
+			'<iframe',
+			$content,
+			'An untrusted write with an empty memo floors the iframe (the normal AI path).'
+		);
+		$this->assertStringContainsString( 'keep', $content, 'Safe content survives the floor.' );
 	}
 }

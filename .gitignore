@@ -15,3 +15,5 @@ dist/
 /docs/
 /tasks/runs/
 .phpunit.result.cache
+/tests/harness/snapshots/*
+!/tests/harness/snapshots/baseline.json

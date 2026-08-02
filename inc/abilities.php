@@ -479,7 +479,7 @@ class SiteOrigin_Panels_Abilities {
 	 *    or out-of-range index is declined as 'block-ambiguous' with the valid range.
 	 *
 	 * The resolved write routes through the compat save chokepoint — see
-	 * write_block_layout() for the sanitize/forced-floor/sign contract and the
+	 * write_block_layout() for the sanitize/forced-floor contract and the
 	 * `siteorigin_panels_ai_block_layout_pre_save` layered-transform note.
 	 *
 	 * @param WP_Post  $post        The post being written.
@@ -608,12 +608,13 @@ class SiteOrigin_Panels_Abilities {
 	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()) — the
 	 * SAME path every Layout Block save uses: the
 	 * `siteorigin_panels_ai_block_layout_pre_save` filter, strict sanitize
-	 * (process_raw_widgets + sanitize_all), the kses floor FORCED regardless of
-	 * the credential's `unfiltered_html` capability (AI output is
-	 * origin-untrusted, whatever authenticates the request), then HMAC signing.
-	 * AI input is never persisted raw, and this is a SINGLE sanitize pass by
-	 * design: the wp_insert_post_data safety net verifies the fresh signature
-	 * and skips re-sanitizing, so widget update() never runs twice per write.
+	 * (process_raw_widgets + sanitize_all), and the kses floor FORCED regardless
+	 * of the credential's `unfiltered_html` capability (AI output is
+	 * origin-untrusted, whatever authenticates the request). AI input is never
+	 * persisted raw, and this is a SINGLE sanitize pass by design: the
+	 * wp_insert_post_data safety net recognizes the block as already sanitized
+	 * this request via the request-local memo in sanitize_block() and skips the
+	 * second pass, so widget update() never runs twice per write.
 	 *
 	 * NOTE for premium-addon authors (layered transforms): because the write
 	 * goes through the chokepoint, any consumer hooked to
@@ -647,9 +648,10 @@ class SiteOrigin_Panels_Abilities {
 			return new WP_Error( 'block_index_not_found', __( 'Requested block index not found.', 'siteorigin-panels' ) );
 		}
 
-		// The chokepoint class is required to sanitize-and-sign the write. It is
-		// loaded behind function_exists( 'register_block_type' ), so mirror
-		// ai-exposure.php's class_exists guard and decline rather than fatal.
+		// The chokepoint class is required to sanitize the write and apply the
+		// forced kses floor. It is loaded behind function_exists(
+		// 'register_block_type' ), so mirror ai-exposure.php's class_exists guard
+		// and decline rather than fatal.
 		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block' ) ) {
 			return new WP_Error( 'layout_block_unsupported', __( 'Layout Block saving is not available on this site.', 'siteorigin-panels' ) );
 		}
