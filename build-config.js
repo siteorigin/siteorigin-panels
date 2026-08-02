@@ -68,6 +68,11 @@ module.exports = {
             '!widgets/**/styles/*.css',                      // Don't copy any .css files compiled from runtime .less files
             '!{node_modules,node_modules/**}',               // Ignore node_modules/ and contents
             '!{docs,docs/**}',                               // Ignore docs/ (internal plans/research, never shipped)
+            '!{tests,tests/**}',                             // Ignore tests/ (PHPUnit suites and the render harness)
+            '!{tasks,tasks/**}',                             // Ignore tasks/ (local run records)
+            '!phpunit*.xml',                                 // Ignore PHPUnit suite configs
+            '!composer.json',                                // Ignore composer manifest (dev dependencies only)
+            '!composer.lock',                                // Ignore composer lockfile
             '!{tmp,tmp/**}',                                 // Ignore dist/ and contents
             '!{vendor,vendor/**}',                           // Ignore composer files. We're not using any in release.
             '!siteorigin-panels.php',                        // Not the base plugin file. It is copied by the 'version' task.
