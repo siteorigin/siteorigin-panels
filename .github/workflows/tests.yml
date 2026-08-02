@@ -1,0 +1,17 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # inc/installer and build are git submodules; without them the
+          # checkout is incomplete and inc/admin.php warns on include.
+          submodules: recursive
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: composer install --prefer-dist --no-progress
+      - run: composer test
