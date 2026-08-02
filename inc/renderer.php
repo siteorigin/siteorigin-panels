@@ -10,6 +10,73 @@ class SiteOrigin_Panels_Renderer {
 		$this->inline_css = null;
 	}
 
+	/**
+	 * Canonicalise the layout render identifier before it is concatenated into
+	 * HTML ids and CSS selectors.
+	 *
+	 * The identifier (the first argument to render()/generate_css()) is a post ID
+	 * for classic layouts, or a Layout Block's builder_id — which a Contributor
+	 * can set to arbitrary text. It is concatenated raw into `#pl-`/`#pg-`/`#pgc-`
+	 * CSS selectors (inc/css-builder.php) and into element ids, so CSS-significant
+	 * characters allow arbitrary CSS-rule injection into any page carrying a
+	 * layout. Canonicalising here, at the single entry point every render/CSS path
+	 * flows through, closes that without touching the many producers.
+	 *
+	 * Contract (see docs — grammar is the same one the block save-path already
+	 * accepts):
+	 * - A value already matching /^[A-Za-z0-9_-]+$/ within a sane length is
+	 *   returned BYTE-IDENTICAL. Every real generated id (integer post id,
+	 *   uniqid('gb'...), md5 fallback, 'w'+id, 'gbp'+uniqid) already matches, so
+	 *   existing ids and the customer stylesheets / Live Editor selectors that
+	 *   target them are unchanged. Leading digits are intentionally allowed: a
+	 *   classic id like `42` is only ever used prefixed (`pl-42`), never as a bare
+	 *   CSS ident start.
+	 * - Anything else (unsafe character, empty, over-long, or non-scalar) becomes a
+	 *   DETERMINISTIC token in the reserved `gb_c` namespace. `gb_c` cannot collide
+	 *   with any generator's output: none emits an underscore in its token. It is
+	 *   deterministic (not uniqid()) so output does not vary per render, and it is
+	 *   itself in the safe grammar so re-applying is a no-op (idempotent).
+	 *
+	 * @param mixed $id The raw identifier.
+	 * @return string A CSS/HTML-selector-safe identifier, never empty.
+	 */
+	public function canonicalize_layout_id( $id ) {
+		if ( is_string( $id ) || is_int( $id ) ) {
+			// A value already in the safe grammar is returned UNCHANGED (and, for
+			// an int, keeps its int type) so every real id — integer post ids and
+			// every generated builder_id, including any starting `gb_c` — is
+			// byte-identical, and customer stylesheets / editor selectors that
+			// target it keep working. Only genuinely unsafe values are rewritten.
+			$s = (string) $id;
+			if ( $s !== '' && strlen( $s ) <= 200 && preg_match( '/^[A-Za-z0-9_-]+$/', $s ) ) {
+				return $id;
+			}
+			$seed = 'string|' . $s;
+		} else {
+			// Non-scalar: not a legitimate identifier. Distinguish supported values
+			// by a stable, non-sensitive shape (type + JSON) rather than a single
+			// constant token or serialize()-ing arbitrary objects. Plain
+			// json_encode() (a PHP builtin) so this method stays dependency-free.
+			$json = json_encode( $id );
+			$seed = gettype( $id ) . '|' . ( is_string( $json ) ? $json : '' );
+		}
+
+		// Deterministic reserved-namespace token for unsafe input. `gb_c` is not the
+		// output of any id generator (none emits an underscore in its token), so a
+		// canonicalised unsafe value does not collide with a GENERATED id.
+		//
+		// Accepted tradeoff (not a preimage-resistant guarantee): because a safe
+		// `gb_c…` value passes through unchanged, an author CAN construct a
+		// collision within their OWN content — set one block's builder_id to a
+		// genuinely unsafe value V and another block's to this function's token for
+		// V — making those two blocks share a selector id on that author's own
+		// page. This is a self-inflicted styling quirk, not a cross-content or
+		// cross-user issue (colliding with a DIFFERENT author's id still needs a
+		// sha256 preimage), so it is not rewritten: rewriting safe `gb_c…` values
+		// would break legitimate ids for no security benefit.
+		return 'gb_c' . substr( hash( 'sha256', $seed ), 0, 20 );
+	}
+
 	public static function single() {
 		static $single;
 
@@ -137,6 +204,14 @@ class SiteOrigin_Panels_Renderer {
 		$panels_tablet_width = $settings['tablet-width'];
 		$panels_mobile_width = $settings['mobile-width'];
 		$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
+
+		// $post_id here is the RENDER IDENTIFIER (a builder_id string for Layout
+		// Blocks), not necessarily a post ID. Canonicalise it before it is
+		// concatenated into CSS selectors below (passed to the CSS builder as the
+		// layout id). A no-op for safe ids; neutralises a CSS-injecting builder_id.
+		// The data lookups and filters ABOVE deliberately used the original value;
+		// this line changes the value only for an unsafe id, the case being fixed.
+		$post_id = $this->canonicalize_layout_id( $post_id );
 
 		$css = new SiteOrigin_Panels_Css_Builder();
 
@@ -569,6 +644,18 @@ class SiteOrigin_Panels_Renderer {
 				$post_id = wc_get_page_id( 'shop' );
 			}
 		}
+
+		// $post_id here is the RENDER IDENTIFIER, not necessarily a post ID: for a
+		// Layout Block it is the block's builder_id string (a third-party filter
+		// that compares it to a real post ID is already wrong for Layout Blocks,
+		// independent of this line). Canonicalise it before it is concatenated into
+		// element ids and CSS selectors. This is a NO-OP for every already-valid
+		// value (integer post ids and all generated builder_ids), so the cache key,
+		// lookups and filter context are byte-identical; the value changes ONLY for
+		// an unsafe id (a CSS-injecting builder_id) — the case being fixed — and it
+		// then changes consistently everywhere, including the cache key, so state
+		// stays coherent.
+		$post_id = $this->canonicalize_layout_id( $post_id );
 
 		global $siteorigin_panels_current_post;
 		// If $panels_data is empty, and the current post being processed is the same as the last one, don't process it.
