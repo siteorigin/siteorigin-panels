@@ -97,18 +97,35 @@ class SiteOrigin_Layout_Id_Characterisation {
 		echo wp_json_encode( array( 'captured' => $label, 'posts' => count( $ids ), 'path' => $path ) ) . "\n";
 	}
 
+	/** Fail-closed JSON load: any read/decode failure aborts, never returns partial. */
+	private function load_rows( $path ) {
+		if ( ! file_exists( $path ) ) { return array( 'err' => "missing: $path" ); }
+		$raw = file_get_contents( $path );
+		if ( $raw === false ) { return array( 'err' => "unreadable: $path" ); }
+		$doc = json_decode( $raw, true );
+		if ( ! is_array( $doc ) || ! isset( $doc['rows'] ) || ! is_array( $doc['rows'] ) ) {
+			return array( 'err' => "malformed: $path" );
+		}
+		return array( 'rows' => $doc['rows'] );
+	}
+
 	private function diff() {
-		$b = $this->dir . '/layout-id-baseline.json';
-		$c = $this->dir . '/layout-id-candidate.json';
-		if ( ! file_exists( $b ) || ! file_exists( $c ) ) {
-			echo wp_json_encode( array( 'error' => 'need baseline + candidate' ) ) . "\n";
+		$B = $this->load_rows( $this->dir . '/layout-id-baseline.json' );
+		$C = $this->load_rows( $this->dir . '/layout-id-candidate.json' );
+		if ( isset( $B['err'] ) || isset( $C['err'] ) ) {
+			echo wp_json_encode( array( 'error' => ( $B['err'] ?? '' ) . ' ' . ( $C['err'] ?? '' ) ) ) . "\n";
 			return;
 		}
-		$B = json_decode( file_get_contents( $b ), true )['rows'];
-		$C = json_decode( file_get_contents( $c ), true )['rows'];
+		$B = $B['rows'];
+		$C = $C['rows'];
 		$changed = array();
-		foreach ( $B as $pid => $brow ) {
+		// Union of both key sets so a candidate-only or baseline-only post is
+		// caught — iterating one side alone can report a false SAFE.
+		$keys = array_unique( array_merge( array_keys( $B ), array_keys( $C ) ) );
+		foreach ( $keys as $pid ) {
+			$brow = $B[ $pid ] ?? null;
 			$crow = $C[ $pid ] ?? null;
+			if ( $brow === null ) { $changed[] = array( 'post_id' => $pid, 'why' => 'candidate-only (new)' ); continue; }
 			if ( $crow === null ) { $changed[] = array( 'post_id' => $pid, 'why' => 'missing in candidate' ); continue; }
 			if ( ( $brow['css_hash'] ?? '' ) !== ( $crow['css_hash'] ?? '' ) ) {
 				$changed[] = array(
@@ -122,7 +139,7 @@ class SiteOrigin_Layout_Id_Characterisation {
 		foreach ( $changed as $ch ) { echo wp_json_encode( $ch ) . "\n"; }
 		echo wp_json_encode( array(
 			'_summary' => true,
-			'total'    => count( $B ),
+			'total'    => count( $keys ),
 			'changed'  => count( $changed ),
 			'verdict'  => empty( $changed )
 				? 'SAFE — every stored layout emits byte-identical selectors'
@@ -130,11 +147,59 @@ class SiteOrigin_Layout_Id_Characterisation {
 		) ) . "\n";
 	}
 
+	/**
+	 * Integration probe: run the REAL generate_css() (modern AND legacy) with a
+	 * malicious builder_id as the identifier and assert the actual CSS sink
+	 * contains only the canonical token, not the injected selector structure.
+	 * This exercises the render()/generate_css() call sites — it FAILS if the
+	 * canonicalisation calls there are removed, unlike a direct unit test of the
+	 * canonicaliser.
+	 */
+	private function probe() {
+		$pd = array(
+			'widgets'    => array(),
+			'grids'      => array( array( 'cells' => 1, 'style' => array() ) ),
+			'grid_cells' => array( array( 'grid' => 0, 'weight' => 1, 'style' => array() ) ),
+		);
+		$payloads = array(
+			'css_breakout' => 'gb1}} body{background:red}/*',
+			'html_ish'     => 'gb"><x>',
+		);
+		$renderers = array(
+			'modern' => SiteOrigin_Panels::renderer(),
+			'legacy' => new SiteOrigin_Panels_Renderer_Legacy(),
+		);
+		$fail = 0;
+		foreach ( $renderers as $rname => $r ) {
+			foreach ( $payloads as $pname => $payload ) {
+				$css = (string) $r->generate_css( $payload, $pd );
+				$breakout = ( strpos( $css, 'body{background:red}' ) !== false )
+					|| ( strpos( $css, '}}' ) !== false )
+					|| ( strpos( $css, '<x>' ) !== false );
+				$has_token = ( strpos( $css, 'gb_c' ) !== false );
+				$ok = ( ! $breakout ) && $has_token;
+				if ( ! $ok ) { $fail++; }
+				echo wp_json_encode( array(
+					'renderer' => $rname, 'payload' => $pname,
+					'breakout' => $breakout, 'canonical_token_in_css' => $has_token,
+					'result'   => $ok ? 'PASS' : 'FAIL',
+				) ) . "\n";
+			}
+		}
+		echo wp_json_encode( array(
+			'_summary' => true, 'failures' => $fail,
+			'verdict'  => $fail === 0
+				? 'SAFE — no injected structure in generated CSS; canonical token used at both sinks'
+				: 'STOP — ' . $fail . ' sink(s) leaked the payload',
+		) ) . "\n";
+	}
+
 	public function run() {
 		$mode = $this->mode();
 		if ( $mode === 'diff' ) { $this->diff(); }
+		elseif ( $mode === 'probe' ) { $this->probe(); }
 		elseif ( $mode === 'baseline' || $mode === 'candidate' ) { $this->capture( $mode ); }
-		else { echo wp_json_encode( array( 'usage' => 'SOTRUST_ID_MODE=baseline|candidate|diff' ) ) . "\n"; }
+		else { echo wp_json_encode( array( 'usage' => 'SOTRUST_ID_MODE=baseline|candidate|diff|probe' ) ) . "\n"; }
 	}
 }
 

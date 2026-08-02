@@ -157,8 +157,32 @@ class LayoutIdCanonicalisationTest extends TestCase {
 	public function test_distinct_unsafe_values_do_not_collide() {
 		$this->assertNotSame( $this->canon( 'a.b' ), $this->canon( 'a/b' ) );
 		$this->assertNotSame( $this->canon( 'gb1}}x' ), $this->canon( 'gb1}}y' ) );
-		// String '42' (safe) and int 42 (safe) are equal; but two DIFFERENT
-		// non-scalars must not collide via the type tag.
+		// Different non-scalars must not collide: they are distinguished by a
+		// stable type+JSON representation, not reduced to one constant token.
 		$this->assertNotSame( $this->canon( null ), $this->canon( false ) );
+		$this->assertNotSame( $this->canon( array( 'x' ) ), $this->canon( array( 'y' ) ) );
+	}
+
+	/**
+	 * A value wearing the reserved `gb_c` prefix that is NOT an exact canonical
+	 * token must be forced through the hash, not passed through — so a caller
+	 * cannot hand in a forged token and have it survive verbatim.
+	 */
+	public function test_reserved_prefix_is_not_a_passthrough() {
+		$forged = 'gb_cNOTAREALHASHVALUE';
+		$out = $this->canon( $forged );
+		$this->assertNotSame( $forged, $out, 'a forged gb_c-prefixed value must not pass through' );
+		$this->assertMatchesRegularExpression( '/^gb_c[0-9a-f]{20}$/', $out );
+	}
+
+	/**
+	 * A genuine canonical token (this method's own output) IS a fixed point —
+	 * required for idempotency. This is not a forgery gap: two different inputs
+	 * mapping to the same token would need a sha256 preimage collision.
+	 */
+	public function test_canonical_token_is_a_fixed_point() {
+		$token = $this->canon( 'gb1}} body{x:1}/*' );
+		$this->assertMatchesRegularExpression( '/^gb_c[0-9a-f]{20}$/', $token );
+		$this->assertSame( $token, $this->canon( $token ) );
 	}
 }
