@@ -44,16 +44,35 @@ class SiteOrigin_Panels_Renderer {
 		if ( is_string( $id ) || is_int( $id ) ) {
 			$s = (string) $id;
 
-			if ( $s !== '' && strlen( $s ) <= 200 && preg_match( '/^[A-Za-z0-9_-]+$/', $s ) ) {
+			// An exact canonical token (this method's own output) is already safe
+			// and is returned unchanged — this is the idempotency fixed point.
+			if ( preg_match( '/^gb_c[0-9a-f]{20}$/', $s ) ) {
 				return $s;
 			}
+
+			// Any OTHER value in the safe grammar is byte-identical — EXCEPT one
+			// wearing the reserved `gb_c` prefix, which is forced through the hash
+			// so a caller can never hand in a forged token and have it pass through
+			// (that would let two different ids canonicalise to the same string).
+			if (
+				$s !== '' &&
+				strlen( $s ) <= 200 &&
+				strpos( $s, 'gb_c' ) !== 0 &&
+				preg_match( '/^[A-Za-z0-9_-]+$/', $s )
+			) {
+				return $s;
+			}
+
+			$seed = 'string|' . $s;
 		} else {
-			// Non-scalar: not a legitimate identifier. Represent it stably for the
-			// hash (type-tagged) rather than serialize()-ing arbitrary objects.
-			$s = '';
+			// Non-scalar: not a legitimate identifier. Distinguish supported values
+			// by a stable, non-sensitive shape (type + JSON) rather than a single
+			// constant token or serialize()-ing arbitrary objects.
+			$json = wp_json_encode( $id );
+			$seed = gettype( $id ) . '|' . ( is_string( $json ) ? $json : '' );
 		}
 
-		return 'gb_c' . substr( hash( 'sha256', gettype( $id ) . '|' . $s ), 0, 20 );
+		return 'gb_c' . substr( hash( 'sha256', $seed ), 0, 20 );
 	}
 
 	public static function single() {
