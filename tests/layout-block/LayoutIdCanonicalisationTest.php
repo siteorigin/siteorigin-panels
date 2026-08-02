@@ -54,7 +54,7 @@ class LayoutIdCanonicalisationTest extends TestCase {
 	 */
 	public static function safe_ids() {
 		return array(
-			'integer post id'        => array( 42, '42' ),
+			'integer post id'        => array( 42, 42 ),
 			'numeric string post id' => array( '42', '42' ),
 			'uniqid gb.ID.- '        => array( 'gb42-6a6f097d9d775', 'gb42-6a6f097d9d775' ),
 			'md5 fallback'           => array( 'gb42-9dd4e461268c8034f5c8564e155c67a6-', 'gb42-9dd4e461268c8034f5c8564e155c67a6-' ),
@@ -164,25 +164,26 @@ class LayoutIdCanonicalisationTest extends TestCase {
 	}
 
 	/**
-	 * A value wearing the reserved `gb_c` prefix that is NOT an exact canonical
-	 * token must be forced through the hash, not passed through — so a caller
-	 * cannot hand in a forged token and have it survive verbatim.
+	 * A legitimate safe-grammar id starting with the reserved prefix (e.g.
+	 * `gb_cfoo`) is STILL byte-identical — the reserved namespace is not enforced
+	 * by rewriting safe values (that would break real ids), only by the fact that
+	 * no generator emits `gb_c`. A canonical token is a fixed point (idempotency).
 	 */
-	public function test_reserved_prefix_is_not_a_passthrough() {
-		$forged = 'gb_cNOTAREALHASHVALUE';
-		$out = $this->canon( $forged );
-		$this->assertNotSame( $forged, $out, 'a forged gb_c-prefixed value must not pass through' );
-		$this->assertMatchesRegularExpression( '/^gb_c[0-9a-f]{20}$/', $out );
-	}
-
-	/**
-	 * A genuine canonical token (this method's own output) IS a fixed point —
-	 * required for idempotency. This is not a forgery gap: two different inputs
-	 * mapping to the same token would need a sha256 preimage collision.
-	 */
-	public function test_canonical_token_is_a_fixed_point() {
+	public function test_gb_c_prefixed_safe_ids_are_byte_identical() {
+		$this->assertSame( 'gb_cfoo', $this->canon( 'gb_cfoo' ) );
+		$this->assertSame( 'gb_c123', $this->canon( 'gb_c123' ) );
+		// The method's own token round-trips unchanged.
 		$token = $this->canon( 'gb1}} body{x:1}/*' );
 		$this->assertMatchesRegularExpression( '/^gb_c[0-9a-f]{20}$/', $token );
 		$this->assertSame( $token, $this->canon( $token ) );
+	}
+
+	/**
+	 * An integer post id keeps its integer type (not stringified), so the
+	 * renderer's application state, cache keys and filter args are unchanged.
+	 */
+	public function test_integer_post_id_keeps_int_type() {
+		$this->assertSame( 42, $this->canon( 42 ) );
+		$this->assertIsInt( $this->canon( 42 ) );
 	}
 }

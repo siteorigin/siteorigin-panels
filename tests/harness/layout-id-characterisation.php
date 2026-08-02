@@ -121,7 +121,7 @@ class SiteOrigin_Layout_Id_Characterisation {
 		$C = $this->load_rows( $this->dir . '/layout-id-candidate.json' );
 		if ( isset( $B['err'] ) || isset( $C['err'] ) ) {
 			echo wp_json_encode( array( 'error' => ( $B['err'] ?? '' ) . ' ' . ( $C['err'] ?? '' ) ) ) . "\n";
-			return;
+			return false;
 		}
 		$B = $B['rows'];
 		$C = $C['rows'];
@@ -161,6 +161,8 @@ class SiteOrigin_Layout_Id_Characterisation {
 					? 'STOP — ' . $errored . ' capture(s) errored; run is not reliable evidence'
 					: 'REVIEW — ' . count( $changed ) . ' layouts changed; each must be a currently-UNSAFE id, never a safe one' ),
 		) ) . "\n";
+
+		return empty( $changed ) && $errored === 0;
 	}
 
 	/**
@@ -228,14 +230,22 @@ class SiteOrigin_Layout_Id_Characterisation {
 				? 'SAFE — no injected structure at CSS or HTML sinks; canonical token used'
 				: 'STOP — ' . $fail . ' sink(s) leaked the payload',
 		) ) . "\n";
+
+		return $fail === 0;
 	}
 
 	public function run() {
 		$mode = $this->mode();
-		if ( $mode === 'diff' ) { $this->diff(); }
-		elseif ( $mode === 'probe' ) { $this->probe(); }
-		elseif ( $mode === 'baseline' || $mode === 'candidate' ) { $this->capture( $mode ); }
-		else { echo wp_json_encode( array( 'usage' => 'SOTRUST_ID_MODE=baseline|candidate|diff|probe' ) ) . "\n"; }
+		if ( $mode === 'diff' ) {
+			// exit non-zero so CI / scripted callers see a failed run, not a silent pass.
+			if ( ! $this->diff() ) { exit( 1 ); }
+		} elseif ( $mode === 'probe' ) {
+			if ( ! $this->probe() ) { exit( 1 ); }
+		} elseif ( $mode === 'baseline' || $mode === 'candidate' ) {
+			$this->capture( $mode );
+		} else {
+			echo wp_json_encode( array( 'usage' => 'SOTRUST_ID_MODE=baseline|candidate|diff|probe' ) ) . "\n";
+		}
 	}
 }
 

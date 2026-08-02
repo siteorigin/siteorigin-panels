@@ -42,27 +42,15 @@ class SiteOrigin_Panels_Renderer {
 	 */
 	public function canonicalize_layout_id( $id ) {
 		if ( is_string( $id ) || is_int( $id ) ) {
+			// A value already in the safe grammar is returned UNCHANGED (and, for
+			// an int, keeps its int type) so every real id — integer post ids and
+			// every generated builder_id, including any starting `gb_c` — is
+			// byte-identical, and customer stylesheets / editor selectors that
+			// target it keep working. Only genuinely unsafe values are rewritten.
 			$s = (string) $id;
-
-			// An exact canonical token (this method's own output) is already safe
-			// and is returned unchanged — this is the idempotency fixed point.
-			if ( preg_match( '/^gb_c[0-9a-f]{20}$/', $s ) ) {
-				return $s;
+			if ( $s !== '' && strlen( $s ) <= 200 && preg_match( '/^[A-Za-z0-9_-]+$/', $s ) ) {
+				return $id;
 			}
-
-			// Any OTHER value in the safe grammar is byte-identical — EXCEPT one
-			// wearing the reserved `gb_c` prefix, which is forced through the hash
-			// so a caller can never hand in a forged token and have it pass through
-			// (that would let two different ids canonicalise to the same string).
-			if (
-				$s !== '' &&
-				strlen( $s ) <= 200 &&
-				strpos( $s, 'gb_c' ) !== 0 &&
-				preg_match( '/^[A-Za-z0-9_-]+$/', $s )
-			) {
-				return $s;
-			}
-
 			$seed = 'string|' . $s;
 		} else {
 			// Non-scalar: not a legitimate identifier. Distinguish supported values
@@ -73,6 +61,12 @@ class SiteOrigin_Panels_Renderer {
 			$seed = gettype( $id ) . '|' . ( is_string( $json ) ? $json : '' );
 		}
 
+		// Deterministic reserved-namespace token for unsafe input. `gb_c` cannot be
+		// the output of any id generator (none emits an underscore in its token). A
+		// caller setting a builder_id to a literal `gb_c…` value is harmless: the
+		// worst case is that two of the SAME author's blocks share an id on the
+		// author's own page (a token is a fixed point of this function), which
+		// finding a cross-content collision for would require a sha256 preimage.
 		return 'gb_c' . substr( hash( 'sha256', $seed ), 0, 20 );
 	}
 
