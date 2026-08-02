@@ -25,7 +25,10 @@ class SiteOrigin_Layout_Id_Characterisation {
 
 	public function __construct() {
 		$this->dir = __DIR__ . '/snapshots';
-		if ( ! is_dir( $this->dir ) ) { @mkdir( $this->dir, 0755, true ); }
+		if ( ! is_dir( $this->dir ) && ! mkdir( $this->dir, 0755, true ) && ! is_dir( $this->dir ) ) {
+			echo wp_json_encode( array( 'error' => "could not create snapshot dir: {$this->dir}" ) ) . "\n";
+			exit( 1 );
+		}
 	}
 
 	private function mode() {
@@ -100,7 +103,12 @@ class SiteOrigin_Layout_Id_Characterisation {
 			'rows' => $rows,
 		);
 		$path = $this->dir . '/layout-id-' . preg_replace( '/[^a-z]/', '', $label ) . '.json';
-		file_put_contents( $path, wp_json_encode( $doc, JSON_PRETTY_PRINT ) );
+		$written = file_put_contents( $path, wp_json_encode( $doc, JSON_PRETTY_PRINT ) );
+		if ( $written === false ) {
+			// Fail-closed: an uncaptured snapshot must not read as a successful run.
+			echo wp_json_encode( array( 'error' => "could not write snapshot: $path" ) ) . "\n";
+			exit( 1 );
+		}
 		echo wp_json_encode( array( 'captured' => $label, 'posts' => count( $ids ), 'path' => $path ) ) . "\n";
 	}
 

@@ -186,4 +186,31 @@ class LayoutIdCanonicalisationTest extends TestCase {
 		$this->assertSame( 42, $this->canon( 42 ) );
 		$this->assertIsInt( $this->canon( 42 ) );
 	}
+
+	/**
+	 * Call-site guard, wired into the phpunit suite: the canonicalise call must be
+	 * present at BOTH render sinks (render() and generate_css() in the modern
+	 * renderer, and generate_css() in the legacy renderer). Deleting a call site —
+	 * which the unit tests above would not otherwise catch, since they call the
+	 * canonicaliser directly — fails here. The runnable end-to-end proof that the
+	 * output is actually clean is the harness probe (`SOTRUST_ID_MODE=probe`),
+	 * which drives the real generate_css()/render() and fails non-zero if a sink
+	 * leaks; this guard is its cheap in-suite companion.
+	 */
+	public function test_canonicalise_is_called_at_every_render_sink() {
+		$modern = file_get_contents( dirname( dirname( __DIR__ ) ) . '/inc/renderer.php' );
+		$legacy = file_get_contents( dirname( dirname( __DIR__ ) ) . '/inc/renderer-legacy.php' );
+
+		// Count the canonicalise application in each entry method's body.
+		$this->assertSame(
+			2,
+			substr_count( $modern, '$post_id = $this->canonicalize_layout_id( $post_id );' ),
+			'render() and generate_css() must each canonicalise the identifier.'
+		);
+		$this->assertSame(
+			1,
+			substr_count( $legacy, '$post_id = $this->canonicalize_layout_id( $post_id );' ),
+			'the legacy renderer generate_css() override must canonicalise too.'
+		);
+	}
 }

@@ -61,12 +61,19 @@ class SiteOrigin_Panels_Renderer {
 			$seed = gettype( $id ) . '|' . ( is_string( $json ) ? $json : '' );
 		}
 
-		// Deterministic reserved-namespace token for unsafe input. `gb_c` cannot be
-		// the output of any id generator (none emits an underscore in its token). A
-		// caller setting a builder_id to a literal `gb_c…` value is harmless: the
-		// worst case is that two of the SAME author's blocks share an id on the
-		// author's own page (a token is a fixed point of this function), which
-		// finding a cross-content collision for would require a sha256 preimage.
+		// Deterministic reserved-namespace token for unsafe input. `gb_c` is not the
+		// output of any id generator (none emits an underscore in its token), so a
+		// canonicalised unsafe value does not collide with a GENERATED id.
+		//
+		// Accepted tradeoff (not a preimage-resistant guarantee): because a safe
+		// `gb_c…` value passes through unchanged, an author CAN construct a
+		// collision within their OWN content — set one block's builder_id to a
+		// genuinely unsafe value V and another block's to this function's token for
+		// V — making those two blocks share a selector id on that author's own
+		// page. This is a self-inflicted styling quirk, not a cross-content or
+		// cross-user issue (colliding with a DIFFERENT author's id still needs a
+		// sha256 preimage), so it is not rewritten: rewriting safe `gb_c…` values
+		// would break legitimate ids for no security benefit.
 		return 'gb_c' . substr( hash( 'sha256', $seed ), 0, 20 );
 	}
 
