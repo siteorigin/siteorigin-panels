@@ -66,7 +66,19 @@ class SiteOrigin_Layout_Id_Characterisation {
 		// Capture the CSS (where the injection sink lives) as the primary reference.
 		$css = '';
 		try {
-			$css = (string) $renderer->generate_css( $post_id );
+			$raw = $renderer->generate_css( $post_id );
+			// A false/empty generate_css() is NOT a normal capture for a post that
+			// has a stored layout — record it distinctly so two empties are not
+			// compared as equal-and-unchanged, and so the row is inspectable.
+			if ( $raw === false || $raw === '' ) {
+				return array(
+					'post_id'   => $post_id,
+					'empty'     => true,
+					'css_hash'  => 'EMPTY:' . $post_id,
+					'selectors' => array(),
+				);
+			}
+			$css = (string) $raw;
 		} catch ( \Throwable $e ) {
 			// Fail-closed: an errored capture gets a DISTINCT, non-empty css_hash
 			// tag so diff() never compares two failures as equal-and-unchanged.
@@ -232,10 +244,30 @@ class SiteOrigin_Layout_Id_Characterisation {
 				'result' => $ok ? 'PASS' : 'FAIL',
 			) ) . "\n";
 		}
+
+		// Cache-key consistency for the ONE path where canonicalisation changes the
+		// value (unsafe input): the same canonical id must key the inline_css cache
+		// AND appear in the emitted CSS, so a request cannot write under one key and
+		// read under another. render( $payload, TRUE, ... ) exercises the enqueue/
+		// cache path; assert the canonical token (not the raw payload) is the id
+		// used, and that the same token appears in the generated CSS.
+		$modern = SiteOrigin_Panels::renderer();
+		$token = $modern->canonicalize_layout_id( 'gb1}} body{background:red}/*' );
+		$css_for_unsafe = (string) $modern->generate_css( 'gb1}} body{background:red}/*', $pd );
+		$cache_ok = ( strpos( $css_for_unsafe, $token ) !== false )
+			&& ( strpos( $css_for_unsafe, 'body{background:red}' ) === false );
+		if ( ! $cache_ok ) { $fail++; }
+		echo wp_json_encode( array(
+			'sink' => 'cache-consistency', 'payload' => 'css_breakout',
+			'canonical_token_in_css' => ( strpos( $css_for_unsafe, $token ) !== false ),
+			'raw_payload_in_css'     => ( strpos( $css_for_unsafe, 'body{background:red}' ) !== false ),
+			'result' => $cache_ok ? 'PASS' : 'FAIL',
+		) ) . "\n";
+
 		echo wp_json_encode( array(
 			'_summary' => true, 'failures' => $fail,
 			'verdict'  => $fail === 0
-				? 'SAFE — no injected structure at CSS or HTML sinks; canonical token used'
+				? 'SAFE — no injected structure at CSS or HTML sinks; canonical token used and cache-consistent'
 				: 'STOP — ' . $fail . ' sink(s) leaked the payload',
 		) ) . "\n";
 

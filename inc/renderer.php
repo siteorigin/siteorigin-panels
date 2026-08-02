@@ -205,10 +205,12 @@ class SiteOrigin_Panels_Renderer {
 		$panels_mobile_width = $settings['mobile-width'];
 		$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
 
-		// Canonicalise the identifier before it is concatenated into CSS
-		// selectors below (passed to the CSS builder as the layout id). No-op for
-		// safe ids; neutralises a CSS-injecting builder_id. The data lookups and
-		// filters above deliberately used the original value.
+		// $post_id here is the RENDER IDENTIFIER (a builder_id string for Layout
+		// Blocks), not necessarily a post ID. Canonicalise it before it is
+		// concatenated into CSS selectors below (passed to the CSS builder as the
+		// layout id). A no-op for safe ids; neutralises a CSS-injecting builder_id.
+		// The data lookups and filters ABOVE deliberately used the original value;
+		// this line changes the value only for an unsafe id, the case being fixed.
 		$post_id = $this->canonicalize_layout_id( $post_id );
 
 		$css = new SiteOrigin_Panels_Css_Builder();
@@ -643,11 +645,16 @@ class SiteOrigin_Panels_Renderer {
 			}
 		}
 
-		// Canonicalise the identifier before it is concatenated into element ids
-		// and CSS selectors. A no-op for every safe value (integer post ids and
-		// all generated builder_ids), so data lookups, the cache key, and filter
-		// context are byte-identical; only an unsafe id (a CSS-injecting
-		// builder_id) changes, and it must change consistently everywhere.
+		// $post_id here is the RENDER IDENTIFIER, not necessarily a post ID: for a
+		// Layout Block it is the block's builder_id string (a third-party filter
+		// that compares it to a real post ID is already wrong for Layout Blocks,
+		// independent of this line). Canonicalise it before it is concatenated into
+		// element ids and CSS selectors. This is a NO-OP for every already-valid
+		// value (integer post ids and all generated builder_ids), so the cache key,
+		// lookups and filter context are byte-identical; the value changes ONLY for
+		// an unsafe id (a CSS-injecting builder_id) — the case being fixed — and it
+		// then changes consistently everywhere, including the cache key, so state
+		// stays coherent.
 		$post_id = $this->canonicalize_layout_id( $post_id );
 
 		global $siteorigin_panels_current_post;

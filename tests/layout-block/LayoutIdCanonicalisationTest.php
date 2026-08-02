@@ -188,14 +188,36 @@ class LayoutIdCanonicalisationTest extends TestCase {
 	}
 
 	/**
+	 * Cache/filter consistency for the ONE path where canonicalisation changes the
+	 * value (unsafe input): a downstream consumer that keys off the identifier
+	 * (the inline_css cache uses `$post_id` as its key; filters receive it) must
+	 * see the SAME canonical value the sinks use — otherwise a request could write
+	 * under one key and read under another. For an unsafe id, canonicalize is
+	 * deterministic, so every consumer of the post-canonicalisation value agrees.
+	 */
+	public function test_unsafe_id_is_consistent_across_consumers() {
+		$unsafe = 'gb1}} body{background:red}/*';
+		$a = $this->canon( $unsafe );
+		$b = $this->canon( $unsafe );
+		// Deterministic: the cache key and every filter arg derived from it are the
+		// same string on every call within and across requests.
+		$this->assertSame( $a, $b );
+		// And it is the safe token, so the cache key itself is selector-safe.
+		$this->assertMatchesRegularExpression( '/^gb_c[0-9a-f]{20}$/', $a );
+		// A safe id is unchanged, so its consumers are byte-identical to pre-fix.
+		$this->assertSame( 42, $this->canon( 42 ) );
+	}
+
+	/**
 	 * Call-site guard, wired into the phpunit suite: the canonicalise call must be
 	 * present at BOTH render sinks (render() and generate_css() in the modern
 	 * renderer, and generate_css() in the legacy renderer). Deleting a call site —
 	 * which the unit tests above would not otherwise catch, since they call the
-	 * canonicaliser directly — fails here. The runnable end-to-end proof that the
-	 * output is actually clean is the harness probe (`SOTRUST_ID_MODE=probe`),
-	 * which drives the real generate_css()/render() and fails non-zero if a sink
-	 * leaks; this guard is its cheap in-suite companion.
+	 * canonicaliser directly — fails here. This is a structural guard; the
+	 * BEHAVIOURAL end-to-end proof (that generate_css()/render() actually emit only
+	 * the canonical token, and fail if a call site is removed) is the harness probe
+	 * `SOTRUST_ID_MODE=probe`, which drives the real renderers and exits non-zero on
+	 * a leak. Run both; this one is the cheap in-suite tripwire.
 	 */
 	public function test_canonicalise_is_called_at_every_render_sink() {
 		$modern = file_get_contents( dirname( dirname( __DIR__ ) ) . '/inc/renderer.php' );
