@@ -67,8 +67,9 @@ class SiteOrigin_Panels_Renderer {
 		} else {
 			// Non-scalar: not a legitimate identifier. Distinguish supported values
 			// by a stable, non-sensitive shape (type + JSON) rather than a single
-			// constant token or serialize()-ing arbitrary objects.
-			$json = wp_json_encode( $id );
+			// constant token or serialize()-ing arbitrary objects. Plain
+			// json_encode() (a PHP builtin) so this method stays dependency-free.
+			$json = json_encode( $id );
 			$seed = gettype( $id ) . '|' . ( is_string( $json ) ? $json : '' );
 		}
 

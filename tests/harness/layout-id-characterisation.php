@@ -65,7 +65,14 @@ class SiteOrigin_Layout_Id_Characterisation {
 		try {
 			$css = (string) $renderer->generate_css( $post_id );
 		} catch ( \Throwable $e ) {
-			return array( 'post_id' => $post_id, 'error' => $e->getMessage() );
+			// Fail-closed: an errored capture gets a DISTINCT, non-empty css_hash
+			// tag so diff() never compares two failures as equal-and-unchanged.
+			return array(
+				'post_id'  => $post_id,
+				'error'    => $e->getMessage(),
+				'css_hash' => 'ERROR:' . md5( $post_id . '|' . $e->getMessage() ),
+				'selectors' => array(),
+			);
 		}
 		$selectors = $this->selectors_from_css( $css );
 		return array(
@@ -136,14 +143,23 @@ class SiteOrigin_Layout_Id_Characterisation {
 				);
 			}
 		}
+		// Fail-closed: any capture that errored (either side) makes the run
+		// unreliable as evidence — report it, do not swallow it into SAFE.
+		$errored = 0;
+		foreach ( $keys as $pid ) {
+			if ( isset( $B[ $pid ]['error'] ) || isset( $C[ $pid ]['error'] ) ) { $errored++; }
+		}
 		foreach ( $changed as $ch ) { echo wp_json_encode( $ch ) . "\n"; }
 		echo wp_json_encode( array(
 			'_summary' => true,
 			'total'    => count( $keys ),
 			'changed'  => count( $changed ),
-			'verdict'  => empty( $changed )
+			'errored'  => $errored,
+			'verdict'  => ( empty( $changed ) && $errored === 0 )
 				? 'SAFE — every stored layout emits byte-identical selectors'
-				: 'REVIEW — ' . count( $changed ) . ' layouts changed; each must be a currently-UNSAFE id, never a safe one',
+				: ( $errored > 0
+					? 'STOP — ' . $errored . ' capture(s) errored; run is not reliable evidence'
+					: 'REVIEW — ' . count( $changed ) . ' layouts changed; each must be a currently-UNSAFE id, never a safe one' ),
 		) ) . "\n";
 	}
 
@@ -170,6 +186,7 @@ class SiteOrigin_Layout_Id_Characterisation {
 			'legacy' => new SiteOrigin_Panels_Renderer_Legacy(),
 		);
 		$fail = 0;
+		// CSS sink (generate_css) on both renderers.
 		foreach ( $renderers as $rname => $r ) {
 			foreach ( $payloads as $pname => $payload ) {
 				$css = (string) $r->generate_css( $payload, $pd );
@@ -180,16 +197,35 @@ class SiteOrigin_Layout_Id_Characterisation {
 				$ok = ( ! $breakout ) && $has_token;
 				if ( ! $ok ) { $fail++; }
 				echo wp_json_encode( array(
-					'renderer' => $rname, 'payload' => $pname,
-					'breakout' => $breakout, 'canonical_token_in_css' => $has_token,
+					'sink' => 'css:' . $rname, 'payload' => $pname,
+					'breakout' => $breakout, 'canonical_token' => $has_token,
 					'result'   => $ok ? 'PASS' : 'FAIL',
 				) ) . "\n";
 			}
 		}
+		// HTML sink (render): the payload must not appear as a raw element id;
+		// only the canonical token may. This covers the render() call site that
+		// the CSS probe does not — removing that call must make this FAIL.
+		foreach ( $payloads as $pname => $payload ) {
+			$html = (string) SiteOrigin_Panels::renderer()->render( $payload, false, $pd );
+			// The raw payload's CSS-significant chars would appear in id="pl-{payload}".
+			// esc_attr encodes them in the attribute, but the canonical token means
+			// the id VALUE itself is the token, not the payload. Assert the payload's
+			// distinctive substring is absent from any id, and the token is present.
+			$raw_in_id = ( preg_match( '/id="[^"]*(?:\}\}|body\{|<x>)/', $html ) === 1 );
+			$token_in_html = ( strpos( $html, 'gb_c' ) !== false );
+			$ok = ( ! $raw_in_id ) && $token_in_html;
+			if ( ! $ok ) { $fail++; }
+			echo wp_json_encode( array(
+				'sink' => 'html:render', 'payload' => $pname,
+				'raw_payload_in_id' => $raw_in_id, 'canonical_token' => $token_in_html,
+				'result' => $ok ? 'PASS' : 'FAIL',
+			) ) . "\n";
+		}
 		echo wp_json_encode( array(
 			'_summary' => true, 'failures' => $fail,
 			'verdict'  => $fail === 0
-				? 'SAFE — no injected structure in generated CSS; canonical token used at both sinks'
+				? 'SAFE — no injected structure at CSS or HTML sinks; canonical token used'
 				: 'STOP — ' . $fail . ' sink(s) leaked the payload',
 		) ) . "\n";
 	}
