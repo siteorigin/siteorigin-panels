@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 2.36.0 – 04 August 2026 =
+* Import: Limited how many times an uploaded layout file is decoded, and rejected uploads that don't contain a valid layout.
+* Import: Prevented errors when filtered layout data isn't in the expected format.
+* Layout Block: Fixed embeds, iframes, and other advanced content not displaying for logged out visitors. Affected pages recover automatically with no need to re-save.
+* Layout Block: Standardized the layout identifier used in generated markup and CSS selectors so unusual values can't affect page styling.
+* Layout Block: Prevented errors when a Layout Block contains unexpected layout data.
+* Layout Block: Reduced the empty state message size in the block editor.
+* Styles: Preserved stored row, cell, and widget styles when no style fields are registered for the request, preventing style loss on save.
+* Developer: Added a read-only layouts REST route, the `siteorigin-panels/layout-get` and `siteorigin-panels/layout-update` abilities, and the `siteorigin_panels_ai_layout_loaded` action, allowing addons to read and update Page Builder layouts.
+
 = 2.35.0 – 15 July 2026 =
 * Layout Block: Strengthened save-time security so widget content is verified when saved and rendered from a trusted copy, keeping embeds and other advanced content intact for all visitors.
 * Layout Block: Extended the same save-time verification to reusable blocks and block-based widget areas.
