@@ -471,9 +471,24 @@ class SiteOrigin_Panels_Admin_Layouts {
 			wp_die();
 		}
 
-		// Newer exports may require further decoding.
+		// Layouts exported by 2.29.9 to 2.32.1 are double encoded: the file holds a
+		// JSON string that itself contains the layout JSON. Decode at most twice
+		// more, three json_decode calls in total, so malformed data cannot loop.
+		$attempts = 0;
+
+		while ( is_string( $panels_data ) && $attempts++ < 2 ) {
+			$decoded = json_decode( $panels_data, true );
+
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				break;
+			}
+
+			$panels_data = $decoded;
+		}
+
 		if ( ! is_array( $panels_data ) ) {
-			$panels_data = $this->decode_panels_data( $panels_data );
+			$this->delete_file( $file );
+			wp_die();
 		}
 
 		$panels_data = wp_unslash( $panels_data );
@@ -651,6 +666,16 @@ class SiteOrigin_Panels_Admin_Layouts {
 
 		header( 'content-type:application/json' );
 		$panels_data = apply_filters( 'siteorigin_panels_data', $panels_data, false );
+
+		// A filter may return something other than an array.
+		if ( ! is_array( $panels_data ) ) {
+			wp_send_json_error();
+		}
+
+		if ( empty( $panels_data['widgets'] ) ) {
+			$panels_data['widgets'] = array();
+		}
+
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], array(), true, true );
 
 		if ( ! empty( $panels_data['widgets'] ) ) {

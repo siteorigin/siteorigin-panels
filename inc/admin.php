@@ -241,6 +241,47 @@ class SiteOrigin_Panels_Admin {
 			false
 		);
 
+		/**
+		 * Filter the layout about to be saved, allowing an AI-generated layout to be
+		 * supplied or transformed before persistence.
+		 *
+		 * Public API — premium-addon-facing. Whenever a consumer changes the
+		 * layout here, the result is re-sanitized through process_raw_widgets()
+		 * below, so returned widgets are NEVER trusted raw.
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array   $panels_data Canonical panels_data to be saved.
+		 * @param WP_Post $post        The post being saved.
+		 * @param int     $post_id     The post ID.
+		 */
+		$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_layout_pre_save', $panels_data, $post, $post_id );
+
+		// Re-sanitize ONLY when a consumer changed the layout: anything supplied or
+		// transformed by the filter must traverse process_raw_widgets() before
+		// persist (§3 — AI output is never trusted raw). When no filter is attached,
+		// or it returned the layout unchanged, the second pass MUST be skipped:
+		// widget update() sanitizers are not guaranteed idempotent, so an
+		// unconditional double-run corrupts non-idempotent widget fields on every
+		// classic save (and fires widget_update_callback twice per widget).
+		if ( $filtered_panels_data !== $panels_data ) {
+			$panels_data = $filtered_panels_data;
+			$panels_data['widgets'] = $this->process_raw_widgets(
+				! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+				! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
+				false
+			);
+
+			// Unconditional kses floor for the AI-changed layout (Audit #1 fix
+			// 1c): a layout the AI filter transformed is origin-untrusted, so
+			// the author's unfiltered_html capability must not exempt it.
+			// Applied AFTER the re-sanitize — widget update() output is what
+			// persists. The no-op path above stays unfloored: a capable
+			// author's own unchanged content keeps raw embeds.
+			$panels_data['widgets'] = self::kses_deep( $panels_data['widgets'] );
+		}
+
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$sidebars_emulator = SiteOrigin_Panels_Sidebars_Emulator::single();
 			$panels_data['widgets'] = $sidebars_emulator->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
@@ -249,61 +290,28 @@ class SiteOrigin_Panels_Admin {
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
 
+		/**
+		 * Fires with the fully-sanitized canonical panels_data immediately before it
+		 * is persisted.
+		 *
+		 * Public API — premium-addon-facing. AI consumers may observe the final
+		 * layout being saved. Read-only; to transform a layout before save use the
+		 * `siteorigin_panels_ai_layout_pre_save` filter.
+		 *
+		 * @since {NEXT_VERSION}
+		 * @api
+		 *
+		 * @param array   $panels_data Final canonical panels_data being saved.
+		 * @param WP_Post $post        The post being saved.
+		 * @param int     $post_id     The post ID.
+		 */
+		do_action( 'siteorigin_panels_ai_layout_saved_pre', $panels_data, $post, $post_id );
+
 		if ( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) {
 			// Use `update_metadata` instead of `update_post_meta` to prevent saving to parent post when it's a revision, e.g. preview.
 			update_metadata( 'post', $post_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
-			if ( siteorigin_panels_setting( 'copy-content' ) ) {
-				// Store a version of the HTML in post_content
-				$post_parent_id = wp_is_post_revision( $post_id );
-				$layout_id = ( ! empty( $post_parent_id ) ) ? $post_parent_id : $post_id;
-
-				SiteOrigin_Panels_Post_Content_Filters::add_filters();
-				$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
-				$post_content = self::render_and_restore_post_globals( $layout_id, false, $panels_data );
-				$post_css = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $panels_data );
-				SiteOrigin_Panels_Post_Content_Filters::remove_filters();
-				unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
-
-				// Update the post_content.
-				$post->post_content = $post_content;
-
-				if ( siteorigin_panels_setting( 'copy-styles' ) ) {
-					$post->post_content .= "\n\n";
-					$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
-					$post->post_content .= '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
-					$post->post_content .= $post_css;
-					$post->post_content .= '</style>';
-				}
-				$copy_content_update_method = apply_filters(
-					'siteorigin_panels_copy_content_update_method',
-					'wp_update_post',
-					$post,
-					$post_id,
-					$panels_data
-				);
-
-				if ( $copy_content_update_method === 'direct_db' ) {
-					$this->copy_content_update_post_direct_db( $post );
-				} else {
-					// Prevent slug modification during content-only update.
-					// wp_update_post triggers the full wp_insert_post pipeline,
-					// where filters from other plugins (e.g. WPML) can corrupt
-					// the post slug. Lock it to the current value.
-					$slug_lock = static function( $override, $slug, $id ) use ( $post ) {
-						return $id === $post->ID ? $slug : $override;
-					};
-					add_filter( 'pre_wp_unique_post_slug', $slug_lock, 1, 3 );
-
-					$copy_content_update_args = array(
-						'ID'           => $post->ID,
-						'post_content' => $post->post_content,
-					);
-					wp_update_post( $copy_content_update_args, false, true );
-
-					remove_filter( 'pre_wp_unique_post_slug', $slug_lock, 1 );
-				}
-			}
+			$this->copy_content_to_post( $post, $post_id, $panels_data );
 		} else {
 			// There are no widgets or rows, so delete the panels data.
 			delete_post_meta( $post_id, 'panels_data' );
@@ -319,6 +327,106 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		$this->in_save_post = false;
+	}
+
+	/**
+	 * Render the canonical layout into the post_content mirror and persist it.
+	 *
+	 * Extracted verbatim from save_post() so the same logic can refresh the
+	 * `copy-content` HTML mirror from any write path (e.g. the layout-update
+	 * ability), not just an editor save. Internally gated on the `copy-content`
+	 * setting, so it is a no-op when copy-content is off.
+	 *
+	 * The HTML is rendered from the FINAL canonical $panels_data (already
+	 * sanitized by the caller); raw input must never be rendered here. Preserves
+	 * the revision-parent layout id, the copy-styles CSS append, the
+	 * `siteorigin_panels_copy_content_update_method` filter, and the slug-lock.
+	 *
+	 * Callers that may re-enter save_post() via wp_update_post() should wrap this
+	 * in with_save_guard() so $in_save_post is set during the persist.
+	 *
+	 * @param WP_Post $post        Mutable post snapshot (get_post()); its post_content is set here.
+	 * @param int     $post_id     Post ID (drives revision detection and filter args).
+	 * @param array   $panels_data Final canonical, already-sanitized layout to render.
+	 *
+	 * @return void
+	 */
+	public function copy_content_to_post( $post, $post_id, $panels_data ) {
+		if ( siteorigin_panels_setting( 'copy-content' ) ) {
+			// Store a version of the HTML in post_content
+			$post_parent_id = wp_is_post_revision( $post_id );
+			$layout_id = ( ! empty( $post_parent_id ) ) ? $post_parent_id : $post_id;
+
+			SiteOrigin_Panels_Post_Content_Filters::add_filters();
+			$GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] = true;
+			$post_content = self::render_and_restore_post_globals( $layout_id, false, $panels_data );
+			$post_css = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $panels_data );
+			SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+			unset( $GLOBALS[ 'SITEORIGIN_PANELS_POST_CONTENT_RENDER' ] );
+
+			// Update the post_content.
+			$post->post_content = $post_content;
+
+			if ( siteorigin_panels_setting( 'copy-styles' ) ) {
+				$post->post_content .= "\n\n";
+				$post->post_content .= '<style type="text/css" class="panels-style" data-panels-style-for-post="' . (int) $layout_id . '">';
+				$post->post_content .= '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
+				$post->post_content .= $post_css;
+				$post->post_content .= '</style>';
+			}
+			$copy_content_update_method = apply_filters(
+				'siteorigin_panels_copy_content_update_method',
+				'wp_update_post',
+				$post,
+				$post_id,
+				$panels_data
+			);
+
+			if ( $copy_content_update_method === 'direct_db' ) {
+				$this->copy_content_update_post_direct_db( $post );
+			} else {
+				// Prevent slug modification during content-only update.
+				// wp_update_post triggers the full wp_insert_post pipeline,
+				// where filters from other plugins (e.g. WPML) can corrupt
+				// the post slug. Lock it to the current value.
+				$slug_lock = static function( $override, $slug, $id ) use ( $post ) {
+					return $id === $post->ID ? $slug : $override;
+				};
+				add_filter( 'pre_wp_unique_post_slug', $slug_lock, 1, 3 );
+
+				$copy_content_update_args = array(
+					'ID'           => $post->ID,
+					'post_content' => $post->post_content,
+				);
+				wp_update_post( $copy_content_update_args, false, true );
+
+				remove_filter( 'pre_wp_unique_post_slug', $slug_lock, 1 );
+			}
+		}
+	}
+
+	/**
+	 * Run a callback with the save_post re-entrancy guard ($in_save_post) set.
+	 *
+	 * copy_content_to_post() may call wp_update_post(), which re-fires save_post().
+	 * Wrapping the call in this guard makes save_post() early-return during the
+	 * nested update, exactly as it does for the editor's own copy-content write.
+	 * The PRIOR guard value is preserved and restored (not forced to false), so
+	 * nesting inside an existing save is safe.
+	 *
+	 * @param callable $callback Work to run while $in_save_post is true.
+	 *
+	 * @return mixed The callback's return value.
+	 */
+	public function with_save_guard( $callback ) {
+		$previous = $this->in_save_post;
+		$this->in_save_post = true;
+
+		try {
+			return $callback();
+		} finally {
+			$this->in_save_post = $previous;
+		}
 	}
 
 	/**
@@ -1049,18 +1157,22 @@ class SiteOrigin_Panels_Admin {
 	 * @param array $old_widgets
 	 * @param bool  $escape_classes Should the class names be escaped.
 	 * @param bool  $force
-	 * @param bool  $trusted        Legal ONLY when the caller has independently
-	 *                              verified (e.g. via HMAC signature) that $widgets is
-	 *                              the exact output of a prior call to this same
-	 *                              function under real capability-gated sanitization.
-	 *                              Never set based on inference/heuristics/call-site
-	 *                              identity alone. When true, skips update()/kses_deep
-	 *                              sanitization execution but still runs class
-	 *                              resolution, raw-flag unset, and escape_classes.
+	 * @param bool  $structural_only When true, skip the widget update() and
+	 *                              kses_deep sanitize branches and run only the
+	 *                              structural work: class resolution, raw-flag
+	 *                              strip, and escape_classes. Render passes this
+	 *                              true for ALL stored content, because that
+	 *                              content was already sanitized at save time —
+	 *                              save-time sanitization is what protects it, not
+	 *                              any marker or verification step. The caller
+	 *                              must guarantee only that: the data is stored
+	 *                              content that already passed a save-time
+	 *                              sanitize. Render passes true for all stored
+	 *                              content.
 	 *
 	 * @return array
 	 */
-	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $trusted = false ) {
+	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $structural_only = false ) {
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -1099,12 +1211,12 @@ class SiteOrigin_Panels_Admin {
 			// stored-XSS fix for panels_data.
 			$the_widget = SiteOrigin_Panels::get_widget_instance( $info['class'] );
 
-			// $trusted = true is legal ONLY when the caller has independently
-			// verified (e.g. via HMAC signature) that $widgets is the exact output
-			// of a prior call to this same function under real capability-gated
-			// sanitization; callers must never set it based on inference,
-			// heuristics, or the identity of the calling code path alone.
-			if ( ! $trusted ) {
+			// $structural_only = true skips the update()/kses_deep sanitize
+			// branches below and runs only the structural work. Render passes it
+			// true for stored content because that content was already sanitized
+			// at save time; the protection is the save-time pass, not a marker or
+			// verification of this data.
+			if ( ! $structural_only ) {
 				if ( ! empty( $the_widget ) &&
 					 method_exists( $the_widget, 'update' ) ) {
 					if (
@@ -1154,7 +1266,7 @@ class SiteOrigin_Panels_Admin {
 	 * instances whose class cannot be resolved to a widget with an update()
 	 * method, ensuring unprivileged users can never persist unsanitized markup.
 	 * Also used by SiteOrigin_Panels_Compat_Layout_Block as a universal
-	 * sanitization floor before signing panels_data at save time.
+	 * save-time sanitization floor for panels_data.
 	 *
 	 * @param mixed $value Scalar or (nested) array to sanitize.
 	 * @return mixed The sanitized value, preserving structure.

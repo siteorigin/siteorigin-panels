@@ -1,0 +1,20 @@
+{
+  "autoload": {
+      "psr-4": {
+          "SiteOrigin\\Tests\\": "tests/"
+      }
+  },
+  "require-dev": {
+    "brain/monkey": "~2.6.2",
+    "phpunit/phpunit": "^12.2"
+  },
+  "scripts": {
+    "test": [
+      "phpunit",
+      "phpunit -c phpunit-copy-content.xml",
+      "phpunit -c phpunit-save-post.xml",
+      "phpunit -c phpunit-layout-block.xml",
+      "phpunit -c phpunit-import-layout.xml"
+    ]
+  }
+}

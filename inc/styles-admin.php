@@ -644,7 +644,17 @@ class SiteOrigin_Panels_Styles_Admin {
 		}
 
 		if ( empty( $fields ) ) {
-			return array();
+			// Cold registry: no style fields are registered for this section
+			// this request (the siteorigin_panels_*_style_fields filters
+			// returned nothing). Returning array() here would WIPE the stored
+			// style every time sanitize_all() runs against stored panels_data
+			// with an unhydrated registry — destructive data loss, not
+			// sanitization. Preserve the stored value instead (mirrors
+			// so-widgets-bundle PR #2316): the ceiling of an unvalidated style
+			// value is arbitrary CSS, never script — css-builder.php runs
+			// wp_strip_all_tags() over every key and value before output, and
+			// row_css is already accepted verbatim at any capability level.
+			return is_array( $styles ) ? $styles : array();
 		}
 
 		$return = array();

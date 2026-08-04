@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /*
  * Define the shared global `SiteOrigin_Panels` facade stub at FILE LOAD time.
  * PHPUnit loads every test file while building the suite, BEFORE any test
- * executes, whereas tests/LayoutBlockRenderTrustSignatureTest.php only evals
+ * executes, whereas tests/LayoutBlockRenderTrustTest.php only evals
  * its (smaller) facade inside require_classes() at setUp() time. Defining the
  * superset here therefore wins deterministically in combined runs regardless
  * of execution order, and the class_exists guard keeps coexistence a no-op
@@ -68,12 +68,11 @@ class WidgetBlockOptionRendererStub {
  *
  * Block-based widget areas store Block-widget content in the widget_block
  * OPTION (via WP_Widget::save_settings()), not via wp_insert_post()/REST-post
- * hooks. This hook sanitizes-and-signs any embedded Layout Block on that
- * surface so it renders via the trusted path (fixing the blank-embed
- * regression there) and gets the save-time kses floor for admins lacking
- * unfiltered_html (e.g. multisite). NOTE: this is a render-consistency fix,
- * not a Contributor-XSS fix — editing widget areas requires
- * edit_theme_options (admin-only by default).
+ * hooks. This hook sanitizes any embedded Layout Block on that surface,
+ * applying the save-time kses floor for admins lacking unfiltered_html
+ * (e.g. multisite). NOTE: this is a render-consistency fix, not a
+ * Contributor-XSS fix — editing widget areas requires edit_theme_options
+ * (admin-only by default).
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -102,7 +101,6 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 		);
 
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
-		Functions\when( 'wp_salt' )->justReturn( 'test-salt-value' );
 
 		// render_layout_block() save-path plumbing.
 		Functions\when( 'current_user_can' )->justReturn( false );
@@ -205,11 +203,11 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Admin', false ) ) {
-			require_once dirname( __DIR__ ) . '/inc/admin.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/inc/admin.php';
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block', false ) ) {
-			require_once dirname( __DIR__ ) . '/compat/layout-block.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/compat/layout-block.php';
 		}
 	}
 
@@ -251,9 +249,9 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 		);
 	}
 
-	// --- (b) Unsigned Layout Block in a widget instance gets sanitized+signed.
+	// --- (b) Layout Block in a widget instance gets sanitized on option save.
 
-	public function test_unsigned_layout_block_in_widget_content_is_sanitized_and_signed() {
+	public function test_layout_block_in_widget_content_is_sanitized() {
 		$stub = new WidgetBlockOptionMarkerWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;
@@ -293,15 +291,6 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 			'The widget update() sanitizer must have run against the embedded Layout Block.'
 		);
 		$this->assertSame( 1, $stub->update_calls );
-		$this->assertArrayHasKey(
-			'sanitize_signature',
-			$reparsed_panels_data,
-			'Sanitize-then-sign must have run: the signature was NOT present in the input.'
-		);
-		$this->assertMatchesRegularExpression(
-			'/^[0-9a-f]{64}$/',
-			$reparsed_panels_data['sanitize_signature']
-		);
 	}
 
 	// --- (c) Non-instance keys and non-Block-shaped instances pass through. --

@@ -191,6 +191,15 @@ class SiteOrigin_Panels {
 		// Initialize all the extra classes.
 		SiteOrigin_Panels_Home::single();
 
+		// Expose panels_data to AI consumers via stable read-only REST + hooks.
+		// REST runs on the front-end request lifecycle, so register unconditionally.
+		SiteOrigin_Panels_AI_Exposure::single();
+
+		// Register the Abilities API abilities (layout-get / layout-update). The
+		// class only adds the Abilities API init hook (guarded for older WP), so
+		// always instantiating is cheap and correct.
+		SiteOrigin_Panels_Abilities::single();
+
 		// Check if we need to initialize the admin class.
 		if ( is_admin() ) {
 			SiteOrigin_Panels_Admin::single();

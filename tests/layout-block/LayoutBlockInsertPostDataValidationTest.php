@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /*
  * Define the shared global `SiteOrigin_Panels` facade stub at FILE LOAD time.
  * PHPUnit loads every test file while building the suite, BEFORE any test
- * executes, whereas tests/LayoutBlockRenderTrustSignatureTest.php only evals
+ * executes, whereas tests/LayoutBlockRenderTrustTest.php only evals
  * its (smaller) facade inside require_classes() at setUp() time. Defining the
  * superset here therefore wins deterministically in combined runs regardless
  * of execution order, and the class_exists guard keeps coexistence a no-op
@@ -70,15 +70,14 @@ class InsertPostDataRendererStub {
  *     (not replacing) the rest_pre_insert_* hooks.
  * (b) post_type 'revision' rows (covers plain revisions AND autosaves) are
  *     returned unchanged with zero processing.
- * (c) An UNSIGNED Layout Block arriving via this hook is sanitized-and-signed.
- * (d) A Layout Block that ALREADY carries a valid signature passes through
- *     BYTE-IDENTICAL — sanitize/update() provably does NOT run a second time.
- *     This locks the double-sanitization-avoidance dedup this hook depends on.
+ * (c) A Layout Block arriving via this hook runs the strict sanitize path
+ *     exactly once (widget update() count === 1).
  * (e) The hook's REAL slashed-input contract: content slashed with the
  *     genuine addslashes()-based wp_slash() semantics survives the round trip
- *     with panelsData intact and verifying — the case that catches the
- *     unslash/reslash bug found in plan review (case (d) alone would pass
- *     with that bug present).
+ *     with panelsData intact — the case that catches the unslash/reslash bug
+ *     found in plan review.
+ * (f) A malformed non-array panelsData value passes through unchanged instead
+ *     of reaching array-only sanitization and causing a PHP fatal error.
  *
  * NOTE: Self-contained per this suite's conventions; avoids arrow functions
  * and anonymous classes (build-toolchain parser compatibility); `: void`
@@ -140,7 +139,6 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		);
 
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
-		Functions\when( 'wp_salt' )->justReturn( 'test-salt-value' );
 
 		// REAL slashing semantics — NOT identity stubs. Case (e) depends on
 		// these being the genuine addslashes()/stripslashes() behavior so the
@@ -258,11 +256,11 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Admin', false ) ) {
-			require_once dirname( __DIR__ ) . '/inc/admin.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/inc/admin.php';
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Compat_Layout_Block', false ) ) {
-			require_once dirname( __DIR__ ) . '/compat/layout-block.php';
+			require_once dirname( dirname( __DIR__ ) ) . '/compat/layout-block.php';
 		}
 	}
 
@@ -340,13 +338,13 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		$this->assertSame(
 			0,
 			$this->parse_blocks_calls,
-			'parse_blocks() (and therefore verify/sanitize) must never run for revisions.'
+			'parse_blocks() (and therefore sanitize) must never run for revisions.'
 		);
 	}
 
-	// --- (c) Unsigned Layout Block gets sanitized-and-signed. -----------------
+	// --- (c) Layout Block runs the strict sanitize path exactly once. ---------
 
-	public function test_unsigned_layout_block_is_sanitized_and_signed() {
+	public function test_layout_block_is_sanitized() {
 		$stub = new InsertPostDataMarkerWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;
@@ -367,63 +365,14 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		$this->assertSame(
 			'post-data-content-SANITIZED',
 			$panels_data['widgets'][0]['content'],
-			'The strict sanitize path must have run for unsigned content.'
+			'The strict sanitize path must have run.'
 		);
 		$this->assertSame( 1, $stub->update_calls );
-		$this->assertArrayHasKey( 'sanitize_signature', $panels_data );
-		$this->assertMatchesRegularExpression( '/^[0-9a-f]{64}$/', $panels_data['sanitize_signature'] );
-	}
-
-	// --- (d) Validly-signed Layout Block passes through byte-identical. -------
-
-	public function test_signed_layout_block_passes_through_byte_identical() {
-		$stub = new InsertPostDataMarkerWidgetStub();
-		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
-			return $stub;
-		};
-		\SiteOrigin_Panels::$renderer = new InsertPostDataRendererStub();
-
-		$block = $this->layout_block();
-
-		// Produce validly-signed panelsData exactly as a real save would.
-		$panels_data = $this->marker_panels_data();
-		$panels_data['sanitize_signature'] = $this->invoke( $block, 'sign_panels_data', array( $panels_data ) );
-
-		// Build the content through the SAME serialize codec the handler uses
-		// so byte-identity is a meaningful assertion.
-		$blocks = array(
-			array(
-				'blockName'    => 'siteorigin-panels/layout-block',
-				'attrs'        => array( 'panelsData' => $panels_data, 'builder_id' => 'gbpost1' ),
-				'innerBlocks'  => array(),
-				'innerHTML'    => '',
-				'innerContent' => array(),
-			),
-		);
-		$content = serialize_blocks( $blocks );
-
-		$data = array(
-			'post_type'    => 'post',
-			'post_content' => wp_slash( $content ),
-		);
-
-		$result = $this->layout_block()->validate_post_data( $data );
-
-		$this->assertSame(
-			$data['post_content'],
-			$result['post_content'],
-			'Already-signed content must pass through BYTE-IDENTICAL (verify-first dedup).'
-		);
-		$this->assertSame(
-			0,
-			$stub->update_calls,
-			'sanitize_block()/update() must provably NOT run for already-verified content.'
-		);
 	}
 
 	// --- (e) REAL slashed-input contract: no data loss through the hook. ------
 
-	public function test_slashed_content_survives_round_trip_with_verifying_signature() {
+	public function test_slashed_content_survives_round_trip() {
 		$stub = new InsertPostDataMarkerWidgetStub();
 		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
 			return $stub;
@@ -457,9 +406,23 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		$this->assertIsArray( $reparsed[0]['attrs'], 'Block attrs must be decodable after the round trip.' );
 		$this->assertArrayHasKey( 'panelsData', $reparsed[0]['attrs'], 'panelsData must NOT be silently deleted.' );
 		$this->assertNotEmpty( $reparsed[0]['attrs']['panelsData']['widgets'], 'panelsData must survive non-empty.' );
-		$this->assertTrue(
-			$this->invoke( $block, 'verify_panels_data', array( $reparsed[0]['attrs']['panelsData'] ) ),
-			'The re-parsed panelsData must carry a VALID signature — content survived the slashed-input contract.'
+	}
+
+	// --- (f) Malformed panelsData does not reach array-only sanitization. ------
+
+	public function test_non_array_panels_data_passes_through_without_fatal() {
+		$content = '<!-- wp:siteorigin-panels/layout-block '
+			. json_encode( array( 'panelsData' => 'malformed', 'builder_id' => 'gbpost1' ) )
+			. ' /-->';
+		$data = array(
+			'post_type'    => 'post',
+			'post_content' => wp_slash( $content ),
 		);
+
+		$result = $this->layout_block()->validate_post_data( $data );
+		$reparsed = parse_blocks( wp_unslash( $result['post_content'] ) );
+
+		$this->assertCount( 1, $reparsed );
+		$this->assertSame( 'malformed', $reparsed[0]['attrs']['panelsData'] );
 	}
 }

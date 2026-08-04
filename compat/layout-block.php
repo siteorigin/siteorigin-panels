@@ -5,6 +5,34 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private $return_layout = true;
 
 	/**
+	 * Request-local set of hashes of panelsData already sanitized this request,
+	 * so the two save hooks that both fire on a single REST save (the
+	 * rest_pre_insert_* server_side_validation() and the wp_insert_post_data
+	 * validate_post_data() safety net) do not each run every widget's update()
+	 * a second time. Purely in-memory: no postmeta, option, transient, marker,
+	 * signature or salt. A hash MISS (JSON encoding differing across the
+	 * serialize_blocks -> wp_slash -> wp_unslash -> parse_blocks round trip)
+	 * just sanitizes twice, which is safe; a false HIT would require a sha256
+	 * collision. Do NOT canonicalize to force matches — that is the complexity
+	 * the trust-signature removal deliberately shed.
+	 *
+	 * @var array<string,true>
+	 */
+	private $sanitized_this_request = array();
+
+	/**
+	 * When true, the save-time kses floor in render_layout_block() is applied
+	 * regardless of the author's `unfiltered_html` capability. Set/restored
+	 * only by sanitize_block_untrusted() around the chokepoint call (the same
+	 * instance-scoped discipline as $return_layout): origin-untrusted content
+	 * (AI ability writes) must never be stored unfloored, because the
+	 * capability belongs to the request's author while the content's origin
+	 * does not. Deliberately private state, not a filter — third-party code
+	 * must not be able to toggle a security floor.
+	 */
+	private $force_kses_floor = false;
+
+	/**
 	 * Get the singleton instance
 	 *
 	 * @return SiteOrigin_Panels_Compat_Layout_Block
@@ -54,21 +82,24 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// (classic widgets.php, Customizer, REST widgets controller) funnels
 		// through that same update_option() call, so the option-specific
 		// pre_update_option_widget_block filter is the single hook needed to
-		// sanitize-and-sign Layout Blocks on this surface. Signing here lets
-		// widget-area Layout Blocks render via the trusted path (fixing the
-		// blank-embed regression for this surface) and applies the save-time
-		// kses floor for admins lacking unfiltered_html (e.g. multisite).
+		// sanitize Layout Blocks on this surface. Sanitizing here applies the
+		// save-time kses floor for admins lacking unfiltered_html (e.g.
+		// multisite).
 		add_filter( 'pre_update_option_widget_block', array( $this, 'validate_widget_block_option' ), 10, 1 );
 
 		// Supplemental (NOT a replacement for the rest_pre_insert_* hooks
-		// above): wp_insert_post_data fires for EVERY wp_insert_post()/
-		// wp_update_post() caller — XML-RPC, importers, WP-CLI, cron, direct
+		// above): wp_insert_post_data fires for every wp_insert_post()/
+		// wp_update_post() caller EXCEPT attachments (post.php branches
+		// attachment saves to wp_insert_attachment_data instead; core kses
+		// still floors those) — XML-RPC, importers, WP-CLI, cron, direct
 		// calls — none of which pass through the REST hooks. On REST-driven
-		// saves both hooks legitimately co-fire; validate_post_data() dedupes
-		// by verifying each Layout Block's existing signature first and only
-		// sanitizing blocks that have NOT already been validated, avoiding the
-		// documented double-sanitization mutation risk (so-widgets-bundle PR
-		// #2316).
+		// saves both hooks still co-fire, but sanitize_block()'s same-request
+		// memo means a given block's widget update() runs once per request: the
+		// first hook records the sanitized output's hash and the second hook
+		// hits the memo and skips re-sanitizing. The exception is an
+		// origin-untrusted write (sanitize_block_untrusted() sets
+		// force_kses_floor), which always sanitizes regardless of the memo so
+		// the forced floor can never be skipped.
 		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
 	}
 
@@ -162,34 +193,74 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	public function render_layout_block( $attributes, $content = null ) {
-		if ( empty( $attributes['panelsData'] ) ) {
+		if ( empty( $attributes['panelsData'] ) || ! is_array( $attributes['panelsData'] ) ) {
 			return '<div>' .
 			__( "You need to add a widget, row, or prebuilt layout before you'll see anything here. :)", 'siteorigin-panels' ) .
 			'</div>';
 		}
 		$panels_data = $attributes['panelsData'];
 		if ( $this->return_layout ) {
-			// Normal render (front-end or editor preview): trust only data
-			// carrying a valid save-time signature. Skips BOTH
-			// process_raw_widgets()'s update() calls AND sanitize_all() — never
-			// re-execute sanitizers against their own stored output; this
-			// codebase has repeatedly found that unsafe (see so-widgets-bundle
-			// PR #2316: posts field wiped to array(), multiple-media PHP 8
-			// TypeError, select/icon/font fields reset valid values to default —
-			// all from re-running sanitizers against already-sanitized stored
-			// data). The trusted path is safe specifically BECAUSE it never
-			// re-executes anything, not because re-running would be a no-op.
+			// Normal render (front-end or editor preview): unconditionally
+			// structural. Skips BOTH process_raw_widgets()'s update() calls AND
+			// sanitize_all() — never re-execute sanitizers against their own
+			// stored output; this codebase has repeatedly found that unsafe
+			// (see so-widgets-bundle PR #2316: posts field wiped to array(),
+			// multiple-media PHP 8 TypeError, select/icon/font fields reset
+			// valid values to default — all from re-running sanitizers against
+			// already-sanitized stored data). Markup protection happens at
+			// save time (core kses on HTTP paths, the kses floor below on
+			// unarmed paths), never at render.
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 		} else {
-			// Save-time validation (sanitize_block()): strict, capability-gated,
-			// sanitize then sign.
+			/**
+			 * Filter a single Layout Block's panels_data before it is sanitized,
+			 * allowing an AI-generated layout to be supplied or transformed.
+			 *
+			 * Block-editor counterpart of the classic-editor
+			 * `siteorigin_panels_ai_layout_pre_save` filter (see inc/admin.php).
+			 * Public API — premium-addon-facing. Fires PER LAYOUT BLOCK (a post may
+			 * contain several), carrying only that block's panels_data.
+			 *
+			 * SAVE-TIME ONLY: this fires once per block on every save surface that
+			 * reaches the sanitize chokepoint — REST save validation
+			 * (`rest_pre_insert_*` → server_side_validation()), block widget areas
+			 * (`pre_update_option_widget_block` → validate_widget_block_option()),
+			 * the `wp_insert_post_data` safety net (validate_post_data()), and AI
+			 * ability block writes (sanitize_block_untrusted()). It never fires at
+			 * render: render is structural-only and deliberately does not re-fire
+			 * save-time transforms.
+			 *
+			 * Whatever a consumer returns is re-sanitized through
+			 * sanitize_panels_data() below, so returned widgets are NEVER trusted
+			 * raw. A layout CHANGED by this filter is additionally passed through
+			 * the kses floor regardless of the author's `unfiltered_html`
+			 * capability — AI-transformed output is prompt-injectable no matter
+			 * whose credential carries the request. Non-array returns are ignored.
+			 *
+			 * @since {NEXT_VERSION}
+			 * @api
+			 *
+			 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
+			 */
+			$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
+			$ai_changed_layout = is_array( $filtered_panels_data ) && $filtered_panels_data !== $panels_data;
+			if ( $ai_changed_layout ) {
+				$panels_data = $filtered_panels_data;
+			}
+
+			// Save-time validation (sanitize_block()): strict, capability-gated
+			// sanitize.
 			$panels_data = $this->sanitize_panels_data( $panels_data );
 
 			// current_user_can() runs in the real save-time request context
 			// (the author's session), which is the only place capability-gated
-			// sanitization is meaningful.
-			if ( ! current_user_can( 'unfiltered_html' ) ) {
-				// Floor: the signature must not depend on any individual
+			// sanitization is meaningful. Origin-untrusted content is floored
+			// unconditionally: the capability belongs to the request's author,
+			// but the content's origin is the AI (a forced-floor write via
+			// sanitize_block_untrusted(), or a layout the AI pre-save filter
+			// changed).
+			if ( $this->force_kses_floor || $ai_changed_layout || ! current_user_can( 'unfiltered_html' ) ) {
+				// Floor: stored output must not depend on any individual
 				// field/widget sanitizer being "healthy" this request (some
 				// SiteOrigin Widgets Bundle field sanitizers can silently pass
 				// through unvalidated when their options registry isn't
@@ -199,7 +270,6 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				// that failure mode.
 				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
 			}
-			$panels_data['sanitize_signature'] = $this->sign_panels_data( $panels_data );
 		}
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
 
@@ -257,9 +327,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	private function sanitize_panels_data( $panels_data ) {
-		// Strip any inbound signature so a client-forged 'sanitize_signature'
-		// key can never survive into what gets processed or later re-signed.
+		if ( ! is_array( $panels_data ) ) {
+			return $panels_data;
+		}
+		// Strip any inbound 'sanitize_signature' key (legacy trust marker from
+		// the removed signing scheme) so stale or client-forged keys age out on
+		// re-save and never persist into stored panels_data.
 		unset( $panels_data['sanitize_signature'] );
+
 		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
@@ -267,131 +342,59 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	/**
-	 * Prepare panels_data for rendering, trusting only validly-signed data.
+	 * Prepare panels_data for rendering — unconditionally structural.
+	 *
+	 * Structural processing only (class resolution, panels_info assembly,
+	 * raw-flag strip) — do NOT call update() or sanitize_all() here; never
+	 * re-execute sanitizers against their own stored output (see
+	 * so-widgets-bundle PR #2316). process_raw_widgets()'s $structural_only
+	 * param skips the update()/kses_deep sanitize branches while keeping class
+	 * resolution, escape_classes, and raw-flag unset intact. Render never
+	 * consults a trust marker: save-time markup protection lives at the save
+	 * chokepoints (core kses on HTTP paths, the kses floor on unarmed paths).
+	 *
+	 * Kept as the single shared prep point for render (render_layout_block())
+	 * and CSS (maybe_generate_layout_block_css()) so the two never disagree
+	 * about structure.
 	 *
 	 * @param array $panels_data Panels data from the stored block attribute.
 	 * @return array
 	 */
 	private function prepare_render_panels_data( $panels_data ) {
-		if ( $this->verify_panels_data( $panels_data ) ) {
-			// Verified: this exact array is the persisted output of a
-			// save-time sanitize run. Structural processing only (class
-			// resolution, panels_info assembly, raw-flag strip) — do NOT
-			// call update() or sanitize_all() again. process_raw_widgets()'s
-			// $trusted param skips the update()/kses_deep sanitize branches
-			// while keeping class resolution, escape_classes, and raw-flag
-			// unset intact.
-			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
-				->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
-			return $panels_data; // sanitize_all() deliberately NOT called here
-		}
+		$panels_data = $this->normalize_render_fields( $panels_data );
+		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()
+			->process_raw_widgets( $panels_data['widgets'], false, true, false, true );
 
-		// Unsigned, tampered, or pre-existing content with no signature yet:
-		// exactly today's strict path. Never sign here — this call can run
-		// with an admin VIEWER's capabilities over content an unprivileged
-		// AUTHOR supplied, and signing in this branch would launder attacker
-		// content as trusted.
-		return $this->sanitize_panels_data( $panels_data );
+		return $panels_data; // sanitize_all() deliberately NOT called here
 	}
 
 	/**
-	 * Compute the HMAC signature certifying that $panels_data is the exact
-	 * output of a save-time capability-gated sanitize run.
+	 * Recursively normalize volatile per-save fields so nothing downstream
+	 * chokes on a malformed value: 'builder_id' is kept only when it matches
+	 * [A-Za-z0-9_-]+ (regenerated otherwise); '_sow_form_timestamp' is cast
+	 * to int.
 	 *
-	 * @param array $panels_data Sanitized panels data (any existing signature
-	 *                           key is ignored).
-	 * @return string|false HMAC-SHA256 hex digest, or false if wp_json_encode()
-	 *                      of $panels_data failed.
+	 * @param array $panels_data Panels data (or any nested array of it).
+	 * @return array
 	 */
-	private function sign_panels_data( $panels_data ) {
-		unset( $panels_data['sanitize_signature'] );
-
-		// wp_json_encode() can return false (malformed UTF-8, resource refs,
-		// depth exceeded). Without this guard, false would silently coerce to
-		// '' in the concatenation below, producing a "valid-looking" signature
-		// over "$version|" that is NOT tied to the real content. Fail closed
-		// instead: a false return here stores an empty/false signature at the
-		// save-time call site (which verify_panels_data() treats as 'missing')
-		// and is treated as a failed verification at the verify call site.
-		$encoded = wp_json_encode( $panels_data );
-		if ( false === $encoded ) {
-			return false;
+	private function normalize_render_fields( $panels_data ) {
+		if ( ! is_array( $panels_data ) ) {
+			return $panels_data;
 		}
 
-		// Version bump policy: bump 'panels:1' -> 'panels:2' ONLY for future
-		// security-tightening changes to sanitization semantics, NEVER for
-		// idempotency/bugfix changes. A bump invalidates every existing
-		// signature, falling all previously-signed content back to strict
-		// re-sanitization until each post is individually re-saved by its real
-		// author (no safe bulk/cron re-signing exists, because capability-gated
-		// sanitization is only meaningful under the real author's session).
-		$version = apply_filters( 'siteorigin_panels_sanitize_version', 'panels:1' );
-		return hash_hmac( 'sha256', $version . '|' . $encoded, wp_salt( 'auth' ) );
-	}
-
-	/**
-	 * Verify that $panels_data carries a valid save-time signature.
-	 *
-	 * Fails closed: any missing, malformed, or non-matching signature returns
-	 * false, sending the caller down the strict sanitize path.
-	 *
-	 * @param array $panels_data Panels data possibly carrying 'sanitize_signature'.
-	 * @return bool
-	 */
-	private function verify_panels_data( $panels_data ) {
-		if ( empty( $panels_data['sanitize_signature'] ) ) {
-			// Case (a): no signature at all. Expected/normal for legacy
-			// content saved before this scheme existed, or content from a
-			// still-unvalidated save surface. Not itself suspicious, so this
-			// logs only when debugging is explicitly enabled.
-			$this->maybe_log_signature_failure( 'missing' );
-			return false;
+		foreach ( $panels_data as $key => $value ) {
+			if ( $key === 'builder_id' ) {
+				if ( ! is_string( $value ) || ! preg_match( '/^[A-Za-z0-9_-]+$/', $value ) ) {
+					$panels_data[ $key ] = uniqid( 'gb' );
+				}
+			} elseif ( $key === '_sow_form_timestamp' ) {
+				$panels_data[ $key ] = (int) $value;
+			} elseif ( is_array( $value ) ) {
+				$panels_data[ $key ] = $this->normalize_render_fields( $value );
+			}
 		}
 
-		// sign_panels_data() returns false when wp_json_encode() fails; passing
-		// that to hash_equals() would throw a PHP 8 TypeError (non-string
-		// $known_string) — an uncaught fatal on the render path. Capture and
-		// type-check it first: an UNVERIFIABLE signature (content that fails to
-		// re-encode) is the same fail-closed class as an invalid one.
-		$computed_signature = $this->sign_panels_data( $panels_data );
-
-		if ( ! is_string( $panels_data['sanitize_signature'] )
-			|| ! is_string( $computed_signature )
-			|| ! hash_equals( $computed_signature, $panels_data['sanitize_signature'] )
-		) {
-			// Case (b): a signature IS present but does not verify. Suggests
-			// tampering, a version bump, a salt rotation, OR canonicalization
-			// drift (e.g. a widget update() output containing a JSON-object
-			// value like stdClass, which round-trips as '{}' -> '[]' through
-			// wp_json_encode()/json_decode(), silently and permanently
-			// breaking that post's signature with no other visible signal).
-			$this->maybe_log_signature_failure( 'invalid' );
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Log a signature verification failure when WP_DEBUG is enabled. Never
-	 * outputs anything to the page — error_log() only, matching this
-	 * codebase's absence of any prior debug-logging convention (no existing
-	 * error_log()/WP_DEBUG usage was found anywhere in this plugin, so this
-	 * establishes the minimal standard WordPress pattern for future use).
-	 *
-	 * @param string $reason 'missing' or 'invalid'.
-	 */
-	private function maybe_log_signature_failure( $reason ) {
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
-			return;
-		}
-
-		error_log( sprintf(
-			'[SiteOrigin Panels] Layout Block render signature verification failed (%s). Falling back to strict sanitization for this render.',
-			$reason === 'invalid'
-				? 'signature present but did not verify — possible tampering, version/salt rotation, or JSON canonicalization drift'
-				: 'no signature present — expected for legacy or not-yet-validated content'
-		) );
+		return $panels_data;
 	}
 
 	public function override_container( $container ) {
@@ -438,9 +441,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				continue;
 			}
 
-			// Use the same trust/strict classification as render_layout_block()'s
-			// render branch so the CSS generated here matches the HTML rendered
-			// for the same panels_data on the same request.
+			// Use the same prepare_render_panels_data() the HTML render uses, so
+			// the CSS generated here and the rendered HTML never disagree about
+			// structure for the same panels_data on the same request.
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 			$builder_id = isset( $block['attrs']['builder_id'] ) ? $block['attrs']['builder_id'] : 'gb' . get_the_ID() . '-' . md5( serialize( $panels_data ) ) . '-';
 
@@ -463,7 +466,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		foreach( $blocks as &$block ) {
-			$block = $this->sanitize_blocks( $block, true );
+			$block = $this->sanitize_blocks( $block );
 		}
 
 		$prepared_post->post_content = serialize_blocks( $blocks );
@@ -472,7 +475,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	}
 
 	/**
-	 * Validate and sign any Layout Block content embedded in a block-based
+	 * Validate any Layout Block content embedded in a block-based
 	 * widget area's stored instances before the `widget_block` option is
 	 * written. Fires on EVERY save path for this option (classic widgets.php,
 	 * Customizer, REST) via the option-specific `pre_update_option_widget_block`
@@ -529,11 +532,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * Supplemental save-time validation for post saves that do not go through
 	 * the REST API (XML-RPC, direct wp_insert_post()/wp_update_post() calls,
 	 * importers, classic non-block-editor saves). Skips 'revision' post-type
-	 * rows (covers both plain revisions and autosaves). For any Layout Block
-	 * found, skips re-sanitizing blocks whose panelsData ALREADY carries a
-	 * valid signature (verify_panels_data() === true) to avoid redundant
-	 * double-sanitization on REST-driven saves where rest_pre_insert_{type}
-	 * already validated the content earlier in the same request.
+	 * rows (covers both plain revisions and autosaves). Each Layout Block found
+	 * is sanitized unless sanitize_block()'s same-request memo shows it was
+	 * already sanitized earlier this request (e.g. by the rest_pre_insert_*
+	 * hook), so the widget update() runs once per block per request. An
+	 * origin-untrusted write always sanitizes regardless of the memo.
 	 *
 	 * @param array $data Slashed, processed post data about to be inserted/updated.
 	 * @return array The (possibly modified) $data to actually persist.
@@ -556,8 +559,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// filter (wp_insert_post() only unslashes AFTER wp_insert_post_data
 		// returns — wp-includes/post.php). Parsing the slashed string would
 		// leave every Layout Block's panelsData JSON undecodable (escaped
-		// quotes), which would (a) make verify_panels_data() always fail,
-		// defeating the dedup below, and (b) cause serialize_blocks() to write
+		// quotes), which would cause serialize_blocks() to write
 		// back attrs-wiped blocks — silently DELETING panelsData. Unslash
 		// before parsing, re-slash before writing back so this field matches
 		// the slashed shape of its $data siblings. NOTE: this asymmetry versus
@@ -586,46 +588,13 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		foreach ( $blocks as &$block ) {
-			$block = $this->sanitize_blocks_if_unverified( $block );
+			$block = $this->sanitize_blocks( $block );
 		}
 		unset( $block );
 
 		$data['post_content'] = wp_slash( serialize_blocks( $blocks ) );
 
 		return $data;
-	}
-
-	/**
-	 * Dedup-aware variant of sanitize_blocks(): consults verify_panels_data()
-	 * first and only sanitizes Layout Blocks that do NOT already carry a valid
-	 * signature. A verifying block is already-validated output from earlier in
-	 * this same request (the rest_pre_insert_* hooks) or from a prior save —
-	 * re-sanitizing it would risk the documented double-sanitization mutation
-	 * bug (so-widgets-bundle PR #2316) for no security benefit. Mirrors
-	 * sanitize_blocks()'s recursion shape; reuses sanitize_block() and
-	 * verify_panels_data() unmodified.
-	 *
-	 * @param array $block A single parsed block.
-	 * @return array The (possibly sanitized) block.
-	 */
-	private function sanitize_blocks_if_unverified( $block ) {
-		if (
-			! empty( $block['blockName'] ) &&
-			$block['blockName'] === 'siteorigin-panels/layout-block' &&
-			! empty( $block['attrs'] ) &&
-			! empty( $block['attrs']['panelsData'] ) &&
-			! $this->verify_panels_data( $block['attrs']['panelsData'] )
-		) {
-			$block = $this->sanitize_block( $block );
-		}
-
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $i => $inner ) {
-				$block['innerBlocks'][ $i ] = $this->sanitize_blocks_if_unverified( $inner );
-			}
-		}
-
-		return $block;
 	}
 
 	public function sanitize_blocks( $block ) {
@@ -648,18 +617,118 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	public function sanitize_block( $block ) {
 		if (
 			empty( $block['attrs'] ) ||
-			empty( $block['attrs']['panelsData'] )
+			empty( $block['attrs']['panelsData'] ) ||
+			! is_array( $block['attrs']['panelsData'] )
 		) {
 			return $block;
 		}
 
+		// Same-request dedup: if this exact panelsData was already sanitized
+		// earlier in THIS request (the rest_pre_insert_* hook), the
+		// wp_insert_post_data safety net must not run update() on it a second
+		// time. Check the INPUT here and record the OUTPUT below: on the second
+		// hook the incoming block IS the first hook's sanitized output, so the
+		// input hash here matches the output hash recorded there. Reached at
+		// every tree depth via sanitize_blocks(), so nested Layout Blocks dedup
+		// for free.
+		//
+		// Guard on a false encode: wp_json_encode() returns false when it cannot
+		// encode (e.g. nesting past depth 512, or an unencodable value injected
+		// via a filter), and hash( 'sha256', false ) collapses to the digest of
+		// '' — so EVERY unencodable block would share one hash and a second such
+		// block would falsely hit the memo and skip sanitization. A false encode
+		// therefore neither checks nor records: it degrades to sanitizing twice,
+		// the safe direction. (The same false-encode guard is required anywhere a
+		// hash of wp_json_encode() output is used as a key or identity.)
+		// Never consult the memo for an origin-untrusted write: sanitize_block_untrusted()
+		// sets $force_kses_floor and an untrusted write MUST always sanitize, or a
+		// memo entry seeded earlier this request (e.g. a capable author's no-op
+		// sanitize of the same raw markup) would let it skip the forced floor and
+		// store the content unfloored — an Audit #1 contract break. The OUTPUT is
+		// still recorded below unconditionally, so the wp_insert_post_data safety
+		// net that follows an untrusted write still dedups.
+		$incoming_encoded = wp_json_encode( $block['attrs']['panelsData'] );
+		if (
+			! $this->force_kses_floor &&
+			false !== $incoming_encoded &&
+			isset( $this->sanitized_this_request[ hash( 'sha256', $incoming_encoded ) ] )
+		) {
+			return $block;
+		}
+
+		// Save/restore the PRIOR value (not hard true) via try/finally: restore
+		// keeps a thrown widget update() from leaving the flag stuck on the save
+		// branch, and preserving the prior value keeps a re-entrant sanitize_block()
+		// — reachable when the AI pre-save filter runs a nested block write — from
+		// flipping the OUTER call back to the render branch mid-save.
+		$previous_return_layout = $this->return_layout;
 		$this->return_layout = false;
-		$block['attrs'] = $this->render_layout_block( $block['attrs'] );
-		$this->return_layout = true;
+		try {
+			$block['attrs'] = $this->render_layout_block( $block['attrs'] );
+		} finally {
+			$this->return_layout = $previous_return_layout;
+		}
 		unset( $block['innerHTML'] );
 		if ( ! empty( $block['attrs']['renderedLayout'] ) ) {
 			unset( $block['attrs']['renderedLayout'] );
 		}
+
+		// Record the OUTPUT: on the second hook of the same request this
+		// sanitized panelsData is what arrives as the incoming block, so hashing
+		// the output here is what the input check above will match. A re-entrant
+		// nested sanitize_block() (AI pre-save filter running a nested block
+		// write) records its own output first, then the outer records its own —
+		// the outer already passed its input check before the inner ran.
+		if (
+			! empty( $block['attrs']['panelsData'] ) &&
+			is_array( $block['attrs']['panelsData'] )
+		) {
+			// Same false-encode guard as the input check: never record the
+			// digest of '' (what hash( 'sha256', false ) yields), or two
+			// unencodable blocks would collide on it and the second would skip
+			// sanitization.
+			$output_encoded = wp_json_encode( $block['attrs']['panelsData'] );
+			if ( false !== $output_encoded ) {
+				$this->sanitized_this_request[ hash( 'sha256', $output_encoded ) ] = true;
+			}
+		}
+
+		return $block;
+	}
+
+	/**
+	 * Sanitize a Layout Block whose content origin is untrusted, forcing the
+	 * kses floor regardless of the current user's capabilities.
+	 *
+	 * Entry point for AI ability writes (see inc/abilities.php): AI output is
+	 * prompt-injectable no matter whose credential carries the request, so an
+	 * admin application password must not exempt it from the floor the way it
+	 * would exempt the author's own content. Runs the full save chokepoint —
+	 * the `siteorigin_panels_ai_block_layout_pre_save` filter, strict
+	 * sanitize, then the forced floor — in one pass.
+	 *
+	 * The flag restore uses try/finally because it guards a security floor; if
+	 * an exception did escape, a stuck-true flag would only over-floor later
+	 * saves in the same request — fail-closed. It restores the PRIOR value
+	 * rather than a hard false so a re-entrant call (a consumer of the
+	 * siteorigin_panels_ai_block_layout_pre_save filter or widget_update_callback
+	 * calling this method on a sub-layout, both of which run while the outer
+	 * flag is true) cannot clear the outer write's floor when the inner call
+	 * returns.
+	 *
+	 * @param array $block A parsed Layout Block (parse_blocks() shape).
+	 * @return array The block with sanitized, floored panelsData.
+	 */
+	public function sanitize_block_untrusted( $block ) {
+		$previous = $this->force_kses_floor;
+		$this->force_kses_floor = true;
+
+		try {
+			$block = $this->sanitize_block( $block );
+		} finally {
+			$this->force_kses_floor = $previous;
+		}
+
 		return $block;
 	}
 

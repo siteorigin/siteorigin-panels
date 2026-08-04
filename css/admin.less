@@ -947,6 +947,13 @@
 	padding: 2px;
 }
 
+// Keep block editor empty-state copy compact.
+// Target the Gutenberg block wrapper directly so this works in iframed editor canvases too.
+.block-editor-block-list__block.wp-block-siteorigin-panels-layout-block .siteorigin-panels-layout-block-container .siteorigin-panels-builder .so-panels-welcome-message {
+	font-size: 13px;
+	line-height: 1.8em;
+}
+
 // Force the WP system font on SO dialogs regardless of host chrome (Customizer,
 // block editor, classic editor). Scoped to .so-panels-dialog only so it does
 // not cross-product into unrelated host UI such as Customizer controls.

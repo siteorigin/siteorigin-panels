@@ -105,7 +105,8 @@ class SavePostRawFlagSanitizationTest extends TestCase {
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Admin', false ) ) {
-			require_once dirname( __DIR__ ) . '/inc/admin.php';
+			// From tests/save-post/ the plugin root is two levels up.
+			require_once dirname( dirname( __DIR__ ) ) . '/inc/admin.php';
 		}
 	}
 

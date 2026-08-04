@@ -35,6 +35,12 @@ class SiteOrigin_Panels_Renderer_Legacy extends SiteOrigin_Panels_Renderer {
 		$panels_margin_bottom = $settings['margin-bottom'];
 		$panels_margin_bottom_last_row = $settings['margin-bottom-last-row'];
 
+		// Canonicalise the identifier before it reaches the CSS builder's
+		// selectors (same boundary as the modern renderer; method inherited from
+		// the base class). No-op for safe ids; neutralises a CSS-injecting
+		// builder_id. Data lookups/filters above used the original value.
+		$post_id = $this->canonicalize_layout_id( $post_id );
+
 		$css = new SiteOrigin_Panels_Css_Builder();
 
 		$ci = 0;
