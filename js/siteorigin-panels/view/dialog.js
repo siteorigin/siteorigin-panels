@@ -7,7 +7,11 @@ module.exports = Backbone.View.extend( {
 	tabbed: false,
 	rendered: false,
 	builder: false,
-	className: 'so-panels-dialog-wrapper',
+	// wp-core-ui is what WordPress scopes its admin button and form styling to.
+	// The block editor canvas is an iframe whose body does not carry it, and the
+	// dialog is appended to that body, so without this its controls fall back to
+	// browser defaults.
+	className: 'so-panels-dialog-wrapper wp-core-ui',
 	dialogClass: '',
 	dialogIcon: 'add-widget',
 	parentDialog: false,
