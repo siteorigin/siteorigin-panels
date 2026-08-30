@@ -972,6 +972,28 @@
 	}
 }
 
+// The block editor canvas iframe does not load wp-admin/css/common.css, which
+// resets admin lists with `ul{list-style:none}` and `ul,ol{padding:0}`. The
+// editor's own reset reverts both, so dialog/menu lists get browser bullets AND
+// left indentation. Replicate common.css's reset here, scoped to dialog/menu
+// chrome containers only — never .so-content widget forms, whose lists
+// (arbitrary WP_Widget::form() HTML) are left untouched.
+.so-panels-dialog .so-sidebar,
+.so-panels-dialog .so-toolbar,
+.so-dropdown-wrapper,
+.so-panels-contextual-menu {
+	ul {
+		list-style: none;
+		padding: 0;
+	}
+}
+
+.so-panels-dialog .widget-type-list,
+.so-panels-dialog .so-directory-items-filters ul {
+	list-style: none;
+	padding: 0;
+}
+
 .so-panels-dialog,
 .block-editor-page,
 .wp-customizer {
