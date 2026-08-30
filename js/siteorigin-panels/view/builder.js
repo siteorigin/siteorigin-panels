@@ -440,9 +440,11 @@ module.exports = Backbone.View.extend( {
 		var builderID = builderView.$el.attr( 'id' );
 		var container = 'parent';
 
-		if ( ! $( 'body' ).hasClass( 'wp-customizer' ) && $( 'body' ).attr( 'class' ).match( /version-([0-9-]+)/ )[0].replace( /\D/g,'' ) < 59 ) {
-			wpVersion = '#wpwrap';
-		}
+		// A dead branch here set the sortable container to '#wpwrap' below
+		// WordPress 5.9, which is now the declared minimum. It never took effect
+		// anyway: it assigned to an undeclared `wpVersion` while the sortable reads
+		// `container`. It also threw in the block editor canvas, whose body has no
+		// version-* class, aborting sortable setup entirely.
 
 		// Create the sortable element for rows.
 		this.rowsSortable = this.$( '.so-rows-container:not(.sow-row-color)' ).sortable( {

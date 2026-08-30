@@ -153,14 +153,63 @@ module.exports = Backbone.View.extend( {
 		// Set up the image select fields
 		this.$( '.style-field-image' ).each( function () {
 			var frame = null;
+			var frameMedia = null;
 			var $s = $( this );
+
+			// Inside the block editor canvas the styles form runs in an iframe
+			// that has no wp.media of its own. The Widgets Bundle solves this for
+			// its own media fields by reaching for window.top.wp.media
+			// (base/inc/fields/js/media-field.js:26). Same approach here: prefer
+			// the local one, fall back to the top window.
+			// Usable means callable AND carrying attachment(), because both are
+			// used below. A partially initialised wp.media can satisfy a bare
+			// truthiness check and then throw.
+			var usableMedia = function( candidate ) {
+				return typeof candidate === 'function' &&
+					typeof candidate.attachment === 'function' ?
+					candidate :
+					null;
+			};
+
+			var soMedia = function() {
+				var local = typeof wp !== 'undefined' && wp ? usableMedia( wp.media ) : null;
+
+				if ( local ) {
+					return local;
+				}
+
+				try {
+					if ( window.top && window.top.wp ) {
+						return usableMedia( window.top.wp.media );
+					}
+				} catch ( e ) {
+					// Cross-origin top window. Nothing we can do.
+				}
+
+				return null;
+			};
 
 			$s.find( '.so-image-selector' ).on( 'click', function( e ) {
 				e.preventDefault();
 
 				if ( frame === null ) {
+					// Resolve once and keep it for this frame's lifetime, so the
+					// select handler below cannot pick up a different API than the
+					// one the frame was built from.
+					frameMedia = soMedia();
+
+					if ( ! frameMedia ) {
+						// Neither window has a usable media API. Say so rather than
+						// leaving the control silently inert.
+						if ( window.console && typeof window.console.warn === 'function' ) {
+							console.warn( 'SiteOrigin Page Builder: the media library is unavailable in this context, so the image selector cannot open.' );
+						}
+
+						return;
+					}
+
 					// Create the media frame.
-					frame = wp.media( {
+					frame = frameMedia( {
 						// Set the title of the modal.
 						title: panelsOptions.add_media,
 
@@ -182,7 +231,7 @@ module.exports = Backbone.View.extend( {
 						var selection = frame.state().get( 'selection' );
 						var selectedImage = $s.find( '.so-image-selector > input' ).val();
 						if ( selectedImage ) {
-							selection.add( wp.media.attachment( selectedImage ) );
+							selection.add( frameMedia.attachment( selectedImage ) );
 						}
 					} );
 
