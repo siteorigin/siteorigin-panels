@@ -119,6 +119,40 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 		);
 	}
 
+	public function test_late_registered_shortcodes_cannot_execute_while_suspended() {
+		$filters = array();
+		Functions\when( 'add_filter' )->alias( function ( $tag, $cb ) use ( &$filters ) {
+			$filters[ $tag ] = $cb;
+
+			return true;
+		} );
+		Functions\when( 'remove_filter' )->alias( function ( $tag ) use ( &$filters ) {
+			unset( $filters[ $tag ] );
+
+			return true;
+		} );
+
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+
+		// A shortcode registered mid-render repopulates the registry, so the
+		// registry alone no longer protects it. The pre_do_shortcode_tag
+		// short-circuit must be in place and must return the original text.
+		$this->assertArrayHasKey( 'pre_do_shortcode_tag', $filters,
+			'The execution guard must be registered for the whole suspended scope.' );
+
+		$m = array( '[late_tag foo="bar"]', '', 'late_tag', ' foo="bar"', '', '', '' );
+		$this->assertSame(
+			'[late_tag foo="bar"]',
+			call_user_func( $filters['pre_do_shortcode_tag'], false, 'late_tag', array( 'foo' => 'bar' ), $m ),
+			'A late-registered shortcode reaching do_shortcode_tag() must come back as its original text.'
+		);
+
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+
+		$this->assertArrayNotHasKey( 'pre_do_shortcode_tag', $filters,
+			'The execution guard must be removed when the outermost scope closes.' );
+	}
+
 	public function test_digit_only_shortcode_tags_survive_the_restore_unrenamed() {
 		// Digit-only tags are valid shortcode names and PHP stores them as
 		// integer keys, which a renumbering merge would silently corrupt.

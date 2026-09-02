@@ -58,7 +58,10 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 * Emptying $shortcode_tags makes every do_shortcode() call during the
 	 * render a no-op, so widgets (the WP Text widget, the SiteOrigin Editor
 	 * widget, etc.) keep raw shortcodes intact in the mirror, and they run
-	 * normally through the_content when the mirror itself is displayed.
+	 * normally through the_content when the mirror itself is displayed. A
+	 * shortcode registered while the render is running would repopulate the
+	 * registry and become executable, so the pre_do_shortcode_tag filter
+	 * short-circuits those too, returning the original shortcode text.
 	 */
 	private static function suspend_shortcodes() {
 		if ( self::$suspend_depth > 0 ) {
@@ -78,6 +81,23 @@ class SiteOrigin_Panels_Post_Content_Filters {
 		self::$suspend_depth = 1;
 		self::$shortcode_tags_backup = isset( $GLOBALS['shortcode_tags'] ) ? $GLOBALS['shortcode_tags'] : array();
 		$GLOBALS['shortcode_tags'] = array();
+		add_filter( 'pre_do_shortcode_tag', array( __CLASS__, 'keep_shortcode_intact' ), PHP_INT_MAX, 4 );
+	}
+
+	/**
+	 * Short-circuits any shortcode that reaches do_shortcode_tag() while the
+	 * registry is suspended, returning the original shortcode text unchanged.
+	 * Only a shortcode registered during the render can get this far.
+	 *
+	 * @param false|string $return The short-circuit value.
+	 * @param string       $tag    The shortcode tag.
+	 * @param array|string $attr   The shortcode attributes.
+	 * @param array        $m      The regex match for the shortcode.
+	 *
+	 * @return string The original, unexecuted shortcode text.
+	 */
+	public static function keep_shortcode_intact( $return, $tag, $attr, $m ) {
+		return $m[0];
 	}
 
 	private static function restore_shortcodes() {
@@ -91,6 +111,8 @@ class SiteOrigin_Panels_Post_Content_Filters {
 			// A nested scope closed; the outermost scope restores.
 			return;
 		}
+
+		remove_filter( 'pre_do_shortcode_tag', array( __CLASS__, 'keep_shortcode_intact' ), PHP_INT_MAX );
 
 		// Keep any shortcodes registered during the render, but let the
 		// original registrations win. Array union rather than array_merge:
