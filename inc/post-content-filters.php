@@ -14,9 +14,17 @@ class SiteOrigin_Panels_Post_Content_Filters {
 
 	/**
 	 * How many balanced add_filters()/remove_filters() scopes are currently
-	 * suspending shortcodes. Only the outermost scope backs up and restores.
+	 * open. Only the outermost scope decides whether shortcodes are suspended,
+	 * backs the registry up, and restores it; nested scopes inherit that
+	 * decision without re-consulting the opt-out filter.
 	 */
 	private static $suspend_depth = 0;
+
+	/**
+	 * Whether the outermost open scope actually suspended shortcodes. False
+	 * while the opt-out filter declined suspension for this render.
+	 */
+	private static $suspend_active = false;
 
 	/**
 	 * Add filters that include data-* attributes on Page Builder divs
@@ -74,11 +82,18 @@ class SiteOrigin_Panels_Post_Content_Filters {
 			return;
 		}
 
+		// The scope opens whether or not suspension engages, so a nested
+		// render inherits this decision instead of re-consulting the filter -
+		// an opted-out outer render must not gain suspension from a nested one.
+		self::$suspend_depth = 1;
+
 		if ( ! apply_filters( 'siteorigin_panels_post_content_keep_shortcodes', true ) ) {
+			self::$suspend_active = false;
+
 			return;
 		}
 
-		self::$suspend_depth = 1;
+		self::$suspend_active = true;
 		self::$shortcode_tags_backup = isset( $GLOBALS['shortcode_tags'] ) ? $GLOBALS['shortcode_tags'] : array();
 		$GLOBALS['shortcode_tags'] = array();
 		add_filter( 'pre_do_shortcode_tag', array( __CLASS__, 'keep_shortcode_intact' ), PHP_INT_MAX, 4 );
@@ -111,6 +126,14 @@ class SiteOrigin_Panels_Post_Content_Filters {
 			// A nested scope closed; the outermost scope restores.
 			return;
 		}
+
+		if ( ! self::$suspend_active ) {
+			// The outermost scope closed, but this render opted out of
+			// suspension - there is nothing to restore.
+			return;
+		}
+
+		self::$suspend_active = false;
 
 		remove_filter( 'pre_do_shortcode_tag', array( __CLASS__, 'keep_shortcode_intact' ), PHP_INT_MAX );
 

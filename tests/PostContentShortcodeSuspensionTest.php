@@ -63,6 +63,10 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 		$depth = new ReflectionProperty( SiteOrigin_Panels_Post_Content_Filters::class, 'suspend_depth' );
 		$depth->setAccessible( true );
 		$depth->setValue( null, 0 );
+
+		$active = new ReflectionProperty( SiteOrigin_Panels_Post_Content_Filters::class, 'suspend_active' );
+		$active->setAccessible( true );
+		$active->setValue( null, false );
 	}
 
 	public function test_add_filters_suspends_shortcodes_and_remove_filters_restores() {
@@ -138,13 +142,14 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 		// A shortcode registered mid-render repopulates the registry, so the
 		// registry alone no longer protects it. The pre_do_shortcode_tag
-		// short-circuit must be in place, at a priority nothing outranks,
+		// short-circuit must be in place at the latest priority (a later
+		// callback at the same priority could still override; higher cannot),
 		// receiving all four arguments - with WordPress's default of one, the
 		// callback would fatal for want of $m.
 		$this->assertArrayHasKey( 'pre_do_shortcode_tag', $filters,
 			'The execution guard must be registered for the whole suspended scope.' );
 		$this->assertSame( PHP_INT_MAX, $filters['pre_do_shortcode_tag']['priority'],
-			'The guard must run last so nothing re-enables execution.' );
+			'The guard must register at the latest priority.' );
 		$this->assertSame( 4, $filters['pre_do_shortcode_tag']['args'],
 			'The guard needs all four arguments; the default of one would fatal on $m.' );
 
@@ -159,6 +164,39 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 		$this->assertArrayNotHasKey( 'pre_do_shortcode_tag', $filters,
 			'The execution guard must be removed, at its own priority, when the outermost scope closes.' );
+	}
+
+	public function test_opted_out_render_is_inherited_by_nested_scopes() {
+		$allow = false;
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) use ( &$allow ) {
+				return 'siteorigin_panels_post_content_keep_shortcodes' === $tag ? $allow : $value;
+			}
+		);
+
+		$GLOBALS['shortcode_tags'] = array( 'existing' => 'existing_callback' );
+
+		// The outer render opts out; the filter then flips to true before a
+		// nested scope opens. The nested scope must inherit the outer
+		// decision, never start a suspension of its own.
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		$allow = true;
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+
+		$this->assertSame(
+			array( 'existing' => 'existing_callback' ),
+			$GLOBALS['shortcode_tags'],
+			'A nested scope inside an opted-out render must not suspend shortcodes.'
+		);
+
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+
+		$this->assertSame(
+			array( 'existing' => 'existing_callback' ),
+			$GLOBALS['shortcode_tags'],
+			'The registry must be untouched after an opted-out render closes.'
+		);
 	}
 
 	public function test_digit_only_shortcode_tags_survive_the_restore_unrenamed() {
