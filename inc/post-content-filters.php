@@ -82,18 +82,21 @@ class SiteOrigin_Panels_Post_Content_Filters {
 			return;
 		}
 
+		// Consult the opt-out filter before touching any state: a throwing
+		// filter callback must leave nothing to clean up, because the caller's
+		// try/finally only starts after add_filters() returns.
+		$suspend = (bool) apply_filters( 'siteorigin_panels_post_content_keep_shortcodes', true );
+
 		// The scope opens whether or not suspension engages, so a nested
 		// render inherits this decision instead of re-consulting the filter -
 		// an opted-out outer render must not gain suspension from a nested one.
 		self::$suspend_depth = 1;
+		self::$suspend_active = $suspend;
 
-		if ( ! apply_filters( 'siteorigin_panels_post_content_keep_shortcodes', true ) ) {
-			self::$suspend_active = false;
-
+		if ( ! $suspend ) {
 			return;
 		}
 
-		self::$suspend_active = true;
 		self::$shortcode_tags_backup = isset( $GLOBALS['shortcode_tags'] ) ? $GLOBALS['shortcode_tags'] : array();
 		$GLOBALS['shortcode_tags'] = array();
 		add_filter( 'pre_do_shortcode_tag', array( __CLASS__, 'keep_shortcode_intact' ), PHP_INT_MAX, 4 );

@@ -130,8 +130,15 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 			return true;
 		} );
+		// Removal requires the same callback identity and priority, as
+		// WordPress's remove_filter() does - a removal naming the wrong
+		// callback must leak the guard, not silently clear it.
 		Functions\when( 'remove_filter' )->alias( function ( $tag, $cb = null, $priority = 10 ) use ( &$filters ) {
-			if ( isset( $filters[ $tag ] ) && $filters[ $tag ]['priority'] === $priority ) {
+			if (
+				isset( $filters[ $tag ] ) &&
+				$filters[ $tag ]['priority'] === $priority &&
+				$filters[ $tag ]['cb'] === $cb
+			) {
 				unset( $filters[ $tag ] );
 			}
 
@@ -164,6 +171,35 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 		$this->assertArrayNotHasKey( 'pre_do_shortcode_tag', $filters,
 			'The execution guard must be removed, at its own priority, when the outermost scope closes.' );
+	}
+
+	public function test_a_throwing_opt_out_callback_leaves_no_state_behind() {
+		Functions\when( 'apply_filters' )->alias( function ( $tag, $value ) {
+			if ( 'siteorigin_panels_post_content_keep_shortcodes' === $tag ) {
+				throw new RuntimeException( 'filter callback threw' );
+			}
+
+			return $value;
+		} );
+
+		// The caller's try/finally starts only after add_filters() returns,
+		// so a throw from the opt-out filter must leave nothing to clean up:
+		// no open scope, no emptied registry, no backup.
+		try {
+			SiteOrigin_Panels_Post_Content_Filters::add_filters();
+			$this->fail( 'The filter exception must propagate.' );
+		} catch ( RuntimeException $e ) {
+		}
+
+		$this->assertSame(
+			array( 'ninja_forms' => 'nf_callback' ),
+			$GLOBALS['shortcode_tags'],
+			'A throwing opt-out callback must not leave the registry suspended.'
+		);
+
+		$depth = new ReflectionProperty( SiteOrigin_Panels_Post_Content_Filters::class, 'suspend_depth' );
+		$depth->setAccessible( true );
+		$this->assertSame( 0, $depth->getValue(), 'No scope may remain open after the throw.' );
 	}
 
 	public function test_opted_out_render_is_inherited_by_nested_scopes() {
