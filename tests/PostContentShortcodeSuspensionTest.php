@@ -119,6 +119,29 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 		);
 	}
 
+	public function test_digit_only_shortcode_tags_survive_the_restore_unrenamed() {
+		// Digit-only tags are valid shortcode names and PHP stores them as
+		// integer keys, which a renumbering merge would silently corrupt.
+		$GLOBALS['shortcode_tags']['123'] = 'digit_callback';
+
+		SiteOrigin_Panels_Post_Content_Filters::add_filters();
+		$GLOBALS['shortcode_tags']['456'] = 'late_digit_callback';
+		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
+
+		$this->assertSame(
+			'digit_callback',
+			$GLOBALS['shortcode_tags'][123] ?? null,
+			'A digit-only tag registered before the render must keep its key through the restore.'
+		);
+		$this->assertSame(
+			'late_digit_callback',
+			$GLOBALS['shortcode_tags'][456] ?? null,
+			'A digit-only tag registered during the render must keep its key too.'
+		);
+		$this->assertArrayNotHasKey( 0, $GLOBALS['shortcode_tags'],
+			'The restore must never renumber integer keys from zero.' );
+	}
+
 	public function test_nested_scope_counts_even_when_the_opt_out_filter_flips_mid_render() {
 		$calls = 0;
 		Functions\when( 'apply_filters' )->alias(

@@ -93,10 +93,11 @@ class SiteOrigin_Panels_Post_Content_Filters {
 		}
 
 		// Keep any shortcodes registered during the render, but let the
-		// original registrations win.
-		$GLOBALS['shortcode_tags'] = array_merge(
-			is_array( $GLOBALS['shortcode_tags'] ) ? $GLOBALS['shortcode_tags'] : array(),
-			self::$shortcode_tags_backup
+		// original registrations win. Array union rather than array_merge:
+		// digit-only shortcode tags are valid and PHP stores them as integer
+		// keys, which array_merge would silently renumber from zero.
+		$GLOBALS['shortcode_tags'] = self::$shortcode_tags_backup + (
+			is_array( $GLOBALS['shortcode_tags'] ) ? $GLOBALS['shortcode_tags'] : array()
 		);
 		self::$shortcode_tags_backup = null;
 	}
