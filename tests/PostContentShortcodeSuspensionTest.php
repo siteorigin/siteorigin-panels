@@ -121,13 +121,15 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 	public function test_late_registered_shortcodes_cannot_execute_while_suspended() {
 		$filters = array();
-		Functions\when( 'add_filter' )->alias( function ( $tag, $cb ) use ( &$filters ) {
-			$filters[ $tag ] = $cb;
+		Functions\when( 'add_filter' )->alias( function ( $tag, $cb, $priority = 10, $accepted_args = 1 ) use ( &$filters ) {
+			$filters[ $tag ] = array( 'cb' => $cb, 'priority' => $priority, 'args' => $accepted_args );
 
 			return true;
 		} );
-		Functions\when( 'remove_filter' )->alias( function ( $tag ) use ( &$filters ) {
-			unset( $filters[ $tag ] );
+		Functions\when( 'remove_filter' )->alias( function ( $tag, $cb = null, $priority = 10 ) use ( &$filters ) {
+			if ( isset( $filters[ $tag ] ) && $filters[ $tag ]['priority'] === $priority ) {
+				unset( $filters[ $tag ] );
+			}
 
 			return true;
 		} );
@@ -136,21 +138,27 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 
 		// A shortcode registered mid-render repopulates the registry, so the
 		// registry alone no longer protects it. The pre_do_shortcode_tag
-		// short-circuit must be in place and must return the original text.
+		// short-circuit must be in place, at a priority nothing outranks,
+		// receiving all four arguments - with WordPress's default of one, the
+		// callback would fatal for want of $m.
 		$this->assertArrayHasKey( 'pre_do_shortcode_tag', $filters,
 			'The execution guard must be registered for the whole suspended scope.' );
+		$this->assertSame( PHP_INT_MAX, $filters['pre_do_shortcode_tag']['priority'],
+			'The guard must run last so nothing re-enables execution.' );
+		$this->assertSame( 4, $filters['pre_do_shortcode_tag']['args'],
+			'The guard needs all four arguments; the default of one would fatal on $m.' );
 
 		$m = array( '[late_tag foo="bar"]', '', 'late_tag', ' foo="bar"', '', '', '' );
 		$this->assertSame(
 			'[late_tag foo="bar"]',
-			call_user_func( $filters['pre_do_shortcode_tag'], false, 'late_tag', array( 'foo' => 'bar' ), $m ),
+			call_user_func( $filters['pre_do_shortcode_tag']['cb'], false, 'late_tag', array( 'foo' => 'bar' ), $m ),
 			'A late-registered shortcode reaching do_shortcode_tag() must come back as its original text.'
 		);
 
 		SiteOrigin_Panels_Post_Content_Filters::remove_filters();
 
 		$this->assertArrayNotHasKey( 'pre_do_shortcode_tag', $filters,
-			'The execution guard must be removed when the outermost scope closes.' );
+			'The execution guard must be removed, at its own priority, when the outermost scope closes.' );
 	}
 
 	public function test_digit_only_shortcode_tags_survive_the_restore_unrenamed() {
