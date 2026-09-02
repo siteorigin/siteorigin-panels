@@ -30,13 +30,20 @@ class SiteOrigin_Panels_Post_Content_Filters {
 	 * Add filters that include data-* attributes on Page Builder divs
 	 */
 	public static function add_filters( $is_block_editor = false ) {
+		// Suspension runs first: it applies a public filter whose callbacks
+		// can throw, and the callers' try/finally cleanup only starts after
+		// add_filters() returns - so nothing may be registered before the one
+		// call that can fail.
+		if ( ! $is_block_editor ) {
+			self::suspend_shortcodes();
+		}
+
 		add_filter( 'siteorigin_panels_row_attributes', 'SiteOrigin_Panels_Post_Content_Filters::row_attributes', 99, 2 );
 		add_filter( 'siteorigin_panels_cell_attributes', 'SiteOrigin_Panels_Post_Content_Filters::cell_attributes', 99, 2 );
 		add_filter( 'siteorigin_panels_widget_attributes', 'SiteOrigin_Panels_Post_Content_Filters::widget_attributes', 99, 2 );
 
 		if ( ! $is_block_editor ) {
 			SiteOrigin_Panels_Widget_Shortcode::add_filters();
-			self::suspend_shortcodes();
 		}
 	}
 

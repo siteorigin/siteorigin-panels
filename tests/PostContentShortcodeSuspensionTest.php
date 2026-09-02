@@ -174,6 +174,12 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 	}
 
 	public function test_a_throwing_opt_out_callback_leaves_no_state_behind() {
+		$added = array();
+		Functions\when( 'add_filter' )->alias( function ( $tag ) use ( &$added ) {
+			$added[] = $tag;
+
+			return true;
+		} );
 		Functions\when( 'apply_filters' )->alias( function ( $tag, $value ) {
 			if ( 'siteorigin_panels_post_content_keep_shortcodes' === $tag ) {
 				throw new RuntimeException( 'filter callback threw' );
@@ -200,6 +206,12 @@ class PostContentShortcodeSuspensionTest extends SiteOriginTests {
 		$depth = new ReflectionProperty( SiteOrigin_Panels_Post_Content_Filters::class, 'suspend_depth' );
 		$depth->setAccessible( true );
 		$this->assertSame( 0, $depth->getValue(), 'No scope may remain open after the throw.' );
+
+		$this->assertSame(
+			array(),
+			$added,
+			'No WordPress filter may be registered before the throwable opt-out consult.'
+		);
 	}
 
 	public function test_opted_out_render_is_inherited_by_nested_scopes() {
