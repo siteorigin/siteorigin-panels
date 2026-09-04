@@ -16,6 +16,10 @@ module.exports = Backbone.Model.extend( {
 	 * Set up the cell model
 	 */
 	initialize: function () {
+		if ( ! _.isObject( this.get( 'style' ) ) || _.isNull( this.get( 'style' ) ) ) {
+			this.set( 'style', {} );
+		}
+
 		this.set( 'widgets', new panels.collection.widgets() );
 		this.on( 'destroy', this.onDestroy, this );
 	},
