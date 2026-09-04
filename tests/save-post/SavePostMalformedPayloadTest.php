@@ -57,11 +57,12 @@ class SavePostMalformedPayloadTest extends TestCase {
 			eval(
 				'class SiteOrigin_Panels_Styles_Admin {'
 				. ' private static $instance;'
+				. ' public static $sanitize_calls = 0;'
 				. ' public static function single() {'
 				. '   if ( empty( self::$instance ) ) { self::$instance = new self(); }'
 				. '   return self::$instance;'
 				. ' }'
-				. ' public function sanitize_all( $panels_data ) { return $panels_data; }'
+				. ' public function sanitize_all( $panels_data ) { self::$sanitize_calls++; return $panels_data; }'
 				. '}'
 			);
 		}
@@ -353,11 +354,23 @@ class SavePostMalformedPayloadTest extends TestCase {
 	public function test_layout_widget_still_sanitizes_an_array_layout() {
 		$old = array( 'builder_id' => 'old', 'panels_data' => array() );
 		$new = array( 'panels_data' => $this->valid_layout() );
+		$calls_before = \SiteOrigin_Panels_Styles_Admin::$sanitize_calls;
 
 		$updated = $this->widget()->update( $new, $old );
 
 		$this->assertSame( $this->valid_layout(), $updated['panels_data'] );
 		$this->assertNotSame( 'old', $updated['builder_id'] );
+		$this->assertSame( $calls_before + 1, \SiteOrigin_Panels_Styles_Admin::$sanitize_calls, 'sanitize_all() ran on the array layout' );
+	}
+
+	public function test_layout_widget_does_not_sanitize_when_the_field_is_absent_or_refused() {
+		$old = array( 'builder_id' => 'old', 'panels_data' => $this->valid_layout() );
+		$calls_before = \SiteOrigin_Panels_Styles_Admin::$sanitize_calls;
+
+		$this->widget()->update( array( 'title' => 'x' ), $old );
+		$this->widget()->update( array( 'panels_data' => '{bad' ), $old );
+
+		$this->assertSame( $calls_before, \SiteOrigin_Panels_Styles_Admin::$sanitize_calls, 'nothing to sanitize on the preserving paths' );
 	}
 
 	public function test_layout_widget_decodes_a_valid_string_layout() {

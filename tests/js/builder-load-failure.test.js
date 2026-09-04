@@ -260,6 +260,26 @@ test( 'a scalar, a non-empty list or an unrelated object is a failed load', func
 	} );
 } );
 
+test( 'a layout-shaped object with a non-list member is a failed load', function () {
+	[
+		{ grids: 'x', grid_cells: [] },
+		{ grids: [], grid_cells: 1 },
+		{ widgets: '', grids: [], grid_cells: [] },
+		{ grids: [ { cells: 1, style: {} } ], grid_cells: { 0: { grid: 0, index: 0, weight: 1 } } }
+	].forEach( function ( bad ) {
+		const model = builder();
+		const events = countEvents( model );
+
+		model.loadPanelsData( bad );
+
+		assert.equal( model.loadFailed, true, JSON.stringify( bad ) );
+		assert.equal( events.load_panels_data, 0, JSON.stringify( bad ) );
+
+		model.refreshPanelsData();
+		assert.equal( events[ 'change:data' ], 0, JSON.stringify( bad ) );
+	} );
+} );
+
 test( 'an empty object or list is a successful empty load', function () {
 	[ {}, [] ].forEach( function ( empty ) {
 		const model = builder();
