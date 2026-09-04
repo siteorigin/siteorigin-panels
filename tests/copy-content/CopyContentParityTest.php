@@ -17,9 +17,14 @@ class CopyContent_RendererSpy {
 	public $css_args    = array();
 	public $render_return = '<div class="rendered">HTML</div>';
 	public $css_return    = '.panel { color: red; }';
+	public $render_throws = null;
 
 	public function render( $layout_id, $enqueue_css = false, $panels_data = false ) {
 		$this->render_args = array( $layout_id, $enqueue_css, $panels_data );
+
+		if ( $this->render_throws !== null ) {
+			throw $this->render_throws;
+		}
 
 		return $this->render_return;
 	}
@@ -258,5 +263,34 @@ class CopyContentParityTest extends SiteOriginTests {
 
 		$this->assertNotNull( $wpdb->updated_with, 'direct_db path must write via $wpdb->update().' );
 		$this->assertSame( '<div class="rendered">HTML</div>', $wpdb->updated_with[1]['post_content'] );
+	}
+
+	// --- render filters and globals are cleaned up when a widget throws -------
+
+	public function test_render_exception_still_removes_filters_and_render_global() {
+		CopyContent_RendererSpy::$instance->render_throws = new RuntimeException( 'widget exploded' );
+		Functions\expect( 'wp_update_post' )->never();
+
+		$post = $this->post( 10 );
+		$thrown = null;
+
+		try {
+			$this->admin()->copy_content_to_post( $post, 10, array( 'widgets' => array( 'w' ) ) );
+		} catch ( RuntimeException $e ) {
+			$thrown = $e;
+		}
+
+		$this->assertNotNull( $thrown, 'The render exception must propagate, not be swallowed.' );
+		$this->assertSame( 1, SiteOrigin_Panels_Post_Content_Filters::$added );
+		$this->assertSame(
+			1,
+			SiteOrigin_Panels_Post_Content_Filters::$removed,
+			'remove_filters() must run even when the render throws, so the shortcode registry and content filters cannot leak into the rest of the request.'
+		);
+		$this->assertArrayNotHasKey(
+			'SITEORIGIN_PANELS_POST_CONTENT_RENDER',
+			$GLOBALS,
+			'The content render global must not leak when the render throws.'
+		);
 	}
 }
