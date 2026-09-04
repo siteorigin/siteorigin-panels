@@ -243,6 +243,23 @@ test( 'an object with layout keys but no grid cells is a failed load, not an emp
 	assert.deepEqual( model.getPanelsData(), reference, 'the partial object is handed out as-is rather than an empty layout' );
 } );
 
+test( 'a scalar, a non-empty list or an unrelated object is a failed load', function () {
+	[ 1, 'x', true, [ 1 ], [ {} ], { foo: 'bar' } ].forEach( function ( bad ) {
+		const model = builder();
+		const events = countEvents( model );
+
+		model.loadPanelsData( bad );
+
+		assert.equal( model.loadFailed, true, JSON.stringify( bad ) );
+		assert.equal( events.load_panels_data, 0, JSON.stringify( bad ) );
+		assert.equal( events.load_panels_data_failed, 1, JSON.stringify( bad ) );
+
+		// The submit path must not turn the zero live rows into an empty layout.
+		model.refreshPanelsData();
+		assert.equal( events[ 'change:data' ], 0, JSON.stringify( bad ) );
+	} );
+} );
+
 test( 'an empty object or list is a successful empty load', function () {
 	[ {}, [] ].forEach( function ( empty ) {
 		const model = builder();

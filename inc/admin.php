@@ -223,11 +223,12 @@ class SiteOrigin_Panels_Admin {
 	 * Decode a submitted layout, refusing anything that is not a layout.
 	 *
 	 * Exactly two shapes may reach a write: `false`, which the builder submits
-	 * to clear the layout, and an object carrying at least one of the layout
-	 * lists with every present list an array. Malformed JSON, scalars, empty
-	 * values and lists return null so the caller leaves the stored layout
-	 * alone; indexing any of those as if it were a layout would produce an
-	 * empty one and delete what is stored.
+	 * to clear the layout, and an object whose `grids` and `grid_cells` are
+	 * arrays, with `widgets` an array when present and filled in as empty when
+	 * absent. Malformed JSON, scalars, empty containers, lists, objects without
+	 * both row lists and objects with a non-array list return null so the
+	 * caller leaves the stored layout alone; indexing any of those as if it
+	 * were a layout would produce an empty one and delete what is stored.
 	 *
 	 * @param string $json The submitted JSON, already unslashed by the caller.
 	 *
