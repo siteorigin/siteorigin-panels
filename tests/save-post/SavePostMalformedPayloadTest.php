@@ -8,12 +8,12 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 
 /**
- * A submitted layout that is not a layout must never reach a write. Before
- * this guard, malformed or scalar JSON decoded to nothing, the save paths
- * indexed it into an empty layout, and the stored layout was deleted.
+ * A submitted layout that is not a layout never reaches a write: the save
+ * paths refuse it and leave the stored layout in place, on the post screen,
+ * the home page screen and the Layout Builder widget alike.
  *
- * Written without arrow functions or anonymous classes so the i18n .pot
- * extraction's bundled php-parser can still read the file.
+ * Uses named classes and closures only; the i18n .pot extraction's bundled
+ * php-parser cannot read arrow functions or anonymous classes.
  */
 class SavePostMalformedPayloadTest extends TestCase {
 	use MockeryPHPUnitIntegration;
