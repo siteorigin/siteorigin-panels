@@ -11,6 +11,11 @@ class SiteOrigin_Panels_Admin {
 	 */
 	private $in_save_post;
 
+	/**
+	 * @var bool Whether save_home_page() wrote the home page layout during this request.
+	 */
+	private $home_page_saved = false;
+
 	public function __construct() {
 		add_action( 'plugin_action_links_siteorigin-panels/siteorigin-panels.php', array(
 			$this,
@@ -215,6 +220,81 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * Save the panels data
 	 *
+	 * Decode a submitted layout, refusing anything that is not a layout.
+	 *
+	 * The save paths used to index whatever json_decode() returned, so malformed
+	 * or scalar JSON produced an empty layout and the stored one was deleted.
+	 * Only two shapes may reach a write: an empty layout, which clears, or an
+	 * object carrying at least one of the layout lists. Everything else is
+	 * rejected so the caller can leave the stored layout alone.
+	 *
+	 * @param string $json The submitted JSON, already unslashed by the caller.
+	 *
+	 * @return array|null The layout, or null when the input must not be written.
+	 */
+	public static function decode_panels_data( $json ) {
+		if ( ! is_string( $json ) ) {
+			return null;
+		}
+
+		$decoded = json_decode( $json, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return null;
+		}
+
+		$empty_layout = array(
+			'widgets'    => array(),
+			'grids'      => array(),
+			'grid_cells' => array(),
+		);
+
+		// Revert to Editor submits `false` to clear the layout.
+		if ( $decoded === false ) {
+			return $empty_layout;
+		}
+
+		if ( ! is_array( $decoded ) ) {
+			return null;
+		}
+
+		if ( empty( $decoded ) ) {
+			return $empty_layout;
+		}
+
+		// A JSON list decodes to an array too; a layout is an object.
+		if ( array_keys( $decoded ) === range( 0, count( $decoded ) - 1 ) ) {
+			return null;
+		}
+
+		$layout_keys = array( 'widgets', 'grids', 'grid_cells' );
+		$has_layout_key = false;
+
+		foreach ( $layout_keys as $key ) {
+			if ( ! array_key_exists( $key, $decoded ) ) {
+				continue;
+			}
+
+			if ( ! is_array( $decoded[ $key ] ) ) {
+				return null;
+			}
+
+			$has_layout_key = true;
+		}
+
+		return $has_layout_key ? $decoded : null;
+	}
+
+	/**
+	 * Whether save_home_page() wrote the home page layout during this request.
+	 *
+	 * @return bool
+	 */
+	public function home_page_saved() {
+		return $this->home_page_saved;
+	}
+
+	/**
 	 * @action save_post
 	 */
 	public function save_post( $post_id ) {
@@ -229,11 +309,18 @@ class SiteOrigin_Panels_Admin {
 		) {
 			return;
 		}
+
+		// A submission that is not a layout leaves the stored layout untouched.
+		$panels_data = self::decode_panels_data( wp_unslash( $_POST['panels_data'] ) );
+
+		if ( $panels_data === null ) {
+			return;
+		}
+
 		$this->in_save_post = true;
 		// Get post from db as it might have been changed and saved by other plugins.
 		$post = get_post( $post_id );
 		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
-		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
@@ -952,6 +1039,8 @@ class SiteOrigin_Panels_Admin {
 	 * Save home page.
 	 */
 	public function save_home_page() {
+		$this->home_page_saved = false;
+
 		if ( ! isset( $_POST['_sopanels_home_nonce'] ) || ! wp_verify_nonce( $_POST['_sopanels_home_nonce'], 'save' ) ) {
 			return;
 		}
@@ -961,6 +1050,14 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( ! isset( $_POST['panels_data'] ) ) {
+			return;
+		}
+
+		// Decide before any write: a submission that is not a layout is a no-op
+		// for the page as well as for the layout.
+		$panels_data = self::decode_panels_data( wp_unslash( $_POST['panels_data'] ) );
+
+		if ( $panels_data === null ) {
 			return;
 		}
 
@@ -1000,9 +1097,8 @@ class SiteOrigin_Panels_Admin {
 
 		// Save the updated page data.
 		$old_panels_data = get_post_meta( $page_id, 'panels_data', true );
-		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 		$panels_data['widgets'] = $this->process_raw_widgets(
-			$panels_data['widgets'],
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
@@ -1018,6 +1114,7 @@ class SiteOrigin_Panels_Admin {
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
+		$this->home_page_saved = true;
 
 		$template = get_post_meta( $page_id, '_wp_page_template', true );
 		$home_template = siteorigin_panels_setting( 'home-template' );
