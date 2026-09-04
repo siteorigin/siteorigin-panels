@@ -1,0 +1,15 @@
+{
+	"name": "siteorigin-panels-tests",
+	"private": true,
+	"description": "Unit tests for the builder's Backbone models. These run on a current Node (see engines); the release build under build/ is a separate gulp 3 toolchain that runs on Node 10 through nvm, and the two never share a runtime.",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"test": "node --test tests/js"
+	},
+	"devDependencies": {
+		"backbone": "^1.6.0",
+		"underscore": "^1.13.7"
+	}
+}
