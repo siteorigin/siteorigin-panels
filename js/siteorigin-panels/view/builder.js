@@ -327,12 +327,12 @@ module.exports = Backbone.View.extend( {
 
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets or the normal editor
 		// isn't supported.
-		// A locked builder must not hide the content editor behind itself.
+		// A locked builder must not hide the content editor behind itself; its
+		// notice is shown beneath the editor instead.
 		var data = this.model.get( 'data' );
-		if (
-			! this.model.loadFailed &&
-			( !_.isEmpty( data.widgets ) || !_.isEmpty( data.grids ) || !this.supports( 'revertToEditor' ) )
-		) {
+		if ( this.model.loadFailed ) {
+			metabox.show().find( '> .inside' ).show();
+		} else if ( !_.isEmpty( data.widgets ) || !_.isEmpty( data.grids ) || !this.supports( 'revertToEditor' ) ) {
 			this.displayAttachedBuilder( { confirm: false } );
 		}
 
@@ -402,6 +402,15 @@ module.exports = Backbone.View.extend( {
 		options = _.extend( {
 			confirm: true
 		}, options );
+
+		// A locked builder has nothing to switch to. Show its notice beneath the
+		// content editor and leave the editor in place, since the controls that
+		// would switch back are part of what the lock hides.
+		if ( this.model.loadFailed ) {
+			this.metabox.show().find( '> .inside' ).show();
+
+			return false;
+		}
 
 		// Switch to the Page Builder interface
 
@@ -1043,6 +1052,12 @@ module.exports = Backbone.View.extend( {
 
 		if ( this.dataField ) {
 			this.dataField.prop( 'disabled', true );
+		}
+
+		// The admin bar's Live Editor link opens the editor before the layout
+		// loads, so an open Live Editor is closed here rather than prevented.
+		if ( this.liveEditor && this.liveEditor.$el.is( ':visible' ) ) {
+			this.liveEditor.close( false );
 		}
 	},
 
