@@ -222,11 +222,12 @@ class SiteOrigin_Panels_Admin {
 	 *
 	 * Decode a submitted layout, refusing anything that is not a layout.
 	 *
-	 * The save paths used to index whatever json_decode() returned, so malformed
-	 * or scalar JSON produced an empty layout and the stored one was deleted.
-	 * Only two shapes may reach a write: an empty layout, which clears, or an
-	 * object carrying at least one of the layout lists. Everything else is
-	 * rejected so the caller can leave the stored layout alone.
+	 * Exactly two shapes may reach a write: `false`, which the builder submits
+	 * to clear the layout, and an object carrying at least one of the layout
+	 * lists with every present list an array. Malformed JSON, scalars, empty
+	 * values and lists return null so the caller leaves the stored layout
+	 * alone; indexing any of those as if it were a layout would produce an
+	 * empty one and delete what is stored.
 	 *
 	 * @param string $json The submitted JSON, already unslashed by the caller.
 	 *
@@ -243,23 +244,19 @@ class SiteOrigin_Panels_Admin {
 			return null;
 		}
 
-		$empty_layout = array(
-			'widgets'    => array(),
-			'grids'      => array(),
-			'grid_cells' => array(),
-		);
-
 		// Revert to Editor submits `false` to clear the layout.
 		if ( $decoded === false ) {
-			return $empty_layout;
+			return array(
+				'widgets'    => array(),
+				'grids'      => array(),
+				'grid_cells' => array(),
+			);
 		}
 
-		if ( ! is_array( $decoded ) ) {
+		// Nothing the builder submits decodes to an empty array, and `{}` and
+		// `[]` are indistinguishable once decoded, so neither is a clear.
+		if ( ! is_array( $decoded ) || empty( $decoded ) ) {
 			return null;
-		}
-
-		if ( empty( $decoded ) ) {
-			return $empty_layout;
 		}
 
 		// A JSON list decodes to an array too; a layout is an object.

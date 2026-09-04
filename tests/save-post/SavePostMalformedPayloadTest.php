@@ -145,9 +145,15 @@ class SavePostMalformedPayloadTest extends TestCase {
 		}
 	}
 
-	public function test_decoder_turns_false_and_empty_into_the_empty_layout() {
-		foreach ( array( 'false', '{}', '[]' ) as $json ) {
-			$this->assertSame( $this->empty_layout(), \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
+	public function test_decoder_turns_false_into_the_empty_layout() {
+		$this->assertSame( $this->empty_layout(), \SiteOrigin_Panels_Admin::decode_panels_data( 'false' ) );
+	}
+
+	public function test_decoder_rejects_empty_object_and_empty_list() {
+		// The builder never submits either; once decoded they are the same
+		// empty array, and an empty array must not clear a stored layout.
+		foreach ( array( '{}', '[]' ) as $json ) {
+			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
 		}
 	}
 
@@ -241,8 +247,18 @@ class SavePostMalformedPayloadTest extends TestCase {
 		$this->assertFalse( $admin->home_page_saved() );
 	}
 
-	public function test_home_page_clears_on_false_and_empty_object() {
-		foreach ( array( 'false', '{}' ) as $json ) {
+	public function test_home_page_clears_on_false_and_refuses_an_empty_object() {
+		Functions\when( 'wp_verify_nonce' )->justReturn( true );
+		Functions\when( 'current_user_can' )->justReturn( true );
+		Functions\expect( 'get_option' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$_POST = array( '_sopanels_home_nonce' => 'nonce', 'panels_data' => '{}', 'post_content' => 'content' );
+		$admin = $this->admin();
+		$admin->save_home_page();
+		$this->assertFalse( $admin->home_page_saved(), '{} is not a clear' );
+
+		foreach ( array( 'false' ) as $json ) {
 			Monkey\tearDown();
 			Monkey\setUp();
 			Functions\when( '__' )->returnArg();
