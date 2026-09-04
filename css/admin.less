@@ -667,6 +667,34 @@
 		}
 	}
 
+	// A builder whose layout failed to load shows only its notice. The rule
+	// covers children added after the lock as well, since the JS only marks
+	// the children present when the failure happened.
+	&.so-panels-load-failed > :not(.so-panels-load-failed-notice) {
+		display: none !important;
+	}
+
+	.so-panels-load-failed-notice {
+		margin: 15px;
+		padding: 15px 20px;
+		background: #fcf0f1;
+		border: 1px solid #d63638;
+		border-left-width: 4px;
+		color: #1d2327;
+		line-height: 1.6em;
+
+		p {
+			margin: 0 0 10px;
+		}
+
+		.so-load-failed-error {
+			font-family: Consolas, Monaco, monospace;
+			font-size: 12px;
+			color: #646970;
+			word-break: break-word;
+		}
+	}
+
 	.so-panels-welcome-message {
 		text-align: center;
 		padding: 0px 15px 20px 15px;

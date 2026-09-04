@@ -203,6 +203,12 @@ function SiteOriginPanelsLayoutBlock( props ) {
 		}
 
 			builderViewRef.current.on( 'content_change', () => {
+				// A builder whose layout failed to load has nothing safe to write
+				// back into the block attribute.
+				if ( builderViewRef.current.model.loadFailed ) {
+					return;
+				}
+
 				const newPanelsData = builderViewRef.current.getData();
 
 				if ( ! SiteOriginIsPanelsEqual( initialPanelsData, newPanelsData ) ) {

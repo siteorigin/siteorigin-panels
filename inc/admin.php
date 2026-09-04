@@ -593,6 +593,8 @@ class SiteOrigin_Panels_Admin {
 						'title'       => esc_html__( 'Missing Widget', 'siteorigin-panels' ),
 						'description' => esc_html__( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
 					),
+					'load_failed'          => esc_html__( 'Page Builder could not load this layout. Updating the page will not save the incomplete builder view; reload to try again.', 'siteorigin-panels' ),
+					'reload'               => esc_html__( 'Reload page', 'siteorigin-panels' ),
 					'time'                 => array(
 						// TRANSLATORS: Number of seconds since.
 						'seconds' => esc_html__( '%d seconds', 'siteorigin-panels' ),
