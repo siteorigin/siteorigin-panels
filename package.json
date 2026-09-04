@@ -6,7 +6,7 @@
 		"node": ">=20"
 	},
 	"scripts": {
-		"test": "node --test tests/js"
+		"test": "node --test tests/js/*.test.js"
 	},
 	"devDependencies": {
 		"backbone": "^1.6.0",
