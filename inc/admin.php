@@ -264,22 +264,21 @@ class SiteOrigin_Panels_Admin {
 			return null;
 		}
 
-		$layout_keys = array( 'widgets', 'grids', 'grid_cells' );
-		$has_layout_key = false;
-
-		foreach ( $layout_keys as $key ) {
-			if ( ! array_key_exists( $key, $decoded ) ) {
-				continue;
-			}
-
-			if ( ! is_array( $decoded[ $key ] ) ) {
+		// The builder always serializes rows and cells; a layout without them is
+		// a partial object, and saving it would read as an empty layout.
+		foreach ( array( 'grids', 'grid_cells' ) as $key ) {
+			if ( ! array_key_exists( $key, $decoded ) || ! is_array( $decoded[ $key ] ) ) {
 				return null;
 			}
-
-			$has_layout_key = true;
 		}
 
-		return $has_layout_key ? $decoded : null;
+		if ( ! array_key_exists( 'widgets', $decoded ) ) {
+			$decoded['widgets'] = array();
+		} elseif ( ! is_array( $decoded['widgets'] ) ) {
+			return null;
+		}
+
+		return $decoded;
 	}
 
 	/**

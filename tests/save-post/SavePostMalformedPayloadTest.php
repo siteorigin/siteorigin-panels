@@ -140,9 +140,23 @@ class SavePostMalformedPayloadTest extends TestCase {
 	}
 
 	public function test_decoder_rejects_scalar_layout_members() {
-		foreach ( array( '{"grids":"x"}', '{"grid_cells":1}', '{"widgets":"","grids":[]}' ) as $json ) {
+		foreach ( array( '{"grids":"x","grid_cells":[]}', '{"grids":[],"grid_cells":1}', '{"widgets":"","grids":[],"grid_cells":[]}' ) as $json ) {
 			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
 		}
+	}
+
+	public function test_decoder_rejects_partial_layouts_without_rows_and_cells() {
+		// The builder always serializes grids and grid_cells; an object missing
+		// either would read as an empty layout and delete the stored one.
+		foreach ( array( '{"widgets":[]}', '{"grids":[]}', '{"grid_cells":[]}', '{"widgets":[],"grids":[]}' ) as $json ) {
+			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
+		}
+	}
+
+	public function test_decoder_fills_in_missing_widgets_when_rows_and_cells_are_present() {
+		$decoded = \SiteOrigin_Panels_Admin::decode_panels_data( '{"grids":[],"grid_cells":[]}' );
+
+		$this->assertEquals( $this->empty_layout(), $decoded );
 	}
 
 	public function test_decoder_turns_false_into_the_empty_layout() {
