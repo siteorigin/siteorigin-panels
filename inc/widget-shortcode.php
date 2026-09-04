@@ -6,7 +6,6 @@ class SiteOrigin_Panels_Widget_Shortcode {
 		'SiteOrigin_Panels_Widgets_Layout',
 		'WP_Widget_Black_Studio_TinyMCE',
 		'WP_Widget_Text',
-		'WP_Widget_Custom_HTML',
 	);
 
 	public static function init() {
