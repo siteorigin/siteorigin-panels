@@ -97,12 +97,23 @@ module.exports = Backbone.Model.extend({
 				// what is stored.
 				var isEmptyContainer = ! _.isNull( data ) && typeof data === 'object' && _.isEmpty( data );
 
-				if ( data !== false && ! _.isUndefined( data ) && ! isEmptyContainer ) {
+				if ( data !== false && ! isEmptyContainer ) {
 					throw new Error( 'Layout data has no grid cells' );
 				}
 
 				this.finishLoad();
 				return;
+			}
+
+			// The same shape the server accepts: rows and cells are lists, and so
+			// are the widgets when present. Anything else is not a layout, and an
+			// unlocked empty builder would let an edit replace what is stored.
+			if (
+				! _.isArray( data.grid_cells ) ||
+				! _.isArray( data.grids ) ||
+				( ! _.isUndefined( data.widgets ) && ! _.isArray( data.widgets ) )
+			) {
+				throw new Error( 'Layout data is not a layout' );
 			}
 
 			var gi;
