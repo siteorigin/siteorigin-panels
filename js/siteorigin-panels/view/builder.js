@@ -806,7 +806,8 @@ module.exports = Backbone.View.extend( {
 		// Make sure we actually need to copy content.
 		if ( panelsOptions.copy_content	&& ( panels.helpers.editor.isBlockEditor() || panels.helpers.editor.isClassicEditor( this ) ) ) {
 			var panelsData = this.model.getPanelsData();
-			if ( !_.isEmpty( panelsData.widgets ) ) {
+			// getPanelsData() is null after an unparseable load.
+			if ( panelsData && !_.isEmpty( panelsData.widgets ) ) {
 				// We're going to create a copy of page builder content into the post content
 				$.post(
 					panelsOptions.ajaxurl,
