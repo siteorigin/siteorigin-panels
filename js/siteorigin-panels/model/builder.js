@@ -90,6 +90,14 @@ module.exports = Backbone.Model.extend({
 			var rows = [];
 
 			if ( _.isUndefined( data.grid_cells ) ) {
+				// `false` and an empty container are the builder's own "no layout
+				// yet" values. An object that carries layout keys but no cells is
+				// a partial layout, and building an empty builder from it would
+				// let the next save replace what is stored.
+				if ( data && typeof data === 'object' && ( ! _.isUndefined( data.widgets ) || ! _.isUndefined( data.grids ) ) ) {
+					throw new Error( 'Layout data has no grid cells' );
+				}
+
 				this.finishLoad();
 				return;
 			}

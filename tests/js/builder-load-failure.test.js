@@ -228,6 +228,34 @@ test( 'an unparseable source hands out nothing and leaves the default layout unt
 	assert.deepEqual( model.get( 'data' ), defaults, 'the default empty layout is still there for the view to read' );
 } );
 
+test( 'an object with layout keys but no grid cells is a failed load, not an empty layout', function () {
+	const model = builder();
+	const events = countEvents( model );
+	const partial = { widgets: [ widget( 0, 0, 0 ) ] };
+	const reference = clone( partial );
+
+	model.loadPanelsData( partial );
+
+	assert.equal( model.loadFailed, true );
+	assert.equal( events.load_panels_data, 0 );
+	assert.equal( events.load_panels_data_failed, 1 );
+	assert.deepEqual( model.get( 'data' ), reference );
+	assert.deepEqual( model.getPanelsData(), reference, 'the partial object is handed out as-is rather than an empty layout' );
+} );
+
+test( 'an empty object or list is a successful empty load', function () {
+	[ {}, [] ].forEach( function ( empty ) {
+		const model = builder();
+		const events = countEvents( model );
+
+		model.loadPanelsData( empty );
+
+		assert.equal( model.loadFailed, false, JSON.stringify( empty ) );
+		assert.equal( events.load_panels_data, 1 );
+		assert.equal( model.get( 'rows' ).length, 0 );
+	} );
+} );
+
 test( 'loading false (Revert to Editor) is a successful load', function () {
 	const model = builder();
 	const events = countEvents( model );
