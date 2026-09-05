@@ -77,6 +77,7 @@ module.exports = {
             '!{vendor,vendor/**}',                           // Ignore composer files. We're not using any in release.
             '!siteorigin-panels.php',                        // Not the base plugin file. It is copied by the 'version' task.
             '!package.json',                                 // Ignore the package.json file..
+            '!package-lock.json',                            // ..and the lockfile for the JS unit tests.
             '!readme.txt',                                   // Not the readme.txt file. It is copied by the 'version' task.
             '!readme.md',                                    // Ignore the readme.md file. It is for the github repo.
             '!{js/siteorigin-panels,js/siteorigin-panels/**}',

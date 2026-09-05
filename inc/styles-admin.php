@@ -567,16 +567,74 @@ class SiteOrigin_Panels_Styles_Admin {
 	}
 
 	/**
+	 * Remove style entries that are not arrays from a layout.
+	 *
+	 * A style is an array of settings. Anything else stored under the key, a
+	 * null, an empty string, a number, cannot be rendered or sanitized, and a
+	 * null crashes the builder's style checks when the layout is loaded. Only
+	 * the three style locations are touched: `widgets[*][panels_info][style]`,
+	 * `grids[*][style]` and `grid_cells[*][style]`. Items that are not arrays
+	 * are left alone. Running it twice gives the same result, so it is safe to
+	 * call both before and after filters that may write a style.
+	 *
+	 * @param mixed $panels_data The layout. Returned unchanged unless it is an array.
+	 *
+	 * @return mixed
+	 */
+	public function remove_invalid_styles( $panels_data ) {
+		if ( ! is_array( $panels_data ) ) {
+			return $panels_data;
+		}
+
+		if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
+			foreach ( $panels_data['widgets'] as $i => $widget ) {
+				if (
+					! is_array( $widget ) ||
+					empty( $widget['panels_info'] ) ||
+					! is_array( $widget['panels_info'] ) ||
+					! array_key_exists( 'style', $widget['panels_info'] )
+				) {
+					continue;
+				}
+
+				if ( ! is_array( $widget['panels_info']['style'] ) ) {
+					unset( $panels_data['widgets'][ $i ]['panels_info']['style'] );
+				}
+			}
+		}
+
+		foreach ( array( 'grids', 'grid_cells' ) as $list ) {
+			if ( empty( $panels_data[ $list ] ) || ! is_array( $panels_data[ $list ] ) ) {
+				continue;
+			}
+
+			foreach ( $panels_data[ $list ] as $i => $item ) {
+				if ( ! is_array( $item ) || ! array_key_exists( 'style', $item ) ) {
+					continue;
+				}
+
+				if ( ! is_array( $item['style'] ) ) {
+					unset( $panels_data[ $list ][ $i ]['style'] );
+				}
+			}
+		}
+
+		return $panels_data;
+	}
+
+	/**
 	 * Sanitize the style fields in panels_data
 	 *
 	 * @return mixed
 	 */
 	public function sanitize_all( $panels_data ) {
 		$panels_data = apply_filters( 'siteorigin_panels_data_migration', $panels_data );
+		$panels_data = $this->remove_invalid_styles( $panels_data );
+
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			// Sanitize the widgets
 			for ( $i = 0; $i < count( $panels_data['widgets'] ); $i ++ ) {
-				if ( empty( $panels_data['widgets'][ $i ]['panels_info'] ) ) {
+				if ( ! is_array( $panels_data['widgets'][ $i ] ) || empty( $panels_data['widgets'][ $i ]['panels_info'] ) ) {
 					continue;
 				}
 
@@ -586,51 +644,42 @@ class SiteOrigin_Panels_Styles_Admin {
 					);
 				}
 
-				if ( isset( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
-					if ( is_null( $panels_data['widgets'][ $i ]['panels_info']['style'] ) || ! is_array( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
-						unset( $panels_data['widgets'][ $i ]['panels_info']['style'] );
-					} elseif ( empty( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
-						continue;
-					} else {
-						$panels_data['widgets'][ $i ]['panels_info']['style'] = $this->sanitize_style_fields( 'widget', $panels_data['widgets'][ $i ]['panels_info']['style'] );
-					}
+				if ( empty( $panels_data['widgets'][ $i ]['panels_info']['style'] ) ) {
+					continue;
 				}
+
+				$panels_data['widgets'][ $i ]['panels_info']['style'] = $this->sanitize_style_fields( 'widget', $panels_data['widgets'][ $i ]['panels_info']['style'] );
 			}
 		}
 
 		if ( ! empty( $panels_data['grids'] ) ) {
 			// The rows
 			for ( $i = 0; $i < count( $panels_data['grids'] ); $i ++ ) {
+				if ( ! is_array( $panels_data['grids'][ $i ] ) ) {
+					continue;
+				}
+
 				if ( ! empty( $panels_data['grids'][ $i ]['label'] ) ) {
 					$panels_data['grids'][ $i ]['label'] = sanitize_text_field(
 						$panels_data['grids'][ $i ]['label']
 					);
 				}
 
-				if ( isset( $panels_data['grids'][ $i ]['style'] ) ) {
-					if ( is_null( $panels_data['grids'][ $i ]['style'] ) || ! is_array( $panels_data['grids'][ $i ]['style'] ) ) {
-						unset( $panels_data['grids'][ $i ]['style'] );
-					} elseif ( empty( $panels_data['grids'][ $i ]['style'] ) ) {
-						continue;
-					} else {
-						$panels_data['grids'][ $i ]['style'] = $this->sanitize_style_fields( 'row', $panels_data['grids'][ $i ]['style'] );
-					}
+				if ( empty( $panels_data['grids'][ $i ]['style'] ) ) {
+					continue;
 				}
+				$panels_data['grids'][ $i ]['style'] = $this->sanitize_style_fields( 'row', $panels_data['grids'][ $i ]['style'] );
 			}
 		}
 
 		if ( ! empty( $panels_data['grid_cells'] ) ) {
 			// And finally, the cells
 			for ( $i = 0; $i < count( $panels_data['grid_cells'] ); $i ++ ) {
-				if ( isset( $panels_data['grid_cells'][ $i ]['style'] ) ) {
-					if ( is_null( $panels_data['grid_cells'][ $i ]['style'] ) || ! is_array( $panels_data['grid_cells'][ $i ]['style'] ) ) {
-						unset( $panels_data['grid_cells'][ $i ]['style'] );
-					} elseif ( empty( $panels_data['grid_cells'][ $i ]['style'] ) ) {
-						continue;
-					} else {
-						$panels_data['grid_cells'][ $i ]['style'] = $this->sanitize_style_fields( 'cell', $panels_data['grid_cells'][ $i ]['style'] );
-					}
+				if ( ! is_array( $panels_data['grid_cells'][ $i ] ) || empty( $panels_data['grid_cells'][ $i ]['style'] ) ) {
+					continue;
 				}
+
+				$panels_data['grid_cells'][ $i ]['style'] = $this->sanitize_style_fields( 'cell', $panels_data['grid_cells'][ $i ]['style'] );
 			}
 		}
 

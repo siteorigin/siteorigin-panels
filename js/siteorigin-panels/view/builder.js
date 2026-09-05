@@ -109,6 +109,10 @@ module.exports = Backbone.View.extend( {
 		this.listenTo( this.model, 'change:data load_panels_data', this.storeModelData );
 		this.listenTo( this.model, 'change:data load_panels_data', this.toggleWelcomeDisplay );
 
+		// A layout that fails to load locks the builder until a load completes.
+		this.listenTo( this.model, 'load_panels_data_failed', this.showLoadFailure );
+		this.listenTo( this.model, 'load_panels_data', this.clearLoadFailure );
+
 		// Handle a content change
 		this.on( 'builder_attached_to_editor', this.handleContentChange, this );
 		this.on( 'content_change', this.handleContentChange, this );
@@ -124,7 +128,9 @@ module.exports = Backbone.View.extend( {
 
 		if ( this.config.loadOnAttach ) {
 			this.on( 'builder_attached_to_editor', function () {
-				this.displayAttachedBuilder( { confirm: false } );
+				if ( ! this.model.loadFailed ) {
+					this.displayAttachedBuilder( { confirm: false } );
+				}
 			}, this );
 		}
 		return this;
@@ -321,8 +327,12 @@ module.exports = Backbone.View.extend( {
 
 		// Switch to the Page Builder interface as soon as we load the page if there are widgets or the normal editor
 		// isn't supported.
+		// A locked builder must not hide the content editor behind itself; its
+		// notice is shown beneath the editor instead.
 		var data = this.model.get( 'data' );
-		if ( !_.isEmpty( data.widgets ) || !_.isEmpty( data.grids ) || !this.supports( 'revertToEditor' ) ) {
+		if ( this.model.loadFailed ) {
+			metabox.show().find( '> .inside' ).show();
+		} else if ( !_.isEmpty( data.widgets ) || !_.isEmpty( data.grids ) || !this.supports( 'revertToEditor' ) ) {
 			this.displayAttachedBuilder( { confirm: false } );
 		}
 
@@ -392,6 +402,15 @@ module.exports = Backbone.View.extend( {
 		options = _.extend( {
 			confirm: true
 		}, options );
+
+		// A locked builder has nothing to switch to. Show its notice beneath the
+		// content editor and leave the editor in place, since the controls that
+		// would switch back are part of what the lock hides.
+		if ( this.model.loadFailed ) {
+			this.metabox.show().find( '> .inside' ).show();
+
+			return false;
+		}
 
 		// Switch to the Page Builder interface
 
@@ -526,8 +545,10 @@ module.exports = Backbone.View.extend( {
 				data = JSON.parse( data );
 			}
 			catch ( err ) {
-				console.log( "Failed to parse Page Builder layout data from supplied data field." );
-				data = {};
+				// Leave the field as it is: loading an empty layout in its place
+				// would delete the stored one on the next save.
+				this.model.markSourceUnparseable( err );
+				return this;
 			}
 
 			this.setData( data );
@@ -741,7 +762,7 @@ module.exports = Backbone.View.extend( {
 	 * Show the current live editor
 	 */
 	displayLiveEditor: function () {
-		if ( _.isUndefined( this.liveEditor ) ) {
+		if ( _.isUndefined( this.liveEditor ) || this.model.loadFailed ) {
 			return;
 		}
 
@@ -806,7 +827,8 @@ module.exports = Backbone.View.extend( {
 		// Make sure we actually need to copy content.
 		if ( panelsOptions.copy_content	&& ( panels.helpers.editor.isBlockEditor() || panels.helpers.editor.isClassicEditor( this ) ) ) {
 			var panelsData = this.model.getPanelsData();
-			if ( !_.isEmpty( panelsData.widgets ) ) {
+			// getPanelsData() is null after an unparseable load.
+			if ( panelsData && !_.isEmpty( panelsData.widgets ) ) {
 				// We're going to create a copy of page builder content into the post content
 				$.post(
 					panelsOptions.ajaxurl,
@@ -876,7 +898,10 @@ module.exports = Backbone.View.extend( {
 		var editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( 'content' ) : false;
 		var editorContent = ( editor && _.isFunction( editor.getContent ) ) ? editor.getContent() : $( 'textarea#content' ).val();
 
+		// A locked builder never converts editor content into a layout: that
+		// would clear the failure and serialize a layout the user never saw.
 		if (
+			! this.model.loadFailed &&
 			(
 				_.isEmpty( this.model.get( 'data' ) ) ||
 				( _.isEmpty( this.model.get( 'data' ).widgets ) && _.isEmpty( this.model.get( 'data' ).grids ) )
@@ -970,10 +995,96 @@ module.exports = Backbone.View.extend( {
 	 * This shows or hides the welcome display depending on whether there are any rows in the collection.
 	 */
 	toggleWelcomeDisplay: function () {
+		// The welcome message is part of the locked region; showing it would
+		// expose its add-widget links.
+		if ( this.model.loadFailed ) {
+			return;
+		}
+
 		if ( !this.model.get( 'rows' ).isEmpty() ) {
 			this.$( '.so-panels-welcome-message' ).hide();
 		} else {
 			this.$( '.so-panels-welcome-message' ).show();
+		}
+	},
+
+	/**
+	 * Lock the builder after a layout failed to load. Every control is hidden
+	 * and made inert so nothing can edit the incomplete rows, and the data
+	 * field is disabled so a post save carries no layout at all and the server
+	 * leaves the stored one untouched. Only the notice stays reachable.
+	 *
+	 * @param err Error the exception that stopped the load.
+	 */
+	showLoadFailure: function ( err ) {
+		var message = ( err && err.message ) ? err.message : String( err );
+
+		// A second failure before a load completes only refreshes the message.
+		if ( this.$el.hasClass( 'so-panels-load-failed' ) ) {
+			this.$( '> .so-panels-load-failed-notice .so-load-failed-error' ).text( message );
+			return;
+		}
+
+		var locked = [];
+		this.$el.children().each( function ( i, child ) {
+			locked.push( {
+				el: child,
+				hidden: child.hasAttribute( 'hidden' ),
+				inert: child.hasAttribute( 'inert' )
+			} );
+			child.setAttribute( 'hidden', '' );
+			child.setAttribute( 'inert', '' );
+		} );
+		this.loadFailureLocked = locked;
+
+		var $notice = $( '<div class="so-panels-load-failed-notice"></div>' );
+		$notice.append( $( '<p></p>' ).text( panelsOptions.loc.load_failed ) );
+		$notice.append( $( '<p class="so-load-failed-error"></p>' ).text( message ) );
+		$notice.append(
+			$( '<button type="button" class="button"></button>' )
+				.text( panelsOptions.loc.reload )
+				.on( 'click', function () {
+					window.location.reload();
+				} )
+		);
+
+		this.$el.addClass( 'so-panels-load-failed' ).prepend( $notice );
+
+		if ( this.dataField ) {
+			this.dataField.prop( 'disabled', true );
+		}
+
+		// The admin bar's Live Editor link opens the editor before the layout
+		// loads, so an open Live Editor is closed here rather than prevented.
+		if ( this.liveEditor && this.liveEditor.$el.is( ':visible' ) ) {
+			this.liveEditor.close( false );
+		}
+	},
+
+	/**
+	 * Undo showLoadFailure() once a load completes. Attributes a child already
+	 * carried before the lock are left in place.
+	 */
+	clearLoadFailure: function () {
+		if ( ! this.$el.hasClass( 'so-panels-load-failed' ) ) {
+			return;
+		}
+
+		_.each( this.loadFailureLocked, function ( prior ) {
+			if ( ! prior.hidden ) {
+				prior.el.removeAttribute( 'hidden' );
+			}
+			if ( ! prior.inert ) {
+				prior.el.removeAttribute( 'inert' );
+			}
+		} );
+		this.loadFailureLocked = [];
+
+		this.$( '> .so-panels-load-failed-notice' ).remove();
+		this.$el.removeClass( 'so-panels-load-failed' );
+
+		if ( this.dataField ) {
+			this.dataField.prop( 'disabled', false );
 		}
 	},
 
