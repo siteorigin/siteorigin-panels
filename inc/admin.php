@@ -289,6 +289,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+		// A pre-save callback can write a style that is not an array; the builder cannot load one.
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		/**
 		 * Fires with the fully-sanitized canonical panels_data immediately before it
@@ -1010,6 +1012,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
+		// A pre-save callback can write a style that is not an array; the builder cannot load one.
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
 
