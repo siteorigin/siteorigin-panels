@@ -105,6 +105,7 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 class Abilities_StylesSpy {
 	public static $instance;
 	public $sanitize_all_called = false;
+	public $remove_invalid_styles_input = null;
 
 	public static function single() {
 		return self::$instance;
@@ -112,6 +113,12 @@ class Abilities_StylesSpy {
 
 	public function sanitize_all( $panels_data ) {
 		$this->sanitize_all_called = true;
+
+		return $panels_data;
+	}
+
+	public function remove_invalid_styles( $panels_data ) {
+		$this->remove_invalid_styles_input = $panels_data;
 
 		return $panels_data;
 	}

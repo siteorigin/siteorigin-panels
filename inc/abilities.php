@@ -414,6 +414,8 @@ class SiteOrigin_Panels_Abilities {
 		// Apply the same public pre-save filter save_post applies, so third-party
 		// pre-save transforms run on ability writes too.
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+		// A pre-save callback can write a style that is not an array; the builder cannot load one.
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		// Unconditional kses floor for the AI meta write (Audit #1 fix 1b): the
 		// whole write is AI-originated, and AI output is prompt-injectable no
