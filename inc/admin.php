@@ -268,18 +268,37 @@ class SiteOrigin_Panels_Admin {
 		// The builder always serializes rows and cells; a layout without them is
 		// a partial object, and saving it would read as an empty layout.
 		foreach ( array( 'grids', 'grid_cells' ) as $key ) {
-			if ( ! array_key_exists( $key, $decoded ) || ! is_array( $decoded[ $key ] ) ) {
+			if ( ! array_key_exists( $key, $decoded ) || ! self::is_list( $decoded[ $key ] ) ) {
 				return null;
 			}
 		}
 
 		if ( ! array_key_exists( 'widgets', $decoded ) ) {
 			$decoded['widgets'] = array();
-		} elseif ( ! is_array( $decoded['widgets'] ) ) {
+		} elseif ( ! self::is_list( $decoded['widgets'] ) ) {
 			return null;
 		}
 
 		return $decoded;
+	}
+
+	/**
+	 * Whether a decoded value is a JSON list: an array whose keys run 0..n-1.
+	 *
+	 * The builder indexes rows, cells and widgets by position, so a JSON object
+	 * with numeric keys, which json_decode() also turns into a PHP array, is not
+	 * a usable list even when every value in it is well formed.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return bool
+	 */
+	private static function is_list( $value ) {
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+
+		return empty( $value ) || array_keys( $value ) === range( 0, count( $value ) - 1 );
 	}
 
 	/**
