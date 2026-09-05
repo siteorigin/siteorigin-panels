@@ -295,6 +295,12 @@ class SiteOrigin_Panels_Admin {
 	 * @return bool
 	 */
 	private static function layout_references_resolve( $layout ) {
+		foreach ( $layout['grids'] as $row ) {
+			if ( ! is_array( $row ) ) {
+				return false;
+			}
+		}
+
 		$row_count = count( $layout['grids'] );
 		$cells_per_row = array_fill( 0, max( $row_count, 1 ), 0 );
 
