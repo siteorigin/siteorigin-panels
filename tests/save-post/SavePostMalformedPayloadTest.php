@@ -169,6 +169,39 @@ class SavePostMalformedPayloadTest extends TestCase {
 		}
 	}
 
+	public function test_decoder_rejects_layouts_whose_references_do_not_resolve() {
+		// The builder addresses rows, cells and widgets by position; a layout
+		// that points past what it contains cannot be loaded.
+		$one_row_one_cell = '"grids":[{"cells":1}],"grid_cells":[{"grid":0,"index":0,"weight":1}]';
+		foreach (
+			array(
+				'{"widgets":[{"panels_info":{"class":"X","grid":0,"cell":0}}],"grids":[],"grid_cells":[]}',
+				'{"widgets":[{"panels_info":{"class":"X","grid":1,"cell":0}}],' . $one_row_one_cell . '}',
+				'{"widgets":[{"panels_info":{"class":"X","grid":0,"cell":1}}],' . $one_row_one_cell . '}',
+				'{"widgets":[{"panels_info":{"class":"X"}}],' . $one_row_one_cell . '}',
+				'{"widgets":[{"title":"no placement"}],' . $one_row_one_cell . '}',
+				'{"widgets":[],"grids":[{"cells":1}],"grid_cells":[{"grid":3,"index":0,"weight":1}]}',
+				'{"widgets":[],"grids":[],"grid_cells":[{"grid":0,"index":0,"weight":1}]}',
+			) as $json
+		) {
+			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
+		}
+	}
+
+	public function test_decoder_accepts_layouts_whose_references_resolve() {
+		$json = '{"widgets":[{"panels_info":{"class":"X","grid":0,"cell":"1"}},{"info":{"class":"Y","grid":1,"cell":0}}],'
+			. '"grids":[{"cells":2},{"cells":1}],'
+			. '"grid_cells":[{"grid":0,"index":0,"weight":0.5},{"grid":"0","index":1,"weight":0.5},{"grid":1,"index":0,"weight":1}]}';
+
+		$decoded = \SiteOrigin_Panels_Admin::decode_panels_data( $json );
+
+		$this->assertIsArray( $decoded );
+		$this->assertCount( 2, $decoded['widgets'], 'numeric strings and the legacy info key both resolve' );
+
+		// A layout with rows but no cells and no widgets is empty content, not a broken reference.
+		$this->assertIsArray( \SiteOrigin_Panels_Admin::decode_panels_data( '{"widgets":[],"grids":[{"cells":1}],"grid_cells":[]}' ) );
+	}
+
 	public function test_decoder_fills_in_missing_widgets_when_rows_and_cells_are_present() {
 		$decoded = \SiteOrigin_Panels_Admin::decode_panels_data( '{"grids":[],"grid_cells":[]}' );
 
@@ -196,7 +229,7 @@ class SavePostMalformedPayloadTest extends TestCase {
 
 	public function test_decoder_keeps_escaped_quotes_and_backslashes() {
 		$layout = $this->valid_layout();
-		$layout['widgets'][] = array( 'title' => 'He said "hi" \\ C:\\path', 'panels_info' => array( 'class' => 'X' ) );
+		$layout['widgets'][] = array( 'title' => 'He said "hi" \\ C:\\path', 'panels_info' => array( 'class' => 'X', 'grid' => 0, 'cell' => 0 ) );
 
 		$decoded = \SiteOrigin_Panels_Admin::decode_panels_data( json_encode( $layout ) );
 
