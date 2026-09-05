@@ -279,7 +279,67 @@ class SiteOrigin_Panels_Admin {
 			return null;
 		}
 
-		return $decoded;
+		return self::layout_references_resolve( $decoded ) ? $decoded : null;
+	}
+
+	/**
+	 * Whether every cell points at an existing row and every widget at an
+	 * existing row and cell.
+	 *
+	 * The builder addresses rows, cells and widgets by position, so a layout
+	 * whose references do not resolve cannot be loaded; storing it would only
+	 * lock the builder on the next visit.
+	 *
+	 * @param array $layout A decoded layout whose three lists are JSON lists.
+	 *
+	 * @return bool
+	 */
+	private static function layout_references_resolve( $layout ) {
+		$row_count = count( $layout['grids'] );
+		$cells_per_row = array_fill( 0, max( $row_count, 1 ), 0 );
+
+		foreach ( $layout['grid_cells'] as $cell ) {
+			if ( ! is_array( $cell ) || ! isset( $cell['grid'] ) || ! is_numeric( $cell['grid'] ) ) {
+				return false;
+			}
+
+			$row = (int) $cell['grid'];
+
+			if ( $row < 0 || $row >= $row_count ) {
+				return false;
+			}
+
+			$cells_per_row[ $row ] ++;
+		}
+
+		foreach ( $layout['widgets'] as $widget ) {
+			// Older layouts carry the placement under `info`; the loader reads both.
+			$info = null;
+			if ( is_array( $widget ) ) {
+				if ( ! empty( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+					$info = $widget['panels_info'];
+				} elseif ( ! empty( $widget['info'] ) && is_array( $widget['info'] ) ) {
+					$info = $widget['info'];
+				}
+			}
+
+			if ( $info === null ) {
+				return false;
+			}
+
+			if ( ! isset( $info['grid'], $info['cell'] ) || ! is_numeric( $info['grid'] ) || ! is_numeric( $info['cell'] ) ) {
+				return false;
+			}
+
+			$row = (int) $info['grid'];
+			$cell = (int) $info['cell'];
+
+			if ( $row < 0 || $row >= $row_count || $cell < 0 || $cell >= $cells_per_row[ $row ] ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
