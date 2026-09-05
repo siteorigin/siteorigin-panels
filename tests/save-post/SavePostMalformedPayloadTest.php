@@ -182,6 +182,9 @@ class SavePostMalformedPayloadTest extends TestCase {
 				'{"widgets":[{"title":"no placement"}],' . $one_row_one_cell . '}',
 				'{"widgets":[],"grids":[{"cells":1}],"grid_cells":[{"grid":3,"index":0,"weight":1}]}',
 				'{"widgets":[],"grids":[],"grid_cells":[{"grid":0,"index":0,"weight":1}]}',
+				'{"widgets":[{"panels_info":{"class":"X","grid":0,"cell":0}}],"grids":[null],"grid_cells":[{"grid":0,"index":0,"weight":1}]}',
+				'{"widgets":[],"grids":["row"],"grid_cells":[]}',
+				'{"widgets":[],"grids":[{"cells":1},7],"grid_cells":[]}',
 			) as $json
 		) {
 			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
