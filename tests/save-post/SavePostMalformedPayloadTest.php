@@ -52,8 +52,8 @@ class SavePostMalformedPayloadTest extends TestCase {
 		}
 
 		if ( ! class_exists( 'SiteOrigin_Panels_Styles_Admin', false ) ) {
-			// sanitize_all() passes the layout through unchanged so the test
-			// observes what the save path itself does with it.
+			// sanitize_all() and remove_invalid_styles() pass the layout through
+			// unchanged so the test observes what the save path itself does with it.
 			eval(
 				'class SiteOrigin_Panels_Styles_Admin {'
 				. ' private static $instance;'
@@ -63,6 +63,7 @@ class SavePostMalformedPayloadTest extends TestCase {
 				. '   return self::$instance;'
 				. ' }'
 				. ' public function sanitize_all( $panels_data ) { self::$sanitize_calls++; return $panels_data; }'
+				. ' public function remove_invalid_styles( $panels_data ) { return $panels_data; }'
 				. '}'
 			);
 		}
