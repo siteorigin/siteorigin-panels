@@ -155,6 +155,20 @@ class SavePostMalformedPayloadTest extends TestCase {
 		}
 	}
 
+	public function test_decoder_rejects_layout_lists_that_are_json_objects() {
+		// json_decode() turns a numeric-keyed object into a PHP array too, but
+		// the builder indexes rows, cells and widgets by position.
+		foreach (
+			array(
+				'{"grids":{"1":{"cells":1}},"grid_cells":[]}',
+				'{"grids":[],"grid_cells":{"0":{"grid":0},"2":{"grid":0}}}',
+				'{"widgets":{"a":{}},"grids":[],"grid_cells":[]}',
+			) as $json
+		) {
+			$this->assertNull( \SiteOrigin_Panels_Admin::decode_panels_data( $json ), $json );
+		}
+	}
+
 	public function test_decoder_fills_in_missing_widgets_when_rows_and_cells_are_present() {
 		$decoded = \SiteOrigin_Panels_Admin::decode_panels_data( '{"grids":[],"grid_cells":[]}' );
 
