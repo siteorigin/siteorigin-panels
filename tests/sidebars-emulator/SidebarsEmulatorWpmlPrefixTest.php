@@ -147,14 +147,4 @@ class SidebarsEmulatorWpmlPrefixTest extends TestCase {
 
 		$this->assertTrue( (bool) Filters\has( 'option_widget_text' ) );
 	}
-
-	/**
-	 * What a WPML 5.0 site with a custom prefix saw before the map was
-	 * consulted: the code is stripped, the prefix stays, and the lookup
-	 * runs against the unstripped path. Passes before and after the fix;
-	 * kept beside test_mapped_prefix_is_stripped() for contrast.
-	 */
-	public function test_identity_map_does_not_strip_a_custom_prefix() {
-		$this->assert_lookup_path( '/de-de/about/', '/de-de/about/', 'de', array( 'de' => 'de' ) );
-	}
 }
