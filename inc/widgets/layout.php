@@ -62,9 +62,22 @@ class SiteOrigin_Panels_Widgets_Layout extends WP_Widget {
 	public function update( $new, $old ) {
 		$new['builder_id'] = uniqid();
 
+		// A builder whose layout failed to load disables its field, so the
+		// submission carries no layout at all. Keep the stored one.
+		if ( ! array_key_exists( 'panels_data', $new ) ) {
+			$new['panels_data'] = isset( $old['panels_data'] ) ? $old['panels_data'] : array();
+
+			return $new;
+		}
+
 		if ( is_string( $new['panels_data'] ) && ! empty( $new['panels_data'] ) ) {
 			// This is still in a string format, so we'll convert it to an array for sanitization
-			$new['panels_data'] = json_decode( $new['panels_data'], true );
+			$new['panels_data'] = SiteOrigin_Panels_Admin::decode_panels_data( $new['panels_data'] );
+
+			// Not a layout: keep what was stored rather than replace it.
+			if ( $new['panels_data'] === null ) {
+				return $old;
+			}
 		}
 
 		if ( ! empty( $new['panels_data'] ) ) {

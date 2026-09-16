@@ -180,9 +180,10 @@ module.exports = Backbone.View.extend( {
 	 */
 	toggleVisibilityFade: function() {
 		var styles = this.model.attributes.style;
-		if ( typeof styles == 'undefined' ) {
+		if ( typeof styles == 'undefined' || styles === null || typeof styles !== 'object' ) {
 			return;
 		}
+
 		if (
 			this.checkIfStyleExists( styles, 'disable_row' ) ||
 			this.checkIfStyleExists( styles, 'disable_desktop' ) ||
