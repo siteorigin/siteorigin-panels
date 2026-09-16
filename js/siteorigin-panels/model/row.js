@@ -12,15 +12,19 @@ module.exports = Backbone.Model.extend( {
 	 * Initialize the row model
 	 */
 	initialize: function () {
+		if ( ! _.isObject( this.get( 'style' ) ) || _.isNull( this.get( 'style' ) ) ) {
+			this.set( 'style', {} );
+		}
+
 		if ( _.isEmpty(this.get('cells') ) ) {
 			this.set('cells', new panels.collection.cells());
-		}
-		else {
+		} else {
 			// Make sure that the cells have this row set as their parent
 			this.get('cells').each( function( cell ){
 				cell.row = this;
 			}.bind( this ) );
 		}
+
 		this.on( 'destroy', this.onDestroy, this );
 	},
 

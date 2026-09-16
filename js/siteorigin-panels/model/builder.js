@@ -91,7 +91,7 @@ module.exports = Backbone.Model.extend({
 			_.each( rows, function ( row, i ) {
 				var rowAttrs = {};
 
-				if ( ! _.isUndefined( data.grids[i].style ) ) {
+				if ( ! _.isUndefined( data.grids[i].style ) && ! _.isNull( data.grids[i].style ) && _.isObject( data.grids[i].style ) ) {
 					rowAttrs.style = data.grids[i].style;
 				}
 
@@ -130,7 +130,7 @@ module.exports = Backbone.Model.extend({
 					values: widgetData
 				} );
 
-				if ( ! _.isUndefined( panels_info.style ) ) {
+				if ( ! _.isUndefined( panels_info.style ) && ! _.isNull( panels_info.style ) && _.isObject( panels_info.style ) ) {
 					newWidget.set( 'style', panels_info.style );
 				}
 
