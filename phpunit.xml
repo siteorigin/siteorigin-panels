@@ -24,6 +24,10 @@
                  tests/AbilitiesTest.php. It runs separately via
                  phpunit-import-layout.xml. -->
             <exclude>./tests/import-layout</exclude>
+            <!-- The sidebars-emulator suite needs the REAL
+                 SiteOrigin_Panels_Sidebars_Emulator, which AbilitiesTest replaces with
+                 a spy. It runs separately via phpunit-sidebars-emulator.xml. -->
+            <exclude>./tests/sidebars-emulator</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
