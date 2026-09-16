@@ -33,6 +33,11 @@ module.exports = {
 	},
 
 	saveHeartbeat: function( thisDialog ) {
+		// A builder whose layout failed to load has nothing safe to save.
+		if ( thisDialog.builder && thisDialog.builder.model.loadFailed ) {
+			return;
+		}
+
 		var resetButton = function() {
 			jQuery( '.so-saveinline' ).removeAttr( 'disabled' );
 		};

@@ -7,6 +7,21 @@ module.exports = Backbone.Model.extend({
 
 	rows: {},
 
+	/**
+	 * Set when loadPanelsData() could not build the live rows from the layout it
+	 * was given. While set, the live rows are incomplete and must never be
+	 * serialized: refreshPanelsData() is a no-op and getPanelsData() returns the
+	 * layout that was being loaded, or null when that layout was unparseable.
+	 */
+	loadFailed: false,
+
+	/**
+	 * False when the data attribute holds the default empty layout rather than
+	 * a layout read from the stored field, so nothing may serialize it as if it
+	 * were the stored layout.
+	 */
+	trustedData: true,
+
 	defaults: {
 		'data': {
 			'widgets': [],
@@ -57,10 +72,12 @@ module.exports = Backbone.Model.extend({
 	 */
 	loadPanelsData: function ( data, position ) {
 		try {
+			// getPanelsData() is null after an unparseable load; concatPanelsData()
+			// tolerates undefined but not null.
 			if ( position === this.layoutPosition.BEFORE ) {
-				data = this.concatPanelsData( data, this.getPanelsData() );
+				data = this.concatPanelsData( data, this.getPanelsData() || {} );
 			} else if ( position === this.layoutPosition.AFTER ) {
-				data = this.concatPanelsData( this.getPanelsData(), data );
+				data = this.concatPanelsData( this.getPanelsData() || {}, data );
 			}
 
 			// Start by destroying any rows that currently exist. This will in turn destroy cells, widgets and all the associated views
@@ -73,8 +90,30 @@ module.exports = Backbone.Model.extend({
 			var rows = [];
 
 			if ( _.isUndefined( data.grid_cells ) ) {
-				this.trigger( 'load_panels_data' );
+				// `false` and an empty container are the builder's own "no layout
+				// yet" values. Anything else without cells, whether a partial
+				// layout, a scalar or an unrelated object, is not a layout: an
+				// empty builder built from it would let the next save replace
+				// what is stored.
+				var isEmptyContainer = ! _.isNull( data ) && typeof data === 'object' && _.isEmpty( data );
+
+				if ( data !== false && ! isEmptyContainer ) {
+					throw new Error( 'Layout data has no grid cells' );
+				}
+
+				this.finishLoad();
 				return;
+			}
+
+			// The same shape the server accepts: rows and cells are lists, and so
+			// are the widgets when present. Anything else is not a layout, and an
+			// unlocked empty builder would let an edit replace what is stored.
+			if (
+				! _.isArray( data.grid_cells ) ||
+				! _.isArray( data.grids ) ||
+				( ! _.isUndefined( data.widgets ) && ! _.isArray( data.widgets ) )
+			) {
+				throw new Error( 'Layout data is not a layout' );
 			}
 
 			var gi;
@@ -108,7 +147,7 @@ module.exports = Backbone.Model.extend({
 
 
 			if ( _.isUndefined( data.widgets ) ) {
-				return;
+				data.widgets = [];
 			}
 
 			// Add the widgets
@@ -152,12 +191,57 @@ module.exports = Backbone.Model.extend({
 				cell.get('widgets').add( newWidget, { noAnimate: true } );
 			} );
 
-			this.trigger( 'load_panels_data' );
+			// A layout without a widgets key loaded cleanly, so the stored copy
+			// carries the normalised empty list from here on.
+			var stored = this.get( 'data' );
+			if ( stored && typeof stored === 'object' && _.isUndefined( stored.widgets ) ) {
+				stored.widgets = [];
+			}
+
+			this.finishLoad();
 		}
 		catch ( err ) {
-			console.log( 'Error loading data: ' + err.message );
-
+			this.markLoadFailed( err );
 		}
+	},
+
+	/**
+	 * Record a completed load. Only the success exits of loadPanelsData() call
+	 * this, so a load that throws part-way keeps the failure flag it set.
+	 */
+	finishLoad: function () {
+		this.loadFailed = false;
+		this.trustedData = true;
+		this.trigger( 'load_panels_data' );
+	},
+
+	/**
+	 * Record that the live rows do not represent the layout that was loaded.
+	 * The data attribute still holds that layout: it was stored before the rows
+	 * were built, so serializing it is safe while serializing the rows is not.
+	 *
+	 * @param err Error the exception that stopped the load.
+	 */
+	markLoadFailed: function ( err ) {
+		this.loadFailed = true;
+
+		if ( window.console && console.error ) {
+			console.error( err );
+		}
+
+		this.trigger( 'load_panels_data_failed', err );
+	},
+
+	/**
+	 * Record that the layout source could not be parsed at all. The data
+	 * attribute keeps its default so the rest of the builder can still read it,
+	 * but nothing may serialize that default in place of the stored layout.
+	 *
+	 * @param err Error the parse exception.
+	 */
+	markSourceUnparseable: function ( err ) {
+		this.trustedData = false;
+		this.markLoadFailed( err );
 	},
 
 	/**
@@ -215,6 +299,18 @@ module.exports = Backbone.Model.extend({
 	 * Convert the content of the builder into a object that represents the page builder data
 	 */
 	getPanelsData: function () {
+
+		// The live rows are incomplete after a failed load. Hand out the layout
+		// that was being loaded instead, or nothing when there is no trusted copy.
+		if ( this.loadFailed ) {
+			var stored = this.get( 'data' );
+
+			if ( this.trustedData && stored && typeof stored === 'object' ) {
+				return JSON.parse( JSON.stringify( stored ) );
+			}
+
+			return null;
+		}
 
 		var builder = this;
 
@@ -280,6 +376,12 @@ module.exports = Backbone.Model.extend({
 	 * This will check all the current entries and refresh the panels data
 	 */
 	refreshPanelsData: function ( args ) {
+		// Refreshing from incomplete rows would replace the stored layout with a
+		// truncated one and mark the post dirty with it.
+		if ( this.loadFailed ) {
+			return;
+		}
+
 		args = _.extend( {
 			silent: false
 		}, args );
