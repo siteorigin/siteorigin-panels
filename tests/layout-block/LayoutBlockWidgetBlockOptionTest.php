@@ -100,6 +100,13 @@ class LayoutBlockWidgetBlockOptionTest extends TestCase {
 			}
 		);
 
+		// wp_kses_no_null(): the floor's non-markup branch; strip NUL bytes only.
+		Functions\when( 'wp_kses_no_null' )->alias(
+			function ( $value, $options = null ) {
+				return str_replace( "\0", '', (string) $value );
+			}
+		);
+
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
 
 		// render_layout_block() save-path plumbing.
