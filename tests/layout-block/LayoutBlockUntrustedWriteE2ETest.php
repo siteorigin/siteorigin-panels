@@ -137,6 +137,13 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 			}
 		);
 
+		// wp_kses_no_null(): the floor's non-markup branch; strip NUL bytes only.
+		Functions\when( 'wp_kses_no_null' )->alias(
+			function ( $value, $options = null ) {
+				return str_replace( "\0", '', (string) $value );
+			}
+		);
+
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
 
 		// REAL slashing semantics — the write path slashes for wp_update_post
@@ -635,5 +642,75 @@ class LayoutBlockUntrustedWriteE2ETest extends TestCase {
 			'An untrusted write with an empty memo floors the iframe (the normal AI path).'
 		);
 		$this->assertStringContainsString( 'keep', $content, 'Safe content survives the floor.' );
+	}
+
+	/**
+	 * #1377: a Layout Block save by a user WITHOUT `unfiltered_html` (the
+	 * capability-gated floor) keeps a Widgets Bundle `posts` query string
+	 * byte-identical, while a sibling string carrying <script> still goes to
+	 * wp_kses_post(). The floor previously ran wp_kses_post() over every
+	 * string leaf, turning `&tax_query=` into `&amp;tax_query=` and losing
+	 * the taxonomy filter on read-back.
+	 */
+	public function test_low_capability_save_keeps_posts_query_string_and_still_floors_markup() {
+		$stub = new UntrustedWriteNoopWidgetStub();
+		\SiteOrigin_Panels::$instance_resolver = function () use ( $stub ) {
+			return $stub;
+		};
+
+		// The author lacks unfiltered_html: the capability-gated floor runs.
+		Functions\when( 'current_user_can' )->justReturn( false );
+
+		// Recording wp_kses_post() spy: keeps this suite's strip semantics and
+		// adds the real-world `&` → `&amp;` rewrite that caused the defect, so
+		// a regression is visible in the returned value, not only in the log.
+		$kses_post_calls = array();
+		Functions\when( 'wp_kses_post' )->alias(
+			function ( $value ) use ( &$kses_post_calls ) {
+				$kses_post_calls[] = $value;
+				$value = preg_replace( '#<script\b[^>]*>.*?</script>#is', '', (string) $value );
+				return str_replace( '&', '&amp;', $value );
+			}
+		);
+
+		$posts_query = 'post_type=post&tax_query=category:jobs&orderby=date';
+
+		$compat = $this->layout_block();
+		$block = array(
+			'blockName'    => 'siteorigin-panels/layout-block',
+			'attrs'        => array(
+				'panelsData' => array(
+					'widgets' => array(
+						array(
+							'posts'       => $posts_query,
+							'title'       => 'Jobs & Careers',
+							'text'        => '<script>alert(1)</script><b>x</b>',
+							'panels_info' => array( 'class' => 'UntrustedWriteNoopWidget' ),
+						),
+					),
+				),
+				'builder_id' => 'gb1377',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		$saved = $compat->sanitize_block( $block );
+		$widget = $saved['attrs']['panelsData']['widgets'][0];
+
+		$this->assertSame( $posts_query, $widget['posts'], 'The posts query string must survive the floor byte-identical.' );
+		$this->assertSame( 'Jobs & Careers', $widget['title'], 'A bare & in plain text must survive the floor.' );
+		$this->assertSame( '<b>x</b>', $widget['text'], 'Markup-shaped sibling strings are still floored.' );
+
+		parse_str( $widget['posts'], $args );
+		$this->assertSame( 'category:jobs', $args['tax_query'], 'The taxonomy filter must still parse out of the stored query string.' );
+		$this->assertArrayNotHasKey( 'amp;tax_query', $args );
+
+		$this->assertSame(
+			array( '<script>alert(1)</script><b>x</b>' ),
+			$kses_post_calls,
+			'Only the markup-shaped string reaches wp_kses_post(); the query string and plain text never do.'
+		);
 	}
 }

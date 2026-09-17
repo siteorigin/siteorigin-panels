@@ -51,6 +51,13 @@ class LayoutBlockRenderTrustTest extends TestCase {
 			}
 		);
 
+		// wp_kses_no_null(): the floor's non-markup branch; strip NUL bytes only.
+		Functions\when( 'wp_kses_no_null' )->alias(
+			function ( $value, $options = null ) {
+				return str_replace( "\0", '', (string) $value );
+			}
+		);
+
 		// wp_json_encode(): PHP's native json_encode is a faithful stand-in.
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
 

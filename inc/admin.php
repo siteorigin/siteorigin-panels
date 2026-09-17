@@ -1445,13 +1445,26 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	/**
-	 * Recursively run wp_kses_post() over every string leaf of a value.
+	 * Recursively sanitize every string leaf of a value as the save-time kses floor.
 	 *
 	 * Used as a defense-in-depth fallback in process_raw_widgets() for widget
 	 * instances whose class cannot be resolved to a widget with an update()
 	 * method, ensuring unprivileged users can never persist unsanitized markup.
 	 * Also used by SiteOrigin_Panels_Compat_Layout_Block as a universal
-	 * save-time sanitization floor for panels_data.
+	 * save-time sanitization floor for panels_data, and for AI ability writes.
+	 *
+	 * A string goes through wp_kses_post() only when it is markup-shaped: it
+	 * contains `<` or `>`, or an entity-shaped reference (`&name;`, `&#123;`,
+	 * `&#x1F;`). Every other string gets wp_kses_no_null() only, which removes
+	 * NUL and control bytes, the one non-markup protection kses provides, and is
+	 * otherwise left byte-identical.
+	 *
+	 * Why: wp_kses_post() rewrites a bare `&` to `&amp;`. Widget fields that
+	 * store a query string (the Widgets Bundle `posts` field:
+	 * `post_type=post&tax_query=category:jobs`) are read back with
+	 * wp_parse_args(), which then sees the key `amp;tax_query` and drops the
+	 * filter. A bare `&` carries no markup, so it must never trigger kses.
+	 * See https://github.com/siteorigin/siteorigin-panels/issues/1377.
 	 *
 	 * @param mixed $value Scalar or (nested) array to sanitize.
 	 * @return mixed The sanitized value, preserving structure.
@@ -1466,7 +1479,10 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( is_string( $value ) ) {
-			return wp_kses_post( $value );
+			$needs_kses = false !== strpbrk( $value, '<>' )
+				|| 1 === preg_match( '/&(?:#(?:[0-9]+|[xX][0-9A-Fa-f]+)|[A-Za-z][A-Za-z0-9]*);/', $value );
+
+			return $needs_kses ? wp_kses_post( $value ) : wp_kses_no_null( $value, array( 'slash_zero' => 'keep' ) );
 		}
 
 		return $value;

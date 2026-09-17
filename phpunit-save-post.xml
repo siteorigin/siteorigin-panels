@@ -4,6 +4,9 @@
     <testsuites>
         <testsuite name="SiteOrigin Panels Save-Post Sanitization">
             <directory>./tests/save-post</directory>
+            <!-- The kses floor predicate test needs the REAL SiteOrigin_Panels_Admin
+                 this bootstrap loads; the default suite's Admin shim would shadow it. -->
+            <file>./tests/KsesDeepTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

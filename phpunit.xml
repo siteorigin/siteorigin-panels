@@ -28,6 +28,10 @@
                  SiteOrigin_Panels_Sidebars_Emulator, which AbilitiesTest replaces with
                  a spy. It runs separately via phpunit-sidebars-emulator.xml. -->
             <exclude>./tests/sidebars-emulator</exclude>
+            <!-- KsesDeepTest pins the REAL SiteOrigin_Panels_Admin::kses_deep()
+                 predicate; AbilitiesTest's Admin shim claims the class name in this
+                 suite, so it runs under phpunit-save-post.xml instead. -->
+            <exclude>./tests/KsesDeepTest.php</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
