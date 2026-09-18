@@ -1,7 +1,7 @@
 === Page Builder by SiteOrigin ===
 Tags: page builder, website builder, responsive design, drag and drop, visual editor
 Requires at least: 5.9
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.0.0
 Stable tag: trunk
 Build time: unbuilt
@@ -120,6 +120,18 @@ Page Builder is compatible with the vast majority of third-party plugins and wid
 SiteOrigin offers a single premium plugin that enhances and extends Page Builder, the Widgets Bundle, SiteOrigin CSS and all of our free themes. Find out more about [SiteOrigin Premium](https://siteorigin.com/downloads/premium/) and the powerful addons it offers.
 
 == Changelog ==
+
+= 2.36.1 – 18 September 2026 =
+* Builder: Kept the stored layout when it fails to load in the editor. The builder locks with a notice, and updating the page no longer replaces the layout with an incomplete one.
+* Builder: Refused to save malformed layout data, so a bad submission never clears the stored layout.
+* Styles: Removed empty row, cell, and widget styles on save, so layouts affected by an earlier version of the SiteOrigin Premium Toggle Visibility addon load again.
+* Block Editor: Fixed row and widget sorting, the media picker, dialog control styling, and list markers inside the block editor canvas.
+* Layout Block: Kept ampersands in widget query strings when saved by users without the unfiltered HTML capability.
+* Copy Content: Shortcode handling for the post content mirror now lives in the Widgets Bundle Editor widget. The global shortcode change tested in 2.36.1-beta.2 is not in this release.
+* Sidebars Emulator: Stripped the WPML URL prefix rather than the language code, so emulated sidebars register on sites with custom language directories.
+* Polylang: Hardened how translation term data is read.
+* Developer: Registered the `siteorigin-panels/layout-get` ability as read-only, so it is called with GET and advertised as non-mutating.
+* Updated the WordPress Tested up to tag to 7.1.
 
 = 2.36.0 – 04 August 2026 =
 * Import: Limited how many times an uploaded layout file is decoded, and rejected uploads that don't contain a valid layout.
