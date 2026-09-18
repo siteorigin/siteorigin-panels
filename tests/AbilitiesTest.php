@@ -1466,7 +1466,15 @@ class AbilitiesTest extends SiteOriginTests {
 		$get = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
 
 		$this->assertTrue( $get['meta']['show_in_rest'] );
-		$this->assertTrue( $get['meta']['readonly'], 'layout-get must be readonly.' );
+		$this->assertTrue(
+			$get['meta']['annotations']['readonly'],
+			'layout-get must be readonly under meta.annotations, the key core reads.'
+		);
+		$this->assertArrayNotHasKey(
+			'readonly',
+			$get['meta'],
+			'A top-level meta.readonly is never read by core and must not be registered.'
+		);
 		$this->assertSame( 'siteorigin-panels', $get['category'] );
 	}
 
@@ -1480,6 +1488,10 @@ class AbilitiesTest extends SiteOriginTests {
 			'readonly',
 			$update['meta'],
 			'layout-update must NOT be marked readonly.'
+		);
+		$this->assertEmpty(
+			$update['meta']['annotations']['readonly'] ?? null,
+			'layout-update must NOT carry a readonly annotation; it is a POST write.'
 		);
 		$this->assertSame( 'siteorigin-panels', $update['category'] );
 
