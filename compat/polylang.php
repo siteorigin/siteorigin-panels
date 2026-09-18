@@ -41,10 +41,16 @@ class SiteOrigin_Panels_Compat_Polylang {
 			return array();
 		}
 
-		$language_data = maybe_unserialize( $terms[0]->description );
+		$description = $terms[0]->description;
+		// The description is editable term data. Never let unserialize()
+		// instantiate a class from it. A top-level object payload becomes
+		// __PHP_Incomplete_Class, which the array guard below rejects; an
+		// object nested inside an array is carried as an inert incomplete
+		// class value that nothing here calls.
+		$language_data = is_serialized( $description ) ? @unserialize( trim( $description ), array( 'allowed_classes' => false ) ) : $description;
 
 		// If there's no sync data, there's nothing to sync.
-		if ( empty( $language_data['sync'] ) || ! is_array( $language_data['sync'] ) ) {
+		if ( ! is_array( $language_data ) || empty( $language_data['sync'] ) || ! is_array( $language_data['sync'] ) ) {
 			return $this->pll_language_cache[ $post_id ] = array();
 		}
 
