@@ -136,7 +136,7 @@ class SiteOrigin_Panels_Abilities {
 				'permission_callback' => array( $this, 'layout_get_permission' ),
 				'execute_callback'    => array( $this, 'layout_get' ),
 				'meta'                => array(
-					'readonly'     => true,
+					'annotations'  => array( 'readonly' => true ),
 					'show_in_rest' => true,
 				),
 			)
