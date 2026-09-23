@@ -68,11 +68,14 @@ module.exports = Backbone.View.extend( {
 				cellView.row.builder.trigger( 'widget_sortable_move' );
 			},
 			remove: function ( e, ui ) {
+				// Between this handler and the receiving cell's, the widget belongs to
+				// no cell. Refreshing here would serialize a layout without it, so the
+				// settled state is left to receive, or to stop when the widget has
+				// left this builder.
 				cellView.model.get( 'widgets' ).remove(
 					$( ui.item ).data( 'view' ).model,
 					{ silent: true }
 				);
-				builderModel.refreshPanelsData();
 			},
 			receive: function ( e, ui ) {
 				var widgetView = $( ui.item ).data( 'view' );
@@ -100,6 +103,11 @@ module.exports = Backbone.View.extend( {
 					widget.model.moveToCell( targetCell.model, {}, $$.index() );
 					widget.cell = targetCell;
 
+					builderModel.refreshPanelsData();
+				} else {
+					// The widget has left this builder, so this is where its departure
+					// is serialized. Within one builder the receiving cell has already
+					// stored the settled layout and this call finds nothing to do.
 					builderModel.refreshPanelsData();
 				}
 			},
