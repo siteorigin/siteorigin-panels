@@ -52,14 +52,14 @@ function handlerText( name, next ) {
 	return withoutComments( source.slice( from, to ) );
 }
 
-test( 'the remove handler does not serialize the layout', function () {
+test( 'source guard: the remove handler does not serialize the layout', function () {
 	assert.ok(
 		! handlerText( 'remove', 'receive' ).includes( 'refreshPanelsData' ),
 		'remove must not serialize: the dragged widget is in no cell at that point'
 	);
 } );
 
-test( 'the stop handler serializes when the widget has left this builder', function () {
+test( 'source guard: the stop handler serializes when the widget has left this builder', function () {
 	const body = handlerText( 'stop', 'helper' );
 	const marker = body.indexOf( '} else {' );
 
