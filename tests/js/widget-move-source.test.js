@@ -2,16 +2,12 @@
 
 /*
  * A widget dragged between cells must not be serialized while it belongs to no
- * cell. The handlers that decide this are jQuery UI sortable callbacks in a view
- * module, and this suite has no jQuery, jQuery UI or DOM, so they cannot be
- * loaded or driven here.
+ * cell, so the widget sortable's remove handler does not refresh and stop does.
  *
- * These assertions therefore read the source. They are a guard against the
- * removed call being typed back in, not a proof: they say nothing about callback
- * ordering, what any emission carries, the hidden field, or a move between two
- * builders. Driving a real drag in the editor is what covers those. Making them
- * automatic needs a jsdom, jQuery and jQuery UI harness, not a wider search of
- * this file.
+ * These assertions read the source, because the handlers are jQuery UI callbacks
+ * in a view module and this suite has no jQuery, jQuery UI or DOM to run them
+ * in. They catch the call being put back, and prove nothing about ordering,
+ * emissions or the stored layout; a real drag covers those.
  */
 
 const test = require( 'node:test' );
@@ -33,7 +29,7 @@ const source = fs.readFileSync(
  * @return string The source without block or line comments.
  */
 function withoutComments( text ) {
-	return text.replace( /\/\*[\s\S]*?\*\//g, '' ).replace( /^[\t ]*\/\/.*$/gm, '' );
+	return text.replace( /\/\*[\s\S]*?\*\//g, '' ).replace( /\/\/.*$/gm, '' );
 }
 
 /**
