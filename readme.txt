@@ -122,6 +122,7 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 == Changelog ==
 
 = 2.36.1 – 18 September 2026 =
+* Builder: Fixed a widget being dropped from the layout when it was dragged into a different row or column.
 * Builder: Kept the stored layout when it fails to load in the editor. The builder locks with a notice, and updating the page no longer replaces the layout with an incomplete one.
 * Builder: Refused to save malformed layout data, so a bad submission never clears the stored layout.
 * Styles: Removed empty row, cell, and widget styles on save, so layouts affected by an earlier version of the SiteOrigin Premium Toggle Visibility addon load again.
