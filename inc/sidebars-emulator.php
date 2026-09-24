@@ -78,8 +78,23 @@ class SiteOrigin_Panels_Sidebars_Emulator {
 			$wpml_language = apply_filters( 'wpml_current_language', null );
 
 			if ( ! empty( $wpml_language ) ) {
-				// Remove the current language code from path to avoid 404.
-				$current_url['path'] = preg_replace( "/^\/$wpml_language\//", '/', $current_url['path'], 1 );
+				// WPML 5.0 can serve a language at a URL prefix that differs from its
+				// code (`de` at `/de-de/`). Read the prefix from the map WPML builds its
+				// own links from; WPML 4.x returns the code unchanged.
+				$wpml_language_map = apply_filters( 'wpml_language_codes_map', array( $wpml_language => $wpml_language ) );
+				$wpml_prefix = $wpml_language;
+
+				if (
+					is_array( $wpml_language_map ) &&
+					isset( $wpml_language_map[ $wpml_language ] ) &&
+					is_string( $wpml_language_map[ $wpml_language ] ) &&
+					$wpml_language_map[ $wpml_language ] !== ''
+				) {
+					$wpml_prefix = $wpml_language_map[ $wpml_language ];
+				}
+
+				// Remove the language prefix from the path to avoid a 404.
+				$current_url['path'] = preg_replace( '/^\/' . preg_quote( $wpml_prefix, '/' ) . '\//', '/', $current_url['path'], 1 );
 			}
 
 			$page = get_page_by_path( $current_url['path'], OBJECT, siteorigin_panels_setting( 'post-types' ) );

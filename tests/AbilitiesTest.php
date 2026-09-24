@@ -105,6 +105,7 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 class Abilities_StylesSpy {
 	public static $instance;
 	public $sanitize_all_called = false;
+	public $remove_invalid_styles_input = null;
 
 	public static function single() {
 		return self::$instance;
@@ -112,6 +113,12 @@ class Abilities_StylesSpy {
 
 	public function sanitize_all( $panels_data ) {
 		$this->sanitize_all_called = true;
+
+		return $panels_data;
+	}
+
+	public function remove_invalid_styles( $panels_data ) {
+		$this->remove_invalid_styles_input = $panels_data;
 
 		return $panels_data;
 	}
@@ -1224,6 +1231,36 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'ran', $persisted['pre_save_marker'] ?? null, 'siteorigin_panels_data_pre_save output must be persisted.' );
 	}
 
+	public function test_meta_write_removes_invalid_styles_after_the_pre_save_filter() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'update_post_meta' )->justReturn( true );
+
+		// The style cleanup must see the filter's output, not its input: a
+		// callback on this filter can itself write an invalid style.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data_pre_save' ) {
+					$value['pre_save_marker'] = 'ran';
+				}
+
+				return $value;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 31,
+				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+			)
+		);
+
+		$seen = Abilities_StylesSpy::$instance->remove_invalid_styles_input;
+		$this->assertIsArray( $seen, 'remove_invalid_styles() must run on the ability write path.' );
+		$this->assertSame( 'ran', $seen['pre_save_marker'] ?? null, 'remove_invalid_styles() must receive the pre-save filter output.' );
+	}
+
 	public function test_meta_write_of_empty_layout_deletes_meta() {
 		Functions\when( 'get_post' )->justReturn( (object) array( 'post_content' => 'classic content' ) );
 		Functions\when( 'parse_blocks' )->justReturn( array() );
@@ -1429,7 +1466,15 @@ class AbilitiesTest extends SiteOriginTests {
 		$get = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
 
 		$this->assertTrue( $get['meta']['show_in_rest'] );
-		$this->assertTrue( $get['meta']['readonly'], 'layout-get must be readonly.' );
+		$this->assertTrue(
+			$get['meta']['annotations']['readonly'],
+			'layout-get must be readonly under meta.annotations, the key core reads.'
+		);
+		$this->assertArrayNotHasKey(
+			'readonly',
+			$get['meta'],
+			'A top-level meta.readonly is never read by core and must not be registered.'
+		);
 		$this->assertSame( 'siteorigin-panels', $get['category'] );
 	}
 
@@ -1443,6 +1488,10 @@ class AbilitiesTest extends SiteOriginTests {
 			'readonly',
 			$update['meta'],
 			'layout-update must NOT be marked readonly.'
+		);
+		$this->assertEmpty(
+			$update['meta']['annotations']['readonly'] ?? null,
+			'layout-update must NOT carry a readonly annotation; it is a POST write.'
 		);
 		$this->assertSame( 'siteorigin-panels', $update['category'] );
 

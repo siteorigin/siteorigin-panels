@@ -485,6 +485,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * WP_Widget::update_callback() already runs stripslashes_deep() on the
 	 * instance before the option write, so this handler receives unslashed data.
 	 *
+	 * For a user without `unfiltered_html`, WP_Widget_Block::update() has
+	 * already wp_kses_post()'d the block content; the `&` → `&amp;` artifact
+	 * that leaves in tag-free panelsData strings is undone first (#1377, see
+	 * repair_core_kses_ampersands()).
+	 *
 	 * @param array $value Proposed new `widget_block` option value (numeric
 	 *                     widget-instance keys plus '_multiwidget').
 	 * @return array The (possibly modified) value to actually persist.
@@ -495,6 +500,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// "invent structure that isn't there."
 			return $value;
 		}
+
+		$repair_ampersands = null;
 
 		foreach ( $value as $number => &$instance ) {
 			if ( $number === '_multiwidget' ) {
@@ -516,7 +523,18 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				continue;
 			}
 
+			// Core kses provenance: WP_Widget_Block::update() ran wp_kses_post()
+			// over this block content for a user without unfiltered_html,
+			// turning every bare & into &amp; (see repair_core_kses_ampersands()).
+			// Same condition, so the repair applies exactly when core's kses did.
+			if ( null === $repair_ampersands ) {
+				$repair_ampersands = ! current_user_can( 'unfiltered_html' );
+			}
+
 			foreach ( $blocks as &$block ) {
+				if ( $repair_ampersands ) {
+					$block = $this->repair_core_kses_ampersands_in_blocks( $block );
+				}
 				$block = $this->sanitize_blocks( $block );
 			}
 			unset( $block );
@@ -537,6 +555,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * already sanitized earlier this request (e.g. by the rest_pre_insert_*
 	 * hook), so the widget update() runs once per block per request. An
 	 * origin-untrusted write always sanitizes regardless of the memo.
+	 *
+	 * For a user without `unfiltered_html`, core's `content_save_pre` kses has
+	 * already run on this content; the `&` → `&amp;` artifact it leaves in
+	 * tag-free panelsData strings is undone before the memo check (#1377, see
+	 * repair_core_kses_ampersands()).
 	 *
 	 * @param array $data Slashed, processed post data about to be inserted/updated.
 	 * @return array The (possibly modified) $data to actually persist.
@@ -587,7 +610,21 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $data;
 		}
 
+		// Core kses provenance: for a user without unfiltered_html, core's
+		// content_save_pre filter (wp_filter_post_kses, via kses_init_filters)
+		// has ALREADY run on this post_content before wp_insert_post_data
+		// fires, and its wp_pre_kses_block_attributes() pass turned every bare
+		// & in every panelsData string into &amp;. Undo that one artifact
+		// under the same condition core applied it (see
+		// repair_core_kses_ampersands()). This must run BEFORE
+		// sanitize_blocks() so the same-request memo in sanitize_block() sees
+		// the REST-stage output again and the widget update() is not re-run.
+		$repair_ampersands = ! current_user_can( 'unfiltered_html' );
+
 		foreach ( $blocks as &$block ) {
+			if ( $repair_ampersands ) {
+				$block = $this->repair_core_kses_ampersands_in_blocks( $block );
+			}
 			$block = $this->sanitize_blocks( $block );
 		}
 		unset( $block );
@@ -595,6 +632,113 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$data['post_content'] = wp_slash( serialize_blocks( $blocks ) );
 
 		return $data;
+	}
+
+	/**
+	 * Walk a parsed block tree and apply repair_core_kses_ampersands() to the
+	 * panelsData of every Layout Block found, at any depth (a Layout Block
+	 * nested inside a Group or Column block is kses'd by core just the same).
+	 *
+	 * @param array $block A parsed block (parse_blocks() shape).
+	 * @return array The block tree with every Layout Block's panelsData repaired.
+	 */
+	private function repair_core_kses_ampersands_in_blocks( $block ) {
+		if (
+			! empty( $block['blockName'] ) &&
+			$block['blockName'] === 'siteorigin-panels/layout-block' &&
+			! empty( $block['attrs']['panelsData'] ) &&
+			is_array( $block['attrs']['panelsData'] )
+		) {
+			$block['attrs']['panelsData'] = $this->repair_core_kses_ampersands( $block['attrs']['panelsData'] );
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $i => $inner ) {
+				$block['innerBlocks'][ $i ] = $this->repair_core_kses_ampersands_in_blocks( $inner );
+			}
+		}
+
+		return $block;
+	}
+
+	/**
+	 * Undo the one reversible artifact WordPress core's kses leaves in a Layout
+	 * Block saved by a user without `unfiltered_html`: `&` rewritten to `&amp;`
+	 * in strings that carry no markup (#1377).
+	 *
+	 * The mechanism: for those users core registers wp_filter_post_kses() on
+	 * `content_save_pre` (kses_init_filters()), and its `pre_kses` hook
+	 * wp_pre_kses_block_attributes() → filter_block_kses_value() runs wp_kses()
+	 * over EVERY string attribute of every block, panelsData leaves included.
+	 * wp_kses() normalises a bare `&` to `&amp;`. Block widget areas hit the
+	 * same thing through WP_Widget_Block::update(), which wp_kses_post()s the
+	 * block content for those users. Neither path offers a per-block bypass.
+	 * A Widgets Bundle `posts` field stores a query string
+	 * (`post_type=post&tax_query=category:jobs`) and reads it back with
+	 * wp_parse_args(), which then sees the key `amp;tax_query` and drops the
+	 * filter. The kses floor in SiteOrigin_Panels_Admin::kses_deep() no longer
+	 * does this (Steps 1–3 of #1377); core still does.
+	 *
+	 * The repair, applied to every string leaf under panelsData['widgets']:
+	 * if the string contains NO `<` and NO `>`, replace `&amp;` with `&`.
+	 * A tag-free string cannot become markup by decoding `&amp;` (the result
+	 * still has no `<` or `>`, so `&amp;lt;script&amp;gt;` decodes to
+	 * `&lt;script&gt;`, which is still text). Strings with a `<` or `>` are
+	 * left exactly as core produced them.
+	 *
+	 * Provenance rule: call this ONLY where core kses has provably run —
+	 * validate_post_data() (after `content_save_pre`) and
+	 * validate_widget_block_option() (after WP_Widget_Block::update()) — and
+	 * only when `! current_user_can( 'unfiltered_html' )`, the exact condition
+	 * under which core applied it. NOT in server_side_validation() (core has not
+	 * run yet) and NOT keyed on $force_kses_floor (an AI write under an admin
+	 * credential forces the floor without core kses). A capable user's
+	 * intentional `&amp;` is never touched.
+	 *
+	 * This restores only that one artifact, not the original string: core's
+	 * NUL removal, numeric-entity canonicalisation and
+	 * convert_invalid_entities() stay irreversible. Accepted lossy
+	 * consequence: a user without `unfiltered_html` cannot store a literal
+	 * `&amp;` in a tag-free field; it becomes `&`, which is what it renders as.
+	 *
+	 * @param array $panels_data A Layout Block's panelsData.
+	 * @return array The panelsData with `&amp;` → `&` in tag-free widget strings.
+	 */
+	private function repair_core_kses_ampersands( $panels_data ) {
+		if ( ! is_array( $panels_data ) || empty( $panels_data['widgets'] ) || ! is_array( $panels_data['widgets'] ) ) {
+			return $panels_data;
+		}
+
+		$panels_data['widgets'] = $this->repair_core_kses_ampersands_deep( $panels_data['widgets'] );
+
+		return $panels_data;
+	}
+
+	/**
+	 * Recursive leaf worker for repair_core_kses_ampersands(). Non-string leaves
+	 * are returned as-is.
+	 *
+	 * @param mixed $value A widget instance subtree or leaf.
+	 * @return mixed
+	 */
+	private function repair_core_kses_ampersands_deep( $value ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				$value[ $key ] = $this->repair_core_kses_ampersands_deep( $item );
+			}
+
+			return $value;
+		}
+
+		if (
+			is_string( $value ) &&
+			strpos( $value, '<' ) === false &&
+			strpos( $value, '>' ) === false
+		) {
+			return str_replace( '&amp;', '&', $value );
+		}
+
+		return $value;
 	}
 
 	public function sanitize_blocks( $block ) {

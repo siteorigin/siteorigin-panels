@@ -11,6 +11,11 @@ class SiteOrigin_Panels_Admin {
 	 */
 	private $in_save_post;
 
+	/**
+	 * @var bool Whether save_home_page() wrote the home page layout during this request.
+	 */
+	private $home_page_saved = false;
+
 	public function __construct() {
 		add_action( 'plugin_action_links_siteorigin-panels/siteorigin-panels.php', array(
 			$this,
@@ -215,6 +220,163 @@ class SiteOrigin_Panels_Admin {
 	/**
 	 * Save the panels data
 	 *
+	 * Decode a submitted layout, refusing anything that is not a layout.
+	 *
+	 * Exactly two shapes may reach a write: `false`, which the builder submits
+	 * to clear the layout, and an object whose `grids` and `grid_cells` are
+	 * arrays, with `widgets` an array when present and filled in as empty when
+	 * absent. Malformed JSON, scalars, empty containers, lists, objects without
+	 * both row lists and objects with a non-array list return null so the
+	 * caller leaves the stored layout alone; indexing any of those as if it
+	 * were a layout would produce an empty one and delete what is stored.
+	 *
+	 * @param string $json The submitted JSON, already unslashed by the caller.
+	 *
+	 * @return array|null The layout, or null when the input must not be written.
+	 */
+	public static function decode_panels_data( $json ) {
+		if ( ! is_string( $json ) ) {
+			return null;
+		}
+
+		$decoded = json_decode( $json, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return null;
+		}
+
+		// Revert to Editor submits `false` to clear the layout.
+		if ( $decoded === false ) {
+			return array(
+				'widgets'    => array(),
+				'grids'      => array(),
+				'grid_cells' => array(),
+			);
+		}
+
+		// Nothing the builder submits decodes to an empty array, and `{}` and
+		// `[]` are indistinguishable once decoded, so neither is a clear.
+		if ( ! is_array( $decoded ) || empty( $decoded ) ) {
+			return null;
+		}
+
+		// A JSON list decodes to an array too; a layout is an object.
+		if ( array_keys( $decoded ) === range( 0, count( $decoded ) - 1 ) ) {
+			return null;
+		}
+
+		// The builder always serializes rows and cells; a layout without them is
+		// a partial object, and saving it would read as an empty layout.
+		foreach ( array( 'grids', 'grid_cells' ) as $key ) {
+			if ( ! array_key_exists( $key, $decoded ) || ! self::is_list( $decoded[ $key ] ) ) {
+				return null;
+			}
+		}
+
+		if ( ! array_key_exists( 'widgets', $decoded ) ) {
+			$decoded['widgets'] = array();
+		} elseif ( ! self::is_list( $decoded['widgets'] ) ) {
+			return null;
+		}
+
+		return self::layout_references_resolve( $decoded ) ? $decoded : null;
+	}
+
+	/**
+	 * Whether every cell points at an existing row and every widget at an
+	 * existing row and cell.
+	 *
+	 * The builder addresses rows, cells and widgets by position, so a layout
+	 * whose references do not resolve cannot be loaded; storing it would only
+	 * lock the builder on the next visit.
+	 *
+	 * @param array $layout A decoded layout whose three lists are JSON lists.
+	 *
+	 * @return bool
+	 */
+	private static function layout_references_resolve( $layout ) {
+		foreach ( $layout['grids'] as $row ) {
+			if ( ! is_array( $row ) ) {
+				return false;
+			}
+		}
+
+		$row_count = count( $layout['grids'] );
+		$cells_per_row = array_fill( 0, max( $row_count, 1 ), 0 );
+
+		foreach ( $layout['grid_cells'] as $cell ) {
+			if ( ! is_array( $cell ) || ! isset( $cell['grid'] ) || ! is_numeric( $cell['grid'] ) ) {
+				return false;
+			}
+
+			$row = (int) $cell['grid'];
+
+			if ( $row < 0 || $row >= $row_count ) {
+				return false;
+			}
+
+			$cells_per_row[ $row ] ++;
+		}
+
+		foreach ( $layout['widgets'] as $widget ) {
+			// Older layouts carry the placement under `info`; the loader reads both.
+			$info = null;
+			if ( is_array( $widget ) ) {
+				if ( ! empty( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+					$info = $widget['panels_info'];
+				} elseif ( ! empty( $widget['info'] ) && is_array( $widget['info'] ) ) {
+					$info = $widget['info'];
+				}
+			}
+
+			if ( $info === null ) {
+				return false;
+			}
+
+			if ( ! isset( $info['grid'], $info['cell'] ) || ! is_numeric( $info['grid'] ) || ! is_numeric( $info['cell'] ) ) {
+				return false;
+			}
+
+			$row = (int) $info['grid'];
+			$cell = (int) $info['cell'];
+
+			if ( $row < 0 || $row >= $row_count || $cell < 0 || $cell >= $cells_per_row[ $row ] ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether a decoded value is a JSON list: an array whose keys run 0..n-1.
+	 *
+	 * The builder indexes rows, cells and widgets by position, so a JSON object
+	 * with numeric keys, which json_decode() also turns into a PHP array, is not
+	 * a usable list even when every value in it is well formed.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return bool
+	 */
+	private static function is_list( $value ) {
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+
+		return empty( $value ) || array_keys( $value ) === range( 0, count( $value ) - 1 );
+	}
+
+	/**
+	 * Whether save_home_page() wrote the home page layout during this request.
+	 *
+	 * @return bool
+	 */
+	public function home_page_saved() {
+		return $this->home_page_saved;
+	}
+
+	/**
 	 * @action save_post
 	 */
 	public function save_post( $post_id ) {
@@ -229,11 +391,18 @@ class SiteOrigin_Panels_Admin {
 		) {
 			return;
 		}
+
+		// A submission that is not a layout leaves the stored layout untouched.
+		$panels_data = self::decode_panels_data( wp_unslash( $_POST['panels_data'] ) );
+
+		if ( $panels_data === null ) {
+			return;
+		}
+
 		$this->in_save_post = true;
 		// Get post from db as it might have been changed and saved by other plugins.
 		$post = get_post( $post_id );
 		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
-		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 
 		$panels_data['widgets'] = $this->process_raw_widgets(
 			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
@@ -289,6 +458,8 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $post, $post_id );
+		// A pre-save callback can write a style that is not an array; the builder cannot load one.
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		/**
 		 * Fires with the fully-sanitized canonical panels_data immediately before it
@@ -591,6 +762,8 @@ class SiteOrigin_Panels_Admin {
 						'title'       => esc_html__( 'Missing Widget', 'siteorigin-panels' ),
 						'description' => esc_html__( "Page Builder doesn't know about this widget.", 'siteorigin-panels' ),
 					),
+					'load_failed'          => esc_html__( 'Page Builder could not load this layout. Updating the page will not save the incomplete builder view; reload to try again.', 'siteorigin-panels' ),
+					'reload'               => esc_html__( 'Reload page', 'siteorigin-panels' ),
 					'time'                 => array(
 						// TRANSLATORS: Number of seconds since.
 						'seconds' => esc_html__( '%d seconds', 'siteorigin-panels' ),
@@ -948,6 +1121,8 @@ class SiteOrigin_Panels_Admin {
 	 * Save home page.
 	 */
 	public function save_home_page() {
+		$this->home_page_saved = false;
+
 		if ( ! isset( $_POST['_sopanels_home_nonce'] ) || ! wp_verify_nonce( $_POST['_sopanels_home_nonce'], 'save' ) ) {
 			return;
 		}
@@ -957,6 +1132,14 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( ! isset( $_POST['panels_data'] ) ) {
+			return;
+		}
+
+		// Decide before any write: a submission that is not a layout is a no-op
+		// for the page as well as for the layout.
+		$panels_data = self::decode_panels_data( wp_unslash( $_POST['panels_data'] ) );
+
+		if ( $panels_data === null ) {
 			return;
 		}
 
@@ -996,9 +1179,8 @@ class SiteOrigin_Panels_Admin {
 
 		// Save the updated page data.
 		$old_panels_data = get_post_meta( $page_id, 'panels_data', true );
-		$panels_data = json_decode( wp_unslash( $_POST['panels_data'] ), true );
 		$panels_data['widgets'] = $this->process_raw_widgets(
-			$panels_data['widgets'],
+			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
 			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
 			false
 		);
@@ -1010,8 +1192,11 @@ class SiteOrigin_Panels_Admin {
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 		$panels_data = apply_filters( 'siteorigin_panels_data_pre_save', $panels_data, $page, $page_id );
+		// A pre-save callback can write a style that is not an array; the builder cannot load one.
+		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
 		update_post_meta( $page_id, 'panels_data', map_deep( $panels_data, array( 'SiteOrigin_Panels_Admin', 'double_slash_string' ) ) );
+		$this->home_page_saved = true;
 
 		$template = get_post_meta( $page_id, '_wp_page_template', true );
 		$home_template = siteorigin_panels_setting( 'home-template' );
@@ -1260,13 +1445,26 @@ class SiteOrigin_Panels_Admin {
 	}
 
 	/**
-	 * Recursively run wp_kses_post() over every string leaf of a value.
+	 * Recursively sanitize every string leaf of a value as the save-time kses floor.
 	 *
 	 * Used as a defense-in-depth fallback in process_raw_widgets() for widget
 	 * instances whose class cannot be resolved to a widget with an update()
 	 * method, ensuring unprivileged users can never persist unsanitized markup.
 	 * Also used by SiteOrigin_Panels_Compat_Layout_Block as a universal
-	 * save-time sanitization floor for panels_data.
+	 * save-time sanitization floor for panels_data, and for AI ability writes.
+	 *
+	 * A string goes through wp_kses_post() only when it is markup-shaped: it
+	 * contains `<` or `>`, or an entity-shaped reference (`&name;`, `&#123;`,
+	 * `&#x1F;`). Every other string gets wp_kses_no_null() only, which removes
+	 * NUL and control bytes, the one non-markup protection kses provides, and is
+	 * otherwise left byte-identical.
+	 *
+	 * Why: wp_kses_post() rewrites a bare `&` to `&amp;`. Widget fields that
+	 * store a query string (the Widgets Bundle `posts` field:
+	 * `post_type=post&tax_query=category:jobs`) are read back with
+	 * wp_parse_args(), which then sees the key `amp;tax_query` and drops the
+	 * filter. A bare `&` carries no markup, so it must never trigger kses.
+	 * See https://github.com/siteorigin/siteorigin-panels/issues/1377.
 	 *
 	 * @param mixed $value Scalar or (nested) array to sanitize.
 	 * @return mixed The sanitized value, preserving structure.
@@ -1281,7 +1479,10 @@ class SiteOrigin_Panels_Admin {
 		}
 
 		if ( is_string( $value ) ) {
-			return wp_kses_post( $value );
+			$needs_kses = false !== strpbrk( $value, '<>' )
+				|| 1 === preg_match( '/&(?:#(?:[0-9]+|[xX][0-9A-Fa-f]+)|[A-Za-z][A-Za-z0-9]*);/', $value );
+
+			return $needs_kses ? wp_kses_post( $value ) : wp_kses_no_null( $value, array( 'slash_zero' => 'keep' ) );
 		}
 
 		return $value;
