@@ -199,8 +199,8 @@ class SettingsThemeSupportTest extends TestCase {
 
 		$read = $settings->get();
 
-		// The diagnostic is what the issue reports, so it is asserted before the
-		// values; a later assertion failing first would hide whether it still fires.
+		// The diagnostic is the reported defect, so it is asserted first: a value
+		// assertion failing ahead of it would leave it unevaluated.
 		$this->assertSame(
 			array(),
 			$this->errors,
