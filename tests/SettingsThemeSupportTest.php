@@ -197,9 +197,18 @@ class SettingsThemeSupportTest extends TestCase {
 	public function test_every_theme_support_value_is_read_the_same_way( $theme_support, array $expected_settings, $expected_parsed, int $expected_parse_str_calls ) {
 		$settings = $this->boot( $theme_support, array() );
 
+		$read = $settings->get();
+
+		// The diagnostic is what the issue reports, so it is asserted before the
+		// values; a later assertion failing first would hide whether it still fires.
+		$this->assertSame(
+			array(),
+			$this->errors,
+			'Reading the settings raised a PHP diagnostic.'
+		);
 		$this->assertSame(
 			$expected_settings,
-			$settings->get(),
+			$read,
 			'The settings this theme support value produces changed.'
 		);
 		$this->assertSame(
@@ -211,11 +220,6 @@ class SettingsThemeSupportTest extends TestCase {
 			$expected_parse_str_calls,
 			$this->parse_str_calls,
 			'wp_parse_args() took a different branch than before.'
-		);
-		$this->assertSame(
-			array(),
-			$this->errors,
-			'Reading the settings raised a PHP diagnostic.'
 		);
 	}
 
