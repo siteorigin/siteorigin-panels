@@ -99,12 +99,14 @@ class SettingsThemeSupportTest extends TestCase {
 	public function parse_str_stub( $input_string, &$result ) {
 		$this->parse_str_calls++;
 		parse_str( (string) $input_string, $result );
+		$result = apply_filters( 'wp_parse_str', $result );
 	}
 
 	/**
-	 * Verbatim body of WordPress core's wp_parse_args() (wp-includes/functions.php),
-	 * recording the first argument of the first call, which is what the reader
-	 * decided the theme contributed.
+	 * WordPress core's wp_parse_args() (wp-includes/functions.php), with the array
+	 * branch assigning a copy where core binds a reference, which no caller here
+	 * relies on. It also records the first argument of the first call, which is what
+	 * the reader decided the theme contributed.
 	 */
 	public function parse_args_stub( $args, $defaults = array() ) {
 		if ( $this->parsed_theme_settings === null && $this->parse_str_calls === 0 ) {
