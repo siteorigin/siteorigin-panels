@@ -134,8 +134,11 @@ class SettingsThemeSupportTest extends TestCase {
 	 * hands over the row.
 	 */
 	private function boot( $theme_support, array $stored ) {
-		Functions\when( 'get_theme_support' )->alias( function () use ( $theme_support ) {
-			return $theme_support;
+		// Answers only for the feature the reader is supposed to ask about, and
+		// returns false for anything else exactly as WordPress does, so asking for
+		// the wrong feature fails the row rather than silently receiving the fixture.
+		Functions\when( 'get_theme_support' )->alias( function ( $feature ) use ( $theme_support ) {
+			return $feature === 'siteorigin-panels' ? $theme_support : false;
 		} );
 
 		Functions\when( 'get_option' )->alias( function ( $option, $default_value = false ) use ( $stored ) {
