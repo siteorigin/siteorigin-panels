@@ -64,10 +64,11 @@ class SiteOrigin_Panels_Settings {
 				update_option( 'siteorigin_panels_settings', $current_settings );
 			}
 
-			// Get the settings provided by the theme.
+			// Get the settings provided by the theme. A theme that declares support
+			// without settings gets true back rather than an array of arguments.
 			$theme_settings = get_theme_support( 'siteorigin-panels' );
 
-			if ( ! empty( $theme_settings ) ) {
+			if ( is_array( $theme_settings ) && ! empty( $theme_settings ) ) {
 				$theme_settings = $theme_settings[0];
 			} else {
 				$theme_settings = array();
