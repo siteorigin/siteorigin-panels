@@ -2037,7 +2037,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Image Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% for the SiteOrigin Image, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
+				'text' => __( 'Get a %link% for the SiteOrigin Image, Image Grid, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' ),
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
@@ -2062,7 +2062,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Hide rows and widgets based for logged-in or logged-out users with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Hide rows and widgets for logged-in or logged-out users with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' ),
 				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
@@ -2077,14 +2077,14 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% with SiteOrigin Premium.', 'siteorigin-panels' ),
+				'text' => __( 'Add tooltips to the SiteOrigin Button, Features, Icon, Image, Image Grid, Masonry, and Price Table Widgets with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' ),
 				'anchor' => __( 'Tooltip Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Use Google Fonts in SiteOrigin Widgets with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Choose Google Fonts in TinyMCE editors, including the SiteOrigin Editor Widget, and in SiteOrigin CSS with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/web-font-selector' ),
-				'anchor' => __( 'Webfont Selector Addon', 'siteorigin-panels' ),
+				'anchor' => __( 'Web Font Selector Addon', 'siteorigin-panels' ),
 			),
 			array(
 				'text' => __( 'Get fast email support for Page Builder with %link%.', 'siteorigin-panels' ),
