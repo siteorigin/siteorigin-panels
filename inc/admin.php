@@ -2107,11 +2107,6 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Boost your page-building speed by upgrading to %link% – copy and paste rows and widgets across domains with ease!', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/cross-domain-copy-paste' ),
-				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
-			),
-			array(
 				'text' => __( 'Introduce dynamic video backgrounds to any Page Builder row, column, or widget with %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/video-background' ),
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
