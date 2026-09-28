@@ -35,7 +35,7 @@
 <h2><?php esc_html_e( 'Get More Features', 'siteorigin-panels' ); ?></h2>
 
 <p>
-	<?php printf( esc_html__( '%s is a single plugin that adds additional settings and functionality to Page Builder, SiteOrigin widgets and SiteOrign themes. SiteOrigin Premium also includes our next level email support service. If you need expert advice and quick replies, consider SiteOrigin Premium.', 'siteorigin-panels' ), '<a href="https://siteorigin.com/downloads/premium/" target="_blank">SiteOrigin Premium</a>' ); ?>
+	<?php printf( esc_html__( '%s is a single plugin that adds additional settings and functionality to Page Builder, SiteOrigin widgets and SiteOrigin themes. SiteOrigin Premium also includes our next level email support service. If you need expert advice and quick replies, consider SiteOrigin Premium.', 'siteorigin-panels' ), '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" target="_blank" rel="noopener noreferrer">SiteOrigin Premium</a>' ); ?>
 </p>
 
 <iframe src="https://player.vimeo.com/video/314964526" width="800" height="450" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
