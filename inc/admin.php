@@ -2037,7 +2037,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Image Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% for the SiteOrigin Image, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
+				'text' => __( 'Get a %link% for the SiteOrigin Image, Image Grid, Simple Masonry, and Slider Widgets.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' ),
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
@@ -2062,7 +2062,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Hide rows and widgets based for logged-in or logged-out users with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Hide rows and widgets for logged-in or logged-out users with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/toggle-visibility' ),
 				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
@@ -2077,14 +2077,14 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% with SiteOrigin Premium.', 'siteorigin-panels' ),
+				'text' => __( 'Add tooltips to the SiteOrigin Button, Features, Icon, Image, Image Grid, Price Table, and Simple Masonry Widgets with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' ),
 				'anchor' => __( 'Tooltip Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Use Google Fonts in SiteOrigin Widgets with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Choose Google Fonts in TinyMCE editors, including the SiteOrigin Editor Widget, and in SiteOrigin CSS with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/web-font-selector' ),
-				'anchor' => __( 'Webfont Selector Addon', 'siteorigin-panels' ),
+				'anchor' => __( 'Web Font Selector Addon', 'siteorigin-panels' ),
 			),
 			array(
 				'text' => __( 'Get fast email support for Page Builder with %link%.', 'siteorigin-panels' ),
@@ -2107,9 +2107,29 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Boost your page-building speed by upgrading to %link% – copy and paste rows and widgets across domains with ease!', 'siteorigin-panels' ),
-				'url' => SiteOrigin_Panels::premium_url( 'plugin/cross-domain-copy-paste' ),
-				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
+				'text' => __( 'Display any page or post as a standalone landing page, without your theme header and footer, using the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/landing-page' ),
+				'anchor' => __( 'Landing Page Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Save any row or widget as a custom layout and reuse it across your site with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/custom-layouts' ),
+				'anchor' => __( 'Custom Layouts Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Build a lightbox with Page Builder content that opens from a button with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox-builder' ),
+				'anchor' => __( 'Lightbox Builder Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Add your own colors to the color pickers in Page Builder, SiteOrigin Widgets, and TinyMCE editors with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/custom-palette' ),
+				'anchor' => __( 'Custom Palette Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Set a site-wide background color or image, and change it on any page, with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/page-background' ),
+				'anchor' => __( 'Page Background Addon', 'siteorigin-panels' ),
 			),
 			array(
 				'text' => __( 'Introduce dynamic video backgrounds to any Page Builder row, column, or widget with %link%.', 'siteorigin-panels' ),
