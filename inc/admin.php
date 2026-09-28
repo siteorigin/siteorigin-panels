@@ -2037,7 +2037,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Image Overlay Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Get a %link% for the SiteOrigin Image, Image Grid, Masonry, and Slider Widgets.', 'siteorigin-panels' ),
+				'text' => __( 'Get a %link% for the SiteOrigin Image, Image Grid, Simple Masonry, and Slider Widgets.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox' ),
 				'anchor' => __( 'Lightbox Addon', 'siteorigin-panels' ),
 			),
@@ -2077,7 +2077,7 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'Toggle Visibility Addon', 'siteorigin-panels' ),
 			),
 			array(
-				'text' => __( 'Add tooltips to the SiteOrigin Button, Features, Icon, Image, Image Grid, Masonry, and Price Table Widgets with the %link%.', 'siteorigin-panels' ),
+				'text' => __( 'Add tooltips to the SiteOrigin Button, Features, Icon, Image, Image Grid, Price Table, and Simple Masonry Widgets with the %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/tooltip' ),
 				'anchor' => __( 'Tooltip Addon', 'siteorigin-panels' ),
 			),
