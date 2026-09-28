@@ -2107,6 +2107,31 @@ class SiteOrigin_Panels_Admin {
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
 			),
 			array(
+				'text' => __( 'Display any page or post as a standalone landing page, without your theme header and footer, using the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/landing-page' ),
+				'anchor' => __( 'Landing Page Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Save any row or widget as a custom layout and reuse it across your site with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/custom-layouts' ),
+				'anchor' => __( 'Custom Layouts Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Build a lightbox with Page Builder content that opens from a button with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/lightbox-builder' ),
+				'anchor' => __( 'Lightbox Builder Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Add your own colors to the color pickers in Page Builder, SiteOrigin Widgets, and TinyMCE editors with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/custom-palette' ),
+				'anchor' => __( 'Custom Palette Addon', 'siteorigin-panels' ),
+			),
+			array(
+				'text' => __( 'Set a site-wide background color or image, and change it on any page, with the %link%.', 'siteorigin-panels' ),
+				'url' => SiteOrigin_Panels::premium_url( 'plugin/page-background' ),
+				'anchor' => __( 'Page Background Addon', 'siteorigin-panels' ),
+			),
+			array(
 				'text' => __( 'Introduce dynamic video backgrounds to any Page Builder row, column, or widget with %link%.', 'siteorigin-panels' ),
 				'url' => SiteOrigin_Panels::premium_url( 'plugin/video-background' ),
 				'anchor' => __( 'SiteOrigin Premium', 'siteorigin-panels' ),
