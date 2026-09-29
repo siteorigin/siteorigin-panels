@@ -99,6 +99,17 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	}
 
 	/**
+	 * Check layout input before a save path can convert objects through JSON.
+	 *
+	 * @param array $panels_data Layout data to check.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_unsupported_value.
+	 */
+	public static function assert_supported_values( $panels_data ) {
+		self::detach( $panels_data );
+	}
+
+	/**
 	 * Recursive copy of a layout value for the filter payload.
 	 *
 	 * Arrays are copied value by value; plain objects (stdClass) are cloned

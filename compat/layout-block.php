@@ -1021,6 +1021,10 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * @return array The block with sanitized, floored panelsData.
 	 */
 	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
+		if ( isset( $block['attrs']['panelsData'] ) && is_array( $block['attrs']['panelsData'] ) ) {
+			SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $block['attrs']['panelsData'] );
+		}
+
 		$previous = $this->layout_update_pre_write;
 		$this->layout_update_pre_write = array(
 			'post_id'     => (int) $post_id,

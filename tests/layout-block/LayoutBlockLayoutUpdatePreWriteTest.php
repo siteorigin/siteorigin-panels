@@ -54,6 +54,10 @@ class PreWriteIdentityWidgetStub {
 	}
 }
 
+class HiddenSetting {
+	private $token = 'keep-me';
+}
+
 /**
  * Renderer stub that records each render in the shared call log.
  */
@@ -497,6 +501,24 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 
 		$this->assertCount( 0, $this->pre_write_calls );
 		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_unsupported_object_stops_the_write_before_stored_form_simulation() {
+		$block = $this->layout_block();
+		$raw = $this->block_for( $this->layout( 'Probe' ) );
+		$raw['attrs']['panelsData']['widgets'][0]['setting'] = new HiddenSetting();
+
+		try {
+			$block->sanitize_block_for_layout_update( $raw, 77, 0 );
+			$this->fail( 'The write must stop before the object is JSON encoded.' );
+		} catch ( \SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $e->get_error()->get_error_code() );
+		}
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'content_save_pre', $this->log );
+		$this->assertNotContains( 'render', $this->log );
+		$this->assertSame( array(), $this->read( $block, 'sanitized_this_request' ), 'No memo entry for an aborted block.' );
 	}
 
 	// --- (e) WP_Error from the hook. ---------------------------------------------
