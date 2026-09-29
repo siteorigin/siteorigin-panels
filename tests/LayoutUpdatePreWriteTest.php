@@ -38,6 +38,49 @@ if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Pre_Write' ) ) {
 }
 
 /**
+ * A widget setting object that keeps a nested object in a private property.
+ */
+class Pre_Write_Private_Holder {
+	private $setting;
+
+	public function __construct( $setting ) {
+		$this->setting = $setting;
+	}
+
+	public function setting() {
+		return $this->setting;
+	}
+}
+
+/**
+ * A widget setting object that keeps a nested object in a protected property.
+ */
+class Pre_Write_Protected_Holder {
+	protected $setting;
+
+	public function __construct( $setting ) {
+		$this->setting = $setting;
+	}
+}
+
+/**
+ * A custom class with only public properties.
+ */
+class Pre_Write_Public_Holder {
+	public $setting;
+
+	public function __construct( $setting ) {
+		$this->setting = $setting;
+	}
+}
+
+/**
+ * A subclass of stdClass; only stdClass itself is a plain object.
+ */
+class Pre_Write_Plain_Subclass extends stdClass {
+}
+
+/**
  * Unit tests for SiteOrigin_Panels_Layout_Update_Pre_Write::run(): the
  * arguments the pre-write filter receives, which results continue or stop the
  * write, and that the payload is a copy the listener cannot use to change the
@@ -212,6 +255,86 @@ class LayoutUpdatePreWriteTest extends SiteOriginTests {
 
 		$this->assertSame( $before, serialize( $layout ) );
 		$this->assertSame( 'red', $setting->color );
+	}
+
+	public function test_private_property_object_stops_the_write_before_the_hook() {
+		$setting        = new stdClass();
+		$setting->color = 'red';
+		$holder         = new Pre_Write_Private_Holder( $setting );
+		$layout         = $this->layout();
+		$layout['widgets'][0]['style'] = $holder;
+
+		// A listener that reaches the private property, if it were called.
+		$this->listener = function ( $result, $panels_data ) {
+			$reach = Closure::bind(
+				function ( $object ) {
+					$object->setting->color = 'blue';
+				},
+				null,
+				Pre_Write_Private_Holder::class
+			);
+			$reach( $panels_data['widgets'][0]['style'] );
+
+			return $result;
+		};
+
+		try {
+			SiteOrigin_Panels_Layout_Update_Pre_Write::run( $layout, 42, 'meta', null );
+			$this->fail( 'An object with a private property must stop the write.' );
+		} catch ( SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $e->get_error()->get_error_code() );
+		}
+
+		$this->assertCount( 0, $this->calls, 'The hook does not fire.' );
+		$this->assertSame( 'red', $holder->setting()->color, 'The caller\'s layout keeps its value.' );
+	}
+
+	public static function unsupported_objects() {
+		$setting = new stdClass();
+
+		return array(
+			'private property'      => array( new Pre_Write_Private_Holder( $setting ) ),
+			'protected property'    => array( new Pre_Write_Protected_Holder( $setting ) ),
+			'custom public class'   => array( new Pre_Write_Public_Holder( $setting ) ),
+			'internal storage'      => array( new ArrayObject( array( 'setting' => $setting ) ) ),
+			'plain object subclass' => array( new Pre_Write_Plain_Subclass() ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'unsupported_objects' )]
+	public function test_objects_other_than_plain_objects_stop_the_write( $value ) {
+		$layout = $this->layout();
+		$layout['widgets'][0]['settings'] = array( 'nested' => $value );
+
+		try {
+			SiteOrigin_Panels_Layout_Update_Pre_Write::run( $layout, 42, 'block', 0 );
+			$this->fail( 'The write must stop.' );
+		} catch ( SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $e->get_error()->get_error_code() );
+			$this->assertSame( 'The layout contains a value that cannot be saved by a layout update.', $e->getMessage() );
+		}
+
+		$this->assertCount( 0, $this->calls );
+	}
+
+	public function test_plain_objects_nested_in_plain_objects_are_copied() {
+		$inner        = new stdClass();
+		$inner->color = 'red';
+		$outer        = new stdClass();
+		$outer->inner = $inner;
+		$layout       = $this->layout();
+		$layout['widgets'][0]['style'] = $outer;
+
+		$this->listener = function ( $result, $panels_data ) {
+			$panels_data['widgets'][0]['style']->inner->color = 'blue';
+
+			return $result;
+		};
+
+		SiteOrigin_Panels_Layout_Update_Pre_Write::run( $layout, 42, 'meta', null );
+
+		$this->assertCount( 1, $this->calls );
+		$this->assertSame( 'red', $inner->color );
 	}
 
 	public function test_listener_exception_propagates_unchanged() {

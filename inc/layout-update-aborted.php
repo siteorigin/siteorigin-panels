@@ -4,9 +4,10 @@
  * Carries a layout-update abort out of the save pipeline.
  *
  * Thrown when the `siteorigin_panels_layout_update_pre_write` filter stops a
- * layout-update ability write, or when the Layout Block stored form cannot be
- * prepared. The layout-update ability catches it and returns the WP_Error, so
- * nothing is stored or rendered.
+ * layout-update ability write, when the layout holds an object other than a
+ * plain object, or when the Layout Block stored form cannot be prepared. The
+ * layout-update ability catches it and returns the WP_Error, so nothing is
+ * stored or rendered.
  *
  * @since {NEXT_VERSION}
  */

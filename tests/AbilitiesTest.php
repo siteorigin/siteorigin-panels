@@ -342,6 +342,21 @@ if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
  * before persistence. Mirrors inc/abilities.php; production must not change to
  * fit a test.
  */
+/**
+ * A widget setting object that keeps a nested object in a private property.
+ */
+class Abilities_PrivateSettingHolder {
+	private $setting;
+
+	public function __construct( $setting ) {
+		$this->setting = $setting;
+	}
+
+	public function setting() {
+		return $this->setting;
+	}
+}
+
 class AbilitiesTest extends SiteOriginTests {
 	protected function setUp(): void {
 		parent::setUp();
@@ -1760,6 +1775,50 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertTrue( $result['updated'] );
 		$this->assertSame( 'blue', $this->pre_write_calls[0][2]['widgets'][0]['setting']->color, 'The listener changed its own copy.' );
 		$this->assertSame( 'red', $persisted['widgets'][0]['setting']->color, 'The stored value keeps the original property.' );
+	}
+
+	public function test_meta_write_with_a_non_plain_object_stops_before_the_hook() {
+		$this->classic_post( 29 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write(
+			function ( $result, $panels_data ) {
+				$reach = Closure::bind(
+					function ( $object ) {
+						$object->setting->color = 'blue';
+					},
+					null,
+					Abilities_PrivateSettingHolder::class
+				);
+				$reach( $panels_data['widgets'][0]['setting'] );
+
+				return $result;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$inner        = new stdClass();
+		$inner->color = 'red';
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 29,
+				'panels_data' => array(
+					'widgets' => array(
+						array(
+							'panels_info' => array( 'class' => 'X' ),
+							'setting'     => new Abilities_PrivateSettingHolder( $inner ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $result->get_error_code() );
+		$this->assertCount( 0, $this->pre_write_calls, 'The hook does not fire.' );
+		$this->assertSame( 'red', $inner->color, 'The caller\'s layout keeps its value.' );
+		$this->assert_meta_write_did_not_happen();
 	}
 
 	// --- layout-update pre-write hook: Layout Block path ----------------------

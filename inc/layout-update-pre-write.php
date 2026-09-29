@@ -21,7 +21,8 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	 * @param string   $storage     'meta' or 'block'.
 	 * @param int|null $block_index 0-based Layout Block index; null for 'meta'.
 	 *
-	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the filter returns a WP_Error or exactly false.
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the layout holds an object other than a plain
+	 *                                                 object, or the filter returns a WP_Error or exactly false.
 	 */
 	public static function run( $panels_data, $post_id, $storage, $block_index ) {
 		$payload = self::detach( $panels_data );
@@ -52,9 +53,12 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 * listener is not caught.
 		 *
 		 * Read-only: the filter cannot change what is stored. $panels_data is a
-		 * deep copy (arrays and public object properties; non-public properties
-		 * of custom classes are not copied, and REST or MCP input only holds
-		 * arrays and plain objects).
+		 * deep copy. A layout may hold only arrays, scalars, null and plain
+		 * objects (stdClass), which is all REST or MCP input can hold. If it
+		 * holds any other object, the write stops before this filter with the
+		 * code `siteorigin_panels_layout_update_unsupported_value`, because
+		 * such an object can keep state the copy cannot reach. Then nothing is
+		 * stored, deleted, mirrored or rendered.
 		 *
 		 * Scope of "equals what is stored": $panels_data equals the stored
 		 * layout for the WordPress core and Page Builder save pipeline — core's
@@ -97,13 +101,18 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	/**
 	 * Recursive copy of a layout value for the filter payload.
 	 *
-	 * Arrays are copied value by value; objects are cloned and their public
-	 * properties copied, so a listener that changes a nested object in its
-	 * payload cannot change the value that is stored. Non-public properties of
-	 * custom classes are not walked (REST and JSON input only ever holds
-	 * arrays and plain objects).
+	 * Arrays are copied value by value; plain objects (stdClass) are cloned
+	 * and their properties copied, so a listener that changes a nested object
+	 * in its payload cannot change the value that is stored. A plain object
+	 * has only public properties, so the copy reaches all of its state.
+	 *
+	 * Any other object stops the write: it can hold state a copy cannot
+	 * reach (non-public or readonly properties, or storage inside an internal
+	 * class). REST and JSON input only ever holds arrays and plain objects.
 	 *
 	 * @param mixed $value The value to copy.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_unsupported_value.
 	 *
 	 * @return mixed
 	 */
@@ -117,6 +126,15 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		}
 
 		if ( is_object( $value ) ) {
+			if ( get_class( $value ) !== 'stdClass' ) {
+				throw new SiteOrigin_Panels_Layout_Update_Aborted(
+					new WP_Error(
+						'siteorigin_panels_layout_update_unsupported_value',
+						__( 'The layout contains a value that cannot be saved by a layout update.', 'siteorigin-panels' )
+					)
+				);
+			}
+
 			$copy = clone $value;
 			foreach ( get_object_vars( $copy ) as $key => $item ) {
 				$copy->$key = self::detach( $item );
