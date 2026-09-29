@@ -1885,6 +1885,21 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 	}
 
+	public function test_both_layout_abilities_are_public_to_mcp() {
+		$this->abilities()->register_abilities();
+
+		$get    = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
+		$update = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
+
+		$this->assertTrue( $get['meta']['mcp']['public'] );
+		$this->assertTrue( $update['meta']['mcp']['public'] );
+		$this->assertTrue( $get['meta']['annotations']['readonly'] );
+		$this->assertArrayNotHasKey( 'readonly', $get['meta'] );
+		$this->assertArrayNotHasKey( 'annotations', $update['meta'] );
+		$this->assertArrayNotHasKey( 'public', $get['meta'], 'Only meta.mcp.public is set, not core meta.public.' );
+		$this->assertArrayNotHasKey( 'public', $update['meta'] );
+	}
+
 	public function test_registers_the_ability_category() {
 		$this->abilities()->register_ability_category();
 

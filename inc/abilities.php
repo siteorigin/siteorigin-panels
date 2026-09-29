@@ -138,6 +138,7 @@ class SiteOrigin_Panels_Abilities {
 				'meta'                => array(
 					'annotations'  => array( 'readonly' => true ),
 					'show_in_rest' => true,
+					'mcp'          => array( 'public' => true ),
 				),
 			)
 		);
@@ -186,6 +187,7 @@ class SiteOrigin_Panels_Abilities {
 				'execute_callback'    => array( $this, 'layout_update' ),
 				'meta'                => array(
 					'show_in_rest' => true,
+					'mcp'          => array( 'public' => true ),
 				),
 			)
 		);
