@@ -624,8 +624,9 @@ class SiteOrigin_Panels_Abilities {
 	 * block.
 	 *
 	 * §3: the incoming layout is routed through the compat save CHOKEPOINT
-	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()) — the
-	 * SAME path every Layout Block save uses: the
+	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_for_layout_update(),
+	 * which wraps sanitize_block_untrusted()) — the SAME path every Layout Block
+	 * save uses: the
 	 * `siteorigin_panels_ai_block_layout_pre_save` filter, strict sanitize
 	 * (process_raw_widgets + sanitize_all), and the kses floor FORCED regardless
 	 * of the credential's `unfiltered_html` capability (AI output is
@@ -634,6 +635,12 @@ class SiteOrigin_Panels_Abilities {
 	 * wp_insert_post_data safety net recognizes the block as already sanitized
 	 * this request via the request-local memo in sanitize_block() and skips the
 	 * second pass, so widget update() never runs twice per write.
+	 *
+	 * Inside that save, the chokepoint settles the layout into the form the post
+	 * update stores, then fires the `siteorigin_panels_layout_update_pre_write`
+	 * hook once for the target block, before its render. An abort throws
+	 * SiteOrigin_Panels_Layout_Update_Aborted up to layout_update(), so
+	 * wp_update_post() never runs.
 	 *
 	 * NOTE for premium-addon authors (layered transforms): because the write
 	 * goes through the chokepoint, any consumer hooked to
@@ -651,6 +658,8 @@ class SiteOrigin_Panels_Abilities {
 	 *                      'layout_block_unsupported' when the compat chokepoint class
 	 *                      is unavailable, or 'block_write_failed' when the post update
 	 *                      did not persist.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the pre-write hook stops the write.
 	 */
 	protected function write_block_layout( $post, $block_index, $panels_data ) {
 		$qualifying = $this->qualifying_block_layouts( $post );
@@ -685,7 +694,7 @@ class SiteOrigin_Panels_Abilities {
 
 		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
-		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_untrusted( $blocks[ $target_key ] );
+		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_for_layout_update( $blocks[ $target_key ], $post->ID, $block_index );
 
 		// wp_update_post()/wp_insert_post() run wp_unslash() on their input, so the
 		// content MUST be slashed first — otherwise the backslash in every JSON

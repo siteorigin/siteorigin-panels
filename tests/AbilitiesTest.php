@@ -179,6 +179,23 @@ class Abilities_LayoutBlockSpy {
 
 		return $block;
 	}
+
+	// Mirrors the real layout-update entry point: the same chokepoint as
+	// sanitize_block_untrusted() (counted there too, so existing tests keep
+	// their meaning), plus the post ID and block index it was given. A test can
+	// set $abort to a WP_Error to simulate the pre-write hook stopping the write.
+	public $layout_update_args = null;
+	public $abort = null;
+
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
+		$this->layout_update_args = array( $post_id, $block_index );
+
+		if ( $this->abort !== null ) {
+			throw new SiteOrigin_Panels_Layout_Update_Aborted( $this->abort );
+		}
+
+		return $this->sanitize_block_untrusted( $block );
+	}
 }
 
 /*
@@ -1743,6 +1760,62 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertTrue( $result['updated'] );
 		$this->assertSame( 'blue', $this->pre_write_calls[0][2]['widgets'][0]['setting']->color, 'The listener changed its own copy.' );
 		$this->assertSame( 'red', $persisted['widgets'][0]['setting']->color, 'The stored value keeps the original property.' );
+	}
+
+	// --- layout-update pre-write hook: Layout Block path ----------------------
+
+	public function test_block_write_passes_post_id_and_index_zero_for_a_single_block() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 51, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'wp_update_post' )->justReturn( 51 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 51,
+				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( array( 51, 0 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( 1, Abilities_LayoutBlockSpy::$instance->untrusted_calls );
+	}
+
+	public function test_block_write_passes_the_requested_index_on_a_multi_block_post() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 52, 'post_content' => 'three blocks' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 3, true ) );
+		Functions\when( 'wp_update_post' )->justReturn( 52 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 52,
+				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'block_index' => 2,
+			)
+		);
+
+		$this->assertSame( 2, $result['block_index'] );
+		$this->assertSame( array( 52, 2 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+	}
+
+	public function test_block_write_abort_returns_the_error_and_does_not_update_the_post() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 53, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\expect( 'wp_update_post' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$error = new WP_Error( 'addon_blocked', 'Blocked.', array( 'status' => 409 ) );
+		Abilities_LayoutBlockSpy::$instance->abort = $error;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 53,
+				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+			)
+		);
+
+		$this->assertSame( $error, $result );
+		$this->assertNull( Abilities_AdminSpy::$instance->copy_content_args );
 	}
 
 	// --- Registration shape (locks the public surface) -----------------------
