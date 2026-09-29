@@ -262,6 +262,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
 			 */
 			$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
+			if ( $layout_update_pre_write !== null && is_array( $filtered_panels_data ) ) {
+				SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $filtered_panels_data );
+			}
 			$ai_changed_layout = is_array( $filtered_panels_data ) && $filtered_panels_data !== $panels_data;
 			if ( $ai_changed_layout ) {
 				$panels_data = $filtered_panels_data;

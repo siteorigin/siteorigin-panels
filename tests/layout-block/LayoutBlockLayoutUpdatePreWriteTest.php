@@ -521,6 +521,27 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		$this->assertSame( array(), $this->read( $block, 'sanitized_this_request' ), 'No memo entry for an aborted block.' );
 	}
 
+	public function test_unsupported_object_from_ai_filter_stops_the_write_before_stored_form_simulation() {
+		$block = $this->layout_block();
+		$this->callbacks['siteorigin_panels_ai_block_layout_pre_save'] = function ( $panels_data ) {
+			$panels_data['widgets'][0]['setting'] = new HiddenSetting();
+
+			return $panels_data;
+		};
+
+		try {
+			$block->sanitize_block_for_layout_update( $this->block_for( $this->layout( 'Probe' ) ), 77, 0 );
+			$this->fail( 'The write must stop before the object is JSON encoded.' );
+		} catch ( \SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $e->get_error()->get_error_code() );
+		}
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'content_save_pre', $this->log );
+		$this->assertNotContains( 'render', $this->log );
+		$this->assertSame( array(), $this->read( $block, 'sanitized_this_request' ), 'No memo entry for an aborted block.' );
+	}
+
 	// --- (e) WP_Error from the hook. ---------------------------------------------
 
 	public function test_wp_error_stops_the_write_restores_state_and_records_no_memo() {
