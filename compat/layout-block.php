@@ -360,9 +360,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * that is stored, so the pre-write hook payload equals the stored layout
 	 * and the later save finds nothing left to change.
 	 *
-	 * At most 3 passes: this is a fail-closed limit, not a claim that the
+	 * At most 8 passes: this is a fail-closed limit, not a claim that the
 	 * filters always settle. A layout that has not settled by then, or a pass
-	 * that yields no usable layout, stops the write.
+	 * that yields no usable layout, stops the write. For a user without
+	 * `unfiltered_html`, each pass removes one `amp;` level from tag-free
+	 * text, and core kses may then pad a numeric entity once, so text with N
+	 * `amp;` levels settles by pass N + 2 (`&amp;#91;` on pass 3,
+	 * `&amp;amp;#91;` on pass 4). 8 passes accept up to six levels, well past
+	 * any escaping an author writes by hand, and cap the cost at eight
+	 * filter passes over one block.
 	 *
 	 * @param array $panels_data Sanitized, floored panelsData.
 	 *
@@ -371,7 +377,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * @return array
 	 */
 	private function final_stored_panels_data( $panels_data ) {
-		for ( $pass = 0; $pass < 3; $pass++ ) {
+		for ( $pass = 0; $pass < 8; $pass++ ) {
 			$next = $this->simulate_post_save( $panels_data );
 
 			if ( ! is_array( $next ) ) {

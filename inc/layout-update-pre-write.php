@@ -68,8 +68,8 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 * `sanitize_post_meta_*` filter, can make the stored data differ from
 		 * $panels_data. On the 'block' path the write can also stop with the
 		 * code `siteorigin_panels_layout_update_unstable` when the stored form
-		 * does not settle; then nothing is written or rendered and this filter
-		 * does not fire.
+		 * does not settle within 8 save-filter passes; then nothing is written
+		 * or rendered and this filter does not fire.
 		 *
 		 * @since {NEXT_VERSION}
 		 * @api

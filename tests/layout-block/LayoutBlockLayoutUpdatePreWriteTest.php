@@ -75,7 +75,8 @@ class PreWriteRendererStub {
  * (a) fires once with the post ID, index and floored payload;
  * (b) order: AI pre-save filter, stored-form finalisation, hook, render;
  * (c) the payload equals the stored form under a kses-like save filter;
- * (d) a form that does not settle stops the write before the hook;
+ * (d) a form that does not settle within 8 passes stops the write before
+ *     the hook; one that settles on pass 8 is written;
  * (e)/(f) aborts leave no render and restore every flag, and write no memo;
  * (g) a nested save does not fire the hook;
  * (h) other save entry points never fire it or run the save filters;
@@ -338,9 +339,9 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		};
 	}
 
-	private function expect_abort( $block, $code ) {
+	private function expect_abort( $block, $code, $content = 'Probe' ) {
 		try {
-			$block->sanitize_block_for_layout_update( $this->block_for( $this->layout( 'Probe' ) ), 77, 1 );
+			$block->sanitize_block_for_layout_update( $this->block_for( $this->layout( $content ) ), 77, 1 );
 		} catch ( \SiteOrigin_Panels_Layout_Update_Aborted $e ) {
 			$this->assertSame( $code, $e->get_error()->get_error_code() );
 
@@ -434,7 +435,57 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 
 		$this->assertCount( 0, $this->pre_write_calls );
 		$this->assertNotContains( 'render', $this->log );
-		$this->assertCount( 3, array_keys( $this->log, 'content_save_pre', true ), 'The pass limit is 3.' );
+		$this->assertCount( 8, array_keys( $this->log, 'content_save_pre', true ), 'The pass limit is 8.' );
+	}
+
+	public function test_form_that_settles_on_the_last_allowed_pass_is_written() {
+		// Each pass removes one "~", so seven of them settle on pass 8.
+		$this->callbacks['content_save_pre'] = function ( $content ) {
+			return preg_replace( '/~/', '', $content, 1 );
+		};
+
+		$result = $this->layout_block()->sanitize_block_for_layout_update(
+			$this->block_for( $this->layout( 'Probe~~~~~~~' ) ),
+			77,
+			0
+		);
+
+		$this->assertCount( 8, array_keys( $this->log, 'content_save_pre', true ) );
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assertSame( 'Probe', $this->pre_write_calls[0][2]['widgets'][0]['content'] );
+		$this->assertSame( $this->pre_write_calls[0][2], $result['attrs']['panelsData'] );
+	}
+
+	public function test_form_that_needs_a_ninth_pass_stops_the_write() {
+		// Eight "~" need a ninth pass to settle.
+		$this->callbacks['content_save_pre'] = function ( $content ) {
+			return preg_replace( '/~/', '', $content, 1 );
+		};
+
+		$this->expect_abort( $this->layout_block(), 'siteorigin_panels_layout_update_unstable', 'Probe~~~~~~~~' );
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+		$this->assertCount( 8, array_keys( $this->log, 'content_save_pre', true ) );
+	}
+
+	public function test_double_escaped_entity_text_from_an_author_is_written() {
+		// Kses-like: pads a two-digit numeric entity, as core kses does.
+		$this->callbacks['content_save_pre'] = function ( $content ) {
+			return preg_replace( '/&#(\d{2});/', '&#0$1;', $content );
+		};
+
+		$result = $this->layout_block()->sanitize_block_for_layout_update(
+			$this->block_for( $this->layout( '&amp;amp;#91;x&amp;amp;#93;' ) ),
+			77,
+			0
+		);
+
+		// The repair removes one amp; level per pass; the form settles on pass 4.
+		$this->assertCount( 4, array_keys( $this->log, 'content_save_pre', true ) );
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assertSame( '&#091;x&#093;', $this->pre_write_calls[0][2]['widgets'][0]['content'] );
+		$this->assertSame( $this->pre_write_calls[0][2], $result['attrs']['panelsData'] );
 	}
 
 	public function test_block_lost_by_the_save_filters_stops_the_write() {
