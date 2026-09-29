@@ -405,4 +405,24 @@ test.describe( 'author (no unfiltered_html)', () => {
 			code: 'panels_e2e_blocked',
 		} );
 	} );
+
+	test( 'E5: author block write with double-escaped entity text is stored', async () => {
+		await setProbe( admin, 'pass' );
+
+		// Settles on the fourth save-filter pass for a user without
+		// unfiltered_html: one amp; level per pass, then kses pads the entity.
+		const response = await layoutUpdate( author, {
+			post_id: blockPost,
+			panels_data: probeLayout( '&amp;amp;#91;x&amp;amp;#93;' ),
+		} );
+		expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
+		expect( response.body.source ).toBe( 'block' );
+
+		const state = await probeState( admin );
+		expect( state.log ).toHaveLength( 1 );
+
+		const raw = await rawStorage( admin, blockPost );
+		expectPayloadEqualsStored( state.log[ 0 ], raw );
+		expect( raw.blocks[ 0 ].widgets[ 0 ].text ).toBe( '&#091;x&#093;' );
+	} );
 } );
