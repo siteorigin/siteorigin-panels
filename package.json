@@ -12,7 +12,7 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.55.0",
-		"@wp-playground/cli": "^2.0.22",
+		"@wp-playground/cli": "^3.1.56",
 		"backbone": "^1.6.0",
 		"siteorigin-tests-common": "github:siteorigin/siteorigin-tests-common",
 		"underscore": "^1.13.7"
