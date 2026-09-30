@@ -12,6 +12,8 @@ Donate link: https://siteorigin.com/downloads/premium/
 */
 
 define( 'SITEORIGIN_PANELS_VERSION', 'dev' );
+// Contract version of the siteorigin_panels_layout_update_pre_write filter; bump on a breaking change to its arguments or meaning.
+define( 'SITEORIGIN_PANELS_LAYOUT_UPDATE_PRE_WRITE', 1 );
 
 if ( ! defined( 'SITEORIGIN_PANELS_JS_SUFFIX' ) ) {
 	define( 'SITEORIGIN_PANELS_JS_SUFFIX', '' );

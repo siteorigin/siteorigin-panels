@@ -33,6 +33,19 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private $force_kses_floor = false;
 
 	/**
+	 * Pre-write context for one layout-update ability write: null, or
+	 * array( 'post_id' => int, 'block_index' => int ).
+	 *
+	 * Set only by sanitize_block_for_layout_update(), and taken (read and
+	 * cleared) once by the save branch of render_layout_block(), which then
+	 * fires the `siteorigin_panels_layout_update_pre_write` hook. Private so no
+	 * third-party code can set or clear it.
+	 *
+	 * @var array|null
+	 */
+	private $layout_update_pre_write = null;
+
+	/**
 	 * Get the singleton instance
 	 *
 	 * @return SiteOrigin_Panels_Compat_Layout_Block
@@ -212,6 +225,12 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// unarmed paths), never at render.
 			$panels_data = $this->prepare_render_panels_data( $panels_data );
 		} else {
+			// Take the layout-update pre-write context once. Clearing it here
+			// means a nested save started from inside this one (an AI pre-save
+			// filter consumer, or a widget update()) does not fire the hook.
+			$layout_update_pre_write = $this->layout_update_pre_write;
+			$this->layout_update_pre_write = null;
+
 			/**
 			 * Filter a single Layout Block's panels_data before it is sanitized,
 			 * allowing an AI-generated layout to be supplied or transformed.
@@ -243,6 +262,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			 * @param array $panels_data The Layout Block's panels_data (grids, grid_cells, widgets).
 			 */
 			$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
+			if ( $layout_update_pre_write !== null && is_array( $filtered_panels_data ) ) {
+				SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $filtered_panels_data );
+			}
 			$ai_changed_layout = is_array( $filtered_panels_data ) && $filtered_panels_data !== $panels_data;
 			if ( $ai_changed_layout ) {
 				$panels_data = $filtered_panels_data;
@@ -269,6 +291,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				// idempotent, so it's a safe universal floor independent of
 				// that failure mode.
 				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+			}
+
+			// Layout-update ability write: settle the layout into the form the
+			// post update will store, then let an add-on stop the write. Both
+			// run before the render below, and the render, the returned
+			// panelsData and the same-request memo all use this final form.
+			if ( $layout_update_pre_write !== null ) {
+				$panels_data = $this->final_stored_panels_data( $panels_data );
+				SiteOrigin_Panels_Layout_Update_Pre_Write::run( $panels_data, $layout_update_pre_write['post_id'], 'block', $layout_update_pre_write['block_index'] );
 			}
 		}
 		$builder_id = isset( $attributes['builder_id'] ) ? $attributes['builder_id'] : uniqid( 'gb' . get_the_ID() . '-' );
@@ -319,6 +350,103 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$attributes['contentPreview'] = wp_json_encode( $rendered_layout );
 
 		return $attributes;
+	}
+
+	/**
+	 * The panelsData a layout-update block write will store.
+	 *
+	 * The post update that follows the save branch runs WordPress's save
+	 * filters over the post content (for a user without `unfiltered_html`
+	 * this includes core kses over every block attribute) and then
+	 * validate_post_data(), which undoes core's `&amp;` artifact. Running the
+	 * same transforms here until the layout stops changing gives the form
+	 * that is stored, so the pre-write hook payload equals the stored layout
+	 * and the later save finds nothing left to change.
+	 *
+	 * At most 8 passes: this is a fail-closed limit, not a claim that the
+	 * filters always settle. A layout that has not settled by then, or a pass
+	 * that yields no usable layout, stops the write. For a user without
+	 * `unfiltered_html`, each pass removes one `amp;` level from tag-free
+	 * text, and core kses may then pad a numeric entity once, so text with N
+	 * `amp;` levels settles by pass N + 2 (`&amp;#91;` on pass 3,
+	 * `&amp;amp;#91;` on pass 4). 8 passes accept up to six levels, well past
+	 * any escaping an author writes by hand, and cap the cost at eight
+	 * filter passes over one block.
+	 *
+	 * @param array $panels_data Sanitized, floored panelsData.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_unstable.
+	 *
+	 * @return array
+	 */
+	private function final_stored_panels_data( $panels_data ) {
+		for ( $pass = 0; $pass < 8; $pass++ ) {
+			$next = $this->simulate_post_save( $panels_data );
+
+			if ( ! is_array( $next ) ) {
+				break;
+			}
+
+			if ( $next === $panels_data ) {
+				return $next;
+			}
+
+			$panels_data = $next;
+		}
+
+		throw new SiteOrigin_Panels_Layout_Update_Aborted(
+			new WP_Error(
+				'siteorigin_panels_layout_update_unstable',
+				__( 'The layout could not be prepared for saving.', 'siteorigin-panels' )
+			)
+		);
+	}
+
+	/**
+	 * One pass of what the post update does to this block's panelsData.
+	 *
+	 * Serializes the block alone, applies the two filters sanitize_post()
+	 * applies to `post_content` in the 'db' context (`pre_post_content` and
+	 * `content_save_pre`), parses it back, then applies the same `&amp;`
+	 * repair validate_post_data() applies, under the same condition. The
+	 * serialize and parse round trip also turns any object into an array, as
+	 * storage does.
+	 *
+	 * @param array $panels_data panelsData to pass through the save filters.
+	 *
+	 * @return array|null The resulting panelsData, or null if the block did not survive.
+	 */
+	private function simulate_post_save( $panels_data ) {
+		$content = wp_slash(
+			serialize_block(
+				array(
+					'blockName'    => self::BLOCK_NAME,
+					'attrs'        => array( 'panelsData' => $panels_data ),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '',
+					'innerContent' => array(),
+				)
+			)
+		);
+
+		$content = apply_filters( 'pre_post_content', $content );
+		$content = apply_filters( 'content_save_pre', $content );
+
+		$result = null;
+		foreach ( parse_blocks( wp_unslash( $content ) ) as $block ) {
+			if ( ! empty( $block['blockName'] ) && $block['blockName'] === self::BLOCK_NAME ) {
+				if ( isset( $block['attrs']['panelsData'] ) && is_array( $block['attrs']['panelsData'] ) ) {
+					$result = $block['attrs']['panelsData'];
+				}
+				break;
+			}
+		}
+
+		if ( $result !== null && ! current_user_can( 'unfiltered_html' ) ) {
+			$result = $this->repair_core_kses_ampersands( $result );
+		}
+
+		return $result;
 	}
 
 	// Remove Blocks to prevent potential issues.
@@ -871,6 +999,57 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			$block = $this->sanitize_block( $block );
 		} finally {
 			$this->force_kses_floor = $previous;
+		}
+
+		return $block;
+	}
+
+	/**
+	 * Sanitize the target Layout Block of a layout-update ability write.
+	 *
+	 * Entry point for the `siteorigin-panels/layout-update` ability only. Runs
+	 * the same chokepoint as sanitize_block_untrusted(), with the kses floor
+	 * forced, and marks this block's save so that the save branch settles the
+	 * stored form and then fires the `siteorigin_panels_layout_update_pre_write`
+	 * hook once, before the block's render. If the block has no layout data,
+	 * nothing is sanitized or rendered, and the hook still fires once with an
+	 * empty layout.
+	 *
+	 * @param array $block       A parsed Layout Block (parse_blocks() shape).
+	 * @param int   $post_id     The post being written.
+	 * @param int   $block_index 0-based Layout Block index, as in layout-get.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the hook stops the write, or the stored form does not settle.
+	 *
+	 * @return array The block with sanitized, floored panelsData.
+	 */
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
+		if ( isset( $block['attrs']['panelsData'] ) && is_array( $block['attrs']['panelsData'] ) ) {
+			SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $block['attrs']['panelsData'] );
+		}
+
+		$previous = $this->layout_update_pre_write;
+		$this->layout_update_pre_write = array(
+			'post_id'     => (int) $post_id,
+			'block_index' => (int) $block_index,
+		);
+
+		try {
+			$block = $this->sanitize_block_untrusted( $block );
+			$fired = ( null === $this->layout_update_pre_write );
+		} finally {
+			$this->layout_update_pre_write = $previous;
+		}
+
+		if ( ! $fired ) {
+			// sanitize_block() returned early: the block has no layout data,
+			// so nothing was sanitized or rendered. Fire the hook here.
+			SiteOrigin_Panels_Layout_Update_Pre_Write::run(
+				( isset( $block['attrs']['panelsData'] ) && is_array( $block['attrs']['panelsData'] ) ) ? $block['attrs']['panelsData'] : array(),
+				$post_id,
+				'block',
+				(int) $block_index
+			);
 		}
 
 		return $block;

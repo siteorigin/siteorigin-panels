@@ -17,3 +17,7 @@ dist/
 .phpunit.result.cache
 /tests/harness/snapshots/*
 !/tests/harness/snapshots/baseline.json
+/tests/cache/
+/tests/results/
+/tests/so-tests.env
+/test-results/

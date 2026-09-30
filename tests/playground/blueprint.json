@@ -1,0 +1,17 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"preferredVersions": {
+		"php": "8.3",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"extraLibraries": [ "wp-cli" ],
+	"steps": [
+		{
+			"step": "activatePlugin",
+			"pluginPath": "/wordpress/wp-content/plugins/siteorigin-panels/siteorigin-panels.php"
+		}
+	]
+}
