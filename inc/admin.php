@@ -254,32 +254,50 @@ class SiteOrigin_Panels_Admin {
 			);
 		}
 
+		return self::validate_layout_structure( $decoded );
+	}
+
+	/**
+	 * Check that a decoded value is a layout the builder can load.
+	 *
+	 * The structural rule every layout write shares: the value is an object
+	 * whose `grids` and `grid_cells` are lists, `widgets` is a list when
+	 * present and is filled in as empty when absent, every cell points at an
+	 * existing row, and every widget points at an existing row and cell.
+	 * decode_panels_data() applies it to the decoded JSON of an editor save. A
+	 * write path that receives a layout as an array applies it directly.
+	 *
+	 * @param mixed $layout The decoded layout.
+	 *
+	 * @return array|null The layout, or null when it must not be written.
+	 */
+	public static function validate_layout_structure( $layout ) {
 		// Nothing the builder submits decodes to an empty array, and `{}` and
 		// `[]` are indistinguishable once decoded, so neither is a clear.
-		if ( ! is_array( $decoded ) || empty( $decoded ) ) {
+		if ( ! is_array( $layout ) || empty( $layout ) ) {
 			return null;
 		}
 
 		// A JSON list decodes to an array too; a layout is an object.
-		if ( array_keys( $decoded ) === range( 0, count( $decoded ) - 1 ) ) {
+		if ( array_keys( $layout ) === range( 0, count( $layout ) - 1 ) ) {
 			return null;
 		}
 
 		// The builder always serializes rows and cells; a layout without them is
 		// a partial object, and saving it would read as an empty layout.
 		foreach ( array( 'grids', 'grid_cells' ) as $key ) {
-			if ( ! array_key_exists( $key, $decoded ) || ! self::is_list( $decoded[ $key ] ) ) {
+			if ( ! array_key_exists( $key, $layout ) || ! self::is_list( $layout[ $key ] ) ) {
 				return null;
 			}
 		}
 
-		if ( ! array_key_exists( 'widgets', $decoded ) ) {
-			$decoded['widgets'] = array();
-		} elseif ( ! self::is_list( $decoded['widgets'] ) ) {
+		if ( ! array_key_exists( 'widgets', $layout ) ) {
+			$layout['widgets'] = array();
+		} elseif ( ! self::is_list( $layout['widgets'] ) ) {
 			return null;
 		}
 
-		return self::layout_references_resolve( $decoded ) ? $decoded : null;
+		return self::layout_references_resolve( $layout ) ? $layout : null;
 	}
 
 	/**
