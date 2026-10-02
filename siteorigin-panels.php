@@ -42,6 +42,7 @@ class SiteOrigin_Panels {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'siteorigin_panels_data', array( $this, 'process_panels_data' ), 5 );
 		add_filter( 'siteorigin_panels_widget_class', array( $this, 'fix_namespace_escaping' ), 5 );
+		add_filter( 'map_meta_cap', array( $this, 'restrict_panels_data_meta_caps' ), 10, 4 );
 
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -667,6 +668,34 @@ class SiteOrigin_Panels {
 	 */
 	public function fix_namespace_escaping( $class ) {
 		return preg_replace( '/\\\\+/', '\\', $class );
+	}
+
+	/**
+	 * Require unfiltered_html to add, edit or delete the panels_data post meta
+	 * through core meta-capability routes. Plugin writes use update_post_meta()
+	 * directly and do not pass through map_meta_cap, so they are unaffected.
+	 *
+	 * @param string[] $caps    Required primitive caps as mapped so far.
+	 * @param string   $cap     The capability being mapped.
+	 * @param int      $user_id Acting user ID.
+	 * @param array    $args    $args[0] = object (post) ID, $args[1] = meta key.
+	 *
+	 * @return string[] Unchanged $caps, or array( 'do_not_allow' ) to deny.
+	 */
+	public function restrict_panels_data_meta_caps( $caps, $cap, $user_id, $args ) {
+		if ( ! in_array( $cap, array( 'add_post_meta', 'edit_post_meta', 'delete_post_meta' ), true ) ) {
+			return $caps;
+		}
+
+		if ( ! isset( $args[1] ) || 'panels_data' !== $args[1] ) {
+			return $caps;
+		}
+
+		if ( user_can( $user_id, 'unfiltered_html' ) ) {
+			return $caps;
+		}
+
+		return array( 'do_not_allow' );
 	}
 
 	public static function front_css_url() {
