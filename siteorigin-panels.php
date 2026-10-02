@@ -679,9 +679,9 @@ class SiteOrigin_Panels {
 	 * - a key that is panels_data once its slashes are removed, as the metadata
 	 *   functions do, or once sanitize_key() has run on it, as a caller can do
 	 *   between its capability check and its write;
-	 * - a key that the database matches to the post's panels_data row. The
-	 *   metadata functions select the rows to update or delete with the
-	 *   database's own comparison of the key.
+	 * - a key that the database treats as equal to panels_data. The metadata
+	 *   functions select the rows to update or delete with the database's own
+	 *   comparison of the key.
 	 *
 	 * @param string[] $caps    Required primitive caps as mapped so far.
 	 * @param string   $cap     The capability being mapped.
@@ -699,31 +699,19 @@ class SiteOrigin_Panels {
 			return $caps;
 		}
 
-		$key       = $args[1];
-		$unslashed = wp_unslash( $key );
-
-		if ( in_array( 'panels_data', array( $key, $unslashed, sanitize_key( $unslashed ) ), true ) ) {
-			return user_can( $user_id, 'unfiltered_html' ) ? $caps : array( 'do_not_allow' );
-		}
-
-		// WordPress has already denied a meta capability that names no post.
-		$post_id = isset( $args[0] ) ? (int) $args[0] : 0;
-		if ( $post_id <= 0 ) {
-			return $caps;
-		}
-
 		if ( user_can( $user_id, 'unfiltered_html' ) ) {
 			return $caps;
 		}
 
-		// The post meta functions write to the parent of a revision.
-		$parent_id = wp_is_post_revision( $post_id );
-		if ( $parent_id ) {
-			$post_id = (int) $parent_id;
+		$key       = $args[1];
+		$unslashed = wp_unslash( $key );
+
+		if ( in_array( 'panels_data', array( $key, $unslashed, sanitize_key( $unslashed ) ), true ) ) {
+			return array( 'do_not_allow' );
 		}
 
 		foreach ( array_unique( array( $key, $unslashed ) ) as $candidate ) {
-			if ( $this->database_matches_panels_data_key( $post_id, $candidate ) ) {
+			if ( $this->database_equates_meta_key_with_panels_data( $candidate ) ) {
 				return array( 'do_not_allow' );
 			}
 		}
@@ -732,39 +720,38 @@ class SiteOrigin_Panels {
 	}
 
 	/**
-	 * Whether the database matches a meta key to the panels_data row of a post.
+	 * Whether the database treats a meta key as equal to panels_data.
 	 *
-	 * This is the comparison update_metadata() and delete_metadata() make when
-	 * they select rows, so the answer follows the collation of the meta key
-	 * column: letter case, accents and trailing spaces are decided by the
-	 * database, not here. The stored key of a matched row must be panels_data
-	 * exactly.
+	 * The comparison is the one update_metadata() and delete_metadata() make
+	 * when they select rows, so the answer follows the collation of the meta
+	 * key column: letter case, accents and trailing spaces are decided by the
+	 * database, not here. A stored key that is equal to both the given key and
+	 * panels_data shows the two are equal. The post is not part of the
+	 * question, so the answer holds for a post that gets its row later.
 	 *
-	 * The database is asked each time. The metadata cache and a remembered
-	 * answer can both be out of date within a request.
+	 * The database is asked each time; no answer is kept. A database with no
+	 * row equal to panels_data has nothing to compare with and gives no match.
 	 *
-	 * @param int    $post_id The post ID.
-	 * @param string $key     The meta key to compare.
+	 * @param string $key The meta key to compare.
 	 *
-	 * @return bool True for a match. Also true if the comparison could not be made.
+	 * @return bool True if equal. Also true if the comparison could not be made.
 	 */
-	private function database_matches_panels_data_key( $post_id, $key ) {
+	private function database_equates_meta_key_with_panels_data( $key ) {
 		global $wpdb;
 
-		$stored_keys = $wpdb->get_col(
+		$match = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT meta_key FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = %s",
-				$post_id,
+				"SELECT 1 FROM $wpdb->postmeta WHERE meta_key = %s AND meta_key = 'panels_data' LIMIT 1",
 				$key
 			)
 		);
 
-		// A failed query gives no answer. Treat the key as a match.
+		// A failed query gives no answer. Treat the key as equal.
 		if ( ! empty( $wpdb->last_error ) ) {
 			return true;
 		}
 
-		return in_array( 'panels_data', (array) $stored_keys, true );
+		return null !== $match;
 	}
 
 	public static function front_css_url() {
