@@ -11,6 +11,11 @@
  * - A REST route to report whether the site is a network.
  * - A REST route to read a post and its panels_data rows straight from the
  *   database, with the meta IDs the custom_fields route needs.
+ * - A REST route to read every meta row of a post as stored: the meta ID, the
+ *   stored key and the stored value string.
+ * - A REST route that writes post meta the way a remote publishing endpoint
+ *   does: a capability check on the supplied key, then the core function with
+ *   that same key.
  */
 
 if ( ! empty( $_SERVER['HTTP_X_PANELS_E2E_DISALLOW_UNFILTERED_HTML'] ) && ! defined( 'DISALLOW_UNFILTERED_HTML' ) ) {
@@ -68,6 +73,64 @@ add_action(
 						'author'  => $post ? (int) $post->post_author : null,
 						'meta'    => $meta,
 					);
+				},
+			)
+		);
+
+		register_rest_route(
+			'panels-e2e/v1',
+			'/post-meta/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => $permission,
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+
+					// Read the database directly: no metadata filters, no object cache.
+					$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d ORDER BY meta_id ASC", (int) $request['id'] ) );
+
+					$meta = array();
+					foreach ( $rows as $row ) {
+						$meta[] = array(
+							'meta_id'    => (int) $row->meta_id,
+							'meta_key'   => $row->meta_key,
+							'meta_value' => $row->meta_value,
+						);
+					}
+
+					return array( 'meta' => $meta );
+				},
+			)
+		);
+
+		register_rest_route(
+			'panels-e2e/v1',
+			'/meta-write',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					return current_user_can( 'edit_post', (int) $request->get_param( 'post_id' ) );
+				},
+				'callback'            => function ( WP_REST_Request $request ) {
+					$post_id   = (int) $request->get_param( 'post_id' );
+					$key       = (string) $request->get_param( 'key' );
+					$operation = (string) $request->get_param( 'operation' );
+
+					if ( $operation === 'update' ) {
+						$allowed = current_user_can( 'edit_post_meta', $post_id, $key );
+						if ( $allowed ) {
+							update_post_meta( $post_id, $key, $request->get_param( 'value' ) );
+						}
+					} elseif ( $operation === 'delete' ) {
+						$allowed = current_user_can( 'delete_post_meta', $post_id, $key );
+						if ( $allowed ) {
+							delete_post_meta( $post_id, $key );
+						}
+					} else {
+						return new WP_Error( 'panels_e2e_bad_operation', 'Unknown operation.', array( 'status' => 400 ) );
+					}
+
+					return array( 'allowed' => $allowed );
 				},
 			)
 		);
