@@ -24,7 +24,7 @@ use PHPUnit\Framework\TestCase;
 class StoredLayoutCssSelectorTest extends TestCase {
 	use MockeryPHPUnitIntegration;
 
-	const MARKUP_REFERENCE = 'x</style><script>alert(1)</script><style>';
+	const MARKUP_REFERENCE = 'x</style><script>x</script><style>';
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -199,18 +199,18 @@ class StoredLayoutCssSelectorTest extends TestCase {
 			->generate_css( 42, $this->stored_layout( self::MARKUP_REFERENCE ) );
 
 		$this->assert_no_markup( $css );
-		$this->assertStringContainsString( '#pgc-42-xstylescriptalert1scriptstyle-0', $css, 'The reference stays in the selector as plain identifier characters.' );
+		$this->assertStringContainsString( '#pgc-42-xstylescriptxscriptstyle-0', $css, 'The reference stays in the selector as plain identifier characters.' );
 	}
 
 	public function test_modern_renderer_keeps_a_rule_cell_row_reference_inside_a_selector() {
 		$css = $this->renderer( \SiteOrigin_Panels_Renderer::class )
-			->generate_css( 42, $this->stored_layout( '0 , body { display:none } #x' ) );
+			->generate_css( 42, $this->stored_layout( '0 , blockquote { color:red } #x' ) );
 
 		foreach ( $this->selectors( $css ) as $selector ) {
-			$this->assertStringNotContainsString( 'body', str_replace( '0bodydisplaynonex', '', $selector ), 'No selector may target an element outside the layout: ' . $selector );
+			$this->assertStringNotContainsString( 'blockquote', str_replace( '0blockquotecolorredx', '', $selector ), 'No selector may target an element outside the layout: ' . $selector );
 		}
-		$this->assertStringNotContainsString( 'display:none } #x', $css );
-		$this->assertStringContainsString( '#pgc-42-0bodydisplaynonex-0', $css );
+		$this->assertStringNotContainsString( 'color:red } #x', $css );
+		$this->assertStringContainsString( '#pgc-42-0blockquotecolorredx-0', $css );
 	}
 
 	/**
@@ -243,8 +243,8 @@ class StoredLayoutCssSelectorTest extends TestCase {
 			->generate_css( 42, $this->stored_layout( self::MARKUP_REFERENCE ) );
 
 		$this->assert_no_markup( $css );
-		$this->assertStringContainsString( '#pgc-42-xstylescriptalert1scriptstyle-0', $css );
-		$this->assertStringContainsString( '#xstylescriptalert1scriptstyle', $css, 'The row selector carries the same plain identifier.' );
+		$this->assertStringContainsString( '#pgc-42-xstylescriptxscriptstyle-0', $css );
+		$this->assertStringContainsString( '#xstylescriptxscriptstyle', $css, 'The row selector carries the same plain identifier.' );
 	}
 
 	public function test_legacy_renderer_keeps_a_markup_widget_id_inside_a_selector() {
@@ -260,7 +260,7 @@ class StoredLayoutCssSelectorTest extends TestCase {
 		);
 
 		$this->assert_no_markup( $css );
-		$this->assertStringContainsString( '#panel-42-0-0-xstylescriptalert1scriptstyle a { color:#ff0000 } ', $css );
+		$this->assertStringContainsString( '#panel-42-0-0-xstylescriptxscriptstyle a { color:#ff0000 } ', $css );
 	}
 
 	public function test_legacy_renderer_keeps_markup_widget_row_and_cell_references_inside_a_selector() {
