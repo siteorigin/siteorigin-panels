@@ -257,6 +257,170 @@ class CssBuilderSelectorIndexTest extends TestCase {
 		}
 	}
 
+	/* ---- The fast path gives the same result as the full check ---- */
+
+	/**
+	 * The index handling without its fast paths: the UTF-8 check and the two
+	 * patterns, applied to every string on every call. The builder must return
+	 * the same bytes as this for every input.
+	 */
+	private static function reference_index( $index ) {
+		if ( ! is_string( $index ) ) {
+			return $index;
+		}
+
+		if ( ! mb_check_encoding( $index, 'UTF-8' ) ) {
+			return preg_replace( '/[^A-Za-z0-9_-]/', '', $index );
+		}
+
+		if ( preg_match( '/^[\x{0080}-\x{10FFFF}A-Za-z0-9_-]+\z/u', $index ) ) {
+			return $index;
+		}
+
+		return preg_replace( '/[^\x{0080}-\x{10FFFF}A-Za-z0-9_-]/u', '', $index );
+	}
+
+	private function builder_index( $index ) {
+		$method = new \ReflectionMethod( \SiteOrigin_Panels_Css_Builder::class, 'safe_selector_index' );
+		$method->setAccessible( true );
+
+		return $method->invoke( new \SiteOrigin_Panels_Css_Builder(), $index );
+	}
+
+	public function test_the_empty_string_is_returned_unchanged() {
+		$this->assertSame( '', $this->builder_index( '' ) );
+		$this->assertSame( '', self::reference_index( '' ) );
+		$this->assertSame( '# { color:red } ', $this->css( 'add_row_css', array( 12, '', '', array( 'color' => 'red' ) ) ) );
+	}
+
+	public function test_every_single_byte_gives_the_same_result_as_the_full_check() {
+		for ( $byte = 0; $byte < 256; $byte++ ) {
+			$index = chr( $byte );
+
+			$this->assertSame( self::reference_index( $index ), $this->builder_index( $index ), 'Byte ' . $byte );
+			$this->assertSame( self::reference_index( 'a' . $index . 'b' ), $this->builder_index( 'a' . $index . 'b' ), 'Byte ' . $byte . ' inside a safe string' );
+		}
+	}
+
+	public function test_the_safe_ascii_characters_are_exactly_the_ones_kept() {
+		$kept = '';
+
+		for ( $byte = 0; $byte < 128; $byte++ ) {
+			$kept .= $this->builder_index( chr( $byte ) );
+		}
+
+		$this->assertSame( '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz', $kept );
+	}
+
+	public function test_generated_strings_give_the_same_result_as_the_full_check() {
+		// Safe ASCII, other ASCII, multi-byte characters and bytes that are not
+		// valid UTF-8, mixed at random with a fixed seed.
+		$pieces = array(
+			'a', 'Z', '0', '9', '_', '-', 'gb42', 'row',
+			' ', '<', '>', '{', '}', ';', ':', '.', '#', ',', '"', "'", '/', '*', '\\', "\n", "\t", "\0", '$', '[', ']', '(', ')',
+			'ü', 'é', '行', '😀', "\u{00A0}", "\u{2028}",
+			"\xff", "\xfe", "\xc3", "\x80", "\xe2\x82",
+		);
+		$last = count( $pieces ) - 1;
+
+		mt_srand( 1379 );
+
+		for ( $run = 0; $run < 20000; $run++ ) {
+			$index  = '';
+			$length = mt_rand( 0, 8 );
+
+			for ( $position = 0; $position < $length; $position++ ) {
+				// Lean towards the safe pieces so both paths get many inputs.
+				$index .= $pieces[ mt_rand( 0, mt_rand( 0, 3 ) === 0 ? $last : 7 ) ];
+			}
+
+			$this->assertSame( self::reference_index( $index ), $this->builder_index( $index ), 'Index ' . bin2hex( $index ) );
+		}
+	}
+
+	/**
+	 * The row selector one builder gives for $index, with the CSS it has
+	 * collected so far cleared. The builder keeps its record of checked
+	 * indexes between calls.
+	 */
+	private function row_selector_on( $builder, $index ) {
+		$builder->css = array();
+		$builder->add_row_css( 12, $index, '', array( 'color' => 'red' ), 1920, true );
+
+		return $builder->get_css();
+	}
+
+	public function test_one_builder_gives_the_same_result_for_every_call_with_generated_strings() {
+		// The same generated strings, all through ONE builder, so an index it
+		// has already checked is used again and again between other indexes.
+		$pieces = array(
+			'a', 'Z', '0', '9', '_', '-', 'gb42', 'row',
+			' ', '<', '{', ';', '.', ',', "\n", 'ü', '行', "\xff", "\xc3",
+		);
+		$last    = count( $pieces ) - 1;
+		$builder = new \SiteOrigin_Panels_Css_Builder();
+
+		mt_srand( 1379 );
+
+		for ( $run = 0; $run < 20000; $run++ ) {
+			$index  = '';
+			$length = mt_rand( 0, 3 );
+
+			for ( $position = 0; $position < $length; $position++ ) {
+				$index .= $pieces[ mt_rand( 0, mt_rand( 0, 2 ) === 0 ? $last : 7 ) ];
+			}
+
+			$this->assertSame(
+				'#pl-12 #' . self::reference_index( $index ) . ' { color:red } ',
+				$this->row_selector_on( $builder, $index ),
+				'Index ' . bin2hex( $index )
+			);
+		}
+	}
+
+	public function test_a_checked_index_does_not_let_a_different_index_through() {
+		$builder = new \SiteOrigin_Panels_Css_Builder();
+
+		// Check and record these first.
+		$this->assertSame( '#pl-12 #42 { color:red } ', $this->row_selector_on( $builder, '42' ) );
+		$this->assertSame( '#pl-12 #abc { color:red } ', $this->row_selector_on( $builder, 'abc' ) );
+		$this->assertSame( '#pl-12 # { color:red } ', $this->row_selector_on( $builder, '' ) );
+
+		// Indexes that are near a recorded one are still checked.
+		$this->assertSame( '#pl-12 #42 { color:red } ', $this->row_selector_on( $builder, '42 ' ) );
+		$this->assertSame( '#pl-12 #42 { color:red } ', $this->row_selector_on( $builder, ' 42' ) );
+		$this->assertSame( '#pl-12 #42 { color:red } ', $this->row_selector_on( $builder, '+42' ) );
+		$this->assertSame( '#pl-12 #420 { color:red } ', $this->row_selector_on( $builder, '42.0' ) );
+		$this->assertSame( '#pl-12 #042 { color:red } ', $this->row_selector_on( $builder, '042<' ) );
+		$this->assertSame( '#pl-12 #abc { color:red } ', $this->row_selector_on( $builder, 'abc<' ) );
+		$this->assertSame( '#pl-12 #abc { color:red } ', $this->row_selector_on( $builder, "abc\n" ) );
+		$this->assertSame( '#pl-12 # { color:red } ', $this->row_selector_on( $builder, ' ' ) );
+		$this->assertSame( '#pl-12 # { color:red } ', $this->row_selector_on( $builder, "\0" ) );
+
+		// An integer index is a positional row, also after the string "42" was recorded.
+		$this->assertSame( '#pl-12 #pg-12-42 { color:red } ', $this->row_selector_on( $builder, 42 ) );
+
+		// The recorded indexes give the same result again.
+		$this->assertSame( '#pl-12 #42 { color:red } ', $this->row_selector_on( $builder, '42' ) );
+		$this->assertSame( '#pl-12 #abc { color:red } ', $this->row_selector_on( $builder, 'abc' ) );
+	}
+
+	public function test_an_index_with_other_characters_is_cleaned_on_every_call_of_one_builder() {
+		$builder = new \SiteOrigin_Panels_Css_Builder();
+
+		for ( $call = 0; $call < 3; $call++ ) {
+			$this->assertSame( '#pl-12 #ab { color:red } ', $this->row_selector_on( $builder, 'a b' ) );
+			$this->assertSame( '#pl-12 #überx { color:red } ', $this->row_selector_on( $builder, 'über<x' ) );
+			$this->assertSame( '#pl-12 #über-row { color:red } ', $this->row_selector_on( $builder, 'über-row' ) );
+		}
+	}
+
+	public function test_values_that_are_not_strings_are_returned_as_they_are() {
+		foreach ( array( 0, 7, -1, false, true, null, 1.5 ) as $index ) {
+			$this->assertSame( $index, $this->builder_index( $index ) );
+		}
+	}
+
 	/* ---- Index types the builder branches on ---- */
 
 	public function test_integer_zero_and_string_zero_keep_their_separate_selectors() {
