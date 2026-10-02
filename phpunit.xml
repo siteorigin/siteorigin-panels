@@ -32,6 +32,10 @@
                  predicate; AbilitiesTest's Admin shim claims the class name in this
                  suite, so it runs under phpunit-save-post.xml instead. -->
             <exclude>./tests/KsesDeepTest.php</exclude>
+            <!-- The meta capability suite loads the REAL siteorigin-panels.php, which
+                 defines SiteOrigin_Panels; several tests here define a stand-in under
+                 that name. It runs separately via phpunit-meta-cap.xml. -->
+            <exclude>./tests/meta-cap</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
