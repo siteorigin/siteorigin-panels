@@ -25,14 +25,6 @@ require_once plugin_dir_path( __FILE__ ) . 'inc/functions.php';
 class SiteOrigin_Panels {
 	public $container = array();
 
-	/**
-	 * Whether the database matches a meta key to a post's panels_data row, by
-	 * site, post and key. Kept for the request.
-	 *
-	 * @var bool[]
-	 */
-	private $panels_data_key_matches = array();
-
 	public function __construct() {
 		register_activation_hook( __FILE__, array( 'SiteOrigin_Panels', 'activate' ) );
 
@@ -683,11 +675,13 @@ class SiteOrigin_Panels {
 	 * through core meta-capability routes. Plugin writes use update_post_meta()
 	 * directly and do not pass through map_meta_cap, so they are unaffected.
 	 *
-	 * The metadata functions remove slashes from a key, and select the rows to
-	 * update or delete with the database's own comparison of the key. So the
-	 * same rule applies to a key that is panels_data once its slashes are
-	 * removed, and to a key that the database matches to the post's
-	 * panels_data row.
+	 * The same rule applies to a key that resolves to panels_data:
+	 * - a key that is panels_data once its slashes are removed, as the metadata
+	 *   functions do, or once sanitize_key() has run on it, as a caller can do
+	 *   between its capability check and its write;
+	 * - a key that the database matches to the post's panels_data row. The
+	 *   metadata functions select the rows to update or delete with the
+	 *   database's own comparison of the key.
 	 *
 	 * @param string[] $caps    Required primitive caps as mapped so far.
 	 * @param string   $cap     The capability being mapped.
@@ -705,36 +699,31 @@ class SiteOrigin_Panels {
 			return $caps;
 		}
 
-		// The key as given, and the key the metadata functions write.
-		$keys          = array_unique( array( $args[1], wp_unslash( $args[1] ) ) );
-		$is_layout_key = in_array( 'panels_data', $keys, true );
-		$post_id       = 0;
+		$key       = $args[1];
+		$unslashed = wp_unslash( $key );
 
-		if ( ! $is_layout_key ) {
-			$post_id = isset( $args[0] ) ? (int) $args[0] : 0;
+		if ( in_array( 'panels_data', array( $key, $unslashed, sanitize_key( $unslashed ) ), true ) ) {
+			return user_can( $user_id, 'unfiltered_html' ) ? $caps : array( 'do_not_allow' );
+		}
 
-			// The post meta functions write to the parent of a revision.
-			$parent_id = wp_is_post_revision( $post_id );
-			if ( $parent_id ) {
-				$post_id = (int) $parent_id;
-			}
-
-			// Another key can only resolve to the panels_data row of a post that has one.
-			if ( ! metadata_exists( 'post', $post_id, 'panels_data' ) ) {
-				return $caps;
-			}
+		// WordPress has already denied a meta capability that names no post.
+		$post_id = isset( $args[0] ) ? (int) $args[0] : 0;
+		if ( $post_id <= 0 ) {
+			return $caps;
 		}
 
 		if ( user_can( $user_id, 'unfiltered_html' ) ) {
 			return $caps;
 		}
 
-		if ( $is_layout_key ) {
-			return array( 'do_not_allow' );
+		// The post meta functions write to the parent of a revision.
+		$parent_id = wp_is_post_revision( $post_id );
+		if ( $parent_id ) {
+			$post_id = (int) $parent_id;
 		}
 
-		foreach ( $keys as $key ) {
-			if ( $this->database_matches_panels_data_key( $post_id, $key ) ) {
+		foreach ( array_unique( array( $key, $unslashed ) ) as $candidate ) {
+			if ( $this->database_matches_panels_data_key( $post_id, $candidate ) ) {
 				return array( 'do_not_allow' );
 			}
 		}
@@ -751,6 +740,9 @@ class SiteOrigin_Panels {
 	 * database, not here. The stored key of a matched row must be panels_data
 	 * exactly.
 	 *
+	 * The database is asked each time. The metadata cache and a remembered
+	 * answer can both be out of date within a request.
+	 *
 	 * @param int    $post_id The post ID.
 	 * @param string $key     The meta key to compare.
 	 *
@@ -758,11 +750,6 @@ class SiteOrigin_Panels {
 	 */
 	private function database_matches_panels_data_key( $post_id, $key ) {
 		global $wpdb;
-
-		$cache_key = get_current_blog_id() . ':' . $post_id . ':' . $key;
-		if ( isset( $this->panels_data_key_matches[ $cache_key ] ) ) {
-			return $this->panels_data_key_matches[ $cache_key ];
-		}
 
 		$stored_keys = $wpdb->get_col(
 			$wpdb->prepare(
@@ -772,14 +759,12 @@ class SiteOrigin_Panels {
 			)
 		);
 
-		// A failed query gives no answer. Treat the key as a match, and do not keep that.
+		// A failed query gives no answer. Treat the key as a match.
 		if ( ! empty( $wpdb->last_error ) ) {
 			return true;
 		}
 
-		$this->panels_data_key_matches[ $cache_key ] = in_array( 'panels_data', (array) $stored_keys, true );
-
-		return $this->panels_data_key_matches[ $cache_key ];
+		return in_array( 'panels_data', (array) $stored_keys, true );
 	}
 
 	public static function front_css_url() {
