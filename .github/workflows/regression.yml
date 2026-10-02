@@ -37,6 +37,16 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
+      # The builder scripts and styles are build outputs (not in git). The builder browser tests need them.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 10.18.1
+      - name: Build the builder scripts and styles
+        working-directory: build
+        run: |
+          npm ci
+          npx gulp css browserify
+      - run: test -f js/siteorigin-panels.js && test -f css/admin.css
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
