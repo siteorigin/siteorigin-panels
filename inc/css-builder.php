@@ -53,6 +53,37 @@ class SiteOrigin_Panels_Css_Builder {
 	}
 
 	/**
+	 * Make a layout, row, cell or widget index safe to place in a selector.
+	 *
+	 * The index is concatenated into a selector as it is, so it may hold only
+	 * the characters an unescaped identifier can carry. A value that is not a
+	 * string (an integer index, or false for "all") is returned unchanged, so
+	 * each method still branches on its type. A string keeps every non-ASCII
+	 * character and the ASCII characters A-Z, a-z, 0-9, `_` and `-`; any other
+	 * ASCII character is removed. A string that is not valid UTF-8 keeps only
+	 * those ASCII characters.
+	 *
+	 * @param mixed $index The index as the caller supplied it.
+	 *
+	 * @return mixed
+	 */
+	private function safe_selector_index( $index ) {
+		if ( ! is_string( $index ) ) {
+			return $index;
+		}
+
+		if ( ! function_exists( 'mb_check_encoding' ) || ! mb_check_encoding( $index, 'UTF-8' ) ) {
+			return preg_replace( '/[^A-Za-z0-9_-]/', '', $index );
+		}
+
+		if ( preg_match( '/^[\x{0080}-\x{10FFFF}A-Za-z0-9_-]+\z/u', $index ) ) {
+			return $index;
+		}
+
+		return preg_replace( '/[^\x{0080}-\x{10FFFF}A-Za-z0-9_-]/u', '', $index );
+	}
+
+	/**
 	 * Add CSS that applies to a row or group of rows.
 	 *
 	 * @param int             $li             The layout ID. If false, then the CSS applies to all layouts.
@@ -63,6 +94,9 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool            $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_row_css( $li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		$li = $this->safe_selector_index( $li );
+		$ri = $this->safe_selector_index( $ri );
+
 		$selector = array();
 
 		// Special case of `> .panel-row-style` sub_selector
@@ -102,6 +136,10 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool     $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		$li = $this->safe_selector_index( $li );
+		$ri = $this->safe_selector_index( $ri );
+		$ci = $this->safe_selector_index( $ci );
+
 		$selector_parts = array();
 
 		if ( $ri === false && $ci === false ) {
@@ -158,6 +196,11 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool     $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		$li = $this->safe_selector_index( $li );
+		$ri = $this->safe_selector_index( $ri );
+		$ci = $this->safe_selector_index( $ci );
+		$wi = $this->safe_selector_index( $wi );
+
 		$selector = array();
 
 		if ( $ri === false && $ci === false && $wi === false ) {
