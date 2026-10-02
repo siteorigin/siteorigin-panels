@@ -62,14 +62,14 @@ class AiCallSiteArityTest extends SiteOriginTests {
 				$this->raw_args     = func_get_args();
 				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
 
-				return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+				return Abilities_Fixtures::CLEANED;
 			}
 		};
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 61,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -99,7 +99,7 @@ class AiCallSiteArityTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 62,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 

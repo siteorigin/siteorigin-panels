@@ -50,6 +50,34 @@ class Abilities_CallLog {
 }
 
 /**
+ * Layout fixtures the builder can load: one row with one cell, and every
+ * widget placed in that cell. The layout-update ability refuses a layout
+ * without rows, cells and widget placements, so every write fixture uses
+ * these.
+ */
+class Abilities_Fixtures {
+	// The widget set the default sanitizer stand-ins return.
+	const CLEANED = array( array( 'panels_info' => array( 'class' => 'Cleaned', 'grid' => 0, 'cell' => 0 ) ) );
+
+	// A widget of $class placed in row 0, cell 0, with any extra $fields.
+	public static function widget( $class, array $fields = array() ) {
+		return array_merge(
+			$fields,
+			array( 'panels_info' => array( 'class' => $class, 'grid' => 0, 'cell' => 0 ) )
+		);
+	}
+
+	// A layout of one row and one cell that holds $widgets as given.
+	public static function layout( array $widgets = array() ) {
+		return array(
+			'widgets'    => $widgets,
+			'grids'      => array( array( 'cells' => 1 ) ),
+			'grid_cells' => array( array( 'grid' => 0, 'weight' => 1 ) ),
+		);
+	}
+}
+
+/**
  * Spyable stand-in for SiteOrigin_Panels_Admin::single()->process_raw_widgets().
  * Records the arguments it received so tests can assert the §3 sanitize contract.
  */
@@ -68,7 +96,7 @@ class Abilities_AdminSpy {
 
 		// Simulate a cleaned widget set so tests can assert persisted data is the
 		// sanitizer output, not raw input.
-		return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+		return Abilities_Fixtures::CLEANED;
 	}
 
 	// Mirrors SiteOrigin_Panels_Admin::with_save_guard(): just runs the callback,
@@ -98,6 +126,94 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 		// meta-write slashing (map_deep + this callback) runs in tests.
 		public static function double_slash_string( $value ) {
 			return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
+		}
+
+		// A copy of the real SiteOrigin_Panels_Admin::validate_layout_structure()
+		// and its two helpers, which the meta write calls. The real class cannot
+		// load in this suite.
+		public static function validate_layout_structure( $layout ) {
+			if ( ! is_array( $layout ) || empty( $layout ) ) {
+				return null;
+			}
+
+			if ( array_keys( $layout ) === range( 0, count( $layout ) - 1 ) ) {
+				return null;
+			}
+
+			foreach ( array( 'grids', 'grid_cells' ) as $key ) {
+				if ( ! array_key_exists( $key, $layout ) || ! self::is_list( $layout[ $key ] ) ) {
+					return null;
+				}
+			}
+
+			if ( ! array_key_exists( 'widgets', $layout ) ) {
+				$layout['widgets'] = array();
+			} elseif ( ! self::is_list( $layout['widgets'] ) ) {
+				return null;
+			}
+
+			return self::layout_references_resolve( $layout ) ? $layout : null;
+		}
+
+		private static function layout_references_resolve( $layout ) {
+			foreach ( $layout['grids'] as $row ) {
+				if ( ! is_array( $row ) ) {
+					return false;
+				}
+			}
+
+			$row_count = count( $layout['grids'] );
+			$cells_per_row = array_fill( 0, max( $row_count, 1 ), 0 );
+
+			foreach ( $layout['grid_cells'] as $cell ) {
+				if ( ! is_array( $cell ) || ! isset( $cell['grid'] ) || ! is_numeric( $cell['grid'] ) ) {
+					return false;
+				}
+
+				$row = (int) $cell['grid'];
+
+				if ( $row < 0 || $row >= $row_count ) {
+					return false;
+				}
+
+				$cells_per_row[ $row ] ++;
+			}
+
+			foreach ( $layout['widgets'] as $widget ) {
+				$info = null;
+				if ( is_array( $widget ) ) {
+					if ( ! empty( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+						$info = $widget['panels_info'];
+					} elseif ( ! empty( $widget['info'] ) && is_array( $widget['info'] ) ) {
+						$info = $widget['info'];
+					}
+				}
+
+				if ( $info === null ) {
+					return false;
+				}
+
+				if ( ! isset( $info['grid'], $info['cell'] ) || ! is_numeric( $info['grid'] ) || ! is_numeric( $info['cell'] ) ) {
+					return false;
+				}
+
+				$row = (int) $info['grid'];
+				$cell = (int) $info['cell'];
+
+				if ( $row < 0 || $row >= $row_count || $cell < 0 || $cell >= $cells_per_row[ $row ] ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private static function is_list( $value ) {
+			if ( ! is_array( $value ) ) {
+				return false;
+			}
+
+			return empty( $value ) || array_keys( $value ) === range( 0, count( $value ) - 1 );
 		}
 
 		// Mirrors the real SiteOrigin_Panels_Admin::kses_deep() shape (recursive
@@ -174,7 +290,7 @@ class Abilities_LayoutBlockSpy {
 		$this->untrusted_calls++;
 		$this->received_block = $block;
 
-		$block['attrs']['panelsData']['widgets'] = array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+		$block['attrs']['panelsData']['widgets'] = Abilities_Fixtures::CLEANED;
 		unset( $block['innerHTML'] );
 
 		return $block;
@@ -233,7 +349,7 @@ class Abilities_EmulatorSpy {
 	public function generate_sidebar_widget_ids( $widgets, $post_id ) {
 		$this->called = true;
 
-		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged' ) ) );
+		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged', 'grid' => 0, 'cell' => 0 ) ) );
 	}
 }
 
@@ -550,7 +666,7 @@ class AbilitiesTest extends SiteOriginTests {
 				$this->seen_widgets = $widgets;
 				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
 
-				return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+				return Abilities_Fixtures::CLEANED;
 			}
 		};
 
@@ -558,11 +674,11 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$object_widget = (object) array(
 			'content'     => '<script>alert(1)</script>',
-			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+			'panels_info' => array( 'class' => 'WP_Widget_Text', 'grid' => 0, 'cell' => 0 ),
 		);
 
 		$this->abilities()->layout_update(
-			array( 'post_id' => 9, 'panels_data' => array( 'widgets' => array( $object_widget ) ) )
+			array( 'post_id' => 9, 'panels_data' => Abilities_Fixtures::layout( array( $object_widget ) ) )
 		);
 
 		$seen = Abilities_AdminSpy::$instance->seen_widgets;
@@ -594,7 +710,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 9,
-				'panels_data' => array( 'widgets' => array( 'not-a-widget', array( 'panels_info' => array( 'class' => 'Keep' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( 'not-a-widget', Abilities_Fixtures::widget( 'Keep' ) ) ),
 			)
 		);
 
@@ -648,10 +764,12 @@ class AbilitiesTest extends SiteOriginTests {
 			}
 		);
 
+		$incoming = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'New' ) ) );
+
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 7,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
+				'panels_data' => $incoming,
 			)
 		);
 
@@ -665,7 +783,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$spy = Abilities_LayoutBlockSpy::$instance;
 		$this->assertSame( 1, $spy->untrusted_calls, 'Block write must call sanitize_block_untrusted() exactly once.' );
 		$this->assertSame(
-			array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
+			$incoming,
 			$spy->received_block['attrs']['panelsData'],
 			'The chokepoint must receive the raw incoming layout — no pre-processing in abilities code.'
 		);
@@ -678,7 +796,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// The written block carries the CHOKEPOINT output — sanitized.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$saved['post_content'][0]['attrs']['panelsData']['widgets']
 		);
 	}
@@ -722,7 +840,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 9,
-				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
 				'block_index' => 1,
 			)
 		);
@@ -734,7 +852,7 @@ class AbilitiesTest extends SiteOriginTests {
 		// Layout block_index 1 == array key 2 (paragraph at 0, block0 at 1, block1 at 2).
 		$written = $saved['post_content'];
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$written[2]['attrs']['panelsData']['widgets'],
 			'Targeted block (index 1) must receive the sanitized layout.'
 		);
@@ -839,7 +957,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 21,
-				'panels_data' => array( 'widgets' => array( 'new-for-C' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'NewForC' ) ) ),
 				'block_index' => 1,
 			)
 		);
@@ -850,7 +968,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$written = $saved['post_content'];
 		// Parse-key 2 (C) received the sanitized layout.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$written[2]['attrs']['panelsData']['widgets'],
 			'block_index 1 must write parse-key 2 (C), not the emptied middle block.'
 		);
@@ -883,7 +1001,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( 'meta-new' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'MetaNew' ) ) ),
 			)
 		);
 
@@ -913,7 +1031,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( 'block-new' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'BlockNew' ) ) ),
 				'block_index' => 0,
 			)
 		);
@@ -935,7 +1053,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 41,
-				'panels_data' => array( 'widgets' => array() ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1015,10 +1133,8 @@ class AbilitiesTest extends SiteOriginTests {
 			array(
 				'post_id'     => 51,
 				'block_index' => 0,
-				'panels_data' => array(
-					'widgets' => array(
-						array( 'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ), 'content' => $original_html ),
-					),
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'WP_Widget_Custom_HTML', array( 'content' => $original_html ) ) )
 				),
 			)
 		);
@@ -1064,14 +1180,14 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$object_widget = (object) array(
 			'content'     => '<script>alert(1)</script>',
-			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+			'panels_info' => array( 'class' => 'WP_Widget_Text', 'grid' => 0, 'cell' => 0 ),
 		);
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 7,
 				'block_index' => 0,
-				'panels_data' => array( 'widgets' => array( $object_widget ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( $object_widget ) ),
 			)
 		);
 
@@ -1099,12 +1215,12 @@ class AbilitiesTest extends SiteOriginTests {
 			}
 		);
 
-		$hostile = array( 'panels_info' => array( 'class' => 'Evil_Widget' ), 'raw' => '<script>' );
+		$hostile = Abilities_Fixtures::widget( 'Evil_Widget', array( 'raw' => '<script>' ) );
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 12,
-				'panels_data' => array( 'widgets' => array( $hostile ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( $hostile ) ),
 			)
 		);
 
@@ -1128,7 +1244,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 12, $persisted[0] );
 		$this->assertSame( 'panels_data', $persisted[1] );
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$persisted[2]['widgets'],
 			'Persisted widgets must be the sanitizer output, not raw ability input.'
 		);
@@ -1155,9 +1271,9 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 12,
-				'panels_data' => array(
-					'widgets'            => array( array( 'panels_info' => array( 'class' => 'X' ) ) ),
-					'sanitize_signature' => 'forged-or-copied-signature',
+				'panels_data' => array_merge(
+					Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+					array( 'sanitize_signature' => 'forged-or-copied-signature' )
 				),
 			)
 		);
@@ -1189,7 +1305,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 				return array(
 					array(
-						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo' ),
+						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo', 'grid' => 0, 'cell' => 0 ),
 						'text'        => 'C:\\path\\to\\file',
 						'content'     => '<img src=x onerror=alert(1)>',
 					),
@@ -1210,7 +1326,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 21,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1255,7 +1371,7 @@ class AbilitiesTest extends SiteOriginTests {
 				// custom-HTML widget for an unfiltered_html author).
 				return array(
 					array(
-						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ),
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML', 'grid' => 0, 'cell' => 0 ),
 						'content'     => '<img src=x onerror=alert(1)>',
 					),
 				);
@@ -1274,7 +1390,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 22,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1307,7 +1423,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 30,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1344,7 +1460,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1372,7 +1488,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1447,7 +1563,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 40,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1475,7 +1591,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 41,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1506,7 +1622,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 13,
-				'panels_data' => array( 'widgets' => array() ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1525,7 +1641,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 14,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1539,7 +1655,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// It must receive the FINAL sanitized layout (the sanitizer output), not raw input.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$copy_args[2]['widgets'],
 			'copy_content_to_post() must render the sanitized panels_data, never raw input.'
 		);
@@ -1556,7 +1672,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 15,
-				'panels_data' => array( 'widgets' => array( 'w' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'W' ) ) ),
 			)
 		);
 
@@ -1577,7 +1693,7 @@ class AbilitiesTest extends SiteOriginTests {
 			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
 				return array(
 					array(
-						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ),
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML', 'grid' => 0, 'cell' => 0 ),
 						'content'     => '<img src=x onerror=alert(1)>',
 					),
 				);
@@ -1605,7 +1721,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 22,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1642,7 +1758,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 23,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1664,7 +1780,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 24,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1727,7 +1843,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 27,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1761,13 +1877,8 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 28,
-				'panels_data' => array(
-					'widgets' => array(
-						array(
-							'panels_info' => array( 'class' => 'X' ),
-							'setting'     => $setting,
-						),
-					),
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'X', array( 'setting' => $setting ) ) )
 				),
 			)
 		);
@@ -1803,13 +1914,8 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 29,
-				'panels_data' => array(
-					'widgets' => array(
-						array(
-							'panels_info' => array( 'class' => 'X' ),
-							'setting'     => new Abilities_PrivateSettingHolder( $inner ),
-						),
-					),
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'X', array( 'setting' => new Abilities_PrivateSettingHolder( $inner ) ) ) )
 				),
 			)
 		);
@@ -1831,7 +1937,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 51,
-				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
 			)
 		);
 
@@ -1848,7 +1954,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 52,
-				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
 				'block_index' => 2,
 			)
 		);
@@ -1869,7 +1975,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 53,
-				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
 			)
 		);
 
