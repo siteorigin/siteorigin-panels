@@ -130,7 +130,8 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 
 		// A copy of the real SiteOrigin_Panels_Admin::validate_layout_structure()
 		// and its two helpers, which the meta write calls. The real class cannot
-		// load in this suite.
+		// load in this suite. tests/fixtures/layout-structure-cases.php holds
+		// the cases that both this copy and the real method must agree on.
 		public static function validate_layout_structure( $layout ) {
 			if ( ! is_array( $layout ) || empty( $layout ) ) {
 				return null;
@@ -1981,6 +1982,318 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$this->assertSame( $error, $result );
 		$this->assertNull( Abilities_AdminSpy::$instance->copy_content_args );
+	}
+
+	// --- layout-update: layout structure rule (classic/meta path) -------------
+
+	/**
+	 * Cell row references the builder cannot resolve.
+	 */
+	public static function unresolved_cell_row_references() {
+		return array(
+			'a word'                    => array( 'x' ),
+			'a word with a number'      => array( 'row-1' ),
+			'a number then other text'  => array( '0 {} *' ),
+			'a row that does not exist' => array( 7 ),
+			'a negative row'            => array( -1 ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'unresolved_cell_row_references' )]
+	public function test_meta_write_refuses_a_cell_row_reference_that_does_not_resolve( $reference ) {
+		$this->classic_post( 71 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout                          = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) );
+		$layout['grid_cells'][0]['grid'] = $reference;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 71,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertSame( 71, $result['post_id'] );
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assertNotSame( '', trim( $result['message'] ) );
+		$this->assertCount( 0, $this->pre_write_calls, 'The pre-write hook does not fire for a refused layout.' );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_widget_reference_that_does_not_resolve() {
+		$this->classic_post( 72 );
+		$this->passthrough_admin_spy();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout                                   = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) );
+		$layout['widgets'][0]['panels_info']['cell'] = 3;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 72,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_reference_changed_by_the_pre_save_filter() {
+		// The check runs on the final layout, after the pre-save filter.
+		$this->classic_post( 73 );
+		$this->passthrough_admin_spy();
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data_pre_save' ) {
+					$value['grid_cells'][0]['grid'] = 'x';
+				}
+
+				return $value;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 73,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_widgets_only_layout_with_a_clear_message() {
+		$this->classic_post( 74 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 74,
+				'panels_data' => array(
+					'widgets' => array( array( 'panels_info' => array( 'class' => 'WP_Widget_Text' ), 'text' => 'Hello' ) ),
+				),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		// The message names each part of the layout the caller must supply.
+		$this->assertStringContainsString( 'grids', $result['message'] );
+		$this->assertStringContainsString( 'grid_cells', $result['message'] );
+		$this->assertStringContainsString( 'panels_info.grid', $result['message'] );
+		$this->assertStringContainsString( 'panels_info.cell', $result['message'] );
+		$this->assertStringContainsString( 'layout-get', $result['message'] );
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_placed_widgets_without_rows_and_cells() {
+		$this->classic_post( 75 );
+		$this->passthrough_admin_spy();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 75,
+				'panels_data' => array( 'widgets' => array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+	}
+
+	public function test_meta_write_stores_a_layout_whose_references_resolve() {
+		$this->classic_post( 76 );
+		$this->passthrough_admin_spy();
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout = array(
+			'widgets'    => array(
+				Abilities_Fixtures::widget( 'First' ),
+				array( 'panels_info' => array( 'class' => 'Second', 'grid' => 1, 'cell' => 1 ) ),
+			),
+			'grids'      => array( array( 'cells' => 1 ), array( 'cells' => 2 ) ),
+			'grid_cells' => array(
+				array( 'grid' => 0, 'weight' => 1 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+			),
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 76,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( $layout, $persisted, 'The check stores the layout as it is; it does not change it.' );
+	}
+
+	/**
+	 * Requests that clear the classic layout. None holds a widget or a row.
+	 */
+	public static function clear_requests() {
+		return array(
+			'empty object'                   => array( array() ),
+			'empty widgets list'             => array( array( 'widgets' => array() ) ),
+			'the three empty lists'          => array(
+				array(
+					'widgets'    => array(),
+					'grids'      => array(),
+					'grid_cells' => array(),
+				),
+			),
+			'a cell list alone, no rows'     => array( array( 'grid_cells' => array( array( 'grid' => 'x', 'weight' => 1 ) ) ) ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'clear_requests' )]
+	public function test_meta_write_of_an_empty_layout_still_clears_the_layout( $panels_data ) {
+		$this->classic_post( 77 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'delete_post_meta' )->once()->with( 77, 'panels_data' )->andReturn( true );
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $panels_data,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( 'Layout cleared.', $result['message'] );
+		$this->assertCount( 1, $this->pre_write_calls, 'The pre-write hook still fires once for a clear.' );
+	}
+
+	/**
+	 * Stored classic layouts, as layout-get returns them.
+	 */
+	public static function stored_layouts() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+		$sets  = array();
+
+		foreach ( array( 'one row, one cell, one widget', 'two rows, three cells, widgets in each', 'older layout: placement under info', 'numeric string references', 'extra top-level and style keys' ) as $name ) {
+			$sets[ $name ] = array( $cases['valid'][ $name ] );
+		}
+
+		return $sets;
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'stored_layouts' )]
+	public function test_a_layout_returned_by_layout_get_is_accepted_unchanged_by_layout_update( $stored ) {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 78, 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( $stored );
+		$this->passthrough_admin_spy();
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$read = $this->abilities()->layout_get( array( 'post_id' => 78 ) );
+
+		$this->assertSame( 'meta', $read['source'] );
+		$this->assertSame( $stored, $read['layouts'][0]['panels_data'] );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 78,
+				'panels_data' => $read['layouts'][0]['panels_data'],
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( $stored, $persisted, 'Writing back what layout-get returned stores the same layout.' );
+	}
+
+	// --- The Admin stand-in holds the same rule as the real class -------------
+
+	public static function shared_valid_layouts() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+
+		return array_map(
+			function ( $layout ) {
+				return array( $layout );
+			},
+			$cases['valid']
+		);
+	}
+
+	public static function shared_refused_values() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+
+		return array_map(
+			function ( $value ) {
+				return array( $value );
+			},
+			$cases['refused']
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'shared_valid_layouts' )]
+	public function test_admin_stand_in_returns_each_shared_valid_layout( $layout ) {
+		$expected = $layout;
+
+		if ( ! array_key_exists( 'widgets', $expected ) ) {
+			$expected['widgets'] = array();
+		}
+
+		$this->assertSame( $expected, SiteOrigin_Panels_Admin::validate_layout_structure( $layout ) );
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'shared_refused_values' )]
+	public function test_admin_stand_in_refuses_each_shared_refused_value( $value ) {
+		$this->assertNull( SiteOrigin_Panels_Admin::validate_layout_structure( $value ) );
+	}
+
+	public function test_layout_update_schema_states_the_layout_shape_it_accepts() {
+		$this->abilities()->register_abilities();
+
+		$update      = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
+		$description = $update['input_schema']['properties']['panels_data']['description'];
+
+		foreach ( array( 'grids', 'grid_cells', 'panels_info.grid', 'panels_info.cell', 'layout-get' ) as $term ) {
+			$this->assertStringContainsString( $term, $description );
+		}
 	}
 
 	// --- Registration shape (locks the public surface) -----------------------

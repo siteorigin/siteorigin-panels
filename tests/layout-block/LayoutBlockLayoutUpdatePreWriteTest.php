@@ -84,7 +84,11 @@ class PreWriteRendererStub {
  * (e)/(f) aborts leave no render and restore every flag, and write no memo;
  * (g) a nested save does not fire the hook;
  * (h) other save entry points never fire it or run the save filters;
- * (i) an empty block fires once with an empty layout.
+ * (i) an empty block fires once with an empty layout;
+ * (j) a stored form the builder cannot load stops the write before the hook
+ *     and the render, and other save entry points do not apply that rule;
+ * (k) the same, through the real layout-update ability: the post is not
+ *     updated, and a layout that layout-get returns is accepted unchanged.
  *
  * Self-contained per this suite's conventions; avoids arrow functions and
  * anonymous classes.
@@ -656,6 +660,349 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		$this->assertNotContains( 'content_save_pre', $this->log );
 		$this->assertNotContains( 'pre_post_content', $this->log );
 		$this->assertSame( 2, count( array_keys( $this->log, 'render', true ) ) );
+	}
+
+	// --- (j) The layout structure rule on a layout-update block write. ------------
+
+	/**
+	 * Run a layout-update block write that must stop on the structure rule.
+	 *
+	 * @return \SiteOrigin_Panels_Layout_Update_Aborted
+	 */
+	private function expect_structure_abort( $block, array $panels_data ) {
+		try {
+			$block->sanitize_block_for_layout_update( $this->block_for( $panels_data ), 77, 1 );
+		} catch ( \SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$this->assertSame( 'siteorigin_panels_layout_update_unresolved_reference', $e->get_error()->get_error_code() );
+
+			return $e;
+		}
+
+		$this->fail( 'The write must stop with siteorigin_panels_layout_update_unresolved_reference.' );
+	}
+
+	/**
+	 * Cell row references the builder cannot resolve.
+	 */
+	public static function unresolved_cell_row_references() {
+		return array(
+			'a word'                    => array( 'x' ),
+			'a word with a number'      => array( 'row-1' ),
+			'a number then other text'  => array( '0 {} *' ),
+			'a row that does not exist' => array( 7 ),
+			'a negative row'            => array( -1 ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'unresolved_cell_row_references' )]
+	public function test_cell_row_reference_that_does_not_resolve_stops_the_write_before_the_hook_and_render( $reference ) {
+		$block                           = $this->layout_block();
+		$layout                          = $this->layout( 'Probe' );
+		$layout['grid_cells'][0]['grid'] = $reference;
+
+		$this->expect_structure_abort( $block, $layout );
+
+		$this->assertCount( 0, $this->pre_write_calls, 'The pre-write hook does not fire for a refused layout.' );
+		$this->assertNotContains( 'render', $this->log );
+		$this->assertContains( 'content_save_pre', $this->log, 'The rule is applied to the settled stored form.' );
+		$this->assertFalse( $this->read( $block, 'force_kses_floor' ) );
+		$this->assertTrue( $this->read( $block, 'return_layout' ) );
+		$this->assertNull( $this->read( $block, 'layout_update_pre_write' ) );
+		$this->assertSame( array(), $this->read( $block, 'sanitized_this_request' ), 'No memo entry for a refused block.' );
+	}
+
+	public function test_widget_reference_that_does_not_resolve_stops_the_write() {
+		$layout                                      = $this->layout( 'Probe' );
+		$layout['widgets'][0]['panels_info']['cell'] = 3;
+
+		$this->expect_structure_abort( $this->layout_block(), $layout );
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_reference_changed_by_the_ai_pre_save_filter_stops_the_write() {
+		$this->callbacks['siteorigin_panels_ai_block_layout_pre_save'] = function ( $panels_data ) {
+			$panels_data['grid_cells'][0]['grid'] = 'x';
+
+			return $panels_data;
+		};
+
+		$this->expect_structure_abort( $this->layout_block(), $this->layout( 'Probe' ) );
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_reference_changed_by_the_save_filters_stops_the_write() {
+		// The rule reads the form the post update will store, so a reference a
+		// save filter rewrites is checked too.
+		$this->callbacks['content_save_pre'] = function ( $content ) {
+			return str_replace( '"grid_cells":[{"grid":0,', '"grid_cells":[{"grid":"x",', $content );
+		};
+
+		$this->expect_structure_abort( $this->layout_block(), $this->layout( 'Probe' ) );
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_widgets_only_layout_stops_the_write_with_a_clear_message() {
+		$e = $this->expect_structure_abort(
+			$this->layout_block(),
+			array(
+				'widgets' => array(
+					array(
+						'content'     => 'Probe',
+						'panels_info' => array( 'class' => 'PreWriteIdentityWidget' ),
+					),
+				),
+			)
+		);
+
+		// The message names each part of the layout the caller must supply.
+		$message = $e->get_error()->get_error_message();
+		foreach ( array( 'grids', 'grid_cells', 'panels_info.grid', 'panels_info.cell', 'layout-get' ) as $term ) {
+			$this->assertStringContainsString( $term, $message );
+		}
+
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_layout_whose_references_resolve_is_written_as_it_is() {
+		$layout = array(
+			'widgets'    => array(
+				$this->widget( 'First' ),
+				array(
+					'content'     => 'Second',
+					'panels_info' => array(
+						'class' => 'PreWriteIdentityWidget',
+						'grid'  => 1,
+						'cell'  => 1,
+					),
+				),
+			),
+			'grids'      => array( array( 'cells' => 1 ), array( 'cells' => 2 ) ),
+			'grid_cells' => array(
+				array( 'grid' => 0, 'weight' => 1 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+			),
+		);
+
+		$result = $this->layout_block()->sanitize_block_for_layout_update( $this->block_for( $layout ), 77, 0 );
+
+		$stored = $result['attrs']['panelsData'];
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assertSame( $layout['grids'], $stored['grids'] );
+		$this->assertSame( $layout['grid_cells'], $stored['grid_cells'] );
+		$this->assertSame( 'First', $stored['widgets'][0]['content'] );
+		$this->assertSame( 'Second', $stored['widgets'][1]['content'] );
+		$this->assertSame( 1, $stored['widgets'][1]['panels_info']['grid'] );
+		$this->assertSame( 1, $stored['widgets'][1]['panels_info']['cell'] );
+	}
+
+	public function test_layout_of_three_empty_lists_is_written() {
+		$empty = array(
+			'widgets'    => array(),
+			'grids'      => array(),
+			'grid_cells' => array(),
+		);
+
+		$result = $this->layout_block()->sanitize_block_for_layout_update( $this->block_for( $empty ), 77, 0 );
+
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assertSame( $empty, $result['attrs']['panelsData'] );
+	}
+
+	public function test_plain_and_untrusted_saves_do_not_apply_the_structure_rule() {
+		// The rule belongs to the layout-update write only. An editor save of a
+		// Layout Block is stored as before.
+		$block                           = $this->layout_block();
+		$layout                          = $this->layout( 'Plain' );
+		$layout['grid_cells'][0]['grid'] = 'x';
+
+		$plain     = $block->sanitize_block( $this->block_for( $layout ) );
+		$untrusted = $block->sanitize_block_untrusted( $this->block_for( $layout ) );
+
+		$this->assertSame( 'x', $plain['attrs']['panelsData']['grid_cells'][0]['grid'] );
+		$this->assertSame( 'x', $untrusted['attrs']['panelsData']['grid_cells'][0]['grid'] );
+		$this->assertCount( 0, $this->pre_write_calls );
+	}
+
+	// --- (k) The same rule through the layout-update ability. ---------------------
+
+	/**
+	 * The real layout-update ability over the real Layout Block save, for a
+	 * post that holds one Layout Block.
+	 *
+	 * @param string $post_content The post content the ability reads.
+	 *
+	 * @return \SiteOrigin_Panels_Abilities
+	 */
+	private function abilities_for_post_content( $post_content ) {
+		Functions\when( 'add_action' )->justReturn( true );
+		Functions\when( 'add_filter' )->justReturn( true );
+		Functions\when( 'siteorigin_panels_setting' )->justReturn( array() );
+		Functions\when( 'current_user_can' )->alias(
+			function ( $capability ) {
+				return $capability === 'edit_post';
+			}
+		);
+		Functions\when( 'get_post' )->justReturn(
+			(object) array(
+				'ID'           => 77,
+				'post_content' => $post_content,
+			)
+		);
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+		Functions\when( 'serialize_blocks' )->alias(
+			function ( $blocks ) {
+				return implode( '', array_map( 'serialize_block', $blocks ) );
+			}
+		);
+
+		$root = dirname( dirname( __DIR__ ) );
+
+		if ( ! class_exists( 'SiteOrigin_Panels_AI_Exposure', false ) ) {
+			require_once $root . '/inc/ai-exposure.php';
+		}
+
+		if ( ! class_exists( 'SiteOrigin_Panels_Abilities', false ) ) {
+			require_once $root . '/inc/abilities.php';
+		}
+
+		return \SiteOrigin_Panels_Abilities::single();
+	}
+
+	private function stored_block_content( $content ) {
+		return serialize_block( $this->block_for( $this->layout( $content ) ) );
+	}
+
+	public function test_ability_block_write_with_an_unresolved_reference_never_updates_the_post() {
+		$abilities = $this->abilities_for_post_content( $this->stored_block_content( 'Stored' ) );
+		Functions\expect( 'wp_update_post' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$layout                          = $this->layout( 'Probe' );
+		$layout['grid_cells'][0]['grid'] = 'x';
+
+		$result = $abilities->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_unresolved_reference', $result->get_error_code() );
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assertNotContains( 'render', $this->log );
+	}
+
+	public function test_ability_block_write_of_a_widgets_only_layout_never_updates_the_post() {
+		$abilities = $this->abilities_for_post_content( $this->stored_block_content( 'Stored' ) );
+		Functions\expect( 'wp_update_post' )->never();
+
+		$result = $abilities->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => array(
+					'widgets' => array(
+						array(
+							'content'     => 'Probe',
+							'panels_info' => array( 'class' => 'PreWriteIdentityWidget' ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_unresolved_reference', $result->get_error_code() );
+		$this->assertStringContainsString( 'grid_cells', $result->get_error_message() );
+	}
+
+	public function test_ability_block_write_of_a_layout_whose_references_resolve_updates_the_post() {
+		$abilities = $this->abilities_for_post_content( $this->stored_block_content( 'Stored' ) );
+
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $postarr ) use ( &$saved ) {
+				$saved = $postarr;
+
+				return $postarr['ID'];
+			}
+		);
+
+		$result = $abilities->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $this->layout( 'Probe' ),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'post_id'     => 77,
+				'updated'     => true,
+				'source'      => 'block',
+				'block_index' => 0,
+			),
+			$result
+		);
+		$this->assertCount( 1, $this->pre_write_calls );
+
+		$written = parse_blocks( $saved['post_content'] );
+		$this->assertSame( 'Probe', $written[0]['attrs']['panelsData']['widgets'][0]['content'] );
+		$this->assertSame( $this->pre_write_calls[0][2], $written[0]['attrs']['panelsData'], 'The post update stores the checked layout.' );
+	}
+
+	public function test_ability_accepts_unchanged_a_block_layout_that_layout_get_returns() {
+		$abilities = $this->abilities_for_post_content( $this->stored_block_content( 'Stored' ) );
+
+		$saved = null;
+		Functions\when( 'wp_update_post' )->alias(
+			function ( $postarr ) use ( &$saved ) {
+				$saved = $postarr;
+
+				return $postarr['ID'];
+			}
+		);
+
+		// A first write gives the post content a real save stores.
+		$abilities->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $this->layout( 'Tom & Jerry <strong>x</strong>' ),
+			)
+		);
+		$stored_content = $saved['post_content'];
+		$this->abilities_for_post_content( $stored_content );
+
+		$read = $abilities->layout_get( array( 'post_id' => 77 ) );
+		$this->assertSame( 'block', $read['source'] );
+		$this->assertSame( 0, $read['layouts'][0]['block_index'] );
+
+		$saved  = null;
+		$result = $abilities->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $read['layouts'][0]['panels_data'],
+				'block_index' => $read['layouts'][0]['block_index'],
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'block', $result['source'] );
+
+		$written = parse_blocks( $saved['post_content'] );
+		$this->assertSame(
+			$read['layouts'][0]['panels_data'],
+			$written[0]['attrs']['panelsData'],
+			'Writing back what layout-get returned stores the same layout.'
+		);
 	}
 
 	// --- (i) An empty block fires once with an empty layout. -------------------------
