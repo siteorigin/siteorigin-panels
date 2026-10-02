@@ -195,6 +195,9 @@ const setWidgetText = async ( root, widgetLocator, text, doc ) => {
 	const dialog = await openWidgetDialog( widgetLocator, scope );
 	const field = dialog.locator( 'input.panels-e2e-text-field' );
 	await expect( field ).toBeVisible( { timeout: 15000 } );
+	// Edit once the dialog has loaded its form and its style panel, as a person does: the dialog
+	// reads the form again when the second of the two has loaded.
+	await expect( dialog.locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
 	await field.fill( text );
 	await closeDialog( scope );
 	await expectOpenDialogs( scope, dialogsBefore );
