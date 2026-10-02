@@ -71,7 +71,9 @@ for ( const role of [ 'administrator', 'author' ] ) {
 				await deleteUser( admin, user.userId );
 			}
 
-			await ctx.context.close();
+			if ( ctx ) {
+				await ctx.context.close();
+			}
 			await admin.context.dispose();
 		} );
 

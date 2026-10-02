@@ -24,12 +24,12 @@ const browserLogin = async ( page, username, password ) => {
 	await page.locator( '#user_login' ).fill( username );
 	await page.locator( '#user_pass' ).fill( password );
 	await Promise.all( [
-		page.waitForURL( /wp-admin/ ),
+		page.waitForURL( /wp-admin/, { waitUntil: 'commit', timeout: 60000 } ),
 		page.locator( '#wp-submit' ).click(),
 	] );
 
 	// The first wp-admin request after activation can redirect to the Page Builder welcome page.
-	await page.goto( siteUrl( 'wp-admin/index.php' ) );
+	await page.goto( siteUrl( 'wp-admin/index.php' ), { waitUntil: 'domcontentloaded' } );
 };
 
 /**
@@ -37,6 +37,9 @@ const browserLogin = async ( page, username, password ) => {
  */
 const newLoggedInPage = async ( browser, username, password ) => {
 	const context = await browser.newContext( { storageState: { cookies: [], origins: [] } } );
+	// Only the test site: a slow outside request (avatars, fonts, news feeds) must not decide a result.
+	const site = new URL( siteUrl( '' ) ).host;
+	await context.route( ( url ) => url.host !== site, ( route ) => route.abort() );
 	const page = await context.newPage();
 	const errors = trackPageErrors( page );
 	await browserLogin( page, username, password );
@@ -99,10 +102,12 @@ const builderRoot = ( scope ) => scope.locator( '#siteorigin-panels-metabox' );
  */
 const openDialog = ( scope ) => scope.locator( '.so-panels-dialog-wrapper' ).filter( { has: scope.locator( '.so-panels-dialog .so-title-bar:visible' ) } ).last();
 
+const openTitleBars = ( scope ) => scope.locator( '.so-panels-dialog .so-title-bar:visible' );
+
 /**
- * Wait until no dialog is open.
+ * Wait until the number of open dialogs is back to `count` (0 = no dialog open).
  */
-const expectNoOpenDialog = ( scope ) => expect( scope.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 0 );
+const expectOpenDialogs = ( scope, count = 0 ) => expect( openTitleBars( scope ) ).toHaveCount( count );
 
 /**
  * The document or frame that holds a builder root, for dialog lookups.
@@ -114,6 +119,7 @@ const docOf = ( root ) => root.page ? root.page() : root;
  */
 const addRow = async ( root, cells, doc ) => {
 	const scope = doc || root.page();
+	const dialogsBefore = await openTitleBars( scope ).count();
 	const rowsBefore = await root.locator( '.so-row-container' ).count();
 	await root.locator( '.so-builder-toolbar .so-row-add' ).first().click();
 	const dialog = openDialog( scope );
@@ -122,7 +128,7 @@ const addRow = async ( root, cells, doc ) => {
 	await dialog.locator( '#so-row-count-input' ).dispatchEvent( 'change' );
 	await dialog.locator( '.so-insert' ).click();
 	await expect( root.locator( '.so-row-container' ) ).toHaveCount( rowsBefore + 1 );
-	await expectNoOpenDialog( scope );
+	await expectOpenDialogs( scope, dialogsBefore );
 
 	return root.locator( '.so-row-container' ).nth( rowsBefore );
 };
@@ -132,6 +138,7 @@ const addRow = async ( root, cells, doc ) => {
  */
 const addWidget = async ( root, cellLocator, widgetClass, doc ) => {
 	const scope = doc || root.page();
+	const dialogsBefore = await openTitleBars( scope ).count();
 	const widgetsBefore = await cellLocator.locator( '.so-widget' ).count();
 
 	// A click on the cell makes it the active cell: the next widget is added there.
@@ -145,15 +152,20 @@ const addWidget = async ( root, cellLocator, widgetClass, doc ) => {
 	await expect( cellLocator.locator( '.so-widget' ) ).toHaveCount( widgetsBefore + 1 );
 
 	// With instant open on (the default) the widget's edit dialog opens by itself. Close it untouched.
-	const editDialog = openDialog( scope );
-	const titleBar = scope.locator( '.so-panels-dialog .so-title-bar:visible' );
-	await titleBar.first().waitFor( { state: 'visible', timeout: 3000 } ).catch( () => {} );
-	if ( await titleBar.count() ) {
-		await editDialog.locator( '.so-close' ).last().click();
-		await expectNoOpenDialog( scope );
+	await expect.poll( () => openTitleBars( scope ).count(), { timeout: 3000 } ).toBeGreaterThan( dialogsBefore ).catch( () => {} );
+	if ( await openTitleBars( scope ).count() > dialogsBefore ) {
+		await closeDialog( scope );
+		await expectOpenDialogs( scope, dialogsBefore );
 	}
 
 	return cellLocator.locator( '.so-widget' ).nth( widgetsBefore );
+};
+
+/**
+ * Close the open dialog with its Done (or Close) button.
+ */
+const closeDialog = async ( scope ) => {
+	await openDialog( scope ).locator( '.so-toolbar .so-close' ).first().click();
 };
 
 const WIDGET_TITLES = {
@@ -162,17 +174,30 @@ const WIDGET_TITLES = {
 };
 
 /**
+ * Open a widget's edit dialog with its Edit link and return the dialog.
+ * In a narrow cell the action links cover the widget title, so the title is not clicked.
+ */
+const openWidgetDialog = async ( widgetLocator, scope ) => {
+	const dialogsBefore = await openTitleBars( scope ).count();
+	await widgetLocator.hover();
+	await widgetLocator.locator( '.actions .widget-edit' ).click();
+	await expect( openTitleBars( scope ) ).toHaveCount( dialogsBefore + 1 );
+
+	return openDialog( scope );
+};
+
+/**
  * Open a widget's edit dialog, set the text field and close the dialog with Done.
  */
 const setWidgetText = async ( root, widgetLocator, text, doc ) => {
 	const scope = doc || root.page();
-	await widgetLocator.locator( '.title h4' ).click();
-	const dialog = openDialog( scope );
+	const dialogsBefore = await openTitleBars( scope ).count();
+	const dialog = await openWidgetDialog( widgetLocator, scope );
 	const field = dialog.locator( 'input.panels-e2e-text-field' );
 	await expect( field ).toBeVisible( { timeout: 15000 } );
 	await field.fill( text );
-	await dialog.locator( '.so-close' ).last().click();
-	await expectNoOpenDialog( scope );
+	await closeDialog( scope );
+	await expectOpenDialogs( scope, dialogsBefore );
 };
 
 /**
@@ -259,12 +284,14 @@ module.exports = {
 	createBrowserUser,
 	docOf,
 	dragTo,
-	expectNoOpenDialog,
+	closeDialog,
+	expectOpenDialogs,
 	expectNoPageErrors,
 	fieldLayout,
 	newLoggedInPage,
 	openClassicBuilder,
 	openDialog,
+	openWidgetDialog,
 	placement,
 	seedLayout,
 	setWidgetText,
