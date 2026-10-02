@@ -107,6 +107,7 @@ export class Site {
 			}
 		}
 		mounts.push( `--mount=${ path.join( HERE, 'mu-plugins' ) }:/wordpress/wp-content/mu-plugins` );
+		mounts.push( `--mount=${ path.join( HERE, 'php' ) }:/wordpress/wp-content/parity-php` );
 		return {
 			$schema: 'https://playground.wordpress.net/blueprint-schema.json',
 			...( o.multisite ? { extraLibraries: [ 'wp-cli' ] } : {} ),

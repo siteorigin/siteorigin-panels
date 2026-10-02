@@ -9,7 +9,8 @@
 		"test": "node --test tests/js/*.test.js",
 		"test:e2e": "playwright test",
 		"e2e": "node tests/scripts/run-e2e.js",
-		"parity": "node tests/parity/parity.mjs"
+		"parity": "node tests/parity/parity.mjs",
+		"parity:generate": "node tests/parity/generate.mjs"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.55.0",

@@ -15,6 +15,11 @@ if ( ! defined( 'PANELS_PARITY_HARNESS' ) || ! PANELS_PARITY_HARNESS ) {
 	return;
 }
 
+// Batch endpoints of the generator test (tests/parity/php, mounted by the harness).
+if ( file_exists( WP_CONTENT_DIR . '/parity-php/batch.php' ) ) {
+	require_once WP_CONTENT_DIR . '/parity-php/batch.php';
+}
+
 add_shortcode(
 	'parity_form',
 	function () {
