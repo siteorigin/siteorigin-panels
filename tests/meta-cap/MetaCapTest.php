@@ -62,11 +62,15 @@ class MetaCapFakeWpdb {
  * the map_meta_cap callback for the panels_data post meta key.
  *
  * The add, edit and delete post meta capabilities on that key need
- * unfiltered_html. The same holds for a key that the metadata functions or the
- * database resolve to that key: a key that is panels_data once its slashes are
- * removed, and a key that the database matches to the post's panels_data row.
- * Every other capability and every other key passes through with the mapped
- * capabilities unchanged.
+ * unfiltered_html. The same holds for a key that resolves to that key: a key
+ * that is panels_data once its slashes are removed or once sanitize_key() has
+ * run on it, and a key that the database matches to the post's panels_data
+ * row. Every other capability and every other key passes through with the
+ * mapped capabilities unchanged.
+ *
+ * The database alone decides a match. metadata_exists() is stubbed to report
+ * no panels_data value in every test, as a metadata filter or a meta cache
+ * read before the row existed would, and must never be consulted.
  *
  * This suite loads the REAL siteorigin-panels.php, so it runs on its own via
  * phpunit-meta-cap.xml: the other suites define a SiteOrigin_Panels stand-in.
@@ -101,13 +105,6 @@ class MetaCapTest extends TestCase {
 	private $has_unfiltered_html = false;
 
 	/**
-	 * The posts that have a panels_data row.
-	 */
-	private $posts_with_layout = array();
-
-	private $blog_id = 1;
-
-	/**
 	 * The arguments of each call to a WordPress function, by function name.
 	 */
 	private $calls = array();
@@ -122,8 +119,6 @@ class MetaCapTest extends TestCase {
 		$this->panels = $class->newInstanceWithoutConstructor();
 
 		$this->has_unfiltered_html = false;
-		$this->posts_with_layout   = array();
-		$this->blog_id             = 1;
 		$this->calls               = array(
 			'user_can'        => array(),
 			'metadata_exists' => array(),
@@ -134,7 +129,7 @@ class MetaCapTest extends TestCase {
 		$GLOBALS['wpdb']     = $this->wpdb;
 
 		Functions\when( 'wp_unslash' )->alias( 'stripslashes' );
-		Functions\when( 'get_current_blog_id' )->alias( array( $this, 'blog_id_stub' ) );
+		Functions\when( 'sanitize_key' )->alias( array( $this, 'sanitize_key_stub' ) );
 		Functions\when( 'user_can' )->alias( array( $this, 'user_can_stub' ) );
 		Functions\when( 'metadata_exists' )->alias( array( $this, 'metadata_exists_stub' ) );
 		Functions\when( 'wp_is_post_revision' )->alias( array( $this, 'is_post_revision_stub' ) );
@@ -189,8 +184,11 @@ class MetaCapTest extends TestCase {
 		require_once dirname( __DIR__, 2 ) . '/siteorigin-panels.php';
 	}
 
-	public function blog_id_stub() {
-		return $this->blog_id;
+	/**
+	 * What sanitize_key() does: lower case, then only a-z, 0-9, _ and - are kept.
+	 */
+	public function sanitize_key_stub( $key ) {
+		return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $key ) );
 	}
 
 	public function user_can_stub( $user_id, $cap ) {
@@ -202,7 +200,7 @@ class MetaCapTest extends TestCase {
 	public function metadata_exists_stub( $meta_type, $object_id, $meta_key ) {
 		$this->calls['metadata_exists'][] = array( $meta_type, $object_id, $meta_key );
 
-		return in_array( $object_id, $this->posts_with_layout, true );
+		return false;
 	}
 
 	/**
@@ -302,8 +300,7 @@ class MetaCapTest extends TestCase {
 
 	#[DataProvider( 'cases_with_nothing_to_look_up' )]
 	public function test_other_caps_and_missing_keys_pass_through_without_a_lookup( $cap, $args ) {
-		// A post with a layout and a database that matches everything: neither may be consulted.
-		$this->posts_with_layout = array( self::POST_ID );
+		// A database that matches everything: it may not be consulted.
 		$this->database_matches( 'panels_data', array( 'panels_data' ) );
 
 		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, $args ) );
@@ -312,58 +309,19 @@ class MetaCapTest extends TestCase {
 	}
 
 	/*
-	 * Another key.
+	 * A key that is the layout key once WordPress has cleaned it. No database
+	 * lookup is needed, and the post does not need a layout row: a write with
+	 * the cleaned key would create one.
 	 */
 
-	public static function other_keys() {
-		$cases = array();
-
-		foreach ( self::META_CAPS as $cap ) {
-			$cases[ $cap . ' on another key' ]         = array( $cap, '_thumbnail_id' );
-			$cases[ $cap . ' on a longer key' ]        = array( $cap, 'panels_data_extra' );
-			$cases[ $cap . ' on another letter case' ] = array( $cap, 'Panels_Data' );
-		}
-
-		return $cases;
-	}
-
-	#[DataProvider( 'other_keys' )]
-	public function test_another_key_on_a_post_with_no_layout_passes_through_without_a_database_lookup( $cap, $key ) {
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
-
-		$this->assertSame( array( array( 'post', self::POST_ID, 'panels_data' ) ), $this->calls['metadata_exists'] );
-		$this->assertSame( array(), $this->calls['user_can'] );
-		$this->assertSame( array(), $this->wpdb->lookups );
-	}
-
-	#[DataProvider( 'meta_caps' )]
-	public function test_a_key_the_database_does_not_match_passes_through( $cap ) {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'my_field', array( 'my_field' ) );
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, 'my_field' ) ) );
-
-		$this->assert_capability_was_checked_once();
-		$this->assertSame( array( array( self::POST_ID, 'my_field' ) ), $this->wpdb->lookups );
-	}
-
-	public function test_a_key_with_no_rows_passes_through() {
-		$this->posts_with_layout = array( self::POST_ID );
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'add_post_meta', array( self::POST_ID, 'my_field' ) ) );
-	}
-
-	/*
-	 * A key the database matches to the post's panels_data row.
-	 */
-
-	public static function matched_keys() {
+	public static function keys_that_clean_to_the_layout_key() {
 		$keys = array(
-			'another letter case' => 'Panels_Data',
-			'upper case'          => 'PANELS_DATA',
-			'a trailing space'    => 'panels_data ',
-			'an accented letter'  => "p\u{00e1}nels_data",
-			'a full-width letter' => "\u{ff50}anels_data",
+			'a slash that wp_unslash() removes'         => 'panels\\_data',
+			'another letter case'                       => 'Panels_Data',
+			'upper case'                                => 'PANELS_DATA',
+			'a trailing space'                          => 'panels_data ',
+			'an added character sanitize_key() removes' => 'panels_data!',
+			'a slash and upper case'                    => 'PANELS\\_DATA',
 		);
 
 		$cases = array();
@@ -376,21 +334,105 @@ class MetaCapTest extends TestCase {
 		return $cases;
 	}
 
+	#[DataProvider( 'keys_that_clean_to_the_layout_key' )]
+	public function test_a_key_that_cleans_to_the_layout_key_is_not_allowed( $cap, $key ) {
+		$this->assertSame( self::DENIED, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
+
+		$this->assert_capability_was_checked_once();
+		$this->assertSame( array(), $this->wpdb->lookups );
+	}
+
+	#[DataProvider( 'keys_that_clean_to_the_layout_key' )]
+	public function test_a_key_that_cleans_to_the_layout_key_keeps_the_mapped_caps_for_a_user_with_unfiltered_html( $cap, $key ) {
+		$this->has_unfiltered_html = true;
+
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
+
+		$this->assert_capability_was_checked_once();
+		$this->assertSame( array(), $this->wpdb->lookups );
+	}
+
+	/*
+	 * Another key: the database decides.
+	 */
+
+	public static function other_keys() {
+		$cases = array();
+
+		foreach ( self::META_CAPS as $cap ) {
+			$cases[ $cap . ' on another key' ]  = array( $cap, '_thumbnail_id' );
+			$cases[ $cap . ' on a longer key' ] = array( $cap, 'panels_data_extra' );
+			$cases[ $cap . ' on my_field' ]     = array( $cap, 'my_field' );
+		}
+
+		return $cases;
+	}
+
+	#[DataProvider( 'other_keys' )]
+	public function test_a_key_the_database_does_not_match_passes_through( $cap, $key ) {
+		$this->database_matches( $key, array( $key ) );
+
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
+
+		$this->assert_capability_was_checked_once();
+		$this->assertSame( array( array( self::POST_ID, $key ) ), $this->wpdb->lookups );
+	}
+
+	public function test_a_key_with_no_rows_passes_through() {
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'add_post_meta', array( self::POST_ID, 'my_field' ) ) );
+
+		$this->assertSame( array( array( self::POST_ID, 'my_field' ) ), $this->wpdb->lookups );
+	}
+
+	#[DataProvider( 'other_keys' )]
+	public function test_a_user_with_unfiltered_html_passes_through_without_a_database_lookup( $cap, $key ) {
+		$this->has_unfiltered_html = true;
+
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
+
+		$this->assert_capability_was_checked_once();
+		$this->assertSame( array(), $this->wpdb->lookups );
+	}
+
+	/**
+	 * Keys that sanitize_key() does not turn into the layout key, which a
+	 * database can still match to the panels_data row.
+	 */
+	public static function matched_keys() {
+		$keys = array(
+			'an accented letter'  => "p\u{00e1}nels_data",
+			'a full-width letter' => "\u{ff50}anels_data",
+			'a different accent'  => "panels_dat\u{00e4}",
+		);
+
+		$cases = array();
+		foreach ( self::META_CAPS as $cap ) {
+			foreach ( $keys as $label => $key ) {
+				$cases[ $cap . ' with ' . $label ] = array( $cap, $key );
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * metadata_exists() reports no panels_data value here, as it does in every
+	 * test. The match the database reports must still decide.
+	 */
 	#[DataProvider( 'matched_keys' )]
 	public function test_a_key_the_database_matches_to_the_layout_row_is_not_allowed( $cap, $key ) {
-		$this->posts_with_layout = array( self::POST_ID );
 		$this->database_matches( $key, array( 'panels_data' ) );
 
 		$this->assertSame( self::DENIED, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
 
 		$this->assert_capability_was_checked_once();
 		$this->assertSame( array( array( self::POST_ID, $key ) ), $this->wpdb->lookups );
+		$this->assertSame( array(), $this->calls['metadata_exists'] );
 	}
 
 	#[DataProvider( 'matched_keys' )]
 	public function test_a_matched_key_keeps_the_mapped_caps_for_a_user_with_unfiltered_html( $cap, $key ) {
 		$this->has_unfiltered_html = true;
-		$this->posts_with_layout   = array( self::POST_ID );
 		$this->database_matches( $key, array( 'panels_data' ) );
 
 		$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, $key ) ) );
@@ -404,28 +446,28 @@ class MetaCapTest extends TestCase {
 	 * form of the key is not the row the renderer reads.
 	 */
 	public function test_a_match_to_a_row_stored_under_another_form_passes_through() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'Panels_Data' ) );
+		$key = "p\u{00e1}nels_data";
+		$this->database_matches( $key, array( $key, 'Panels_Data' ) );
 
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
 	}
 
 	public function test_a_match_to_several_rows_that_include_the_layout_row_is_not_allowed() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'Panels_Data', 'panels_data' ) );
+		$key = "p\u{00e1}nels_data";
+		$this->database_matches( $key, array( $key, 'panels_data' ) );
 
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
 	}
 
 	/**
 	 * A match on another post says nothing about this one.
 	 */
 	public function test_a_match_on_another_post_passes_through() {
-		$this->posts_with_layout = array( self::POST_ID, 43 );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ), 43 );
+		$key = "p\u{00e1}nels_data";
+		$this->database_matches( $key, array( 'panels_data' ), 43 );
 
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-		$this->assertSame( array( array( self::POST_ID, 'Panels_Data' ) ), $this->wpdb->lookups );
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
+		$this->assertSame( array( array( self::POST_ID, $key ) ), $this->wpdb->lookups );
 	}
 
 	/**
@@ -433,141 +475,117 @@ class MetaCapTest extends TestCase {
 	 * parent's rows decide.
 	 */
 	public function test_a_revision_is_resolved_to_its_parent() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
+		$key = "p\u{00e1}nels_data";
+		$this->database_matches( $key, array( 'panels_data' ) );
 
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::REVISION_ID, 'Panels_Data' ) ) );
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::REVISION_ID, $key ) ) );
 
-		$this->assertSame( array( array( 'post', self::POST_ID, 'panels_data' ) ), $this->calls['metadata_exists'] );
-		$this->assertSame( array( array( self::POST_ID, 'Panels_Data' ) ), $this->wpdb->lookups );
+		$this->assertSame( array( array( self::POST_ID, $key ) ), $this->wpdb->lookups );
 	}
 
 	public function test_a_post_id_given_as_a_string_is_used_as_an_integer() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
+		$key = "p\u{00e1}nels_data";
+		$this->database_matches( $key, array( 'panels_data' ) );
 
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( (string) self::POST_ID, 'Panels_Data' ) ) );
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( (string) self::POST_ID, $key ) ) );
 	}
 
-	/*
-	 * A key with slashes. The metadata functions remove them before they write.
+	public static function arguments_with_no_post() {
+		return array(
+			'post ID zero'       => array( array( 0, 'my_field' ) ),
+			'a negative post ID' => array( array( -42, 'my_field' ) ),
+			'a null post ID'     => array( array( null, 'my_field' ) ),
+		);
+	}
+
+	/**
+	 * WordPress has already denied a meta capability that names no post, so
+	 * there is no post whose rows could be compared.
 	 */
+	#[DataProvider( 'arguments_with_no_post' )]
+	public function test_a_key_with_no_post_passes_through_without_a_database_lookup( $args ) {
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', $args, self::DENIED ) );
 
-	#[DataProvider( 'meta_caps' )]
-	public function test_a_key_that_is_the_layout_key_without_its_slashes_is_not_allowed( $cap ) {
-		// No layout row yet: the write would create one.
-		$this->assertSame( self::DENIED, $this->restrict( $cap, array( self::POST_ID, 'panels\\_data' ) ) );
-
-		$this->assert_capability_was_checked_once();
-		$this->assertSame( array(), $this->calls['metadata_exists'] );
 		$this->assertSame( array(), $this->wpdb->lookups );
 	}
 
-	public function test_a_slashed_layout_key_keeps_the_mapped_caps_for_a_user_with_unfiltered_html() {
-		$this->has_unfiltered_html = true;
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'panels\\_data' ) ) );
-	}
-
+	/**
+	 * A slashed key is compared as given and as the metadata functions write it.
+	 */
 	public function test_a_slashed_key_is_looked_up_with_and_without_its_slashes() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
+		$this->database_matches( "p\u{00e1}nels_data", array( 'panels_data' ) );
 
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels\\_Data' ) ) );
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, "p\u{00e1}nels\\_data" ) ) );
 
 		$this->assertSame(
 			array(
-				array( self::POST_ID, 'Panels\\_Data' ),
-				array( self::POST_ID, 'Panels_Data' ),
+				array( self::POST_ID, "p\u{00e1}nels\\_data" ),
+				array( self::POST_ID, "p\u{00e1}nels_data" ),
 			),
 			$this->wpdb->lookups
 		);
 	}
 
 	/*
-	 * A lookup that fails, and what is remembered.
+	 * A lookup that fails, and lookups that repeat.
 	 */
 
-	public function test_a_failed_lookup_is_not_allowed_and_is_not_remembered() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->wpdb->failing     = array( self::POST_ID . '|my_field' );
+	public function test_a_failed_lookup_is_not_allowed() {
+		$this->wpdb->failing = array( self::POST_ID . '|my_field' );
 
 		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'my_field' ) ) );
 
 		$this->wpdb->failing = array();
 
 		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'my_field' ) ) );
-		$this->assertCount( 2, $this->wpdb->lookups );
 	}
 
-	public static function remembered_answers() {
-		return array(
-			'a match'  => array( array( 'panels_data' ), self::DENIED ),
-			'no match' => array( array( 'my_field' ), self::MAPPED_CAPS ),
-		);
+	/**
+	 * No answer is remembered: a panels_data row created later in the request
+	 * is seen by the next check.
+	 */
+	public function test_a_layout_row_created_after_a_check_is_seen_by_the_next_check() {
+		$key = "p\u{00e1}nels_data";
+
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
+
+		$this->database_matches( $key, array( 'panels_data' ) );
+
+		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
+
+		$this->database_matches( $key, array() );
+
+		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, $key ) ) );
+		$this->assertCount( 3, $this->wpdb->lookups );
 	}
 
-	#[DataProvider( 'remembered_answers' )]
-	public function test_the_database_is_asked_once_for_a_post_and_key( $stored_keys, $expected ) {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Some_Key', $stored_keys );
-
-		foreach ( self::META_CAPS as $cap ) {
-			$this->assertSame( $expected, $this->restrict( $cap, array( self::POST_ID, 'Some_Key' ) ) );
+	/**
+	 * The cost for a user without unfiltered_html: one lookup for each check
+	 * of a key that is not the layout key. Ten keys, ten lookups; the three
+	 * capabilities of one key, three lookups.
+	 */
+	public function test_each_check_of_another_key_makes_one_database_lookup() {
+		for ( $i = 1; $i <= 10; $i++ ) {
+			$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'my_field_' . $i ) ) );
 		}
 
-		$this->assertSame( array( array( self::POST_ID, 'Some_Key' ) ), $this->wpdb->lookups );
+		$this->assertCount( 10, $this->wpdb->lookups );
+
+		foreach ( self::META_CAPS as $cap ) {
+			$this->assertSame( self::MAPPED_CAPS, $this->restrict( $cap, array( self::POST_ID, 'my_field_1' ) ) );
+		}
+
+		$this->assertCount( 13, $this->wpdb->lookups );
+		$this->assertSame( array(), $this->calls['metadata_exists'] );
 	}
 
-	/**
-	 * A remembered match must not outlive the layout row: once the row is gone
-	 * there is nothing for the key to resolve to.
-	 */
-	public function test_a_remembered_match_does_not_apply_once_the_layout_row_is_gone() {
-		$this->posts_with_layout = array( self::POST_ID );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
+	public function test_ten_other_keys_make_no_database_lookup_for_a_user_with_unfiltered_html() {
+		$this->has_unfiltered_html = true;
 
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
+		for ( $i = 1; $i <= 10; $i++ ) {
+			$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'my_field_' . $i ) ) );
+		}
 
-		$this->posts_with_layout = array();
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-	}
-
-	/**
-	 * A post with no layout row is checked again each time: a layout row
-	 * created later in the request must be seen.
-	 */
-	public function test_a_post_with_no_layout_row_is_checked_again_each_time() {
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-
-		$this->posts_with_layout = array( self::POST_ID );
-
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-	}
-
-	public function test_an_answer_is_remembered_for_one_post_of_one_site_only() {
-		$this->posts_with_layout = array( self::POST_ID, 43 );
-		$this->database_matches( 'Panels_Data', array( 'panels_data' ) );
-
-		$this->assertSame( self::DENIED, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( 43, 'Panels_Data' ) ) );
-
-		// The same post ID on another site of a network is another post.
-		$this->blog_id = 2;
-		$this->database_matches( 'Panels_Data', array() );
-
-		$this->assertSame( self::MAPPED_CAPS, $this->restrict( 'edit_post_meta', array( self::POST_ID, 'Panels_Data' ) ) );
-
-		$this->assertSame(
-			array(
-				array( self::POST_ID, 'Panels_Data' ),
-				array( 43, 'Panels_Data' ),
-				array( self::POST_ID, 'Panels_Data' ),
-			),
-			$this->wpdb->lookups
-		);
+		$this->assertSame( array(), $this->wpdb->lookups );
 	}
 }

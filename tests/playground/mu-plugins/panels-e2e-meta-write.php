@@ -15,7 +15,12 @@
  *   stored key and the stored value string.
  * - A REST route that writes post meta the way a remote publishing endpoint
  *   does: a capability check on the supplied key, then the core function with
- *   that same key.
+ *   that same key. Options set up three conditions first: a metadata filter
+ *   that reports no panels_data value, a meta cache read before the
+ *   panels_data row was inserted by SQL, and a write with sanitize_key() of
+ *   the key that was checked.
+ * - A REST route that counts the database queries of the edit_post_meta
+ *   capability check for a list of keys.
  */
 
 if ( ! empty( $_SERVER['HTTP_X_PANELS_E2E_DISALLOW_UNFILTERED_HTML'] ) && ! defined( 'DISALLOW_UNFILTERED_HTML' ) ) {
@@ -112,25 +117,91 @@ add_action(
 					return current_user_can( 'edit_post', (int) $request->get_param( 'post_id' ) );
 				},
 				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+
 					$post_id   = (int) $request->get_param( 'post_id' );
 					$key       = (string) $request->get_param( 'key' );
 					$operation = (string) $request->get_param( 'operation' );
+					$result    = array();
+
+					if ( $request->get_param( 'hide_layout_meta' ) ) {
+						// A metadata filter that reports no panels_data value, whatever is stored.
+						add_filter(
+							'get_post_metadata',
+							function ( $value, $object_id, $meta_key ) {
+								return $meta_key === 'panels_data' ? false : $value;
+							},
+							10,
+							3
+						);
+					}
+
+					if ( $request->get_param( 'stale_cache_layout' ) !== null ) {
+						// Read the post's meta into the cache, then insert the panels_data row
+						// by SQL, so the cache does not hold it.
+						update_meta_cache( 'post', array( $post_id ) );
+
+						$result['inserted_value'] = maybe_serialize( $request->get_param( 'stale_cache_layout' ) );
+						$wpdb->insert(
+							$wpdb->postmeta,
+							array(
+								'post_id'    => $post_id,
+								'meta_key'   => 'panels_data',
+								'meta_value' => $result['inserted_value'],
+							)
+						);
+					}
+
+					// The key the caller writes: the key it checked, or sanitize_key() of it.
+					$write_key = $request->get_param( 'write_key' ) === 'sanitized' ? sanitize_key( $key ) : $key;
 
 					if ( $operation === 'update' ) {
 						$allowed = current_user_can( 'edit_post_meta', $post_id, $key );
 						if ( $allowed ) {
-							update_post_meta( $post_id, $key, $request->get_param( 'value' ) );
+							update_post_meta( $post_id, $write_key, $request->get_param( 'value' ) );
 						}
 					} elseif ( $operation === 'delete' ) {
 						$allowed = current_user_can( 'delete_post_meta', $post_id, $key );
 						if ( $allowed ) {
-							delete_post_meta( $post_id, $key );
+							delete_post_meta( $post_id, $write_key );
 						}
 					} else {
 						return new WP_Error( 'panels_e2e_bad_operation', 'Unknown operation.', array( 'status' => 400 ) );
 					}
 
-					return array( 'allowed' => $allowed );
+					$result['allowed'] = $allowed;
+
+					return $result;
+				},
+			)
+		);
+
+		register_rest_route(
+			'panels-e2e/v1',
+			'/cap-queries',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					return current_user_can( 'edit_post', (int) $request->get_param( 'post_id' ) );
+				},
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+
+					$post_id = (int) $request->get_param( 'post_id' );
+
+					// Load the post, the user and their caches first, so only the checks are counted.
+					current_user_can( 'edit_post_meta', $post_id, 'panels_e2e_warm_up' );
+
+					$before  = $wpdb->num_queries;
+					$allowed = array();
+					foreach ( (array) $request->get_param( 'keys' ) as $key ) {
+						$allowed[] = current_user_can( 'edit_post_meta', $post_id, (string) $key );
+					}
+
+					return array(
+						'queries' => $wpdb->num_queries - $before,
+						'allowed' => $allowed,
+					);
 				},
 			)
 		);
