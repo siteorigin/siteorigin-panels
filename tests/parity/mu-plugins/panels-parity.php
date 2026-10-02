@@ -79,10 +79,48 @@ add_filter(
 			$settings['legacy-layout'] = 'never';
 		}
 
+		// The custom home page screen, for the home page save cases. Admin only: it adds a menu item.
+		if ( is_admin() ) {
+			$settings['home-page'] = true;
+		}
+
 		return $settings;
 	},
 	PHP_INT_MAX
 );
+
+// A widget area for the widget cases, printed in the footer only when it holds widgets.
+add_action(
+	'widgets_init',
+	function () {
+		register_sidebar(
+			array(
+				'id'   => 'panels-parity-sidebar',
+				'name' => 'Parity Sidebar',
+			)
+		);
+	}
+);
+
+add_action(
+	'wp_footer',
+	function () {
+		if ( is_active_sidebar( 'panels-parity-sidebar' ) ) {
+			echo '<div id="panels-parity-sidebar">';
+			dynamic_sidebar( 'panels-parity-sidebar' );
+			echo '</div>';
+		}
+	}
+);
+
+/**
+ * The raw stored value of an option, read from the database.
+ */
+function panels_parity_raw_option( $name ) {
+	global $wpdb;
+
+	return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name ) );
+}
 
 function panels_parity_send( $data ) {
 	nocache_headers();
@@ -174,8 +212,11 @@ add_action(
 			panels_parity_send(
 				array(
 					'user'   => get_current_user_id(),
-					'update' => wp_create_nonce( 'update-post_' . $id ),
-					'panels' => wp_create_nonce( 'save' ),
+					'update'      => wp_create_nonce( 'update-post_' . $id ),
+					'panels'      => wp_create_nonce( 'save' ),
+					'savewidgets' => wp_create_nonce( 'save-sidebar-widgets' ),
+					'home'        => wp_create_nonce( 'save' ),
+					'sidebars'    => wp_get_sidebars_widgets(),
 				)
 			);
 		}
@@ -237,8 +278,21 @@ add_action(
 		}
 
 		if ( $action === 'css' ) {
-			// The CSS the pinned renderer generates for a stored classic layout.
-			$pd  = get_post_meta( $id, 'panels_data', true );
+			// The CSS the pinned renderer generates for a stored classic layout, or for the layout of a
+			// stored Layout Builder widget (source=widget&number=<n>).
+			$layout_id = $id;
+
+			if ( isset( $_GET['source'] ) && $_GET['source'] === 'widget' ) {
+				$instances = get_option( 'widget_siteorigin-panels-builder' );
+				$number    = isset( $_GET['number'] ) ? (int) $_GET['number'] : 0;
+				$instance  = is_array( $instances ) && isset( $instances[ $number ] ) ? $instances[ $number ] : array();
+				$pd        = isset( $instance['panels_data'] ) ? $instance['panels_data'] : array();
+				$pd        = is_string( $pd ) ? json_decode( $pd, true ) : $pd;
+				$layout_id = 'w' . ( isset( $instance['builder_id'] ) ? $instance['builder_id'] : '' );
+			} else {
+				$pd = get_post_meta( $id, 'panels_data', true );
+			}
+
 			$out = array(
 				'renderer' => get_class( SiteOrigin_Panels::renderer() ),
 				'has_meta' => ! empty( $pd ),
@@ -246,7 +300,7 @@ add_action(
 
 			if ( ! empty( $pd ) && is_array( $pd ) ) {
 				try {
-					$out['css'] = SiteOrigin_Panels::renderer()->generate_css( $id, $pd );
+					$out['css'] = SiteOrigin_Panels::renderer()->generate_css( $layout_id, $pd );
 				} catch ( \Throwable $e ) {
 					$out['error'] = get_class( $e ) . ': ' . $e->getMessage();
 				}
@@ -263,6 +317,99 @@ add_action(
 					'value' => get_option( $body['name'] ),
 				)
 			);
+		}
+
+		if ( $action === 'seed_widget' ) {
+			// Direct write of one Layout Builder widget in the parity widget area. No widget update() runs:
+			// this stands for a widget stored by an earlier version.
+			panels_parity_require_admin();
+			$number = (int) $body['number'];
+			update_option(
+				'widget_siteorigin-panels-builder',
+				array(
+					$number        => array(
+						'panels_data' => $body['panels_data'],
+						'builder_id'  => isset( $body['builder_id'] ) ? $body['builder_id'] : 'a1b2c3d4e5f60',
+					),
+					'_multiwidget' => 1,
+				)
+			);
+			$sidebars                          = get_option( 'sidebars_widgets', array() );
+			$sidebars['panels-parity-sidebar'] = array( 'siteorigin-panels-builder-' . $number );
+			update_option( 'sidebars_widgets', $sidebars );
+			panels_parity_send( array( 'number' => $number ) );
+		}
+
+		if ( $action === 'clear_widget' ) {
+			panels_parity_require_admin();
+			update_option( 'widget_siteorigin-panels-builder', array( '_multiwidget' => 1 ) );
+			$sidebars                          = get_option( 'sidebars_widgets', array() );
+			$sidebars['panels-parity-sidebar'] = array();
+			update_option( 'sidebars_widgets', $sidebars );
+			panels_parity_send( array( 'ok' => true ) );
+		}
+
+		if ( $action === 'seed_home' ) {
+			// Direct insert of a front page with a layout, and the options a home page save sets.
+			panels_parity_require_admin();
+			$wpdb->insert(
+				$wpdb->posts,
+				array(
+					'post_author'           => 1,
+					'post_date'             => '2026-01-15 10:00:00',
+					'post_date_gmt'         => '2026-01-15 10:00:00',
+					'post_modified'         => '2026-01-15 10:00:00',
+					'post_modified_gmt'     => '2026-01-15 10:00:00',
+					'post_content'          => '',
+					'post_title'            => $body['title'],
+					'post_excerpt'          => '',
+					'post_status'           => 'publish',
+					'post_name'             => sanitize_title( $body['title'] ),
+					'post_type'             => 'page',
+					'comment_status'        => 'closed',
+					'to_ping'               => '',
+					'pinged'                => '',
+					'post_content_filtered' => '',
+				)
+			);
+			$new = (int) $wpdb->insert_id;
+			$wpdb->update( $wpdb->posts, array( 'guid' => home_url( '/?page_id=' . $new ) ), array( 'ID' => $new ) );
+			$wpdb->insert(
+				$wpdb->postmeta,
+				array(
+					'post_id'    => $new,
+					'meta_key'   => 'panels_data',
+					'meta_value' => serialize( $body['panels'] ),
+				)
+			);
+			clean_post_cache( $new );
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $new );
+			update_option( 'siteorigin_panels_home_page_id', $new );
+			panels_parity_send( array( 'id' => $new ) );
+		}
+
+		if ( $action === 'clear_home' ) {
+			panels_parity_require_admin();
+			$page_id = (int) get_option( 'siteorigin_panels_home_page_id' );
+
+			if ( $page_id ) {
+				wp_delete_post( $page_id, true );
+			}
+			update_option( 'show_on_front', 'posts' );
+			delete_option( 'page_on_front' );
+			delete_option( 'siteorigin_panels_home_page_id' );
+			panels_parity_send( array( 'deleted' => $page_id ) );
+		}
+
+		if ( $action === 'dump_option' ) {
+			$names = array_filter( array_map( 'trim', explode( ',', isset( $_GET['name'] ) ? $_GET['name'] : '' ) ) );
+			$out   = array();
+
+			foreach ( $names as $name ) {
+				$out[ $name ] = panels_parity_raw_option( $name );
+			}
+			panels_parity_send( $out );
 		}
 
 		panels_parity_send( array( 'error' => 'unknown action' ) );

@@ -77,6 +77,7 @@ export function coverage( l, recs ) {
 	const h = ( c ) => readHtml( l, c.key, 'modern' ) || '';
 	const admin = recs.filter( ( c ) => ! c.key.includes( '.author.' ) );
 	return {
+		keys: recs.map( ( c ) => c.key ),
 		cases: recs.length,
 		harnessErrors: recs.filter( ( c ) => c.error ).length,
 		visitor200: recs.filter( ( c ) => c.vis && c.vis.modern && c.vis.legacy && c.vis.modern.status === 200 && c.vis.legacy.status === 200 ).length,
@@ -90,10 +91,24 @@ export function coverage( l, recs ) {
 		liveSvg: admin.filter( ( c ) => /<circle cx="25"/.test( h( c ) ) ).map( ( c ) => c.key ),
 		liveShortcode: admin.filter( ( c ) => /<form class="parity-form">/.test( h( c ) ) ).map( ( c ) => c.key ),
 		nonAsciiRowSelector: recs.filter( ( c ) => c.vis && c.vis.modern && c.vis.modern.styleBlocks.join( '' ).includes( '#ряд' ) ).map( ( c ) => c.key ),
+		widgetCases: recs.filter( ( c ) => /^s?widget\./.test( c.key ) ).length,
+		widgetAreaText: recs.filter( ( c ) => /^s?widget\./.test( c.key ) && /<div id="panels-parity-sidebar">[\s\S]*PARITY-S-/.test( h( c ) ) ).map( ( c ) => c.key ),
+		homeCases: recs.filter( ( c ) => /^s?home\./.test( c.key ) ).length,
+		homePageText: recs.filter( ( c ) => /^s?home\./.test( c.key ) && /PARITY-S-/.test( h( c ) ) ).map( ( c ) => c.key ),
 	};
 }
 
 // The coverage floor of the pass rule. Returns the list of missed items (empty = met).
+// Each count applies when the run holds a case that should produce it (a --filter can leave them out).
+const FLOOR = {
+	liveIframe: /\.admin\.std\.iframe$/,
+	liveScript: /\.admin\.std\.script$/,
+	liveStyle: /\.admin\.std\.style$/,
+	liveSvg: /\.admin\.std\.svg$/,
+	liveShortcode: /\.admin\.std\.shortcode$/,
+	nonAsciiRowSelector: /strnonascii/,
+};
+
 export function coverageFloor( cov ) {
 	const missed = [];
 	if ( cov.cases === 0 ) {
@@ -102,10 +117,17 @@ export function coverageFloor( cov ) {
 	if ( cov.visitor200 !== cov.cases ) {
 		missed.push( `visitor200 ${ cov.visitor200 } of ${ cov.cases }` );
 	}
-	for ( const k of [ 'liveIframe', 'liveScript', 'liveStyle', 'liveSvg', 'liveShortcode', 'nonAsciiRowSelector' ] ) {
-		if ( ! cov[ k ].length ) {
+	for ( const [ k, re ] of Object.entries( FLOOR ) ) {
+		if ( cov.keys.some( ( key ) => re.test( key ) ) && ! cov[ k ].length ) {
 			missed.push( `${ k } is 0` );
 		}
+	}
+	// The widget area and home page counts apply when the run holds those cases (a --filter can leave them out).
+	if ( cov.widgetCases && ! cov.widgetAreaText.length ) {
+		missed.push( 'widgetAreaText is 0' );
+	}
+	if ( cov.homeCases && ! cov.homePageText.length ) {
+		missed.push( 'homePageText is 0' );
 	}
 	return missed;
 }
@@ -211,7 +233,7 @@ export function compareRuns( X, Y, { tokens: extra = [], only = '' } = {} ) {
 		}
 	}
 	const c = cov[ X ];
-	md.push( '', `## Coverage (${ X })`, '', ...Object.entries( c ).map( ( [ k, v ] ) => `- ${ k }: ${ Array.isArray( v ) ? v.length + ( k === 'noLayoutStored' ? ' (' + v.join( ', ' ) + ')' : '' ) : v }` ) );
+	md.push( '', `## Coverage (${ X })`, '', ...Object.entries( c ).filter( ( [ k ] ) => k !== 'keys' ).map( ( [ k, v ] ) => `- ${ k }: ${ Array.isArray( v ) ? v.length + ( k === 'noLayoutStored' ? ' (' + v.join( ', ' ) + ')' : '' ) : v }` ) );
 	md.push( '', `Coverage floor: ${ out.floorMissed[ X ].length ? 'MISSED: ' + out.floorMissed[ X ].join( '; ' ) : 'met' }` );
 	fs.writeFileSync( path.join( dir, `${ X }__${ Y }${ sfx }.md` ), md.join( '\n' ) + '\n' );
 

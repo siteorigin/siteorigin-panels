@@ -72,19 +72,68 @@ function casesAbility() {
 	return list;
 }
 
-async function capture( rec, id, withCss = true, dir = HTML ) {
-	const d = await site.dump( id );
-	rec.stored = d && ! d.missing ? { content: d.row.post_content, status: d.row.post_status, author: d.row.post_author, meta: d.meta, revisions: d.revisions } : { missing: true };
+async function capture( rec, id, { withCss = true, dir = HTML, url, cssQuery, stored } = {} ) {
+	if ( stored ) {
+		rec.stored = stored;
+	} else {
+		const d = await site.dump( id );
+		rec.stored = d && ! d.missing ? { content: d.row.post_content, status: d.row.post_status, author: d.row.post_author, meta: d.meta, revisions: d.revisions } : { missing: true };
+	}
 	rec.vis = {};
 	rec.css = {};
 	for ( const r of RENDERERS ) {
-		const v = await site.visitor( id, r );
+		const v = await site.visitor( id, r, url );
 		fs.writeFileSync( path.join( dir, `${ rec.key }.${ r }.html` ), v.html );
 		rec.vis[ r ] = { status: v.status, len: v.html.length, sha: sha( v.html ), styleBlocks: styleBlocks( v.html ) };
 		if ( withCss ) {
-			rec.css[ r ] = await site.css( id, r );
+			rec.css[ r ] = await site.css( id, r, cssQuery );
 		}
 	}
+}
+
+// ---------- Widget area and custom home page (stored outside post meta; run last, cleaned up) ----------
+function casesOutside() {
+	const list = [];
+	for ( const fam of [ 'widget', 'home' ] ) {
+		for ( const shape of [ 'std', 'info', 'numkey', 'numstr' ] ) {
+			list.push( { key: `s${ fam }.seed.${ shape }`, fam, seed: true, shape, k: 'mix' } );
+		}
+		for ( const k of [ 'iframe', 'script' ] ) {
+			list.push( { key: `${ fam }.admin.std.${ k }`, fam, seed: false, shape: 'std', k } );
+		}
+	}
+	if ( o.smoke ) {
+		return list.filter( ( c ) => ( c.seed && c.shape === 'std' ) || ( ! c.seed && c.k === 'iframe' ) );
+	}
+	return list;
+}
+
+const WIDGET_NUMBER = 2;
+
+async function runOutside( c ) {
+	const rec = { key: c.key, set: 'O' };
+	const pd = SHAPES[ c.shape ]( std( site, c.k, ! c.seed ) );
+	if ( c.fam === 'widget' ) {
+		rec.save = c.seed
+			? await site.req( 'POST', '/?parity=seed_widget', { user: 'admin', json: { number: WIDGET_NUMBER, panels_data: pd } } ).then( parse )
+			: await site.widgetSave( JSON.stringify( pd ), WIDGET_NUMBER );
+		rec.id = WIDGET_NUMBER;
+		const opt = parse( await site.req( 'GET', '/?parity=dump_option&name=widget_siteorigin-panels-builder,sidebars_widgets', { user: 'admin' } ) );
+		await capture( rec, rec.id, { url: '/?p=1', cssQuery: `source=widget&number=${ WIDGET_NUMBER }`, stored: { content: '', meta: [], option: opt } } );
+		await site.req( 'GET', '/?parity=clear_widget', { user: 'admin' } );
+	} else {
+		rec.save = c.seed
+			? await site.req( 'POST', '/?parity=seed_home', { user: 'admin', json: { title: `Parity ${ c.key }`, panels: pd } } ).then( parse )
+			: await site.homeSave( JSON.stringify( pd ) );
+		const opt = parse( await site.req( 'GET', '/?parity=dump_option&name=show_on_front,page_on_front,siteorigin_panels_home_page_id', { user: 'admin' } ) );
+		rec.id = opt && Number( opt.siteorigin_panels_home_page_id );
+		if ( rec.id ) {
+			await capture( rec, rec.id, { url: '/' } );
+			rec.stored.option = opt;
+		}
+		await site.req( 'GET', '/?parity=clear_home', { user: 'admin' } );
+	}
+	return rec;
 }
 
 async function runA( c ) {
@@ -189,6 +238,7 @@ try {
 	} else {
 		console.log( `${ o.label }: ability round-trip cases skipped (no Abilities API on this WordPress)` );
 	}
+	todo.push( ...casesOutside().map( ( c ) => [ runOutside, c ] ) );
 	for ( const [ fn, c ] of todo ) {
 		if ( filter && ! filter.test( c.key ) ) {
 			continue;

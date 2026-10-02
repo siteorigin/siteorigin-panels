@@ -209,13 +209,13 @@ export class Site {
 		return parse( await this.req( 'GET', `/?parity=dump&id=${ id }`, { user: 'admin' } ) );
 	}
 
-	async visitor( id, renderer ) {
-		const r = await this.req( 'GET', `/?p=${ id }`, { follow: true, renderer } );
+	async visitor( id, renderer, url ) {
+		const r = await this.req( 'GET', url || `/?p=${ id }`, { follow: true, renderer } );
 		return { status: r.status, html: r.text };
 	}
 
-	async css( id, renderer ) {
-		return parse( await this.req( 'GET', `/?parity=css&id=${ id }`, { user: 'admin', renderer } ) );
+	async css( id, renderer, query ) {
+		return parse( await this.req( 'GET', query ? `/?parity=css&${ query }` : `/?parity=css&id=${ id }`, { user: 'admin', renderer } ) );
 	}
 
 	async ability( name, user, input, readonly ) {
@@ -276,6 +276,40 @@ export class Site {
 			panels_data: pdJson, _sopanels_nonce: n.panels,
 		} } );
 		return { id, nonceUser: n.user, saveStatus: r.status, saveLocation: r.location ? r.location.replace( this.BASE, '' ) : r.location, saveOk: r.status === 302 && String( r.location ).includes( `post.php?post=${ id }` ) };
+	}
+
+	// Layout Builder widget save through the widgets screen's own request: wp-admin/admin-ajax.php
+	// save-widget, cookie session, as a new widget numbered `number` in the parity widget area.
+	async widgetSave( pdJson, number ) {
+		const cookie = await this.login( 'admin' );
+		const n = parse( await this.req( 'GET', '/?parity=nonces&id=0', { cookie } ) );
+		const r = await this.req( 'POST', '/wp-admin/admin-ajax.php', { cookie, form: {
+			action: 'save-widget', savewidgets: n.savewidgets, sidebar: 'panels-parity-sidebar',
+			id_base: 'siteorigin-panels-builder', 'widget-id': 'siteorigin-panels-builder-__i__',
+			multi_number: String( number ), 'widget-width': '250', 'widget-height': '200',
+			'widget-siteorigin-panels-builder[__i__][panels_data]': pdJson,
+			'widget-siteorigin-panels-builder[__i__][builder_id]': '',
+		} } );
+		// Then the screen saves the widget order of every widget area, with the new widget in ours.
+		const sidebars = { ...( n.sidebars || {} ), 'panels-parity-sidebar': [ `siteorigin-panels-builder-${ number }` ] };
+		const order = { action: 'widgets-order', savewidgets: n.savewidgets };
+		for ( const [ id, list ] of Object.entries( sidebars ) ) {
+			if ( Array.isArray( list ) ) {
+				order[ `sidebars[${ id }]` ] = list.map( ( w, i ) => `widget-${ i }_${ w }` ).join( ',' );
+			}
+		}
+		const o = await this.req( 'POST', '/wp-admin/admin-ajax.php', { cookie, form: order } );
+		return { number, saveStatus: r.status, orderStatus: o.status, orderBody: o.text.trim(), saveOk: r.status === 200 && ! [ '-1', '0' ].includes( r.text.trim() ) && o.text.trim() === '1' };
+	}
+
+	// Custom home page save: a real POST to the Home Page screen, cookie session, home page switched on.
+	async homeSave( pdJson ) {
+		const cookie = await this.login( 'admin' );
+		const n = parse( await this.req( 'GET', '/?parity=nonces&id=0', { cookie } ) );
+		const r = await this.req( 'POST', '/wp-admin/themes.php?page=so_panels_home_page', { cookie, form: {
+			panels_data: pdJson, post_content: '', _sopanels_home_nonce: n.home, siteorigin_panels_home_enabled: 'on',
+		} } );
+		return { saveStatus: r.status, saveOk: r.status === 200 && r.text.includes( 'id="message" class="updated"' ) };
 	}
 
 	uuid() {
