@@ -26,9 +26,11 @@
  *    turn the key into panels_data. In every case the stored row stays
  *    byte-identical.
  *
- * The answer must come from the database and the key alone. Further tests
- * check it when a metadata filter reports no panels_data value, when the meta
- * cache was read before the row existed, and when the post has no layout row.
+ * The answer must come from the database and the key alone, and must not
+ * depend on the post: a key the database matches to panels_data is not
+ * allowed on a post that has no layout row yet. Further tests check it when a
+ * metadata filter reports no panels_data value, when the meta cache was read
+ * before the row existed, and when the post has no layout row.
  *
  * Storage is read straight from the database, as stored.
  */
@@ -65,6 +67,8 @@ const SANITIZED_FORMS = [
 	{ label: 'upper case', key: 'PANELS_DATA' },
 	{ label: 'an added character that sanitize_key() removes', key: 'panels_data!' },
 ];
+
+const ACCENTED_KEY = 'p\u00e1nels_data';
 
 const UNRELATED_KEYS = Array.from( { length: 10 }, ( unused, index ) => `my_field_${ index + 1 }` );
 
@@ -305,6 +309,37 @@ test.describe( 'panels_data meta write authorization for other forms of the key'
 			expect( result.allowed ).toBe( false );
 		} );
 	}
+
+	test( 'an accented letter, on a post that has no layout while another post has one: an author can use the key only if the database does not match it', async () => {
+		// What the database does with this key, on a post that has a layout.
+		const adminPost = await createTracked( admin, 'administrator' );
+		const adminStored = await storeLayout( adminPost, LAYOUT_A );
+
+		expect( await write( admin, adminPost, 'update', ACCENTED_KEY, LAYOUT_B ) ).toBe( true );
+
+		const afterUpdate = await layoutRow( adminPost );
+		expect( afterUpdate ).toBeTruthy();
+
+		const selectsTheRow = afterUpdate.meta_value !== adminStored.meta_value;
+		test.info().annotations.push( {
+			type: 'database',
+			description: `${ JSON.stringify( ACCENTED_KEY ) } ${ selectsTheRow ? 'selects' : 'does not select' } the panels_data row`,
+		} );
+
+		// The author's post has no layout row. The administrator's post still has one.
+		const authorPost = await createTracked( author, 'author' );
+		expect( await layoutRow( authorPost ) ).toBeUndefined();
+
+		const updateAllowed = await write( author, authorPost, 'update', ACCENTED_KEY, LAYOUT_B );
+		expect( await layoutRow( authorPost ) ).toBeUndefined();
+		expect( updateAllowed ).toBe( ! selectsTheRow );
+
+		const deleteAllowed = await write( author, authorPost, 'delete', ACCENTED_KEY );
+		expect( await layoutRow( authorPost ) ).toBeUndefined();
+		expect( deleteAllowed ).toBe( ! selectsTheRow );
+
+		expect( await layoutRow( adminPost ) ).toStrictEqual( afterUpdate );
+	} );
 
 	for ( const form of SANITIZED_FORMS ) {
 		test( `${ form.label }, written as sanitize_key() of the key: an author cannot create a layout on a post that has none`, async () => {
