@@ -310,10 +310,17 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		return $reflection->invoke( $object, $panels_data );
 	}
 
+	/**
+	 * A widget placed in row 0, cell 0.
+	 */
 	private function widget( $content ) {
 		return array(
 			'content'     => $content,
-			'panels_info' => array( 'class' => 'PreWriteIdentityWidget' ),
+			'panels_info' => array(
+				'class' => 'PreWriteIdentityWidget',
+				'grid'  => 0,
+				'cell'  => 0,
+			),
 		);
 	}
 
@@ -330,8 +337,27 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		);
 	}
 
+	/**
+	 * A layout the builder can load: one row, one cell, one widget in it.
+	 */
 	private function layout( $content ) {
-		return array( 'widgets' => array( $this->widget( $content ) ) );
+		return $this->layout_of( array( $this->widget( $content ) ) );
+	}
+
+	/**
+	 * A layout of one row and one cell that holds $widgets.
+	 */
+	private function layout_of( array $widgets ) {
+		return array(
+			'widgets'    => $widgets,
+			'grids'      => array( array( 'cells' => 1 ) ),
+			'grid_cells' => array(
+				array(
+					'grid'   => 0,
+					'weight' => 1,
+				),
+			),
+		);
 	}
 
 	/**
@@ -410,11 +436,11 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 
 		$result = $block->sanitize_block_for_layout_update(
 			$this->block_for(
-				array(
-					'widgets' => array(
+				$this->layout_of(
+					array(
 						$this->widget( 'Tom & Jerry' ),
 						$this->widget( '<strong>Tom & Jerry</strong>' ),
-					),
+					)
 				)
 			),
 			77,
