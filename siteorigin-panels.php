@@ -25,6 +25,14 @@ require_once plugin_dir_path( __FILE__ ) . 'inc/functions.php';
 class SiteOrigin_Panels {
 	public $container = array();
 
+	/**
+	 * Whether the database matches a meta key to a post's panels_data row, by
+	 * site, post and key. Kept for the request.
+	 *
+	 * @var bool[]
+	 */
+	private $panels_data_key_matches = array();
+
 	public function __construct() {
 		register_activation_hook( __FILE__, array( 'SiteOrigin_Panels', 'activate' ) );
 
@@ -675,6 +683,12 @@ class SiteOrigin_Panels {
 	 * through core meta-capability routes. Plugin writes use update_post_meta()
 	 * directly and do not pass through map_meta_cap, so they are unaffected.
 	 *
+	 * The metadata functions remove slashes from a key, and select the rows to
+	 * update or delete with the database's own comparison of the key. So the
+	 * same rule applies to a key that is panels_data once its slashes are
+	 * removed, and to a key that the database matches to the post's
+	 * panels_data row.
+	 *
 	 * @param string[] $caps    Required primitive caps as mapped so far.
 	 * @param string   $cap     The capability being mapped.
 	 * @param int      $user_id Acting user ID.
@@ -687,15 +701,85 @@ class SiteOrigin_Panels {
 			return $caps;
 		}
 
-		if ( ! isset( $args[1] ) || 'panels_data' !== $args[1] ) {
+		if ( ! isset( $args[1] ) || ! is_string( $args[1] ) ) {
 			return $caps;
+		}
+
+		// The key as given, and the key the metadata functions write.
+		$keys          = array_unique( array( $args[1], wp_unslash( $args[1] ) ) );
+		$is_layout_key = in_array( 'panels_data', $keys, true );
+		$post_id       = 0;
+
+		if ( ! $is_layout_key ) {
+			$post_id = isset( $args[0] ) ? (int) $args[0] : 0;
+
+			// The post meta functions write to the parent of a revision.
+			$parent_id = wp_is_post_revision( $post_id );
+			if ( $parent_id ) {
+				$post_id = (int) $parent_id;
+			}
+
+			// Another key can only resolve to the panels_data row of a post that has one.
+			if ( ! metadata_exists( 'post', $post_id, 'panels_data' ) ) {
+				return $caps;
+			}
 		}
 
 		if ( user_can( $user_id, 'unfiltered_html' ) ) {
 			return $caps;
 		}
 
-		return array( 'do_not_allow' );
+		if ( $is_layout_key ) {
+			return array( 'do_not_allow' );
+		}
+
+		foreach ( $keys as $key ) {
+			if ( $this->database_matches_panels_data_key( $post_id, $key ) ) {
+				return array( 'do_not_allow' );
+			}
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Whether the database matches a meta key to the panels_data row of a post.
+	 *
+	 * This is the comparison update_metadata() and delete_metadata() make when
+	 * they select rows, so the answer follows the collation of the meta key
+	 * column: letter case, accents and trailing spaces are decided by the
+	 * database, not here. The stored key of a matched row must be panels_data
+	 * exactly.
+	 *
+	 * @param int    $post_id The post ID.
+	 * @param string $key     The meta key to compare.
+	 *
+	 * @return bool True for a match. Also true if the comparison could not be made.
+	 */
+	private function database_matches_panels_data_key( $post_id, $key ) {
+		global $wpdb;
+
+		$cache_key = get_current_blog_id() . ':' . $post_id . ':' . $key;
+		if ( isset( $this->panels_data_key_matches[ $cache_key ] ) ) {
+			return $this->panels_data_key_matches[ $cache_key ];
+		}
+
+		$stored_keys = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT meta_key FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = %s",
+				$post_id,
+				$key
+			)
+		);
+
+		// A failed query gives no answer. Treat the key as a match, and do not keep that.
+		if ( ! empty( $wpdb->last_error ) ) {
+			return true;
+		}
+
+		$this->panels_data_key_matches[ $cache_key ] = in_array( 'panels_data', (array) $stored_keys, true );
+
+		return $this->panels_data_key_matches[ $cache_key ];
 	}
 
 	public static function front_css_url() {
