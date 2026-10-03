@@ -19,7 +19,8 @@ const filter = o.filter ? new RegExp( o.filter ) : null;
 const site = new Site( o );
 const HTML = path.join( site.OUT, 'html' );
 fs.mkdirSync( HTML, { recursive: true } );
-const RENDERERS = [ 'modern', 'legacy' ];
+// With the legacy fixture theme the theme picks the renderer, so no renderer header is sent.
+const RENDERERS = o.theme === 'legacy-fixture' ? [ 'theme' ] : [ 'modern', 'legacy' ];
 
 // ---------- Human saves and stored data ----------
 // classic: builder field through wp-admin/post.php. block: Layout Block through REST.
@@ -82,11 +83,11 @@ async function capture( rec, id, { withCss = true, dir = HTML, url, cssQuery, st
 	rec.vis = {};
 	rec.css = {};
 	for ( const r of RENDERERS ) {
-		const v = await site.visitor( id, r, url );
+		const v = await site.visitor( id, r === 'theme' ? undefined : r, url );
 		fs.writeFileSync( path.join( dir, `${ rec.key }.${ r }.html` ), v.html );
 		rec.vis[ r ] = { status: v.status, len: v.html.length, sha: sha( v.html ), styleBlocks: styleBlocks( v.html ) };
 		if ( withCss ) {
-			rec.css[ r ] = await site.css( id, r, cssQuery );
+			rec.css[ r ] = await site.css( id, r === 'theme' ? undefined : r, cssQuery );
 		}
 	}
 }
@@ -231,6 +232,17 @@ try {
 	const setup = parse( await site.req( 'GET', '/?parity=setup', { user: 'admin' } ) );
 	const info = { admin: await site.info( 'admin' ), author: await site.info( 'author' ), options: o, setup };
 	fs.writeFileSync( path.join( site.OUT, 'info.json' ), JSON.stringify( info, null, 1 ) );
+	if ( o.multisite === 'subsite' && info.admin.blog_id !== 2 ) {
+		throw new Error( `the requests reach blog ${ info.admin.blog_id }, not the sub-site (blog 2)` );
+	}
+	const wantTheme = o.theme === 'legacy-fixture' ? 'panels-parity-legacy' : o.theme;
+	if ( wantTheme && info.admin.theme !== wantTheme ) {
+		// A failed theme download leaves the default theme active; such a run is not the cell it claims to be.
+		throw new Error( `the site runs the theme ${ info.admin.theme }, not ${ wantTheme }` );
+	}
+	if ( o.theme === 'legacy-fixture' && info.admin.renderer !== 'SiteOrigin_Panels_Renderer_Legacy' ) {
+		throw new Error( `the legacy fixture theme runs ${ info.admin.renderer }, not SiteOrigin_Panels_Renderer_Legacy` );
+	}
 	console.log( `${ o.label }: wp ${ info.admin.wp } php ${ info.admin.php } panels ${ info.admin.panels_version } wb ${ info.admin.sow_version } premium ${ info.admin.premium_version } multisite ${ info.admin.multisite } abilities ${ info.admin.has_abilities_api }` );
 	const todo = casesA().map( ( c ) => [ runA, c ] );
 	if ( info.admin.has_abilities_api ) {

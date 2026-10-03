@@ -51,7 +51,14 @@ add_action(
 	'init',
 	function () {
 		// One author. The display name is fixed, so the theme's post-author block is the same in every run.
-		if ( get_user_by( 'login', 'pauthor' ) ) {
+		$existing = get_user_by( 'login', 'pauthor' );
+
+		if ( $existing ) {
+			// On multisite the user is global; make it an author of the site of this request too.
+			if ( is_multisite() && ! is_user_member_of_blog( $existing->ID, get_current_blog_id() ) ) {
+				add_user_to_blog( get_current_blog_id(), $existing->ID, 'author' );
+			}
+
 			return;
 		}
 
@@ -184,6 +191,7 @@ add_action(
 					'premium_addons'               => get_option( 'siteorigin_premium_active' ),
 					'panels_dir'                   => defined( 'SITEORIGIN_PANELS_BASE_FILE' ) ? dirname( SITEORIGIN_PANELS_BASE_FILE ) : null,
 					'renderer'                     => class_exists( 'SiteOrigin_Panels' ) ? get_class( SiteOrigin_Panels::renderer() ) : null,
+					'legacy_layout_setting'        => function_exists( 'siteorigin_panels_setting' ) ? siteorigin_panels_setting( 'legacy-layout' ) : null,
 					'current_user'                 => get_current_user_id(),
 					'current_user_unfiltered_html' => current_user_can( 'unfiltered_html' ),
 					'author_id'                    => $author ? $author->ID : 0,

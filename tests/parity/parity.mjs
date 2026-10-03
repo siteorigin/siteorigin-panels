@@ -100,7 +100,9 @@ export async function runWithTries( label, tree, o, tries ) {
 			console.log( `${ label }: complete in ${ secs }s (${ last })` );
 			return true;
 		}
-		console.log( `${ label }: try ${ t } incomplete after ${ secs }s: exit ${ code }; ${ problems[ 0 ] || last }` );
+		const failed = fs.readFileSync( logFile, 'utf8' ).split( '\n' ).find( ( l ) => /^FAILED|Error: /.test( l ) );
+		console.log( `${ label }: try ${ t } incomplete after ${ secs }s: exit ${ code }; ${ failed || problems[ 0 ] || last }` );
+		runWithTries.lastReason = ( failed || problems[ 0 ] || last || '' ).trim();
 	}
 	return false;
 }
@@ -116,13 +118,19 @@ export async function parity( o ) {
 	const L = { b1: `${ prefix }base-1`, c1: `${ prefix }cand-1`, b2: `${ prefix }base-2`, c2: `${ prefix }cand-2` };
 	const order = [ [ L.b1, baseTree ], [ L.c1, candTree ], [ L.b2, baseTree ], [ L.c2, candTree ] ];
 	const complete = {};
+	const reasons = {};
 	for ( const [ label, tree ] of order ) {
 		complete[ label ] = await runWithTries( label, tree, o, tries );
+		if ( ! complete[ label ] ) {
+			// An incomplete run is never compared, so the remaining runs would be wasted.
+			reasons[ label ] = runWithTries.lastReason;
+			break;
+		}
 	}
 	const rows = [];
 	let ok = Object.values( complete ).every( Boolean );
 	if ( ! ok ) {
-		rows.push( `INCOMPLETE: ${ Object.entries( complete ).filter( ( [ , v ] ) => ! v ).map( ( [ k ] ) => k ).join( ', ' ) }` );
+		rows.push( `INCOMPLETE: ${ Object.entries( complete ).filter( ( [ , v ] ) => ! v ).map( ( [ k ] ) => `${ k } (${ reasons[ k ] })` ).join( ', ' ) }` );
 	} else {
 		for ( const [ x, y, what ] of [ [ L.b1, L.b2, 'base noise' ], [ L.c1, L.c2, 'candidate noise' ], [ L.b1, L.c1, 'base vs candidate (1)' ], [ L.b2, L.c2, 'base vs candidate (2)' ] ] ) {
 			const r = compareRuns( x, y, { tokens } );
@@ -136,13 +144,13 @@ export async function parity( o ) {
 		}
 	}
 	console.log( '\n' + rows.join( '\n' ) + `\n\nVERDICT: ${ ok ? 'PASS' : 'FAIL' }  (reports: ${ path.join( OUTROOT, 'compare' ) })` );
-	return ok;
+	return { ok, incomplete: Object.entries( complete ).filter( ( [ , v ] ) => ! v ).map( ( [ k ] ) => k ), reason: Object.values( reasons )[ 0 ] };
 }
 
 if ( import.meta.url === pathToFileURL( process.argv[ 1 ] ).href ) {
 	const o = args();
-	parity( o ).then( ( ok ) => {
-		process.exitCode = ok ? 0 : 1;
+	parity( o ).then( ( res ) => {
+		process.exitCode = res.ok ? 0 : 1;
 	}, ( e ) => {
 		console.error( e );
 		process.exitCode = 1;

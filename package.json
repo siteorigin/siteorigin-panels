@@ -11,7 +11,8 @@
 		"e2e": "node tests/scripts/run-e2e.js",
 		"parity": "node tests/parity/parity.mjs",
 		"parity:generate": "node tests/parity/generate.mjs",
-		"parity:corpus": "node tests/parity/generate.mjs --corpus"
+		"parity:corpus": "node tests/parity/generate.mjs --corpus",
+		"parity:matrix": "node tests/parity/matrix.mjs"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.55.0",

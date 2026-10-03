@@ -85,6 +85,7 @@ A token is a value that changes between two runs of the same code. It is replace
 | `uniqid:layout-block-render-id` | A Layout Block with no stored builder ID gets `gb<post>-<13 hex>` from `uniqid()` on each render. |
 | `uniqid:layout-builder-widget-id` | A Layout Builder widget gets a new `builder_id` from `uniqid()` on each save, printed as `w<13 hex>`. |
 | `wb:_sow_form_timestamp` | Widgets Bundle widgets store the save time (13 digits). |
+| `wp-core:post-modified-time(theme)` | A theme that prints the post's modified time (`<time class="updated">`, for example Vantage). A saved post is modified at the time of the run. |
 | `wp-core:enclosure-meta(cron)` | WordPress writes `enclosure` post meta from WP-Cron for a media URL. Whether cron has run yet is timing, so the row is left out. |
 | `harness:port` (opt-in, `--tokens=port`) | Two runs on different ports. |
 | `package:version-string` (opt-in, `--tokens=version`) | The plugin version of each run, read from its `info.json` (asset URLs, generator comment). |
@@ -112,6 +113,30 @@ Real layouts are the best test data, and they belong to their sites. Private cor
 
    Every stored layout is rendered on both renderers, and every post meta layout is saved again through the classic path as administrator. The pass rule is 0 differences after the named tokens. The command fails when the directory is inside the repository.
 
+## Environment matrix
+
+`npm run parity:matrix` runs the smoke comparison in other environments, one cell after the other. Base and candidate share each cell, so a difference is still a plugin difference. Local only; not in CI.
+
+| Cell | Environment |
+|---|---|
+| `multisite-subsite` | Multisite (WP-CLI conversion), every request on the sub-site `/parity/` except the login (network root). The run fails unless the requests reach blog 2. |
+| `legacy-theme` | The test theme `themes/panels-parity-legacy` (classic theme, `legacy-layout` set to `always` by theme support). No renderer header is sent; the run fails unless the site runs `SiteOrigin_Panels_Renderer_Legacy`. |
+| `siteorigin-theme` | The Vantage theme from wordpress.org. |
+| `no-wb` | No Widgets Bundle. |
+| `premium`, `premium-no-wb` | SiteOrigin Premium from a local path, with and without the Widgets Bundle. Only with `--premium=<absolute path>`. |
+
+```
+npm run parity:matrix
+npm run parity:matrix -- --cell=legacy-theme
+npm run parity:matrix -- --premium=/abs/path/to/siteorigin-premium
+```
+
+Each cell prints one line: PASS, FAIL, or NOT RUN with the reason (a cell that cannot boot, or whose environment check fails). NOT RUN makes the exit code 1. A cell takes about 6 minutes.
+
+Premium rule: Premium is never in the repository or in CI. `--premium` is refused when the `CI` environment variable is set.
+
+The same environment options work on `npm run parity` itself: `--multisite`, `--multisite=subsite`, `--theme=<wordpress.org slug>`, `--theme=legacy-fixture`, `--wb=none`, `--premium=<absolute path>`.
+
 ## Files
 
 - `parity.mjs` — the four runs, the comparisons and the verdict.
@@ -119,6 +144,8 @@ Real layouts are the best test data, and they belong to their sites. Private cor
 - `compare.mjs` — the comparison of two runs, the named tokens and the coverage counts.
 - `integrity.mjs` — is a run complete?
 - `generate.mjs` — the generator test and the private corpus mode.
+- `matrix.mjs` — the environment matrix.
+- `themes/panels-parity-legacy/` — the classic test theme of the `legacy-theme` cell.
 - `lib.mjs` — Playground boot, requests, layout builders, save paths.
 - `mu-plugins/panels-parity.php` — the test mu-plugin (header users, renderer pin, seed and read endpoints). It does nothing unless the blueprint defines `PANELS_PARITY_HARNESS`.
 - `php/generator.php`, `php/batch.php` — the generator and its batch save and render endpoints.

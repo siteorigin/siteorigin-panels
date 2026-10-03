@@ -10,7 +10,9 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { OUTROOT, args } from './lib.mjs';
 
-const RENDERERS = [ 'modern', 'legacy' ];
+// The renderers a record was captured on (modern and legacy, or the theme's own with a theme that picks it).
+const renderersOf = ( c ) => ( c.vis && Object.keys( c.vis ).length ? Object.keys( c.vis ) : [ 'modern', 'legacy' ] );
+const first = ( c ) => ( c.vis ? c.vis[ renderersOf( c )[ 0 ] ] : null );
 const escapeRe = ( s ) => s.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 // Named tokens. Each is a value that changes between two runs of the SAME code.
@@ -25,6 +27,8 @@ export function tokenList( extra, versions = [] ) {
 		// Widgets Bundle form timestamp (13 digits) in stored values.
 		[ 'wb:_sow_form_timestamp', /(_sow_form_timestamp\\?";(?:s:13:\\?"|d:))\d{13}/g, '$1TIMESTAMP' ],
 		[ 'wb:_sow_form_timestamp', /(\\?"_sow_form_timestamp\\?":\\?"?)\d{13}/g, '$1TIMESTAMP' ],
+		// A theme that prints the post's modified time (Vantage): a saved post is modified at the time of the run.
+		[ 'wp-core:post-modified-time(theme)', /(<time class="updated" datetime=")[^"]*(">)[^<]*(<\/time>)/g, '$1MODIFIED$2MODIFIED$3' ],
 	];
 	if ( extra.includes( 'port' ) ) {
 		// The two runs used different ports.
@@ -82,23 +86,23 @@ const readHtml = ( l, key, r ) => {
 // Coverage: is the comparison a real one?
 export function coverage( l, recs ) {
 	const meta = ( c ) => ( ( c.stored && c.stored.meta ) || [] ).find( ( m ) => m.meta_key === 'panels_data' );
-	const h = ( c ) => readHtml( l, c.key, 'modern' ) || '';
+	const h = ( c ) => readHtml( l, c.key, renderersOf( c )[ 0 ] ) || '';
 	const admin = recs.filter( ( c ) => ! c.key.includes( '.author.' ) );
 	return {
 		keys: recs.map( ( c ) => c.key ),
 		cases: recs.length,
 		harnessErrors: recs.filter( ( c ) => c.error ).length,
-		visitor200: recs.filter( ( c ) => c.vis && c.vis.modern && c.vis.legacy && c.vis.modern.status === 200 && c.vis.legacy.status === 200 ).length,
+		visitor200: recs.filter( ( c ) => c.vis && renderersOf( c ).every( ( r ) => c.vis[ r ] && c.vis[ r ].status === 200 ) ).length,
 		storedLayout: recs.filter( ( c ) => meta( c ) || ( c.stored && /wp:siteorigin-panels\/layout-block/.test( c.stored.content ) ) ).length,
 		noLayoutStored: recs.filter( ( c ) => c.stored && ! c.stored.option && ! meta( c ) && ! /wp:siteorigin-panels\/layout-block/.test( c.stored.content ) ).map( ( c ) => c.key ),
-		pagePrintsPanelsCss: recs.filter( ( c ) => c.vis && c.vis.modern && c.vis.modern.styleBlocks.length > 0 ).length,
+		pagePrintsPanelsCss: recs.filter( ( c ) => first( c ) && first( c ).styleBlocks.length > 0 ).length,
 		pageShowsWidgetText: recs.filter( ( c ) => /PARITY-S-/.test( h( c ) ) ).length,
 		liveIframe: admin.filter( ( c ) => /<iframe[^>]*PARITYIFRAME/.test( h( c ) ) ).map( ( c ) => c.key ),
 		liveScript: admin.filter( ( c ) => /<script>console\.log\("parity-script"\)<\/script>/.test( h( c ) ) ).map( ( c ) => c.key ),
 		liveStyle: admin.filter( ( c ) => /<style>\.parity-style/.test( h( c ) ) ).map( ( c ) => c.key ),
 		liveSvg: admin.filter( ( c ) => /<circle cx="25"/.test( h( c ) ) ).map( ( c ) => c.key ),
 		liveShortcode: admin.filter( ( c ) => /<form class="parity-form">/.test( h( c ) ) ).map( ( c ) => c.key ),
-		nonAsciiRowSelector: recs.filter( ( c ) => c.vis && c.vis.modern && c.vis.modern.styleBlocks.join( '' ).includes( '#ряд' ) ).map( ( c ) => c.key ),
+		nonAsciiRowSelector: recs.filter( ( c ) => first( c ) && first( c ).styleBlocks.join( '' ).includes( '#ряд' ) ).map( ( c ) => c.key ),
 		widgetCases: recs.filter( ( c ) => /^s?widget\./.test( c.key ) ).length,
 		widgetAreaText: recs.filter( ( c ) => /^s?widget\./.test( c.key ) && /<div id="panels-parity-sidebar">[\s\S]*PARITY-S-/.test( h( c ) ) ).map( ( c ) => c.key ),
 		homeCases: recs.filter( ( c ) => /^s?home\./.test( c.key ) ).length,
@@ -157,7 +161,7 @@ export function fieldsOf( l, c, used ) {
 		} ) ) : 'NONE',
 		'stored.other': c.stored ? JSON.stringify( [ c.stored.status, c.stored.author, c.stored.revisions, c.stored.option ?? null ] ) : 'NONE',
 	};
-	for ( const r of RENDERERS ) {
+	for ( const r of renderersOf( c ) ) {
 		f[ `html.${ r }` ] = readHtml( l, c.key, r ) ?? 'NONE';
 		f[ `http.${ r }` ] = c.vis && c.vis[ r ] ? String( c.vis[ r ].status ) : 'NONE';
 		f[ `pagecss.${ r }` ] = c.vis && c.vis[ r ] ? JSON.stringify( c.vis[ r ].styleBlocks ) : 'NONE';

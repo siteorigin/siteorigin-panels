@@ -25,7 +25,7 @@ export function integrity( label ) {
 			problems.push( `${ label } ${ c.key }: no post id` );
 		} else if ( ! c.stored || c.stored.missing ) {
 			problems.push( `${ label } ${ c.key }: no stored data` );
-		} else if ( ! c.vis || ! c.vis.modern || ! c.vis.legacy || c.vis.modern.status === 0 || c.vis.legacy.status === 0 ) {
+		} else if ( ! c.vis || ! Object.keys( c.vis ).length || Object.values( c.vis ).some( ( v ) => ! v || v.status === 0 ) ) {
 			problems.push( `${ label } ${ c.key }: no visitor response` );
 		} else if ( c.ai && c.ai.http === 0 ) {
 			problems.push( `${ label } ${ c.key }: no ability response` );

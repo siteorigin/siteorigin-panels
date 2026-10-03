@@ -49,6 +49,11 @@ export class Site {
 		this.o.wb = this.o.wb || 'latest';
 		this.port = Number( o.port || 1139 );
 		this.BASE = `http://127.0.0.1:${ this.port }`;
+		// --multisite=subsite: every request goes to the sub-site, except the login (network root).
+		this.prefix = o.multisite === 'subsite' ? '/parity' : '';
+		if ( this.hasPremium() && process.env.CI ) {
+			throw new Error( '--premium is for local runs only; it is refused when CI is set' );
+		}
 		this.OUT = path.join( OUTROOT, o.label );
 		fs.mkdirSync( this.OUT, { recursive: true } );
 		this.reqCount = 0;
@@ -95,13 +100,23 @@ export class Site {
 			mounts.push( `--mount=${ this.abs( o.premium ) }:/wordpress/wp-content/plugins/siteorigin-premium` );
 			steps.push( { step: 'activatePlugin', pluginPath: '/wordpress/wp-content/plugins/siteorigin-premium/siteorigin-premium.php' } );
 		}
-		if ( o.theme ) {
+		if ( o.theme === 'legacy-fixture' ) {
+			// The test theme that asks for the legacy renderer.
+			mounts.push( `--mount=${ path.join( HERE, 'themes', 'panels-parity-legacy' ) }:/wordpress/wp-content/themes/panels-parity-legacy` );
+			steps.push( { step: 'activateTheme', themeFolderName: 'panels-parity-legacy' } );
+		} else if ( o.theme ) {
 			steps.push( { step: 'installTheme', themeData: { resource: 'wordpress.org/themes', slug: o.theme }, options: { activate: true } } );
 		}
 		// Playground's enableMultisite step refuses a custom port, so convert with WP-CLI, after activation.
 		if ( o.multisite ) {
 			steps.push( { step: 'wp-cli', command: 'wp core multisite-convert' } );
 			steps.push( { step: 'defineWpConfigConsts', consts: { MULTISITE: true, SUBDOMAIN_INSTALL: false, DOMAIN_CURRENT_SITE: `127.0.0.1:${ this.port }`, PATH_CURRENT_SITE: '/', SITE_ID_CURRENT_SITE: 1, BLOG_ID_CURRENT_SITE: 1 } } );
+			if ( o.multisite === 'subsite' ) {
+				// A sub-site at /parity/, with every plugin of the run active on the network.
+				steps.push( { step: 'wp-cli', command: 'wp site create --slug=parity --title=Parity' } );
+				const slugs = [ 'siteorigin-panels', ...( this.hasWb() ? [ 'so-widgets-bundle' ] : [] ), ...( this.hasPremium() ? [ 'siteorigin-premium' ] : [] ) ];
+				steps.push( { step: 'wp-cli', command: `wp plugin activate --network ${ slugs.join( ' ' ) }` } );
+			}
 			if ( ! o.siteurl ) {
 				o.siteurl = `http://127.0.0.1:${ this.port }`;
 			}
@@ -137,7 +152,7 @@ export class Site {
 			const r = await this.req( 'GET', '/?parity=info', { user: 'admin' } );
 			const j = r.status === 200 ? parse( r ) : null;
 			// The server answers before the blueprint has finished. Wait until every plugin of this run is active.
-			if ( j && j.panels_version && ( ! this.hasWb() || j.sow_version ) && ( ! this.hasPremium() || j.premium_version ) && ( ! o.multisite || j.multisite ) ) {
+			if ( j && j.panels_version && ( ! this.hasWb() || j.sow_version ) && ( ! this.hasPremium() || j.premium_version ) && ( ! o.multisite || j.multisite ) && ( ! this.prefix || j.blog_id === 2 ) && ( o.theme !== 'legacy-fixture' || j.theme === 'panels-parity-legacy' ) ) {
 				// And until the blueprint's last step is done.
 				await sleep( o.multisite ? 4000 : 1500 );
 				return;
@@ -179,8 +194,10 @@ export class Site {
 			body = new URLSearchParams( form ).toString();
 		}
 		this.reqCount++;
+		// The login lives on the network root; every other request goes to the site under test.
+		const target = this.BASE + ( url.startsWith( '/wp-login.php' ) ? '' : this.prefix ) + url;
 		try {
-			const res = await fetch( this.BASE + url, { method, headers: h, body, redirect: follow ? 'follow' : 'manual', signal: AbortSignal.timeout( 180000 ) } );
+			const res = await fetch( target, { method, headers: h, body, redirect: follow ? 'follow' : 'manual', signal: AbortSignal.timeout( 180000 ) } );
 			const text = await res.text();
 			return { status: res.status, text, location: res.headers.get( 'location' ) || undefined, setCookie: res.headers.getSetCookie ? res.headers.getSetCookie() : [] };
 		} catch ( e ) {
@@ -242,7 +259,7 @@ export class Site {
 		if ( ! creds ) {
 			throw new Error( `unknown user ${ who }` );
 		}
-		const r = await this.req( 'POST', '/wp-login.php', { cookie: 'wordpress_test_cookie=WP%20Cookie%20check', form: { log: creds[ 0 ], pwd: creds[ 1 ], 'wp-submit': 'Log In', redirect_to: this.BASE + '/wp-admin/', testcookie: '1' } } );
+		const r = await this.req( 'POST', '/wp-login.php', { cookie: 'wordpress_test_cookie=WP%20Cookie%20check', form: { log: creds[ 0 ], pwd: creds[ 1 ], 'wp-submit': 'Log In', redirect_to: this.BASE + this.prefix + '/wp-admin/', testcookie: '1' } } );
 		const jar = r.setCookie.map( ( c ) => c.split( ';' )[ 0 ] ).filter( ( c ) => ! /=\s*$/.test( c ) );
 		if ( ! jar.some( ( c ) => c.startsWith( 'wordpress_logged_in' ) ) ) {
 			throw new Error( `login failed for ${ who }: ${ r.status } ${ r.text.slice( 0, 300 ) }` );
@@ -276,7 +293,7 @@ export class Site {
 			original_post_status: 'publish', post_status: 'publish', post_title: title, content,
 			panels_data: pdJson, _sopanels_nonce: n.panels,
 		} } );
-		return { id, nonceUser: n.user, saveStatus: r.status, saveLocation: r.location ? r.location.replace( this.BASE, '' ) : r.location, saveOk: r.status === 302 && String( r.location ).includes( `post.php?post=${ id }` ) };
+		return { id, nonceUser: n.user, saveStatus: r.status, saveLocation: r.location ? r.location.replace( this.BASE + this.prefix, '' ) : r.location, saveOk: r.status === 302 && String( r.location ).includes( `post.php?post=${ id }` ) };
 	}
 
 	// Layout Builder widget save through the widgets screen's own request: wp-admin/admin-ajax.php
