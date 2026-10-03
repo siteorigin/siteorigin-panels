@@ -30,6 +30,14 @@ export function tokenList( extra, versions = [] ) {
 		// The two runs used different ports.
 		tokens.push( [ 'harness:port', /127\.0\.0\.1(:|%3A)\d{2,5}/g, '127.0.0.1$1PORT' ] );
 	}
+	if ( extra.includes( 'premium-animations' ) ) {
+		// SiteOrigin Premium Animations: a random id per animated element, made on every render.
+		tokens.push( [ 'premium:animation-id', /\banimate-[0-9a-f]{22}\b/g, 'animate-ANIMID' ] );
+	}
+	if ( extra.includes( 'wb-google-map' ) ) {
+		// Widgets Bundle Google Maps: a random map id, made on every render.
+		tokens.push( [ 'wb:google-map-id', /("id":")[0-9a-f]{6}"/g, '$1MAPID"' ] );
+	}
 	if ( extra.includes( 'version' ) ) {
 		// The plugin version string of each run (from info.json): asset URLs and the generator comment.
 		for ( const v of [ ...new Set( versions.filter( Boolean ) ) ] ) {

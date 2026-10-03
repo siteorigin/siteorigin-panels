@@ -22,9 +22,33 @@ if ( ! defined( 'PANELS_PARITY_HARNESS' ) || ! PANELS_PARITY_HARNESS ) {
 require_once __DIR__ . '/generator.php';
 
 /**
- * The cases a request asks for, generated from a seed.
+ * The cases a request asks for: generated from a seed, or a private corpus sent in the body
+ * ({ corpus: [ { key, storage: meta|block|widget, serialized_b64 | post_content_b64 } ] }).
  */
 function panels_parity_batch_cases( $body ) {
+	if ( ! empty( $body['corpus'] ) && is_array( $body['corpus'] ) ) {
+		$cases = array();
+
+		foreach ( $body['corpus'] as $n => $item ) {
+			$case = array(
+				'i'       => isset( $item['i'] ) ? $item['i'] : $n,
+				'kind'    => $item['storage'],
+				'note'    => isset( $item['key'] ) ? $item['key'] : '',
+				'storage' => $item['storage'],
+				'json'    => null,
+			);
+
+			if ( $item['storage'] === 'meta' ) {
+				// A re-save of the stored value: the builder field carries it as JSON.
+				$value        = @unserialize( base64_decode( $item['serialized_b64'] ) );
+				$case['json'] = is_array( $value ) ? wp_json_encode( $value ) : null;
+			}
+			$cases[] = $case;
+		}
+
+		return $cases;
+	}
+
 	$seed  = isset( $body['seed'] ) ? (int) $body['seed'] : 20261002;
 	$count = isset( $body['count'] ) ? (int) $body['count'] : 1000;
 	$from  = isset( $body['from'] ) ? (int) $body['from'] : 0;
@@ -135,7 +159,7 @@ add_action(
 			}
 
 			// block: a Layout Block in the post content.
-			if ( isset( $case['data'] ) ) {
+			if ( isset( $case['data'] ) && empty( $case['storage'] ) ) {
 				$id      = (int) $scratch['block'];
 				$content = '<!-- wp:siteorigin-panels/layout-block ' . serialize_block_attributes( array( 'panelsData' => $case['data'] ) ) . ' /-->';
 				$wpdb->update( $wpdb->posts, array( 'post_content' => '' ), array( 'ID' => $id ) );
@@ -204,7 +228,7 @@ add_action(
 			panels_parity_batch_send( $out );
 		}
 
-		// batch_render: { items: [ { key, kind: raw|classic|block, bytes_b64, post_id } ] }
+		// batch_render: { items: [ { key, kind: raw|classic|block|widget, bytes_b64, post_id } ] }
 		// post_id is the scratch post the value belongs to (the render id of a classic value, the global
 		// post of a block value).
 		$out = array();
@@ -223,7 +247,19 @@ add_action(
 			$GLOBALS['siteorigin_panels_current_post'] = null;
 
 			try {
-				if ( $item['kind'] === 'block' ) {
+				if ( $item['kind'] === 'widget' ) {
+					// A stored Layout Builder widget instance, rendered by the widget itself.
+					ob_start();
+					the_widget(
+						'SiteOrigin_Panels_Widgets_Layout',
+						@unserialize( $bytes ),
+						array(
+							'before_widget' => '<div class="parity-widget">',
+							'after_widget'  => '</div>',
+						)
+					);
+					$rec['html'] = ob_get_clean();
+				} elseif ( $item['kind'] === 'block' ) {
 					$GLOBALS['post'] = get_post( (int) $item['post_id'] );
 					setup_postdata( $GLOBALS['post'] );
 					$rec['html'] = apply_filters( 'the_content', $bytes );

@@ -3,7 +3,11 @@
  * the release and on the working tree. A layout the release stores must be stored byte-equal and
  * render equal on the working tree; two runs per version show which bytes change on their own.
  *
- * Usage: node tests/parity/generate.mjs [--seed=20261002] [--count=1000] [--chunk=50]
+ * Private corpus mode: --corpus=<absolute dir outside the repository> (files written by
+ * tests/parity/tools/export-corpus.php). Every stored layout is rendered on both versions, and every
+ * post meta layout is saved again through the classic path as an administrator.
+ *
+ * Usage: node tests/parity/generate.mjs [--seed=20261002] [--count=1000] [--chunk=50] [--corpus=<dir>]
  *        [--base=<tag|git ref|absolute path>] [--candidate=<git ref>] [--port=1139]
  *        [--wp=latest] [--php=8.3] [--wb=latest|<version>|<path>|none] [--tokens=port,version]
  *        [--tries=3] [--prefix=gen]
@@ -100,9 +104,24 @@ async function selfCheck( site, seed, count, chunk ) {
 	return { cases: a, problems };
 }
 
+// ---------- private corpus ----------
+
+export function loadCorpus( dir ) {
+	const abs = path.resolve( dir );
+	const rel = path.relative( ROOT, abs );
+	if ( ! rel.startsWith( '..' ) && ! path.isAbsolute( rel ) ) {
+		throw new Error( `${ abs } is inside the repository. Keep a private corpus outside it.` );
+	}
+	const files = fs.readdirSync( abs ).filter( ( f ) => f.endsWith( '.json' ) ).sort();
+	return files.map( ( f, i ) => {
+		const item = JSON.parse( fs.readFileSync( path.join( abs, f ), 'utf8' ) );
+		return { i, key: item.key, storage: item.storage, serialized_b64: item.serialized_b64, post_content_b64: item.post_content_b64 };
+	} );
+}
+
 // ---------- one run ----------
 
-async function oneRun( label, tree, o, seed, count, chunk ) {
+async function oneRun( label, tree, o, seed, count, chunk, corpus ) {
 	const site = new Site( { ...o, label, pb: tree } );
 	const t0 = Date.now();
 	try {
@@ -110,13 +129,15 @@ async function oneRun( label, tree, o, seed, count, chunk ) {
 		await site.req( 'GET', '/?parity=setup', { user: 'admin' } );
 		const info = { admin: await site.info( 'admin' ), options: o, seed, count };
 		fs.writeFileSync( path.join( site.OUT, 'info.json' ), JSON.stringify( info, null, 1 ) );
-		const cases = await fetchCases( site, seed, count, chunk );
+		const cases = corpus ? corpus.map( ( c ) => ( { i: c.i, kind: c.storage, note: c.key } ) ) : await fetchCases( site, seed, count, chunk );
+		count = cases.length;
 		const recs = cases.map( ( c ) => ( { i: c.i, kind: c.kind, note: c.note, save: {}, render: {} } ) );
 		const scratch = {};
+		const body = ( from ) => ( corpus ? { corpus: corpus.slice( from, from + chunk ) } : { seed, count, from, to: Math.min( count, from + chunk ) } );
 
-		for ( const role of ROLES ) {
+		for ( const role of corpus ? [ 'admin' ] : ROLES ) {
 			for ( let from = 0; from < count; from += chunk ) {
-				const r = await site.req( 'POST', '/wp-admin/admin-ajax.php?action=panels_parity_batch_save', { user: role, json: { seed, count, from, to: Math.min( count, from + chunk ) } } );
+				const r = await site.req( 'POST', '/wp-admin/admin-ajax.php?action=panels_parity_batch_save', { user: role, json: body( from ) } );
 				const j = parse( r );
 				if ( ! j || ! Array.isArray( j.cases ) ) {
 					throw new Error( `save ${ role } ${ from }: HTTP ${ r.status } ${ r.text.slice( 0, 300 ) }` );
@@ -133,7 +154,14 @@ async function oneRun( label, tree, o, seed, count, chunk ) {
 			for ( let from = 0; from < count; from += chunk ) {
 				const items = [];
 				for ( const rec of recs.slice( from, from + chunk ) ) {
-					items.push( { key: `${ rec.i }|raw`, kind: 'raw', post_id: scratch.admin.classic, bytes_b64: Buffer.from( cases[ rec.i ].json, 'utf8' ).toString( 'base64' ) } );
+					if ( corpus ) {
+						// The stored bytes as they are.
+						const c = corpus[ rec.i ];
+						const kind = { meta: 'classic', block: 'block', widget: 'widget' }[ c.storage ];
+						items.push( { key: `${ rec.i }|stored`, kind, post_id: scratch.admin[ kind === 'block' ? 'block' : 'classic' ], bytes_b64: c.serialized_b64 || c.post_content_b64 } );
+					} else {
+						items.push( { key: `${ rec.i }|raw`, kind: 'raw', post_id: scratch.admin.classic, bytes_b64: Buffer.from( cases[ rec.i ].json, 'utf8' ).toString( 'base64' ) } );
+					}
 					for ( const role of ROLES ) {
 						for ( const p of PATHS ) {
 							const s = rec.save[ role ] && rec.save[ role ][ p ];
@@ -168,7 +196,7 @@ async function oneRun( label, tree, o, seed, count, chunk ) {
 	}
 }
 
-async function runWithTries( label, tree, o, seed, count, chunk, tries ) {
+async function runWithTries( label, tree, o, seed, count, chunk, tries, corpus ) {
 	const port = Number( o.port || 1139 );
 	for ( let t = 1; t <= tries; t++ ) {
 		for ( let i = 0; i < 120 && ! ( await portFree( port ) ); i++ ) {
@@ -181,7 +209,7 @@ async function runWithTries( label, tree, o, seed, count, chunk, tries ) {
 			fs.renameSync( out, dst );
 		}
 		try {
-			return await oneRun( label, tree, o, seed, count, chunk );
+			return await oneRun( label, tree, o, seed, count, chunk, corpus );
 		} catch ( e ) {
 			console.log( `${ label }: try ${ t } incomplete: ${ String( ( e && e.message ) || e ).slice( 0, 300 ) }` );
 		}
@@ -287,18 +315,19 @@ export async function generate( o ) {
 	const chunk = Number( o.chunk || 50 );
 	const tries = Number( o.tries || 3 );
 	const tokens = String( o.tokens || '' ).split( ',' ).filter( Boolean );
-	const prefix = o.prefix || 'gen';
+	const corpus = o.corpus ? loadCorpus( o.corpus === true ? '' : o.corpus ) : null;
+	const prefix = o.prefix || ( corpus ? 'corpus' : 'gen' );
 	const baseRef = o.base || latestReleaseTag();
 	const baseTree = materialise( baseRef );
 	const candTree = o.candidate ? materialise( o.candidate ) : ROOT;
 	const runOpts = { port: o.port, wp: o.wp, php: o.php, wb: o.wb };
-	console.log( `base: ${ baseRef } (${ baseTree })\ncandidate: ${ o.candidate || 'working tree' } (${ candTree })\nseed ${ seed }, ${ count } cases` );
+	console.log( `base: ${ baseRef } (${ baseTree })\ncandidate: ${ o.candidate || 'working tree' } (${ candTree })\n${ corpus ? `corpus: ${ corpus.length } layouts` : `seed ${ seed }, ${ count } cases` }` );
 	const t0 = Date.now();
 	const rows = [];
 
-	// Self-check on a base site, before any run.
+	// Self-check on a base site, before any run (generated cases only).
 	let ok = true;
-	{
+	if ( ! corpus ) {
 		const port = Number( o.port || 1139 );
 		for ( let i = 0; i < 120 && ! ( await portFree( port ) ); i++ ) {
 			await sleep( 5000 );
@@ -321,7 +350,7 @@ export async function generate( o ) {
 	const complete = {};
 	if ( ok ) {
 		for ( const [ label, tree ] of [ [ L.b1, baseTree ], [ L.c1, candTree ], [ L.b2, baseTree ], [ L.c2, candTree ] ] ) {
-			complete[ label ] = await runWithTries( label, tree, runOpts, seed, count, chunk, tries );
+			complete[ label ] = await runWithTries( label, tree, runOpts, seed, count, chunk, tries, corpus );
 		}
 		if ( ! Object.values( complete ).every( Boolean ) ) {
 			ok = false;
@@ -333,7 +362,7 @@ export async function generate( o ) {
 				ok = ok && r.pass;
 			}
 			const acc = acceptance( L.b1 );
-			for ( const p of PATHS ) {
+			for ( const p of corpus ? [] : PATHS ) {
 				const a = acc[ p ];
 				const pass = a.ratio >= ACCEPT_FLOOR;
 				ok = ok && pass;
