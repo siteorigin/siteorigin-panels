@@ -36,25 +36,29 @@ export function latestReleaseTag() {
 	return tags[ tags.length - 1 ];
 }
 
-// A git ref as a plain source tree in tests/cache/parity/trees/<ref>. Reused when complete.
+// A git ref as a plain source tree in tests/cache/parity/trees/<ref>. The tree is reused only while
+// the commit stored in its .complete marker is the commit the ref names now; a ref that has moved
+// (a branch) gets a fresh tree.
 // The ref's own tests/ folder is left out: the plugin does not need it, and PHPUnit scans tests/
 // recursively, so test classes in a tree under tests/cache would be loaded twice by `composer test`.
-export function materialise( ref ) {
+export function materialise( ref, { root = ROOT, outroot = OUTROOT } = {} ) {
 	if ( path.isAbsolute( ref ) ) {
 		if ( ! fs.existsSync( path.join( ref, 'siteorigin-panels.php' ) ) ) {
 			throw new Error( `${ ref } is not a Page Builder tree` );
 		}
 		return ref;
 	}
-	git( 'rev-parse', '--verify', '--quiet', ref + '^{commit}' );
-	const dir = path.join( OUTROOT, 'trees', ref.replace( /[^A-Za-z0-9._-]/g, '_' ) );
-	if ( fs.existsSync( path.join( dir, '.complete' ) ) && ! fs.existsSync( path.join( dir, 'tests' ) ) ) {
+	const sha = execFileSync( 'git', [ 'rev-parse', '--verify', '--quiet', ref + '^{commit}' ], { cwd: root, encoding: 'utf8' } ).trim();
+	const dir = path.join( outroot, 'trees', ref.replace( /[^A-Za-z0-9._-]/g, '_' ) );
+	const marker = path.join( dir, '.complete' );
+	const stored = fs.existsSync( marker ) ? fs.readFileSync( marker, 'utf8' ).trim() : '';
+	if ( stored === sha && ! fs.existsSync( path.join( dir, 'tests' ) ) ) {
 		return dir;
 	}
 	fs.rmSync( dir, { recursive: true, force: true } );
 	fs.mkdirSync( dir, { recursive: true } );
-	execFileSync( 'sh', [ '-c', `git archive --format=tar "$1" -- . ":(exclude)tests" | tar -x -C "$2"`, 'sh', ref, dir ], { cwd: ROOT } );
-	fs.writeFileSync( path.join( dir, '.complete' ), git( 'rev-parse', ref + '^{commit}' ) + '\n' );
+	execFileSync( 'sh', [ '-c', `git archive --format=tar "$1" -- . ":(exclude)tests" | tar -x -C "$2"`, 'sh', sha, dir ], { cwd: root } );
+	fs.writeFileSync( marker, sha + '\n' );
 	return dir;
 }
 
@@ -133,7 +137,7 @@ export async function parity( o ) {
 		rows.push( `INCOMPLETE: ${ Object.entries( complete ).filter( ( [ , v ] ) => ! v ).map( ( [ k ] ) => `${ k } (${ reasons[ k ] })` ).join( ', ' ) }` );
 	} else {
 		for ( const [ x, y, what ] of [ [ L.b1, L.b2, 'base noise' ], [ L.c1, L.c2, 'candidate noise' ], [ L.b1, L.c1, 'base vs candidate (1)' ], [ L.b2, L.c2, 'base vs candidate (2)' ] ] ) {
-			const r = compareRuns( x, y, { tokens } );
+			const r = compareRuns( x, y, { tokens, requireAll: ! o.filter } );
 			rows.push( `${ r.pass ? 'PASS' : 'FAIL' }  ${ what }: ${ x } vs ${ y } — ${ r.compared } cases, ${ r.diffs.length } differing fields, ${ r.missing.length } missing` );
 			ok = ok && r.pass;
 			if ( x === L.b1 && y === L.b2 ) {

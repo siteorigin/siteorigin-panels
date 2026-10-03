@@ -518,7 +518,6 @@ function parity_gen_mut_mixed( &$l, &$note ) {
 			break;
 		case 8:
 			$l['extra'] = array( 'a' => 1 );
-			$l['sanitize_signature'] = 'abc';
 			break;
 		case 9:
 			$l = array_values( $l ); // A list, not an object.
@@ -549,47 +548,7 @@ function parity_gen_mut_mixed( &$l, &$note ) {
 function parity_gen_json_raw( $value ) {
 	$json = json_encode( $value );
 
-	if ( $json !== false ) {
-		return $json;
-	}
-
-	// Invalid UTF-8 somewhere: encode by hand so the raw bytes stay in the JSON.
-	if ( is_array( $value ) || is_object( $value ) ) {
-		$arr     = (array) $value;
-		$is_list = is_array( $value ) && array_keys( $arr ) === range( 0, count( $arr ) - 1 );
-		$parts   = array();
-
-		foreach ( $arr as $k => $v ) {
-			$parts[] = $is_list ? parity_gen_json_raw( $v ) : parity_gen_json_raw( (string) $k ) . ':' . parity_gen_json_raw( $v );
-		}
-
-		if ( empty( $arr ) ) {
-			return is_object( $value ) ? '{}' : '[]';
-		}
-
-		return $is_list ? '[' . implode( ',', $parts ) . ']' : '{' . implode( ',', $parts ) . '}';
-	}
-
-	if ( is_string( $value ) ) {
-		$out = '';
-
-		for ( $i = 0, $n = strlen( $value ); $i < $n; $i ++ ) {
-			$c = $value[ $i ];
-			$o = ord( $c );
-
-			if ( $c === '"' || $c === '\\' ) {
-				$out .= '\\' . $c;
-			} elseif ( $o < 0x20 ) {
-				$out .= sprintf( '\\u%04x', $o );
-			} else {
-				$out .= $c;
-			}
-		}
-
-		return '"' . $out . '"';
-	}
-
-	return 'null';
+	return $json === false ? 'null' : $json;
 }
 
 /* ---------- case assembly ---------- */

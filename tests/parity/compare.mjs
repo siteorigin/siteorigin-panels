@@ -112,6 +112,8 @@ export function coverage( l, recs ) {
 
 // The coverage floor of the pass rule. Returns the list of missed items (empty = met).
 // Each count applies when the run holds a case that should produce it (a --filter can leave them out).
+// With requireAll (a run without --filter) every case family must be present as well, so a renamed
+// family cannot switch its count off.
 const FLOOR = {
 	liveIframe: /\.admin\.std\.iframe$/,
 	liveScript: /\.admin\.std\.script$/,
@@ -121,8 +123,21 @@ const FLOOR = {
 	nonAsciiRowSelector: /strnonascii/,
 };
 
-export function coverageFloor( cov ) {
+const FAMILIES = {
+	...FLOOR,
+	widgetAreaText: /^s?widget\./,
+	homePageText: /^s?home\./,
+};
+
+export function coverageFloor( cov, { requireAll = false } = {} ) {
 	const missed = [];
+	if ( requireAll ) {
+		for ( const [ k, re ] of Object.entries( FAMILIES ) ) {
+			if ( ! cov.keys.some( ( key ) => re.test( key ) ) ) {
+				missed.push( `${ k }: no case of this family in the run` );
+			}
+		}
+	}
 	if ( cov.cases === 0 ) {
 		missed.push( 'no cases' );
 	}
@@ -170,7 +185,7 @@ export function fieldsOf( l, c, used ) {
 	return f;
 }
 
-export function compareRuns( X, Y, { tokens: extra = [], only = '' } = {} ) {
+export function compareRuns( X, Y, { tokens: extra = [], only = '', requireAll = false } = {} ) {
 	const load = ( l ) => JSON.parse( fs.readFileSync( path.join( OUTROOT, l, 'cases.json' ), 'utf8' ) );
 	const infoOf = ( l ) => {
 		try {
@@ -223,7 +238,7 @@ export function compareRuns( X, Y, { tokens: extra = [], only = '' } = {} ) {
 		}
 	}
 	const cov = { [ X ]: coverage( X, rx ), [ Y ]: coverage( Y, ry ) };
-	const out = { X, Y, compared, missing, tally, tokensUsed: used, diffs, coverage: cov, floorMissed: { [ X ]: coverageFloor( cov[ X ] ), [ Y ]: coverageFloor( cov[ Y ] ) } };
+	const out = { X, Y, compared, missing, tally, tokensUsed: used, diffs, coverage: cov, floorMissed: { [ X ]: coverageFloor( cov[ X ], { requireAll } ), [ Y ]: coverageFloor( cov[ Y ], { requireAll } ) } };
 	out.pass = diffs.length === 0 && missing.length === 0;
 
 	const dir = path.join( OUTROOT, 'compare' );
@@ -269,6 +284,6 @@ if ( import.meta.url === pathToFileURL( process.argv[ 1 ] ).href ) {
 		console.error( 'usage: compare.mjs <labelX> <labelY> [--tokens=port,version] [--only=<regex>]' );
 		process.exit( 2 );
 	}
-	const out = compareRuns( X, Y, { tokens: String( o.tokens || '' ).split( ',' ).filter( Boolean ), only: o.only || '' } );
+	const out = compareRuns( X, Y, { tokens: String( o.tokens || '' ).split( ',' ).filter( Boolean ), only: o.only || '', requireAll: ! o.only } );
 	process.exitCode = out.pass ? 0 : 1;
 }

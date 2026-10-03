@@ -38,7 +38,7 @@ Pass rule (exit 0 only if all hold):
 
 - all four runs are complete;
 - `base-1` vs `base-2`, `cand-1` vs `cand-2`, `base-1` vs `cand-1`, `base-2` vs `cand-2`: no field differs after the named tokens, and no case is missing;
-- the comparison is a real one: every case answers HTTP 200 on both renderers, and the base run shows a live iframe, script, style, SVG and shortcode, a non-ASCII row selector, the widget area text and the home page text (each count applies when the run holds such a case).
+- the comparison is a real one: every case answers HTTP 200 on both renderers, and the base run shows a live iframe, script, style, SVG and shortcode, a non-ASCII row selector, the widget area text and the home page text. Without `--filter`, every one of these case families must be in the run; with `--filter`, each count applies when the run holds such a case.
 
 Options: `--smoke`, `--filter=<regex>` (case keys), `--base=<tag|git ref|absolute path>`, `--candidate=<git ref>`, `--port=1139`, `--wp=latest`, `--php=8.3`, `--wb=latest|<version>|<path>|none`, `--tokens=port,version`, `--tries=3`, `--prefix=<label prefix>`.
 
@@ -52,7 +52,7 @@ npm run parity -- --smoke --base=develop
 npm run parity -- --smoke --base=/abs/path/to/a/plugin/tree
 ```
 
-A git ref is extracted with `git archive` into `tests/cache/parity/trees/<ref>` and reused. The ref's own `tests/` folder is left out (PHPUnit scans `tests/` recursively). Git submodules (`inc/installer`) are not in the archive; the plugin runs without them.
+A git ref is extracted with `git archive` into `tests/cache/parity/trees/<ref>`. The tree is reused while the ref names the same commit; when a branch has moved, the tree is built again. The ref's own `tests/` folder is left out (PHPUnit scans `tests/` recursively). Git submodules (`inc/installer`) are not in the archive; the plugin runs without them.
 
 `--base=develop` on an unchanged branch compares the code with itself: it must show 0 differences.
 
