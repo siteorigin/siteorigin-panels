@@ -319,7 +319,7 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = {};
 
 		// A failed preview has no readable scroll position.
-		var previewFailed = this.$( '.so-preview-error' ).is( ':visible' );
+		var previewFailed = this.$( '.so-preview-error' ).hasClass( 'so-active' );
 		this.clearPreviewFailure();
 
 		// Store the last preview iframe position
@@ -379,7 +379,7 @@ module.exports = Backbone.View.extend( {
 			this.previewProbe = null;
 		}
 
-		this.$( '.so-preview-error' ).hide();
+		this.$( '.so-preview-error' ).removeClass( 'so-active' );
 	},
 
 	clearPreviewTimer: function () {
@@ -460,7 +460,8 @@ module.exports = Backbone.View.extend( {
 			};
 
 		$reason.text( '' );
-		$panel.css( 'display', 'grid' );
+		// The stylesheet shows the panel where the preview shows: not at 980px and below, unless collapsed.
+		$panel.addClass( 'so-active' );
 
 		if ( reason === 'timeout' ) {
 			setReason( 'timeout', Math.round( timeout / 1000 ) );
@@ -597,7 +598,7 @@ module.exports = Backbone.View.extend( {
 				$$.data( 'iframeready', true );
 
 				thisView.clearPreviewTimer();
-				thisView.$( '.so-preview-error' ).hide();
+				thisView.$( '.so-preview-error' ).removeClass( 'so-active' );
 
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
@@ -786,7 +787,7 @@ module.exports = Backbone.View.extend( {
 			! this.isCurrentPreview( this.previewIframe[0] ) ||
 			this.previewDocument( this.previewIframe[0] ) !== map.doc ||
 			this.$( '.so-preview-overlay' ).is( ':visible' ) ||
-			this.$( '.so-preview-error' ).is( ':visible' )
+			this.$( '.so-preview-error' ).hasClass( 'so-active' )
 		) {
 			return false;
 		}

@@ -3394,9 +3394,18 @@
 		}
 	}
 
-	// Shown by the Live Editor (display: grid) when the preview request fails or times out (#1368).
+	// The Live Editor adds .so-active when the preview request fails or times out (#1368). Like the
+	// preview, the panel shows only above 980px or when the sidebar is collapsed, so it never covers
+	// the sidebar tools (Close, Save).
 	.so-preview-error {
 		display: none;
+
+		&.so-active {
+			@media (min-width: 981px) {
+				display: grid;
+			}
+		}
+
 		top: 0;
 		right: 0;
 		bottom: 0;
@@ -3455,9 +3464,13 @@
 			display: block;
 		}
 
-		// Width only: the error panel shows only when the Live Editor shows it.
+		// Width only: the error panel shows only when the Live Editor marks it active.
 		.so-preview-error {
 			width: 100%;
+
+			&.so-active {
+				display: grid;
+			}
 		}
 	}
 

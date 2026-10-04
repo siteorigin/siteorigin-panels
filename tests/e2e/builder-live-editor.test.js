@@ -613,6 +613,8 @@ test.describe( 'Live Editor preview errors', () => {
 			await setCookie( iso.context, 'panels_e2e_preview_block', '403' );
 			await openLiveEditorOnly( iso.page, errorPostId );
 			await expectErrorPanel( iso.page, 'The preview request failed with HTTP status 403.' );
+			// The blocked response is in another agent cluster: the editor cannot read it.
+			expect( await iso.page.locator( '.so-panels-live-editor .so-preview iframe' ).last().evaluate( ( el ) => el.contentDocument === null ) ).toBe( true );
 			expectNoPageErrors( iso.errors );
 		} finally {
 			await iso.context.close();
@@ -638,16 +640,41 @@ test.describe( 'Live Editor preview errors', () => {
 		expectNoPageErrors( ctx.errors );
 	} );
 
-	test( 'E5 a working preview never shows the panel', async () => {
+	test( 'E6 at 980px and below the panel never covers Close and Save', async () => {
+		await page.setViewportSize( { width: 800, height: 720 } );
+		try {
+			await setCookie( ctx.context, 'panels_e2e_preview_block', '403' );
+			await openLiveEditorOnly( page, errorPostId );
+
+			// The preview failed (the reason is set), but at this width the preview area, and so the panel, is hidden.
+			await expect( errorPanel( page ).locator( '.so-preview-error-reason' ) ).toHaveText( 'The preview request failed with HTTP status 403.', { timeout: 30000 } );
+
+			// A click only lands when nothing covers the button.
+			await page.locator( '.so-panels-live-editor .live-editor-close' ).click( { timeout: 5000 } );
+			await expect( page.locator( '.so-panels-live-editor' ) ).toBeHidden();
+			await expect( errorPanel( page ) ).toBeHidden();
+		} finally {
+			await page.setViewportSize( { width: 1280, height: 720 } );
+		}
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E5 a working preview never shows the panel, and its load timer is cancelled', async () => {
+		// A 2 s timer: if a working preview did not cancel it, the panel would show within the waits below.
+		await setCookie( ctx.context, 'panels_e2e_preview_timeout_ms', '2000' );
 		await openLiveEditorOnly( page, errorPostId );
+		expect( await page.evaluate( () => window.panelsOptions.live_editor_preview_timeout ) ).toBe( 2000 );
 		await waitForPreview( page, ERROR_TEXT );
-		await page.waitForTimeout( 1000 );
+		await page.waitForTimeout( 3000 );
 		await expect( errorPanel( page ) ).toBeHidden();
+		await expect( errorPanel( page ) ).not.toHaveClass( /so-active/ );
 
 		await setWidgetText( liveBuilder( page ), liveBuilder( page ).locator( '.so-widget' ).first(), ERROR_TEXT_NEW, page );
 		await waitForPreview( page, ERROR_TEXT_NEW );
 		await expectRealPreview( page );
+		await page.waitForTimeout( 3000 );
 		await expect( errorPanel( page ) ).toBeHidden();
+		await expect( errorPanel( page ) ).not.toHaveClass( /so-active/ );
 		expectNoPageErrors( ctx.errors );
 	} );
 } );
