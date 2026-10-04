@@ -10,11 +10,22 @@ module.exports = Backbone.View.extend( {
 	previewUrl: null,
 	previewIframe: null,
 
+	// How long a preview may take to load before the error panel shows (ms). panelsOptions.live_editor_preview_timeout overrides it.
+	PREVIEW_TIMEOUT: 30000,
+
+	// The URL and fields of the current preview POST, the load timer, and the AbortController of the diagnostic request.
+	previewRequest: null,
+	previewTimer: null,
+	previewProbe: null,
+
 	events: {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
 		'click .live-editor-mode': 'mobileToggle',
+		'click .so-preview-error-retry': function () {
+			this.refreshPreview( this.builder.model.getPanelsData() );
+		},
 		'keyup .live-editor-mode': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
@@ -146,6 +157,9 @@ module.exports = Backbone.View.extend( {
 	 * Close the Live Editor
 	 */
 	close: function ( closeAfter = true ) {
+		// No load timer or diagnostic request may outlive the Live Editor.
+		this.clearPreviewFailure();
+
 		if ( ! this.$el.is( ':visible' ) ) {
 			return this;
 		}
@@ -267,8 +281,12 @@ module.exports = Backbone.View.extend( {
 			return memo + num;
 		}, 0 ) / this.loadTimes.length : 1000;
 
+		// A failed preview has no readable scroll position.
+		var previewFailed = this.$( '.so-preview-error' ).is( ':visible' );
+		this.clearPreviewFailure();
+
 		// Store the last preview iframe position
-		if( ! _.isNull( this.previewIframe )  ) {
+		if( ! _.isNull( this.previewIframe ) && ! previewFailed ) {
 			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
 				this.previewScrollTop = this.previewIframe.contents().scrollTop();
 			}
@@ -292,6 +310,125 @@ module.exports = Backbone.View.extend( {
 		);
 
 		this.previewIframe.data( 'load-start', new Date().getTime() );
+
+		// Show the error panel if the preview does not load in time.
+		var thisView = this,
+			iframeEl = this.previewIframe[0],
+			timeout = this.previewTimeout();
+		this.previewTimer = setTimeout( function () {
+			thisView.failPreview( iframeEl, 'timeout', timeout );
+		}, timeout );
+	},
+
+	/**
+	 * The preview load timeout in milliseconds.
+	 *
+	 * @return {number}
+	 */
+	previewTimeout: function () {
+		var timeout = typeof panelsOptions !== 'undefined' ? parseInt( panelsOptions.live_editor_preview_timeout, 10 ) : NaN;
+
+		return timeout > 0 ? timeout : this.PREVIEW_TIMEOUT;
+	},
+
+	/**
+	 * Stop the load timer, cancel the diagnostic request and hide the error panel.
+	 */
+	clearPreviewFailure: function () {
+		this.clearPreviewTimer();
+
+		if ( this.previewProbe ) {
+			this.previewProbe.abort();
+			this.previewProbe = null;
+		}
+
+		this.$( '.so-preview-error' ).hide();
+	},
+
+	clearPreviewTimer: function () {
+		if ( this.previewTimer ) {
+			clearTimeout( this.previewTimer );
+			this.previewTimer = null;
+		}
+	},
+
+	/**
+	 * Show the error panel for a preview that failed to load (#1368).
+	 *
+	 * The preview is a form POST into an iframe, so its HTTP status cannot be read. After a failed load, one
+	 * request with the same URL and fields reads the status. A preview that loads costs nothing extra.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl The preview iframe that failed.
+	 * @param {string} reason 'timeout' or 'load'.
+	 * @param {number} timeout The timeout in milliseconds, for 'timeout'.
+	 */
+	failPreview: function ( iframeEl, reason, timeout ) {
+		if ( _.isNull( this.previewIframe ) || iframeEl !== this.previewIframe[0] || ! this.$el.is( ':visible' ) ) {
+			return;
+		}
+
+		this.clearPreviewTimer();
+
+		this.$( '.so-preview-overlay .so-loading-bar' ).stop( true );
+		this.$( '.so-preview-overlay' ).hide();
+
+		var thisView = this,
+			$panel = this.$( '.so-preview-error' ),
+			$reason = $panel.find( '.so-preview-error-reason' ),
+			setReason = function ( key, value ) {
+				var text = String( $panel.data( key ) || '' );
+				$reason.text( value === undefined ? text : text.replace( /%(1\$)?s/, value ) );
+			};
+
+		$reason.text( '' );
+		$panel.css( 'display', 'grid' );
+
+		if ( reason === 'timeout' ) {
+			setReason( 'timeout', Math.round( timeout / 1000 ) );
+			return;
+		}
+
+		var request = this.previewRequest;
+		if ( ! request || typeof window.fetch !== 'function' ) {
+			setReason( 'unknown' );
+			return;
+		}
+
+		if ( this.previewProbe ) {
+			this.previewProbe.abort();
+		}
+		var probe = this.previewProbe = typeof AbortController === 'function' ? new AbortController() : null;
+		var isCurrent = function () {
+			return thisView.previewProbe === probe && ! _.isNull( thisView.previewIframe ) && iframeEl === thisView.previewIframe[0];
+		};
+
+		window.fetch( request.url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			body: new URLSearchParams( request.fields ),
+			signal: probe ? probe.signal : undefined,
+		} ).then( function ( response ) {
+			// Only the status is needed.
+			if ( response.body && typeof response.body.cancel === 'function' ) {
+				response.body.cancel().catch( function () {} );
+			}
+
+			if ( ! isCurrent() ) {
+				return;
+			}
+
+			if ( response.ok ) {
+				setReason( 'unknown' );
+			} else {
+				setReason( 'status', response.status );
+			}
+		} ).catch( function ( error ) {
+			if ( ( error && error.name === 'AbortError' ) || ! isCurrent() ) {
+				return;
+			}
+
+			setReason( 'unknown' );
+		} );
 	},
 
 	/**
@@ -304,6 +441,9 @@ module.exports = Backbone.View.extend( {
 	postToIframe: function( data, url, target ){
 		// An isolated editor needs a preview with the same isolation policy (#1400).
 		url = panels.helpers.utils.isolatedPreviewUrl( url );
+
+		// Kept for the diagnostic request after a failed load.
+		this.previewRequest = { url: url, fields: data };
 
 		// Store the old preview
 
@@ -369,6 +509,11 @@ module.exports = Backbone.View.extend( {
 
 				$$.data( 'iframeready', true );
 
+				if ( ! _.isNull( thisView.previewIframe ) && this === thisView.previewIframe[0] ) {
+					thisView.clearPreviewTimer();
+					thisView.$( '.so-preview-error' ).hide();
+				}
+
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
 
@@ -427,9 +572,34 @@ module.exports = Backbone.View.extend( {
 
 			} )
 			.on( 'load', function(){
-				var $$ = $( this );
-				if( ! $$.data( 'iframeready' ) ) {
-					$$.trigger('iframeready');
+				var $$ = $( this ),
+					doc = null;
+
+				// Null, or a throw, when the response is in another agent cluster (a blocked response under isolation).
+				try {
+					doc = this.contentDocument;
+				} catch ( e ) {
+					doc = null;
+				}
+
+				// The initial blank document: the preview is still loading.
+				if ( doc && doc.URL === 'about:blank' ) {
+					return;
+				}
+
+				if ( ! _.isNull( thisView.previewIframe ) && this === thisView.previewIframe[0] ) {
+					thisView.clearPreviewTimer();
+				}
+
+				if ( $$.data( 'iframeready' ) ) {
+					return;
+				}
+
+				// Every preview has this body class (SiteOrigin_Panels::body_class()).
+				if ( doc && doc.body && doc.body.classList.contains( 'siteorigin-panels-live-editor' ) ) {
+					$$.trigger( 'iframeready' );
+				} else {
+					thisView.failPreview( this, 'load' );
 				}
 			} );
 	},
