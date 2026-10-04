@@ -402,15 +402,13 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * The document of a preview iframe when it holds a Live Editor preview, else null.
-	 *
-	 * Null for the initial blank document, a response in another agent cluster, and a response that is not a
-	 * preview (every preview has the body class from SiteOrigin_Panels::body_class()).
+	 * The document of a preview iframe when the editor can read it and it is not the initial blank
+	 * document, else null (null also for a response in another agent cluster).
 	 *
 	 * @param {HTMLIFrameElement} iframeEl
 	 * @return {Document|null}
 	 */
-	previewDocument: function ( iframeEl ) {
+	readablePreviewDocument: function ( iframeEl ) {
 		var doc = null;
 
 		try {
@@ -419,16 +417,33 @@ module.exports = Backbone.View.extend( {
 			doc = null;
 		}
 
-		if (
-			! doc ||
-			doc.URL === 'about:blank' ||
-			! doc.body ||
-			! doc.body.classList.contains( 'siteorigin-panels-live-editor' )
-		) {
+		return doc && doc.URL !== 'about:blank' && doc.body ? doc : null;
+	},
+
+	/**
+	 * The document of a preview iframe when it holds a Live Editor preview, else null.
+	 *
+	 * A preview has the siteorigin-panels-live-editor body class (SiteOrigin_Panels::body_class()), or, for a
+	 * theme that does not call body_class(), the liveEditorScrollTo() function of live-editor-front.js.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {Document|null}
+	 */
+	previewDocument: function ( iframeEl ) {
+		var doc = this.readablePreviewDocument( iframeEl );
+
+		if ( ! doc ) {
 			return null;
 		}
 
-		return doc;
+		var hasFrontScript = false;
+		try {
+			hasFrontScript = !! doc.defaultView && typeof doc.defaultView.liveEditorScrollTo === 'function';
+		} catch ( e ) {
+			hasFrontScript = false;
+		}
+
+		return doc.body.classList.contains( 'siteorigin-panels-live-editor' ) || hasFrontScript ? doc : null;
 	},
 
 	/**
@@ -588,8 +603,9 @@ module.exports = Backbone.View.extend( {
 					return;
 				}
 
-				// Bind only the current preview, and only a document that is a Live Editor preview.
-				if ( ! thisView.isCurrentPreview( this ) || ! thisView.previewDocument( this ) ) {
+				// Bind only the current preview, and only a readable document. live-editor-front.js sends this event
+				// from the preview itself, so no other marker is needed (a theme may not call body_class()).
+				if ( ! thisView.isCurrentPreview( this ) || ! thisView.readablePreviewDocument( this ) ) {
 					return;
 				}
 
@@ -621,7 +637,7 @@ module.exports = Backbone.View.extend( {
 				}, 100 );
 
 				// Map the preview before the binding below changes it.
-				thisView.previewMap = thisView.buildPreviewMap( thisView.previewDocument( this ) );
+				thisView.previewMap = thisView.buildPreviewMap( thisView.readablePreviewDocument( this ) );
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
@@ -668,7 +684,7 @@ module.exports = Backbone.View.extend( {
 					return;
 				}
 
-				// Every preview has this body class (SiteOrigin_Panels::body_class()).
+				// A Live Editor preview whose ready event did not arrive (body class or front script, see previewDocument()).
 				if ( thisView.previewDocument( this ) ) {
 					$$.trigger( 'iframeready' );
 				} else {
@@ -785,7 +801,7 @@ module.exports = Backbone.View.extend( {
 			_.isNull( this.previewIframe ) ||
 			! this.previewIframe.data( 'iframeready' ) ||
 			! this.isCurrentPreview( this.previewIframe[0] ) ||
-			this.previewDocument( this.previewIframe[0] ) !== map.doc ||
+			this.readablePreviewDocument( this.previewIframe[0] ) !== map.doc ||
 			this.$( '.so-preview-overlay' ).is( ':visible' ) ||
 			this.$( '.so-preview-error' ).hasClass( 'so-active' )
 		) {
