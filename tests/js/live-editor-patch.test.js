@@ -232,3 +232,40 @@ test( 'cellWidth refuses a value it cannot read or a weight a filter changed', (
 	assert.equal( patch.cellWidth( '', 0.5, 0.3 ), null );
 	assert.equal( patch.cellWidth( 'calc(50% - 15px)', NaN, 0.3 ), null );
 } );
+
+test( 'changedWidgets lists the widgets whose data changed when the structure is the same', () => {
+	const s = setup();
+	assert.deepEqual( patch.changedWidgets( s.prev, patch.snapshot( s.model ) ), [], 'nothing changed' );
+
+	s.byText( 'B' ).set( 'values', { text: 'B changed' } );
+	assert.deepEqual( patch.changedWidgets( s.prev, patch.snapshot( s.model ) ), [ s.byText( 'B changed' ).cid ] );
+
+	s.byText( 'E' ).set( 'style', { class: 'x' } );
+	assert.deepEqual( patch.changedWidgets( s.prev, patch.snapshot( s.model ) ), [ s.byText( 'B changed' ).cid, s.byText( 'E' ).cid ] );
+} );
+
+test( 'changedWidgets is null for any structural change', () => {
+	const moved = setup();
+	moveWidget( moved.byText( 'C' ), moved.cell( 0, 1 ), 0 );
+	assert.equal( patch.changedWidgets( moved.prev, patch.snapshot( moved.model ) ), null );
+
+	const rowMoved = setup();
+	moveRow( rowMoved.rows, rowMoved.row( 1 ), 0 );
+	assert.equal( patch.changedWidgets( rowMoved.prev, patch.snapshot( rowMoved.model ) ), null );
+
+	const resized = setup();
+	resized.cell( 0, 0 ).set( 'weight', 0.3 );
+	resized.cell( 0, 1 ).set( 'weight', 0.7 );
+	assert.equal( patch.changedWidgets( resized.prev, patch.snapshot( resized.model ) ), null );
+
+	const rowStyle = setup();
+	rowStyle.row( 0 ).set( 'style', { padding: '1px' } );
+	assert.equal( patch.changedWidgets( rowStyle.prev, patch.snapshot( rowStyle.model ) ), null );
+
+	const added = setup();
+	added.cell( 1, 0 ).get( 'widgets' ).add( new panels.model.widget( { class: 'Panels_E2E_Text_Widget', values: { text: 'F' } } ) );
+	assert.equal( patch.changedWidgets( added.prev, patch.snapshot( added.model ) ), null );
+
+	const s = setup();
+	assert.equal( patch.changedWidgets( null, patch.snapshot( s.model ) ), null );
+} );

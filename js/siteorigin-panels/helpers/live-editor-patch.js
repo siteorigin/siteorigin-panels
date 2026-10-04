@@ -195,6 +195,52 @@ module.exports = {
 	},
 
 	/**
+	 * The widgets whose data changed between two snapshots with exactly the same structure: the same rows
+	 * in the same order, the same cells, the same widgets in the same places, and equal row and cell data
+	 * (weights included). Null when the structure differs or a snapshot cannot be trusted.
+	 *
+	 * @param {Object} prev Snapshot the preview shows.
+	 * @param {Object} next Snapshot of the builder now.
+	 * @return {null|string[]} Widget cids, in layout order.
+	 */
+	changedWidgets: function ( prev, next ) {
+		var a = index( prev );
+		var b = index( next );
+
+		if ( ! a || ! b || ! same( a.rowOrder, b.rowOrder ) ) {
+			return null;
+		}
+
+		var structureSame = _.every( b.rowOrder, function ( rowCid ) {
+			var before = a.rows[ rowCid ];
+			var after = b.rows[ rowCid ];
+
+			return same( before.grid, after.grid ) &&
+				same( before.cells, after.cells ) &&
+				_.every( after.cells, function ( cellCid ) {
+					return same( a.cells[ cellCid ].data, b.cells[ cellCid ].data ) &&
+						same( a.cells[ cellCid ].widgets, b.cells[ cellCid ].widgets );
+				} );
+		} );
+		if ( ! structureSame ) {
+			return null;
+		}
+
+		var changed = [];
+		_.each( b.rowOrder, function ( rowCid ) {
+			_.each( b.rows[ rowCid ].cells, function ( cellCid ) {
+				_.each( b.cells[ cellCid ].widgets, function ( widgetCid ) {
+					if ( ! same( a.widgets[ widgetCid ], b.widgets[ widgetCid ] ) ) {
+						changed.push( widgetCid );
+					}
+				} );
+			} );
+		} );
+
+		return changed;
+	},
+
+	/**
 	 * The patch from the preview of `prev` to the preview of `next`. Null means a full reload.
 	 *
 	 * @param {Object} prev Snapshot the preview shows.

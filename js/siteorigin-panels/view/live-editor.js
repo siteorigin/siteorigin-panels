@@ -45,6 +45,15 @@ module.exports = Backbone.View.extend( {
 	previewMap: null,
 	previewWidths: null,
 
+	// True after a move or resize was patched into the preview (positional ids are stale). Only
+	// refreshPreview() resets it. A single-widget swap needs it false.
+	previewPatched: false,
+
+	// The single-widget swap in flight ({ controller, generation }), and the last swapped-in response
+	// ({ dataJson, text }), reused as the "before" render of the next swap.
+	swapRequest: null,
+	swapCache: null,
+
 	events: {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
@@ -184,8 +193,9 @@ module.exports = Backbone.View.extend( {
 	 * Close the Live Editor
 	 */
 	close: function ( closeAfter = true ) {
-		// No load timer or diagnostic request may outlive the Live Editor.
+		// No load timer, diagnostic request or swap may outlive the Live Editor.
 		this.clearPreviewFailure();
+		this.abortSwap();
 
 		if ( ! this.$el.is( ':visible' ) ) {
 			return this;
@@ -287,6 +297,11 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
+		// An edit to one allow-listed widget replaces only that widget, when a reload would change nothing else.
+		if ( this.swapPreview( newData ) ) {
+			return this;
+		}
+
 		// A move or a resize changes the preview in place when nothing else changed.
 		if ( this.patchPreview( newData ) ) {
 			return this;
@@ -317,6 +332,9 @@ module.exports = Backbone.View.extend( {
 		this.previewSnapshot = panels.helpers.liveEditorPatch.snapshot( this.builder.model, data );
 		this.previewMap = null;
 		this.previewWidths = {};
+		this.previewPatched = false;
+		this.swapCache = null;
+		this.abortSwap();
 
 		// A failed preview has no readable scroll position.
 		var previewFailed = this.$( '.so-preview-error' ).hasClass( 'so-active' );
@@ -788,6 +806,211 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Whether the current preview may be changed without a reload: it is mapped, ready, of the current
+	 * generation, still the mapped document, not loading and not failed.
+	 *
+	 * @return {boolean}
+	 */
+	canChangePreviewInPlace: function () {
+		var map = this.previewMap;
+
+		return !! map &&
+			! _.isNull( this.previewIframe ) &&
+			!! this.previewIframe.data( 'iframeready' ) &&
+			this.isCurrentPreview( this.previewIframe[0] ) &&
+			this.readablePreviewDocument( this.previewIframe[0] ) === map.doc &&
+			! this.$( '.so-preview-overlay' ).is( ':visible' ) &&
+			! this.$( '.so-preview-error' ).hasClass( 'so-active' );
+	},
+
+	/**
+	 * Cancel the single-widget swap in flight, if any.
+	 */
+	abortSwap: function () {
+		if ( this.swapRequest && this.swapRequest.controller ) {
+			this.swapRequest.controller.abort();
+		}
+		this.swapRequest = null;
+	},
+
+	/**
+	 * After an edit to one allow-listed widget, replace only that widget in the preview (Phase 3).
+	 *
+	 * The editor sends the request the preview iframe sends (same URL with its nonce, same fields, same
+	 * encoding, same cookies) twice: with the data the preview shows and with the new data. Both responses
+	 * are parsed inertly (DOMParser: no scripts, no loads). The widget is replaced only when both are HTML
+	 * 200 responses with no document policy, the two pages are the same apart from the widget's element,
+	 * and the new element holds no script. Otherwise, or on any error, the preview reloads.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} True when a swap started (it reloads by itself if it fails). False to try a patch or reload.
+	 */
+	swapPreview: function ( data ) {
+		var swap = panels.helpers.liveEditorSwap,
+			patch = panels.helpers.liveEditorPatch,
+			map = this.previewMap,
+			request = this.previewRequest;
+
+		if (
+			this.previewPatched ||
+			! this.canChangePreviewInPlace() ||
+			! request ||
+			typeof window.fetch !== 'function' ||
+			typeof window.DOMParser !== 'function' ||
+			typeof window.URLSearchParams !== 'function' ||
+			typeof panelsOptions === 'undefined' ||
+			! _.isArray( panelsOptions.live_editor_swap_widgets )
+		) {
+			return false;
+		}
+
+		var origin;
+		try {
+			origin = map.doc.location.origin;
+		} catch ( e ) {
+			return false;
+		}
+		if ( ! swap.isSwapRoute( request.url, origin ) ) {
+			return false;
+		}
+
+		var next = patch.snapshot( this.builder.model, data ),
+			changed = patch.changedWidgets( this.previewSnapshot, next );
+		if ( ! changed || changed.length !== 1 ) {
+			return false;
+		}
+
+		// The widget's position: the same in both renders, because the structure is unchanged.
+		var cid = changed[0],
+			position = null,
+			widgetIndex = 0;
+		_.each( next.rows, function ( row, ri ) {
+			_.each( row.cells, function ( cell, ci ) {
+				_.each( cell.widgets, function ( widgetCid, wi ) {
+					if ( widgetCid === cid ) {
+						position = { ri: ri, ci: ci, wi: wi, index: widgetIndex };
+					}
+					widgetIndex++;
+				} );
+			} );
+		} );
+		if ( ! position || ! swap.isSwapWidget( next.data.widgets[ position.index ], panelsOptions.live_editor_swap_widgets ) ) {
+			return false;
+		}
+
+		var targetId = 'panel-' + this.builder.config.postId + '-' + position.ri + '-' + position.ci + '-' + position.wi,
+			oldEl = map.widgets[ cid ],
+			$sidebarWidget = this.$( '.so-live-editor-builder .so-widget' ).filter( function () {
+				var view = $( this ).data( 'view' );
+				return !! view && !! view.model && view.model.cid === cid;
+			} );
+		if ( ! oldEl || oldEl.id !== targetId || ! oldEl.parentNode || $sidebarWidget.length !== 1 ) {
+			return false;
+		}
+
+		// One swap at a time: a newer edit replaces an older swap.
+		this.abortSwap();
+		var thisView = this,
+			controller = typeof AbortController === 'function' ? new AbortController() : null,
+			current = this.swapRequest = { controller: controller, generation: this.previewGeneration },
+			prevJson = JSON.stringify( this.previewSnapshot.data ),
+			nextJson = JSON.stringify( next.data ),
+			isCurrent = function () {
+				return thisView.swapRequest === current && current.generation === thisView.previewGeneration;
+			},
+			parse = function ( text ) {
+				return new window.DOMParser().parseFromString( text, 'text/html' );
+			},
+			fetchPreview = function ( json ) {
+				return window.fetch( request.url, {
+					method: 'POST',
+					credentials: 'same-origin',
+					redirect: 'manual',
+					cache: 'no-store',
+					signal: controller ? controller.signal : undefined,
+					// The fields and the encoding of the preview form.
+					body: new window.URLSearchParams( {
+						live_editor_panels_data: json,
+						live_editor_post_ID: String( request.fields.live_editor_post_ID ),
+					} ),
+				} ).then( function ( response ) {
+					var type = String( response.headers.get( 'content-type' ) || '' ).toLowerCase();
+					if (
+						response.status !== 200 ||
+						response.redirected ||
+						response.type === 'opaqueredirect' ||
+						type.indexOf( 'text/html' ) !== 0
+					) {
+						throw new Error( 'The response is not a preview.' );
+					}
+
+					return response.text().then( function ( text ) {
+						var doc = parse( text );
+						if ( swap.hasDocumentPolicy( response.headers, doc ) ) {
+							throw new Error( 'The response has a document policy.' );
+						}
+
+						return { text: text, doc: doc };
+					} );
+				} );
+			},
+			cache = this.swapCache,
+			before = cache && cache.dataJson === prevJson ?
+				Promise.resolve( { text: cache.text, doc: parse( cache.text ) } ) :
+				fetchPreview( prevJson );
+
+		Promise.all( [ before, fetchPreview( nextJson ) ] ).then( function ( results ) {
+			if ( ! isCurrent() ) {
+				return;
+			}
+			thisView.swapRequest = null;
+
+			var prevShell = swap.shell( results[0].doc, targetId ),
+				nextShell = swap.shell( results[1].doc, targetId ),
+				target = swap.target( results[1].doc, targetId );
+
+			if ( ! prevShell || prevShell !== nextShell || ! target ) {
+				throw new Error( 'A reload would change more than the widget.' );
+			}
+
+			// The preview must still be the one that was mapped, with the same element in place.
+			if ( thisView.previewPatched || ! thisView.canChangePreviewInPlace() || thisView.previewMap !== map || map.widgets[ cid ] !== oldEl || ! oldEl.parentNode ) {
+				throw new Error( 'The preview changed during the swap.' );
+			}
+
+			var node = map.doc.importNode( target, true );
+			oldEl.parentNode.replaceChild( node, oldEl );
+			map.widgets[ cid ] = node;
+			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
+
+			thisView.previewSnapshot = next;
+			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
+
+			var previewWindow = thisView.previewIframe[0].contentWindow;
+			previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+		} ).catch( function ( error ) {
+			// Aborted, or replaced by a newer swap or a reload: that one owns the preview now.
+			if (
+				( error && error.name === 'AbortError' ) ||
+				current.generation !== thisView.previewGeneration ||
+				( thisView.swapRequest !== null && thisView.swapRequest !== current )
+			) {
+				return;
+			}
+
+			thisView.swapRequest = null;
+			if ( ! thisView.$el.is( ':visible' ) ) {
+				return;
+			}
+
+			// Today's behaviour: reload with the builder's current data.
+			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+		} );
+
+		return true;
+	},
+
+	/**
 	 * Apply a move or resize to the preview without a reload.
 	 *
 	 * @param {Object} data The new builder data.
@@ -796,15 +1019,7 @@ module.exports = Backbone.View.extend( {
 	patchPreview: function ( data ) {
 		var map = this.previewMap;
 
-		if (
-			! map ||
-			_.isNull( this.previewIframe ) ||
-			! this.previewIframe.data( 'iframeready' ) ||
-			! this.isCurrentPreview( this.previewIframe[0] ) ||
-			this.readablePreviewDocument( this.previewIframe[0] ) !== map.doc ||
-			this.$( '.so-preview-overlay' ).is( ':visible' ) ||
-			this.$( '.so-preview-error' ).hasClass( 'so-active' )
-		) {
+		if ( ! this.canChangePreviewInPlace() ) {
 			return false;
 		}
 
@@ -842,6 +1057,7 @@ module.exports = Backbone.View.extend( {
 
 		this.previewWidths = widths;
 		this.previewSnapshot = next;
+		this.previewPatched = true;
 
 		// Widgets that measure their layout listen for this.
 		var previewWindow = this.previewIframe[0].contentWindow;
