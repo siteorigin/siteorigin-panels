@@ -294,11 +294,25 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			}
 
 			// Layout-update ability write: settle the layout into the form the
-			// post update will store, then let an add-on stop the write. Both
-			// run before the render below, and the render, the returned
-			// panelsData and the same-request memo all use this final form.
+			// post update will store, check that the builder can load that
+			// form, then let an add-on stop the write. All three run before
+			// the render below, and the render, the returned panelsData and
+			// the same-request memo all use this final form.
 			if ( $layout_update_pre_write !== null ) {
 				$panels_data = $this->final_stored_panels_data( $panels_data );
+
+				// The same structural rule an editor save of a classic layout
+				// applies. Only a layout-update write reaches this; an editor
+				// save of a Layout Block is stored as before.
+				if ( SiteOrigin_Panels_Admin::validate_layout_structure( $panels_data ) === null ) {
+					throw new SiteOrigin_Panels_Layout_Update_Aborted(
+						new WP_Error(
+							'siteorigin_panels_layout_update_unresolved_reference',
+							__( 'The layout was not saved because the builder cannot load it. A layout needs grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. The layout-get ability returns layouts in this shape.', 'siteorigin-panels' )
+						)
+					);
+				}
+
 				SiteOrigin_Panels_Layout_Update_Pre_Write::run( $panels_data, $layout_update_pre_write['post_id'], 'block', $layout_update_pre_write['block_index'] );
 			}
 		}
@@ -1010,16 +1024,21 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * Entry point for the `siteorigin-panels/layout-update` ability only. Runs
 	 * the same chokepoint as sanitize_block_untrusted(), with the kses floor
 	 * forced, and marks this block's save so that the save branch settles the
-	 * stored form and then fires the `siteorigin_panels_layout_update_pre_write`
-	 * hook once, before the block's render. If the block has no layout data,
-	 * nothing is sanitized or rendered, and the hook still fires once with an
-	 * empty layout.
+	 * stored form, checks it with
+	 * SiteOrigin_Panels_Admin::validate_layout_structure(), and then fires the
+	 * `siteorigin_panels_layout_update_pre_write` hook once, before the block's
+	 * render. A stored form the builder cannot load stops the write with the
+	 * code `siteorigin_panels_layout_update_unresolved_reference`; the hook
+	 * does not fire and nothing is rendered. If the block has no layout data,
+	 * nothing is sanitized, checked or rendered, and the hook still fires once
+	 * with an empty layout.
 	 *
 	 * @param array $block       A parsed Layout Block (parse_blocks() shape).
 	 * @param int   $post_id     The post being written.
 	 * @param int   $block_index 0-based Layout Block index, as in layout-get.
 	 *
-	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the hook stops the write, or the stored form does not settle.
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the hook stops the write, the stored form does not settle,
+	 *                                                 or the builder cannot load the stored form.
 	 *
 	 * @return array The block with sanitized, floored panelsData.
 	 */

@@ -147,7 +147,7 @@ class SiteOrigin_Panels_Abilities {
 			'siteorigin-panels/layout-update',
 			array(
 				'label'               => __( 'Update Page Builder layout', 'siteorigin-panels' ),
-				'description'         => __( "Writes a post's Page Builder layout — either the classic (meta-stored) layout, or a specific block-stored Layout Block selected by block_index (the 0-based index from layout-get). The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. When a post has multiple Layout Blocks, block_index is required; if it is missing or out of range the call declines as 'block-ambiguous' rather than guessing.", 'siteorigin-panels' ),
+				'description'         => __( "Writes a post's Page Builder layout — either the classic (meta-stored) layout, or a specific block-stored Layout Block selected by block_index (the 0-based index from layout-get). The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. A layout the builder cannot load is not saved. When a post has multiple Layout Blocks, block_index is required; if it is missing or out of range the call declines as 'block-ambiguous' rather than guessing.", 'siteorigin-panels' ),
 				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -159,7 +159,7 @@ class SiteOrigin_Panels_Abilities {
 						),
 						'panels_data' => array(
 							'type'        => 'object',
-							'description' => __( 'Canonical panels_data to persist (widgets, grids, grid_cells).', 'siteorigin-panels' ),
+							'description' => __( 'Canonical panels_data to persist, in the shape layout-get returns: widgets, grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. A layout that does not meet this is not saved. An empty object clears a classic layout.', 'siteorigin-panels' ),
 						),
 						'block_index' => array(
 							'type'        => 'integer',
@@ -377,9 +377,14 @@ class SiteOrigin_Panels_Abilities {
 	 * persisted raw; the value is double-slashed because update_post_meta()
 	 * wp_unslash()es its input.
 	 *
-	 * The `siteorigin_panels_layout_update_pre_write` hook fires once after the
-	 * kses floor and before the empty-layout delete, the meta update and the
-	 * copy-content refresh; an abort stops the write there.
+	 * After the kses floor, a layout that holds a widget or a row must pass
+	 * SiteOrigin_Panels_Admin::validate_layout_structure(), the rule an editor
+	 * save applies. A layout that does not pass is declined as 'unsupported'
+	 * and nothing is stored, deleted or mirrored.
+	 *
+	 * The `siteorigin_panels_layout_update_pre_write` hook then fires once,
+	 * before the empty-layout delete, the meta update and the copy-content
+	 * refresh; an abort stops the write there.
 	 *
 	 * @param int   $post_id         The post to write to.
 	 * @param array $panels_data     Incoming canonical panels_data.
@@ -442,6 +447,22 @@ class SiteOrigin_Panels_Abilities {
 		// this surface gets.
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+		}
+
+		// The same structural rule an editor save applies, on the final layout,
+		// so a reference changed by the pre-save filter is checked too. A layout
+		// the builder cannot load is not stored. A layout with no widgets and no
+		// rows is the clear request; it takes the delete branch below instead.
+		if (
+			( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) &&
+			SiteOrigin_Panels_Admin::validate_layout_structure( $panels_data ) === null
+		) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'unsupported',
+				'message' => __( 'The layout was not saved because the builder cannot load it. A layout needs grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. The layout-get ability returns layouts in this shape.', 'siteorigin-panels' ),
+			);
 		}
 
 		// The final layout: let an add-on stop the write before anything is

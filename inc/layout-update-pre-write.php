@@ -35,15 +35,32 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 *
 		 * Fires only for the `siteorigin-panels/layout-update` ability. Human
 		 * editor saves, REST block saves and other save surfaces do not fire it.
-		 * Fires exactly once per layout-update write, on both storage paths,
-		 * after the final sanitizer and before any write or render:
+		 * Fires once per layout-update write that reaches it, on both storage
+		 * paths, after the final sanitizer and the layout structure check, and
+		 * before any write or render. A write that stops earlier, with one of
+		 * the codes below, does not fire it.
 		 *  - 'meta': after the widget sanitizer, the
-		 *    `siteorigin_panels_data_pre_save` filter, the style check and the
-		 *    kses floor; before the meta update, the empty-layout meta delete
-		 *    (it fires for an empty layout too) and the copy-content refresh.
-		 *  - 'block': after the widget sanitizer and the forced kses floor, and
+		 *    `siteorigin_panels_data_pre_save` filter, the style check, the
+		 *    kses floor and the layout structure check; before the meta
+		 *    update, the empty-layout meta delete (it fires for an empty
+		 *    layout too) and the copy-content refresh.
+		 *  - 'block': after the widget sanitizer and the forced kses floor,
 		 *    after Page Builder applies the WordPress save transforms the block
-		 *    will receive; before the block preview render and the post update.
+		 *    will receive, and after the layout structure check on that stored
+		 *    form; before the block preview render and the post update.
+		 *
+		 * Layout structure check: the final layout must be one the builder can
+		 * load (SiteOrigin_Panels_Admin::validate_layout_structure()). It needs
+		 * `grids` and `grid_cells` lists, each `grid_cells` entry must point at
+		 * an existing row, and each widget must point at an existing row and
+		 * cell. A layout that does not pass stops the write before this
+		 * filter. Then nothing is stored, deleted, mirrored or rendered.
+		 *  - 'meta': layout-update returns `updated: false` with the source
+		 *    `unsupported` and a message. A layout with no widgets and no rows
+		 *    is the clear request; it is not checked and this filter fires.
+		 *  - 'block': layout-update returns a WP_Error with the code
+		 *    `siteorigin_panels_layout_update_unresolved_reference`. A block
+		 *    write with no layout data is not checked and this filter fires.
 		 *
 		 * Abort: return a WP_Error, or exactly `false`, to stop the write. Then
 		 * nothing is stored, deleted, mirrored or rendered, no revision is made,
