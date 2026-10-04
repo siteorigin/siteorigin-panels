@@ -25,7 +25,7 @@ const browserLogin = async ( page, username, password ) => {
 	await page.locator( '#user_pass' ).fill( password );
 	await Promise.all( [
 		page.waitForURL( /wp-admin/, { waitUntil: 'commit', timeout: 60000 } ),
-		page.locator( '#wp-submit' ).click(),
+		page.locator( '#wp-submit' ).click( { noWaitAfter: true } ),
 	] );
 
 	// The first wp-admin request after activation can redirect to the Page Builder welcome page.
