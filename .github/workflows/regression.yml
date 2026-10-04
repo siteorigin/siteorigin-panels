@@ -1,0 +1,96 @@
+name: Regression
+on:
+  pull_request:
+    paths:
+      - 'siteorigin-panels.php'
+      - 'inc/**'
+      - 'compat/**'
+      - 'widgets/**'
+      - 'tpl/**'
+      - 'js/**'
+      - 'css/**'
+      - 'settings/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/regression.yml'
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Run the full parity set (not only the smoke set)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+      # The builder scripts and styles are build outputs (not in git). The builder browser tests need them.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 10.18.1
+      - name: Build the builder scripts and styles
+        working-directory: build
+        run: |
+          npm ci
+          npx gulp css browserify
+      # The browserify task runs babel, which rewrites the tracked Layout Block script. Test the committed one.
+      - run: git checkout -- compat/js/
+      - run: test -f js/siteorigin-panels.js && test -f css/admin.css
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-results
+          path: tests/results/
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # Tags are needed to find the last release (the parity base).
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Parity with the last release
+        env:
+          FULL: ${{ inputs.full }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$FULL" = "true" ] || [ "$EVENT" = "push" ]; then
+            npm run parity
+          else
+            npm run parity -- --smoke
+          fi
+      - name: Generated layouts against the last release
+        run: npm run parity:generate -- --count=300
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: parity-compare
+          path: tests/cache/parity/compare/
+          if-no-files-found: ignore
