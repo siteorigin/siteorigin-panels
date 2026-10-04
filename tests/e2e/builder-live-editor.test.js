@@ -175,6 +175,26 @@ const wrappedLayout = () => ( {
 const isPreviewPost = ( response ) => response.request().method() === 'POST' && response.url().includes( 'siteorigin_panels_live_editor=true' );
 
 /**
+ * Whether the site's WordPress sends Document-Isolation-Policy (7.1 and later), read from the generator
+ * meta tag of the home page. Unknown (no tag) counts as yes, so the I1 guard still runs and fails loudly.
+ *
+ * @return {Promise<{ supported: boolean, version: string }>}
+ */
+const isolationSupport = async ( session ) => {
+	const html = await ( await session.context.get( siteUrl( '' ) ) ).text();
+	const match = html.match( /<meta name="generator" content="WordPress ([0-9.]+)/ );
+	if ( ! match ) {
+		return { supported: true, version: 'unknown' };
+	}
+
+	const [ major, minor ] = match[ 1 ].split( '.' ).map( Number );
+
+	return { supported: major > 7 || ( major === 7 && minor >= 1 ), version: match[ 1 ] };
+};
+
+const notIsolatedReason = ( version ) => `environment not isolated: WordPress ${ version } sends no Document-Isolation-Policy (7.1 and later do)`;
+
+/**
  * A new browser context with the isolation cookie set before login.
  */
 const newIsolatedPage = async ( browser ) => {
@@ -301,8 +321,15 @@ test.describe( 'Live Editor under Document-Isolation-Policy', () => {
 	let isoPostId;
 	let blockPostId;
 
+	let support;
+
 	test.beforeAll( async ( { browser } ) => {
 		admin = await adminLogin();
+		support = await isolationSupport( admin );
+		if ( ! support.supported ) {
+			return;
+		}
+
 		isoPostId = await createPost( admin, 'post', { title: 'Live editor isolated', status: 'publish', content: '' } );
 		await seedLayout( admin, isoPostId, wrappedLayout() );
 		ctx = await newIsolatedPage( browser );
@@ -320,6 +347,11 @@ test.describe( 'Live Editor under Document-Isolation-Policy', () => {
 			await ctx.context.close();
 		}
 		await admin.context.dispose();
+	} );
+
+	// Below WordPress 7.1 nothing sends the policy: skip, do not fail.
+	test.beforeEach( () => {
+		test.skip( ! support.supported, notIsolatedReason( support.version ) );
 	} );
 
 	test( 'I1 the editor is isolated', async () => {
