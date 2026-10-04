@@ -751,6 +751,8 @@ class SiteOrigin_Panels_Admin {
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
+				// The Live Editor moves rows and widgets in the preview only when widget margins are in the CSS, not inline.
+				'live_editor_inline_styles' => (bool) siteorigin_panels_setting( 'inline-styles' ),
 				'add_media'                 => esc_html__( 'Choose Media', 'siteorigin-panels' ),
 				'add_media_done'            => esc_html__( 'Done', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(

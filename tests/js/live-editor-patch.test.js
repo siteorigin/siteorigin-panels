@@ -214,3 +214,21 @@ test( 'a snapshot is a copy: later model changes do not change it', () => {
 	s.byText( 'A' ).get( 'values' ).text = 'mutated';
 	assert.equal( JSON.stringify( s.prev ), before );
 } );
+
+test( 'cellWidth rebuilds the server width for a new weight', () => {
+	// Chrome reports the server's calc(50% - ( 0.5 * 30px ) ) as calc(50% - 15px).
+	assert.equal( patch.cellWidth( 'calc(50% - 15px)', 0.5, 0.3 ), 'calc(30% - ( 0.70000000000000 * 30px ) )' );
+	assert.equal( patch.cellWidth( 'calc(33.3333% - 20px)', 1 / 3, 0.5 ), 'calc(50% - ( 0.50000000000000 * 30px ) )' );
+	assert.equal( patch.cellWidth( 'calc(50% - 1em)', 0.5, 0.25 ), 'calc(25% - ( 0.75000000000000 * 2em ) )' );
+	// A zero gutter is a bare percent.
+	assert.equal( patch.cellWidth( '50%', 0.5, 0.123456789 ), '12.3457%' );
+} );
+
+test( 'cellWidth refuses a value it cannot read or a weight a filter changed', () => {
+	assert.equal( patch.cellWidth( 'calc(40% - 15px)', 0.5, 0.3 ), null, 'percent does not match the rendered weight' );
+	assert.equal( patch.cellWidth( '40%', 0.5, 0.3 ), null );
+	assert.equal( patch.cellWidth( 'calc(100% + 0px)', 1, 0.5 ), null, 'a full-width cell has no gutter term to read' );
+	assert.equal( patch.cellWidth( 'min(50%, 300px)', 0.5, 0.3 ), null );
+	assert.equal( patch.cellWidth( '', 0.5, 0.3 ), null );
+	assert.equal( patch.cellWidth( 'calc(50% - 15px)', NaN, 0.3 ), null );
+} );

@@ -1,5 +1,23 @@
 var panels = window.panels, $ = jQuery;
 
+/**
+ * Whether two lists hold the same elements in the same order. Identity, not _.isEqual(), which compares
+ * DOM elements by their own properties.
+ */
+var sameElements = function ( a, b ) {
+	if ( a.length !== b.length ) {
+		return false;
+	}
+
+	for ( var i = 0; i < a.length; i++ ) {
+		if ( a[ i ] !== b[ i ] ) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
 module.exports = Backbone.View.extend( {
 	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-live-editor' ).html() ) ),
 
@@ -20,6 +38,12 @@ module.exports = Backbone.View.extend( {
 
 	// Increased on every preview load. A ready or load event from an older preview is ignored.
 	previewGeneration: 0,
+
+	// The builder as the preview shows it (panels.helpers.liveEditorPatch.snapshot()), the map from model cid to
+	// preview element (null = every change reloads), and the patched cell widths by cell cid.
+	previewSnapshot: null,
+	previewMap: null,
+	previewWidths: null,
 
 	events: {
 		'click .live-editor-close': 'close',
@@ -263,6 +287,11 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
+		// A move or a resize changes the preview in place when nothing else changed.
+		if ( this.patchPreview( newData ) ) {
+			return this;
+		}
+
 		this.refreshPreview( newData );
 	},
 
@@ -285,6 +314,9 @@ module.exports = Backbone.View.extend( {
 		}, 0 ) / this.loadTimes.length : 1000;
 
 		this.previewGeneration++;
+		this.previewSnapshot = panels.helpers.liveEditorPatch.snapshot( this.builder.model, data );
+		this.previewMap = null;
+		this.previewWidths = {};
 
 		// A failed preview has no readable scroll position.
 		var previewFailed = this.$( '.so-preview-error' ).is( ':visible' );
@@ -587,6 +619,9 @@ module.exports = Backbone.View.extend( {
 					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'all .2s ease' );
 				}, 100 );
 
+				// Map the preview before the binding below changes it.
+				thisView.previewMap = thisView.buildPreviewMap( thisView.previewDocument( this ) );
+
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
 				layoutWrapper.find( '.panel-grid .panel-grid-cell .so-panel' )
@@ -639,6 +674,320 @@ module.exports = Backbone.View.extend( {
 					thisView.failPreview( this, 'load' );
 				}
 			} );
+	},
+
+	/**
+	 * Map the rows, cells and widgets of the preview snapshot to their elements in the preview.
+	 *
+	 * Null (every change reloads) unless the preview is the post's own layout (#pl-{postId}; the admin-ajax
+	 * preview and the Layout Block use other ids), every row, cell and widget is where the snapshot puts it,
+	 * every non-empty cell's widgets are the only children of one container, and widget margins are not
+	 * inline (inline-styles writes position-dependent margins into each widget).
+	 *
+	 * @param {Document|null} doc The preview document.
+	 * @return {Object|null}
+	 */
+	buildPreviewMap: function ( doc ) {
+		var snap = this.previewSnapshot,
+			postId = this.builder.config.postId;
+
+		if (
+			! doc ||
+			! snap ||
+			! snap.data ||
+			! _.isArray( snap.data.grid_cells ) ||
+			( typeof panelsOptions !== 'undefined' && panelsOptions.live_editor_inline_styles )
+		) {
+			return null;
+		}
+
+		var wrapper = doc.getElementById( 'pl-' + postId );
+		if ( ! wrapper ) {
+			return null;
+		}
+
+		var map = {
+				doc: doc,
+				wrapper: wrapper,
+				rows: {},
+				cells: {},
+				containers: {},
+				widgets: {},
+				renderedWeights: {},
+				widthRules: {},
+			},
+			cellIndex = 0,
+			widgetIndex = 0,
+			valid = true;
+
+		_.each( snap.rows, function ( row, ri ) {
+			var rowEl = doc.getElementById( 'pg-' + postId + '-' + ri );
+			if ( ! rowEl || rowEl.parentNode !== wrapper ) {
+				valid = false;
+				return;
+			}
+			map.rows[ row.cid ] = rowEl;
+
+			_.each( row.cells, function ( cell, ci ) {
+				var cellEl = doc.getElementById( 'pgc-' + postId + '-' + ri + '-' + ci );
+				var cellData = snap.data.grid_cells[ cellIndex++ ];
+				if ( ! cellEl || ! rowEl.contains( cellEl ) || ! cellData ) {
+					valid = false;
+					return;
+				}
+				map.cells[ cell.cid ] = cellEl;
+				map.renderedWeights[ cell.cid ] = Number( cellData.weight );
+
+				var widgetEls = _.map( cell.widgets, function ( widgetCid, wi ) {
+					var el = doc.getElementById( 'panel-' + postId + '-' + ri + '-' + ci + '-' + wi );
+					if ( ! el || ! cellEl.contains( el ) || String( el.getAttribute( 'data-index' ) ) !== String( widgetIndex ) ) {
+						valid = false;
+					}
+					widgetIndex++;
+					map.widgets[ widgetCid ] = el;
+
+					return el;
+				} );
+
+				if ( valid && widgetEls.length ) {
+					var container = widgetEls[0].parentNode;
+					var children = Array.prototype.slice.call( container.children );
+					if ( children.length !== widgetEls.length || _.some( children, function ( child, i ) {
+						return child !== widgetEls[ i ];
+					} ) ) {
+						valid = false;
+						return;
+					}
+					map.containers[ cell.cid ] = container;
+				}
+			} );
+		} );
+
+		var rowCount = _.filter( wrapper.children, function ( el ) {
+			return el.classList.contains( 'panel-grid' );
+		} ).length;
+
+		return valid && rowCount === snap.rows.length ? map : null;
+	},
+
+	/**
+	 * Apply a move or resize to the preview without a reload.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} False when the preview must reload.
+	 */
+	patchPreview: function ( data ) {
+		var map = this.previewMap;
+
+		if (
+			! map ||
+			_.isNull( this.previewIframe ) ||
+			! this.previewIframe.data( 'iframeready' ) ||
+			! this.isCurrentPreview( this.previewIframe[0] ) ||
+			this.previewDocument( this.previewIframe[0] ) !== map.doc ||
+			this.$( '.so-preview-overlay' ).is( ':visible' ) ||
+			this.$( '.so-preview-error' ).is( ':visible' )
+		) {
+			return false;
+		}
+
+		var patch = panels.helpers.liveEditorPatch,
+			next = patch.snapshot( this.builder.model, data ),
+			ops = patch.plan( this.previewSnapshot, next );
+
+		if ( ! ops ) {
+			return false;
+		}
+
+		// Work out every new width before the DOM changes, so a width that cannot be read reloads cleanly.
+		var widths = _.clone( this.previewWidths || {} );
+		var widthsOk = _.every( ops.weights, function ( weight, cellCid ) {
+			var rule = this.cellWidthRule( cellCid );
+			var width = rule ? patch.cellWidth( rule.width, map.renderedWeights[ cellCid ], weight ) : null;
+			if ( ! width ) {
+				return false;
+			}
+			widths[ cellCid ] = { selector: rule.selector, media: rule.media, width: width };
+
+			return true;
+		}, this );
+		if ( ! widthsOk ) {
+			return false;
+		}
+
+		try {
+			this.moveRows( ops.rowOrder );
+			this.moveWidgets( ops.cells );
+			this.writeWidths( widths );
+		} catch ( e ) {
+			return false;
+		}
+
+		this.previewWidths = widths;
+		this.previewSnapshot = next;
+
+		// Widgets that measure their layout listen for this.
+		var previewWindow = this.previewIframe[0].contentWindow;
+		previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+
+		return true;
+	},
+
+	/**
+	 * Put the row elements into the places the rows held, in the new order. Other children of the layout
+	 * wrapper stay where they are.
+	 *
+	 * @param {string[]} rowOrder Row cids.
+	 */
+	moveRows: function ( rowOrder ) {
+		var map = this.previewMap,
+			rowEls = _.values( map.rows ),
+			current = _.filter( map.wrapper.children, function ( el ) {
+				return _.contains( rowEls, el );
+			} ),
+			desired = _.map( rowOrder, function ( cid ) {
+				return map.rows[ cid ];
+			} );
+
+		if ( sameElements( current, desired ) ) {
+			return;
+		}
+
+		var markers = _.map( current, function ( el ) {
+			var marker = map.doc.createComment( '' );
+			map.wrapper.insertBefore( marker, el );
+
+			return marker;
+		} );
+
+		_.each( markers, function ( marker, i ) {
+			map.wrapper.replaceChild( desired[ i ], marker );
+		} );
+	},
+
+	/**
+	 * Put the widget elements into their cells in the new order, and set the first and last child classes.
+	 *
+	 * @param {Object} cells Widget cids by cell cid, for every non-empty cell.
+	 */
+	moveWidgets: function ( cells ) {
+		var map = this.previewMap,
+			elementsOf = function ( widgetCids ) {
+				return _.map( widgetCids, function ( cid ) {
+					return map.widgets[ cid ];
+				} );
+			};
+
+		// Append in order to every cell whose widgets changed. A widget that left a cell is appended to its new one.
+		_.each( cells, function ( widgetCids, cellCid ) {
+			var container = map.containers[ cellCid ];
+			var desired = elementsOf( widgetCids );
+			if ( ! sameElements( container.children, desired ) ) {
+				_.each( desired, function ( el ) {
+					container.appendChild( el );
+				} );
+			}
+		} );
+
+		_.each( cells, function ( widgetCids, cellCid ) {
+			var container = map.containers[ cellCid ];
+			var desired = elementsOf( widgetCids );
+			if ( ! sameElements( container.children, desired ) ) {
+				throw new Error( 'The preview cell does not hold the expected widgets.' );
+			}
+
+			_.each( desired, function ( el, i ) {
+				el.classList.toggle( 'panel-first-child', i === 0 );
+				el.classList.toggle( 'panel-last-child', i === desired.length - 1 );
+			} );
+		} );
+	},
+
+	/**
+	 * The server's width rule for a cell: the one rule whose selector list names the cell's id and sets a
+	 * width, with its @media condition. Null when there is not exactly one, or it is inside another kind of
+	 * group (@supports, @layer, @container).
+	 *
+	 * @param {string} cellCid
+	 * @return {Object|null} { selector, media, width }
+	 */
+	cellWidthRule: function ( cellCid ) {
+		var map = this.previewMap;
+		if ( _.has( map.widthRules, cellCid ) ) {
+			return map.widthRules[ cellCid ];
+		}
+
+		var selector = '#' + map.cells[ cellCid ].id,
+			found = [];
+
+		var walk = function ( rules, media, unsupported ) {
+			_.each( rules, function ( rule ) {
+				if ( rule.type === 1 ) {
+					// A style rule. With CSS nesting it also has cssRules, so test the type first.
+					var selectors = _.map( String( rule.selectorText || '' ).split( ',' ), function ( part ) {
+						return part.trim();
+					} );
+					if ( _.contains( selectors, selector ) && rule.style && rule.style.width ) {
+						found.push( { selector: selector, media: media, width: rule.style.width, unsupported: unsupported } );
+					}
+				} else if ( rule.type === 4 ) {
+					// @media. A nested @media has two conditions to keep: not supported.
+					walk( rule.cssRules, rule.conditionText || rule.media.mediaText, unsupported || !! media );
+				} else if ( rule.cssRules ) {
+					walk( rule.cssRules, media, true );
+				}
+			} );
+		};
+
+		_.each( map.doc.styleSheets, function ( sheet ) {
+			if ( sheet.ownerNode && sheet.ownerNode.id === 'so-live-editor-patch' ) {
+				return;
+			}
+
+			var rules;
+			try {
+				rules = sheet.cssRules;
+			} catch ( e ) {
+				// A cross-origin stylesheet.
+				return;
+			}
+			walk( rules, '', false );
+		} );
+
+		var rule = found.length === 1 && ! found[0].unsupported ? _.omit( found[0], 'unsupported' ) : null;
+		map.widthRules[ cellCid ] = rule;
+
+		return rule;
+	},
+
+	/**
+	 * Write the patched cell widths into one style element at the end of the preview body. A later rule with
+	 * the same selector and condition wins over the server's rule; the mobile rule (id and class) still wins.
+	 *
+	 * @param {Object} widths { selector, media, width } by cell cid.
+	 */
+	writeWidths: function ( widths ) {
+		var doc = this.previewMap.doc;
+		var css = _.map( widths, function ( entry ) {
+			var rule = entry.selector + ' { width: ' + entry.width + '; }';
+
+			return entry.media ? '@media ' + entry.media + ' { ' + rule + ' }' : rule;
+		} ).join( '\n' );
+
+		var style = doc.getElementById( 'so-live-editor-patch' );
+		if ( ! css ) {
+			if ( style ) {
+				style.parentNode.removeChild( style );
+			}
+			return;
+		}
+
+		if ( ! style ) {
+			style = doc.createElement( 'style' );
+			style.id = 'so-live-editor-patch';
+			doc.body.appendChild( style );
+		}
+		style.textContent = css;
 	},
 
 	/**

@@ -118,7 +118,50 @@ var sameKeys = function ( a, b ) {
 	return same( _.keys( a ).sort(), _.keys( b ).sort() );
 };
 
+var round4 = function ( value ) {
+	return Math.round( value * 10000 ) / 10000;
+};
+
 module.exports = {
+
+	/**
+	 * The new width of a cell, from the width the browser reports for the server's cell rule.
+	 *
+	 * The server writes `width: P%` with a zero gutter, else `width: calc(P% - ( (1 - w0) * g ) )`
+	 * (SiteOrigin_Panels_Renderer::generate_css()). Chrome reports the calc as `calc(P% - Kpx)`. The
+	 * rule must show the weight it was rendered with; any other value means a filter changed it.
+	 *
+	 * @param {string} reported The width the browser reports for the rule (CSSStyleRule.style.width).
+	 * @param {number} renderedWeight The weight the preview was rendered with (w0).
+	 * @param {number} weight The new weight (w).
+	 * @return {string|null} The new width, or null when the value cannot be read safely.
+	 */
+	cellWidth: function ( reported, renderedWeight, weight ) {
+		var value = String( reported || '' ).trim();
+		var expected = round4( renderedWeight * 100 );
+		var percent = round4( weight * 100 );
+		var match;
+
+		if ( ! isFinite( renderedWeight ) || ! isFinite( weight ) ) {
+			return null;
+		}
+
+		match = /^(-?\d*\.?\d+)%$/.exec( value );
+		if ( match ) {
+			return Math.abs( parseFloat( match[1] ) - expected ) < 1e-6 ? percent + '%' : null;
+		}
+
+		match = /^calc\(\s*(-?\d*\.?\d+)%\s*([+-])\s*(\d*\.?\d+)([a-z]+)\s*\)$/i.exec( value );
+		if ( ! match || Math.abs( parseFloat( match[1] ) - expected ) >= 1e-6 || 1 - renderedWeight <= 0 ) {
+			return null;
+		}
+
+		var term = parseFloat( match[3] );
+		var gutter = ( match[2] === '-' ? term : -term ) / ( 1 - renderedWeight );
+		gutter = parseFloat( gutter.toPrecision( 12 ) );
+
+		return 'calc(' + percent + '% - ( ' + ( 1 - weight ).toPrecision( 14 ) + ' * ' + gutter + match[4] + ' ) )';
+	},
 
 	/**
 	 * Snapshot of the builder at the moment its data is posted to (or patched into) the preview.
