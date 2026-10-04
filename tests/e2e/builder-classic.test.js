@@ -165,7 +165,7 @@ for ( const role of [ 'administrator', 'author' ] ) {
 			const fieldPlacement = placement( await fieldLayout( page ) );
 			await Promise.all( [
 				page.waitForURL( /message=\d+/, { timeout: 60000 } ),
-				page.locator( '#publish' ).click(),
+				page.locator( '#publish' ).click( { noWaitAfter: true } ),
 			] );
 
 			const raw = await rawStorage( admin, postId );
@@ -198,7 +198,7 @@ for ( const role of [ 'administrator', 'author' ] ) {
 
 			await Promise.all( [
 				page.waitForURL( /message=\d+/, { timeout: 60000 } ),
-				page.locator( '#publish' ).click(),
+				page.locator( '#publish' ).click( { noWaitAfter: true } ),
 			] );
 			const raw = await rawStorage( admin, postId );
 			expect( raw.meta_rows ).toBe( 1 );
