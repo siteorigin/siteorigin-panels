@@ -25,9 +25,55 @@ if ( ! class_exists( 'WP_Error' ) ) {
 			return $this->code;
 		}
 
+		public function get_error_message() {
+			return $this->message;
+		}
+
 		public function get_error_data() {
 			return $this->data;
 		}
+	}
+}
+
+/**
+ * Shared, ordered call log for the pre-write order tests. Off (null) unless a
+ * test sets it to an array; the spies and shims below append to it.
+ */
+class Abilities_CallLog {
+	public static $entries = null;
+
+	public static function add( $name ) {
+		if ( is_array( self::$entries ) ) {
+			self::$entries[] = $name;
+		}
+	}
+}
+
+/**
+ * Layout fixtures the builder can load: one row with one cell, and every
+ * widget placed in that cell. The layout-update ability refuses a layout
+ * without rows, cells and widget placements, so every write fixture uses
+ * these.
+ */
+class Abilities_Fixtures {
+	// The widget set the default sanitizer stand-ins return.
+	const CLEANED = array( array( 'panels_info' => array( 'class' => 'Cleaned', 'grid' => 0, 'cell' => 0 ) ) );
+
+	// A widget of $class placed in row 0, cell 0, with any extra $fields.
+	public static function widget( $class, array $fields = array() ) {
+		return array_merge(
+			$fields,
+			array( 'panels_info' => array( 'class' => $class, 'grid' => 0, 'cell' => 0 ) )
+		);
+	}
+
+	// A layout of one row and one cell that holds $widgets as given.
+	public static function layout( array $widgets = array() ) {
+		return array(
+			'widgets'    => $widgets,
+			'grids'      => array( array( 'cells' => 1 ) ),
+			'grid_cells' => array( array( 'grid' => 0, 'weight' => 1 ) ),
+		);
 	}
 }
 
@@ -50,7 +96,7 @@ class Abilities_AdminSpy {
 
 		// Simulate a cleaned widget set so tests can assert persisted data is the
 		// sanitizer output, not raw input.
-		return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+		return Abilities_Fixtures::CLEANED;
 	}
 
 	// Mirrors SiteOrigin_Panels_Admin::with_save_guard(): just runs the callback,
@@ -65,6 +111,7 @@ class Abilities_AdminSpy {
 	// the meta-write tests can assert the copy-content refresh was invoked with the
 	// final sanitized layout.
 	public function copy_content_to_post( $post, $post_id, $panels_data ) {
+		Abilities_CallLog::add( 'copy_content_to_post' );
 		$this->copy_content_args = array( $post, $post_id, $panels_data );
 	}
 }
@@ -81,11 +128,102 @@ if ( ! class_exists( 'SiteOrigin_Panels_Admin' ) ) {
 			return is_string( $value ) ? addcslashes( $value, '\\' ) : $value;
 		}
 
+		// A copy of the real SiteOrigin_Panels_Admin::validate_layout_structure()
+		// and its two helpers, which the meta write calls. The real class cannot
+		// load in this suite. tests/fixtures/layout-structure-cases.php holds
+		// the cases that both this copy and the real method must agree on.
+		public static function validate_layout_structure( $layout ) {
+			if ( ! is_array( $layout ) || empty( $layout ) ) {
+				return null;
+			}
+
+			if ( array_keys( $layout ) === range( 0, count( $layout ) - 1 ) ) {
+				return null;
+			}
+
+			foreach ( array( 'grids', 'grid_cells' ) as $key ) {
+				if ( ! array_key_exists( $key, $layout ) || ! self::is_list( $layout[ $key ] ) ) {
+					return null;
+				}
+			}
+
+			if ( ! array_key_exists( 'widgets', $layout ) ) {
+				$layout['widgets'] = array();
+			} elseif ( ! self::is_list( $layout['widgets'] ) ) {
+				return null;
+			}
+
+			return self::layout_references_resolve( $layout ) ? $layout : null;
+		}
+
+		private static function layout_references_resolve( $layout ) {
+			foreach ( $layout['grids'] as $row ) {
+				if ( ! is_array( $row ) ) {
+					return false;
+				}
+			}
+
+			$row_count = count( $layout['grids'] );
+			$cells_per_row = array_fill( 0, max( $row_count, 1 ), 0 );
+
+			foreach ( $layout['grid_cells'] as $cell ) {
+				if ( ! is_array( $cell ) || ! isset( $cell['grid'] ) || ! is_numeric( $cell['grid'] ) ) {
+					return false;
+				}
+
+				$row = (int) $cell['grid'];
+
+				if ( $row < 0 || $row >= $row_count ) {
+					return false;
+				}
+
+				$cells_per_row[ $row ] ++;
+			}
+
+			foreach ( $layout['widgets'] as $widget ) {
+				$info = null;
+				if ( is_array( $widget ) ) {
+					if ( ! empty( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+						$info = $widget['panels_info'];
+					} elseif ( ! empty( $widget['info'] ) && is_array( $widget['info'] ) ) {
+						$info = $widget['info'];
+					}
+				}
+
+				if ( $info === null ) {
+					return false;
+				}
+
+				if ( ! isset( $info['grid'], $info['cell'] ) || ! is_numeric( $info['grid'] ) || ! is_numeric( $info['cell'] ) ) {
+					return false;
+				}
+
+				$row = (int) $info['grid'];
+				$cell = (int) $info['cell'];
+
+				if ( $row < 0 || $row >= $row_count || $cell < 0 || $cell >= $cells_per_row[ $row ] ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private static function is_list( $value ) {
+			if ( ! is_array( $value ) ) {
+				return false;
+			}
+
+			return empty( $value ) || array_keys( $value ) === range( 0, count( $value ) - 1 );
+		}
+
 		// Mirrors the real SiteOrigin_Panels_Admin::kses_deep() shape (recursive
 		// wp_kses_post over string leaves), with the same on*-attribute strip the
 		// other suites use to emulate wp_kses_post. Lets tests observe the
 		// unconditional meta-write kses floor.
 		public static function kses_deep( $value ) {
+			Abilities_CallLog::add( 'kses_deep' );
+
 			if ( is_array( $value ) ) {
 				return array_map( array( __CLASS__, 'kses_deep' ), $value );
 			}
@@ -153,10 +291,27 @@ class Abilities_LayoutBlockSpy {
 		$this->untrusted_calls++;
 		$this->received_block = $block;
 
-		$block['attrs']['panelsData']['widgets'] = array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+		$block['attrs']['panelsData']['widgets'] = Abilities_Fixtures::CLEANED;
 		unset( $block['innerHTML'] );
 
 		return $block;
+	}
+
+	// Mirrors the real layout-update entry point: the same chokepoint as
+	// sanitize_block_untrusted() (counted there too, so existing tests keep
+	// their meaning), plus the post ID and block index it was given. A test can
+	// set $abort to a WP_Error to simulate the pre-write hook stopping the write.
+	public $layout_update_args = null;
+	public $abort = null;
+
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
+		$this->layout_update_args = array( $post_id, $block_index );
+
+		if ( $this->abort !== null ) {
+			throw new SiteOrigin_Panels_Layout_Update_Aborted( $this->abort );
+		}
+
+		return $this->sanitize_block_untrusted( $block );
 	}
 }
 
@@ -195,7 +350,7 @@ class Abilities_EmulatorSpy {
 	public function generate_sidebar_widget_ids( $widgets, $post_id ) {
 		$this->called = true;
 
-		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged' ) ) );
+		return array( array( 'panels_info' => array( 'class' => 'EmulatorTagged', 'grid' => 0, 'cell' => 0 ) ) );
 	}
 }
 
@@ -284,6 +439,14 @@ if ( ! class_exists( 'SiteOrigin_Panels_AI_Exposure' ) ) {
 	require __DIR__ . '/../inc/ai-exposure.php';
 }
 
+if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Aborted' ) ) {
+	require __DIR__ . '/../inc/layout-update-aborted.php';
+}
+
+if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Pre_Write' ) ) {
+	require __DIR__ . '/../inc/layout-update-pre-write.php';
+}
+
 if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
 	require __DIR__ . '/../inc/abilities.php';
 }
@@ -296,6 +459,21 @@ if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
  * before persistence. Mirrors inc/abilities.php; production must not change to
  * fit a test.
  */
+/**
+ * A widget setting object that keeps a nested object in a private property.
+ */
+class Abilities_PrivateSettingHolder {
+	private $setting;
+
+	public function __construct( $setting ) {
+		$this->setting = $setting;
+	}
+
+	public function setting() {
+		return $this->setting;
+	}
+}
+
 class AbilitiesTest extends SiteOriginTests {
 	protected function setUp(): void {
 		parent::setUp();
@@ -304,6 +482,9 @@ class AbilitiesTest extends SiteOriginTests {
 		Abilities_StylesSpy::$instance      = new Abilities_StylesSpy();
 		Abilities_EmulatorSpy::$instance    = new Abilities_EmulatorSpy();
 		Abilities_LayoutBlockSpy::$instance = new Abilities_LayoutBlockSpy();
+
+		Abilities_CallLog::$entries         = null;
+		$this->pre_write_calls              = array();
 
 		$GLOBALS['abilities_registered']           = array();
 		$GLOBALS['ability_categories_registered']  = array();
@@ -327,6 +508,62 @@ class AbilitiesTest extends SiteOriginTests {
 
 	private function abilities(): SiteOrigin_Panels_Abilities {
 		return SiteOrigin_Panels_Abilities::single();
+	}
+
+	/**
+	 * Arguments of each siteorigin_panels_layout_update_pre_write application.
+	 *
+	 * @var array
+	 */
+	private $pre_write_calls = array();
+
+	/**
+	 * Route apply_filters() so the pre-write tag is recorded (and logged in the
+	 * shared call log) and answered by $listener; other tags pass through.
+	 *
+	 * @param callable|null $listener Receives ( $result, $panels_data, $post_id, $storage, $block_index ).
+	 */
+	private function listen_pre_write( $listener = null ) {
+		Functions\when( 'apply_filters' )->alias(
+			function () use ( $listener ) {
+				$args = func_get_args();
+
+				if ( $args[0] !== 'siteorigin_panels_layout_update_pre_write' ) {
+					return $args[1];
+				}
+
+				Abilities_CallLog::add( 'pre_write' );
+				$this->pre_write_calls[] = $args;
+
+				return $listener === null ? $args[1] : call_user_func_array( $listener, array_slice( $args, 1 ) );
+			}
+		);
+	}
+
+	/**
+	 * A classic (meta) post with no blocks and no stored layout.
+	 */
+	private function classic_post( $post_id ) {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => $post_id, 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+	}
+
+	/**
+	 * An Admin spy whose sanitizer returns $widgets unchanged.
+	 */
+	private function passthrough_admin_spy() {
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return $widgets;
+			}
+		};
+	}
+
+	private function assert_meta_write_did_not_happen() {
+		$this->assertNull( Abilities_AdminSpy::$instance->copy_content_args, 'The copy-content mirror must not run after an abort.' );
 	}
 
 	// --- Permissions ---------------------------------------------------------
@@ -430,7 +667,7 @@ class AbilitiesTest extends SiteOriginTests {
 				$this->seen_widgets = $widgets;
 				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
 
-				return array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) );
+				return Abilities_Fixtures::CLEANED;
 			}
 		};
 
@@ -438,11 +675,11 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$object_widget = (object) array(
 			'content'     => '<script>alert(1)</script>',
-			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+			'panels_info' => array( 'class' => 'WP_Widget_Text', 'grid' => 0, 'cell' => 0 ),
 		);
 
 		$this->abilities()->layout_update(
-			array( 'post_id' => 9, 'panels_data' => array( 'widgets' => array( $object_widget ) ) )
+			array( 'post_id' => 9, 'panels_data' => Abilities_Fixtures::layout( array( $object_widget ) ) )
 		);
 
 		$seen = Abilities_AdminSpy::$instance->seen_widgets;
@@ -474,7 +711,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 9,
-				'panels_data' => array( 'widgets' => array( 'not-a-widget', array( 'panels_info' => array( 'class' => 'Keep' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( 'not-a-widget', Abilities_Fixtures::widget( 'Keep' ) ) ),
 			)
 		);
 
@@ -528,10 +765,12 @@ class AbilitiesTest extends SiteOriginTests {
 			}
 		);
 
+		$incoming = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'New' ) ) );
+
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 7,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
+				'panels_data' => $incoming,
 			)
 		);
 
@@ -545,7 +784,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$spy = Abilities_LayoutBlockSpy::$instance;
 		$this->assertSame( 1, $spy->untrusted_calls, 'Block write must call sanitize_block_untrusted() exactly once.' );
 		$this->assertSame(
-			array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'New' ) ) ) ),
+			$incoming,
 			$spy->received_block['attrs']['panelsData'],
 			'The chokepoint must receive the raw incoming layout — no pre-processing in abilities code.'
 		);
@@ -558,7 +797,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// The written block carries the CHOKEPOINT output — sanitized.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$saved['post_content'][0]['attrs']['panelsData']['widgets']
 		);
 	}
@@ -602,7 +841,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 9,
-				'panels_data' => array( 'widgets' => array( 'incoming' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
 				'block_index' => 1,
 			)
 		);
@@ -614,7 +853,7 @@ class AbilitiesTest extends SiteOriginTests {
 		// Layout block_index 1 == array key 2 (paragraph at 0, block0 at 1, block1 at 2).
 		$written = $saved['post_content'];
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$written[2]['attrs']['panelsData']['widgets'],
 			'Targeted block (index 1) must receive the sanitized layout.'
 		);
@@ -719,7 +958,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 21,
-				'panels_data' => array( 'widgets' => array( 'new-for-C' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'NewForC' ) ) ),
 				'block_index' => 1,
 			)
 		);
@@ -730,7 +969,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$written = $saved['post_content'];
 		// Parse-key 2 (C) received the sanitized layout.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$written[2]['attrs']['panelsData']['widgets'],
 			'block_index 1 must write parse-key 2 (C), not the emptied middle block.'
 		);
@@ -763,7 +1002,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( 'meta-new' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'MetaNew' ) ) ),
 			)
 		);
 
@@ -793,7 +1032,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( 'block-new' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'BlockNew' ) ) ),
 				'block_index' => 0,
 			)
 		);
@@ -815,7 +1054,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 41,
-				'panels_data' => array( 'widgets' => array() ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -895,10 +1134,8 @@ class AbilitiesTest extends SiteOriginTests {
 			array(
 				'post_id'     => 51,
 				'block_index' => 0,
-				'panels_data' => array(
-					'widgets' => array(
-						array( 'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ), 'content' => $original_html ),
-					),
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'WP_Widget_Custom_HTML', array( 'content' => $original_html ) ) )
 				),
 			)
 		);
@@ -944,14 +1181,14 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$object_widget = (object) array(
 			'content'     => '<script>alert(1)</script>',
-			'panels_info' => array( 'class' => 'WP_Widget_Text' ),
+			'panels_info' => array( 'class' => 'WP_Widget_Text', 'grid' => 0, 'cell' => 0 ),
 		);
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 7,
 				'block_index' => 0,
-				'panels_data' => array( 'widgets' => array( $object_widget ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( $object_widget ) ),
 			)
 		);
 
@@ -979,12 +1216,12 @@ class AbilitiesTest extends SiteOriginTests {
 			}
 		);
 
-		$hostile = array( 'panels_info' => array( 'class' => 'Evil_Widget' ), 'raw' => '<script>' );
+		$hostile = Abilities_Fixtures::widget( 'Evil_Widget', array( 'raw' => '<script>' ) );
 
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 12,
-				'panels_data' => array( 'widgets' => array( $hostile ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( $hostile ) ),
 			)
 		);
 
@@ -1008,7 +1245,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 12, $persisted[0] );
 		$this->assertSame( 'panels_data', $persisted[1] );
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$persisted[2]['widgets'],
 			'Persisted widgets must be the sanitizer output, not raw ability input.'
 		);
@@ -1035,9 +1272,9 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 12,
-				'panels_data' => array(
-					'widgets'            => array( array( 'panels_info' => array( 'class' => 'X' ) ) ),
-					'sanitize_signature' => 'forged-or-copied-signature',
+				'panels_data' => array_merge(
+					Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+					array( 'sanitize_signature' => 'forged-or-copied-signature' )
 				),
 			)
 		);
@@ -1069,7 +1306,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 				return array(
 					array(
-						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo' ),
+						'panels_info' => array( 'class' => 'SiteOrigin\\Widget\\Foo', 'grid' => 0, 'cell' => 0 ),
 						'text'        => 'C:\\path\\to\\file',
 						'content'     => '<img src=x onerror=alert(1)>',
 					),
@@ -1090,7 +1327,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 21,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1135,7 +1372,7 @@ class AbilitiesTest extends SiteOriginTests {
 				// custom-HTML widget for an unfiltered_html author).
 				return array(
 					array(
-						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML' ),
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML', 'grid' => 0, 'cell' => 0 ),
 						'content'     => '<img src=x onerror=alert(1)>',
 					),
 				);
@@ -1154,7 +1391,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 22,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1187,7 +1424,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 30,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1224,7 +1461,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1252,7 +1489,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 31,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1327,7 +1564,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 40,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1355,7 +1592,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 41,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1386,7 +1623,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 13,
-				'panels_data' => array( 'widgets' => array() ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1405,7 +1642,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$result = $this->abilities()->layout_update(
 			array(
 				'post_id'     => 14,
-				'panels_data' => array( 'widgets' => array( array( 'panels_info' => array( 'class' => 'X' ) ) ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
 			)
 		);
 
@@ -1419,7 +1656,7 @@ class AbilitiesTest extends SiteOriginTests {
 
 		// It must receive the FINAL sanitized layout (the sanitizer output), not raw input.
 		$this->assertSame(
-			array( array( 'panels_info' => array( 'class' => 'Cleaned' ) ) ),
+			Abilities_Fixtures::CLEANED,
 			$copy_args[2]['widgets'],
 			'copy_content_to_post() must render the sanitized panels_data, never raw input.'
 		);
@@ -1436,7 +1673,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->abilities()->layout_update(
 			array(
 				'post_id'     => 15,
-				'panels_data' => array( 'widgets' => array( 'w' ) ),
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'W' ) ) ),
 			)
 		);
 
@@ -1444,6 +1681,619 @@ class AbilitiesTest extends SiteOriginTests {
 			Abilities_AdminSpy::$instance->copy_content_args,
 			'Block writes must not trigger the copy-content refresh.'
 		);
+	}
+
+	// --- layout-update pre-write hook: classic (meta) path --------------------
+
+	public function test_meta_pre_write_fires_once_with_the_final_layout_in_order() {
+		$this->classic_post( 22 );
+		$this->listen_pre_write();
+		Abilities_CallLog::$entries = array();
+
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				return array(
+					array(
+						'panels_info' => array( 'class' => 'WP_Widget_Custom_HTML', 'grid' => 0, 'cell' => 0 ),
+						'content'     => '<img src=x onerror=alert(1)>',
+					),
+				);
+			}
+		};
+		Abilities_StylesSpy::$instance = new class extends Abilities_StylesSpy {
+			public function remove_invalid_styles( $panels_data ) {
+				$panels_data['styles_checked'] = true;
+
+				return $panels_data;
+			}
+		};
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				Abilities_CallLog::add( 'update_post_meta' );
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 22,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertCount( 1, $this->pre_write_calls, 'The pre-write hook fires exactly once per write.' );
+
+		list( , $initial, $payload, $post_id, $storage, $block_index ) = $this->pre_write_calls[0];
+		$this->assertTrue( $initial );
+		$this->assertSame( 22, $post_id );
+		$this->assertSame( 'meta', $storage );
+		$this->assertNull( $block_index );
+		$this->assertSame( '<img src=x>', $payload['widgets'][0]['content'], 'The payload is the floored layout.' );
+		$this->assertTrue( $payload['styles_checked'], 'The payload has been through remove_invalid_styles().' );
+		$this->assertSame( $persisted, $payload, 'The payload equals the stored meta.' );
+
+		$log = Abilities_CallLog::$entries;
+		$pre_write = array_search( 'pre_write', $log, true );
+		$this->assertLessThan( $pre_write, max( array_keys( $log, 'kses_deep', true ) ), 'The floor runs before the hook.' );
+		$this->assertLessThan( array_search( 'update_post_meta', $log, true ), $pre_write, 'The hook runs before the meta update.' );
+		$this->assertLessThan( array_search( 'copy_content_to_post', $log, true ), array_search( 'update_post_meta', $log, true ), 'The meta update runs before the copy-content mirror.' );
+	}
+
+	public function test_meta_pre_write_wp_error_stops_the_write() {
+		$this->classic_post( 23 );
+		$error = new WP_Error( 'addon_blocked', 'Blocked.', array( 'status' => 409 ) );
+		$this->listen_pre_write(
+			function () use ( $error ) {
+				return $error;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 23,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertSame( $error, $result, 'layout_update() returns the listener\'s own WP_Error.' );
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_pre_write_false_stops_the_write_with_the_aborted_code() {
+		$this->classic_post( 24 );
+		$this->listen_pre_write(
+			function () {
+				return false;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 24,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_aborted', $result->get_error_code() );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_pre_write_fires_for_an_empty_layout_before_the_delete() {
+		$this->classic_post( 25 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'delete_post_meta' )->once()->with( 25, 'panels_data' )->andReturn( true );
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 25,
+				'panels_data' => array(),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertCount( 1, $this->pre_write_calls );
+		$this->assertEmpty( $this->pre_write_calls[0][2]['widgets'] );
+		$this->assertArrayNotHasKey( 'grids', $this->pre_write_calls[0][2] );
+	}
+
+	public function test_meta_pre_write_abort_on_an_empty_layout_keeps_the_meta() {
+		$this->classic_post( 26 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write(
+			function () {
+				return new WP_Error( 'addon_blocked', 'Blocked.' );
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 26,
+				'panels_data' => array(),
+			)
+		);
+
+		$this->assertSame( 'addon_blocked', $result->get_error_code() );
+		$this->assertCount( 1, $this->pre_write_calls );
+	}
+
+	public function test_meta_pre_write_null_result_continues_and_persists() {
+		$this->classic_post( 27 );
+		$this->listen_pre_write(
+			function () {
+				return null;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->once()->andReturn( true );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 27,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertNotNull( Abilities_AdminSpy::$instance->copy_content_args );
+	}
+
+	public function test_meta_pre_write_listener_cannot_change_a_nested_object() {
+		$this->classic_post( 28 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write(
+			function ( $result, $panels_data ) {
+				$panels_data['widgets'][0]['setting']->color = 'blue';
+
+				return $result;
+			}
+		);
+
+		$setting        = new stdClass();
+		$setting->color = 'red';
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = $value;
+
+				return true;
+			}
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 28,
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'X', array( 'setting' => $setting ) ) )
+				),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'blue', $this->pre_write_calls[0][2]['widgets'][0]['setting']->color, 'The listener changed its own copy.' );
+		$this->assertSame( 'red', $persisted['widgets'][0]['setting']->color, 'The stored value keeps the original property.' );
+	}
+
+	public function test_meta_write_with_a_non_plain_object_stops_before_the_hook() {
+		$this->classic_post( 29 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write(
+			function ( $result, $panels_data ) {
+				$reach = Closure::bind(
+					function ( $object ) {
+						$object->setting->color = 'blue';
+					},
+					null,
+					Abilities_PrivateSettingHolder::class
+				);
+				$reach( $panels_data['widgets'][0]['setting'] );
+
+				return $result;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$inner        = new stdClass();
+		$inner->color = 'red';
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 29,
+				'panels_data' => Abilities_Fixtures::layout(
+					array( Abilities_Fixtures::widget( 'X', array( 'setting' => new Abilities_PrivateSettingHolder( $inner ) ) ) )
+				),
+			)
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $result->get_error_code() );
+		$this->assertCount( 0, $this->pre_write_calls, 'The hook does not fire.' );
+		$this->assertSame( 'red', $inner->color, 'The caller\'s layout keeps its value.' );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	// --- layout-update pre-write hook: Layout Block path ----------------------
+
+	public function test_block_write_passes_post_id_and_index_zero_for_a_single_block() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 51, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'wp_update_post' )->justReturn( 51 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 51,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( array( 51, 0 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( 1, Abilities_LayoutBlockSpy::$instance->untrusted_calls );
+	}
+
+	public function test_block_write_passes_the_requested_index_on_a_multi_block_post() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 52, 'post_content' => 'three blocks' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 3, true ) );
+		Functions\when( 'wp_update_post' )->justReturn( 52 );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 52,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
+				'block_index' => 2,
+			)
+		);
+
+		$this->assertSame( 2, $result['block_index'] );
+		$this->assertSame( array( 52, 2 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+	}
+
+	public function test_block_write_abort_returns_the_error_and_does_not_update_the_post() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 53, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\expect( 'wp_update_post' )->never();
+		Functions\expect( 'update_post_meta' )->never();
+
+		$error = new WP_Error( 'addon_blocked', 'Blocked.', array( 'status' => 409 ) );
+		Abilities_LayoutBlockSpy::$instance->abort = $error;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 53,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Incoming' ) ) ),
+			)
+		);
+
+		$this->assertSame( $error, $result );
+		$this->assertNull( Abilities_AdminSpy::$instance->copy_content_args );
+	}
+
+	// --- layout-update: layout structure rule (classic/meta path) -------------
+
+	/**
+	 * Cell row references the builder cannot resolve.
+	 */
+	public static function unresolved_cell_row_references() {
+		return array(
+			'a word'                    => array( 'x' ),
+			'a word with a number'      => array( 'row-1' ),
+			'a number then other text'  => array( '0 {} *' ),
+			'a row that does not exist' => array( 7 ),
+			'a negative row'            => array( -1 ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'unresolved_cell_row_references' )]
+	public function test_meta_write_refuses_a_cell_row_reference_that_does_not_resolve( $reference ) {
+		$this->classic_post( 71 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout                          = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) );
+		$layout['grid_cells'][0]['grid'] = $reference;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 71,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertSame( 71, $result['post_id'] );
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assertNotSame( '', trim( $result['message'] ) );
+		$this->assertCount( 0, $this->pre_write_calls, 'The pre-write hook does not fire for a refused layout.' );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_widget_reference_that_does_not_resolve() {
+		$this->classic_post( 72 );
+		$this->passthrough_admin_spy();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout                                   = Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) );
+		$layout['widgets'][0]['panels_info']['cell'] = 3;
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 72,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_reference_changed_by_the_pre_save_filter() {
+		// The check runs on the final layout, after the pre-save filter.
+		$this->classic_post( 73 );
+		$this->passthrough_admin_spy();
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				if ( $tag === 'siteorigin_panels_data_pre_save' ) {
+					$value['grid_cells'][0]['grid'] = 'x';
+				}
+
+				return $value;
+			}
+		);
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 73,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_a_widgets_only_layout_with_a_clear_message() {
+		$this->classic_post( 74 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 74,
+				'panels_data' => array(
+					'widgets' => array( array( 'panels_info' => array( 'class' => 'WP_Widget_Text' ), 'text' => 'Hello' ) ),
+				),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+		// The message names each part of the layout the caller must supply.
+		$this->assertStringContainsString( 'grids', $result['message'] );
+		$this->assertStringContainsString( 'grid_cells', $result['message'] );
+		$this->assertStringContainsString( 'panels_info.grid', $result['message'] );
+		$this->assertStringContainsString( 'panels_info.cell', $result['message'] );
+		$this->assertStringContainsString( 'layout-get', $result['message'] );
+		$this->assertCount( 0, $this->pre_write_calls );
+		$this->assert_meta_write_did_not_happen();
+	}
+
+	public function test_meta_write_refuses_placed_widgets_without_rows_and_cells() {
+		$this->classic_post( 75 );
+		$this->passthrough_admin_spy();
+		Functions\expect( 'update_post_meta' )->never();
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 75,
+				'panels_data' => array( 'widgets' => array( Abilities_Fixtures::widget( 'X' ) ) ),
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertSame( 'unsupported', $result['source'] );
+	}
+
+	public function test_meta_write_stores_a_layout_whose_references_resolve() {
+		$this->classic_post( 76 );
+		$this->passthrough_admin_spy();
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$layout = array(
+			'widgets'    => array(
+				Abilities_Fixtures::widget( 'First' ),
+				array( 'panels_info' => array( 'class' => 'Second', 'grid' => 1, 'cell' => 1 ) ),
+			),
+			'grids'      => array( array( 'cells' => 1 ), array( 'cells' => 2 ) ),
+			'grid_cells' => array(
+				array( 'grid' => 0, 'weight' => 1 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+				array( 'grid' => 1, 'weight' => 0.5 ),
+			),
+		);
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 76,
+				'panels_data' => $layout,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( $layout, $persisted, 'The check stores the layout as it is; it does not change it.' );
+	}
+
+	/**
+	 * Requests that clear the classic layout. None holds a widget or a row.
+	 */
+	public static function clear_requests() {
+		return array(
+			'empty object'                   => array( array() ),
+			'empty widgets list'             => array( array( 'widgets' => array() ) ),
+			'the three empty lists'          => array(
+				array(
+					'widgets'    => array(),
+					'grids'      => array(),
+					'grid_cells' => array(),
+				),
+			),
+			'a cell list alone, no rows'     => array( array( 'grid_cells' => array( array( 'grid' => 'x', 'weight' => 1 ) ) ) ),
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'clear_requests' )]
+	public function test_meta_write_of_an_empty_layout_still_clears_the_layout( $panels_data ) {
+		$this->classic_post( 77 );
+		$this->passthrough_admin_spy();
+		$this->listen_pre_write();
+		Functions\expect( 'delete_post_meta' )->once()->with( 77, 'panels_data' )->andReturn( true );
+		Functions\expect( 'update_post_meta' )->never();
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 77,
+				'panels_data' => $panels_data,
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( 'Layout cleared.', $result['message'] );
+		$this->assertCount( 1, $this->pre_write_calls, 'The pre-write hook still fires once for a clear.' );
+	}
+
+	/**
+	 * Stored classic layouts, as layout-get returns them.
+	 */
+	public static function stored_layouts() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+		$sets  = array();
+
+		foreach ( array( 'one row, one cell, one widget', 'two rows, three cells, widgets in each', 'older layout: placement under info', 'numeric string references', 'extra top-level and style keys' ) as $name ) {
+			$sets[ $name ] = array( $cases['valid'][ $name ] );
+		}
+
+		return $sets;
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'stored_layouts' )]
+	public function test_a_layout_returned_by_layout_get_is_accepted_unchanged_by_layout_update( $stored ) {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 78, 'post_content' => 'classic content' ) );
+		Functions\when( 'parse_blocks' )->justReturn( array() );
+		Functions\when( 'get_post_meta' )->justReturn( $stored );
+		$this->passthrough_admin_spy();
+
+		$persisted = null;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) use ( &$persisted ) {
+				$persisted = wp_unslash( $value );
+
+				return true;
+			}
+		);
+		Functions\expect( 'delete_post_meta' )->never();
+
+		$read = $this->abilities()->layout_get( array( 'post_id' => 78 ) );
+
+		$this->assertSame( 'meta', $read['source'] );
+		$this->assertSame( $stored, $read['layouts'][0]['panels_data'] );
+
+		$result = $this->abilities()->layout_update(
+			array(
+				'post_id'     => 78,
+				'panels_data' => $read['layouts'][0]['panels_data'],
+			)
+		);
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'meta', $result['source'] );
+		$this->assertSame( $stored, $persisted, 'Writing back what layout-get returned stores the same layout.' );
+	}
+
+	// --- The Admin stand-in holds the same rule as the real class -------------
+
+	public static function shared_valid_layouts() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+
+		return array_map(
+			function ( $layout ) {
+				return array( $layout );
+			},
+			$cases['valid']
+		);
+	}
+
+	public static function shared_refused_values() {
+		$cases = require __DIR__ . '/fixtures/layout-structure-cases.php';
+
+		return array_map(
+			function ( $value ) {
+				return array( $value );
+			},
+			$cases['refused']
+		);
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'shared_valid_layouts' )]
+	public function test_admin_stand_in_returns_each_shared_valid_layout( $layout ) {
+		$expected = $layout;
+
+		if ( ! array_key_exists( 'widgets', $expected ) ) {
+			$expected['widgets'] = array();
+		}
+
+		$this->assertSame( $expected, SiteOrigin_Panels_Admin::validate_layout_structure( $layout ) );
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider( 'shared_refused_values' )]
+	public function test_admin_stand_in_refuses_each_shared_refused_value( $value ) {
+		$this->assertNull( SiteOrigin_Panels_Admin::validate_layout_structure( $value ) );
+	}
+
+	public function test_layout_update_schema_states_the_layout_shape_it_accepts() {
+		$this->abilities()->register_abilities();
+
+		$update      = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
+		$description = $update['input_schema']['properties']['panels_data']['description'];
+
+		foreach ( array( 'grids', 'grid_cells', 'panels_info.grid', 'panels_info.cell', 'layout-get' ) as $term ) {
+			$this->assertStringContainsString( $term, $description );
+		}
 	}
 
 	// --- Registration shape (locks the public surface) -----------------------
@@ -1511,6 +2361,21 @@ class AbilitiesTest extends SiteOriginTests {
 			$update['output_schema']['properties'],
 			'layout-update must echo block_index in output.'
 		);
+	}
+
+	public function test_both_layout_abilities_are_public_to_mcp() {
+		$this->abilities()->register_abilities();
+
+		$get    = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
+		$update = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
+
+		$this->assertTrue( $get['meta']['mcp']['public'] );
+		$this->assertTrue( $update['meta']['mcp']['public'] );
+		$this->assertTrue( $get['meta']['annotations']['readonly'] );
+		$this->assertArrayNotHasKey( 'readonly', $get['meta'] );
+		$this->assertArrayNotHasKey( 'annotations', $update['meta'] );
+		$this->assertArrayNotHasKey( 'public', $get['meta'], 'Only meta.mcp.public is set, not core meta.public.' );
+		$this->assertArrayNotHasKey( 'public', $update['meta'] );
 	}
 
 	public function test_registers_the_ability_category() {

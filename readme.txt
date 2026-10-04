@@ -121,6 +121,13 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.37.0 – 04 October 2026 =
+* Layouts: Validated the layout structure before an ability update, and standardized the identifiers used in generated CSS selectors so unusual values can't affect page styling.
+* Layouts: Limited direct changes to stored layout data to users who can post unfiltered HTML, to harden against stored cross-site scripting.
+* Settings: Fixed a PHP warning on every page when a theme declares Page Builder support without settings.
+* Admin: Refreshed the SiteOrigin Premium suggestions and added the Landing Page, Custom Layouts, Lightbox Builder, Custom Palette and Page Background Addons.
+* Developer: Added the `siteorigin_panels_layout_update_pre_write` filter, which can stop a `siteorigin-panels/layout-update` write before it is stored, and made the layout abilities available to MCP clients.
+
 = 2.36.1 – 18 September 2026 =
 * Builder: Fixed a widget being dropped from the layout when it was dragged into a different row or column.
 * Builder: Kept the stored layout when it fails to load in the editor. The builder locks with a notice, and updating the page no longer replaces the layout with an incomplete one.

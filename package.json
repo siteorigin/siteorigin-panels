@@ -1,15 +1,24 @@
 {
 	"name": "siteorigin-panels-tests",
 	"private": true,
-	"description": "Unit tests for the builder's Backbone models. These run on a current Node (see engines); the release build under build/ is a separate gulp 3 toolchain that runs on Node 10 through nvm, and the two never share a runtime.",
+	"description": "Unit tests for the builder's Backbone models, plus Playwright end-to-end tests that run against WordPress Playground (npm run e2e). These run on a current Node (see engines); the release build under build/ is a separate gulp 3 toolchain that runs on Node 10 through nvm, and the two never share a runtime.",
 	"engines": {
 		"node": ">=20"
 	},
 	"scripts": {
-		"test": "node --test tests/js/*.test.js"
+		"test": "node --test tests/js/*.test.js",
+		"test:e2e": "playwright test",
+		"e2e": "node tests/scripts/run-e2e.js",
+		"parity": "node tests/parity/parity.mjs",
+		"parity:generate": "node tests/parity/generate.mjs",
+		"parity:corpus": "node tests/parity/generate.mjs --corpus",
+		"parity:matrix": "node tests/parity/matrix.mjs"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.55.0",
+		"@wp-playground/cli": "^2.0.22",
 		"backbone": "^1.6.0",
+		"siteorigin-tests-common": "github:siteorigin/siteorigin-tests-common",
 		"underscore": "^1.13.7"
 	}
 }

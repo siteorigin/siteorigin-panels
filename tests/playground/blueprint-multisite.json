@@ -1,0 +1,27 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"preferredVersions": {
+		"php": "8.3",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "activatePlugin",
+			"pluginPath": "/wordpress/wp-content/plugins/siteorigin-panels/siteorigin-panels.php"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php\n// Turn the single site into a network of one, in sub-directory mode. The\n// Playground enableMultisite step refuses a site address with a port, so the\n// network tables are filled here with the core functions that step runs.\nrequire_once '/wordpress/wp-load.php';\nrequire_once ABSPATH . 'wp-admin/includes/upgrade.php';\n\nglobal $wpdb;\n\n// A network ignores the WP_HOME and WP_SITEURL constants and reads the stored\n// site address. Playground can start from a cached site that was built on\n// another port, so store the address this site runs on.\n$address = get_option( 'siteurl' );\nforeach ( array( 'siteurl', 'home' ) as $option ) {\n\t$wpdb->update( $wpdb->options, array( 'option_value' => $address ), array( 'option_name' => $option ) );\n}\nwp_cache_delete( 'alloptions', 'options' );\n\nforeach ( $wpdb->tables( 'ms_global' ) as $table => $prefixed_table ) {\n\t$wpdb->$table = $prefixed_table;\n}\n\ninstall_network();\n\n$domain = preg_replace( '|https?://|', '', $address );\n$slash  = strpos( $domain, '/' );\nif ( $slash !== false ) {\n\t$domain = substr( $domain, 0, $slash );\n}\n\n$admin  = get_user_by( 'login', 'admin' );\n$result = populate_network( 1, $domain, $admin->user_email, 'Panels e2e network', '/', false );\nif ( is_wp_error( $result ) ) {\n\tthrow new Exception( implode( ' ', $result->get_error_messages() ) );\n}\n"
+		},
+		{
+			"step": "defineWpConfigConsts",
+			"consts": {
+				"MULTISITE": true,
+				"SUBDOMAIN_INSTALL": false
+			}
+		}
+	]
+}

@@ -8,6 +8,15 @@
 class SiteOrigin_Panels_Css_Builder {
 	public $css;
 
+	/**
+	 * String indexes that safe_selector_index() has checked and returned
+	 * unchanged, as keys. A layout uses the same few indexes in every selector,
+	 * so each method looks here before it calls the check again.
+	 *
+	 * @var array
+	 */
+	private $safe_indexes = array();
+
 	public function __construct() {
 		$this->css = array();
 	}
@@ -53,6 +62,55 @@ class SiteOrigin_Panels_Css_Builder {
 	}
 
 	/**
+	 * Make a layout, row, cell or widget index safe to place in a selector.
+	 *
+	 * The index is concatenated into a selector as it is, so it may hold only
+	 * the characters an unescaped identifier can carry. A value that is not a
+	 * string (an integer index, or false for "all") is returned unchanged, so
+	 * each method still branches on its type. A string keeps every non-ASCII
+	 * character and the ASCII characters A-Z, a-z, 0-9, `_` and `-`; any other
+	 * ASCII character is removed. A string that is not valid UTF-8 keeps only
+	 * those ASCII characters.
+	 *
+	 * This is needed for every index of every selector, so the common cases are
+	 * kept cheap, with the same result for every input:
+	 * - The callers test is_string() themselves, so an integer or false index
+	 *   costs no call.
+	 * - A string made only of the safe ASCII characters (a Layout Block id, a
+	 *   numeric string, the empty string) returns before any UTF-8 work. The
+	 *   checks after it would return such a string unchanged.
+	 * - That string is recorded in $safe_indexes, and the callers skip the call
+	 *   for a recorded string. Only a string returned unchanged is recorded.
+	 *
+	 * @param mixed $index The index as the caller supplied it.
+	 *
+	 * @return mixed
+	 */
+	private function safe_selector_index( $index ) {
+		if ( ! is_string( $index ) ) {
+			return $index;
+		}
+
+		// rtrim() with a character list removes every listed character from
+		// the end, so nothing is left only when every character is listed.
+		if ( rtrim( $index, 'A..Za..z0..9_-' ) === '' ) {
+			$this->safe_indexes[ $index ] = true;
+
+			return $index;
+		}
+
+		if ( ! function_exists( 'mb_check_encoding' ) || ! mb_check_encoding( $index, 'UTF-8' ) ) {
+			return preg_replace( '/[^A-Za-z0-9_-]/', '', $index );
+		}
+
+		if ( preg_match( '/^[\x{0080}-\x{10FFFF}A-Za-z0-9_-]+\z/u', $index ) ) {
+			return $index;
+		}
+
+		return preg_replace( '/[^\x{0080}-\x{10FFFF}A-Za-z0-9_-]/u', '', $index );
+	}
+
+	/**
 	 * Add CSS that applies to a row or group of rows.
 	 *
 	 * @param int             $li             The layout ID. If false, then the CSS applies to all layouts.
@@ -63,6 +121,13 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool            $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_row_css( $li, $ri = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		if ( is_string( $li ) && ! isset( $this->safe_indexes[ $li ] ) ) {
+			$li = $this->safe_selector_index( $li );
+		}
+		if ( is_string( $ri ) && ! isset( $this->safe_indexes[ $ri ] ) ) {
+			$ri = $this->safe_selector_index( $ri );
+		}
+
 		$selector = array();
 
 		// Special case of `> .panel-row-style` sub_selector
@@ -102,6 +167,16 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool     $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_cell_css( $li, $ri = false, $ci = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		if ( is_string( $li ) && ! isset( $this->safe_indexes[ $li ] ) ) {
+			$li = $this->safe_selector_index( $li );
+		}
+		if ( is_string( $ri ) && ! isset( $this->safe_indexes[ $ri ] ) ) {
+			$ri = $this->safe_selector_index( $ri );
+		}
+		if ( is_string( $ci ) && ! isset( $this->safe_indexes[ $ci ] ) ) {
+			$ci = $this->safe_selector_index( $ci );
+		}
+
 		$selector_parts = array();
 
 		if ( $ri === false && $ci === false ) {
@@ -158,6 +233,19 @@ class SiteOrigin_Panels_Css_Builder {
 	 * @param bool     $specify_layout Sometimes for CSS specificity, we need to include the layout ID.
 	 */
 	public function add_widget_css( $li, $ri = false, $ci = false, $wi = false, $sub_selector = '', $attributes = array(), $resolution = 1920, $specify_layout = false ) {
+		if ( is_string( $li ) && ! isset( $this->safe_indexes[ $li ] ) ) {
+			$li = $this->safe_selector_index( $li );
+		}
+		if ( is_string( $ri ) && ! isset( $this->safe_indexes[ $ri ] ) ) {
+			$ri = $this->safe_selector_index( $ri );
+		}
+		if ( is_string( $ci ) && ! isset( $this->safe_indexes[ $ci ] ) ) {
+			$ci = $this->safe_selector_index( $ci );
+		}
+		if ( is_string( $wi ) && ! isset( $this->safe_indexes[ $wi ] ) ) {
+			$wi = $this->safe_selector_index( $wi );
+		}
+
 		$selector = array();
 
 		if ( $ri === false && $ci === false && $wi === false ) {

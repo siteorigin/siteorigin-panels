@@ -138,6 +138,7 @@ class SiteOrigin_Panels_Abilities {
 				'meta'                => array(
 					'annotations'  => array( 'readonly' => true ),
 					'show_in_rest' => true,
+					'mcp'          => array( 'public' => true ),
 				),
 			)
 		);
@@ -146,7 +147,7 @@ class SiteOrigin_Panels_Abilities {
 			'siteorigin-panels/layout-update',
 			array(
 				'label'               => __( 'Update Page Builder layout', 'siteorigin-panels' ),
-				'description'         => __( "Writes a post's Page Builder layout — either the classic (meta-stored) layout, or a specific block-stored Layout Block selected by block_index (the 0-based index from layout-get). The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. When a post has multiple Layout Blocks, block_index is required; if it is missing or out of range the call declines as 'block-ambiguous' rather than guessing.", 'siteorigin-panels' ),
+				'description'         => __( "Writes a post's Page Builder layout — either the classic (meta-stored) layout, or a specific block-stored Layout Block selected by block_index (the 0-based index from layout-get). The incoming layout is re-sanitized through Page Builder's widget sanitizer before being persisted, so input is never trusted raw. A layout the builder cannot load is not saved. When a post has multiple Layout Blocks, block_index is required; if it is missing or out of range the call declines as 'block-ambiguous' rather than guessing.", 'siteorigin-panels' ),
 				'category'            => 'siteorigin-panels',
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -158,7 +159,7 @@ class SiteOrigin_Panels_Abilities {
 						),
 						'panels_data' => array(
 							'type'        => 'object',
-							'description' => __( 'Canonical panels_data to persist (widgets, grids, grid_cells).', 'siteorigin-panels' ),
+							'description' => __( 'Canonical panels_data to persist, in the shape layout-get returns: widgets, grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. A layout that does not meet this is not saved. An empty object clears a classic layout.', 'siteorigin-panels' ),
 						),
 						'block_index' => array(
 							'type'        => 'integer',
@@ -186,6 +187,7 @@ class SiteOrigin_Panels_Abilities {
 				'execute_callback'    => array( $this, 'layout_update' ),
 				'meta'                => array(
 					'show_in_rest' => true,
+					'mcp'          => array( 'public' => true ),
 				),
 			)
 		);
@@ -279,62 +281,51 @@ class SiteOrigin_Panels_Abilities {
 			);
 		}
 
-		$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
-		$has_meta_layout = ! empty( $old_panels_data );
+		// The pre-write hook (siteorigin_panels_layout_update_pre_write) can stop
+		// the write on either storage path; nothing is stored or rendered then.
+		try {
+			$old_panels_data = get_post_meta( $post_id, 'panels_data', true );
+			$has_meta_layout = ! empty( $old_panels_data );
 
-		// No block_index given AND a meta layout exists → write meta. This covers
-		// the pure-classic post and honors the meta entry layout-get advertises on
-		// a mixed post (so its classic layout stays writable).
-		if ( $block_index === null && $has_meta_layout ) {
+			// No block_index given AND a meta layout exists → write meta. This covers
+			// the pure-classic post and honors the meta entry layout-get advertises on
+			// a mixed post (so its classic layout stays writable).
+			if ( $block_index === null && $has_meta_layout ) {
+				return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
+			}
+
+			// Block-stored: write the targeted Layout Block (never guess on ambiguity).
+			$block_count = $this->count_layout_blocks( $post );
+			if ( $block_count > 0 ) {
+				return $this->update_block_layout( $post, $block_count, $block_index, $panels_data );
+			}
+
+			// No TARGETABLE top-level block, but the post visibly contains a Layout
+			// Block the walk could not target (nested inside a container block, or with
+			// empty panelsData). Decline: writing a classic meta layout here would
+			// create a NEW competing layout while the untargetable block keeps
+			// rendering — duplicate content. (A mixed post with a real meta layout was
+			// already handled by the block_index === null && has_meta branch above; a
+			// post with a qualifying top-level block took the block path above.)
+			if (
+				function_exists( 'has_block' ) &&
+				has_block( SiteOrigin_Panels_AI_Exposure::single()->layout_block_name(), $post )
+			) {
+				return array(
+					'post_id' => $post_id,
+					'updated' => false,
+					'source'  => 'unsupported',
+					'message' => __( 'This post contains Layout Block(s) that cannot be targeted (nested inside another block, or without layout data). Writing a classic layout here could create duplicate content.', 'siteorigin-panels' ),
+				);
+			}
+
+			// No blocks present → meta path (creates/updates the classic layout).
 			return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
+		} catch ( SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			return $e->get_error();
 		}
-
-		// Block-stored: write the targeted Layout Block (never guess on ambiguity).
-		$block_count = $this->count_layout_blocks( $post );
-		if ( $block_count > 0 ) {
-			return $this->update_block_layout( $post, $block_count, $block_index, $panels_data );
-		}
-
-		// No TARGETABLE top-level block, but the post visibly contains a Layout
-		// Block the walk could not target (nested inside a container block, or with
-		// empty panelsData). Decline: writing a classic meta layout here would
-		// create a NEW competing layout while the untargetable block keeps
-		// rendering — duplicate content. (A mixed post with a real meta layout was
-		// already handled by the block_index === null && has_meta branch above; a
-		// post with a qualifying top-level block took the block path above.)
-		if (
-			function_exists( 'has_block' ) &&
-			has_block( SiteOrigin_Panels_AI_Exposure::single()->layout_block_name(), $post )
-		) {
-			return array(
-				'post_id' => $post_id,
-				'updated' => false,
-				'source'  => 'unsupported',
-				'message' => __( 'This post contains Layout Block(s) that cannot be targeted (nested inside another block, or without layout data). Writing a classic layout here could create duplicate content.', 'siteorigin-panels' ),
-			);
-		}
-
-		// No blocks present → meta path (creates/updates the classic layout).
-		return $this->update_meta_layout( $post_id, $panels_data, $old_panels_data );
 	}
 
-	/**
-	 * Write the classic (meta-stored) layout.
-	 *
-	 * Mirrors the persist semantics of the classic save (admin.php save_post):
-	 * re-sanitizes via process_raw_widgets(), runs the sidebars-emulator when
-	 * enabled, applies the public siteorigin_panels_data_pre_save filter, and —
-	 * like save_post — DELETES the meta when the sanitized layout has no widgets
-	 * and no grids (rather than persisting an empty layout). §3: input is never
-	 * persisted raw; the value is double-slashed because update_post_meta()
-	 * wp_unslash()es its input.
-	 *
-	 * @param int   $post_id         The post to write to.
-	 * @param array $panels_data     Incoming canonical panels_data.
-	 * @param mixed $old_panels_data Existing meta value (any scalar/array from get_post_meta).
-	 *
-	 * @return array The layout-update result array.
-	 */
 	/**
 	 * Coerce every entry of $panels_data['widgets'] to an array so no object- or
 	 * scalar-shaped widget can slip past process_raw_widgets()'s
@@ -375,6 +366,34 @@ class SiteOrigin_Panels_Abilities {
 		return $panels_data;
 	}
 
+	/**
+	 * Write the classic (meta-stored) layout.
+	 *
+	 * Mirrors the persist semantics of the classic save (admin.php save_post):
+	 * re-sanitizes via process_raw_widgets(), runs the sidebars-emulator when
+	 * enabled, applies the public siteorigin_panels_data_pre_save filter, and —
+	 * like save_post — DELETES the meta when the sanitized layout has no widgets
+	 * and no grids (rather than persisting an empty layout). §3: input is never
+	 * persisted raw; the value is double-slashed because update_post_meta()
+	 * wp_unslash()es its input.
+	 *
+	 * After the kses floor, a layout that holds a widget or a row must pass
+	 * SiteOrigin_Panels_Admin::validate_layout_structure(), the rule an editor
+	 * save applies. A layout that does not pass is declined as 'unsupported'
+	 * and nothing is stored, deleted or mirrored.
+	 *
+	 * The `siteorigin_panels_layout_update_pre_write` hook then fires once,
+	 * before the empty-layout delete, the meta update and the copy-content
+	 * refresh; an abort stops the write there.
+	 *
+	 * @param int   $post_id         The post to write to.
+	 * @param array $panels_data     Incoming canonical panels_data.
+	 * @param mixed $old_panels_data Existing meta value (any scalar/array from get_post_meta).
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the pre-write hook stops the write.
+	 *
+	 * @return array The layout-update result array.
+	 */
 	protected function update_meta_layout( $post_id, $panels_data, $old_panels_data ) {
 		$admin = SiteOrigin_Panels_Admin::single();
 
@@ -429,6 +448,27 @@ class SiteOrigin_Panels_Abilities {
 		if ( ! empty( $panels_data['widgets'] ) ) {
 			$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
 		}
+
+		// The same structural rule an editor save applies, on the final layout,
+		// so a reference changed by the pre-save filter is checked too. A layout
+		// the builder cannot load is not stored. A layout with no widgets and no
+		// rows is the clear request; it takes the delete branch below instead.
+		if (
+			( ! empty( $panels_data['widgets'] ) || ! empty( $panels_data['grids'] ) ) &&
+			SiteOrigin_Panels_Admin::validate_layout_structure( $panels_data ) === null
+		) {
+			return array(
+				'post_id' => $post_id,
+				'updated' => false,
+				'source'  => 'unsupported',
+				'message' => __( 'The layout was not saved because the builder cannot load it. A layout needs grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. The layout-get ability returns layouts in this shape.', 'siteorigin-panels' ),
+			);
+		}
+
+		// The final layout: let an add-on stop the write before anything is
+		// stored, deleted or rendered. Throws SiteOrigin_Panels_Layout_Update_Aborted,
+		// which layout_update() turns into its WP_Error result.
+		SiteOrigin_Panels_Layout_Update_Pre_Write::run( $panels_data, $post_id, 'meta', null );
 
 		// Empty-layout parity (admin.php save_post): a layout with no widgets and no
 		// grids means "clear the layout" — delete the meta rather than storing an
@@ -607,8 +647,9 @@ class SiteOrigin_Panels_Abilities {
 	 * block.
 	 *
 	 * §3: the incoming layout is routed through the compat save CHOKEPOINT
-	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()) — the
-	 * SAME path every Layout Block save uses: the
+	 * (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_for_layout_update(),
+	 * which wraps sanitize_block_untrusted()) — the SAME path every Layout Block
+	 * save uses: the
 	 * `siteorigin_panels_ai_block_layout_pre_save` filter, strict sanitize
 	 * (process_raw_widgets + sanitize_all), and the kses floor FORCED regardless
 	 * of the credential's `unfiltered_html` capability (AI output is
@@ -617,6 +658,12 @@ class SiteOrigin_Panels_Abilities {
 	 * wp_insert_post_data safety net recognizes the block as already sanitized
 	 * this request via the request-local memo in sanitize_block() and skips the
 	 * second pass, so widget update() never runs twice per write.
+	 *
+	 * Inside that save, the chokepoint settles the layout into the form the post
+	 * update stores, then fires the `siteorigin_panels_layout_update_pre_write`
+	 * hook once for the target block, before its render. An abort throws
+	 * SiteOrigin_Panels_Layout_Update_Aborted up to layout_update(), so
+	 * wp_update_post() never runs.
 	 *
 	 * NOTE for premium-addon authors (layered transforms): because the write
 	 * goes through the chokepoint, any consumer hooked to
@@ -634,6 +681,8 @@ class SiteOrigin_Panels_Abilities {
 	 *                      'layout_block_unsupported' when the compat chokepoint class
 	 *                      is unavailable, or 'block_write_failed' when the post update
 	 *                      did not persist.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the pre-write hook stops the write.
 	 */
 	protected function write_block_layout( $post, $block_index, $panels_data ) {
 		$qualifying = $this->qualifying_block_layouts( $post );
@@ -668,7 +717,7 @@ class SiteOrigin_Panels_Abilities {
 
 		$blocks = parse_blocks( $post->post_content );
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
-		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_untrusted( $blocks[ $target_key ] );
+		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_for_layout_update( $blocks[ $target_key ], $post->ID, $block_index );
 
 		// wp_update_post()/wp_insert_post() run wp_unslash() on their input, so the
 		// content MUST be slashed first — otherwise the backslash in every JSON
