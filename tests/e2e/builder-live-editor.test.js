@@ -498,3 +498,152 @@ test.describe( 'Live Editor under Document-Isolation-Policy', () => {
 		expectNoPageErrors( ctx.errors );
 	} );
 } );
+
+/*
+ * Preview errors (#1368). A firewall or security plugin that rejects the preview request used to leave a raw
+ * response (for example "Forbidden") in the preview with no message. The Live Editor now shows a message with
+ * the HTTP status, or the timeout, and Retry and Close keep working.
+ *
+ * The panels_e2e_preview_block cookie blocks the preview before WordPress loads plugins
+ * (tests/playground/mu-plugins/panels-e2e-live-editor.php).
+ */
+const ERROR_TEXT = 'Error text';
+const ERROR_TEXT_NEW = 'Error text new';
+
+const oneWrappedLayout = ( text ) => ( {
+	widgets: [ wrappedWidget( text, 0, 0, 0 ) ],
+	grids: [ { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+} );
+
+const errorPanel = ( page ) => page.locator( '.so-panels-live-editor .so-preview-error' );
+
+const setCookie = ( context, name, value ) => context.addCookies( [ { name, value, url: siteUrl( '' ) } ] );
+
+/**
+ * Open the Live Editor without waiting for the preview.
+ */
+const openLiveEditorOnly = async ( page, id ) => {
+	const root = await openClassicBuilder( page, { postId: id } );
+	await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+	await expect( liveEditorTools( page ) ).toBeVisible();
+	await expect( liveBuilder( page ).locator( '.so-widget' ) ).toHaveCount( 1 );
+};
+
+// The newest preview frame shows a real Page Builder preview.
+const expectRealPreview = async ( page, timeout = 30000 ) => {
+	await expect.poll( async () => {
+		const frame = await previewFrame( page );
+
+		return frame.evaluate( () => !! document.body && document.body.classList.contains( 'siteorigin-panels-live-editor' ) ).catch( () => false );
+	}, { timeout, message: 'the preview frame holds a Live Editor preview' } ).toBe( true );
+};
+
+// The panel shows the title, the hint and exactly this reason, over a hidden loading overlay.
+const expectErrorPanel = async ( page, reason, timeout = 30000 ) => {
+	const panel = errorPanel( page );
+	await expect( panel ).toBeVisible( { timeout } );
+	await expect( panel.locator( '.so-preview-error-reason' ) ).toHaveText( reason, { timeout } );
+	await expect( panel.locator( '.so-preview-error-title' ) ).toHaveText( 'This page could not be previewed.' );
+	await expect( panel.locator( '.so-preview-error-hint' ) ).toBeVisible();
+	await expect( page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden();
+	await expect( liveBuilder( page ).locator( '.so-widget' ) ).toHaveCount( 1 );
+};
+
+test.describe( 'Live Editor preview errors', () => {
+	let admin;
+	let ctx;
+	let page;
+	let errorPostId;
+
+	test.beforeAll( async ( { browser } ) => {
+		admin = await adminLogin();
+		errorPostId = await createPost( admin, 'post', { title: 'Live editor preview errors', status: 'publish', content: '' } );
+		await seedLayout( admin, errorPostId, oneWrappedLayout( ERROR_TEXT ) );
+		ctx = await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+		page = ctx.page;
+	} );
+
+	test.afterEach( async () => {
+		await ctx.context.clearCookies( { name: 'panels_e2e_preview_block' } );
+		await ctx.context.clearCookies( { name: 'panels_e2e_preview_timeout_ms' } );
+	} );
+
+	test.afterAll( async () => {
+		if ( errorPostId ) {
+			await deletePost( admin, 'post', errorPostId );
+		}
+
+		if ( ctx ) {
+			await ctx.context.close();
+		}
+		await admin.context.dispose();
+	} );
+
+	test( 'E1 a 403 shows the status; Retry and Close work', async () => {
+		await setCookie( ctx.context, 'panels_e2e_preview_block', '403' );
+		await openLiveEditorOnly( page, errorPostId );
+		await expectErrorPanel( page, 'The preview request failed with HTTP status 403.' );
+
+		await ctx.context.clearCookies( { name: 'panels_e2e_preview_block' } );
+		await errorPanel( page ).locator( '.so-preview-error-retry' ).click();
+		await expect( errorPanel( page ) ).toBeHidden( { timeout: 30000 } );
+		await expectRealPreview( page );
+		await waitForPreview( page, ERROR_TEXT );
+		await expect( errorPanel( page ) ).toBeHidden();
+
+		await page.locator( '.so-panels-live-editor .live-editor-close' ).click();
+		await expect( page.locator( '.so-panels-live-editor' ) ).toBeHidden();
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E2 a 403 under isolation shows the status', async ( { browser } ) => {
+		const support = await isolationSupport( admin );
+		test.skip( ! support.supported, notIsolatedReason( support.version ) );
+
+		const iso = await newIsolatedPage( browser );
+		try {
+			const response = await iso.page.goto( siteUrl( `wp-admin/post.php?post=${ errorPostId }&action=edit` ) );
+			expect( response.headers()[ 'document-isolation-policy' ], 'environment not isolated' ).toBe( ISOLATION_POLICY );
+
+			await setCookie( iso.context, 'panels_e2e_preview_block', '403' );
+			await openLiveEditorOnly( iso.page, errorPostId );
+			await expectErrorPanel( iso.page, 'The preview request failed with HTTP status 403.' );
+			expectNoPageErrors( iso.errors );
+		} finally {
+			await iso.context.close();
+		}
+	} );
+
+	test( 'E3 a 200 that is not a preview shows the plain reason', async () => {
+		await setCookie( ctx.context, 'panels_e2e_preview_block', '200' );
+		await openLiveEditorOnly( page, errorPostId );
+		await expectErrorPanel( page, 'The preview request did not return a Page Builder preview.' );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E4 a slow preview shows the timeout, then the late preview replaces it', async () => {
+		await setCookie( ctx.context, 'panels_e2e_preview_block', 'timeout' );
+		await setCookie( ctx.context, 'panels_e2e_preview_timeout_ms', '2000' );
+		await openLiveEditorOnly( page, errorPostId );
+		await expectErrorPanel( page, 'The preview did not load within 2 seconds.', 5000 );
+
+		// No click: the late load removes the message.
+		await expect( errorPanel( page ) ).toBeHidden( { timeout: 20000 } );
+		await expectRealPreview( page, 20000 );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E5 a working preview never shows the panel', async () => {
+		await openLiveEditorOnly( page, errorPostId );
+		await waitForPreview( page, ERROR_TEXT );
+		await page.waitForTimeout( 1000 );
+		await expect( errorPanel( page ) ).toBeHidden();
+
+		await setWidgetText( liveBuilder( page ), liveBuilder( page ).locator( '.so-widget' ).first(), ERROR_TEXT_NEW, page );
+		await waitForPreview( page, ERROR_TEXT_NEW );
+		await expectRealPreview( page );
+		await expect( errorPanel( page ) ).toBeHidden();
+		expectNoPageErrors( ctx.errors );
+	} );
+} );
