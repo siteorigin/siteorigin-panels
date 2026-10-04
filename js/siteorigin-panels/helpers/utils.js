@@ -13,6 +13,29 @@ module.exports = {
 		return uuid;
 	},
 
+	/**
+	 * Ask for the editor's Document-Isolation-Policy on a preview URL when the editor is isolated.
+	 *
+	 * WordPress 7.1 sends Document-Isolation-Policy on the editor screens to Chromium 137+. A same-origin
+	 * preview without the same policy cannot be scripted by the editor, and cannot script it. The server
+	 * sends the policy when the URL has siteorigin_panels_live_editor_isolated
+	 * (SiteOrigin_Panels_Live_Editor::maybe_send_isolation_header()).
+	 *
+	 * @param {string} url The preview URL.
+	 * @return {string} The URL, with the isolation argument when the editor is cross-origin isolated.
+	 */
+	isolatedPreviewUrl: function ( url ) {
+		if ( typeof url !== 'string' || url === '' || window.crossOriginIsolated !== true ) {
+			return url;
+		}
+
+		var hashIndex = url.indexOf( '#' );
+		var hash = hashIndex === -1 ? '' : url.slice( hashIndex );
+		var base = hashIndex === -1 ? url : url.slice( 0, hashIndex );
+
+		return base + ( base.indexOf( '?' ) === -1 ? '?' : '&' ) + 'siteorigin_panels_live_editor_isolated=1' + hash;
+	},
+
 	processTemplate: function ( s ) {
 		if ( _.isUndefined( s ) || _.isNull( s ) ) {
 			return '';

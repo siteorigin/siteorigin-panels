@@ -302,6 +302,9 @@ module.exports = Backbone.View.extend( {
 	 * @param target The target iframe
 	 */
 	postToIframe: function( data, url, target ){
+		// An isolated editor needs a preview with the same isolation policy (#1400).
+		url = panels.helpers.utils.isolatedPreviewUrl( url );
+
 		// Store the old preview
 
 		if( ! _.isNull( this.previewIframe )  ) {
