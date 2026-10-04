@@ -1926,6 +1926,8 @@ class SiteOrigin_Panels_Admin {
 			wp_die();
 		}
 
+		SiteOrigin_Panels_Live_Editor::maybe_send_isolation_header();
+
 		include plugin_dir_path( __FILE__ ) . '../tpl/live-editor-preview.php';
 
 		exit();
