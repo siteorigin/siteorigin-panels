@@ -14,6 +14,10 @@
  *   6 seconds and then lets the preview render.
  * - The cookie panels_e2e_preview_timeout_ms sets panelsOptions.live_editor_preview_timeout on admin
  *   screens, so a test does not wait the 30 second default.
+ * - The cookie panels_e2e_inline_styles=1 turns on the inline-styles setting for that browser only, so a
+ *   test cannot leave the setting on for later tests.
+ * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
+ *   password typing (the username then holds the password and the login fails).
  *
  * This file sorts after panels-e2e-builder.php, so Panels_E2E_Text_Widget exists when it loads.
  */
@@ -48,6 +52,19 @@ if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['p
 			);
 		},
 		100
+	);
+}
+
+add_filter( 'enable_login_autofocus', '__return_false' );
+
+if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) ) {
+	add_filter(
+		'siteorigin_panels_settings',
+		function ( $settings ) {
+			$settings['inline-styles'] = true;
+
+			return $settings;
+		}
 	);
 }
 

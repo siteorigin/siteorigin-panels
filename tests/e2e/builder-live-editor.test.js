@@ -12,20 +12,24 @@ const {
 	addWidget,
 	adminLogin,
 	browserLogin,
+	builderRoot,
 	closeDialog,
 	createPost,
 	deletePost,
+	dragTo,
 	expectNoPageErrors,
 	expectOpenDialogs,
 	fieldLayout,
 	newLoggedInPage,
 	openClassicBuilder,
 	openDialog,
+	openWidgetDialog,
 	rawStorage,
 	seedLayout,
 	setWidgetText,
 	siteUrl,
 	trackPageErrors,
+	waitForField,
 } = require( './builder-helpers' );
 
 test.describe.configure( { mode: 'serial' } );
@@ -644,6 +648,356 @@ test.describe( 'Live Editor preview errors', () => {
 		await waitForPreview( page, ERROR_TEXT_NEW );
 		await expectRealPreview( page );
 		await expect( errorPanel( page ) ).toBeHidden();
+		expectNoPageErrors( ctx.errors );
+	} );
+} );
+
+/*
+ * In-place changes (Phase 2). A move of rows or widgets, or a cell resize, changes the preview without a
+ * reload when nothing else changed. Anything else reloads as before. In place = no new preview POST and the
+ * preview window keeps a mark set before the action.
+ */
+const MOVE_TEXTS = [ 'Move A', 'Move B', 'Move C', 'Move D', 'Move E' ];
+
+// row0 [A] [B, C]; row1 [D]; row2 [E].
+const moveLayout = () => ( {
+	widgets: [
+		wrappedWidget( 'Move A', 0, 0, 0 ),
+		wrappedWidget( 'Move B', 0, 1, 1 ),
+		wrappedWidget( 'Move C', 0, 1, 2 ),
+		wrappedWidget( 'Move D', 1, 0, 3 ),
+		wrappedWidget( 'Move E', 2, 0, 4 ),
+	],
+	grids: [ { cells: 2, style: {} }, { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [
+		{ grid: 0, index: 0, weight: 0.5, style: {} },
+		{ grid: 0, index: 1, weight: 0.5, style: {} },
+		{ grid: 1, index: 0, weight: 1, style: {} },
+		{ grid: 2, index: 0, weight: 1, style: {} },
+	],
+} );
+
+/**
+ * The preview layout, read from the DOM (ids go stale after an in-place change): per row, per cell, the
+ * widget texts, and the first/last classes per widget.
+ */
+const previewLayout = ( frame, postId ) => frame.evaluate( ( id ) => {
+	const wrapper = document.getElementById( `pl-${ id }` );
+
+	return Array.from( wrapper.children ).filter( ( el ) => el.classList.contains( 'panel-grid' ) ).map( ( row ) => (
+		Array.from( row.querySelectorAll( '.panel-grid-cell' ) ).map( ( cell ) => Array.from( cell.querySelectorAll( '.so-panel' ) ).map( ( panel, i, all ) => {
+			const text = panel.querySelector( '.panels-e2e-text' ).textContent;
+			const first = panel.classList.contains( 'panel-first-child' ) === ( i === 0 );
+			const last = panel.classList.contains( 'panel-last-child' ) === ( i === all.length - 1 );
+
+			return first && last ? text : `${ text } (bad first/last class)`;
+		} ) )
+	) );
+}, postId );
+
+// The field layout in the same shape as previewLayout().
+const fieldShape = ( layout ) => layout.grids.map( ( grid, ri ) => layout.grid_cells.filter( ( c ) => Number( c.grid ) === ri ).map( ( cell ) => (
+	layout.widgets.filter( ( w ) => Number( w.panels_info.grid ) === ri && Number( w.panels_info.cell ) === Number( cell.index ) ).map( ( w ) => w.text )
+) ) );
+
+/**
+ * Count preview POSTs on a page.
+ */
+const trackPreviewPosts = ( page ) => {
+	const counter = { count: 0 };
+	page.on( 'request', ( request ) => {
+		if ( request.method() === 'POST' && request.url().includes( 'siteorigin_panels_live_editor=true' ) ) {
+			counter.count++;
+		}
+	} );
+
+	return counter;
+};
+
+const markPreview = async ( page ) => ( await previewFrame( page ) ).evaluate( () => {
+	window.__soMark = 1;
+} );
+
+const previewMarked = async ( page ) => ( await previewFrame( page ) ).evaluate( () => window.__soMark === 1 ).catch( () => false );
+
+/**
+ * Run an action and wait until the field passes `check`. Returns whether the preview changed in place.
+ */
+const actAndSettle = async ( page, counter, action, check, message ) => {
+	await markPreview( page );
+	const before = counter.count;
+	await action();
+	await waitForField( page, check, message );
+	// A reload, if any, starts at once: give it time to show.
+	await page.waitForTimeout( 1500 );
+	await expect( page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+
+	return { posts: counter.count - before, marked: await previewMarked( page ) };
+};
+
+const expectInPlace = ( result ) => expect( result, 'changed in place (no preview POST, same preview window)' ).toEqual( { posts: 0, marked: true } );
+const expectReloaded = ( result ) => {
+	expect( result.posts, 'a preview POST' ).toBeGreaterThan( 0 );
+	expect( result.marked, 'a new preview window' ).toBe( false );
+};
+
+// Field placement of one row as texts per cell.
+const fieldRow = ( layout, ri ) => fieldShape( layout )[ ri ];
+
+/**
+ * Per widget: row, cell and index in the DOM, box relative to the layout wrapper, and margin-bottom.
+ * Per cell: width. Per row: margin-bottom.
+ */
+const previewGeometry = ( frame, postId ) => frame.evaluate( ( id ) => {
+	const wrapper = document.getElementById( `pl-${ id }` );
+	const origin = wrapper.getBoundingClientRect();
+	const box = ( el ) => {
+		const r = el.getBoundingClientRect();
+		return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
+	};
+	const out = { widgets: {}, cells: [], rows: [] };
+	Array.from( wrapper.children ).filter( ( el ) => el.classList.contains( 'panel-grid' ) ).forEach( ( row, ri ) => {
+		out.rows.push( { margin: parseFloat( getComputedStyle( row ).marginBottom ), box: box( row ) } );
+		Array.from( row.querySelectorAll( '.panel-grid-cell' ) ).forEach( ( cell, ci ) => {
+			out.cells.push( { ri, ci, width: cell.getBoundingClientRect().width } );
+			Array.from( cell.querySelectorAll( '.so-panel' ) ).forEach( ( panel, wi ) => {
+				out.widgets[ panel.querySelector( '.panels-e2e-text' ).textContent ] = {
+					ri, ci, wi, box: box( panel ), margin: parseFloat( getComputedStyle( panel ).marginBottom ),
+				};
+			} );
+		} );
+	} );
+
+	return out;
+}, postId );
+
+const expectGeometryClose = ( actual, expected, path = 'geometry' ) => {
+	if ( typeof expected === 'number' ) {
+		expect( Math.abs( actual - expected ), `${ path }: ${ actual } vs ${ expected }` ).toBeLessThanOrEqual( 1 );
+		return;
+	}
+
+	if ( expected && typeof expected === 'object' ) {
+		expect( Object.keys( actual ).sort(), path ).toEqual( Object.keys( expected ).sort() );
+		for ( const key of Object.keys( expected ) ) {
+			expectGeometryClose( actual[ key ], expected[ key ], `${ path }.${ key }` );
+		}
+		return;
+	}
+
+	expect( actual, path ).toEqual( expected );
+};
+
+const sidebarWidget = ( page, text ) => liveBuilder( page ).locator( '.so-widget' ).filter( { hasText: text } );
+const sidebarRows = ( page ) => liveBuilder( page ).locator( '.so-row-container' );
+
+// Drop on the upper part of the target (lands above it) or the lower part (lands below it).
+const dragWidget = async ( page, text, targetText, where ) => {
+	const target = sidebarWidget( page, targetText );
+	const height = ( await target.boundingBox() ).height;
+	await dragTo( page, sidebarWidget( page, text ).locator( '.title h4' ), target, { offsetY: where === 'below' ? height - 3 : 4 } );
+};
+
+test.describe( 'Live Editor in-place changes', () => {
+	let admin;
+	let ctx;
+	let page;
+	let movePostId;
+	let counter;
+	let support;
+	let patched;
+
+	test.beforeAll( async ( { browser } ) => {
+		admin = await adminLogin();
+		support = await isolationSupport( admin );
+		movePostId = await createPost( admin, 'post', { title: 'Live editor in place', status: 'publish', content: '' } );
+		await seedLayout( admin, movePostId, moveLayout() );
+		ctx = support.supported ? await newIsolatedPage( browser ) : await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+		page = ctx.page;
+		counter = trackPreviewPosts( page );
+	} );
+
+	test.afterAll( async () => {
+		if ( movePostId ) {
+			await deletePost( admin, 'post', movePostId );
+		}
+
+		if ( ctx ) {
+			await ctx.context.close();
+		}
+		await admin.context.dispose();
+	} );
+
+	test( 'P0 open', async () => {
+		const root = await openClassicBuilder( page, { postId: movePostId } );
+		await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await expect( liveEditorTools( page ) ).toBeVisible();
+		await expect( liveBuilder( page ).locator( '.so-widget' ) ).toHaveCount( 5 );
+		const frame = await waitForPreview( page, 'Move E' );
+		expect( await previewLayout( frame, movePostId ) ).toEqual( [ [ [ 'Move A' ], [ 'Move B', 'Move C' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P1 a widget moved inside its cell changes in place', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragWidget( page, 'Move C', 'Move B', 'above' ),
+			( l ) => fieldRow( l, 0 ).join( '|' ) === 'Move A|Move C,Move B', 'C is above B' );
+		expectInPlace( result );
+		const frame = await previewFrame( page );
+		expect( await previewLayout( frame, movePostId ) ).toEqual( fieldShape( await fieldLayout( page ) ) );
+		expect( await previewLayout( frame, movePostId ) ).toEqual( [ [ [ 'Move A' ], [ 'Move C', 'Move B' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P2 a widget moved to another cell changes in place', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragWidget( page, 'Move B', 'Move A', 'below' ),
+			( l ) => fieldRow( l, 0 ).join( '|' ) === 'Move A,Move B|Move C', 'B is below A' );
+		expectInPlace( result );
+		expect( await previewLayout( await previewFrame( page ), movePostId ) ).toEqual( [ [ [ 'Move A', 'Move B' ], [ 'Move C' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P3 a row moved above another, with the last row kept, changes in place', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragTo( page, sidebarRows( page ).nth( 1 ).locator( '.so-row-move' ), sidebarRows( page ).nth( 0 ), { offsetY: 4 } ),
+			( l ) => JSON.stringify( fieldShape( l ) ) === JSON.stringify( [ [ [ 'Move D' ] ], [ [ 'Move A', 'Move B' ], [ 'Move C' ] ], [ [ 'Move E' ] ] ] ), 'row D is first' );
+		expectInPlace( result );
+		expect( await previewLayout( await previewFrame( page ), movePostId ) ).toEqual( [ [ [ 'Move D' ] ], [ [ 'Move A', 'Move B' ], [ 'Move C' ] ], [ [ 'Move E' ] ] ] );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P4 a cell resize changes in place with the model widths', async () => {
+		const handle = sidebarRows( page ).nth( 1 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+		const result = await actAndSettle( page, counter, async () => {
+			const box = await handle.boundingBox();
+			const x = box.x + box.width / 2;
+			const y = box.y + box.height / 2;
+			await page.mouse.move( x, y );
+			await page.mouse.down();
+			await page.mouse.move( x - 10, y, { steps: 3 } );
+			await page.mouse.move( x - 50, y, { steps: 10 } );
+			await page.mouse.up();
+		}, ( l ) => Math.abs( Number( l.grid_cells.find( ( c ) => Number( c.grid ) === 1 && Number( c.index ) === 0 ).weight ) - 0.5 ) > 0.05, 'row 2 weights changed' );
+		expectInPlace( result );
+
+		const layout = await fieldLayout( page );
+		const weights = layout.grid_cells.filter( ( c ) => Number( c.grid ) === 1 ).map( ( c ) => Number( c.weight ) );
+		const frame = await previewFrame( page );
+		const widths = await frame.evaluate( ( id ) => {
+			const row = Array.from( document.getElementById( `pl-${ id }` ).children ).filter( ( el ) => el.classList.contains( 'panel-grid' ) )[ 1 ];
+			const rowWidth = row.getBoundingClientRect().width;
+			return { rowWidth, cells: Array.from( row.querySelectorAll( '.panel-grid-cell' ) ).map( ( c ) => c.getBoundingClientRect().width ) };
+		}, movePostId );
+		// The server's width: calc(w% - ( (1 - w) * 30px ) ) with the default 30px gutter.
+		weights.forEach( ( w, i ) => {
+			const expected = widths.rowWidth * w - ( 1 - w ) * 30;
+			expect( Math.abs( widths.cells[ i ] - expected ), `cell ${ i }: ${ widths.cells[ i ] } vs ${ expected }` ).toBeLessThanOrEqual( 1 );
+		} );
+		patched = await previewGeometry( frame, movePostId );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P5 the patched preview equals a fresh render of the same layout', async () => {
+		expect( patched, 'P4 recorded the patched geometry' ).toBeTruthy();
+		await page.locator( '.so-panels-live-editor .live-editor-close' ).click();
+		await expect( liveEditorTools( page ) ).toBeHidden();
+		await builderRoot( page ).locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await expect( liveEditorTools( page ) ).toBeVisible();
+		const frame = await waitForPreview( page, 'Move E' );
+		await expect.poll( async () => ( await previewFrame( page ) ).evaluate( () => window.__soMark === undefined ) ).toBe( true );
+
+		expectGeometryClose( await previewGeometry( frame, movePostId ), patched );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P6a moving the only widget out of a cell reloads', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragWidget( page, 'Move C', 'Move B', 'below' ),
+			( l ) => fieldRow( l, 1 ).join( '|' ) === 'Move A,Move B,Move C|', 'C is below B' );
+		expectReloaded( result );
+		await waitForPreview( page, 'Move C' );
+		expect( await previewLayout( await previewFrame( page ), movePostId ) ).toEqual( fieldShape( await fieldLayout( page ) ) );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P6b moving the last row reloads', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragTo( page, sidebarRows( page ).nth( 2 ).locator( '.so-row-move' ), sidebarRows( page ).nth( 0 ), { offsetY: 4 } ),
+			( l ) => fieldShape( l )[ 0 ].join( '|' ) === 'Move E', 'row E is first' );
+		expectReloaded( result );
+		await waitForPreview( page, 'Move E' );
+		expect( await previewLayout( await previewFrame( page ), movePostId ) ).toEqual( fieldShape( await fieldLayout( page ) ) );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P6c a widget style change reloads', async () => {
+		const result = await actAndSettle( page, counter, async () => {
+			const dialog = await openWidgetDialog( sidebarWidget( page, 'Move A' ), page );
+			await expect( dialog.locator( 'input.panels-e2e-text-field' ) ).toBeVisible( { timeout: 15000 } );
+			const classField = dialog.locator( 'input[name="style[class]"]' );
+			await expect( classField ).toBeAttached( { timeout: 15000 } );
+			await classField.evaluate( ( el ) => {
+				el.value = 'panels-e2e-extra';
+				el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+			} );
+			await closeDialog( page );
+			await expectOpenDialogs( page, 0 );
+		}, ( l ) => l.widgets.some( ( w ) => w.text === 'Move A' && w.panels_info.style && w.panels_info.style.class === 'panels-e2e-extra' ), 'A has the class' );
+		expectReloaded( result );
+		const frame = await waitForPreview( page, 'Move A' );
+		// The style class is on the widget's style wrapper inside .so-panel.
+		await expect( frame.locator( '.so-panel .panels-e2e-extra' ) ).toHaveCount( 1 );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	// After P6c: opening a widget dialog updates its model silently (#1414), so the next move would reload.
+	test( 'P7 after an in-place move, hover and click work on the moved widget', async () => {
+		const result = await actAndSettle( page, counter,
+			() => dragWidget( page, 'Move C', 'Move B', 'above' ),
+			( l ) => fieldShape( l )[ 2 ].join( '|' ) === 'Move A,Move C,Move B|', 'C is above B' );
+		expectInPlace( result );
+
+		const frame = await previewFrame( page );
+		const panelC = frame.locator( '.so-panel' ).filter( { hasText: 'Move C' } );
+
+		await sidebarWidget( page, 'Move C' ).hover();
+		await expect( panelC ).toHaveClass( /so-panels-highlighted/ );
+
+		await panelC.hover();
+		await expect( sidebarWidget( page, 'Move C' ).locator( 'xpath=..' ) ).toHaveClass( /so-hovered/ );
+
+		await panelC.click();
+		await expect( page.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 1 );
+		await expect( openDialog( page ).locator( 'input.panels-e2e-text-field' ) ).toHaveValue( 'Move C', { timeout: 15000 } );
+		await expect( openDialog( page ).locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
+		await closeDialog( page );
+		await expectOpenDialogs( page, 0 );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P6d with inline styles on, a move reloads', async () => {
+		// A new page: the classic editor above has unsaved builder changes. It loads the stored layout.
+		await setCookie( ctx.context, 'panels_e2e_inline_styles', '1' );
+		const inlinePage = await ctx.context.newPage();
+		const errors = trackPageErrors( inlinePage );
+		const inlineCounter = trackPreviewPosts( inlinePage );
+		try {
+			const root = await openClassicBuilder( inlinePage, { postId: movePostId } );
+			await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+			await expect( liveEditorTools( inlinePage ) ).toBeVisible();
+			await waitForPreview( inlinePage, 'Move E' );
+			expect( await inlinePage.evaluate( () => !! window.panelsOptions.live_editor_inline_styles ) ).toBe( true );
+
+			const result = await actAndSettle( inlinePage, inlineCounter,
+				() => dragWidget( inlinePage, 'Move C', 'Move B', 'above' ),
+				( l ) => fieldRow( l, 0 ).join( '|' ) === 'Move A|Move C,Move B', 'C is above B' );
+			expectReloaded( result );
+			expectNoPageErrors( errors );
+		} finally {
+			await ctx.context.clearCookies( { name: 'panels_e2e_inline_styles' } );
+			await inlinePage.close();
+		}
 		expectNoPageErrors( ctx.errors );
 	} );
 } );
