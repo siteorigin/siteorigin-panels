@@ -16,6 +16,9 @@
  *   screens, so a test does not wait the 30 second default.
  * - The cookie panels_e2e_inline_styles=1 turns on the inline-styles setting for that browser only, so a
  *   test cannot leave the setting on for later tests.
+ * - The cookie panels_e2e_zero_gutter=1 sets the column gutter (margin-sides) to 0 for that browser only.
+ * - The cookie panels_e2e_no_body_class=1 removes every body class on the front end, like a theme
+ *   that does not call body_class().
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -57,15 +60,25 @@ if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['p
 
 add_filter( 'enable_login_autofocus', '__return_false' );
 
-if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) ) {
+if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) || ! empty( $_COOKIE['panels_e2e_zero_gutter'] ) ) {
 	add_filter(
 		'siteorigin_panels_settings',
 		function ( $settings ) {
-			$settings['inline-styles'] = true;
+			if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) ) {
+				$settings['inline-styles'] = true;
+			}
+
+			if ( ! empty( $_COOKIE['panels_e2e_zero_gutter'] ) ) {
+				$settings['margin-sides'] = 0;
+			}
 
 			return $settings;
 		}
 	);
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_no_body_class'] ) ) {
+	add_filter( 'body_class', '__return_empty_array', PHP_INT_MAX );
 }
 
 if ( ! empty( $_COOKIE['panels_e2e_isolation'] ) ) {

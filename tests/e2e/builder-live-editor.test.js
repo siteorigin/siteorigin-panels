@@ -659,6 +659,28 @@ test.describe( 'Live Editor preview errors', () => {
 		expectNoPageErrors( ctx.errors );
 	} );
 
+	test( 'E7 a preview without body classes still binds and shows no error', async () => {
+		// Like a theme that does not call body_class(): the preview has no siteorigin-panels-live-editor class.
+		await setCookie( ctx.context, 'panels_e2e_no_body_class', '1' );
+		await setCookie( ctx.context, 'panels_e2e_preview_timeout_ms', '2000' );
+		try {
+			await openLiveEditorOnly( page, errorPostId );
+			const frame = await waitForPreview( page, ERROR_TEXT );
+			expect( await frame.evaluate( () => document.body.className ) ).toBe( '' );
+			await page.waitForTimeout( 3000 );
+			await expect( errorPanel( page ) ).toBeHidden();
+			await expect( errorPanel( page ) ).not.toHaveClass( /so-active/ );
+
+			// Bound: sidebar hover highlights the preview widget, which has the pointer cursor.
+			await liveBuilder( page ).locator( '.so-widget' ).first().hover();
+			await expect( frame.locator( '.so-panel' ).first() ).toHaveClass( /so-panels-highlighted/ );
+			expect( await frame.locator( '.so-panel' ).first().evaluate( ( el ) => getComputedStyle( el ).cursor ) ).toBe( 'pointer' );
+		} finally {
+			await ctx.context.clearCookies( { name: 'panels_e2e_no_body_class' } );
+		}
+		expectNoPageErrors( ctx.errors );
+	} );
+
 	test( 'E5 a working preview never shows the panel, and its load timer is cancelled', async () => {
 		// A 2 s timer: if a working preview did not cancel it, the panel would show within the waits below.
 		await setCookie( ctx.context, 'panels_e2e_preview_timeout_ms', '2000' );
@@ -687,22 +709,31 @@ test.describe( 'Live Editor preview errors', () => {
 const MOVE_TEXTS = [ 'Move A', 'Move B', 'Move C', 'Move D', 'Move E' ];
 
 // row0 [A] [B, C]; row1 [D]; row2 [E].
-const moveLayout = () => ( {
-	widgets: [
-		wrappedWidget( 'Move A', 0, 0, 0 ),
-		wrappedWidget( 'Move B', 0, 1, 1 ),
-		wrappedWidget( 'Move C', 0, 1, 2 ),
-		wrappedWidget( 'Move D', 1, 0, 3 ),
-		wrappedWidget( 'Move E', 2, 0, 4 ),
-	],
-	grids: [ { cells: 2, style: {} }, { cells: 1, style: {} }, { cells: 1, style: {} } ],
-	grid_cells: [
-		{ grid: 0, index: 0, weight: 0.5, style: {} },
-		{ grid: 0, index: 1, weight: 0.5, style: {} },
-		{ grid: 1, index: 0, weight: 1, style: {} },
-		{ grid: 2, index: 0, weight: 1, style: {} },
-	],
-} );
+// Row D (moved in P3) and widget B (moved in P2) have styles, so P5 shows their id-keyed CSS moves with them.
+const MOVE_ROW_STYLE = { padding: '20px', bottom_margin: '45px' };
+const MOVE_WIDGET_STYLE = { padding: '12px', margin: '0 0 25px 0' };
+
+const moveLayout = () => {
+	const styledB = wrappedWidget( 'Move B', 0, 1, 1 );
+	styledB.panels_info.style = { ...MOVE_WIDGET_STYLE };
+
+	return {
+		widgets: [
+			wrappedWidget( 'Move A', 0, 0, 0 ),
+			styledB,
+			wrappedWidget( 'Move C', 0, 1, 2 ),
+			wrappedWidget( 'Move D', 1, 0, 3 ),
+			wrappedWidget( 'Move E', 2, 0, 4 ),
+		],
+		grids: [ { cells: 2, style: {} }, { cells: 1, style: { ...MOVE_ROW_STYLE } }, { cells: 1, style: {} } ],
+		grid_cells: [
+			{ grid: 0, index: 0, weight: 0.5, style: {} },
+			{ grid: 0, index: 1, weight: 0.5, style: {} },
+			{ grid: 1, index: 0, weight: 1, style: {} },
+			{ grid: 2, index: 0, weight: 1, style: {} },
+		],
+	};
+};
 
 /**
  * The preview layout, read from the DOM (ids go stale after an in-place change): per row, per cell, the
@@ -782,14 +813,20 @@ const previewGeometry = ( frame, postId ) => frame.evaluate( ( id ) => {
 		const r = el.getBoundingClientRect();
 		return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
 	};
+	// Padding of the style wrapper (row and widget styles render one), else of the element.
+	const pad = ( el, wrapperClass ) => {
+		const target = Array.from( el.children ).find( ( child ) => child.classList.contains( wrapperClass ) ) || el;
+		const cs = getComputedStyle( target );
+		return [ cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft ].map( parseFloat );
+	};
 	const out = { widgets: {}, cells: [], rows: [] };
 	Array.from( wrapper.children ).filter( ( el ) => el.classList.contains( 'panel-grid' ) ).forEach( ( row, ri ) => {
-		out.rows.push( { margin: parseFloat( getComputedStyle( row ).marginBottom ), box: box( row ) } );
+		out.rows.push( { margin: parseFloat( getComputedStyle( row ).marginBottom ), pad: pad( row, 'panel-row-style' ), box: box( row ) } );
 		Array.from( row.querySelectorAll( '.panel-grid-cell' ) ).forEach( ( cell, ci ) => {
 			out.cells.push( { ri, ci, width: cell.getBoundingClientRect().width } );
 			Array.from( cell.querySelectorAll( '.so-panel' ) ).forEach( ( panel, wi ) => {
 				out.widgets[ panel.querySelector( '.panels-e2e-text' ).textContent ] = {
-					ri, ci, wi, box: box( panel ), margin: parseFloat( getComputedStyle( panel ).marginBottom ),
+					ri, ci, wi, box: box( panel ), margin: parseFloat( getComputedStyle( panel ).marginBottom ), pad: pad( panel, 'panel-widget-style' ),
 				};
 			} );
 		} );
@@ -862,6 +899,13 @@ test.describe( 'Live Editor in-place changes', () => {
 		await expect( liveBuilder( page ).locator( '.so-widget' ) ).toHaveCount( 5 );
 		const frame = await waitForPreview( page, 'Move E' );
 		expect( await previewLayout( frame, movePostId ) ).toEqual( [ [ [ 'Move A' ], [ 'Move B', 'Move C' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+
+		// The seeded styles render: row D's padding and bottom margin, widget B's padding and margin.
+		const geometry = await previewGeometry( frame, movePostId );
+		expect( geometry.rows[ 1 ].pad ).toEqual( [ 20, 20, 20, 20 ] );
+		expect( geometry.rows[ 1 ].margin ).toBe( 45 );
+		expect( geometry.widgets[ 'Move B' ].pad ).toEqual( [ 12, 12, 12, 12 ] );
+		expect( geometry.widgets[ 'Move B' ].margin ).toBe( 25 );
 		expectNoPageErrors( ctx.errors );
 	} );
 
@@ -881,7 +925,16 @@ test.describe( 'Live Editor in-place changes', () => {
 			() => dragWidget( page, 'Move B', 'Move A', 'below' ),
 			( l ) => fieldRow( l, 0 ).join( '|' ) === 'Move A,Move B|Move C', 'B is below A' );
 		expectInPlace( result );
-		expect( await previewLayout( await previewFrame( page ), movePostId ) ).toEqual( [ [ [ 'Move A', 'Move B' ], [ 'Move C' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+		const frame = await previewFrame( page );
+		expect( await previewLayout( frame, movePostId ) ).toEqual( [ [ [ 'Move A', 'Move B' ], [ 'Move C' ] ], [ [ 'Move D' ] ], [ [ 'Move E' ] ] ] );
+
+		// Hover still works both ways on the widget that changed cells. (A click opens the dialog, which
+		// updates the widget model silently (#1414), so the click check is in P7.)
+		const panelB = frame.locator( '.so-panel' ).filter( { hasText: 'Move B' } );
+		await sidebarWidget( page, 'Move B' ).hover();
+		await expect( panelB ).toHaveClass( /so-panels-highlighted/ );
+		await panelB.hover();
+		await expect( sidebarWidget( page, 'Move B' ).locator( 'xpath=..' ) ).toHaveClass( /so-hovered/ );
 		expectNoPageErrors( ctx.errors );
 	} );
 
@@ -1024,6 +1077,59 @@ test.describe( 'Live Editor in-place changes', () => {
 		} finally {
 			await ctx.context.clearCookies( { name: 'panels_e2e_inline_styles' } );
 			await inlinePage.close();
+		}
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'P8 with a zero gutter, a resize changes in place and equals a fresh render', async () => {
+		// A new page that loads the stored layout, with the column gutter (margin-sides) set to 0.
+		await setCookie( ctx.context, 'panels_e2e_zero_gutter', '1' );
+		const zeroPage = await ctx.context.newPage();
+		const errors = trackPageErrors( zeroPage );
+		const zeroCounter = trackPreviewPosts( zeroPage );
+		try {
+			const root = await openClassicBuilder( zeroPage, { postId: movePostId } );
+			await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+			await expect( liveEditorTools( zeroPage ) ).toBeVisible();
+			await waitForPreview( zeroPage, 'Move E' );
+
+			const handle = sidebarRows( zeroPage ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+			const result = await actAndSettle( zeroPage, zeroCounter, async () => {
+				const box = await handle.boundingBox();
+				const x = box.x + box.width / 2;
+				const y = box.y + box.height / 2;
+				await zeroPage.mouse.move( x, y );
+				await zeroPage.mouse.down();
+				await zeroPage.mouse.move( x - 10, y, { steps: 3 } );
+				await zeroPage.mouse.move( x - 50, y, { steps: 10 } );
+				await zeroPage.mouse.up();
+			}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) > 0.05, 'row 1 weights changed' );
+			expectInPlace( result );
+
+			// The patch wrote a bare percent: width = w * row width.
+			const frame = await previewFrame( zeroPage );
+			const patchCss = await frame.evaluate( () => ( document.getElementById( 'so-live-editor-patch' ) || {} ).textContent || '' );
+			expect( patchCss ).not.toContain( 'calc(' );
+			const weights = ( await fieldLayout( zeroPage ) ).grid_cells.filter( ( c ) => Number( c.grid ) === 0 ).map( ( c ) => Number( c.weight ) );
+			const widths = await frame.evaluate( ( id ) => {
+				const row = document.getElementById( `pl-${ id }` ).querySelector( '.panel-grid' );
+				return { rowWidth: row.getBoundingClientRect().width, cells: Array.from( row.querySelectorAll( '.panel-grid-cell' ) ).map( ( c ) => c.getBoundingClientRect().width ) };
+			}, movePostId );
+			weights.forEach( ( w, i ) => {
+				expect( Math.abs( widths.cells[ i ] - widths.rowWidth * w ), `cell ${ i }` ).toBeLessThanOrEqual( 1 );
+			} );
+			const zeroPatched = await previewGeometry( frame, movePostId );
+
+			await zeroPage.locator( '.so-panels-live-editor .live-editor-close' ).click();
+			await expect( liveEditorTools( zeroPage ) ).toBeHidden();
+			await builderRoot( zeroPage ).locator( '.so-builder-toolbar .so-live-editor' ).click();
+			const fresh = await waitForPreview( zeroPage, 'Move E' );
+			await expect.poll( async () => ( await previewFrame( zeroPage ) ).evaluate( () => window.__soMark === undefined ) ).toBe( true );
+			expectGeometryClose( await previewGeometry( fresh, movePostId ), zeroPatched );
+			expectNoPageErrors( errors );
+		} finally {
+			await ctx.context.clearCookies( { name: 'panels_e2e_zero_gutter' } );
+			await zeroPage.close();
 		}
 		expectNoPageErrors( ctx.errors );
 	} );
