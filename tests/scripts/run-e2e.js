@@ -1,14 +1,18 @@
 /**
- * Start WordPress Playground with this plugin and the e2e mu-plugin, then run
+ * Start WordPress Playground with this plugin and the e2e mu-plugins, then run
  * the Playwright end-to-end tests against it.
  *
  * If tests/so-tests.env exists, Playground is not started and the tests run
  * against the site that file names (siteorigin-tests-common convention). That
- * site must have Page Builder active and tests/playground/mu-plugins/panels-e2e.php
- * installed by hand as a must-use plugin.
+ * site must have Page Builder active and the files in tests/playground/mu-plugins
+ * installed by hand as must-use plugins.
  *
  * The port defaults to 1129 (the shared SiteOrigin default); set
  * PANELS_E2E_PORT to use another one.
+ *
+ * The blueprint defaults to tests/playground/blueprint.json, a single site.
+ * Set PANELS_E2E_BLUEPRINT to a path, relative to the plugin root, to use
+ * another one: tests/playground/blueprint-multisite.json starts a network.
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
@@ -16,6 +20,7 @@ const { spawn } = require( 'child_process' );
 
 const root = path.resolve( __dirname, '..', '..' );
 const port = parseInt( process.env.PANELS_E2E_PORT || '1129', 10 );
+const blueprintPath = path.resolve( root, process.env.PANELS_E2E_BLUEPRINT || path.join( 'tests', 'playground', 'blueprint.json' ) );
 
 const startPlayground = async () => {
 	const { runCLI } = require( '@wp-playground/cli' );
@@ -25,7 +30,7 @@ const startPlayground = async () => {
 	return runCLI( {
 		command: 'server',
 		port,
-		blueprint: JSON.parse( fs.readFileSync( path.join( root, 'tests', 'playground', 'blueprint.json' ), 'utf8' ) ),
+		blueprint: JSON.parse( fs.readFileSync( blueprintPath, 'utf8' ) ),
 		'mount-before-install': [
 			{
 				hostPath: root,

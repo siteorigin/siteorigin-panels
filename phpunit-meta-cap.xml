@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="tests/bootstrap-default.php">
+    <testsuites>
+        <testsuite name="SiteOrigin Panels Meta Capability Tests">
+            <directory>./tests/meta-cap</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
