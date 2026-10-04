@@ -70,3 +70,67 @@ test( 'shell and target refuse an id that is not a widget wrapper id', () => {
 	assert.equal( swap.shell( doc, 'panel-1-0-0-0"],script[x="' ), null );
 	assert.equal( swap.target( doc, 'x' ), null );
 } );
+
+test( 'hasDeferredContent refuses shortcodes and auto-embed URLs in any widget value', () => {
+	const widget = ( values ) => ( { ...values, panels_info: { class: 'WP_Widget_Text', style: { class: 'x[1]' } } } );
+	assert.equal( swap.hasDeferredContent( widget( { title: 'Hello', text: '<p>Plain <a href="https://example.com/">link</a></p>' } ) ), false );
+	assert.equal( swap.hasDeferredContent( widget( { title: '', text: 'Text with a URL https://example.com/ inside' } ) ), false );
+
+	assert.equal( swap.hasDeferredContent( widget( { text: '[video src="a.mp4"]' } ) ), true );
+	assert.equal( swap.hasDeferredContent( widget( { text: 'Before [contact-form-7 id="1"] after' } ) ), true );
+	assert.equal( swap.hasDeferredContent( widget( { title: 'A [b]', text: '' } ) ), true, 'any value, the title too' );
+	assert.equal( swap.hasDeferredContent( widget( { text: '<p>Intro</p>\nhttps://www.youtube.com/watch?v=x\n<p>More</p>' } ) ), true );
+	assert.equal( swap.hasDeferredContent( widget( { text: '  http://example.com/post/  ' } ) ), true );
+	assert.equal( swap.hasDeferredContent( widget( { text: '<p>https://example.com/post/</p>' } ) ), true );
+	assert.equal( swap.hasDeferredContent( widget( { content: { nested: [ 'x', '[gallery]' ] } } ) ), true, 'nested values' );
+
+	// panels_info is ignored; missing data refuses.
+	assert.equal( swap.hasDeferredContent( { text: 'plain', panels_info: { label: '[x]' } } ), false );
+	assert.equal( swap.hasDeferredContent( null ), true );
+} );
+
+// A minimal element tree for needsDocumentSetup() and target().
+const el = ( tag, classes = [], children = [] ) => {
+	const node = { tagName: tag.toUpperCase(), classList: classes, children };
+	node.querySelectorAll = ( selector ) => {
+		const all = [];
+		const walk = ( n ) => n.children.forEach( ( c ) => {
+			all.push( c );
+			walk( c );
+		} );
+		walk( node );
+		if ( selector === '*' ) {
+			return all;
+		}
+		const id = /^\[id="(.+)"\]$/.exec( selector )[1];
+		return all.filter( ( c ) => c.id === id );
+	};
+	return node;
+};
+
+test( 'needsDocumentSetup finds scripts, media, embeds, noscript and template at any depth', () => {
+	assert.equal( swap.needsDocumentSetup( el( 'div', [ 'so-panel' ], [ el( 'p' ), el( 'a' ) ] ) ), false );
+	for ( const tag of [ 'script', 'iframe', 'video', 'audio', 'object', 'embed', 'noscript', 'template' ] ) {
+		assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'p', [], [ el( tag ) ] ) ] ) ), true, tag );
+	}
+	assert.equal( swap.needsDocumentSetup( el( 'script' ) ), true, 'the element itself' );
+	assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'blockquote', [ 'wp-embedded-content' ] ) ] ) ), true );
+	assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'figure', [ 'wp-block-embed', 'is-type-video' ] ) ] ) ), true );
+	assert.equal( swap.needsDocumentSetup( el( 'div', [ 'my-wp-embed' ] ) ), false, 'the prefix must start the class name' );
+	assert.deepEqual( swap.documentSetupMarkup.classPrefixes, [ 'wp-embed', 'wp-block-embed' ] );
+} );
+
+test( 'target refuses a widget that needs document setup', () => {
+	const plain = el( 'div', [ 'so-panel' ], [ el( 'p' ) ] );
+	plain.id = 'panel-1-0-0-0';
+	const docPlain = el( 'body', [], [ plain ] );
+	assert.equal( swap.target( docPlain, 'panel-1-0-0-0' ), plain );
+
+	const video = el( 'div', [ 'so-panel' ], [ el( 'video' ) ] );
+	video.id = 'panel-1-0-0-0';
+	assert.equal( swap.target( el( 'body', [], [ video ] ), 'panel-1-0-0-0' ), null );
+
+	const twin = el( 'div' );
+	twin.id = 'panel-1-0-0-0';
+	assert.equal( swap.target( el( 'body', [], [ plain, twin ] ), 'panel-1-0-0-0' ), null, 'not unique' );
+} );

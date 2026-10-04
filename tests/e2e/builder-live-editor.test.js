@@ -1171,6 +1171,22 @@ const randomLayout = () => ( {
 	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
 } );
 
+// row0 [CT: core Text widget, legacy mode (a plain textarea), with a link; T2].
+const coreLayout = () => ( {
+	widgets: [
+		{
+			title: '',
+			text: '<p>Core one <a href="/">core link</a></p>',
+			filter: true,
+			visual: false,
+			panels_info: { class: 'WP_Widget_Text', grid: 0, cell: 0, id: 0, widget_id: 'a0e2e000-0000-4000-8000-000000000340', style: {} },
+		},
+		wrappedWidget( 'Core two', 0, 0, 1 ),
+	],
+	grids: [ { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+} );
+
 /**
  * Count, on a page: preview navigations (the iframe form POST), preview fetches (the swap requests) and
  * probe image requests.
@@ -1214,6 +1230,7 @@ test.describe( 'Live Editor single-widget update', () => {
 	let ctx;
 	let swapPostId;
 	let randomPostId;
+	let corePostId;
 	let support;
 	let s1;
 
@@ -1224,11 +1241,13 @@ test.describe( 'Live Editor single-widget update', () => {
 		await seedLayout( admin, swapPostId, swapLayout() );
 		randomPostId = await createPost( admin, 'post', { title: 'Live editor swap random', status: 'publish', content: '' } );
 		await seedLayout( admin, randomPostId, randomLayout() );
+		corePostId = await createPost( admin, 'post', { title: 'Live editor swap core text', status: 'publish', content: '' } );
+		await seedLayout( admin, corePostId, coreLayout() );
 		ctx = support.supported ? await newIsolatedPage( browser ) : await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
 	} );
 
 	test.afterAll( async () => {
-		for ( const id of [ swapPostId, randomPostId ] ) {
+		for ( const id of [ swapPostId, randomPostId, corePostId ] ) {
 			if ( id ) {
 				await deletePost( admin, 'post', id );
 			}
@@ -1296,12 +1315,39 @@ test.describe( 'Live Editor single-widget update', () => {
 		expect( result.marked, 'a new preview window' ).toBe( false );
 	};
 
+	// The core Text widget is the first widget in coreLayout().
+	const coreSidebarWidget = ( page ) => liveBuilder( page ).locator( '.so-widget' ).first();
+
+	// Set the core Text widget's text in its dialog (legacy mode: a plain textarea), then report like editAndSettle().
+	const editCoreTextAndSettle = async ( session, text, marker ) => {
+		const before = { ...session.counts };
+		const dialog = await openWidgetDialog( coreSidebarWidget( session.page ), session.page );
+		await expect( dialog.locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
+		const field = dialog.locator( 'textarea[name$="[text]"]' );
+		await expect( field ).toBeVisible( { timeout: 15000 } );
+		await field.fill( text );
+		await closeDialog( session.page );
+		await expectOpenDialogs( session.page, 0 );
+
+		await expect.poll( () => previewText( session.page ), { timeout: 30000 } ).toContain( marker );
+		await session.page.waitForTimeout( 1500 );
+		await expect( session.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+
+		return {
+			nav: session.counts.nav - before.nav,
+			fetch: session.counts.fetch - before.fetch,
+			marked: await previewMarked( session.page ),
+		};
+	};
+
 	test( 'S3 an edit to a widget that is not allow-listed reloads', async () => {
 		const session = await openSwapPage( swapPostId, {}, 'Swap html' );
 		s1 = { page: session.page };
 		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML' ] );
 
-		expectReloadedNav( await editAndSettle( session, 'Swap one', 'Swap one S3' ) );
+		const result = await editAndSettle( session, 'Swap one', 'Swap one S3' );
+		expectReloadedNav( result );
+		expect( result.fetch, 'refused by the allow list, before any request' ).toBe( 0 );
 		expectNoPageErrors( session.errors );
 	} );
 
@@ -1382,6 +1428,7 @@ test.describe( 'Live Editor single-widget update', () => {
 		await expect.poll( () => previewText( session.page ), { timeout: 30000 } ).toContain( 'Swap html S4' );
 		await expect( session.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
 		expectReloadedNav( { nav: session.counts.nav - before.nav, marked: await previewMarked( session.page ) } );
+		expect( session.counts.fetch - before.fetch, 'fetched both renders, then refused the script' ).toBe( 2 );
 		expect( await ( await previewFrame( session.page ) ).evaluate( () => window.__soS4 ), 'the script ran in the reloaded preview' ).toBe( 1 );
 		expectNoPageErrors( session.errors );
 	} );
@@ -1421,6 +1468,86 @@ test.describe( 'Live Editor single-widget update', () => {
 		expectNoPageErrors( session.errors );
 	} );
 
+	test( 'S10 two quick edits on the reload path with 5 s responses settle on the second text', async () => {
+		// A hang here must fail fast (S7 once hung for 16.8 min on the reload path).
+		test.setTimeout( 100000 );
+		const session = await openSwapPage( swapPostId, { panels_e2e_preview_block: 'slow5' }, 'Swap html' );
+		s1 = { page: session.page };
+		const before = { ...session.counts };
+		const sidebar = liveBuilder( session.page );
+		await setWidgetText( sidebar, sidebarWidget( session.page, 'Swap one' ), 'Slow A', session.page );
+		await setWidgetText( sidebar, sidebarWidget( session.page, 'Slow A' ), 'Slow B', session.page );
+
+		await expect.poll( () => previewText( session.page ), { timeout: 45000 } ).toContain( 'Slow B' );
+		await expect( session.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 20000 } );
+		await session.page.waitForTimeout( 6000 );
+		const text = await previewText( session.page );
+		expect( text ).toContain( 'Slow B' );
+		expect( text ).not.toContain( 'Slow A' );
+		await expect( errorPanel( session.page ) ).not.toHaveClass( /so-active/ );
+		expect( session.counts.fetch - before.fetch, 'the wrapped widget is not allow-listed: no swap' ).toBe( 0 );
+		expect( session.counts.nav - before.nav, 'reloads' ).toBeGreaterThan( 0 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S11 a core Text widget (default allow list) swaps, with links disabled and hover working', async () => {
+		const session = await openSwapPage( corePostId, {}, 'Core two' );
+		s1 = { page: session.page };
+		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML' ] );
+
+		const first = await editCoreTextAndSettle( session, '<p>Core one S11 <a href="/">core link</a></p>', 'Core one S11' );
+		expectSwapped( first );
+		expect( first.fetch, 'the first swap fetches both renders' ).toBe( 2 );
+
+		const swapped = await previewPanel( session.page, 'Core one S11' );
+		await expect( swapped ).toHaveCount( 1 );
+		expect( await swapped.locator( 'a' ).evaluate( ( a ) => getComputedStyle( a ).pointerEvents ), 'the swapped link is disabled' ).toBe( 'none' );
+		await coreSidebarWidget( session.page ).hover();
+		await expect( swapped ).toHaveClass( /so-panels-highlighted/ );
+		await swapped.hover();
+		await expect( coreSidebarWidget( session.page ).locator( 'xpath=..' ) ).toHaveClass( /so-hovered/ );
+
+		// A second edit reuses the last swapped-in render as its "before".
+		const second = await editCoreTextAndSettle( session, '<p>Core one S11 again <a href="/">core link</a></p>', 'Core one S11 again' );
+		expectSwapped( second );
+		expect( second.fetch, 'the second swap fetches only the new render' ).toBe( 1 );
+		const html = await normalisedOuterHtml( await previewPanel( session.page, 'Core one S11 again' ) );
+
+		// Equal to a fresh render.
+		await session.page.locator( '.so-panels-live-editor .live-editor-close' ).click();
+		await expect( liveEditorTools( session.page ) ).toBeHidden();
+		await builderRoot( session.page ).locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await waitForPreview( session.page, 'Core one S11 again' );
+		expect( await previewMarked( session.page ), 'a fresh render' ).toBe( false );
+		expect( await normalisedOuterHtml( await previewPanel( session.page, 'Core one S11 again' ) ) ).toBe( html );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S12 a shortcode, a bare URL, an iframe or noscript in a core Text widget reloads', async () => {
+		const session = await openSwapPage( corePostId, {}, 'Core two' );
+		s1 = { page: session.page };
+		const embedUrl = siteUrl( `?p=${ swapPostId }` );
+		// The check also reads the values the preview shows, so a case after a shortcode or a URL starts from plain text.
+		const cases = [
+			// Refused after both renders: the new widget markup needs document setup.
+			{ name: 'iframe', text: '<p>Core one iframe</p><iframe src="about:blank" title="x"></iframe>', marker: 'Core one iframe', fetch: 2 },
+			{ name: 'noscript', text: '<p>Core one noscript</p><noscript><p>Core noscript body</p></noscript>', marker: 'Core one noscript', fetch: 2 },
+			// Refused before any request: the new values hold a shortcode.
+			{ name: 'shortcode', text: '<p>Core one shortcode</p>[video src="/wp-content/panels-e2e.mp4"]', marker: 'Core one shortcode', fetch: 0 },
+			// Back to plain text: refused before any request, because the preview shows the shortcode.
+			{ name: 'plain after shortcode', text: '<p>Core one plain</p>', marker: 'Core one plain', fetch: 0 },
+			// Refused before any request: the new values hold a URL alone on a line (an auto-embed).
+			{ name: 'bare URL', text: `<p>Core one url</p>\n${ embedUrl }`, marker: 'Core one url', fetch: 0 },
+		];
+
+		for ( const item of cases ) {
+			await markPreview( session.page );
+			const result = await editCoreTextAndSettle( session, item.text, item.marker );
+			expect( { name: item.name, nav: result.nav > 0, marked: result.marked, fetch: result.fetch } ).toEqual( { name: item.name, nav: true, marked: false, fetch: item.fetch } );
+		}
+		expectNoPageErrors( session.errors );
+	} );
+
 	test( 'S9 after an in-place move, an edit reloads', async () => {
 		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1' }, 'Swap html' );
 		s1 = { page: session.page };
@@ -1430,7 +1557,9 @@ test.describe( 'Live Editor single-widget update', () => {
 		await session.page.waitForTimeout( 1500 );
 		expect( { nav: session.counts.nav - before.nav, marked: await previewMarked( session.page ) }, 'the move was in place' ).toEqual( { nav: 0, marked: true } );
 
-		expectReloadedNav( await editAndSettle( session, 'Swap one', 'Swap one S9' ) );
+		const result = await editAndSettle( session, 'Swap one', 'Swap one S9' );
+		expectReloadedNav( result );
+		expect( result.fetch, 'refused after the in-place move, before any request' ).toBe( 0 );
 		expectNoPageErrors( session.errors );
 		await session.page.close();
 		s1 = null;

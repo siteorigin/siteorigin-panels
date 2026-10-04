@@ -25,7 +25,7 @@
  *   - the cookie panels_e2e_csp=1 sends a permissive Content-Security-Policy on preview responses;
  *   - Panels_E2E_Random_Widget prints a new random number on every render;
  *   - a request for /?panels-e2e-inert-probe=1 answers 204, uncached, so each real load is counted;
- *   - panels_e2e_preview_block=slow delays every preview response by 2 seconds.
+ *   - panels_e2e_preview_block=slow delays every preview response by 2 seconds, slow5 by 5 seconds.
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -52,6 +52,10 @@ if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) && ! empty( $_COOKIE['pan
 
 		case 'slow':
 			sleep( 2 );
+			break;
+
+		case 'slow5':
+			sleep( 5 );
 			break;
 	}
 }
