@@ -1,6 +1,6 @@
 /**
  * Helpers that decide when the Live Editor may replace one edited widget in the preview instead of
- * reloading it (Phase 3 of the Live Editor work).
+ * reloading it.
  *
  * The Live Editor fetches the same preview request twice (the data the preview shows, and the new data),
  * parses both responses inertly with DOMParser, and swaps one widget only when the two documents are the
@@ -12,6 +12,40 @@ var TARGET_ID = /^panel-\d+-\d+-\d+-\d+$/;
 
 // Replaces the target in a shell, so two shells compare everything but the target.
 var PLACEHOLDER = 'so-live-editor-swap-target';
+
+/*
+ * Markup a swap cannot reproduce, so the preview reloads instead:
+ * - scripts: a parsed script does not run when inserted, but runs on a reload;
+ * - media and embeds (iframe, video, audio, object, embed, and wp-embed / wp-block-embed classes): their
+ *   players and sizing are set up by scripts on document load (MediaElement, wp-embed.js);
+ * - noscript and template: DOMParser parses with scripting off, so noscript content becomes live markup and
+ *   a declarative shadow root is not attached.
+ * A later opt-in (for example a Widgets Bundle widget with its own setup) can extend these lists.
+ */
+var documentSetupMarkup = {
+	tags: [ 'script', 'iframe', 'video', 'audio', 'object', 'embed', 'noscript', 'template' ],
+	classPrefixes: [ 'wp-embed', 'wp-block-embed' ],
+};
+
+// A line, or a paragraph, that holds only a URL: WordPress replaces it with an embed (WP_Embed::autoembed()).
+var BARE_URL_LINE = /^\s*https?:\/\/[^\s<>"]+\s*$/im;
+var BARE_URL_PARAGRAPH = /<p(?:\s[^>]*)?>\s*https?:\/\/[^\s<>"]+\s*<\/p>/i;
+
+/**
+ * Every string in a value, at any depth.
+ */
+var strings = function ( value, out ) {
+	out = out || [];
+	if ( typeof value === 'string' ) {
+		out.push( value );
+	} else if ( value && typeof value === 'object' ) {
+		Object.keys( value ).forEach( function ( key ) {
+			strings( value[ key ], out );
+		} );
+	}
+
+	return out;
+};
 
 /**
  * The elements with an id, found by attribute so a duplicate id is seen. Empty for an id that is not a
@@ -26,6 +60,56 @@ var byId = function ( root, targetId ) {
 };
 
 module.exports = {
+
+	documentSetupMarkup: documentSetupMarkup,
+
+	/**
+	 * True when a widget's values may render as something that needs document-load setup: a shortcode
+	 * (any "["; [video], [audio] and plugin shortcodes set themselves up on document ready) or a URL alone
+	 * on a line or in a paragraph (an auto-embed). Checked before any request.
+	 *
+	 * @param {Object} widgetData One entry of panels_data.widgets.
+	 * @return {boolean}
+	 */
+	hasDeferredContent: function ( widgetData ) {
+		if ( ! widgetData || typeof widgetData !== 'object' ) {
+			return true;
+		}
+
+		var values = {};
+		Object.keys( widgetData ).forEach( function ( key ) {
+			if ( key !== 'panels_info' ) {
+				values[ key ] = widgetData[ key ];
+			}
+		} );
+
+		return strings( values ).some( function ( text ) {
+			return text.indexOf( '[' ) !== -1 || BARE_URL_LINE.test( text ) || BARE_URL_PARAGRAPH.test( text );
+		} );
+	},
+
+	/**
+	 * True when an element, or anything in it, is markup a swap cannot reproduce (documentSetupMarkup).
+	 *
+	 * @param {Element} el
+	 * @return {boolean}
+	 */
+	needsDocumentSetup: function ( el ) {
+		var nodes = [ el ].concat( Array.prototype.slice.call( el.querySelectorAll( '*' ) ) );
+
+		return nodes.some( function ( node ) {
+			var tag = String( node.tagName || '' ).toLowerCase();
+			if ( documentSetupMarkup.tags.indexOf( tag ) !== -1 ) {
+				return true;
+			}
+
+			return Array.prototype.some.call( node.classList || [], function ( className ) {
+				return documentSetupMarkup.classPrefixes.some( function ( prefix ) {
+					return className.indexOf( prefix ) === 0;
+				} );
+			} );
+		} );
+	},
 
 	/**
 	 * True only for the front-end permalink preview: an absolute http(s) URL with the same origin as the
@@ -121,8 +205,8 @@ module.exports = {
 	},
 
 	/**
-	 * The parsed target element. Null when it is missing, not unique, or is or holds a script: a parsed
-	 * script would not run when inserted, but would run on a reload.
+	 * The parsed target element. Null when it is missing, not unique, or is or holds markup a swap cannot
+	 * reproduce (needsDocumentSetup(): scripts, media, embeds, noscript, template).
 	 *
 	 * @param {Document} doc A parsed response.
 	 * @param {string} targetId
@@ -134,11 +218,6 @@ module.exports = {
 			return null;
 		}
 
-		var el = found[0];
-		if ( el.tagName.toLowerCase() === 'script' || el.querySelector( 'script' ) ) {
-			return null;
-		}
-
-		return el;
+		return this.needsDocumentSetup( found[0] ) ? null : found[0];
 	},
 };

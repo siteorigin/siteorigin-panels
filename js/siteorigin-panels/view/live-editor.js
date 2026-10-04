@@ -670,9 +670,7 @@ module.exports = Backbone.View.extend( {
 					} );
 
 				// Prevent default clicks inside the preview iframe
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).on( 'click', function( e ) {
-					e.preventDefault();
-				} );
+				thisView.disablePreviewLinks( $iframeContents.find( 'body' ) );
 
 			} )
 			.on( 'load', function(){
@@ -834,7 +832,7 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * After an edit to one allow-listed widget, replace only that widget in the preview (Phase 3).
+	 * After an edit to one allow-listed widget, replace only that widget in the preview.
 	 *
 	 * The editor sends the request the preview iframe sends (same URL with its nonce, same fields, same
 	 * encoding, same cookies) twice: with the data the preview shows and with the new data. Both responses
@@ -895,6 +893,14 @@ module.exports = Backbone.View.extend( {
 			} );
 		} );
 		if ( ! position || ! swap.isSwapWidget( next.data.widgets[ position.index ], panelsOptions.live_editor_swap_widgets ) ) {
+			return false;
+		}
+
+		// Shortcodes and auto-embeds can render markup that is set up on document load: reload.
+		if (
+			swap.hasDeferredContent( this.previewSnapshot.data.widgets[ position.index ] ) ||
+			swap.hasDeferredContent( next.data.widgets[ position.index ] )
+		) {
 			return false;
 		}
 
@@ -981,6 +987,9 @@ module.exports = Backbone.View.extend( {
 			var node = map.doc.importNode( target, true );
 			oldEl.parentNode.replaceChild( node, oldEl );
 			map.widgets[ cid ] = node;
+
+			// What the preview gets when it loads, for this widget: disabled links, hover and click to edit.
+			thisView.disablePreviewLinks( $( node ) );
 			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
 
 			thisView.previewSnapshot = next;
@@ -1221,6 +1230,17 @@ module.exports = Backbone.View.extend( {
 			doc.body.appendChild( style );
 		}
 		style.textContent = css;
+	},
+
+	/**
+	 * Disable the links in part of the preview: no pointer events, and a click does not navigate.
+	 *
+	 * @param {jQuery} $root The preview body, or a swapped widget.
+	 */
+	disablePreviewLinks: function ( $root ) {
+		$root.find( 'a' ).addBack( 'a' ).css( { 'pointer-events': 'none' } ).on( 'click', function( e ) {
+			e.preventDefault();
+		} );
 	},
 
 	/**

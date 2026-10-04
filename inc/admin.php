@@ -765,7 +765,12 @@ class SiteOrigin_Panels_Admin {
 							 *
 							 * List a class only if its front end needs no script setup: the replaced markup runs
 							 * no setup code. Page Builder's legacy widgets are not listed (the embedded video
-							 * sets itself up on document ready).
+							 * sets itself up on document ready). Whatever the list, an edit always reloads when
+							 * the widget's values hold a shortcode ("[") or a URL alone on a line (an auto-embed),
+							 * or when the new widget markup holds a script, an iframe, media, an embed, noscript
+							 * or template.
+							 *
+							 * @since {NEXT_VERSION}
 							 *
 							 * @param string[] $classes Widget class names.
 							 */
