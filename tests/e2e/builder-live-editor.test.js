@@ -1134,3 +1134,305 @@ test.describe( 'Live Editor in-place changes', () => {
 		expectNoPageErrors( ctx.errors );
 	} );
 } );
+
+/*
+ * Single-widget update (Phase 3). After an edit to one allow-listed widget, the Live Editor fetches the
+ * preview twice (before and after), and replaces only that widget when the two pages are the same apart
+ * from it. Anything else reloads. In place = no new preview navigation and the same preview window.
+ *
+ * Cookies (tests/playground/mu-plugins/panels-e2e-live-editor.php): panels_e2e_swap=1 allow-lists the
+ * wrapped text widget; panels_e2e_csp=1 adds a CSP to preview responses; panels_e2e_preview_block=slow
+ * delays preview responses.
+ */
+const SWAP_PROBE = 'panels-e2e-inert-probe';
+
+// row0 [T1, T2]; row1 [H: Custom HTML with an image that requests the probe].
+const swapLayout = () => ( {
+	widgets: [
+		wrappedWidget( 'Swap one', 0, 0, 0 ),
+		wrappedWidget( 'Swap two', 0, 0, 1 ),
+		{
+			title: '',
+			content: `<p class="panels-e2e-html">Swap html</p><img src="/?${ SWAP_PROBE }=1" alt="">`,
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 1, cell: 0, id: 2, widget_id: 'a0e2e000-0000-4000-8000-000000000320', style: {} },
+		},
+	],
+	grids: [ { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
+// row0 [T1, R: a widget whose output changes on every render].
+const randomLayout = () => ( {
+	widgets: [
+		wrappedWidget( 'Swap one', 0, 0, 0 ),
+		{ text: '', panels_info: { class: 'Panels_E2E_Random_Widget', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000330', style: {} } },
+	],
+	grids: [ { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+} );
+
+/**
+ * Count, on a page: preview navigations (the iframe form POST), preview fetches (the swap requests) and
+ * probe image requests.
+ */
+const trackSwapRequests = ( page ) => {
+	const counts = { nav: 0, fetch: 0, probe: 0 };
+	page.on( 'request', ( request ) => {
+		const url = request.url();
+		if ( url.includes( `${ SWAP_PROBE }=1` ) ) {
+			counts.probe++;
+		}
+		if ( request.method() === 'POST' && url.includes( 'siteorigin_panels_live_editor=true' ) ) {
+			if ( request.isNavigationRequest() ) {
+				counts.nav++;
+			} else if ( request.resourceType() === 'fetch' ) {
+				counts.fetch++;
+			}
+		}
+	} );
+
+	return counts;
+};
+
+// The preview widget whose text is `text`, as an element handle locator in the newest preview frame.
+const previewPanel = async ( page, text ) => ( await previewFrame( page ) ).locator( '.so-panel' ).filter( { hasText: text } );
+
+// outerHTML without what the Live Editor adds (the pointer cursor and the highlight classes).
+const normalisedOuterHtml = ( locator ) => locator.evaluate( ( el ) => {
+	const copy = el.cloneNode( true );
+	copy.style.removeProperty( 'cursor' );
+	if ( ! copy.getAttribute( 'style' ) ) {
+		copy.removeAttribute( 'style' );
+	}
+	copy.classList.remove( 'so-panels-highlighted', 'so-panels-faded' );
+
+	return copy.outerHTML;
+} );
+
+test.describe( 'Live Editor single-widget update', () => {
+	let admin;
+	let ctx;
+	let swapPostId;
+	let randomPostId;
+	let support;
+	let s1;
+
+	test.beforeAll( async ( { browser } ) => {
+		admin = await adminLogin();
+		support = await isolationSupport( admin );
+		swapPostId = await createPost( admin, 'post', { title: 'Live editor swap', status: 'publish', content: '' } );
+		await seedLayout( admin, swapPostId, swapLayout() );
+		randomPostId = await createPost( admin, 'post', { title: 'Live editor swap random', status: 'publish', content: '' } );
+		await seedLayout( admin, randomPostId, randomLayout() );
+		ctx = support.supported ? await newIsolatedPage( browser ) : await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+	} );
+
+	test.afterAll( async () => {
+		for ( const id of [ swapPostId, randomPostId ] ) {
+			if ( id ) {
+				await deletePost( admin, 'post', id );
+			}
+		}
+
+		if ( ctx ) {
+			await ctx.context.close();
+		}
+		await admin.context.dispose();
+	} );
+
+	/**
+	 * A new page with the cookies set, the Live Editor open on a post and its preview ready.
+	 * The previous page is closed (it may hold unsaved builder changes).
+	 */
+	const openSwapPage = async ( id, cookies, readyText ) => {
+		if ( s1 && s1.page && ! s1.keep ) {
+			await s1.page.close();
+			s1 = null;
+		}
+		for ( const name of [ 'panels_e2e_swap', 'panels_e2e_csp', 'panels_e2e_preview_block' ] ) {
+			await ctx.context.clearCookies( { name } );
+		}
+		for ( const [ name, value ] of Object.entries( cookies ) ) {
+			await setCookie( ctx.context, name, value );
+		}
+
+		const page = await ctx.context.newPage();
+		const errors = trackPageErrors( page );
+		const counts = trackSwapRequests( page );
+		const root = await openClassicBuilder( page, { postId: id } );
+		await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await expect( liveEditorTools( page ) ).toBeVisible();
+		await waitForPreview( page, readyText );
+		await markPreview( page );
+
+		return { page, errors, counts };
+	};
+
+	// Edit a wrapped text widget, wait for the new text, then report what happened.
+	const editAndSettle = async ( session, fromText, toText ) => {
+		const before = { ...session.counts };
+		await setWidgetText( liveBuilder( session.page ), sidebarWidget( session.page, fromText ), toText, session.page );
+		await expect.poll( () => previewText( session.page ), { timeout: 30000 } ).toContain( toText );
+		// A reload, if any, has started by now: wait for it and for any fetch to settle.
+		await session.page.waitForTimeout( 1500 );
+		await expect( session.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+
+		return {
+			nav: session.counts.nav - before.nav,
+			fetch: session.counts.fetch - before.fetch,
+			probe: session.counts.probe - before.probe,
+			marked: await previewMarked( session.page ),
+		};
+	};
+
+	const expectSwapped = ( result ) => {
+		expect( result.nav, 'no preview navigation' ).toBe( 0 );
+		expect( result.marked, 'the same preview window' ).toBe( true );
+		expect( result.fetch, 'the swap fetched the preview' ).toBeGreaterThan( 0 );
+	};
+
+	const expectReloadedNav = ( result ) => {
+		expect( result.nav, 'a preview navigation' ).toBeGreaterThan( 0 );
+		expect( result.marked, 'a new preview window' ).toBe( false );
+	};
+
+	test( 'S3 an edit to a widget that is not allow-listed reloads', async () => {
+		const session = await openSwapPage( swapPostId, {}, 'Swap html' );
+		s1 = { page: session.page };
+		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML' ] );
+
+		expectReloadedNav( await editAndSettle( session, 'Swap one', 'Swap one S3' ) );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S1 an edit to an allow-listed widget replaces only that widget', async () => {
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1' }, 'Swap html' );
+		s1 = { page: session.page, keep: true };
+
+		// Duplicates and non-strings from the filter are dropped.
+		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML', 'Panels_E2E_Wrapped_Text_Widget' ] );
+
+		// The sibling keeps an expando: the swap leaves other nodes alone.
+		await ( await previewPanel( session.page, 'Swap two' ) ).evaluate( ( el ) => {
+			el.__soKeep = 1;
+		} );
+
+		expectSwapped( await editAndSettle( session, 'Swap one', 'Swap one S1' ) );
+		const swapped = await previewPanel( session.page, 'Swap one S1' );
+		await expect( swapped ).toHaveCount( 1 );
+		expect( await ( await previewPanel( session.page, 'Swap two' ) ).evaluate( ( el ) => el.__soKeep ) ).toBe( 1 );
+		s1.html = await normalisedOuterHtml( swapped );
+
+		// The swapped node is bound: hover both ways, the pointer cursor, click to edit.
+		await sidebarWidget( session.page, 'Swap one S1' ).hover();
+		await expect( swapped ).toHaveClass( /so-panels-highlighted/ );
+		await swapped.hover();
+		await expect( sidebarWidget( session.page, 'Swap one S1' ).locator( 'xpath=..' ) ).toHaveClass( /so-hovered/ );
+		expect( await swapped.evaluate( ( el ) => getComputedStyle( el ).cursor ) ).toBe( 'pointer' );
+		await swapped.click();
+		await expect( session.page.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 1 );
+		await expect( openDialog( session.page ).locator( 'input.panels-e2e-text-field' ) ).toHaveValue( 'Swap one S1', { timeout: 15000 } );
+		await expect( openDialog( session.page ).locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
+		await closeDialog( session.page );
+		await expectOpenDialogs( session.page, 0 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S2 the swapped widget equals a fresh render', async () => {
+		expect( s1 && s1.html, 'S1 recorded the swapped widget' ).toBeTruthy();
+		const { page } = s1;
+		await page.locator( '.so-panels-live-editor .live-editor-close' ).click();
+		await expect( liveEditorTools( page ) ).toBeHidden();
+		await builderRoot( page ).locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await waitForPreview( page, 'Swap one S1' );
+		expect( await previewMarked( page ), 'a fresh render' ).toBe( false );
+
+		expect( await normalisedOuterHtml( await previewPanel( page, 'Swap one S1' ) ) ).toBe( s1.html );
+		s1.keep = false;
+	} );
+
+	test( 'S8 the parsed responses load nothing', async () => {
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1' }, 'Swap html' );
+		s1 = { page: session.page };
+		expect( session.counts.probe, 'the probe image loads with the preview' ).toBeGreaterThan( 0 );
+
+		const result = await editAndSettle( session, 'Swap one', 'Swap one S8' );
+		expectSwapped( result );
+		expect( result.fetch, 'two renders were fetched' ).toBe( 2 );
+		expect( result.probe, 'no probe request from the parsed responses' ).toBe( 0 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S4 a Custom HTML edit that adds a script reloads', async () => {
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1' }, 'Swap html' );
+		s1 = { page: session.page };
+		const before = { ...session.counts };
+
+		const dialog = await openWidgetDialog( liveBuilder( session.page ).locator( '.so-widget' ).nth( 2 ), session.page );
+		await expect( dialog.locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
+		const content = dialog.locator( 'textarea[name$="[content]"]' );
+		await expect( content ).toBeAttached( { timeout: 15000 } );
+		await content.evaluate( ( el ) => {
+			el.value = '<p class="panels-e2e-html">Swap html S4</p><script>window.__soS4 = 1;</script>';
+			el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		} );
+		await closeDialog( session.page );
+		await expectOpenDialogs( session.page, 0 );
+
+		await expect.poll( () => previewText( session.page ), { timeout: 30000 } ).toContain( 'Swap html S4' );
+		await expect( session.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+		expectReloadedNav( { nav: session.counts.nav - before.nav, marked: await previewMarked( session.page ) } );
+		expect( await ( await previewFrame( session.page ) ).evaluate( () => window.__soS4 ), 'the script ran in the reloaded preview' ).toBe( 1 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S5 a preview response with a Content-Security-Policy reloads', async () => {
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1', panels_e2e_csp: '1' }, 'Swap html' );
+		s1 = { page: session.page };
+		const result = await editAndSettle( session, 'Swap one', 'Swap one S5' );
+		expectReloadedNav( result );
+		expect( result.fetch, 'the swap was tried' ).toBeGreaterThan( 0 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S6 a page whose other output changes per render reloads', async () => {
+		const session = await openSwapPage( randomPostId, { panels_e2e_swap: '1' }, 'Swap one' );
+		s1 = { page: session.page };
+		const result = await editAndSettle( session, 'Swap one', 'Swap one S6' );
+		expectReloadedNav( result );
+		expect( result.fetch, 'the swap was tried' ).toBeGreaterThan( 0 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S7 two quick edits end with the second text', async () => {
+		// Slow responses keep the first swap in flight while the second edit starts.
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1', panels_e2e_preview_block: 'slow' }, 'Swap html' );
+		s1 = { page: session.page };
+		const sidebar = liveBuilder( session.page );
+		await setWidgetText( sidebar, sidebarWidget( session.page, 'Swap one' ), 'Quick A', session.page );
+		await setWidgetText( sidebar, sidebarWidget( session.page, 'Quick A' ), 'Quick B', session.page );
+
+		await expect.poll( () => previewText( session.page ), { timeout: 60000 } ).toContain( 'Quick B' );
+		await session.page.waitForTimeout( 6000 );
+		const text = await previewText( session.page );
+		expect( text ).toContain( 'Quick B' );
+		expect( text ).not.toContain( 'Quick A' );
+		await expect( await previewPanel( session.page, 'Quick B' ) ).toHaveCount( 1 );
+		expectNoPageErrors( session.errors );
+	} );
+
+	test( 'S9 after an in-place move, an edit reloads', async () => {
+		const session = await openSwapPage( swapPostId, { panels_e2e_swap: '1' }, 'Swap html' );
+		s1 = { page: session.page };
+		const before = { ...session.counts };
+		await dragWidget( session.page, 'Swap one', 'Swap two', 'below' );
+		await waitForField( session.page, ( l ) => fieldShape( l )[ 0 ][ 0 ].join( ',' ) === 'Swap two,Swap one', 'T1 is below T2' );
+		await session.page.waitForTimeout( 1500 );
+		expect( { nav: session.counts.nav - before.nav, marked: await previewMarked( session.page ) }, 'the move was in place' ).toEqual( { nav: 0, marked: true } );
+
+		expectReloadedNav( await editAndSettle( session, 'Swap one', 'Swap one S9' ) );
+		expectNoPageErrors( session.errors );
+		await session.page.close();
+		s1 = null;
+	} );
+} );

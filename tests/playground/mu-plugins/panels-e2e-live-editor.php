@@ -19,6 +19,13 @@
  * - The cookie panels_e2e_zero_gutter=1 sets the column gutter (margin-sides) to 0 for that browser only.
  * - The cookie panels_e2e_no_body_class=1 removes every body class on the front end, like a theme
  *   that does not call body_class().
+ * - Single-widget update (Phase 3) fixtures:
+ *   - the cookie panels_e2e_swap=1 adds Panels_E2E_Wrapped_Text_Widget to the swap allow list (plus a
+ *     duplicate and two non-strings, which the plugin must drop);
+ *   - the cookie panels_e2e_csp=1 sends a permissive Content-Security-Policy on preview responses;
+ *   - Panels_E2E_Random_Widget prints a new random number on every render;
+ *   - a request for /?panels-e2e-inert-probe=1 answers 204, uncached, so each real load is counted;
+ *   - panels_e2e_preview_block=slow delays every preview response by 2 seconds.
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -42,7 +49,40 @@ if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) && ! empty( $_COOKIE['pan
 		case 'timeout':
 			sleep( 6 );
 			break;
+
+		case 'slow':
+			sleep( 2 );
+			break;
 	}
+}
+
+if ( isset( $_GET['panels-e2e-inert-probe'] ) ) {
+	nocache_headers();
+	status_header( 204 );
+	exit;
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_swap'] ) ) {
+	add_filter(
+		'siteorigin_panels_live_editor_swap_widgets',
+		function ( $classes ) {
+			$classes[] = 'Panels_E2E_Wrapped_Text_Widget';
+			$classes[] = 'WP_Widget_Text';
+			$classes[] = 123;
+			$classes[] = array( 'Not_A_String' );
+
+			return $classes;
+		}
+	);
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_csp'] ) && ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+	add_action(
+		'send_headers',
+		function () {
+			header( "Content-Security-Policy: script-src 'self' 'unsafe-inline' 'unsafe-eval'" );
+		}
+	);
 }
 
 if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['panels_e2e_preview_timeout_ms'] ) > 0 ) {
@@ -105,10 +145,30 @@ if ( class_exists( 'Panels_E2E_Text_Widget' ) ) {
 		}
 	}
 
+	/**
+	 * A wrapped widget whose output changes on every render.
+	 */
+	class Panels_E2E_Random_Widget extends Panels_E2E_Text_Widget {
+		public function __construct() {
+			WP_Widget::__construct(
+				'panels_e2e_random',
+				'Panels E2E Random',
+				array( 'description' => 'Prints a random number, for the Live Editor tests.' )
+			);
+		}
+
+		public function widget( $args, $instance ) {
+			echo $args['before_widget'];
+			echo '<div class="panels-e2e-random">' . (int) wp_rand() . '</div>';
+			echo $args['after_widget'];
+		}
+	}
+
 	add_action(
 		'widgets_init',
 		function () {
 			register_widget( 'Panels_E2E_Wrapped_Text_Widget' );
+			register_widget( 'Panels_E2E_Random_Widget' );
 		}
 	);
 }
