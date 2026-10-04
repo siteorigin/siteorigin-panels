@@ -18,6 +18,9 @@ module.exports = Backbone.View.extend( {
 	previewTimer: null,
 	previewProbe: null,
 
+	// Increased on every preview load. A ready or load event from an older preview is ignored.
+	previewGeneration: 0,
+
 	events: {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
@@ -281,6 +284,8 @@ module.exports = Backbone.View.extend( {
 			return memo + num;
 		}, 0 ) / this.loadTimes.length : 1000;
 
+		this.previewGeneration++;
+
 		// A failed preview has no readable scroll position.
 		var previewFailed = this.$( '.so-preview-error' ).is( ':visible' );
 		this.clearPreviewFailure();
@@ -353,6 +358,48 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Whether an iframe element is the current preview, of the current generation.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {boolean}
+	 */
+	isCurrentPreview: function ( iframeEl ) {
+		return ! _.isNull( this.previewIframe ) &&
+			iframeEl === this.previewIframe[0] &&
+			$( iframeEl ).data( 'generation' ) === this.previewGeneration;
+	},
+
+	/**
+	 * The document of a preview iframe when it holds a Live Editor preview, else null.
+	 *
+	 * Null for the initial blank document, a response in another agent cluster, and a response that is not a
+	 * preview (every preview has the body class from SiteOrigin_Panels::body_class()).
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {Document|null}
+	 */
+	previewDocument: function ( iframeEl ) {
+		var doc = null;
+
+		try {
+			doc = iframeEl.contentDocument;
+		} catch ( e ) {
+			doc = null;
+		}
+
+		if (
+			! doc ||
+			doc.URL === 'about:blank' ||
+			! doc.body ||
+			! doc.body.classList.contains( 'siteorigin-panels-live-editor' )
+		) {
+			return null;
+		}
+
+		return doc;
+	},
+
+	/**
 	 * Show the error panel for a preview that failed to load (#1368).
 	 *
 	 * The preview is a form POST into an iframe, so its HTTP status cannot be read. After a failed load, one
@@ -363,7 +410,7 @@ module.exports = Backbone.View.extend( {
 	 * @param {number} timeout The timeout in milliseconds, for 'timeout'.
 	 */
 	failPreview: function ( iframeEl, reason, timeout ) {
-		if ( _.isNull( this.previewIframe ) || iframeEl !== this.previewIframe[0] || ! this.$el.is( ':visible' ) ) {
+		if ( ! this.isCurrentPreview( iframeEl ) || ! this.$el.is( ':visible' ) ) {
 			return;
 		}
 
@@ -399,7 +446,7 @@ module.exports = Backbone.View.extend( {
 		}
 		var probe = this.previewProbe = typeof AbortController === 'function' ? new AbortController() : null;
 		var isCurrent = function () {
-			return thisView.previewProbe === probe && ! _.isNull( thisView.previewIframe ) && iframeEl === thisView.previewIframe[0];
+			return thisView.previewProbe === probe && thisView.isCurrentPreview( iframeEl );
 		};
 
 		window.fetch( request.url, {
@@ -454,11 +501,13 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $( '<iframe src="' + url + '"></iframe>' )
+		// No src: the form POST below is the only navigation, so no other document can become ready first.
+		this.previewIframe = $( '<iframe></iframe>' )
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
 			} )
+			.data( 'generation', this.previewGeneration )
 			.appendTo( target );
 
 		this.setupPreviewFrame( this.previewIframe );
@@ -499,20 +548,24 @@ module.exports = Backbone.View.extend( {
 		iframe
 			.data( 'iframeready', false )
 			.on( 'iframeready', function () {
-				var $$ = $( this ),
-					$iframeContents = $$.contents();
+				var $$ = $( this );
 
 				if( $$.data( 'iframeready' ) ) {
 					// Skip this if the iframeready function has already run
 					return;
 				}
 
+				// Bind only the current preview, and only a document that is a Live Editor preview.
+				if ( ! thisView.isCurrentPreview( this ) || ! thisView.previewDocument( this ) ) {
+					return;
+				}
+
+				var $iframeContents = $$.contents();
+
 				$$.data( 'iframeready', true );
 
-				if ( ! _.isNull( thisView.previewIframe ) && this === thisView.previewIframe[0] ) {
-					thisView.clearPreviewTimer();
-					thisView.$( '.so-preview-error' ).hide();
-				}
+				thisView.clearPreviewTimer();
+				thisView.$( '.so-preview-error' ).hide();
 
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
@@ -543,26 +596,7 @@ module.exports = Backbone.View.extend( {
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) );
-						widgetEdit.data( 'live-editor-preview-widget', $$ );
-
-						$$
-							.css( {
-								'cursor': 'pointer'
-							} )
-							.on( 'mouseenter', function() {
-								widgetEdit.parent().addClass( 'so-hovered' );
-								thisView.highlightElement( $$ );
-							} )
-							.on( 'mouseleave', function() {
-								widgetEdit.parent().removeClass( 'so-hovered' );
-								thisView.resetHighlights();
-							} )
-							.on( 'click', function( e ) {
-								e.preventDefault();
-								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).trigger( 'click' );
-							} );
+						thisView.bindPreviewWidget( $$, thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) ) );
 					} );
 
 				// Prevent default clicks inside the preview iframe
@@ -587,20 +621,53 @@ module.exports = Backbone.View.extend( {
 					return;
 				}
 
-				if ( ! _.isNull( thisView.previewIframe ) && this === thisView.previewIframe[0] ) {
-					thisView.clearPreviewTimer();
+				// A load from an older preview.
+				if ( ! thisView.isCurrentPreview( this ) ) {
+					return;
 				}
+
+				thisView.clearPreviewTimer();
 
 				if ( $$.data( 'iframeready' ) ) {
 					return;
 				}
 
 				// Every preview has this body class (SiteOrigin_Panels::body_class()).
-				if ( doc && doc.body && doc.body.classList.contains( 'siteorigin-panels-live-editor' ) ) {
+				if ( thisView.previewDocument( this ) ) {
 					$$.trigger( 'iframeready' );
 				} else {
 					thisView.failPreview( this, 'load' );
 				}
+			} );
+	},
+
+	/**
+	 * Bind a preview widget to its widget in the Live Editor sidebar: pointer cursor, hover highlight in both
+	 * directions, and click to edit.
+	 *
+	 * @param {jQuery} $previewEl The widget wrapper (.so-panel) in the preview.
+	 * @param {jQuery} $sidebarWidget The widget (.so-widget) in the Live Editor sidebar.
+	 */
+	bindPreviewWidget: function ( $previewEl, $sidebarWidget ) {
+		var thisView = this;
+		$sidebarWidget.data( 'live-editor-preview-widget', $previewEl );
+
+		$previewEl
+			.css( {
+				'cursor': 'pointer'
+			} )
+			.on( 'mouseenter', function() {
+				$sidebarWidget.parent().addClass( 'so-hovered' );
+				thisView.highlightElement( $previewEl );
+			} )
+			.on( 'mouseleave', function() {
+				$sidebarWidget.parent().removeClass( 'so-hovered' );
+				thisView.resetHighlights();
+			} )
+			.on( 'click', function( e ) {
+				e.preventDefault();
+				// When we click a widget, send that click to the form
+				$sidebarWidget.find( '.title h4' ).trigger( 'click' );
 			} );
 	},
 
