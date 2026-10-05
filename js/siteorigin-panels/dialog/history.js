@@ -55,7 +55,8 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	/**
-	 * Set the original entry. This should be set when creating the dialog.
+	 * Set the original entry. The builder sets it when it creates the dialog,
+	 * and again in setData() once the stored layout has loaded.
 	 *
 	 * @param {panels.model.builder} builder
 	 */
