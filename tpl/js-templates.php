@@ -719,6 +719,25 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 			<div class="so-loading-container"><div class="so-loading-bar"></div></div>
 		</div>
 
+		<div
+			class="so-preview-error"
+			role="alert"
+			data-status="<?php
+				/* translators: %s: HTTP status code */
+				esc_attr_e( 'The preview request failed with HTTP status %s.', 'siteorigin-panels' );
+			?>"
+			data-timeout="<?php
+				/* translators: %s: number of seconds */
+				esc_attr_e( 'The preview did not load within %s seconds.', 'siteorigin-panels' );
+			?>"
+			data-unknown="<?php esc_attr_e( 'The preview request did not return a Page Builder preview.', 'siteorigin-panels' ); ?>"
+		>
+			<p class="so-preview-error-title"><strong><?php esc_html_e( 'This page could not be previewed.', 'siteorigin-panels' ); ?></strong></p>
+			<p class="so-preview-error-reason"></p>
+			<p class="so-preview-error-hint"><?php esc_html_e( "A security plugin or a server rule may be blocking the preview request. To see what blocked it, check the response headers of the preview request in your browser's developer tools. Your layout is not affected.", 'siteorigin-panels' ); ?></p>
+			<button type="button" class="so-preview-error-retry button-secondary"><?php esc_html_e( 'Retry', 'siteorigin-panels' ); ?></button>
+		</div>
+
 	</div>
 </script>
 

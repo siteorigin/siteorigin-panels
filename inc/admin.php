@@ -751,6 +751,34 @@ class SiteOrigin_Panels_Admin {
 				'copy_content'              => siteorigin_panels_setting( 'copy-content' ),
 				'cache'                     => array(),
 				'instant_open'              => siteorigin_panels_setting( 'instant-open-widgets' ),
+				// The Live Editor moves rows and widgets in the preview only when widget margins are in the CSS, not inline.
+				'live_editor_inline_styles' => (bool) siteorigin_panels_setting( 'inline-styles' ),
+				'live_editor_swap_widgets'  => array_values(
+					array_unique(
+						array_filter(
+							/**
+							 * Filters the widget classes the Live Editor may update in place after an edit.
+							 *
+							 * After an edit to one of these widgets, the Live Editor fetches the preview twice
+							 * (before and after the edit) and replaces only that widget in the preview, if the two
+							 * pages are the same apart from it. Otherwise the preview reloads.
+							 *
+							 * List a class only if its front end needs no script setup: the replaced markup runs
+							 * no setup code. Page Builder's legacy widgets are not listed (the embedded video
+							 * sets itself up on document ready). Whatever the list, an edit always reloads when
+							 * the widget's values hold a shortcode ("[") or a URL alone on a line (an auto-embed),
+							 * or when the new widget markup holds a script, an iframe, media, an embed, noscript
+							 * or template.
+							 *
+							 * @since {NEXT_VERSION}
+							 *
+							 * @param string[] $classes Widget class names.
+							 */
+							(array) apply_filters( 'siteorigin_panels_live_editor_swap_widgets', array( 'WP_Widget_Text', 'WP_Widget_Custom_HTML' ) ),
+							'is_string'
+						)
+					)
+				),
 				'add_media'                 => esc_html__( 'Choose Media', 'siteorigin-panels' ),
 				'add_media_done'            => esc_html__( 'Done', 'siteorigin-panels' ),
 				'default_columns'           => apply_filters( 'siteorigin_panels_default_row_columns', array(
@@ -1925,6 +1953,8 @@ class SiteOrigin_Panels_Admin {
 		if ( empty( $_REQUEST['_panelsnonce'] ) || ! wp_verify_nonce( $_REQUEST['_panelsnonce'], 'live-editor-preview' ) ) {
 			wp_die();
 		}
+
+		SiteOrigin_Panels_Live_Editor::maybe_send_isolation_header();
 
 		include plugin_dir_path( __FILE__ ) . '../tpl/live-editor-preview.php';
 

@@ -22,6 +22,8 @@ panels.helpers.editor = require( './helpers/editor' );
 panels.helpers.serialize = require( './helpers/serialize' );
 panels.helpers.pageScroll = require( './helpers/page-scroll' );
 panels.helpers.accessibility = require( './helpers/accessibility' );
+panels.helpers.liveEditorPatch = require( './helpers/live-editor-patch' );
+panels.helpers.liveEditorSwap = require( './helpers/live-editor-swap' );
 
 // The models
 panels.model = {};

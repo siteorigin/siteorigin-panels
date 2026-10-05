@@ -43,7 +43,8 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-history' ).html(), {} ) );
 
 		// Set the history URL.
-		this.$( 'form.history-form' ).attr( 'action', this.builder.config.editorPreview );
+		// An isolated editor needs a preview with the same isolation policy (#1400).
+		this.$( 'form.history-form' ).attr( 'action', panels.helpers.utils.isolatedPreviewUrl( this.builder.config.editorPreview ) );
 
 		this.$( 'iframe.siteorigin-panels-history-iframe' ).on( 'load', function () {
 			var $$ = $( this );
