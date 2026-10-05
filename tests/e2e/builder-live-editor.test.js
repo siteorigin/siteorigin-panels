@@ -115,7 +115,7 @@ test.describe( 'Live Editor', () => {
 		const { page } = ctx;
 		await Promise.all( [
 			page.waitForURL( /message=\d+/, { timeout: 60000 } ),
-			page.locator( '.so-panels-live-editor .live-editor-save' ).click(),
+			page.locator( '.so-panels-live-editor .live-editor-save' ).click( { noWaitAfter: true } ),
 		] );
 
 		const raw = await rawStorage( admin, postId );
