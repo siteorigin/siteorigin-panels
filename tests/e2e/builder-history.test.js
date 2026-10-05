@@ -9,7 +9,6 @@ const {
 	adminLogin,
 	addRow,
 	createPost,
-	deletePost,
 	expectNoPageErrors,
 	fieldLayout,
 	layoutBlock,
@@ -140,13 +139,32 @@ test.describe( 'History Original entry', () => {
 	} );
 
 	test.afterAll( async () => {
-		for ( const [ type, id ] of posts ) {
-			await deletePost( admin, type, id );
-		}
-
+		// Close the editor tabs first. An open block editor keeps the single Playground worker busy.
 		if ( ctx ) {
 			await ctx.context.close();
 		}
+
+		for ( const [ type, id ] of posts ) {
+			let lastError;
+			for ( let attempt = 0; attempt < 3; attempt++ ) {
+				try {
+					await admin.context.fetch( siteUrl( `wp-json/wp/v2/${ type }s/${ id }` ), {
+						method: 'DELETE',
+						headers: { 'X-WP-Nonce': admin.nonce, Accept: 'application/json' },
+						params: { force: 'true' },
+						timeout: 30000,
+					} );
+					lastError = null;
+					break;
+				} catch ( error ) {
+					lastError = error;
+				}
+			}
+			if ( lastError ) {
+				throw lastError;
+			}
+		}
+
 		await admin.context.dispose();
 	} );
 
