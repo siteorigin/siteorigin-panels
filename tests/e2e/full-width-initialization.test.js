@@ -113,3 +113,52 @@ test( 'pages without stretched rows clear the fallback in the footer', async ( {
 		await admin.context.dispose();
 	}
 } );
+
+test( 'mixed stretch modes keep their final geometry across desktop and mobile resizes', async ( { browser } ) => {
+	const admin = await adminLogin();
+	const id = await createPost( admin, 'page', { title: 'Mixed full-width rows', status: 'publish' } );
+	const context = await browser.newContext( { viewport: { width: 1280, height: 800 } } );
+	const modes = [ 'full', 'full-stretched', 'full-width-stretch', 'full-stretched-padded' ];
+
+	try {
+		await seedLayout( admin, id, {
+			widgets: modes.map( ( mode, grid ) => ( {
+				text: `Row ${ mode }`,
+				panels_info: { class: 'Panels_E2E_Text_Widget', grid, cell: 0, id: grid },
+			} ) ),
+			grids: modes.map( ( row_stretch ) => ( { cells: 1, style: { row_stretch } } ) ),
+			grid_cells: modes.map( ( grid ) => ( { grid, weight: 1 } ) ),
+		} );
+
+		const target = siteUrl( `?page_id=${ id }&panels_e2e_legacy_container=1` );
+		await context.route( target, async ( route ) => {
+			const response = await route.fetch();
+			const html = ( await response.text() ).replace(
+				'</head>',
+				`<style>#pl-${ id }{width:min(600px,100%)!important;max-width:none!important;margin:0 auto!important}.panels-e2e-text{height:60px}</style></head>`
+			);
+			await route.fulfill( { response, body: html } );
+		} );
+
+		const page = await context.newPage();
+		await page.goto( target );
+		for ( const width of [ 1280, 768, 390 ] ) {
+			await page.setViewportSize( { width, height: 800 } );
+			await expect.poll( async () => page.locator( '.siteorigin-panels-stretch.panel-row-style' ).count() ).toBe( modes.length );
+			const rows = await page.locator( '.siteorigin-panels-stretch.panel-row-style' ).evaluateAll( ( elements ) => elements.map( ( element ) => {
+				const rect = element.getBoundingClientRect();
+				return { left: rect.left, right: rect.right, type: element.dataset.stretchType };
+			} ) );
+			for ( const [ index, row ] of rows.entries() ) {
+				expect( row.type ).toBe( modes[ index ] );
+				expect( row.left ).toBeLessThanOrEqual( 1 );
+				expect( row.right ).toBeGreaterThanOrEqual( width - 1 );
+			}
+			await expect( page.locator( 'body' ) ).not.toHaveClass( /siteorigin-panels-before-js/ );
+		}
+	} finally {
+		await context.close();
+		await deletePost( admin, 'page', id );
+		await admin.context.dispose();
+	}
+} );
