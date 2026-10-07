@@ -88,7 +88,12 @@ for ( const source of [ 'classic', 'block' ] ) {
 			const hidden = ( await inspect() ).find( ( frame ) => frame.text === 'Slide two' && frame.visibility !== 'visible' );
 			expect( hidden.rows ).toHaveLength( 2 );
 			await page.evaluate( () => window.jQuery( '.sow-slider-images' ).first().cycle( 1 ) );
-			await expect.poll( async () => ( await inspect() ).some( ( frame ) => frame.text === 'Slide two' && frame.visibility === 'visible' ) ).toBe( true );
+			// Cycle marks the incoming frame visible before its slide animation
+			// finishes. Measure only after it reaches its final position.
+			await expect.poll( async () => ( await inspect() ).some( ( frame ) =>
+				frame.text === 'Slide two' && frame.visibility === 'visible' && frame.rows.length === 2 &&
+				frame.rows.every( ( row ) => Math.abs( row.left ) <= 1 && Math.abs( row.right - row.viewport ) <= 1 )
+			) ).toBe( true );
 			const active = ( await inspect() ).find( ( frame ) => frame.text === 'Slide two' && frame.visibility === 'visible' );
 			expect( active.rows ).toHaveLength( 2 );
 			for ( const row of active.rows ) {

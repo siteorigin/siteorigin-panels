@@ -18,6 +18,9 @@ const escapeRe = ( s ) => s.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 // Named tokens. Each is a value that changes between two runs of the SAME code.
 export function tokenList( extra, versions = [] ) {
 	const tokens = [
+		// Layout Block pages now receive the same pre-JavaScript stretch fallback
+		// body classes as classic layouts. Browser tests check their timing and geometry.
+		[ 'panels:stretch-fallback-body-class', /(<body[^>]*class="[^"]*?) siteorigin-panels siteorigin-panels-before-js(?=")/g, '$1' ],
 		// The CLS fix deliberately moves this exact fallback removal out of the footer
 		// on pages with stretched rows. Browser tests cover the new timing behavior.
 		[ 'panels:legacy-footer-fallback', /<script>document\.body\.className = document\.body\.className\.replace\("siteorigin-panels-before-js",""\);<\/script>/g, '' ],
