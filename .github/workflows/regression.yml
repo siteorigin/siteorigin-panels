@@ -57,6 +57,16 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: siteorigin/so-widgets-bundle
+          ref: 5ef285878d4e5d5f9263194b260dea0117df4393
+          path: tests/deps/so-widgets-bundle
+          persist-credentials: false
+      - name: Layout Slider nested stretch integration
+        env:
+          PANELS_E2E_WIDGETS_BUNDLE_ROOT: tests/deps/so-widgets-bundle
+        run: npm run e2e -- tests/e2e/layout-slider-stretch.test.js
       - if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

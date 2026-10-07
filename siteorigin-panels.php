@@ -516,7 +516,10 @@ class SiteOrigin_Panels {
 	 * @return array
 	 */
 	public function body_class( $classes ) {
-		if ( self::is_panel() ) {
+		if (
+			self::is_panel() ||
+			( is_singular() && function_exists( 'has_block' ) && has_block( 'siteorigin-panels/layout-block', get_queried_object() ) )
+		) {
 			$classes[] = 'siteorigin-panels';
 			$classes[] = 'siteorigin-panels-before-js';
 
