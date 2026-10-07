@@ -520,7 +520,8 @@ class SiteOrigin_Panels {
 			$classes[] = 'siteorigin-panels';
 			$classes[] = 'siteorigin-panels-before-js';
 
-			add_action( 'wp_footer', array( $this, 'strip_before_js' ), 99 );
+			// styling.js clears this fallback while initializing full-width rows.
+			// Removing it in the footer can collapse rows before DOM ready.
 		}
 
 		if ( self::is_home() ) {
