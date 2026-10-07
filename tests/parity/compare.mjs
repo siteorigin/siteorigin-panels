@@ -18,6 +18,9 @@ const escapeRe = ( s ) => s.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 // Named tokens. Each is a value that changes between two runs of the SAME code.
 export function tokenList( extra, versions = [] ) {
 	const tokens = [
+		// The CLS fix deliberately moves this exact fallback removal out of the footer
+		// on pages with stretched rows. Browser tests cover the new timing behavior.
+		[ 'panels:legacy-footer-fallback', /<script>document\.body\.className = document\.body\.className\.replace\("siteorigin-panels-before-js",""\);<\/script>/g, '' ],
 		// uniqid(): Layout Block with no stored builder_id, printed as gb<post>-<13 hex> (gb-<13 hex> in a stored preview).
 		[ 'uniqid:layout-block-render-id', /\bgb(\d*)-[0-9a-f]{13}\b/g, 'gb$1-UNIQID' ],
 		// uniqid(): Layout Builder widget builder_id, made again on every widget update(); printed as w<13 hex>.
