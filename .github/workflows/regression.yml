@@ -63,6 +63,10 @@ jobs:
           ref: 5ef285878d4e5d5f9263194b260dea0117df4393
           path: tests/deps/so-widgets-bundle
           persist-credentials: false
+      - name: Build Widgets Bundle slider CSS for the integration fixture
+        run: |
+          npx --yes --package=less@4.4.1 lessc tests/deps/so-widgets-bundle/css/slider/slider.less tests/deps/so-widgets-bundle/css/slider/slider.css
+          test -s tests/deps/so-widgets-bundle/css/slider/slider.css
       - name: Layout Slider nested stretch integration
         env:
           PANELS_E2E_WIDGETS_BUNDLE_ROOT: tests/deps/so-widgets-bundle

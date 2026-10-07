@@ -71,10 +71,19 @@ for ( const source of [ 'classic', 'block' ] ) {
 			} );
 			const page = await context.newPage();
 			const errors = [];
+			const missingAssets = [];
 			page.on( 'pageerror', ( error ) => errors.push( error.message ) );
+			page.on( 'response', ( response ) => {
+				if ( response.status() >= 400 && /\/wp-content\/plugins\/(siteorigin-panels|so-widgets-bundle)\/.*\.(css|js)(\?|$)/.test( response.url() ) ) {
+					missingAssets.push( `${ response.status() } ${ response.url() }` );
+				}
+			} );
+			const sliderCss = page.waitForResponse( ( response ) => response.url().includes( '/css/slider/slider.css' ) );
 			await page.goto( target, { waitUntil: 'load' } );
+			expect( ( await sliderCss ).status() ).toBe( 200 );
 			const slider = page.locator( '.sow-slider-base' ).first();
 			await expect( slider ).toBeVisible();
+			await expect( slider ).toHaveCSS( 'overflow', 'hidden' );
 			const frames = slider.locator( '.sow-slider-image' );
 			const inspect = () => frames.evaluateAll( ( elements ) => elements.map( ( element ) => ( {
 				visibility: getComputedStyle( element ).visibility,
@@ -101,6 +110,7 @@ for ( const source of [ 'classic', 'block' ] ) {
 				expect( Math.abs( row.right - row.viewport ) ).toBeLessThanOrEqual( 1 );
 			}
 			expect( errors ).toEqual( [] );
+			expect( missingAssets ).toEqual( [] );
 		} finally {
 			await context.close();
 			if ( id ) {
