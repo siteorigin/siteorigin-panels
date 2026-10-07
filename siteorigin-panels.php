@@ -521,7 +521,8 @@ class SiteOrigin_Panels {
 			$classes[] = 'siteorigin-panels-before-js';
 
 			// styling.js clears this fallback while initializing full-width rows.
-			// Removing it in the footer can collapse rows before DOM ready.
+			// Pages without that script still need the footer fallback removed.
+			add_action( 'wp_footer', array( $this, 'strip_before_js_without_front_styles' ), 99 );
 		}
 
 		if ( self::is_home() ) {
@@ -779,6 +780,16 @@ class SiteOrigin_Panels {
 	 */
 	public function strip_before_js() {
 		?><script>document.body.className = document.body.className.replace("siteorigin-panels-before-js","");</script><?php
+	}
+
+	/**
+	 * Remove the fallback in the footer for layouts without the styling script.
+	 * Full-width rows clear the class in styling.js immediately before stretching.
+	 */
+	public function strip_before_js_without_front_styles() {
+		if ( ! wp_script_is( 'siteorigin-panels-front-styles', 'enqueued' ) && ! wp_script_is( 'siteorigin-panels-front-styles', 'done' ) ) {
+			$this->strip_before_js();
+		}
 	}
 
 	/**

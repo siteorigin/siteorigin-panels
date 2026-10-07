@@ -87,3 +87,29 @@ test( 'full-width rows do not collapse between footer parsing and DOM ready', as
 		await admin.context.dispose();
 	}
 } );
+
+test( 'pages without stretched rows clear the fallback in the footer', async ( { browser } ) => {
+	const admin = await adminLogin();
+	const id = await createPost( admin, 'page', { title: 'Ordinary row initialization', status: 'publish' } );
+	const context = await browser.newContext();
+
+	try {
+		await seedLayout( admin, id, {
+			widgets: [ {
+				text: 'An ordinary row',
+				panels_info: { class: 'Panels_E2E_Text_Widget', grid: 0, cell: 0, id: 0 },
+			} ],
+			grids: [ { cells: 1 } ],
+			grid_cells: [ { grid: 0, weight: 1 } ],
+		} );
+
+		const page = await context.newPage();
+		await page.goto( siteUrl( `?page_id=${ id }` ) );
+		await expect( page.locator( 'body' ) ).not.toHaveClass( /siteorigin-panels-before-js/ );
+		await expect( page.locator( 'body' ) ).toHaveClass( /siteorigin-panels/ );
+	} finally {
+		await context.close();
+		await deletePost( admin, 'page', id );
+		await admin.context.dispose();
+	}
+} );
