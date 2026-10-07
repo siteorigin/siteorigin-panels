@@ -142,17 +142,30 @@ test( 'mixed stretch modes keep their final geometry across desktop and mobile r
 
 		const page = await context.newPage();
 		await page.goto( target );
-		for ( const width of [ 1280, 768, 390 ] ) {
+		for ( const width of [ 1280, 768, 390, 1280 ] ) {
 			await page.setViewportSize( { width, height: 800 } );
 			await expect.poll( async () => page.locator( '.siteorigin-panels-stretch.panel-row-style' ).count() ).toBe( modes.length );
+			await page.evaluate( () => new Promise( ( resolve ) => requestAnimationFrame( () => requestAnimationFrame( resolve ) ) ) );
 			const rows = await page.locator( '.siteorigin-panels-stretch.panel-row-style' ).evaluateAll( ( elements ) => elements.map( ( element ) => {
 				const rect = element.getBoundingClientRect();
-				return { left: rect.left, right: rect.right, type: element.dataset.stretchType };
+				return {
+					left: rect.left,
+					right: rect.right,
+					parentLeft: element.parentElement.getBoundingClientRect().left,
+					parentRight: element.parentElement.getBoundingClientRect().right,
+					paddingLeft: parseFloat( getComputedStyle( element ).paddingLeft ),
+					paddingRight: parseFloat( getComputedStyle( element ).paddingRight ),
+					type: element.dataset.stretchType,
+				};
 			} ) );
 			for ( const [ index, row ] of rows.entries() ) {
 				expect( row.type ).toBe( modes[ index ] );
-				expect( row.left ).toBeLessThanOrEqual( 1 );
-				expect( row.right ).toBeGreaterThanOrEqual( width - 1 );
+				expect( Math.abs( row.left ) ).toBeLessThanOrEqual( 1 );
+				expect( Math.abs( row.right - width ) ).toBeLessThanOrEqual( 1 );
+				if ( row.type === 'full' ) {
+					expect( Math.abs( row.paddingLeft - row.parentLeft ) ).toBeLessThanOrEqual( 1 );
+					expect( Math.abs( row.paddingRight - ( width - row.parentRight ) ) ).toBeLessThanOrEqual( 1 );
+				}
 			}
 			await expect( page.locator( 'body' ) ).not.toHaveClass( /siteorigin-panels-before-js/ );
 		}
