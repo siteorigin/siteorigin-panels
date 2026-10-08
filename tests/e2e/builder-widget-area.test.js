@@ -300,9 +300,13 @@ test.describe( 'widget area', () => {
 		const { encoded: data, hash } = encoded.body.instance;
 		const legacyWidget = `<!-- wp:group --><div class="wp-block-group"><!-- wp:legacy-widget ${ JSON.stringify( { idBase: 'siteorigin-panels-builder', instance: { encoded: data, hash } } ) } /--></div><!-- /wp:group -->`;
 		const layoutInBlock = `<!-- wp:group --><div class="wp-block-group">${ layoutBlock( layout ) }</div><!-- /wp:group -->`;
+		const option = ( await uiOption( admin, 'widget_siteorigin-panels-builder' ) ).value;
+		const widgetId = `siteorigin-panels-builder-${ Object.keys( option ).find( ( key ) => /^\d+$/.test( key ) ) }`;
+		const legacyWidgetById = `<!-- wp:group --><div class="wp-block-group"><!-- wp:legacy-widget ${ JSON.stringify( { id: widgetId } ) } /--></div><!-- /wp:group -->`;
 		const cases = [
-			{ name: 'Legacy Widget in a Group', content: legacyWidget, expected: true },
-			{ name: 'Layout Block in a Group', content: layoutInBlock, expected: true },
+			{ name: 'Legacy Widget in a Group', content: legacyWidget, expected: true, rows: 1 },
+			{ name: 'Layout Block in a Group', content: layoutInBlock, expected: true, rows: 1 },
+			{ name: 'Legacy Widget by id in a Group', content: legacyWidgetById, expected: true },
 			{ name: 'paragraph', content: '<!-- wp:paragraph --><p>Plain</p><!-- /wp:paragraph -->', expected: false },
 			{ name: 'malformed Legacy Widget', content: '<!-- wp:legacy-widget {"idBase":', expected: false },
 			{ name: 'inactive Legacy Widget', content: legacyWidget, expected: false, inactive: true },
@@ -324,8 +328,8 @@ test.describe( 'widget area', () => {
 				const classes = bodyClasses( html );
 				expect( classes.includes( FALLBACK ), check.name ).toBe( check.expected );
 				expect( classes, check.name ).not.toContain( 'siteorigin-panels' );
-				if ( check.expected ) {
-					expect( ( html.match( /data-stretch-type="/g ) || [] ).length, check.name ).toBe( 1 );
+				if ( check.rows ) {
+					expect( ( html.match( /data-stretch-type="/g ) || [] ).length, check.name ).toBe( check.rows );
 				}
 			} );
 		}
