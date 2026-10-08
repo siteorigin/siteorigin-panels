@@ -57,10 +57,18 @@ const textWidget = ( text ) => ( { text, panels_info: { class: 'Panels_E2E_Text_
 
 const STRETCHED_TEXT = 'Widget area stretched content';
 
-// One Full Width Stretched row.
+// A Full Width row holding a Layout Builder widget whose row is Full Width Stretched.
 const stretchedLayout = () => ( {
-	widgets: [ textWidget( STRETCHED_TEXT ) ],
-	grids: [ { cells: 1, style: { row_stretch: 'full-width-stretch' } } ],
+	widgets: [ {
+		panels_data: {
+			widgets: [ textWidget( STRETCHED_TEXT ) ],
+			grids: [ { cells: 1, style: { row_stretch: 'full-width-stretch' } } ],
+			grid_cells: [ cell ],
+		},
+		builder_id: 'standalonenested',
+		panels_info: { class: 'SiteOrigin_Panels_Widgets_Layout', raw: false, grid: 0, cell: 0, id: 0, style: {} },
+	} ],
+	grids: [ { cells: 1, style: { row_stretch: 'full' } } ],
 	grid_cells: [ cell ],
 } );
 
@@ -261,7 +269,7 @@ test.describe( 'widget area', () => {
 				// styling.js removes the fallback class first in its DOM-ready callback, so the class
 				// still being there shows the rows below are measured before that callback ran.
 				const rows = page.locator( `#${ SIDEBAR } .siteorigin-panels-stretch.panel-row-style` );
-				await expect( rows ).toHaveCount( 1 );
+				await expect( rows ).toHaveCount( 2 );
 				const state = await page.evaluate( () => ( {
 					ready: document.readyState,
 					styling: !! document.querySelector( 'script[src*="js/styling"]' ),
@@ -304,8 +312,8 @@ test.describe( 'widget area', () => {
 		const widgetId = `siteorigin-panels-builder-${ Object.keys( option ).find( ( key ) => /^\d+$/.test( key ) ) }`;
 		const legacyWidgetById = `<!-- wp:group --><div class="wp-block-group"><!-- wp:legacy-widget ${ JSON.stringify( { id: widgetId } ) } /--></div><!-- /wp:group -->`;
 		const cases = [
-			{ name: 'Legacy Widget in a Group', content: legacyWidget, expected: true, rows: 1 },
-			{ name: 'Layout Block in a Group', content: layoutInBlock, expected: true, rows: 1 },
+			{ name: 'Legacy Widget in a Group', content: legacyWidget, expected: true, rows: 2 },
+			{ name: 'Layout Block in a Group', content: layoutInBlock, expected: true, rows: 2 },
 			{ name: 'Legacy Widget by id in a Group', content: legacyWidgetById, expected: true },
 			{ name: 'paragraph', content: '<!-- wp:paragraph --><p>Plain</p><!-- /wp:paragraph -->', expected: false },
 			{ name: 'malformed Legacy Widget', content: '<!-- wp:legacy-widget {"idBase":', expected: false },
