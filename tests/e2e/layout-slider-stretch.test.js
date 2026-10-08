@@ -75,7 +75,8 @@ const fixtures = [
 // Playwright's visibility checks ignore clipping by an ancestor, so compare
 // the text's own box with the slider's clipping box and the viewport. Cycle
 // marks the incoming frame visible while the outgoing frame still covers it
-// during a fade, so also check the text is what the browser hits at its centre.
+// during a fade, so also check the text is what the browser hits at its centre
+// and is fully opaque.
 const textOnScreen = ( slides, label ) => slides.evaluateAll( ( elements, text ) => {
 	const copy = ( rect ) => ( { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom } );
 	const matches = elements.filter( ( element ) => element.textContent.trim() === text && getComputedStyle( element ).visibility === 'visible' );
@@ -98,6 +99,10 @@ const textOnScreen = ( slides, label ) => slides.evaluateAll( ( elements, text )
 		bottom: Math.min( slider.bottom, document.documentElement.clientHeight ),
 	};
 	const hit = document.elementFromPoint( ( box.left + box.right ) / 2, ( box.top + box.bottom ) / 2 );
+	let opacity = 1;
+	for ( let node = element; node; node = node.parentElement ) {
+		opacity *= Number( getComputedStyle( node ).opacity );
+	}
 	return {
 		found: true,
 		lines: rects.length,
@@ -105,6 +110,7 @@ const textOnScreen = ( slides, label ) => slides.evaluateAll( ( elements, text )
 		clip,
 		inside: box.left >= clip.left - 1 && box.right <= clip.right + 1 && box.top >= clip.top - 1 && box.bottom <= clip.bottom + 1,
 		hit: !! hit && hit.closest( '.panels-e2e-text' ) === element,
+		opaque: opacity >= 0.99,
 	};
 }, label );
 
@@ -153,10 +159,9 @@ for ( const fixture of fixtures ) {
 				await expect( slider ).toBeVisible();
 				await expect( slider ).toHaveCSS( 'overflow', 'hidden' );
 				await slider.scrollIntoViewIfNeeded();
-				const frames = slider.locator( '.sow-slider-image' );
-				// Cycle adds a sentinel copy of a slide, so leave it out of the content check.
+				// Cycle adds a hidden sentinel copy of a slide; leave it out.
 				const slides = slider.locator( '.sow-slider-image:not(.cycle-sentinel)' );
-				const inspect = () => frames.evaluateAll( ( elements ) => elements.map( ( element ) => ( {
+				const inspect = () => slides.evaluateAll( ( elements ) => elements.map( ( element ) => ( {
 					visibility: getComputedStyle( element ).visibility,
 					text: element.textContent.trim(),
 					rows: Array.from( element.querySelectorAll( '.siteorigin-panels-stretch.panel-row-style' ) ).map( ( row ) => {
@@ -179,7 +184,7 @@ for ( const fixture of fixtures ) {
 						return settled;
 					}
 					const content = await textOnScreen( slides, 'Slide two' );
-					return content.found && content.lines === 1 && content.inside && content.hit;
+					return content.found && content.lines === 1 && content.inside && content.hit && content.opaque;
 				} ).toBe( true );
 				const active = ( await inspect() ).find( ( frame ) => frame.text === 'Slide two' && frame.visibility === 'visible' );
 				expect( active.rows ).toHaveLength( 2 );
@@ -188,7 +193,7 @@ for ( const fixture of fixtures ) {
 					expect( Math.abs( row.right - row.viewport ) ).toBeLessThanOrEqual( 1 );
 				}
 				if ( fixture.checkVisible ) {
-					expect( await textOnScreen( slides, 'Slide two' ) ).toMatchObject( { found: true, lines: 1, inside: true, hit: true } );
+					expect( await textOnScreen( slides, 'Slide two' ) ).toMatchObject( { found: true, lines: 1, inside: true, hit: true, opaque: true } );
 				}
 
 				const sliderBox = await slider.evaluate( ( element ) => {
