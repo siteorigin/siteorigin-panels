@@ -516,13 +516,22 @@ class SiteOrigin_Panels {
 	 * @return array
 	 */
 	public function body_class( $classes ) {
+		$fallback = true;
+
 		if (
 			self::is_panel() ||
 			( is_singular() && function_exists( 'has_block' ) && has_block( 'siteorigin-panels/layout-block', get_queried_object() ) )
 		) {
 			$classes[] = 'siteorigin-panels';
 			$classes[] = 'siteorigin-panels-before-js';
+		} elseif ( $this->widget_areas_have_layout() ) {
+			// A widget area layout doesn't make this a Page Builder page, so it only gets the fallback.
+			$classes[] = 'siteorigin-panels-before-js';
+		} else {
+			$fallback = false;
+		}
 
+		if ( $fallback ) {
 			// styling.js clears this fallback while initializing full-width rows.
 			// Pages without that script still need the footer fallback removed.
 			add_action( 'wp_footer', array( $this, 'strip_before_js_without_front_styles' ), 99 );
@@ -543,6 +552,93 @@ class SiteOrigin_Panels {
 		}
 
 		return $classes;
+	}
+
+	/**
+	 * Check whether an active widget area holds a Page Builder layout. Widgets render after the body
+	 * tag, so this reads the stored widget areas: a Layout Builder widget, or a block widget that
+	 * contains a Layout Builder Legacy Widget block or a Layout Block.
+	 *
+	 * @return bool
+	 */
+	private function widget_areas_have_layout() {
+		if ( is_active_widget( false, false, 'siteorigin-panels-builder' ) ) {
+			return true;
+		}
+
+		$block_widgets = get_option( 'widget_block' );
+		if ( ! is_array( $block_widgets ) ) {
+			return false;
+		}
+
+		foreach ( wp_get_sidebars_widgets() as $sidebar => $widgets ) {
+			if (
+				$sidebar === 'wp_inactive_widgets' ||
+				strpos( $sidebar, 'orphaned_widgets' ) === 0 ||
+				! is_array( $widgets )
+			) {
+				continue;
+			}
+
+			foreach ( $widgets as $widget ) {
+				if ( ! is_string( $widget ) || ! preg_match( '/^block-(\d+)$/', $widget, $match ) ) {
+					continue;
+				}
+
+				$content = isset( $block_widgets[ $match[1] ]['content'] ) ? $block_widgets[ $match[1] ]['content'] : '';
+				if (
+					! is_string( $content ) ||
+					(
+						strpos( $content, '<!-- wp:legacy-widget' ) === false &&
+						strpos( $content, '<!-- wp:siteorigin-panels/layout-block' ) === false
+					)
+				) {
+					continue;
+				}
+
+				if ( self::blocks_have_layout( parse_blocks( $content ) ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check parsed blocks, at any depth, for a Layout Builder Legacy Widget block or a Layout Block.
+	 *
+	 * @param array $blocks Blocks from parse_blocks().
+	 *
+	 * @return bool
+	 */
+	private static function blocks_have_layout( $blocks ) {
+		foreach ( $blocks as $block ) {
+			if ( ! is_array( $block ) || ! isset( $block['blockName'] ) || ! is_string( $block['blockName'] ) ) {
+				continue;
+			}
+
+			if ( $block['blockName'] === 'siteorigin-panels/layout-block' ) {
+				return true;
+			}
+
+			$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+			if (
+				$block['blockName'] === 'core/legacy-widget' &&
+				(
+					( isset( $attrs['idBase'] ) && $attrs['idBase'] === 'siteorigin-panels-builder' ) ||
+					( isset( $attrs['id'] ) && is_string( $attrs['id'] ) && strpos( $attrs['id'], 'siteorigin-panels-builder-' ) === 0 )
+				)
+			) {
+				return true;
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) && self::blocks_have_layout( $block['innerBlocks'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
