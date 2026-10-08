@@ -567,11 +567,12 @@ class SiteOrigin_Panels {
 		}
 
 		$block_widgets = get_option( 'widget_block' );
-		if ( ! is_array( $block_widgets ) ) {
+		$sidebars      = wp_get_sidebars_widgets();
+		if ( ! is_array( $block_widgets ) || ! is_array( $sidebars ) ) {
 			return false;
 		}
 
-		foreach ( wp_get_sidebars_widgets() as $sidebar => $widgets ) {
+		foreach ( $sidebars as $sidebar => $widgets ) {
 			if (
 				$sidebar === 'wp_inactive_widgets' ||
 				strpos( $sidebar, 'orphaned_widgets' ) === 0 ||
