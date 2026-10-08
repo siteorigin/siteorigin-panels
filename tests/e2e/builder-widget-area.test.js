@@ -309,7 +309,8 @@ test.describe( 'widget area', () => {
 			{ name: 'Legacy Widget by id in a Group', content: legacyWidgetById, expected: true },
 			{ name: 'paragraph', content: '<!-- wp:paragraph --><p>Plain</p><!-- /wp:paragraph -->', expected: false },
 			{ name: 'malformed Legacy Widget', content: '<!-- wp:legacy-widget {"idBase":', expected: false },
-			{ name: 'inactive Legacy Widget', content: legacyWidget, expected: false, inactive: true },
+			{ name: 'inactive Legacy Widget', content: legacyWidget, expected: false, area: 'wp_inactive_widgets' },
+			{ name: 'orphaned Legacy Widget', content: legacyWidget, expected: false, area: 'orphaned_widgets_1' },
 		];
 
 		const stored = await uiOption( admin, 'widget_block' );
@@ -318,7 +319,7 @@ test.describe( 'widget area', () => {
 		const base = withoutWidgetLayouts( ( await uiOption( admin, 'sidebars_widgets' ) ).value || {} );
 
 		for ( const check of cases ) {
-			const area = check.inactive ? 'wp_inactive_widgets' : SIDEBAR;
+			const area = check.area || SIDEBAR;
 			const sidebars = { ...base, [ area ]: [ ...( base[ area ] || [] ), `block-${ number }` ] };
 			await withOptions( admin, {
 				widget_block: { ...blocks, [ number ]: { content: check.content } },
