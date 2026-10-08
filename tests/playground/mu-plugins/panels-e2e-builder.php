@@ -100,6 +100,7 @@ add_action(
 			'panels_e2e_classic_widgets',
 			'sidebars_widgets',
 			'widget_siteorigin-panels-builder',
+			'widget_block',
 			'show_on_front',
 			'page_on_front',
 			'siteorigin_panels_home_page_id',
