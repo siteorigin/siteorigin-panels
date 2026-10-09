@@ -95,7 +95,7 @@
 	}
 }
 
-body.siteorigin-panels-before-js:not(.siteorigin-panels-css-container) {
+.stretch-fallback() {
 	overflow-x: clip;
 
 	.siteorigin-panels-stretch {
@@ -103,6 +103,20 @@ body.siteorigin-panels-before-js:not(.siteorigin-panels-css-container) {
 		margin-left: -1000px !important;
 		padding-right: 1000px !important;
 		padding-left: 1000px !important;
+	}
+}
+
+body.siteorigin-panels-before-js:not(.siteorigin-panels-css-container) {
+	&.siteorigin-panels {
+		.stretch-fallback();
+	}
+
+	// A page whose only layout is in a widget area keeps its pre-fallback layout when JavaScript
+	// can't run, because nothing would remove the fallback.
+	@media (scripting: enabled) {
+		&:not(.siteorigin-panels) {
+			.stretch-fallback();
+		}
 	}
 }
 
