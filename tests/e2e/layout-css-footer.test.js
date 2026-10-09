@@ -63,16 +63,25 @@ const anonymousHtml = async ( url ) => {
 test.describe( 'layouts rendered from wp_footer', () => {
 	let admin;
 	let postId;
+	let listedId;
 
 	test.beforeAll( async () => {
 		admin = await adminLogin();
 		postId = await createPost( admin, 'page', { title: 'Footer layout page', status: 'publish' } );
 		await seedLayout( admin, postId, twoCells );
+
+		// The tests load the posts page, so other layouts are on it too, as on a real site and as
+		// other test files leave them. With the Footer setting their CSS is the first footer block.
+		listedId = await createPost( admin, 'post', { title: 'Footer layout listed post', status: 'publish' } );
+		await seedLayout( admin, listedId, twoCells );
 	} );
 
 	test.afterAll( async () => {
 		if ( postId ) {
 			await deletePost( admin, 'page', postId );
+		}
+		if ( listedId ) {
+			await deletePost( admin, 'post', listedId );
 		}
 		await admin.context.dispose();
 	} );
@@ -188,9 +197,13 @@ test.describe( 'layouts rendered from wp_footer', () => {
 					const ids = blocks.map( ( block ) => block.id );
 					expect( new Set( ids ).size, ids.join( ', ' ) ).toBe( ids.length );
 
-					// Each print is in its own footer block.
+					// Each print is in its own footer block. Other layouts on the page may print the
+					// first footer block, so the numbers depend on the page.
 					const printed = blocks.filter( ( block ) => layoutComment( layoutId ).test( block.css ) );
-					expect( printed.map( ( block ) => block.id ) ).toEqual( widths.map( ( width, i ) => `siteorigin-panels-layouts-footer${ i ? `-${ i + 1 }` : '' }` ) );
+					expect( printed ).toHaveLength( widths.length );
+					for ( const block of printed ) {
+						expect( block.id ).toMatch( /^siteorigin-panels-layouts-footer(-\d+)?$/ );
+					}
 					printed.forEach( ( block, i ) => {
 						// Equal cells share one rule.
 						expect( block.css ).toMatch( new RegExp( `#pgc-${ layoutId }-0-0 (, #pgc-${ layoutId }-0-1 )?\\{ width:${ widths[ i ] }` ) );
