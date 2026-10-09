@@ -367,4 +367,43 @@ test.describe( 'widget area', () => {
 			}
 		}
 	} );
+
+	test( 'without JavaScript, only Page Builder pages use the stretch fallback', async ( { browser } ) => {
+		const option = ( await uiOption( admin, 'widget_siteorigin-panels-builder' ) ).value;
+		const number = Object.keys( option ).find( ( key ) => /^\d+$/.test( key ) );
+		const value = { ...option, [ number ]: { ...option[ number ], panels_data: stretchedLayout() } };
+		const pageLayout = { widgets: [ textWidget( 'Page layout' ) ], grids: [ { cells: 1, style: { row_stretch: 'full-width-stretch' } } ], grid_cells: [ cell ] };
+
+		await withOptions( admin, { 'widget_siteorigin-panels-builder': value }, async () => {
+			const context = await browser.newContext( {
+				javaScriptEnabled: false,
+				viewport: { width: 1280, height: 800 },
+				storageState: { cookies: [], origins: [] },
+			} );
+			let id;
+			try {
+				id = await createPost( admin, 'page', { title: 'Widget area no JavaScript page', status: 'publish' } );
+				await seedLayout( admin, id, pageLayout );
+				const page = await context.newPage();
+				const marginsOf = ( selector ) => page.locator( selector ).evaluateAll( ( elements ) => elements.map( ( element ) => getComputedStyle( element ).marginLeft ) );
+
+				// Nothing removes the fallback class without JavaScript, so a widget area layout keeps the
+				// layout it had before the fallback existed.
+				await page.goto( siteUrl( '?p=1&panels_e2e_legacy_container=1' ) );
+				expect( await page.evaluate( () => matchMedia( '(scripting: none)' ).matches ) ).toBe( true );
+				await expect( page.locator( 'body' ) ).toHaveClass( FALLBACK_CLASS );
+				const widgetMargins = await marginsOf( `#${ SIDEBAR } .siteorigin-panels-stretch.panel-row-style` );
+				expect( widgetMargins ).toHaveLength( 2 );
+				expect( widgetMargins ).not.toContain( '-1000px' );
+
+				await page.goto( siteUrl( `?page_id=${ id }&panels_e2e_legacy_container=1` ) );
+				expect( await marginsOf( `#pl-${ id } .siteorigin-panels-stretch.panel-row-style` ) ).toEqual( [ '-1000px' ] );
+			} finally {
+				await context.close();
+				if ( id ) {
+					await deletePost( admin, 'page', id );
+				}
+			}
+		} );
+	} );
 } );
