@@ -11,8 +11,8 @@
  * This integration run mounts Widgets Bundle in WordPress Playground.
  */
 const { expect, test } = require( '@playwright/test' );
-const { adminLogin, createPost, deletePost, seedLayout, siteUrl } = require( './builder-helpers' );
-const { layoutBlock } = require( './helpers' );
+const { adminLogin, createPost, deletePost, seedLayout, siteUrl, sliderInstances } = require( './builder-helpers' );
+const { layoutBlock, rawStorage } = require( './helpers' );
 
 test.skip( ! process.env.PANELS_E2E_WIDGETS_BUNDLE_ROOT, 'Requires Widgets Bundle.' );
 
@@ -50,6 +50,94 @@ const outerLayout = ( sliderRowStretch, nestedStretch ) => ( {
 	grids: [ { cells: 1, style: sliderRowStretch ? { row_stretch: sliderRowStretch } : {} } ],
 	grid_cells: gridCells,
 } );
+
+// Saves generate form timestamps and nested Layout Builder IDs independently.
+// Every setting, including explicit blanks written by update(), must match.
+const withoutSaveIds = ( value ) => {
+	if ( Array.isArray( value ) ) {
+		return value.map( withoutSaveIds );
+	}
+	if ( value && typeof value === 'object' ) {
+		return Object.fromEntries( Object.entries( value )
+			.filter( ( [ key ] ) => key !== '_sow_form_timestamp' && key !== 'builder_id' )
+			.map( ( [ key, item ] ) => [ key, withoutSaveIds( item ) ] ) );
+	}
+	return value;
+};
+
+for ( const explicit of [ false, true ] ) {
+	test( `Layout Slider classic and block fixtures store and render the same ${ explicit ? 'explicit' : 'omitted' } frame settings`, async ( { browser } ) => {
+		const layout = outerLayout( '', 'full' );
+		// Explicit values differ from the form defaults (#333333 and 20px), so a
+		// default applied at render time cannot pass for a stored value.
+		if ( explicit ) {
+			layout.widgets[ 0 ].frames.forEach( ( frame ) => {
+				frame.background = { color: '#2a6f97' };
+			} );
+			layout.widgets[ 0 ].layout.desktop.padding_sides = '32px';
+		}
+		const admin = await adminLogin();
+		const context = await browser.newContext( {
+			viewport: { width: 1280, height: 800 },
+			storageState: { cookies: [], origins: [] },
+		} );
+		const ids = [];
+		const stored = [];
+		const rendered = [];
+		const beforeLess = [];
+		try {
+			for ( const source of [ 'classic', 'block' ] ) {
+				const id = await createPost( admin, 'page', {
+					title: `Layout Slider frame settings ${ source }`,
+					status: 'publish',
+					...( source === 'block' ? { content: layoutBlock( layout ) } : {} ),
+				} );
+				ids.push( id );
+				if ( source === 'classic' ) {
+					await seedLayout( admin, id, layout, { sanitize: true } );
+				}
+				const storage = await rawStorage( admin, id );
+				const widgets = ( source === 'classic' ? storage.meta : storage.blocks[ 0 ] ).widgets;
+				stored.push( withoutSaveIds( widgets ) );
+				expect( widgets[ 0 ].layout.desktop.padding_sides ).toBe( explicit ? '32px' : '' );
+				for ( const frame of widgets[ 0 ].frames ) {
+					expect( frame.background.color ).toBe( explicit ? '#2a6f97' : '' );
+				}
+
+				const page = await context.newPage();
+				await page.goto( siteUrl( `?page_id=${ id }&panels_e2e_legacy_container=1&panels_e2e_slider_instance=1` ), { waitUntil: 'load' } );
+				const slider = page.locator( '.sow-slider-base' ).first();
+				await expect( slider ).toBeVisible();
+				await expect( slider.locator( '.sow-slider-image-wrapper' ).first() ).toHaveCSS( 'padding-left', explicit ? '32px' : '10px' );
+				const frames = slider.locator( '.sow-slider-image:not(.cycle-sentinel)' );
+				await expect( frames ).toHaveCount( 2 );
+				for ( const frame of await frames.all() ) {
+					await expect( frame ).toHaveCSS( 'background-color', explicit ? 'rgb(42, 111, 151)' : 'rgba(0, 0, 0, 0)' );
+				}
+				rendered.push( await slider.evaluate( ( element ) => {
+					const wrapper = element.closest( '.so-widget-sow-layout-slider' );
+					// Stylesheet handles include the post ID; compare the settings hash.
+					return wrapper.className.match( /so-widget-sow-layout-slider-default-([a-f0-9]{12})/ )[ 1 ];
+				} ) );
+				beforeLess.push( withoutSaveIds( await sliderInstances( page ) ) );
+				// Rendering must preserve the save-time instance, including blanks.
+				expect( await rawStorage( admin, id ) ).toEqual( storage );
+				await page.close();
+			}
+			expect( stored[ 1 ] ).toEqual( stored[ 0 ] );
+			expect( beforeLess[ 0 ] ).toHaveLength( 1 );
+			expect( beforeLess[ 1 ] ).toEqual( beforeLess[ 0 ] );
+			expect( rendered[ 0 ] ).toMatch( /^[a-f0-9]{12}$/ );
+			expect( rendered[ 1 ] ).toBe( rendered[ 0 ] );
+		} finally {
+			await context.close();
+			for ( const id of ids ) {
+				await deletePost( admin, 'page', id );
+			}
+			await admin.context.dispose();
+		}
+	} );
+}
 
 const fixtures = [
 	{
@@ -131,7 +219,10 @@ for ( const fixture of fixtures ) {
 					...( source === 'block' ? { content: layoutBlock( layout ) } : {} ),
 				} );
 				if ( source === 'classic' ) {
-					await seedLayout( admin, id, layout );
+					// Direct meta writes skip update(): missing fields get render-time
+					// form defaults, whereas block saves store explicit blanks. Seed
+					// the same save-time instance on both paths (issue #1431).
+					await seedLayout( admin, id, layout, { sanitize: true } );
 				}
 
 				const target = siteUrl( `?page_id=${ id }&panels_e2e_legacy_container=1` );

@@ -260,9 +260,29 @@ const uiOption = async ( session, name, value ) => {
 	return response.body;
 };
 
-const seedLayout = async ( session, postId, panelsData ) => {
-	const response = await rest( session, 'POST', '/panels-e2e/v1/ui/seed-layout', { data: { post_id: postId, panels_data: panelsData } } );
+// Opt into save-time widget/style sanitization when comparing saved layouts.
+// By default, preserve raw fixtures such as layouts with historic stretch modes.
+const seedLayout = async ( session, postId, panelsData, { sanitize = false } = {} ) => {
+	const response = await rest( session, 'POST', '/panels-e2e/v1/ui/seed-layout', { data: { post_id: postId, panels_data: panelsData, sanitize } } );
 	expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
+};
+
+/**
+ * The distinct widget instances printed by panels-e2e-layout-slider.php.
+ * A theme can render a widget more than once, and each pass can give it a
+ * different cell and widget index. Those are not widget settings.
+ */
+const sliderInstances = async ( page ) => {
+	const distinct = new Map();
+	for ( const instance of JSON.parse( await page.locator( '#panels-e2e-slider-instances' ).textContent() ) ) {
+		if ( instance.panels_info ) {
+			delete instance.panels_info.cell_index;
+			delete instance.panels_info.widget_index;
+		}
+		distinct.set( JSON.stringify( instance ), instance );
+	}
+
+	return [ ...distinct.values() ];
 };
 
 /**
@@ -298,6 +318,7 @@ module.exports = {
 	placement,
 	seedLayout,
 	setWidgetText,
+	sliderInstances,
 	trackPageErrors,
 	uiOption,
 	waitForField,
