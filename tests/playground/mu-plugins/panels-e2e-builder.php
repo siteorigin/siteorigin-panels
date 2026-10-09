@@ -174,6 +174,17 @@ add_action(
 						return new WP_Error( 'panels_e2e_seed', 'A post ID and a layout are required.', array( 'status' => 400 ) );
 					}
 
+					// Opt into save-time processing for parity with Layout Block saves.
+					// Raw seeding remains available for historic-style geometry tests.
+					if ( $request->get_param( 'sanitize' ) === true ) {
+						// Load lazy widget classes before calling their update() methods.
+						if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
+							SiteOrigin_Widgets_Bundle::single()->load_missing_widgets( $panels_data );
+						}
+						$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( isset( $panels_data['widgets'] ) ? $panels_data['widgets'] : array() );
+						$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+					}
+
 					update_post_meta( $post_id, 'panels_data', wp_slash( $panels_data ) );
 
 					return array( 'post_id' => $post_id );
