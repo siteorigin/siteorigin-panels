@@ -64,6 +64,7 @@ test.describe( 'layouts rendered from wp_footer', () => {
 	let admin;
 	let postId;
 	let listedId;
+	let plainId;
 
 	test.beforeAll( async () => {
 		admin = await adminLogin();
@@ -74,6 +75,9 @@ test.describe( 'layouts rendered from wp_footer', () => {
 		// other test files leave them. With the Footer setting their CSS is the first footer block.
 		listedId = await createPost( admin, 'post', { title: 'Footer layout listed post', status: 'publish' } );
 		await seedLayout( admin, listedId, twoCells );
+
+		// A page with no layout, for the tests that need no other layout on the page.
+		plainId = await createPost( admin, 'page', { title: 'Footer layout plain page', status: 'publish' } );
 	} );
 
 	test.afterAll( async () => {
@@ -82,6 +86,9 @@ test.describe( 'layouts rendered from wp_footer', () => {
 		}
 		if ( listedId ) {
 			await deletePost( admin, 'post', listedId );
+		}
+		if ( plainId ) {
+			await deletePost( admin, 'page', plainId );
 		}
 		await admin.context.dispose();
 	} );
@@ -211,6 +218,25 @@ test.describe( 'layouts rendered from wp_footer', () => {
 				} finally {
 					await context.close();
 				}
+			} );
+		}
+
+		// The same repeats on a page with no other layout. No earlier footer print can collect the
+		// first layout's CSS, so its own print at the next priority must do it.
+		for ( const { repeat, widths } of repeats.filter( ( r ) => r.priority === 10 ) ) {
+			test( `${ repeat } layout again at wp_footer 150 after 10 on a page with no other layout, CSS location ${ location }`, async () => {
+				const layoutId = 'wpanelse2efooter';
+				const html = await anonymousHtml( siteUrl( `?page_id=${ plainId }&panels_e2e_no_widget_area=1&panels_e2e_footer_layout=widget&panels_e2e_footer_priority=10&panels_e2e_footer_repeat=${ repeat }&panels_e2e_repeat_priority=150&panels_e2e_css_location=${ location }` ) );
+
+				// The page holds this layout twice and nothing else from Page Builder.
+				expect( [ ...html.matchAll( /id="pl-([^"]+)"/g ) ].map( ( match ) => match[ 1 ] ) ).toEqual( [ layoutId, layoutId ] );
+				expect( html ).toMatch( /<link[^>]*id=['"]siteorigin-panels-front-css['"]/ );
+
+				const blocks = styleBlocks( html );
+				expect( blocks.map( ( block ) => block.id ) ).toEqual( widths.map( ( width, i ) => `siteorigin-panels-layouts-footer${ i ? `-${ i + 1 }` : '' }` ) );
+				blocks.forEach( ( block, i ) => {
+					expect( block.css ).toMatch( new RegExp( `^/\\* Layout ${ layoutId } \\*/ #pgc-${ layoutId }-0-0 (, #pgc-${ layoutId }-0-1 )?\\{ width:${ widths[ i ] }` ) );
+				} );
 			} );
 		}
 

@@ -18,7 +18,20 @@
  *   layout renders another layout with its CSS turned off, and throws it away.
  * - panels_e2e_body_layout: any value prints a Layout Builder widget on wp_body_open, after wp_head.
  * - panels_e2e_css_location: the Layout CSS Output Location setting (auto, header or footer).
+ * - panels_e2e_no_widget_area: any value hides the e2e widget area, which other test files may fill,
+ *   so a page can hold no Page Builder layout but the ones these arguments print.
  */
+
+if ( isset( $_GET['panels_e2e_no_widget_area'] ) ) {
+	add_filter(
+		'is_active_sidebar',
+		function ( $is_active, $index ) {
+			return $index === 'panels-e2e-sidebar' ? false : $is_active;
+		},
+		10,
+		2
+	);
+}
 
 if ( isset( $_GET['panels_e2e_css_location'] ) ) {
 	add_filter(
