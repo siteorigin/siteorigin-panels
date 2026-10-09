@@ -171,6 +171,7 @@ const closeDialog = async ( scope ) => {
 const WIDGET_TITLES = {
 	Panels_E2E_Text_Widget: 'Panels E2E Text',
 	SiteOrigin_Panels_Widgets_Layout: 'Layout Builder',
+	SiteOrigin_Widget_LayoutSlider_Widget: 'SiteOrigin Layout Slider',
 };
 
 /**
