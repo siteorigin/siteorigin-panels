@@ -59,6 +59,8 @@ add_action(
 	}
 );
 
+// Print before priority 10: Page Builder prints the layout CSS for widgets on wp_footer at the
+// default priority, so a widget area printed at or after it would render without that CSS.
 add_action(
 	'wp_footer',
 	function () {
@@ -67,7 +69,8 @@ add_action(
 			dynamic_sidebar( 'panels-e2e-sidebar' );
 			echo '</div>';
 		}
-	}
+	},
+	5
 );
 
 add_filter(
@@ -100,6 +103,7 @@ add_action(
 			'panels_e2e_classic_widgets',
 			'sidebars_widgets',
 			'widget_siteorigin-panels-builder',
+			'widget_block',
 			'show_on_front',
 			'page_on_front',
 			'siteorigin_panels_home_page_id',
