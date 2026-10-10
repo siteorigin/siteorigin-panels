@@ -24,10 +24,12 @@
  * AI content is origin-untrusted regardless of the credential carrying the
  * request — an admin application password does not exempt it. On both paths,
  * a widget the caller sent back equal to a stored widget keeps its stored
- * value and skips update() and the floor; a widget whose only change is its
- * position (grid, cell, id, cell_index) keeps its stored content and takes
- * the caller's position fields, filtered. Every other new or changed widget
- * is sanitized and floored (SiteOrigin_Panels_Layout_Update_Unchanged).
+ * value and skips update() and the floor. cell_index is ignored for this, so
+ * a widget whose only difference is cell_index keeps its stored cell_index. A
+ * widget moved to another grid, cell or id but otherwise unchanged keeps its
+ * stored content and takes the caller's grid, cell, id and cell_index,
+ * filtered. Every other new or changed widget is sanitized and floored
+ * (SiteOrigin_Panels_Layout_Update_Unchanged).
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
