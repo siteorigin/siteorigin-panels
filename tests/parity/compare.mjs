@@ -166,12 +166,255 @@ export function coverageFloor( cov, { requireAll = false } = {} ) {
 	return missed;
 }
 
+// PHP unserialize() for the value types a stored layout holds. An array becomes { a: [ [ key, value ] ] },
+// an integer or float { i } or { d } with its digits, so serializePhp() writes the same bytes back.
+// Returns undefined for anything else.
+function unserializePhp( text ) {
+	const buf = Buffer.from( text, 'utf8' );
+	let i = 0;
+	const upTo = ( ch ) => {
+		const end = buf.indexOf( ch, i );
+		if ( end < 0 ) {
+			throw new Error( 'truncated' );
+		}
+		const out = buf.toString( 'utf8', i, end );
+		i = end + 1;
+		return out;
+	};
+	const value = () => {
+		const type = String.fromCharCode( buf[ i ] );
+		i += 2;
+		if ( type === 'N' ) {
+			return null;
+		}
+		if ( type === 'b' ) {
+			return upTo( ';' ) === '1';
+		}
+		if ( type === 'i' || type === 'd' ) {
+			return { [ type ]: upTo( ';' ) };
+		}
+		if ( type === 's' ) {
+			const len = Number( upTo( ':' ) );
+			const out = buf.toString( 'utf8', i + 1, i + 1 + len );
+			i += len + 3;
+			return out;
+		}
+		if ( type === 'a' ) {
+			const count = Number( upTo( ':' ) );
+			i++;
+			const pairs = [];
+			for ( let n = 0; n < count; n++ ) {
+				pairs.push( [ value(), value() ] );
+			}
+			i++;
+			return { a: pairs };
+		}
+		throw new Error( 'unsupported type ' + type );
+	};
+	try {
+		const out = value();
+		return i === buf.length ? out : undefined;
+	} catch ( e ) {
+		return undefined;
+	}
+}
+
+function serializePhp( v ) {
+	if ( v === null ) {
+		return 'N;';
+	}
+	if ( typeof v === 'boolean' ) {
+		return `b:${ v ? 1 : 0 };`;
+	}
+	if ( typeof v === 'string' ) {
+		return `s:${ Buffer.byteLength( v, 'utf8' ) }:"${ v }";`;
+	}
+	if ( v.a ) {
+		return `a:${ v.a.length }:{${ v.a.map( ( [ k, x ] ) => serializePhp( k ) + serializePhp( x ) ).join( '' ) }}`;
+	}
+	return v.i !== undefined ? `i:${ v.i };` : `d:${ v.d };`;
+}
+
+// The ability round trip (run.mjs: layout-get, change widget 2, layout-update) stores every other
+// widget exactly as it was stored (#1409). layout-get adds `panels_info.cell_index` to each widget it
+// returns, and on a classic layout the stored widget can hold `so_sidebar_emulator_id` and
+// `option_name` right after `panels_info` where a re-save writes them right before it. So in these
+// cases only, a widget other than widget 2 is compared without a `cell_index` whose value is the one
+// layout-get adds, and, on a classic layout, with that emulator pair moved from right before
+// `panels_info` to right after it. Every other byte is compared as stored.
+const ROUND_TRIP_CASE = /^ab\.(meta|block)\.[a-z]+\.legit$/;
+const ROUND_TRIP_CHANGED_WIDGET = 2;
+const EMULATOR_KEYS = [ 'so_sidebar_emulator_id', 'option_name' ];
+const UNCHANGED_TOKEN = 'panels:unchanged-widget-stored-as-is';
+
+// The cell_index layout-get gives each widget: its position in its cell, counted in list order.
+function readCellIndexes( positions ) {
+	let grid;
+	let cell;
+	let next = 0;
+	return positions.map( ( [ g, c ] ) => {
+		if ( String( g ) !== String( grid ) ) {
+			grid = g;
+			cell = c;
+			next = 0;
+		} else if ( String( c ) !== String( cell ) ) {
+			cell = c;
+			next = 0;
+		}
+		return next++;
+	} );
+}
+
+// Object members in a JSON text, with their path and where the member and its value start and end.
+function jsonMembers( text ) {
+	const members = [];
+	let i = 0;
+	const space = () => {
+		while ( /\s/.test( text[ i ] ) ) {
+			i++;
+		}
+	};
+	const string = () => {
+		const start = i++;
+		while ( text[ i ] !== '"' ) {
+			i += text[ i ] === '\\' ? 2 : 1;
+		}
+		i++;
+		return JSON.parse( text.slice( start, i ) );
+	};
+	const value = ( path ) => {
+		space();
+		if ( text[ i ] === '{' ) {
+			i++;
+			space();
+			while ( text[ i ] !== '}' ) {
+				space();
+				const start = i;
+				const key = string();
+				space();
+				i++;
+				space();
+				const valueStart = i;
+				value( [ ...path, key ] );
+				members.push( { path: [ ...path, key ], start, valueStart, end: i } );
+				space();
+				if ( text[ i ] === ',' ) {
+					i++;
+				}
+			}
+			i++;
+		} else if ( text[ i ] === '[' ) {
+			i++;
+			space();
+			for ( let n = 0; text[ i ] !== ']'; n++ ) {
+				value( [ ...path, n ] );
+				space();
+				if ( text[ i ] === ',' ) {
+					i++;
+				}
+				space();
+			}
+			i++;
+		} else if ( text[ i ] === '"' ) {
+			string();
+		} else {
+			while ( i < text.length && ! /[,}\]\s]/.test( text[ i ] ) ) {
+				i++;
+			}
+		}
+	};
+	value( [] );
+	return members;
+}
+
+// Layout Block: panelsData is JSON in post_content. The first Layout Block comment ends at the
+// first ` /-->` (block attributes escape `--`, so it cannot occur inside them). A widget's
+// `"cell_index":N` member is cut out of the stored text when it is its only `cell_index`; nothing
+// else in the text is changed.
+export function roundTripContent( content, used ) {
+	return content.replace( /(<!-- wp:siteorigin-panels\/layout-block )(\{.*?\})( \/-->)/s, ( all, open, json, close ) => {
+		let attrs;
+		let members;
+		try {
+			attrs = JSON.parse( json );
+			members = jsonMembers( json );
+		} catch ( e ) {
+			return all;
+		}
+		const widgets = attrs.panelsData && Array.isArray( attrs.panelsData.widgets ) ? attrs.panelsData.widgets : [];
+		const expected = readCellIndexes( widgets.map( ( w ) => [ w?.panels_info?.grid, w?.panels_info?.cell ] ) );
+		const cellIndexes = members.filter( ( m ) => m.path.length === 5 &&
+			m.path[ 0 ] === 'panelsData' && m.path[ 1 ] === 'widgets' && m.path[ 3 ] === 'panels_info' && m.path[ 4 ] === 'cell_index' );
+		const cuts = cellIndexes.filter( ( m ) => m.path[ 2 ] !== ROUND_TRIP_CHANGED_WIDGET &&
+			cellIndexes.filter( ( other ) => other.path[ 2 ] === m.path[ 2 ] ).length === 1 &&
+			json.slice( m.valueStart, m.end ) === String( expected[ m.path[ 2 ] ] ) );
+		let out = json;
+		for ( const m of cuts.sort( ( a, b ) => b.start - a.start ) ) {
+			let from = m.start;
+			let to = m.end;
+			const before = out.slice( 0, from ).replace( /\s*$/, '' );
+			if ( before.endsWith( ',' ) ) {
+				from = before.length - 1;
+			} else {
+				const after = out.slice( to ).match( /^\s*,/ );
+				to += after ? after[ 0 ].length : 0;
+			}
+			out = out.slice( 0, from ) + out.slice( to );
+			used[ UNCHANGED_TOKEN ] = ( used[ UNCHANGED_TOKEN ] || 0 ) + 1;
+		}
+		return open + out + close;
+	} );
+}
+
+// Classic layout: panels_data is a serialized PHP array in post meta. A value the parser cannot
+// write back byte for byte is compared as stored.
+export function roundTripMeta( m, used ) {
+	if ( m.meta_key !== 'panels_data' ) {
+		return m;
+	}
+	const text = String( m.meta_value );
+	const pd = unserializePhp( text );
+	if ( pd === undefined || serializePhp( pd ) !== text ) {
+		return m;
+	}
+	const entry = pd && Array.isArray( pd.a ) ? pd.a.find( ( [ k ] ) => k === 'widgets' ) : null;
+	if ( ! entry || ! entry[ 1 ] || ! Array.isArray( entry[ 1 ].a ) ) {
+		return m;
+	}
+	const field = ( pairs, name ) => {
+		const pair = Array.isArray( pairs ) ? pairs.find( ( [ k ] ) => k === name ) : null;
+		return pair ? pair[ 1 ] : undefined;
+	};
+	const scalar = ( v ) => ( v && typeof v === 'object' && ! v.a ? ( v.i ?? v.d ) : v );
+	const infoOf = ( widget ) => field( widget && widget.a, 'panels_info' );
+	const expected = readCellIndexes( entry[ 1 ].a.map( ( [ , w ] ) => [ scalar( field( infoOf( w )?.a, 'grid' ) ), scalar( field( infoOf( w )?.a, 'cell' ) ) ] ) );
+	entry[ 1 ].a.forEach( ( [ key, widget ], n ) => {
+		if ( ( key && key.i ) === String( ROUND_TRIP_CHANGED_WIDGET ) || ! widget || ! Array.isArray( widget.a ) ) {
+			return;
+		}
+		const info = infoOf( widget );
+		if ( info && Array.isArray( info.a ) ) {
+			const kept = info.a.filter( ( [ k, v ] ) => ! ( k === 'cell_index' && v && v.i === String( expected[ n ] ) ) );
+			if ( kept.length !== info.a.length ) {
+				info.a = kept;
+				used[ UNCHANGED_TOKEN ] = ( used[ UNCHANGED_TOKEN ] || 0 ) + 1;
+			}
+		}
+		const p = widget.a.findIndex( ( [ k ] ) => k === 'panels_info' );
+		if ( p >= 2 && widget.a[ p - 2 ][ 0 ] === EMULATOR_KEYS[ 0 ] && widget.a[ p - 1 ][ 0 ] === EMULATOR_KEYS[ 1 ] ) {
+			widget.a = [ ...widget.a.slice( 0, p - 2 ), widget.a[ p ], widget.a[ p - 2 ], widget.a[ p - 1 ], ...widget.a.slice( p + 1 ) ];
+		}
+	} );
+	return { ...m, meta_value: serializePhp( pd ) };
+}
+
 export function fieldsOf( l, c, used ) {
+	const roundTrip = ROUND_TRIP_CASE.test( c.key );
 	const f = {
 		save: JSON.stringify( c.save ?? null ),
 		ability: JSON.stringify( c.ai ?? null ),
 		id: String( c.id ),
-		'stored.content': c.stored ? String( c.stored.content ?? '' ) : 'NONE',
+		'stored.content': c.stored ? ( roundTrip ? roundTripContent( String( c.stored.content ?? '' ), used ) : String( c.stored.content ?? '' ) ) : 'NONE',
 		// WordPress core writes `enclosure` post meta from WP-Cron (do_enclose) for a media URL in the
 		// content. Whether cron has run yet is timing, so the row is left out (named token).
 		'stored.meta': c.stored ? JSON.stringify( ( c.stored.meta || [] ).filter( ( m ) => {
@@ -180,7 +423,7 @@ export function fieldsOf( l, c, used ) {
 			}
 			used[ 'wp-core:enclosure-meta(cron)' ] = ( used[ 'wp-core:enclosure-meta(cron)' ] || 0 ) + 1;
 			return false;
-		} ) ) : 'NONE',
+		} ).map( ( m ) => ( roundTrip ? roundTripMeta( m, used ) : m ) ) ) : 'NONE',
 		'stored.other': c.stored ? JSON.stringify( [ c.stored.status, c.stored.author, c.stored.revisions, c.stored.option ?? null ] ) : 'NONE',
 	};
 	for ( const r of renderersOf( c ) ) {

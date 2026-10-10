@@ -86,6 +86,7 @@ A token is a value that changes between two runs of the same code. It is replace
 | `uniqid:layout-builder-widget-id` | A Layout Builder widget gets a new `builder_id` from `uniqid()` on each save, printed as `w<13 hex>`. |
 | `wb:_sow_form_timestamp` | Widgets Bundle widgets store the save time (13 digits). |
 | `wp-core:post-modified-time(theme)` | A theme that prints the post's modified time (`<time class="updated">`, for example Vantage). A saved post is modified at the time of the run. |
+| `panels:unchanged-widget-stored-as-is` | Not a run-to-run value. In the ability round-trip cases (`ab.*.legit`), `layout-update` stores every widget except the changed widget 2 exactly as it was stored. Those widgets are compared without a `panels_info.cell_index` whose value is the one `layout-get` adds, and, on a classic layout, with `so_sidebar_emulator_id` and `option_name` moved from right before `panels_info` to right after it. |
 | `wp-core:enclosure-meta(cron)` | WordPress writes `enclosure` post meta from WP-Cron for a media URL. Whether cron has run yet is timing, so the row is left out. |
 | `harness:port` (opt-in, `--tokens=port`) | Two runs on different ports. |
 | `package:version-string` (opt-in, `--tokens=version`) | The plugin version of each run, read from its `info.json` (asset URLs, generator comment). |
