@@ -414,18 +414,77 @@ class SiteOrigin_Panels_Abilities {
 
 		// Coerce object/scalar widget entries to arrays so none slips past the
 		// sanitizer (see normalize_widget_entries()).
-		$panels_data = $this->normalize_widget_entries( $panels_data );
+		$object_keys = array();
+		$panels_data = $this->normalize_widget_entries( $panels_data, $object_keys );
 
-		$panels_data['widgets'] = $admin->process_raw_widgets(
-			! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
-			! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false,
-			false
-		);
+		// The sanitizers below recurse without a cycle check.
+		SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $panels_data );
+
+		// Widgets the caller sent back unchanged keep their stored value: they
+		// skip update() and the floor. A stored widget that is cyclic or holds an
+		// unsupported object is never matched and never reaches a replacement's
+		// update(); process_raw_widgets() already ignores non-array entries.
+		$old_widgets = ! empty( $old_panels_data['widgets'] ) ? $old_panels_data['widgets'] : false;
+		$restored    = array();
+		$snapshots   = array();
+		$emulator    = array();
+		if ( is_array( $old_widgets ) ) {
+			$frozen = array();
+			foreach ( $old_widgets as $key => $widget ) {
+				if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
+					$frozen[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+				} elseif ( is_array( $widget ) ) {
+					unset( $old_widgets[ $key ] );
+				}
+			}
+
+			if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) && ! empty( $frozen ) ) {
+				$incoming = array();
+				foreach ( $panels_data['widgets'] as $key => $widget ) {
+					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
+						$incoming[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+					}
+				}
+
+				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $frozen, $object_keys );
+				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $frozen, $matches );
+				foreach ( $restored as $key => $widget ) {
+					$snapshots[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+				}
+			}
+
+			$old_widgets = ! empty( $old_widgets ) ? $old_widgets : false;
+		}
+
+		if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
+			// Process only the widgets that did not match, then write every
+			// result back at its own key, so the list keeps its keys and order.
+			$processed = $admin->process_raw_widgets( array_diff_key( $panels_data['widgets'], $restored ), $old_widgets, false );
+			foreach ( $processed as $key => $widget ) {
+				$panels_data['widgets'][ $key ] = $widget;
+			}
+			foreach ( $restored as $key => $widget ) {
+				$panels_data['widgets'][ $key ] = $widget;
+			}
+		} else {
+			$panels_data['widgets'] = $admin->process_raw_widgets(
+				! empty( $panels_data['widgets'] ) ? $panels_data['widgets'] : array(),
+				$old_widgets,
+				false
+			);
+		}
 
 		// Sidebars-emulator parity (admin.php save_post): generate sidebar widget IDs
 		// when the setting is on, between sanitize passes.
 		if ( siteorigin_panels_setting( 'sidebars-emulator' ) ) {
 			$panels_data['widgets'] = SiteOrigin_Panels_Sidebars_Emulator::single()->generate_sidebar_widget_ids( $panels_data['widgets'], $post_id );
+
+			// A kept widget may carry the IDs this call wrote, and no others.
+			foreach ( $restored as $key => $widget ) {
+				if ( isset( $panels_data['widgets'][ $key ] ) && is_array( $panels_data['widgets'][ $key ] ) ) {
+					$emulator[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( SiteOrigin_Panels_Layout_Update_Unchanged::emulator_values( $panels_data['widgets'][ $key ] ) );
+				}
+			}
 		}
 
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
@@ -436,17 +495,17 @@ class SiteOrigin_Panels_Abilities {
 		// A pre-save callback can write a style that is not an array; the builder cannot load one.
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->remove_invalid_styles( $panels_data );
 
-		// Unconditional kses floor for the AI meta write (Audit #1 fix 1b): the
-		// whole write is AI-originated, and AI output is prompt-injectable no
-		// matter whose credential carries the request — the author's
-		// unfiltered_html capability must not exempt it. Applied AFTER sanitize
-		// and the pre-save filter (widget update() output is what persists;
-		// filter-injected content is floored too), directly at this call site:
-		// nothing signs meta, so no chokepoint flag is involved. Classic render
-		// trusts stored meta, which makes this write-time floor the only floor
-		// this surface gets.
+		// The kses floor for the AI meta write: AI output is prompt-injectable no
+		// matter whose credential carries the request, so the author's
+		// unfiltered_html capability does not exempt it. Every widget is floored
+		// except one that still equals the stored widget it was matched to; that
+		// widget is stored as its stored value. Applied after sanitize and the
+		// pre-save filter, so filter-injected content is floored too. Classic
+		// render trusts stored meta, which makes this write-time floor the only
+		// floor this surface gets.
+		SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $panels_data );
 		if ( ! empty( $panels_data['widgets'] ) ) {
-			$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+			$panels_data['widgets'] = SiteOrigin_Panels_Layout_Update_Unchanged::floor( $panels_data['widgets'], $snapshots, $emulator );
 		}
 
 		// The same structural rule an editor save applies, on the final layout,
@@ -464,6 +523,10 @@ class SiteOrigin_Panels_Abilities {
 				'message' => __( 'The layout was not saved because the builder cannot load it. A layout needs grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. The layout-get ability returns layouts in this shape.', 'siteorigin-panels' ),
 			);
 		}
+
+		// What is stored holds no reference that a filter kept, so a listener
+		// cannot reach it through one.
+		$panels_data = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $panels_data );
 
 		// The final layout: let an add-on stop the write before anything is
 		// stored, deleted or rendered. Throws SiteOrigin_Panels_Layout_Update_Aborted,

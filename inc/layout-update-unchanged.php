@@ -50,6 +50,28 @@ class SiteOrigin_Panels_Layout_Update_Unchanged {
 	}
 
 	/**
+	 * Stop a layout-update write whose layout holds a cycle.
+	 *
+	 * The save pipeline and kses_deep() recurse without a cycle check, so a
+	 * cyclic value would loop. The write is declined with the code the
+	 * pre-write copy uses for values it cannot copy; nothing is stored.
+	 *
+	 * @param mixed $value The layout.
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_unsupported_value.
+	 */
+	public static function assert_walkable( $value ) {
+		if ( ! self::walkable( $value ) ) {
+			throw new SiteOrigin_Panels_Layout_Update_Aborted(
+				new WP_Error(
+					'siteorigin_panels_layout_update_unsupported_value',
+					__( 'The layout contains a value that cannot be saved by a layout update.', 'siteorigin-panels' )
+				)
+			);
+		}
+	}
+
+	/**
 	 * Whether a stored or incoming widget can be compared and copied.
 	 *
 	 * @param mixed $entry A widget entry.
