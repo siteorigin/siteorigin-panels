@@ -127,16 +127,21 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	}
 
 	/**
-	 * Recursive copy of a layout value for the filter payload.
+	 * Recursive copy of a layout value.
 	 *
-	 * Arrays are copied value by value; plain objects (stdClass) are cloned
-	 * and their properties copied, so a listener that changes a nested object
-	 * in its payload cannot change the value that is stored. A plain object
-	 * has only public properties, so the copy reaches all of its state.
+	 * Arrays are rebuilt key by key and plain objects (stdClass) are rebuilt
+	 * property by property, so the copy holds no PHP reference and shares no
+	 * object with the original: a listener that changes its payload, or code
+	 * that still holds a reference into the original, cannot change the copy.
+	 * Keys, property order, values and types are kept. A plain object has only
+	 * public properties, so the copy reaches all of its state.
 	 *
 	 * Any other object stops the write: it can hold state a copy cannot
 	 * reach (non-public or readonly properties, or storage inside an internal
 	 * class). REST and JSON input only ever holds arrays and plain objects.
+	 *
+	 * The value must not contain a cycle; layout-update writes check that with
+	 * SiteOrigin_Panels_Layout_Update_Unchanged::walkable() first.
 	 *
 	 * @param mixed $value The value to copy.
 	 *
@@ -144,13 +149,14 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	 *
 	 * @return mixed
 	 */
-	private static function detach( $value ) {
+	public static function detach( $value ) {
 		if ( is_array( $value ) ) {
+			$copy = array();
 			foreach ( $value as $key => $item ) {
-				$value[ $key ] = self::detach( $item );
+				$copy[ $key ] = self::detach( $item );
 			}
 
-			return $value;
+			return $copy;
 		}
 
 		if ( is_object( $value ) ) {
@@ -163,8 +169,8 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 				);
 			}
 
-			$copy = clone $value;
-			foreach ( get_object_vars( $copy ) as $key => $item ) {
+			$copy = new stdClass();
+			foreach ( get_object_vars( $value ) as $key => $item ) {
 				$copy->$key = self::detach( $item );
 			}
 
