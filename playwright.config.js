@@ -10,6 +10,7 @@ const LISTENER_SPECS = [
 	'**/abilities-mcp.test.js',
 	'**/layout-update-pre-write.test.js',
 	'**/layout-update-structure.test.js',
+	'**/layout-update-unchanged-widgets.test.js',
 ];
 
 const [ chrome ] = config.projects;
