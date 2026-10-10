@@ -304,8 +304,8 @@ class Abilities_LayoutBlockSpy {
 	public $layout_update_args = null;
 	public $abort = null;
 
-	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
-		$this->layout_update_args = array( $post_id, $block_index );
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index, $stored = null, $object_keys = array() ) {
+		$this->layout_update_args = array( $post_id, $block_index, $stored, $object_keys );
 
 		if ( $this->abort !== null ) {
 			throw new SiteOrigin_Panels_Layout_Update_Aborted( $this->abort );
@@ -1947,8 +1947,31 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 
 		$this->assertTrue( $result['updated'] );
-		$this->assertSame( array( 51, 0 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( array( 51, 0 ), array_slice( Abilities_LayoutBlockSpy::$instance->layout_update_args, 0, 2 ) );
 		$this->assertSame( 1, Abilities_LayoutBlockSpy::$instance->untrusted_calls );
+	}
+
+	public function test_block_write_passes_the_raw_stored_layout_and_object_keys() { // #1409
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 53, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'wp_update_post' )->justReturn( 53 );
+		// A read filter that rewrites the layout must not become the baseline.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				return $tag === 'siteorigin_panels_data' && is_array( $value ) ? array( 'widgets' => array( 'rewritten' ) ) : $value;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 53,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Array' ), (object) Abilities_Fixtures::widget( 'Object' ) ) ),
+			)
+		);
+
+		$args = Abilities_LayoutBlockSpy::$instance->layout_update_args;
+		$this->assertSame( array( 'widgets' => array( 'existing-0' ) ), $args[2], 'the raw stored panelsData' );
+		$this->assertSame( array( 1 ), $args[3], 'the key of the entry that arrived as an object' );
 	}
 
 	public function test_block_write_passes_the_requested_index_on_a_multi_block_post() {
@@ -1965,7 +1988,7 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 
 		$this->assertSame( 2, $result['block_index'] );
-		$this->assertSame( array( 52, 2 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( array( 52, 2 ), array_slice( Abilities_LayoutBlockSpy::$instance->layout_update_args, 0, 2 ) );
 	}
 
 	public function test_block_write_abort_returns_the_error_and_does_not_update_the_post() {

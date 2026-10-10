@@ -776,11 +776,15 @@ class SiteOrigin_Panels_Abilities {
 		// blocks untouched.
 		// Coerce object/scalar widget entries to arrays so none slips past the
 		// sanitizer inside the chokepoint (see normalize_widget_entries()).
-		$panels_data = $this->normalize_widget_entries( $panels_data );
+		$object_keys = array();
+		$panels_data = $this->normalize_widget_entries( $panels_data, $object_keys );
 
 		$blocks = parse_blocks( $post->post_content );
+		// The raw stored layout of this block, not the read-filtered one, is
+		// what an unchanged widget must equal.
+		$stored = isset( $blocks[ $target_key ]['attrs']['panelsData'] ) ? $blocks[ $target_key ]['attrs']['panelsData'] : null;
 		$blocks[ $target_key ]['attrs']['panelsData'] = $panels_data;
-		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_for_layout_update( $blocks[ $target_key ], $post->ID, $block_index );
+		$blocks[ $target_key ] = SiteOrigin_Panels_Compat_Layout_Block::single()->sanitize_block_for_layout_update( $blocks[ $target_key ], $post->ID, $block_index, $stored, $object_keys );
 
 		// wp_update_post()/wp_insert_post() run wp_unslash() on their input, so the
 		// content MUST be slashed first — otherwise the backslash in every JSON
