@@ -432,7 +432,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * validate_post_data(), which undoes core's `&amp;` artifact. Running the
 	 * same transforms here until the layout stops changing gives the form
 	 * that is stored, so the pre-write hook payload equals the stored layout
-	 * and the later save finds nothing left to change.
+	 * and the later save finds nothing left to change. For a user without
+	 * `unfiltered_html`, the result is then checked against the widgets the
+	 * floor kept (assert_kept_widgets_stored()).
 	 *
 	 * At most 8 passes: this is a fail-closed limit, not a claim that the
 	 * filters always settle. A layout that has not settled by then, or a pass
