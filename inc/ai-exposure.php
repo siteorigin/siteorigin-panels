@@ -24,9 +24,10 @@
  * AI content is origin-untrusted regardless of the credential carrying the
  * request — an admin application password does not exempt it. On both paths,
  * a widget that SiteOrigin_Panels_Layout_Update_Unchanged::match() pairs with
- * a stored widget keeps its stored value and skips update() and the floor (see
- * match() and restore() for the pairing and position rules); every other
- * widget is sanitized and floored.
+ * a stored widget skips update(), and is stored with its stored value unless a
+ * later step of the save changes it, in which case it is floored (see match(),
+ * restore() and floor() for the rules); every other widget is sanitized and
+ * floored.
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
