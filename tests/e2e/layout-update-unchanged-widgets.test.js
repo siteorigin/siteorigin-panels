@@ -26,6 +26,7 @@ const {
 
 const EMBED = '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" width="560" height="315"></iframe>';
 const MALICIOUS = 'Changed <img src=x onerror="panelsE2e()"><script>panelsE2e()</script>';
+const NEEDS_UNFILTERED_HTML = 'siteorigin_panels_layout_update_needs_unfiltered_html';
 
 let admin;
 let author;
@@ -143,6 +144,36 @@ const roundTrip = async ( session, postId, change ) => {
 	expect( state.log[ 0 ].panels_data, 'the pre-write payload equals what is stored' ).toStrictEqual( storedLayout( raw, layout.storage ) );
 
 	return { raw, stored: storedLayout( raw, layout.storage ) };
+};
+
+/**
+ * layout-get, change the copy, layout-update, and expect the write to be
+ * refused because WordPress kses would strip a kept widget. Nothing is stored
+ * and the pre-write hook does not fire.
+ */
+const refusedTrip = async ( session, postId, change ) => {
+	const before = await rawStorage( admin, postId );
+	const layout = await readLayout( session, postId );
+	const panelsData = change( JSON.parse( JSON.stringify( layout.panels_data ) ) );
+
+	await setProbe( admin, 'pass' );
+	const response = await runAbility( session, 'siteorigin-panels/layout-update', { post_id: postId, panels_data: panelsData, block_index: layout.block_index } );
+	expect( response.status, JSON.stringify( response.body ) ).toBe( 403 );
+	expect( response.body.code ).toBe( NEEDS_UNFILTERED_HTML );
+	expect( response.body.message ).toContain( 'An Editor or Administrator must make this change.' );
+
+	expect( ( await probeState( admin ) ).log ).toHaveLength( 0 );
+	expect( await rawStorage( admin, postId ), 'nothing is stored' ).toStrictEqual( before );
+};
+
+/**
+ * Store a Layout Block on a post as the administrator, so an embed is kept.
+ */
+const seedBlock = async ( postId, layout ) => {
+	const seeded = await rest( admin, 'POST', `/wp/v2/posts/${ postId }`, { data: { content: layoutBlock( layout ) } } );
+	expect( seeded.status, JSON.stringify( seeded.body ) ).toBe( 200 );
+
+	return ( await rawStorage( admin, postId ) ).blocks[ 0 ];
 };
 
 const changeB = ( panelsData ) => {
@@ -287,14 +318,52 @@ test.describe( 'author credential', () => {
 		expectFloored( stored.widgets[ 1 ] );
 	} );
 
-	test( 'A2: Layout Block — the payload equals what is stored', async () => {
+	test( 'A2: Layout Block — a kept embed kses would strip refuses the write', async () => {
 		const postId = await createTracked( author, 'post', { title: 'Panels e2e author draft (block)' } );
-		const seeded = await rest( admin, 'POST', `/wp/v2/posts/${ postId }`, { data: { content: layoutBlock( seedLayout() ) } } );
-		expect( seeded.status, JSON.stringify( seeded.body ) ).toBe( 200 );
+		const seeded = await seedBlock( postId, seedLayout() );
+		expect( seeded.widgets[ 0 ].content ).toBe( EMBED );
 
-		// roundTrip() asserts the payload equals storage. Whether the embed
-		// survives is decided by WordPress's own kses for an author.
+		await refusedTrip( author, postId, changeB );
+	} );
+
+	test( 'A3: Layout Block — kept widgets kses leaves alone are written', async () => {
+		const postId = await createTracked( author, 'post', { title: 'Panels e2e author draft (plain block)' } );
+		const layout = seedLayout();
+		layout.widgets[ 0 ].content = 'Tom & Jerry';
+		const seeded = await seedBlock( postId, layout );
+
 		const { stored } = await roundTrip( author, postId, changeB );
+
+		expect( stored.widgets[ 0 ] ).toStrictEqual( seeded.widgets[ 0 ] );
 		expectFloored( stored.widgets[ 1 ] );
+	} );
+} );
+
+test.describe( 'administrator without unfiltered_html (as on multisite)', () => {
+	let restricted;
+
+	test.beforeAll( async () => {
+		restricted = await createUserSession( admin, 'administrator' );
+		const response = await rest( admin, 'POST', '/panels-e2e/v1/state', { data: { mode: 'pass', deny_unfiltered_html: restricted.userId } } );
+		expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
+	} );
+
+	test.afterAll( async () => {
+		await rest( admin, 'POST', '/panels-e2e/v1/state', { data: { mode: 'pass', deny_unfiltered_html: 0 } } ).catch( () => {} );
+
+		if ( restricted ) {
+			await deleteUser( admin, restricted.userId ).catch( () => {} );
+			await restricted.context.dispose();
+		}
+	} );
+
+	test( 'A4: Layout Block — a kept embed kses would strip refuses the write', async () => {
+		const pageId = await createTracked( admin, 'page', {
+			title: 'Panels e2e restricted administrator (block)',
+			content: layoutBlock( seedLayout() ),
+		} );
+		expect( ( await rawStorage( admin, pageId ) ).blocks[ 0 ].widgets[ 0 ].content ).toBe( EMBED );
+
+		await refusedTrip( restricted, pageId, changeB );
 	} );
 } );
