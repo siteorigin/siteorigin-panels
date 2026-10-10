@@ -24,9 +24,12 @@
  * AI content is origin-untrusted regardless of the credential carrying the
  * request — an admin application password does not exempt it. On both paths,
  * a widget that SiteOrigin_Panels_Layout_Update_Unchanged::match() pairs with
- * a stored widget skips update(), and SiteOrigin_Panels_Layout_Update_Unchanged::floor()
- * decides whether it is stored with its stored value or floored; every other
- * widget is sanitized and floored.
+ * a stored widget skips update(). If that widget is still in the final list,
+ * SiteOrigin_Panels_Layout_Update_Unchanged::floor() either keeps it or
+ * floors it. A kept widget is stored as a copy of the stored widget, with the
+ * caller's floored position fields if it moved, and, on META writes where the
+ * sidebars emulator runs, with the emulator values from this write. Every
+ * other widget is sanitized and floored.
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
