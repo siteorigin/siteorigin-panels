@@ -2792,18 +2792,38 @@ class AbilitiesTest extends SiteOriginTests {
 			$stored,
 			array(
 				'siteorigin_panels_data_pre_save' => function ( $panels_data ) use ( &$kept_ref ) {
-					$kept_ref = &$panels_data['widgets'][0]['text'];
+					$panels_data['grids'][0]['style'] = array( 'class' => 'row' );
+					$kept_ref = &$panels_data['grids'][0]['style']['class'];
 
 					return $panels_data;
 				},
 				'pre_write' => function ( $result ) use ( &$kept_ref ) {
-					$kept_ref = '<script>evil()</script>';
+					$kept_ref = '"><script>evil()</script>';
 
 					return $result;
 				},
 			)
 		);
 		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 'row', $this->persisted['grids'][0]['style']['class'], 'a reference a filter kept into the rows cannot reach storage' );
+
+		$setting       = new stdClass();
+		$setting->html = 'stored';
+		$with_object   = $this->html( 'A' );
+		$with_object['setting'] = $setting;
+		$object_layout = $this->two_cells( array( $with_object ) );
+		$this->meta_write(
+			$object_layout,
+			unserialize( serialize( $object_layout ) ),
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'][0]['setting']->html = '<img src=x onerror=p()>';
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['setting']->html, 'an in-place edit of a kept widget\'s object is floored' );
 
 		$shared         = new stdClass();
 		$shared->html   = 'stored';
@@ -2823,6 +2843,11 @@ class AbilitiesTest extends SiteOriginTests {
 		$incoming = unserialize( serialize( $stored ) );
 		$incoming['widgets'][1]['text'] = 'B2';
 		Functions\when( 'get_post_meta' )->justReturn( $stored );
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				return $value;
+			}
+		);
 		$this->persisted = null;
 		$this->abilities()->layout_update( array( 'post_id' => 30, 'panels_data' => $incoming ) );
 		$this->assertSame( 'stored', $this->persisted['widgets'][0]['setting']->html, 'the kept widget is the frozen stored value' );

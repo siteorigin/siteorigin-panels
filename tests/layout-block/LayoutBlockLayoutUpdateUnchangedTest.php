@@ -378,8 +378,17 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 			return $panels_data;
 		};
 		$written = $this->write( $stored, $stored );
-		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'a replaced layout is floored whole' );
+		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'the edited widget is floored' );
 		$this->assertSame( '<img src=x>', $written['widgets'][0]['extra']['html'], 'strings inside an added object are floored' );
+
+		$two = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
+		$this->callbacks['siteorigin_panels_ai_block_layout_pre_save'] = function ( $panels_data ) {
+			$panels_data['widgets'][1]['content'] = 'Edited by the filter';
+
+			return $panels_data;
+		};
+		$written = $this->write( $two, $two );
+		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'a replaced layout is floored whole, untouched widgets included' );
 
 		$shared       = new \stdClass();
 		$shared->html = 'stored';
