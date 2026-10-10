@@ -160,7 +160,7 @@ const refusedTrip = async ( session, postId, change ) => {
 	const response = await runAbility( session, 'siteorigin-panels/layout-update', { post_id: postId, panels_data: panelsData, block_index: layout.block_index } );
 	expect( response.status, JSON.stringify( response.body ) ).toBe( 403 );
 	expect( response.body.code ).toBe( NEEDS_UNFILTERED_HTML );
-	expect( response.body.message ).toContain( 'An Editor or Administrator must make this change.' );
+	expect( response.body.message ).toBe( "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a user who can save HTML on this site to make the change." );
 
 	expect( ( await probeState( admin ) ).log ).toHaveLength( 0 );
 	expect( await rawStorage( admin, postId ), 'nothing is stored' ).toStrictEqual( before );

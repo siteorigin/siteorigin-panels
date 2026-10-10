@@ -495,7 +495,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				throw new SiteOrigin_Panels_Layout_Update_Aborted(
 					new WP_Error(
 						'siteorigin_panels_layout_update_needs_unfiltered_html',
-						__( "The layout was not saved. It holds an existing embed or HTML that can't be saved with this account's permissions. An Editor or Administrator must make this change.", 'siteorigin-panels' ),
+						is_multisite()
+							? __( "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a Super Admin for the multisite network to make the change.", 'siteorigin-panels' )
+							: __( "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a user who can save HTML on this site to make the change.", 'siteorigin-panels' ),
 						array( 'status' => 403 )
 					)
 				);

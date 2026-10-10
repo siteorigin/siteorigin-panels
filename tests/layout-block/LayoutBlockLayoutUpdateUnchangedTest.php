@@ -5,6 +5,7 @@ namespace SiteOrigin\Tests;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 if ( ! class_exists( 'SiteOrigin_Panels', false ) ) {
@@ -516,7 +517,16 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		);
 	}
 
-	public function test_a_kept_widget_kses_would_change_stops_the_write() {
+	public static function sites() {
+		return array(
+			'single site' => array( false, "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a user who can save HTML on this site to make the change." ),
+			'multisite'   => array( true, "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a Super Admin for the multisite network to make the change." ),
+		);
+	}
+
+	#[DataProvider( 'sites' )]
+	public function test_a_kept_widget_kses_would_change_stops_the_write( $multisite, $message ) {
+		Functions\when( 'is_multisite' )->justReturn( $multisite );
 		$this->without_unfiltered_html();
 		$this->core_kses();
 		$stored   = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
@@ -530,13 +540,14 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 			$error = $e->get_error();
 			$this->assertSame( 'siteorigin_panels_layout_update_needs_unfiltered_html', $error->get_error_code() );
 			$this->assertSame( array( 'status' => 403 ), $error->get_error_data() );
-			$this->assertStringContainsString( 'An Editor or Administrator must make this change.', $error->get_error_message() );
+			$this->assertSame( $message, $error->get_error_message() );
 		}
 
 		$this->assertCount( 0, $this->pre_write_calls, 'nothing reaches the hook' );
 	}
 
 	public function test_a_moved_kept_widget_kses_would_change_stops_the_write() {
+		Functions\when( 'is_multisite' )->justReturn( false );
 		$this->without_unfiltered_html();
 		$this->core_kses();
 		$stored   = $this->layout( array( $this->widget( self::EMBED ) ) );
