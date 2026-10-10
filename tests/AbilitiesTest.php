@@ -2785,20 +2785,21 @@ class AbilitiesTest extends SiteOriginTests {
 
 	public function test_references_cannot_change_what_is_stored() { // T22, T23
 		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
-		$kept_ref = null;
+		$kept = array();
 
 		$this->meta_write(
 			$stored,
 			$stored,
 			array(
-				'siteorigin_panels_data_pre_save' => function ( $panels_data ) use ( &$kept_ref ) {
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) use ( &$kept ) {
 					$panels_data['grids'][0]['style'] = array( 'class' => 'row' );
-					$kept_ref = &$panels_data['grids'][0]['style']['class'];
+					// An element of $kept becomes a reference to the row's slot.
+					$kept[0] = &$panels_data['grids'][0]['style']['class'];
 
 					return $panels_data;
 				},
-				'pre_write' => function ( $result ) use ( &$kept_ref ) {
-					$kept_ref = '"><script>evil()</script>';
+				'pre_write' => function ( $result ) use ( &$kept ) {
+					$kept[0] = '"><script>evil()</script>';
 
 					return $result;
 				},
