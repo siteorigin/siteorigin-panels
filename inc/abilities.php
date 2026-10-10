@@ -334,20 +334,19 @@ class SiteOrigin_Panels_Abilities {
 	 *
 	 * Casting a stdClass widget ENTRY to an assoc array is sufficient: once the
 	 * entry is an array, process_raw_widgets() runs the widget's update() over it
-	 * and kses_deep() recurses its string leaves. kses_deep() recurses only
-	 * is_array values, so a stdClass nested INSIDE a widget (e.g. an object-valued
-	 * setting) would still be skipped by the floor — that deeper case is out of
-	 * scope here: it is not the reported finding, widget schema values are
-	 * scalars/arrays not objects, and casting arbitrarily deep risks corrupting
-	 * legitimate structures.
+	 * and the layout-update floor filters its strings, including strings inside
+	 * stdClass values nested in it.
 	 *
 	 * Reachable only from the AI direct-caller path; classic/import/live-editor
 	 * saves receive $_POST/editor JSON already decoded to arrays.
 	 *
-	 * @param array $panels_data Incoming canonical panels_data.
+	 * @param array      $panels_data Incoming canonical panels_data.
+	 * @param array|null $object_keys Set to the normalized keys of the entries that arrived as objects.
 	 * @return array Panels_data with every widgets entry normalized to an array.
 	 */
-	protected function normalize_widget_entries( $panels_data ) {
+	protected function normalize_widget_entries( $panels_data, &$object_keys = null ) {
+		$object_keys = array();
+
 		if ( empty( $panels_data['widgets'] ) || ! is_array( $panels_data['widgets'] ) ) {
 			return $panels_data;
 		}
@@ -355,7 +354,8 @@ class SiteOrigin_Panels_Abilities {
 		$normalized = array();
 		foreach ( $panels_data['widgets'] as $widget ) {
 			if ( is_object( $widget ) ) {
-				$normalized[] = (array) $widget;
+				$object_keys[] = count( $normalized );
+				$normalized[]  = (array) $widget;
 			} elseif ( is_array( $widget ) ) {
 				$normalized[] = $widget;
 			}
