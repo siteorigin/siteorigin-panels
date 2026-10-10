@@ -1951,7 +1951,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 1, Abilities_LayoutBlockSpy::$instance->untrusted_calls );
 	}
 
-	public function test_block_write_passes_the_raw_stored_layout_and_object_keys() { // #1409
+	public function test_block_write_passes_the_raw_stored_layout_and_object_keys() {
 		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 53, 'post_content' => 'one block' ) );
 		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
 		Functions\when( 'wp_update_post' )->justReturn( 53 );
@@ -2414,7 +2414,6 @@ class AbilitiesTest extends SiteOriginTests {
 
 
 	// --- Unchanged widgets (#1409), meta path --------------------------------
-	// Row names (T1 ...) refer to the decision table for issue #1409.
 
 	private function html( $text, $cell = 0, $id = 0, $widget_id = null ) {
 		return array(
@@ -2505,7 +2504,7 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 	}
 
-	public function test_unchanged_widget_keeps_its_stored_value_and_changed_widget_is_floored() { // T1, T2, T30
+	public function test_unchanged_widget_keeps_its_stored_value_and_changed_widget_is_floored() {
 		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Plain', 0, 1 ) ) );
 		$incoming = $stored;
 		$incoming['widgets'][0]['panels_info']['cell_index'] = 0;
@@ -2520,7 +2519,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertNotContains( 'Embed <img src=x onerror=a()>', $this->processed_texts(), 'a kept widget never reaches process_raw_widgets()' );
 	}
 
-	public function test_moved_widget_is_kept_at_the_callers_position() { // T3
+	public function test_moved_widget_is_kept_at_the_callers_position() {
 		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Plain', 0, 1 ) ) );
 		$incoming = $stored;
 		$incoming['widgets'][0]['panels_info']['cell'] = 1;
@@ -2533,7 +2532,22 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 1, $this->persisted['widgets'][0]['panels_info']['cell'] );
 	}
 
-	public function test_a_copy_and_an_ambiguous_duplicate_are_floored() { // T5, T6
+	public function test_a_moved_widget_whose_panels_info_is_a_reference_keeps_its_position() {
+		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
+		$info     = $stored['widgets'][0]['panels_info'];
+		$info['cell'] = 1;
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info'] = &$info;
+
+		$result = $this->meta_write( $stored, $incoming );
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 1, $this->persisted['widgets'][0]['panels_info']['cell'] );
+		$this->assertSame( 0, $this->persisted['widgets'][0]['panels_info']['grid'] );
+	}
+
+	public function test_a_copy_and_an_ambiguous_duplicate_are_floored() {
 		$a      = $this->html( 'Embed <img src=x onerror=a()>' );
 		$copy   = $a;
 		$copy['panels_info']['cell'] = 1;
@@ -2549,7 +2563,7 @@ class AbilitiesTest extends SiteOriginTests {
 		}
 	}
 
-	public function test_a_change_to_any_field_floors_the_widget() { // T7
+	public function test_a_change_to_any_field_floors_the_widget() {
 		$a      = $this->html( 'Embed <img src=x onerror=a()>' );
 		$stored = $this->two_cells( array( $a ) );
 
@@ -2569,7 +2583,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertStringNotContainsString( 'onerror', $this->persisted['widgets'][0]['text'], 'raw added' );
 	}
 
-	public function test_widget_list_shapes_keep_todays_outcome() { // T9, T10, T16
+	public function test_widget_list_shapes_keep_todays_outcome() {
 		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
 		// Like the real process_raw_widgets(), which returns array() for an
 		// empty or non-array list (inc/admin.php).
@@ -2593,7 +2607,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'], 'no stored layout: everything floored' );
 	}
 
-	public function test_a_filter_that_reorders_list_keys_is_declined() { // T11
+	public function test_a_filter_that_reorders_list_keys_is_declined() {
 		$stored   = $this->two_cells( array( $this->html( 'A' ), $this->html( 'B', 0, 1 ), $this->html( 'C', 1, 0 ) ) );
 		$result   = $this->meta_write(
 			$stored,
@@ -2611,7 +2625,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertNull( $this->persisted );
 	}
 
-	public function test_kept_widgets_keep_list_order_in_a_mixed_update() { // T38, T25
+	public function test_kept_widgets_keep_list_order_in_a_mixed_update() {
 		$stored   = $this->two_cells( array( $this->html( 'A <img src=x onerror=a()>' ), $this->html( 'B', 0, 1 ), $this->html( 'C <img src=x onerror=c()>', 1, 0 ) ) );
 		$incoming = $stored;
 		$incoming['widgets'][1]['text'] = 'B2';
@@ -2630,7 +2644,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( $stored['widgets'][2], $this->persisted['widgets'][0], 'values swapped at keys 0 and 2 are kept in that order' );
 	}
 
-	public function test_server_edits_after_restore_floor_the_widget() { // T13
+	public function test_server_edits_after_restore_floor_the_widget() {
 		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Other <img src=x onerror=o()>', 0, 1 ) ) );
 
 		$this->meta_write(
@@ -2672,7 +2686,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'], 'sanitize_all() rewrote its style' );
 	}
 
-	public function test_kept_widget_takes_only_this_writes_emulator_values() { // T15
+	public function test_kept_widget_takes_only_this_writes_emulator_values() {
 		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
 		Functions\when( 'siteorigin_panels_setting' )->justReturn( true );
 		Abilities_EmulatorSpy::$instance = new class extends Abilities_EmulatorSpy {
@@ -2704,7 +2718,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'] );
 	}
 
-	public function test_object_values_follow_the_stored_object_contract() { // T17, T18, T19, T36
+	public function test_object_values_follow_the_stored_object_contract() {
 		$setting       = new stdClass();
 		$setting->html = '<img src=x onerror=s()>';
 		$a             = $this->html( 'A' );
@@ -2731,7 +2745,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['panels_info']['id']->v, 'a moved position value is floored' );
 	}
 
-	public function test_unsafe_stored_widgets_never_block_or_reach_a_replacement() { // T20, T21, T37, T39
+	public function test_unsafe_stored_widgets_never_block_or_reach_a_replacement() {
 		$cyclic                     = $this->html( 'Old', 0, 0, 'same-id' );
 		$cyclic['loop']             = array( 'x' => 1 );
 		$cyclic['loop']['self']     = &$cyclic['loop'];
@@ -2751,7 +2765,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertTrue( $result['updated'], 'removing them succeeds' );
 	}
 
-	public function test_cyclic_incoming_values_are_declined() { // T33, T40
+	public function test_cyclic_incoming_values_are_declined() {
 		$loop         = array( 'x' => 1 );
 		$loop['self'] = &$loop;
 		$widget       = $this->html( 'A' );
@@ -2783,7 +2797,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertNull( $this->persisted );
 	}
 
-	public function test_references_cannot_change_what_is_stored() { // T22, T23
+	public function test_references_cannot_change_what_is_stored() {
 		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
 		$kept = array();
 
@@ -2854,7 +2868,7 @@ class AbilitiesTest extends SiteOriginTests {
 		$this->assertSame( 'stored', $this->persisted['widgets'][0]['setting']->html, 'the kept widget is the frozen stored value' );
 	}
 
-	public function test_deep_values_have_no_depth_limit() { // T34
+	public function test_deep_values_have_no_depth_limit() {
 		$deep = 'deep <img src=x onerror=d()>';
 		for ( $i = 0; $i < 1000; $i++ ) {
 			$deep = array( 'n' => $deep );

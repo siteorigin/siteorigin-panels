@@ -60,11 +60,7 @@ class UnchangedRendererStub {
  * The Layout Block path of issue #1409 on the REAL
  * SiteOrigin_Panels_Compat_Layout_Block: a layout-update write keeps the
  * stored value of widgets the caller sent back unchanged and floors every
- * other widget; an editor save is unchanged. Row names (T1 ...) refer to the
- * decision table for the issue.
- *
- * Self-contained per this suite's conventions; avoids arrow functions and
- * anonymous classes.
+ * other widget; an editor save is unchanged.
  */
 class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 	use MockeryPHPUnitIntegration;
@@ -322,7 +318,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->fail( 'The write must stop with ' . $code . '.' );
 	}
 
-	public function test_unchanged_widget_skips_update_and_keeps_its_stored_value() { // T1, T2, T30
+	public function test_unchanged_widget_skips_update_and_keeps_its_stored_value() {
 		$stored   = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
 		$incoming = $stored;
 		$incoming['widgets'][0]['panels_info']['cell_index'] = 0;
@@ -338,7 +334,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertNull( $this->read( $block, 'layout_update_pre_write' ), 'the context is cleared after the call' );
 	}
 
-	public function test_memo_pass_does_not_update_a_kept_widget() { // stage check
+	public function test_memo_pass_does_not_update_a_kept_widget() {
 		$stored = $this->layout( array( $this->widget( self::EMBED ) ) );
 		$block  = $this->layout_block();
 		$result = $block->sanitize_block_for_layout_update( $this->block_for( $stored ), 77, 0, $stored, array() );
@@ -349,7 +345,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertSame( $before, $this->widget_stub->updated );
 	}
 
-	public function test_moved_widget_is_kept_at_the_callers_position() { // T3, T36
+	public function test_moved_widget_is_kept_at_the_callers_position() {
 		$stored   = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
 		$incoming = $stored;
 		$incoming['widgets'][0]['panels_info']['cell'] = 1;
@@ -364,7 +360,21 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertNull( $written['widgets'][0]['panels_info']['id'], 'present null is kept' );
 	}
 
-	public function test_ai_filter_return_decides_whether_widgets_are_kept() { // T16, T29, T19
+	public function test_a_moved_widget_whose_panels_info_is_a_reference_keeps_its_position() {
+		$stored   = $this->layout( array( $this->widget( self::EMBED ) ) );
+		$info     = $stored['widgets'][0]['panels_info'];
+		$info['cell'] = 1;
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info'] = &$info;
+
+		$written = $this->write( $stored, $incoming );
+
+		$this->assertSame( self::EMBED, $written['widgets'][0]['content'] );
+		$this->assertSame( 1, $written['widgets'][0]['panels_info']['cell'] );
+		$this->assertSame( 0, $written['widgets'][0]['panels_info']['grid'] );
+	}
+
+	public function test_ai_filter_return_decides_whether_widgets_are_kept() {
 		$stored = $this->layout( array( $this->widget( self::EMBED ) ) );
 
 		$this->callbacks['siteorigin_panels_ai_block_layout_pre_save'] = function () {
@@ -402,7 +412,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'an in-place edit is compared after the filter and floored' );
 	}
 
-	public function test_ai_filter_that_reorders_keys_is_declined() { // T11
+	public function test_ai_filter_that_reorders_keys_is_declined() {
 		$stored = $this->layout( array( $this->widget( 'A' ), $this->widget( 'B', 0, 1 ), $this->widget( 'C', 1, 0 ) ) );
 		$this->callbacks['siteorigin_panels_ai_block_layout_pre_save'] = function ( $panels_data ) {
 			$panels_data['widgets'] = array( 2 => $panels_data['widgets'][2], 0 => $panels_data['widgets'][0], 1 => $panels_data['widgets'][1] );
@@ -413,7 +423,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->expect_decline( 'siteorigin_panels_layout_update_unresolved_reference', $stored, $stored );
 	}
 
-	public function test_cyclic_values_are_declined() { // T33, T35
+	public function test_cyclic_values_are_declined() {
 		$loop         = array( 'x' => 1 );
 		$loop['self'] = &$loop;
 		$cyclic       = $this->widget( 'A' );
@@ -429,7 +439,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->expect_decline( 'siteorigin_panels_layout_update_unsupported_value', null, $this->layout( array( $this->widget( 'A' ) ) ) );
 	}
 
-	public function test_stored_shapes_and_list_order() { // T20, T21, T38, T24
+	public function test_stored_shapes_and_list_order() {
 		$a       = $this->widget( self::EMBED );
 		$a['panels_info']['raw'] = true;
 		$stored  = $this->layout( array( 'scalar', $a, $this->widget( 'B', 0, 1 ) ) );
@@ -444,7 +454,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'no stored layout: everything floored' );
 	}
 
-	public function test_deep_values_within_block_storage() { // T31, T32, T34b
+	public function test_deep_values_within_block_storage() {
 		$deep = 'deep <img src=x onerror=d()>';
 		for ( $i = 0; $i < 500; $i++ ) {
 			$deep = array( 'n' => $deep );
@@ -470,7 +480,7 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->expect_decline( 'siteorigin_panels_layout_update_unstable', null, $this->layout( array( array_merge( $this->widget( 'A' ), array( 'nested' => $too_deep ) ) ) ) );
 	}
 
-	public function test_editor_save_keeps_its_floor() { // T26
+	public function test_editor_save_keeps_its_floor() {
 		Functions\when( 'current_user_can' )->justReturn( false );
 		$setting       = new \stdClass();
 		$setting->html = '<img src=x onerror=e()>';

@@ -337,9 +337,14 @@ class SiteOrigin_Panels_Layout_Update_Unchanged {
 
 	private static function form_key( array $widget ) {
 		if ( isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+			// Work on a copy, and drop the slot before writing it back: a
+			// panels_info held by reference must not change for the caller.
+			$info = $widget['panels_info'];
+			unset( $widget['panels_info'] );
 			foreach ( self::POSITION_KEYS as $position ) {
-				unset( $widget['panels_info'][ $position ] );
+				unset( $info[ $position ] );
 			}
+			$widget['panels_info'] = $info;
 		}
 
 		return self::key( $widget );
