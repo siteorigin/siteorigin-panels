@@ -23,14 +23,10 @@
  * Write contract (ability `siteorigin-panels/layout-update`, inc/abilities.php):
  * AI content is origin-untrusted regardless of the credential carrying the
  * request — an admin application password does not exempt it. On both paths,
- * a widget the caller sent back equal to exactly one stored widget, with no
- * other incoming widget competing for it, keeps its stored value and skips
- * update() and the floor; cell_index is ignored for the comparison. If its
- * grid, cell or id also changed, it keeps its stored content and takes the
- * caller's grid, cell, id and cell_index, filtered; otherwise it keeps its
- * stored position fields, cell_index included. Every other widget, including
- * an ambiguous duplicate, is sanitized and floored
- * (SiteOrigin_Panels_Layout_Update_Unchanged).
+ * a widget that SiteOrigin_Panels_Layout_Update_Unchanged::match() pairs with
+ * a stored widget keeps its stored value and skips update() and the floor (see
+ * match() and restore() for the pairing and position rules); every other
+ * widget is sanitized and floored.
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
