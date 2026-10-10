@@ -22,20 +22,25 @@
  *
  * Write contract (ability `siteorigin-panels/layout-update`, inc/abilities.php):
  * AI content is origin-untrusted regardless of the credential carrying the
- * request — an admin application password does not exempt it.
+ * request — an admin application password does not exempt it. On both paths,
+ * a widget the caller sent back equal to a stored widget keeps its stored
+ * value and skips update() and the floor; every new or changed widget is
+ * sanitized and floored (SiteOrigin_Panels_Layout_Update_Unchanged).
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
  *     layered-transform interaction premium-addon consumers of that filter
  *     must expect), then strict sanitize, then the kses floor FORCED
- *     regardless of capability. Single sanitize pass: the wp_insert_post_data
- *     safety net recognizes the block as already sanitized this request via the
- *     request-local memo in sanitize_block() and skips the second pass — there
- *     is no signature and nothing to verify.
- *   - META writes are strictly sanitized, unconditionally kses-floored, and
- *     double-slashed; the write-time floor is not capability-gated because
- *     classic render serves stored meta as-is (no render-time re-sanitize), so
- *     the save pass is the only floor this surface gets.
+ *     regardless of capability for every widget that is not unchanged.
+ *     Single sanitize pass: the wp_insert_post_data safety net recognizes the
+ *     block as already sanitized this request via the request-local memo in
+ *     sanitize_block() and skips the second pass — there is no signature and
+ *     nothing to verify.
+ *   - META writes are strictly sanitized, kses-floored (every widget that is
+ *     not unchanged, whatever the credential), and double-slashed; the
+ *     write-time floor is not capability-gated because classic render serves
+ *     stored meta as-is (no render-time re-sanitize), so the save pass is the
+ *     only floor this surface gets.
  *
  * @since {NEXT_VERSION}
  * @api

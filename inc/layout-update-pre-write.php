@@ -49,6 +49,10 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 *    will receive, and after the layout structure check on that stored
 		 *    form; before the block preview render and the post update.
 		 *
+		 * The kses floor applies to every new or changed widget. A widget the
+		 * caller sent back equal to a stored widget is not floored: it is in
+		 * $panels_data with its stored value, as it will be stored.
+		 *
 		 * Layout structure check: the final layout must be one the builder can
 		 * load (SiteOrigin_Panels_Admin::validate_layout_structure()). It needs
 		 * `grids` and `grid_cells` lists, each `grid_cells` entry must point at
@@ -74,8 +78,9 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 * objects (stdClass), which is all REST or MCP input can hold. If it
 		 * holds any other object, the write stops before this filter with the
 		 * code `siteorigin_panels_layout_update_unsupported_value`, because
-		 * such an object can keep state the copy cannot reach. Then nothing is
-		 * stored, deleted, mirrored or rendered.
+		 * such an object can keep state the copy cannot reach. A layout that
+		 * holds a cycle stops with the same code. Then nothing is stored,
+		 * deleted, mirrored or rendered.
 		 *
 		 * Scope of "equals what is stored": $panels_data equals the stored
 		 * layout for the WordPress core and Page Builder save pipeline — core's
