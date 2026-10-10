@@ -263,10 +263,13 @@ class SiteOrigin_Panels_Layout_Update_Unchanged {
 	 * @param mixed $widgets   The widget list after the save pipeline.
 	 * @param array $snapshots Key => copy of the restored widget.
 	 * @param array $emulator  Key => emulator values recorded after the emulator call.
+	 * @param array $kept      Receives the keys of the widgets kept.
 	 *
 	 * @return mixed
 	 */
-	public static function floor( $widgets, array $snapshots, array $emulator = array() ) {
+	public static function floor( $widgets, array $snapshots, array $emulator = array(), &$kept = null ) {
+		$kept = array();
+
 		if ( ! is_array( $widgets ) ) {
 			return SiteOrigin_Panels_Admin::kses_deep( $widgets );
 		}
@@ -274,6 +277,7 @@ class SiteOrigin_Panels_Layout_Update_Unchanged {
 		foreach ( $widgets as $key => $widget ) {
 			if ( isset( $snapshots[ $key ] ) && self::kept( $widget, $snapshots[ $key ], $key, $emulator ) ) {
 				$widgets[ $key ] = self::keep( $snapshots[ $key ], $key, $emulator );
+				$kept[]          = $key;
 			} else {
 				$widgets[ $key ] = self::floor_value( $widget );
 			}

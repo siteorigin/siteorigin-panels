@@ -385,6 +385,19 @@ class LayoutUpdateUnchangedTest extends TestCase {
 		$this->assertStringNotContainsString( 'onerror', $floored[0]['content'], 'a swap floors both keys' );
 	}
 
+	public function test_floor_reports_the_keys_it_kept() {
+		$a = $this->widget( 'A <iframe src="https://example.com"></iframe>' );
+		$b = $this->widget( 'B' );
+		$c = $this->widget( 'C' );
+
+		\SiteOrigin_Panels_Layout_Update_Unchanged::floor( array( 0 => $a, 1 => $this->widget( 'B changed' ), 2 => $c ), array( 0 => $a, 1 => $b ), array(), $kept );
+		$this->assertSame( array( 0 ), $kept, 'kept: 0; changed: 1; no snapshot: 2' );
+
+		$kept = array( 'stale' );
+		\SiteOrigin_Panels_Layout_Update_Unchanged::floor( 'not a list', array( 0 => $a ), array(), $kept );
+		$this->assertSame( array(), $kept, 'a non-array widget list keeps nothing' );
+	}
+
 	public function test_deep_markup_inside_plain_objects_is_filtered() {
 		$value = '<img src=x onerror=alert(1)>';
 		for ( $i = 0; $i < 1000; $i++ ) {
