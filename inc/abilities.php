@@ -162,8 +162,8 @@ class SiteOrigin_Panels_Abilities {
 							'description' => __( 'Canonical panels_data to persist, in the shape layout-get returns: widgets, grids and grid_cells lists. Each grid_cells entry needs a numeric grid that points at an existing row. Each widget needs a numeric panels_info.grid and panels_info.cell that point at an existing row and cell. A layout that does not meet this is not saved. An empty object clears a classic layout.', 'siteorigin-panels' ),
 						),
 						'block_index' => array(
-							'type'        => 'integer',
-							'description' => __( 'For block-stored posts, the 0-based index (from layout-get) of the Layout Block to write. Optional for a single-block post (defaults to 0); required when the post has multiple Layout Blocks. Ignored for classic/meta posts.', 'siteorigin-panels' ),
+							'type'        => array( 'integer', 'null' ),
+							'description' => __( 'For block-stored posts, the 0-based index (from layout-get) of the Layout Block to write. Optional for a single-block post (defaults to 0); required when the post has multiple Layout Blocks. Ignored for classic/meta posts. null, as layout-get returns for a classic layout, is the same as leaving it out.', 'siteorigin-panels' ),
 							'minimum'     => 0,
 						),
 					),

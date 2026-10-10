@@ -2358,6 +2358,7 @@ class AbilitiesTest extends SiteOriginTests {
 	public function test_layout_update_registration_meta_and_category() {
 		$this->abilities()->register_abilities();
 
+		$get    = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
 		$update = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
 
 		$this->assertTrue( $update['meta']['show_in_rest'] );
@@ -2377,6 +2378,11 @@ class AbilitiesTest extends SiteOriginTests {
 			'block_index',
 			$update['input_schema']['properties'],
 			'layout-update must accept block_index input.'
+		);
+		$this->assertSame(
+			$get['output_schema']['properties']['layouts']['items']['properties']['block_index']['type'],
+			$update['input_schema']['properties']['block_index']['type'],
+			'layout-update must accept the block_index layout-get returns, null for a classic layout.'
 		);
 		$this->assertContains(
 			'block-ambiguous',

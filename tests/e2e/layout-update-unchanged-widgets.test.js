@@ -124,11 +124,11 @@ const readLayout = async ( session, postId ) => {
  * layout-get, change the copy, layout-update. Returns the raw storage after
  * the write and the single pre-write payload.
  */
-const roundTrip = async ( session, postId, change ) => {
+const roundTrip = async ( session, postId, change, echoBlockIndex = false ) => {
 	const layout = await readLayout( session, postId );
 	const panelsData = change( JSON.parse( JSON.stringify( layout.panels_data ) ) );
 	const input = { post_id: postId, panels_data: panelsData };
-	if ( layout.storage === 'block' ) {
+	if ( layout.storage === 'block' || echoBlockIndex ) {
 		input.block_index = layout.block_index;
 	}
 
@@ -257,6 +257,17 @@ test.describe( 'administrator, classic (meta) layout', () => {
 
 		expect( stored.widgets[ 0 ].content ).toBe( EMBED );
 		expect( stored.widgets[ 0 ].panels_info.cell ).toBe( 1 );
+	} );
+
+	test( 'M4: a round trip that echoes the null block_index from layout-get is accepted', async () => {
+		const layout = await readLayout( admin, pageId );
+		expect( layout.storage ).toBe( 'meta' );
+		expect( layout.block_index ).toBeNull();
+
+		const { stored } = await roundTrip( admin, pageId, changeB, true );
+
+		expect( stored.widgets[ 0 ] ).toStrictEqual( seeded.widgets[ 0 ] );
+		expectFloored( stored.widgets[ 1 ] );
 	} );
 } );
 
