@@ -288,18 +288,18 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				$incoming = array();
 				foreach ( $panels_data['widgets'] as $key => $widget ) {
 					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
-						$incoming[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+						$incoming[ $key ] = $widget;
 					}
 				}
-				$frozen = array();
+				$baseline = array();
 				foreach ( $layout_update_pre_write['stored']['widgets'] as $key => $widget ) {
 					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
-						$frozen[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+						$baseline[ $key ] = $widget;
 					}
 				}
 
-				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $frozen, $layout_update_pre_write['object_keys'] );
-				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $frozen, $matches );
+				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $baseline, $layout_update_pre_write['object_keys'] );
+				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $baseline, $matches );
 				foreach ( $restored as $key => $widget ) {
 					$snapshots[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
 				}

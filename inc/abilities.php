@@ -429,25 +429,25 @@ class SiteOrigin_Panels_Abilities {
 		$snapshots   = array();
 		$emulator    = array();
 		if ( is_array( $old_widgets ) ) {
-			$frozen = array();
+			$baseline = array();
 			foreach ( $old_widgets as $key => $widget ) {
 				if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
-					$frozen[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+					$baseline[ $key ] = $widget;
 				} elseif ( is_array( $widget ) ) {
 					unset( $old_widgets[ $key ] );
 				}
 			}
 
-			if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) && ! empty( $frozen ) ) {
+			if ( ! empty( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) && ! empty( $baseline ) ) {
 				$incoming = array();
 				foreach ( $panels_data['widgets'] as $key => $widget ) {
 					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
-						$incoming[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+						$incoming[ $key ] = $widget;
 					}
 				}
 
-				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $frozen, $object_keys );
-				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $frozen, $matches );
+				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $baseline, $object_keys );
+				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $baseline, $matches );
 				foreach ( $restored as $key => $widget ) {
 					$snapshots[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
 				}
