@@ -492,4 +492,99 @@ class LayoutBlockLayoutUpdateUnchangedTest extends TestCase {
 		$this->assertSame( '<img src=x onerror=e()>', $result['attrs']['panelsData']['widgets'][0]['setting']->html, 'today\'s floor does not descend objects' );
 		$this->assertCount( 0, $this->pre_write_calls );
 	}
+
+	// --- A kept widget that WordPress kses would change -------------------------
+
+	/**
+	 * A content_save_pre stand-in for core kses: removes iframes and on*
+	 * attributes, and escapes a bare &.
+	 */
+	private function core_kses() {
+		$this->callbacks['content_save_pre'] = function ( $content ) {
+			$content = preg_replace( '#<iframe[^>]*>(<\\\\/iframe>)?#', '', $content );
+			$content = preg_replace( '/\s*on\w+=[^\s>"\\\\]+/i', '', $content );
+
+			return preg_replace( '/&(?!amp;)/', '&amp;', $content );
+		};
+	}
+
+	private function without_unfiltered_html() {
+		Functions\when( 'current_user_can' )->alias(
+			function ( $capability ) {
+				return $capability !== 'unfiltered_html';
+			}
+		);
+	}
+
+	public function test_a_kept_widget_kses_would_change_stops_the_write() {
+		$this->without_unfiltered_html();
+		$this->core_kses();
+		$stored   = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][1]['content'] = 'Changed';
+
+		try {
+			$this->write( $stored, $incoming );
+			$this->fail( 'The write must stop.' );
+		} catch ( \SiteOrigin_Panels_Layout_Update_Aborted $e ) {
+			$error = $e->get_error();
+			$this->assertSame( 'siteorigin_panels_layout_update_needs_unfiltered_html', $error->get_error_code() );
+			$this->assertSame( array( 'status' => 403 ), $error->get_error_data() );
+			$this->assertStringContainsString( 'An Editor or Administrator must make this change.', $error->get_error_message() );
+		}
+
+		$this->assertCount( 0, $this->pre_write_calls, 'nothing reaches the hook' );
+	}
+
+	public function test_a_moved_kept_widget_kses_would_change_stops_the_write() {
+		$this->without_unfiltered_html();
+		$this->core_kses();
+		$stored   = $this->layout( array( $this->widget( self::EMBED ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info']['cell'] = 1;
+
+		$this->expect_decline( 'siteorigin_panels_layout_update_needs_unfiltered_html', $stored, $incoming );
+	}
+
+	public function test_kept_widgets_kses_leaves_alone_are_written() {
+		$this->without_unfiltered_html();
+		$this->core_kses();
+		$stored   = $this->layout( array( $this->widget( 'Plain' ), $this->widget( 'Tom & Jerry', 0, 1 ), $this->widget( 'B', 1, 0 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][2]['content'] = 'Changed <img src=x onerror=b()>';
+
+		$written = $this->write( $stored, $incoming );
+
+		$this->assertSame( $stored['widgets'][0], $written['widgets'][0] );
+		$this->assertSame( $stored['widgets'][1], $written['widgets'][1], 'the & repair settles the text' );
+		$this->assertSame( 'Changed <img src=x>', $written['widgets'][2]['content'] );
+		$this->assertSame( $written, $this->pre_write_calls[0][2] );
+	}
+
+	public function test_new_and_changed_widgets_kses_strips_do_not_stop_the_write() {
+		$this->without_unfiltered_html();
+		$this->core_kses();
+		$stored   = $this->layout( array( $this->widget( 'Plain' ), $this->widget( 'B', 0, 1 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][1]['content'] = 'Changed <img src=x onerror=b()>';
+		$incoming['widgets'][2]           = $this->widget( 'New <iframe src="https://example.com"></iframe>', 1, 0 );
+
+		$written = $this->write( $stored, $incoming );
+
+		$this->assertSame( $stored['widgets'][0], $written['widgets'][0] );
+		$this->assertSame( 'Changed <img src=x>', $written['widgets'][1]['content'] );
+		$this->assertSame( 'New ', $written['widgets'][2]['content'], 'kses strips the new widget\'s iframe, as today' );
+	}
+
+	public function test_a_user_with_unfiltered_html_is_never_refused() {
+		$this->core_kses();
+		$stored   = $this->layout( array( $this->widget( self::EMBED ), $this->widget( 'Plain', 0, 1 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][1]['content'] = 'Changed';
+
+		$written = $this->write( $stored, $incoming );
+
+		$this->assertSame( 'Embed <img src=x>', $written['widgets'][0]['content'], 'a save filter still runs; the rule is gated on the capability' );
+		$this->assertCount( 1, $this->pre_write_calls );
+	}
 }

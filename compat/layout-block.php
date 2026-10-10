@@ -277,6 +277,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// AI pre-save filter replaced is floored whole.
 			$restored  = array();
 			$snapshots = array();
+			$kept      = array();
 			if (
 				$layout_update_pre_write !== null &&
 				! $ai_changed_layout &&
@@ -329,7 +330,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					// A layout-update write floors every widget except one that
 					// still equals the stored widget it was matched to.
 					SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $panels_data );
-					$panels_data['widgets'] = SiteOrigin_Panels_Layout_Update_Unchanged::floor( $panels_data['widgets'], $snapshots );
+					$panels_data['widgets'] = SiteOrigin_Panels_Layout_Update_Unchanged::floor( $panels_data['widgets'], $snapshots, array(), $kept );
 				} else {
 					$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
 				}
@@ -341,7 +342,20 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// the render below, and the render, the returned panelsData and
 			// the same-request memo all use this final form.
 			if ( $layout_update_pre_write !== null ) {
+				$kept_widgets = array();
+				foreach ( $kept as $key ) {
+					$kept_widgets[ $key ] = $panels_data['widgets'][ $key ];
+				}
+
 				$panels_data = $this->final_stored_panels_data( $panels_data );
+
+				// For a user without unfiltered_html, WordPress kses runs over
+				// the post content. A kept widget it would change or strip
+				// (an existing embed, for example) stops the write: storing
+				// the layout would lose content the caller did not change.
+				if ( ! empty( $kept_widgets ) && ! current_user_can( 'unfiltered_html' ) ) {
+					$this->assert_kept_widgets_stored( $kept_widgets, $panels_data );
+				}
 
 				// The same structural rule an editor save of a classic layout
 				// applies. Only a layout-update write reaches this; an editor
@@ -457,6 +471,34 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				__( 'The layout could not be prepared for saving.', 'siteorigin-panels' )
 			)
 		);
+	}
+
+	/**
+	 * Stop a layout-update write that would change a kept widget.
+	 *
+	 * Block storage is JSON, so a kept widget is stored unchanged when the
+	 * settled panelsData holds its JSON form at the same key.
+	 *
+	 * @param array $kept_widgets Key => widget the floor kept.
+	 * @param array $panels_data  The settled panelsData from final_stored_panels_data().
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_needs_unfiltered_html.
+	 */
+	private function assert_kept_widgets_stored( $kept_widgets, $panels_data ) {
+		foreach ( $kept_widgets as $key => $widget ) {
+			if (
+				! isset( $panels_data['widgets'][ $key ] ) ||
+				! SiteOrigin_Panels_Layout_Update_Unchanged::same( json_decode( wp_json_encode( $widget ), true ), $panels_data['widgets'][ $key ] )
+			) {
+				throw new SiteOrigin_Panels_Layout_Update_Aborted(
+					new WP_Error(
+						'siteorigin_panels_layout_update_needs_unfiltered_html',
+						__( "The layout was not saved. It holds an existing embed or HTML that can't be saved with this account's permissions. An Editor or Administrator must make this change.", 'siteorigin-panels' ),
+						array( 'status' => 403 )
+					)
+				);
+			}
+		}
 	}
 
 	/**
