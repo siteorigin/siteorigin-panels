@@ -22,20 +22,38 @@
  *
  * Write contract (ability `siteorigin-panels/layout-update`, inc/abilities.php):
  * AI content is origin-untrusted regardless of the credential carrying the
- * request — an admin application password does not exempt it.
+ * request — an admin application password does not exempt it. On both paths,
+ * a widget that SiteOrigin_Panels_Layout_Update_Unchanged::match() pairs with
+ * a stored widget skips update(). If that widget is still in the final list,
+ * SiteOrigin_Panels_Layout_Update_Unchanged::floor() either keeps it or
+ * floors it. A kept widget is stored as a copy of the stored widget, with the
+ * caller's floored position fields if it moved, and, on META writes where the
+ * sidebars emulator runs, with the emulator values from this write. A BLOCK
+ * write by a user without `unfiltered_html` that would store a kept widget
+ * any other way is refused (below). Every other widget is sanitized and
+ * floored.
  *   - BLOCK writes route through the compat save chokepoint
  *     (SiteOrigin_Panels_Compat_Layout_Block::sanitize_block_untrusted()):
  *     the `siteorigin_panels_ai_block_layout_pre_save` filter fires (a
  *     layered-transform interaction premium-addon consumers of that filter
  *     must expect), then strict sanitize, then the kses floor FORCED
- *     regardless of capability. Single sanitize pass: the wp_insert_post_data
- *     safety net recognizes the block as already sanitized this request via the
- *     request-local memo in sanitize_block() and skips the second pass — there
- *     is no signature and nothing to verify.
- *   - META writes are strictly sanitized, unconditionally kses-floored, and
- *     double-slashed; the write-time floor is not capability-gated because
- *     classic render serves stored meta as-is (no render-time re-sanitize), so
- *     the save pass is the only floor this surface gets.
+ *     regardless of capability for every widget that is not kept.
+ *     For a user without `unfiltered_html` (an Author, or on multisite any
+ *     user who is not a super admin), WordPress kses then runs over the post
+ *     content. If the post-content save filters, kses among them, would
+ *     change or strip a kept widget (an existing embed, for example), the
+ *     whole write is refused before anything is stored,
+ *     with `siteorigin_panels_layout_update_needs_unfiltered_html` (403).
+ *     Changed and new widgets are filtered as before and never cause it.
+ *     Single sanitize pass: the wp_insert_post_data safety net recognizes the
+ *     block as already sanitized this request via the request-local memo in
+ *     sanitize_block() and skips the second pass — there is no signature and
+ *     nothing to verify.
+ *   - META writes are strictly sanitized, kses-floored (every widget that is
+ *     not kept, whatever the credential), and double-slashed; the
+ *     write-time floor is not capability-gated because classic render serves
+ *     stored meta as-is (no render-time re-sanitize), so the save pass is the
+ *     only floor this surface gets.
  *
  * @since {NEXT_VERSION}
  * @api

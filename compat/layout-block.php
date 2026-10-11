@@ -263,6 +263,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			 */
 			$filtered_panels_data = apply_filters( 'siteorigin_panels_ai_block_layout_pre_save', $panels_data );
 			if ( $layout_update_pre_write !== null && is_array( $filtered_panels_data ) ) {
+				SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $filtered_panels_data );
 				SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $filtered_panels_data );
 			}
 			$ai_changed_layout = is_array( $filtered_panels_data ) && $filtered_panels_data !== $panels_data;
@@ -270,9 +271,44 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				$panels_data = $filtered_panels_data;
 			}
 
+			// Layout-update ability write: widgets the caller sent back
+			// unchanged keep their stored value; they skip update() and the
+			// floor. Only when the layout is still the caller's: a layout the
+			// AI pre-save filter replaced is floored whole.
+			$restored  = array();
+			$snapshots = array();
+			$kept      = array();
+			if (
+				$layout_update_pre_write !== null &&
+				! $ai_changed_layout &&
+				! empty( $layout_update_pre_write['stored']['widgets'] ) &&
+				is_array( $layout_update_pre_write['stored']['widgets'] ) &&
+				! empty( $panels_data['widgets'] ) &&
+				is_array( $panels_data['widgets'] )
+			) {
+				$incoming = array();
+				foreach ( $panels_data['widgets'] as $key => $widget ) {
+					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
+						$incoming[ $key ] = $widget;
+					}
+				}
+				$baseline = array();
+				foreach ( $layout_update_pre_write['stored']['widgets'] as $key => $widget ) {
+					if ( SiteOrigin_Panels_Layout_Update_Unchanged::comparable( $widget ) ) {
+						$baseline[ $key ] = $widget;
+					}
+				}
+
+				$matches  = SiteOrigin_Panels_Layout_Update_Unchanged::match( $incoming, $baseline, $layout_update_pre_write['object_keys'] );
+				$restored = SiteOrigin_Panels_Layout_Update_Unchanged::restore( $incoming, $baseline, $matches );
+				foreach ( $restored as $key => $widget ) {
+					$snapshots[ $key ] = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $widget );
+				}
+			}
+
 			// Save-time validation (sanitize_block()): strict, capability-gated
 			// sanitize.
-			$panels_data = $this->sanitize_panels_data( $panels_data );
+			$panels_data = $this->sanitize_panels_data( $panels_data, $restored );
 
 			// current_user_can() runs in the real save-time request context
 			// (the author's session), which is the only place capability-gated
@@ -290,7 +326,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				// #2316). wp_kses_post() needs no hydrated registry and is
 				// idempotent, so it's a safe universal floor independent of
 				// that failure mode.
-				$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+				if ( $layout_update_pre_write !== null ) {
+					// A layout-update write floors every widget except one that
+					// still equals the stored widget it was matched to.
+					SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $panels_data );
+					$panels_data['widgets'] = SiteOrigin_Panels_Layout_Update_Unchanged::floor( $panels_data['widgets'], $snapshots, array(), $kept );
+				} else {
+					$panels_data['widgets'] = SiteOrigin_Panels_Admin::kses_deep( $panels_data['widgets'] );
+				}
 			}
 
 			// Layout-update ability write: settle the layout into the form the
@@ -299,7 +342,20 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			// the render below, and the render, the returned panelsData and
 			// the same-request memo all use this final form.
 			if ( $layout_update_pre_write !== null ) {
+				$kept_widgets = array();
+				foreach ( $kept as $key ) {
+					$kept_widgets[ $key ] = $panels_data['widgets'][ $key ];
+				}
+
 				$panels_data = $this->final_stored_panels_data( $panels_data );
+
+				// For a user without unfiltered_html, WordPress kses runs over
+				// the post content. A kept widget it would change or strip
+				// (an existing embed, for example) stops the write: storing
+				// the layout would lose content the caller did not change.
+				if ( ! empty( $kept_widgets ) && ! current_user_can( 'unfiltered_html' ) ) {
+					$this->assert_kept_widgets_stored( $kept_widgets, $panels_data );
+				}
 
 				// The same structural rule an editor save of a classic layout
 				// applies. Only a layout-update write reaches this; an editor
@@ -313,6 +369,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 					);
 				}
 
+				$panels_data = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $panels_data );
 				SiteOrigin_Panels_Layout_Update_Pre_Write::run( $panels_data, $layout_update_pre_write['post_id'], 'block', $layout_update_pre_write['block_index'] );
 			}
 		}
@@ -375,7 +432,9 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * validate_post_data(), which undoes core's `&amp;` artifact. Running the
 	 * same transforms here until the layout stops changing gives the form
 	 * that is stored, so the pre-write hook payload equals the stored layout
-	 * and the later save finds nothing left to change.
+	 * and the later save finds nothing left to change. For a user without
+	 * `unfiltered_html`, the result is then checked against the widgets the
+	 * floor kept (assert_kept_widgets_stored()).
 	 *
 	 * At most 8 passes: this is a fail-closed limit, not a claim that the
 	 * filters always settle. A layout that has not settled by then, or a pass
@@ -414,6 +473,36 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				__( 'The layout could not be prepared for saving.', 'siteorigin-panels' )
 			)
 		);
+	}
+
+	/**
+	 * Stop a layout-update write that would change a kept widget.
+	 *
+	 * Block storage is JSON, so a kept widget is stored unchanged when the
+	 * settled panelsData holds its JSON form at the same key.
+	 *
+	 * @param array $kept_widgets Key => widget the floor kept.
+	 * @param array $panels_data  The settled panelsData from final_stored_panels_data().
+	 *
+	 * @throws SiteOrigin_Panels_Layout_Update_Aborted Code siteorigin_panels_layout_update_needs_unfiltered_html.
+	 */
+	private function assert_kept_widgets_stored( $kept_widgets, $panels_data ) {
+		foreach ( $kept_widgets as $key => $widget ) {
+			if (
+				! isset( $panels_data['widgets'][ $key ] ) ||
+				! SiteOrigin_Panels_Layout_Update_Unchanged::same( json_decode( wp_json_encode( $widget ), true ), $panels_data['widgets'][ $key ] )
+			) {
+				throw new SiteOrigin_Panels_Layout_Update_Aborted(
+					new WP_Error(
+						'siteorigin_panels_layout_update_needs_unfiltered_html',
+						is_multisite()
+							? __( "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a Super Admin for the multisite network to make the change.", 'siteorigin-panels' )
+							: __( "The layout wasn't saved because it has an embed or HTML your account can't save. Ask a user who can save HTML on this site to make the change.", 'siteorigin-panels' ),
+						array( 'status' => 403 )
+					)
+				);
+			}
+		}
 	}
 
 	/**
@@ -468,7 +557,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		return preg_replace( '/<!-- \/?(wp:.*?)-->/s', '', $content );
 	}
 
-	private function sanitize_panels_data( $panels_data ) {
+	/**
+	 * Sanitize a Layout Block layout for storage.
+	 *
+	 * @param array $panels_data The layout.
+	 * @param array $restored    Key => widget kept from storage. These skip
+	 *                           process_raw_widgets(); every other widget is
+	 *                           processed and written back at its own key.
+	 */
+	private function sanitize_panels_data( $panels_data, $restored = array() ) {
 		if ( ! is_array( $panels_data ) ) {
 			return $panels_data;
 		}
@@ -477,7 +574,17 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// re-save and never persist into stored panels_data.
 		unset( $panels_data['sanitize_signature'] );
 
-		$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		if ( ! empty( $restored ) && is_array( $panels_data['widgets'] ) ) {
+			$processed = SiteOrigin_Panels_Admin::single()->process_raw_widgets( array_diff_key( $panels_data['widgets'], $restored ), false, true );
+			foreach ( $processed as $key => $widget ) {
+				$panels_data['widgets'][ $key ] = $widget;
+			}
+			foreach ( $restored as $key => $widget ) {
+				$panels_data['widgets'][ $key ] = $widget;
+			}
+		} else {
+			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		}
 		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 
 		return $panels_data;
@@ -1033,17 +1140,25 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * nothing is sanitized, checked or rendered, and the hook still fires once
 	 * with an empty layout.
 	 *
-	 * @param array $block       A parsed Layout Block (parse_blocks() shape).
-	 * @param int   $post_id     The post being written.
-	 * @param int   $block_index 0-based Layout Block index, as in layout-get.
+	 * Widgets that equal a widget of $stored keep their stored value; every
+	 * other widget is floored. A layout holding a cycle stops the write with
+	 * the code `siteorigin_panels_layout_update_unsupported_value`.
+	 *
+	 * @param array      $block       A parsed Layout Block (parse_blocks() shape).
+	 * @param int        $post_id     The post being written.
+	 * @param int        $block_index 0-based Layout Block index, as in layout-get.
+	 * @param array|null $stored      The block's stored panelsData, as parsed from post_content.
+	 * @param array      $object_keys Widget keys that arrived as objects; they are never kept.
 	 *
 	 * @throws SiteOrigin_Panels_Layout_Update_Aborted When the hook stops the write, the stored form does not settle,
-	 *                                                 or the builder cannot load the stored form.
+	 *                                                 the builder cannot load the stored form, or the layout holds
+	 *                                                 a value that cannot be saved.
 	 *
 	 * @return array The block with sanitized, floored panelsData.
 	 */
-	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index, $stored = null, $object_keys = array() ) {
 		if ( isset( $block['attrs']['panelsData'] ) && is_array( $block['attrs']['panelsData'] ) ) {
+			SiteOrigin_Panels_Layout_Update_Unchanged::assert_walkable( $block['attrs']['panelsData'] );
 			SiteOrigin_Panels_Layout_Update_Pre_Write::assert_supported_values( $block['attrs']['panelsData'] );
 		}
 
@@ -1051,6 +1166,8 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		$this->layout_update_pre_write = array(
 			'post_id'     => (int) $post_id,
 			'block_index' => (int) $block_index,
+			'stored'      => is_array( $stored ) ? $stored : null,
+			'object_keys' => is_array( $object_keys ) ? $object_keys : array(),
 		);
 
 		try {

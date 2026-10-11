@@ -224,7 +224,7 @@ test.describe( 'classic (meta) path', () => {
 		expect( before.raw.meta.widgets[ 0 ].text ).toBe( 'S5 stored text' );
 	} );
 
-	test( 'S6: a layout that layout-get returns is accepted again and stored as returned', async () => {
+	test( 'S6: a layout that layout-get returns is accepted again and stored unchanged', async () => {
 		const before = await rawStorage( admin, pageId );
 
 		const read = await layoutGet( admin, pageId );
@@ -240,11 +240,11 @@ test.describe( 'classic (meta) path', () => {
 		const again = await layoutGet( admin, pageId );
 		expect( again.body.layouts[ 0 ].panels_data ).toStrictEqual( read.body.layouts[ 0 ].panels_data );
 
-		// The layout is stored exactly as layout-get returned it. That is the
-		// layout stored before, plus the `cell_index` the read filter adds to
-		// each widget placement.
+		// The stored layout does not change: every widget came back unchanged,
+		// so each keeps its stored value, without the `cell_index` the read
+		// filter adds to each widget placement.
 		const after = await rawStorage( admin, pageId );
-		expect( after.meta ).toStrictEqual( read.body.layouts[ 0 ].panels_data );
+		expect( after.meta ).toStrictEqual( before.meta );
 		expect( after.meta.grids ).toStrictEqual( before.meta.grids );
 		expect( after.meta.grid_cells ).toStrictEqual( before.meta.grid_cells );
 		expect( after.meta.widgets[ 0 ].text ).toBe( before.meta.widgets[ 0 ].text );
@@ -333,7 +333,7 @@ test.describe( 'Layout Block path', () => {
 		expect( before.raw.blocks[ 0 ].widgets[ 0 ].text ).toBe( 'T4 stored text' );
 	} );
 
-	test( 'T5: a layout that layout-get returns is accepted again and stored as returned', async () => {
+	test( 'T5: a layout that layout-get returns is accepted again and stored unchanged', async () => {
 		const before = await rawStorage( admin, pageId );
 
 		const read = await layoutGet( admin, pageId );
@@ -353,10 +353,10 @@ test.describe( 'Layout Block path', () => {
 		const again = await layoutGet( admin, pageId );
 		expect( again.body.layouts[ 0 ].panels_data ).toStrictEqual( read.body.layouts[ 0 ].panels_data );
 
-		// The block layout is stored exactly as layout-get returned it, with the
-		// rows, cells and widget content stored before.
+		// The stored block layout does not change: every widget came back
+		// unchanged, so each keeps its stored value.
 		const after = await rawStorage( admin, pageId );
-		expect( after.blocks[ 0 ] ).toStrictEqual( read.body.layouts[ 0 ].panels_data );
+		expect( after.blocks[ 0 ] ).toStrictEqual( before.blocks[ 0 ] );
 		expect( after.blocks[ 0 ].grids ).toStrictEqual( before.blocks[ 0 ].grids );
 		expect( after.blocks[ 0 ].grid_cells ).toStrictEqual( before.blocks[ 0 ].grid_cells );
 		expect( after.blocks[ 0 ].widgets[ 0 ].text ).toBe( before.blocks[ 0 ].widgets[ 0 ].text );

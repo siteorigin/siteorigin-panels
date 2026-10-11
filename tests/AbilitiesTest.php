@@ -304,8 +304,8 @@ class Abilities_LayoutBlockSpy {
 	public $layout_update_args = null;
 	public $abort = null;
 
-	public function sanitize_block_for_layout_update( $block, $post_id, $block_index ) {
-		$this->layout_update_args = array( $post_id, $block_index );
+	public function sanitize_block_for_layout_update( $block, $post_id, $block_index, $stored = null, $object_keys = array() ) {
+		$this->layout_update_args = array( $post_id, $block_index, $stored, $object_keys );
 
 		if ( $this->abort !== null ) {
 			throw new SiteOrigin_Panels_Layout_Update_Aborted( $this->abort );
@@ -445,6 +445,10 @@ if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Aborted' ) ) {
 
 if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Pre_Write' ) ) {
 	require __DIR__ . '/../inc/layout-update-pre-write.php';
+}
+
+if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Unchanged' ) ) {
+	require_once __DIR__ . '/../inc/layout-update-unchanged.php';
 }
 
 if ( ! class_exists( 'SiteOrigin_Panels_Abilities' ) ) {
@@ -1943,8 +1947,31 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 
 		$this->assertTrue( $result['updated'] );
-		$this->assertSame( array( 51, 0 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( array( 51, 0 ), array_slice( Abilities_LayoutBlockSpy::$instance->layout_update_args, 0, 2 ) );
 		$this->assertSame( 1, Abilities_LayoutBlockSpy::$instance->untrusted_calls );
+	}
+
+	public function test_block_write_passes_the_raw_stored_layout_and_object_keys() {
+		Functions\when( 'get_post' )->justReturn( (object) array( 'ID' => 53, 'post_content' => 'one block' ) );
+		Functions\when( 'parse_blocks' )->justReturn( $this->layout_blocks( 1 ) );
+		Functions\when( 'wp_update_post' )->justReturn( 53 );
+		// A read filter that rewrites the layout must not become the baseline.
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				return $tag === 'siteorigin_panels_data' && is_array( $value ) ? array( 'widgets' => array( 'rewritten' ) ) : $value;
+			}
+		);
+
+		$this->abilities()->layout_update(
+			array(
+				'post_id'     => 53,
+				'panels_data' => Abilities_Fixtures::layout( array( Abilities_Fixtures::widget( 'Array' ), (object) Abilities_Fixtures::widget( 'Object' ) ) ),
+			)
+		);
+
+		$args = Abilities_LayoutBlockSpy::$instance->layout_update_args;
+		$this->assertSame( array( 'widgets' => array( 'existing-0' ) ), $args[2], 'the raw stored panelsData' );
+		$this->assertSame( array( 1 ), $args[3], 'the key of the entry that arrived as an object' );
 	}
 
 	public function test_block_write_passes_the_requested_index_on_a_multi_block_post() {
@@ -1961,7 +1988,7 @@ class AbilitiesTest extends SiteOriginTests {
 		);
 
 		$this->assertSame( 2, $result['block_index'] );
-		$this->assertSame( array( 52, 2 ), Abilities_LayoutBlockSpy::$instance->layout_update_args );
+		$this->assertSame( array( 52, 2 ), array_slice( Abilities_LayoutBlockSpy::$instance->layout_update_args, 0, 2 ) );
 	}
 
 	public function test_block_write_abort_returns_the_error_and_does_not_update_the_post() {
@@ -2331,6 +2358,7 @@ class AbilitiesTest extends SiteOriginTests {
 	public function test_layout_update_registration_meta_and_category() {
 		$this->abilities()->register_abilities();
 
+		$get    = $GLOBALS['abilities_registered']['siteorigin-panels/layout-get'];
 		$update = $GLOBALS['abilities_registered']['siteorigin-panels/layout-update'];
 
 		$this->assertTrue( $update['meta']['show_in_rest'] );
@@ -2350,6 +2378,11 @@ class AbilitiesTest extends SiteOriginTests {
 			'block_index',
 			$update['input_schema']['properties'],
 			'layout-update must accept block_index input.'
+		);
+		$this->assertSame(
+			$get['output_schema']['properties']['layouts']['items']['properties']['block_index']['type'],
+			$update['input_schema']['properties']['block_index']['type'],
+			'layout-update must accept the block_index layout-get returns, null for a classic layout.'
 		);
 		$this->assertContains(
 			'block-ambiguous',
@@ -2383,5 +2416,483 @@ class AbilitiesTest extends SiteOriginTests {
 
 		$this->assertArrayHasKey( 'siteorigin-panels', $GLOBALS['ability_categories_registered'] );
 		$this->assertArrayHasKey( 'label', $GLOBALS['ability_categories_registered']['siteorigin-panels'] );
+	}
+
+
+	// --- Unchanged widgets (#1409), meta path --------------------------------
+
+	private function html( $text, $cell = 0, $id = 0, $widget_id = null ) {
+		return array(
+			'text'        => $text,
+			'panels_info' => array(
+				'class'     => 'Html',
+				'grid'      => 0,
+				'cell'      => $cell,
+				'id'        => $id,
+				'widget_id' => $widget_id === null ? 'w-' . md5( $text ) : $widget_id,
+			),
+		);
+	}
+
+	private function two_cells( array $widgets ) {
+		return array(
+			'widgets'    => $widgets,
+			'grids'      => array( array( 'cells' => 2 ) ),
+			'grid_cells' => array( array( 'grid' => 0, 'weight' => 0.5 ), array( 'grid' => 0, 'weight' => 0.5 ) ),
+		);
+	}
+
+	/**
+	 * A classic post whose stored layout is $stored; records the stored value,
+	 * the pre-write payload, and routes $filters by tag.
+	 */
+	private function meta_write( $stored, $incoming, array $filters = array() ) {
+		$this->classic_post( 30 );
+		$this->passthrough_admin_spy();
+		if ( $this->meta_write_spy !== null ) {
+			Abilities_AdminSpy::$instance = $this->meta_write_spy;
+		}
+		Functions\when( 'get_post_meta' )->justReturn( $stored );
+
+		$this->persisted = null;
+		$this->deleted   = false;
+		Functions\when( 'update_post_meta' )->alias(
+			function ( $post_id, $key, $value ) {
+				$this->persisted = $value;
+
+				return true;
+			}
+		);
+		Functions\when( 'delete_post_meta' )->alias(
+			function () {
+				$this->deleted = true;
+
+				return true;
+			}
+		);
+		Functions\when( 'apply_filters' )->alias(
+			function () use ( $filters ) {
+				$args = func_get_args();
+				if ( $args[0] === 'siteorigin_panels_layout_update_pre_write' ) {
+					$this->pre_write_calls[] = $args;
+
+					return isset( $filters['pre_write'] ) ? call_user_func_array( $filters['pre_write'], array_slice( $args, 1 ) ) : $args[1];
+				}
+
+				return isset( $filters[ $args[0] ] ) ? call_user_func_array( $filters[ $args[0] ], array_slice( $args, 1 ) ) : $args[1];
+			}
+		);
+
+		return $this->abilities()->layout_update( array( 'post_id' => 30, 'panels_data' => $incoming ) );
+	}
+
+	private $persisted = null;
+	private $deleted   = false;
+
+	private function meta_write_with( $spy, $stored, $incoming, array $filters = array() ) {
+		$this->meta_write_spy = $spy;
+		$result = $this->meta_write( $stored, $incoming, $filters );
+		$this->meta_write_spy = null;
+
+		return $result;
+	}
+
+	private $meta_write_spy = null;
+
+	private function processed_texts() {
+		$args = Abilities_AdminSpy::$instance->process_args;
+
+		return $args === null ? array() : array_map(
+			function ( $widget ) {
+				return is_array( $widget ) && isset( $widget['text'] ) ? $widget['text'] : null;
+			},
+			$args[0]
+		);
+	}
+
+	public function test_unchanged_widget_keeps_its_stored_value_and_changed_widget_is_floored() {
+		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Plain', 0, 1 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info']['cell_index'] = 0;
+		$incoming['widgets'][1]['text'] = 'Changed <img src=x onerror=b()>';
+
+		$result = $this->meta_write( $stored, $incoming );
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( $stored['widgets'][0], $this->persisted['widgets'][0], 'kept byte-identical, cell_index as stored' );
+		$this->assertSame( 'Changed <img src=x>', $this->persisted['widgets'][1]['text'] );
+		$this->assertSame( $this->persisted, $this->pre_write_calls[0][2], 'the pre-write payload equals what is stored' );
+		$this->assertNotContains( 'Embed <img src=x onerror=a()>', $this->processed_texts(), 'a kept widget never reaches process_raw_widgets()' );
+	}
+
+	public function test_moved_widget_is_kept_at_the_callers_position() {
+		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Plain', 0, 1 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info']['cell'] = 1;
+		$incoming['widgets'][0]['panels_info']['id']   = 1;
+		$incoming['widgets'][1]['panels_info']['id']   = 0;
+
+		$this->meta_write( $stored, $incoming );
+
+		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 1, $this->persisted['widgets'][0]['panels_info']['cell'] );
+	}
+
+	public function test_a_moved_widget_whose_panels_info_is_a_reference_keeps_its_position() {
+		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
+		$info     = $stored['widgets'][0]['panels_info'];
+		$info['cell'] = 1;
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info'] = &$info;
+
+		$result = $this->meta_write( $stored, $incoming );
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 1, $this->persisted['widgets'][0]['panels_info']['cell'] );
+		$this->assertSame( 0, $this->persisted['widgets'][0]['panels_info']['grid'] );
+	}
+
+	public function test_a_copy_and_an_ambiguous_duplicate_are_floored() {
+		$a      = $this->html( 'Embed <img src=x onerror=a()>' );
+		$copy   = $a;
+		$copy['panels_info']['cell'] = 1;
+		$stored = $this->two_cells( array( $a ) );
+
+		$this->meta_write( $stored, $this->two_cells( array( $a, $copy ) ) );
+		$this->assertSame( $a, $this->persisted['widgets'][0] );
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][1]['text'] );
+
+		$this->meta_write( $stored, $this->two_cells( array( $a, $a, $copy ) ) );
+		foreach ( $this->persisted['widgets'] as $widget ) {
+			$this->assertSame( 'Embed <img src=x>', $widget['text'], 'P/P/Q: every copy floored' );
+		}
+	}
+
+	public function test_a_change_to_any_field_floors_the_widget() {
+		$a      = $this->html( 'Embed <img src=x onerror=a()>' );
+		$stored = $this->two_cells( array( $a ) );
+
+		foreach ( array(
+			array( 'text', 'Embed <img src=x onerror=a()> ' ),
+			array( 'so_sidebar_emulator_id', 'html-1' ),
+		) as $change ) {
+			$incoming = $stored;
+			$incoming['widgets'][0][ $change[0] ] = $change[1];
+			$this->meta_write( $stored, $incoming );
+			$this->assertStringNotContainsString( 'onerror', $this->persisted['widgets'][0]['text'], $change[0] );
+		}
+
+		$incoming = $stored;
+		$incoming['widgets'][0]['panels_info']['raw'] = true;
+		$this->meta_write( $stored, $incoming );
+		$this->assertStringNotContainsString( 'onerror', $this->persisted['widgets'][0]['text'], 'raw added' );
+	}
+
+	public function test_widget_list_shapes_keep_todays_outcome() {
+		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
+		// Like the real process_raw_widgets(), which returns array() for an
+		// empty or non-array list (inc/admin.php).
+		$coercing = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+
+				return empty( $widgets ) || ! is_array( $widgets ) ? array() : $widgets;
+			}
+		};
+		$this->meta_write_with( $coercing, $stored, array( 'widgets' => 'not a list' ) );
+		$this->assertTrue( $this->deleted, 'a non-empty string with no rows clears, as today' );
+
+		$this->meta_write_with( $coercing, $stored, array( 'widgets' => 'not a list', 'grids' => $stored['grids'], 'grid_cells' => $stored['grid_cells'] ) );
+		$this->assertSame( array(), $this->persisted['widgets'], 'a non-empty string with rows stores no widgets, as today' );
+
+		$this->meta_write_with( $coercing, $stored, array( 'widgets' => array( 'scalar', null ) ) + $stored );
+		$this->assertSame( array(), $this->persisted['widgets'], 'scalars are dropped, as today' );
+
+		$this->meta_write_with( $coercing, '', $stored );
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'], 'no stored layout: everything floored' );
+	}
+
+	public function test_a_filter_that_reorders_list_keys_is_declined() {
+		$stored   = $this->two_cells( array( $this->html( 'A' ), $this->html( 'B', 0, 1 ), $this->html( 'C', 1, 0 ) ) );
+		$result   = $this->meta_write(
+			$stored,
+			$stored,
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'] = array( 2 => $panels_data['widgets'][2], 0 => $panels_data['widgets'][0], 1 => $panels_data['widgets'][1] );
+
+					return $panels_data;
+				},
+			)
+		);
+
+		$this->assertFalse( $result['updated'] );
+		$this->assertNull( $this->persisted );
+	}
+
+	public function test_kept_widgets_keep_list_order_in_a_mixed_update() {
+		$stored   = $this->two_cells( array( $this->html( 'A <img src=x onerror=a()>' ), $this->html( 'B', 0, 1 ), $this->html( 'C <img src=x onerror=c()>', 1, 0 ) ) );
+		$incoming = $stored;
+		$incoming['widgets'][1]['text'] = 'B2';
+
+		$this->meta_write( $stored, $incoming );
+
+		$this->assertSame( array( 0, 1, 2 ), array_keys( $this->persisted['widgets'] ) );
+		$this->assertSame( $stored['widgets'][0], $this->persisted['widgets'][0] );
+		$this->assertSame( 'B2', $this->persisted['widgets'][1]['text'] );
+		$this->assertSame( $stored['widgets'][2], $this->persisted['widgets'][2] );
+
+		$swapped = $stored;
+		$swapped['widgets'] = array( $stored['widgets'][2], $stored['widgets'][1], $stored['widgets'][0] );
+		$this->meta_write( $stored, $swapped );
+		$this->assertSame( array( 0, 1, 2 ), array_keys( $this->persisted['widgets'] ) );
+		$this->assertSame( $stored['widgets'][2], $this->persisted['widgets'][0], 'values swapped at keys 0 and 2 are kept in that order' );
+	}
+
+	public function test_server_edits_after_restore_floor_the_widget() {
+		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ), $this->html( 'Other <img src=x onerror=o()>', 0, 1 ) ) );
+
+		$this->meta_write(
+			$stored,
+			$stored,
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'][0]['extra'] = 'added';
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'], 'edited by a pre-save callback' );
+		$this->assertSame( $stored['widgets'][1], $this->persisted['widgets'][1] );
+
+		$this->meta_write(
+			$stored,
+			$stored,
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'] = array( $panels_data['widgets'][1], $panels_data['widgets'][0] );
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertSame( 'Other <img src=x>', $this->persisted['widgets'][0]['text'], 'swapped: both floored' );
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][1]['text'] );
+
+		Abilities_StylesSpy::$instance = new class extends Abilities_StylesSpy {
+			public function sanitize_all( $panels_data ) {
+				$panels_data['widgets'][0]['panels_info']['style'] = array( 'padding' => '1px' );
+
+				return $panels_data;
+			}
+		};
+		$this->meta_write( $stored, $stored );
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'], 'sanitize_all() rewrote its style' );
+	}
+
+	public function test_kept_widget_takes_only_this_writes_emulator_values() {
+		$stored = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
+		Functions\when( 'siteorigin_panels_setting' )->justReturn( true );
+		Abilities_EmulatorSpy::$instance = new class extends Abilities_EmulatorSpy {
+			public function generate_sidebar_widget_ids( $widgets, $post_id ) {
+				foreach ( $widgets as $i => &$widget ) {
+					$widget['so_sidebar_emulator_id'] = 'html-' . $post_id . $i;
+					$widget['option_name']            = 'widget_html';
+				}
+
+				return $widgets;
+			}
+		};
+
+		$this->meta_write( $stored, $stored );
+		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 'html-300', $this->persisted['widgets'][0]['so_sidebar_emulator_id'] );
+
+		$this->meta_write(
+			$stored,
+			$stored,
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'][0]['so_sidebar_emulator_id'] = 'html-other';
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertSame( 'Embed <img src=x>', $this->persisted['widgets'][0]['text'] );
+	}
+
+	public function test_object_values_follow_the_stored_object_contract() {
+		$setting       = new stdClass();
+		$setting->html = '<img src=x onerror=s()>';
+		$a             = $this->html( 'A' );
+		$a['setting']  = $setting;
+		$stored        = $this->two_cells( array( $a ) );
+
+		$this->meta_write( $stored, $this->two_cells( array( unserialize( serialize( $a ) ) ) ) );
+		$this->assertInstanceOf( stdClass::class, $this->persisted['widgets'][0]['setting'] );
+		$this->assertSame( '<img src=x onerror=s()>', $this->persisted['widgets'][0]['setting']->html, 'an unchanged object is kept' );
+
+		$changed = unserialize( serialize( $a ) );
+		$changed['text'] = 'A2';
+		$this->meta_write( $stored, $this->two_cells( array( $changed ) ) );
+		$this->assertInstanceOf( stdClass::class, $this->persisted['widgets'][0]['setting'] );
+		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['setting']->html, 'strings inside a changed widget\'s object are floored' );
+
+		$this->meta_write( $stored, $this->two_cells( array( (object) $a ) ) );
+		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['setting']->html, 'a top-level object entry is never kept' );
+
+		$moved = unserialize( serialize( $a ) );
+		$moved['panels_info']['cell'] = 1;
+		$moved['panels_info']['id']   = (object) array( 'v' => '<img src=x onerror=i()>' );
+		$this->meta_write( $stored, $this->two_cells( array( $moved ) ) );
+		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['panels_info']['id']->v, 'a moved position value is floored' );
+	}
+
+	public function test_unsafe_stored_widgets_never_block_or_reach_a_replacement() {
+		$cyclic                     = $this->html( 'Old', 0, 0, 'same-id' );
+		$cyclic['loop']             = array( 'x' => 1 );
+		$cyclic['loop']['self']     = &$cyclic['loop'];
+		$other                      = $this->html( 'Old2', 0, 1, 'other-id' );
+		$other['holder']            = new ArrayObject( array() );
+		$stored                     = $this->two_cells( array( $cyclic, $other ) );
+		$replacement                = $this->html( 'New <img src=x onerror=n()>', 0, 0, 'same-id' );
+		$replacement2               = $this->html( 'New2', 0, 1, 'other-id' );
+
+		$result = $this->meta_write( $stored, $this->two_cells( array( $replacement, $replacement2 ) ) );
+
+		$this->assertTrue( $result['updated'] );
+		$this->assertSame( 'New <img src=x>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( array(), Abilities_AdminSpy::$instance->process_args[1] === false ? array() : Abilities_AdminSpy::$instance->process_args[1], 'neither unsafe stored widget is passed as an old instance' );
+
+		$result = $this->meta_write( $stored, $this->two_cells( array() ) );
+		$this->assertTrue( $result['updated'], 'removing them succeeds' );
+	}
+
+	public function test_cyclic_incoming_values_are_declined() {
+		$loop         = array( 'x' => 1 );
+		$loop['self'] = &$loop;
+		$widget       = $this->html( 'A' );
+		$widget['loop'] = $loop;
+
+		$result = $this->meta_write( '', $this->two_cells( array( $widget ) ) );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'siteorigin_panels_layout_update_unsupported_value', $result->get_error_code() );
+		$this->assertNull( $this->persisted );
+
+		$object         = new stdClass();
+		$object->holder = new stdClass();
+		$object->holder->back = $object;
+		$result = $this->meta_write( '', $this->two_cells( array( $object ) ) );
+		$this->assertInstanceOf( WP_Error::class, $result, 'a cycle exposed by the top-level cast' );
+
+		$result = $this->meta_write(
+			'',
+			$this->two_cells( array( $this->html( 'A' ) ) ),
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) use ( $loop ) {
+					$panels_data['widgets'][0]['loop'] = $loop;
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertInstanceOf( WP_Error::class, $result, 'a cycle returned by a pre-save callback' );
+		$this->assertNull( $this->persisted );
+	}
+
+	public function test_references_cannot_change_what_is_stored() {
+		$stored   = $this->two_cells( array( $this->html( 'Embed <img src=x onerror=a()>' ) ) );
+		$kept = array();
+
+		$this->meta_write(
+			$stored,
+			$stored,
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) use ( &$kept ) {
+					$panels_data['grids'][0]['style'] = array( 'class' => 'row' );
+					// An element of $kept becomes a reference to the row's slot.
+					$kept[0] = &$panels_data['grids'][0]['style']['class'];
+
+					return $panels_data;
+				},
+				'pre_write' => function ( $result ) use ( &$kept ) {
+					$kept[0] = '"><script>evil()</script>';
+
+					return $result;
+				},
+			)
+		);
+		$this->assertSame( 'Embed <img src=x onerror=a()>', $this->persisted['widgets'][0]['text'] );
+		$this->assertSame( 'row', $this->persisted['grids'][0]['style']['class'], 'a reference a filter kept into the rows cannot reach storage' );
+
+		$setting       = new stdClass();
+		$setting->html = 'stored';
+		$with_object   = $this->html( 'A' );
+		$with_object['setting'] = $setting;
+		$object_layout = $this->two_cells( array( $with_object ) );
+		$this->meta_write(
+			$object_layout,
+			unserialize( serialize( $object_layout ) ),
+			array(
+				'siteorigin_panels_data_pre_save' => function ( $panels_data ) {
+					$panels_data['widgets'][0]['setting']->html = '<img src=x onerror=p()>';
+
+					return $panels_data;
+				},
+			)
+		);
+		$this->assertSame( '<img src=x>', $this->persisted['widgets'][0]['setting']->html, 'an in-place edit of a kept widget\'s object is floored' );
+
+		$shared         = new stdClass();
+		$shared->html   = 'stored';
+		$a              = $this->html( 'A' );
+		$a['setting']   = $shared;
+		$stored         = $this->two_cells( array( $a, $this->html( 'B', 0, 1 ) ) );
+		Abilities_AdminSpy::$instance = new class extends Abilities_AdminSpy {
+			public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false ) {
+				$this->process_args = array( $widgets, $old_widgets, $escape_classes );
+				if ( is_array( $old_widgets ) && isset( $old_widgets[0]['setting'] ) ) {
+					$old_widgets[0]['setting']->html = '<img src=x onerror=u()>';
+				}
+
+				return $widgets;
+			}
+		};
+		$incoming = unserialize( serialize( $stored ) );
+		$incoming['widgets'][1]['text'] = 'B2';
+		Functions\when( 'get_post_meta' )->justReturn( $stored );
+		Functions\when( 'apply_filters' )->alias(
+			function ( $tag, $value ) {
+				return $value;
+			}
+		);
+		$this->persisted = null;
+		$this->abilities()->layout_update( array( 'post_id' => 30, 'panels_data' => $incoming ) );
+		$this->assertSame( 'stored', $this->persisted['widgets'][0]['setting']->html, 'the kept widget is the frozen stored value' );
+	}
+
+	public function test_deep_values_have_no_depth_limit() {
+		$deep = 'deep <img src=x onerror=d()>';
+		for ( $i = 0; $i < 1000; $i++ ) {
+			$deep = array( 'n' => $deep );
+		}
+		$a           = $this->html( 'A' );
+		$a['nested'] = $deep;
+		$stored      = $this->two_cells( array( $a ) );
+
+		$this->meta_write( $stored, $stored );
+		$this->assertSame( $a, $this->persisted['widgets'][0], 'a deep identical widget is kept' );
+
+		$changed         = $a;
+		$changed['text'] = 'A2';
+		$this->meta_write( $stored, $this->two_cells( array( $changed ) ) );
+		$leaf = $this->persisted['widgets'][0]['nested'];
+		for ( $i = 0; $i < 1000; $i++ ) {
+			$leaf = $leaf['n'];
+		}
+		$this->assertSame( 'deep <img src=x>', $leaf );
 	}
 }
