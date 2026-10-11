@@ -292,6 +292,12 @@ class LayoutBlockLayoutUpdatePreWriteTest extends TestCase {
 		if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Pre_Write', false ) ) {
 			require_once $root . '/inc/layout-update-pre-write.php';
 		}
+
+		if ( ! class_exists( 'SiteOrigin_Panels_Layout_Update_Unchanged', false ) ) {
+			require_once $root . '/inc/layout-update-unchanged.php';
+		}
+
+		require_once __DIR__ . '/map-deep.php';
 	}
 
 	private function layout_block() {

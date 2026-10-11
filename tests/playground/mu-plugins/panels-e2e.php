@@ -40,6 +40,24 @@ add_action(
 	}
 );
 
+/*
+ * Deny unfiltered_html to one user, the way WordPress core does on multisite
+ * for a user who is not a super admin (map_meta_cap()). Set through the state
+ * route's deny_unfiltered_html parameter; 0 turns it off.
+ */
+add_filter(
+	'map_meta_cap',
+	function ( $caps, $cap, $user_id ) {
+		if ( $cap === 'unfiltered_html' && (int) $user_id === (int) get_option( 'panels_e2e_deny_unfiltered_html', 0 ) ) {
+			$caps[] = 'do_not_allow';
+		}
+
+		return $caps;
+	},
+	10,
+	3
+);
+
 add_filter(
 	'siteorigin_panels_layout_update_pre_write',
 	function ( $result, $panels_data, $post_id, $storage, $block_index ) {
@@ -103,6 +121,10 @@ add_action(
 						update_option( 'panels_e2e_pre_write_mode', $mode, false );
 						update_option( 'panels_e2e_pre_write_log', array(), false );
 						update_option( 'panels_e2e_probe_renders', 0, false );
+
+						if ( $request->has_param( 'deny_unfiltered_html' ) ) {
+							update_option( 'panels_e2e_deny_unfiltered_html', (int) $request->get_param( 'deny_unfiltered_html' ), false );
+						}
 
 						return array( 'mode' => $mode );
 					},
