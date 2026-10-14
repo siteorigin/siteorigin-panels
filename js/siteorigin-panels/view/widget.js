@@ -253,7 +253,7 @@ module.exports = Backbone.View.extend( {
 
 	onModelChange: function () {
 		// Update the description when ever the model changes
-		this.$( '.description' ).html( this.model.getTitle() );
+		this.$( '.description' ).text( this.model.getTitle() );
 	},
 
 	onLabelChange: function( model ) {
