@@ -252,6 +252,10 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 		// Keep only rows the viewer may read, as the REST API does per row. Public rows are untouched.
 		global $wp_query;
+		// Core's query cache path for fields=id=>parent can return without setting `posts`.
+		if ( ! is_array( $wp_query->posts ) ) {
+			$wp_query->posts = array();
+		}
 		$wp_query->posts = array_values( array_filter( $wp_query->posts, array( __CLASS__, 'viewer_can_read' ) ) );
 		$wp_query->post_count = count( $wp_query->posts );
 		// Core sets `post` only for object rows (fields=ids / id=>parent leave it unset).

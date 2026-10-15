@@ -103,6 +103,8 @@ class SiteOrigin_Panels_Post_Loop_Visibility_Harness {
 			'post_type=attachment&post_status=inherit&suppress_filters=1',
 			'post_status=draft&p=' . $this->fixtures['DRAFT'],
 			'post_status=draft&posts_per_page=3',
+			'post_type=any&post_status=any&fields=' . rawurlencode( 'id=>parent' ),
+			'post_type=any&post_status=any&fields=' . rawurlencode( 'id=>parent' ) . '&post__in=999999999',
 		);
 	}
 
