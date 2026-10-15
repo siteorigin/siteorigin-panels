@@ -98,7 +98,7 @@ module.exports = Backbone.View.extend( {
 
 		this.setElement( this.template( {
 			title: _.escape( this.model.getWidgetField( 'title' ) ),
-			description: this.model.getTitle(),
+			description: panels.helpers.utils.decodeEntities( this.model.getTitle() ),
 			widget_class: _.escape( this.model.attributes.class )
 		} ) );
 
@@ -253,7 +253,7 @@ module.exports = Backbone.View.extend( {
 
 	onModelChange: function () {
 		// Update the description when ever the model changes
-		this.$( '.description' ).text( this.model.getTitle() );
+		this.$( '.description' ).text( panels.helpers.utils.decodeEntities( this.model.getTitle() ) );
 	},
 
 	onLabelChange: function( model ) {

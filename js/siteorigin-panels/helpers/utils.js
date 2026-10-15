@@ -46,6 +46,19 @@ module.exports = {
 		return s;
 	},
 
+	/**
+	 * Decode HTML entities without rendering the string. Every literal `<` is first turned into `&lt;`, so the
+	 * parsed text can hold no element at all (nothing to load, nothing to run, no tag that could end early);
+	 * the parser then decodes every entity, including those `&lt;`, back to text. One decode, like .html() did.
+	 */
+	decodeEntities: function ( s ) {
+		if ( typeof s !== 'string' || s.indexOf( '&' ) === -1 ) {
+			return s;
+		}
+		var doc = new window.DOMParser().parseFromString( '<!DOCTYPE html><body>' + s.replace( /</g, '&lt;' ), 'text/html' );
+		return doc.body ? doc.body.textContent : s;
+	},
+
 	// From this SO post: http://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
 	selectElementContents: function( element ) {
 		var range = document.createRange();
