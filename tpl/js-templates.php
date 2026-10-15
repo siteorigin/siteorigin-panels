@@ -163,7 +163,7 @@ $layouts = apply_filters( 'siteorigin_panels_prebuilt_layouts', array() );
 					</a>
 				</span>
 			</div>
-			<small class="description">{{%= description %}}</small>
+			<small class="description">{{%- description %}}</small>
 		</div>
 	</div>
 </script>
