@@ -121,6 +121,21 @@ SiteOrigin offers a single premium plugin that enhances and extends Page Builder
 
 == Changelog ==
 
+= 2.38.0 – 19 October 2026 =
+* Live Editor: Fixed the preview on WordPress 7.1, where rows and widgets couldn't be highlighted or clicked to edit.
+* Live Editor: Added a message with a Retry button when the preview is blocked or doesn't load within 30 seconds.
+* Live Editor: Moving rows and widgets, resizing columns, and editing Text and Custom HTML widgets now update the preview without a full reload.
+* Rows: Kept stretched rows at full width while the page loads, including on Layout Block pages and for layouts in widget areas.
+* Layouts: Printed the CSS for layouts first rendered from `wp_footer`, such as off-canvas panels and popups.
+* History: Fixed restoring the Original entry, which could empty the layout.
+* Welcome: The Get More Features section now follows the Upgrade Teaser setting and the `siteorigin_premium_upgrade_teaser` filter.
+* Layouts: Kept the stored content of unchanged widgets during `siteorigin-panels/layout-update`, preserving embeds and other advanced content when another widget changes.
+* Layout Block: Refused `siteorigin-panels/layout-update` writes that would strip content from unchanged widgets for users who cannot save unfiltered HTML.
+* Layouts: Accepted `block_index: null` from `siteorigin-panels/layout-get` when updating classic layouts.
+* Post Loop: Hardened post visibility checks so the widget only shows posts the viewer can read. Reported by Karthik (WPScan).
+* Builder: Hardened widget description rendering while keeping encoded characters readable. Reported by Mike Gozdiskowski (WPScan).
+* Developer: Added the `siteorigin_panels_live_editor_swap_widgets` filter, which lists the widgets the Live Editor may update in place.
+
 = 2.37.0 – 04 October 2026 =
 * Layouts: Validated the layout structure before an ability update, and standardized the identifiers used in generated CSS selectors so unusual values can't affect page styling.
 * Layouts: Limited direct changes to stored layout data to users who can post unfiltered HTML, to harden against stored cross-site scripting.
