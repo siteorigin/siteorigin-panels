@@ -114,6 +114,9 @@ add_action(
 	}
 );
 
+// Print before priority 10, where Page Builder prints the layout CSS for widgets. Releases before
+// the fix for layouts first rendered from wp_footer (#1434) print no CSS for a widget area printed
+// at priority 10 or later, so printing earlier compares that CSS with the base release too.
 add_action(
 	'wp_footer',
 	function () {
@@ -122,7 +125,8 @@ add_action(
 			dynamic_sidebar( 'panels-parity-sidebar' );
 			echo '</div>';
 		}
-	}
+	},
+	5
 );
 
 /**

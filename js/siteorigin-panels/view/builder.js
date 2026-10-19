@@ -566,6 +566,13 @@ module.exports = Backbone.View.extend( {
 	 */
 	setData: function( data ) {
 		this.model.loadPanelsData( data );
+
+		// The History dialog is created in attach(), before this load, so its
+		// Original entry still holds the empty default layout (#1397).
+		if ( ! _.isUndefined( this.dialogs.history ) ) {
+			this.dialogs.history.setRevertEntry( this.model );
+		}
+
 		this.currentData = data;
 		this.toggleWelcomeDisplay();
 	},

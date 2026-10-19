@@ -103,6 +103,27 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 	}
 
 	/**
+	 * Whether the current viewer may read one row of a loop result. Public statuses need no capability;
+	 * everything else asks core's read_post, the rule the REST API applies per row.
+	 *
+	 * @param WP_Post|object|int $post A row as WP_Query returns it for any `fields` value.
+	 */
+	public static function viewer_can_read( $post ) {
+		if ( ! ( $post instanceof WP_Post ) ) {
+			$id = is_object( $post ) ? ( isset( $post->ID ) ? (int) $post->ID : 0 ) : (int) $post;
+			$post = $id ? get_post( $id ) : null;
+			if ( ! $post ) {
+				return false;
+			}
+		}
+		$status = get_post_status_object( get_post_status( $post ) );
+		if ( $status && $status->public ) {
+			return true;
+		}
+		return current_user_can( 'read_post', $post->ID );
+	}
+
+	/**
 	 * @param array $args
 	 * @param array $instance
 	 */
@@ -228,6 +249,19 @@ class SiteOrigin_Panels_Widgets_PostLoop extends WP_Widget {
 
 		// Create the query
 		query_posts( apply_filters( 'siteorigin_panels_postloop_query_args', $query_args ) );
+
+		// Keep only rows the viewer may read, as the REST API does per row. Public rows are untouched.
+		global $wp_query;
+		// Core's query cache path for fields=id=>parent can return without setting `posts`.
+		if ( ! is_array( $wp_query->posts ) ) {
+			$wp_query->posts = array();
+		}
+		$wp_query->posts = array_values( array_filter( $wp_query->posts, array( __CLASS__, 'viewer_can_read' ) ) );
+		$wp_query->post_count = count( $wp_query->posts );
+		// Core sets `post` only for object rows (fields=ids / id=>parent leave it unset).
+		$wp_query->post = ( $wp_query->post_count && $wp_query->posts[0] instanceof WP_Post ) ? $wp_query->posts[0] : null;
+		unset( $wp_query->queried_object, $wp_query->queried_object_id );
+
 		echo $args['before_widget'];
 
 		// Filter the title

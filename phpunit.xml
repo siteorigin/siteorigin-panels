@@ -36,6 +36,10 @@
                  defines SiteOrigin_Panels; several tests here define a stand-in under
                  that name. It runs separately via phpunit-meta-cap.xml. -->
             <exclude>./tests/meta-cap</exclude>
+            <!-- The renderer suite drives the REAL SiteOrigin_Panels_Renderer, which asks the
+                 REAL SiteOrigin_Panels_Admin::is_block_editor(); AbilitiesTest's Admin shim has
+                 no such method. It runs separately via phpunit-renderer.xml. -->
+            <exclude>./tests/renderer</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

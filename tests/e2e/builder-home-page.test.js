@@ -85,7 +85,7 @@ test.describe( 'custom home page', () => {
 		await Promise.all( [
 			page.waitForLoadState( 'load' ),
 			page.waitForURL( /so_panels_home_page/ ),
-			page.locator( '#panels-save-home-page' ).click(),
+			page.locator( '#panels-save-home-page' ).click( { noWaitAfter: true } ),
 		] );
 		await expect( page.locator( '#message.updated' ) ).toBeVisible( { timeout: 30000 } );
 		expectNoPageErrors( ctx.errors );

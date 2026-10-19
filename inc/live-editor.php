@@ -6,6 +6,16 @@
  * Class SiteOrigin_Panels_Live_Editor
  */
 class SiteOrigin_Panels_Live_Editor {
+	/**
+	 * The query argument the editor adds to the preview URL when it is cross-origin isolated.
+	 */
+	const ISOLATION_ARG = 'siteorigin_panels_live_editor_isolated';
+
+	/**
+	 * The Document-Isolation-Policy WordPress sends on the editor screens (wp_start_cross_origin_isolation_output_buffer()).
+	 */
+	const ISOLATION_POLICY = 'isolate-and-credentialless';
+
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'xss_headers' ) );
 		add_action( 'get_post_metadata', array( $this, 'post_metadata' ), 10, 3 );
@@ -31,6 +41,8 @@ class SiteOrigin_Panels_Live_Editor {
 			wp_die();
 		}
 
+		self::maybe_send_isolation_header();
+
 		if (
 			! empty( $_POST['live_editor_panels_data'] ) &&
 			! empty( $post->ID ) &&
@@ -38,6 +50,23 @@ class SiteOrigin_Panels_Live_Editor {
 		) {
 			// Disable XSS protection when in the Live Editor
 			header( 'X-XSS-Protection: 0' );
+		}
+	}
+
+	/**
+	 * Send the editor's Document-Isolation-Policy on the preview when the editor asks for it.
+	 *
+	 * WordPress 7.1 sends Document-Isolation-Policy on the editor screens to Chromium 137+. A same-origin
+	 * preview without the same policy is in another agent cluster, so the editor and the preview cannot
+	 * script each other. The editor adds ISOLATION_ARG to the preview URL only when it is cross-origin
+	 * isolated, so the preview then matches the editor.
+	 *
+	 * Call this only after the preview nonce check.
+	 */
+	public static function maybe_send_isolation_header() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The caller verifies the preview nonce.
+		if ( ! empty( $_GET[ self::ISOLATION_ARG ] ) && ! headers_sent() ) {
+			header( 'Document-Isolation-Policy: ' . self::ISOLATION_POLICY );
 		}
 	}
 

@@ -32,10 +32,12 @@
 	<?php esc_html_e( 'Row and widget styles give you all the control you need to make your content uniquely your own. Change attributes like paddings, background colours and column spacing. You can also enter custom CSS and CSS classes if you need even finer grained control.', 'siteorigin-panels' ); ?>
 </p>
 
-<h2><?php esc_html_e( 'Get More Features', 'siteorigin-panels' ); ?></h2>
+<?php if ( SiteOrigin_Panels::display_premium_teaser() ) { ?>
+	<h2><?php esc_html_e( 'Get More Features', 'siteorigin-panels' ); ?></h2>
 
-<p>
-	<?php printf( esc_html__( '%s is a single plugin that adds additional settings and functionality to Page Builder, SiteOrigin widgets and SiteOrigin themes. SiteOrigin Premium also includes our next level email support service. If you need expert advice and quick replies, consider SiteOrigin Premium.', 'siteorigin-panels' ), '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" target="_blank" rel="noopener noreferrer">SiteOrigin Premium</a>' ); ?>
-</p>
+	<p>
+		<?php printf( esc_html__( '%s is a single plugin that adds additional settings and functionality to Page Builder, SiteOrigin widgets and SiteOrigin themes. SiteOrigin Premium also includes our next level email support service. If you need expert advice and quick replies, consider SiteOrigin Premium.', 'siteorigin-panels' ), '<a href="' . esc_url( SiteOrigin_Panels::premium_url() ) . '" target="_blank" rel="noopener noreferrer">SiteOrigin Premium</a>' ); ?>
+	</p>
+<?php } ?>
 
 <iframe src="https://player.vimeo.com/video/314964526" width="800" height="450" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>

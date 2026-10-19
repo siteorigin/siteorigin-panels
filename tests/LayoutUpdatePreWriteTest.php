@@ -337,6 +337,61 @@ class LayoutUpdatePreWriteTest extends SiteOriginTests {
 		$this->assertSame( 'red', $inner->color );
 	}
 
+	public function test_listener_cannot_write_through_a_reference_in_an_array() {
+		$shared = 'red';
+		$layout = $this->layout();
+		$layout['widgets'][0]['text'] = &$shared;
+
+		$this->listener = function ( $result, $panels_data ) {
+			$panels_data['widgets'][0]['text'] = 'blue';
+
+			return $result;
+		};
+
+		SiteOrigin_Panels_Layout_Update_Pre_Write::run( $layout, 42, 'meta', null );
+
+		$this->assertCount( 1, $this->calls );
+		$this->assertSame( 'red', $shared );
+		$this->assertSame( 'red', $layout['widgets'][0]['text'] );
+	}
+
+	public function test_listener_cannot_write_through_a_reference_in_a_plain_object() {
+		$shared       = 'red';
+		$setting      = new stdClass();
+		$setting->color = &$shared;
+		$layout       = $this->layout();
+		$layout['widgets'][0]['style'] = $setting;
+
+		$this->listener = function ( $result, $panels_data ) {
+			$panels_data['widgets'][0]['style']->color = 'blue';
+
+			return $result;
+		};
+
+		SiteOrigin_Panels_Layout_Update_Pre_Write::run( $layout, 42, 'meta', null );
+
+		$this->assertSame( 'red', $shared );
+		$this->assertSame( 'red', $setting->color );
+	}
+
+	public function test_detach_copies_without_references_and_keeps_plain_objects() {
+		$shared         = 'red';
+		$setting        = new stdClass();
+		$setting->first = 'a';
+		$setting->color = &$shared;
+		$value          = array( 'text' => &$shared, 'style' => $setting, 'list' => array( 1, '1', null ) );
+
+		$copy = SiteOrigin_Panels_Layout_Update_Pre_Write::detach( $value );
+		$shared = 'blue';
+
+		$this->assertSame( 'red', $copy['text'] );
+		$this->assertSame( 'red', $copy['style']->color );
+		$this->assertInstanceOf( stdClass::class, $copy['style'] );
+		$this->assertNotSame( $setting, $copy['style'] );
+		$this->assertSame( array( 'first', 'color' ), array_keys( get_object_vars( $copy['style'] ) ) );
+		$this->assertSame( array( 1, '1', null ), $copy['list'] );
+	}
+
 	public function test_listener_exception_propagates_unchanged() {
 		$thrown = new RuntimeException( 'listener failed' );
 		$this->listener = function () use ( $thrown ) {

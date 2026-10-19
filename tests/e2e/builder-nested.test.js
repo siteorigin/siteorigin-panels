@@ -72,7 +72,7 @@ test.describe( 'nested Layout Builder widget', () => {
 
 		await Promise.all( [
 			page.waitForURL( /message=\d+/, { timeout: 60000 } ),
-			page.locator( '#publish' ).click(),
+			page.locator( '#publish' ).click( { noWaitAfter: true } ),
 		] );
 		expectNoPageErrors( ctx.errors );
 	} );

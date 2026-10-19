@@ -44,6 +44,10 @@ jQuery( function ( $ ) {
 		$( window ).trigger( 'panelsStretchRows' );
 	}
 
+	// Clear the fallback before measuring row offsets. Keep this in the same
+	// callback as stretching so the un-stretched rows cannot paint in between.
+	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
+
 	if ( panelsStyles.stretchRows ) {
 		$( window ).on( 'resize load', stretchFullWidthRows ).trigger( 'resize' );
 	}
@@ -65,6 +69,4 @@ jQuery( function ( $ ) {
 		}
 	}
 
-	// This should have been done in the footer, but run it here just incase.
-	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
 } );

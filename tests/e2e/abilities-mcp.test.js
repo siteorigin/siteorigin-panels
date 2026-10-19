@@ -78,7 +78,7 @@ const installAdapter = async ( browser ) => {
 		await page.setInputFiles( '#pluginzip', zipPath );
 		await Promise.all( [
 			page.waitForNavigation(),
-			page.click( '#install-plugin-submit' ),
+			page.click( '#install-plugin-submit', { noWaitAfter: true } ),
 		] );
 		await expect( page.locator( '#wpbody-content' ) ).toContainText( 'Plugin installed successfully' );
 	} finally {

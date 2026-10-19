@@ -13,6 +13,8 @@
  * The blueprint defaults to tests/playground/blueprint.json, a single site.
  * Set PANELS_E2E_BLUEPRINT to a path, relative to the plugin root, to use
  * another one: tests/playground/blueprint-multisite.json starts a network.
+ * Set PANELS_E2E_WIDGETS_BUNDLE_ROOT to mount and activate Widgets Bundle for
+ * Layout Slider integration tests.
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
@@ -21,26 +23,39 @@ const { spawn } = require( 'child_process' );
 const root = path.resolve( __dirname, '..', '..' );
 const port = parseInt( process.env.PANELS_E2E_PORT || '1129', 10 );
 const blueprintPath = path.resolve( root, process.env.PANELS_E2E_BLUEPRINT || path.join( 'tests', 'playground', 'blueprint.json' ) );
+const widgetsBundleRoot = process.env.PANELS_E2E_WIDGETS_BUNDLE_ROOT;
 
 const startPlayground = async () => {
 	const { runCLI } = require( '@wp-playground/cli' );
 
 	process.env.WP_BASE_URL = `http://127.0.0.1:${ port }`;
+	const blueprint = JSON.parse( fs.readFileSync( blueprintPath, 'utf8' ) );
+	const mounts = [
+		{
+			hostPath: root,
+			vfsPath: '/wordpress/wp-content/plugins/siteorigin-panels',
+		},
+		{
+			hostPath: path.join( root, 'tests', 'playground', 'mu-plugins' ),
+			vfsPath: '/wordpress/wp-content/mu-plugins',
+		},
+	];
+	if ( widgetsBundleRoot ) {
+		mounts.push( {
+			hostPath: path.resolve( root, widgetsBundleRoot ),
+			vfsPath: '/wordpress/wp-content/plugins/so-widgets-bundle',
+		} );
+		blueprint.steps.push( {
+			step: 'activatePlugin',
+			pluginPath: '/wordpress/wp-content/plugins/so-widgets-bundle/so-widgets-bundle.php',
+		} );
+	}
 
 	return runCLI( {
 		command: 'server',
 		port,
-		blueprint: JSON.parse( fs.readFileSync( blueprintPath, 'utf8' ) ),
-		'mount-before-install': [
-			{
-				hostPath: root,
-				vfsPath: '/wordpress/wp-content/plugins/siteorigin-panels',
-			},
-			{
-				hostPath: path.join( root, 'tests', 'playground', 'mu-plugins' ),
-				vfsPath: '/wordpress/wp-content/mu-plugins',
-			},
-		],
+		blueprint,
+		'mount-before-install': mounts,
 	} );
 };
 

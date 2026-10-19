@@ -1,5 +1,23 @@
 var panels = window.panels, $ = jQuery;
 
+/**
+ * Whether two lists hold the same elements in the same order. Identity, not _.isEqual(), which compares
+ * DOM elements by their own properties.
+ */
+var sameElements = function ( a, b ) {
+	if ( a.length !== b.length ) {
+		return false;
+	}
+
+	for ( var i = 0; i < a.length; i++ ) {
+		if ( a[ i ] !== b[ i ] ) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
 module.exports = Backbone.View.extend( {
 	template: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-live-editor' ).html() ) ),
 
@@ -10,11 +28,40 @@ module.exports = Backbone.View.extend( {
 	previewUrl: null,
 	previewIframe: null,
 
+	// How long a preview may take to load before the error panel shows (ms). panelsOptions.live_editor_preview_timeout overrides it.
+	PREVIEW_TIMEOUT: 30000,
+
+	// The URL and fields of the current preview POST, the load timer, and the AbortController of the diagnostic request.
+	previewRequest: null,
+	previewTimer: null,
+	previewProbe: null,
+
+	// Increased on every preview load. A ready or load event from an older preview is ignored.
+	previewGeneration: 0,
+
+	// The builder as the preview shows it (panels.helpers.liveEditorPatch.snapshot()), the map from model cid to
+	// preview element (null = every change reloads), and the patched cell widths by cell cid.
+	previewSnapshot: null,
+	previewMap: null,
+	previewWidths: null,
+
+	// True after a move or resize was patched into the preview (positional ids are stale). Only
+	// refreshPreview() resets it. A single-widget swap needs it false.
+	previewPatched: false,
+
+	// The single-widget swap in flight ({ controller, generation }), and the last swapped-in response
+	// ({ dataJson, text }), reused as the "before" render of the next swap.
+	swapRequest: null,
+	swapCache: null,
+
 	events: {
 		'click .live-editor-close': 'close',
 		'click .live-editor-save': 'closeAndSave',
 		'click .live-editor-collapse': 'collapse',
 		'click .live-editor-mode': 'mobileToggle',
+		'click .so-preview-error-retry': function () {
+			this.refreshPreview( this.builder.model.getPanelsData() );
+		},
 		'keyup .live-editor-mode': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
@@ -146,6 +193,10 @@ module.exports = Backbone.View.extend( {
 	 * Close the Live Editor
 	 */
 	close: function ( closeAfter = true ) {
+		// No load timer, diagnostic request or swap may outlive the Live Editor.
+		this.clearPreviewFailure();
+		this.abortSwap();
+
 		if ( ! this.$el.is( ':visible' ) ) {
 			return this;
 		}
@@ -246,6 +297,16 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
+		// An edit to one allow-listed widget replaces only that widget, when a reload would change nothing else.
+		if ( this.swapPreview( newData ) ) {
+			return this;
+		}
+
+		// A move or a resize changes the preview in place when nothing else changed.
+		if ( this.patchPreview( newData ) ) {
+			return this;
+		}
+
 		this.refreshPreview( newData );
 	},
 
@@ -267,8 +328,20 @@ module.exports = Backbone.View.extend( {
 			return memo + num;
 		}, 0 ) / this.loadTimes.length : 1000;
 
+		this.previewGeneration++;
+		this.previewSnapshot = panels.helpers.liveEditorPatch.snapshot( this.builder.model, data );
+		this.previewMap = null;
+		this.previewWidths = {};
+		this.previewPatched = false;
+		this.swapCache = null;
+		this.abortSwap();
+
+		// A failed preview has no readable scroll position.
+		var previewFailed = this.$( '.so-preview-error' ).hasClass( 'so-active' );
+		this.clearPreviewFailure();
+
 		// Store the last preview iframe position
-		if( ! _.isNull( this.previewIframe )  ) {
+		if( ! _.isNull( this.previewIframe ) && ! previewFailed ) {
 			if ( ! this.$( '.so-preview-overlay' ).is( ':visible' ) ) {
 				this.previewScrollTop = this.previewIframe.contents().scrollTop();
 			}
@@ -292,6 +365,183 @@ module.exports = Backbone.View.extend( {
 		);
 
 		this.previewIframe.data( 'load-start', new Date().getTime() );
+
+		// Show the error panel if the preview does not load in time.
+		var thisView = this,
+			iframeEl = this.previewIframe[0],
+			timeout = this.previewTimeout();
+		this.previewTimer = setTimeout( function () {
+			thisView.failPreview( iframeEl, 'timeout', timeout );
+		}, timeout );
+	},
+
+	/**
+	 * The preview load timeout in milliseconds.
+	 *
+	 * @return {number}
+	 */
+	previewTimeout: function () {
+		var timeout = typeof panelsOptions !== 'undefined' ? parseInt( panelsOptions.live_editor_preview_timeout, 10 ) : NaN;
+
+		return timeout > 0 ? timeout : this.PREVIEW_TIMEOUT;
+	},
+
+	/**
+	 * Stop the load timer, cancel the diagnostic request and hide the error panel.
+	 */
+	clearPreviewFailure: function () {
+		this.clearPreviewTimer();
+
+		if ( this.previewProbe ) {
+			this.previewProbe.abort();
+			this.previewProbe = null;
+		}
+
+		this.$( '.so-preview-error' ).removeClass( 'so-active' );
+	},
+
+	clearPreviewTimer: function () {
+		if ( this.previewTimer ) {
+			clearTimeout( this.previewTimer );
+			this.previewTimer = null;
+		}
+	},
+
+	/**
+	 * Whether an iframe element is the current preview, of the current generation.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {boolean}
+	 */
+	isCurrentPreview: function ( iframeEl ) {
+		return ! _.isNull( this.previewIframe ) &&
+			iframeEl === this.previewIframe[0] &&
+			$( iframeEl ).data( 'generation' ) === this.previewGeneration;
+	},
+
+	/**
+	 * The document of a preview iframe when the editor can read it and it is not the initial blank
+	 * document, else null (null also for a response in another agent cluster).
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {Document|null}
+	 */
+	readablePreviewDocument: function ( iframeEl ) {
+		var doc = null;
+
+		try {
+			doc = iframeEl.contentDocument;
+		} catch ( e ) {
+			doc = null;
+		}
+
+		return doc && doc.URL !== 'about:blank' && doc.body ? doc : null;
+	},
+
+	/**
+	 * The document of a preview iframe when it holds a Live Editor preview, else null.
+	 *
+	 * A preview has the siteorigin-panels-live-editor body class (SiteOrigin_Panels::body_class()), or, for a
+	 * theme that does not call body_class(), the liveEditorScrollTo() function of live-editor-front.js.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl
+	 * @return {Document|null}
+	 */
+	previewDocument: function ( iframeEl ) {
+		var doc = this.readablePreviewDocument( iframeEl );
+
+		if ( ! doc ) {
+			return null;
+		}
+
+		var hasFrontScript = false;
+		try {
+			hasFrontScript = !! doc.defaultView && typeof doc.defaultView.liveEditorScrollTo === 'function';
+		} catch ( e ) {
+			hasFrontScript = false;
+		}
+
+		return doc.body.classList.contains( 'siteorigin-panels-live-editor' ) || hasFrontScript ? doc : null;
+	},
+
+	/**
+	 * Show the error panel for a preview that failed to load (#1368).
+	 *
+	 * The preview is a form POST into an iframe, so its HTTP status cannot be read. After a failed load, one
+	 * request with the same URL and fields reads the status. A preview that loads costs nothing extra.
+	 *
+	 * @param {HTMLIFrameElement} iframeEl The preview iframe that failed.
+	 * @param {string} reason 'timeout' or 'load'.
+	 * @param {number} timeout The timeout in milliseconds, for 'timeout'.
+	 */
+	failPreview: function ( iframeEl, reason, timeout ) {
+		if ( ! this.isCurrentPreview( iframeEl ) || ! this.$el.is( ':visible' ) ) {
+			return;
+		}
+
+		this.clearPreviewTimer();
+
+		this.$( '.so-preview-overlay .so-loading-bar' ).stop( true );
+		this.$( '.so-preview-overlay' ).hide();
+
+		var thisView = this,
+			$panel = this.$( '.so-preview-error' ),
+			$reason = $panel.find( '.so-preview-error-reason' ),
+			setReason = function ( key, value ) {
+				var text = String( $panel.data( key ) || '' );
+				$reason.text( value === undefined ? text : text.replace( /%(1\$)?s/, value ) );
+			};
+
+		$reason.text( '' );
+		// The stylesheet shows the panel where the preview shows: not at 980px and below, unless collapsed.
+		$panel.addClass( 'so-active' );
+
+		if ( reason === 'timeout' ) {
+			setReason( 'timeout', Math.round( timeout / 1000 ) );
+			return;
+		}
+
+		var request = this.previewRequest;
+		if ( ! request || typeof window.fetch !== 'function' ) {
+			setReason( 'unknown' );
+			return;
+		}
+
+		if ( this.previewProbe ) {
+			this.previewProbe.abort();
+		}
+		var probe = this.previewProbe = typeof AbortController === 'function' ? new AbortController() : null;
+		var isCurrent = function () {
+			return thisView.previewProbe === probe && thisView.isCurrentPreview( iframeEl );
+		};
+
+		window.fetch( request.url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			body: new URLSearchParams( request.fields ),
+			signal: probe ? probe.signal : undefined,
+		} ).then( function ( response ) {
+			// Only the status is needed.
+			if ( response.body && typeof response.body.cancel === 'function' ) {
+				response.body.cancel().catch( function () {} );
+			}
+
+			if ( ! isCurrent() ) {
+				return;
+			}
+
+			if ( response.ok ) {
+				setReason( 'unknown' );
+			} else {
+				setReason( 'status', response.status );
+			}
+		} ).catch( function ( error ) {
+			if ( ( error && error.name === 'AbortError' ) || ! isCurrent() ) {
+				return;
+			}
+
+			setReason( 'unknown' );
+		} );
 	},
 
 	/**
@@ -302,6 +552,12 @@ module.exports = Backbone.View.extend( {
 	 * @param target The target iframe
 	 */
 	postToIframe: function( data, url, target ){
+		// An isolated editor needs a preview with the same isolation policy (#1400).
+		url = panels.helpers.utils.isolatedPreviewUrl( url );
+
+		// Kept for the diagnostic request after a failed load.
+		this.previewRequest = { url: url, fields: data };
+
 		// Store the old preview
 
 		if( ! _.isNull( this.previewIframe )  ) {
@@ -311,11 +567,13 @@ module.exports = Backbone.View.extend( {
 		var iframeId = 'siteorigin-panels-live-preview-' + this.previewFrameId;
 
 		// Remove the old preview frame
-		this.previewIframe = $( '<iframe src="' + url + '"></iframe>' )
+		// No src: the form POST below is the only navigation, so no other document can become ready first.
+		this.previewIframe = $( '<iframe></iframe>' )
 			.attr( {
 				'id' : iframeId,
 				'name' : iframeId,
 			} )
+			.data( 'generation', this.previewGeneration )
 			.appendTo( target );
 
 		this.setupPreviewFrame( this.previewIframe );
@@ -356,15 +614,25 @@ module.exports = Backbone.View.extend( {
 		iframe
 			.data( 'iframeready', false )
 			.on( 'iframeready', function () {
-				var $$ = $( this ),
-					$iframeContents = $$.contents();
+				var $$ = $( this );
 
 				if( $$.data( 'iframeready' ) ) {
 					// Skip this if the iframeready function has already run
 					return;
 				}
 
+				// Bind only the current preview, and only a readable document. live-editor-front.js sends this event
+				// from the preview itself, so no other marker is needed (a theme may not call body_class()).
+				if ( ! thisView.isCurrentPreview( this ) || ! thisView.readablePreviewDocument( this ) ) {
+					return;
+				}
+
+				var $iframeContents = $$.contents();
+
 				$$.data( 'iframeready', true );
+
+				thisView.clearPreviewTimer();
+				thisView.$( '.so-preview-error' ).removeClass( 'so-active' );
 
 				if ( $$.data( 'load-start' ) !== undefined ) {
 					thisView.loadTimes.unshift( new Date().getTime() - $$.data( 'load-start' ) );
@@ -386,6 +654,9 @@ module.exports = Backbone.View.extend( {
 					$( '.so-panels-live-editor .so-preview iframe' ).css( 'transition', 'all .2s ease' );
 				}, 100 );
 
+				// Map the preview before the binding below changes it.
+				thisView.previewMap = thisView.buildPreviewMap( thisView.readablePreviewDocument( this ) );
+
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
 				layoutWrapper.find( '.panel-grid .panel-grid-cell .so-panel' )
@@ -395,39 +666,610 @@ module.exports = Backbone.View.extend( {
 					} )
 					.each( function ( i, el ) {
 						var $$ = $( el );
-						var widgetEdit = thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) );
-						widgetEdit.data( 'live-editor-preview-widget', $$ );
-
-						$$
-							.css( {
-								'cursor': 'pointer'
-							} )
-							.on( 'mouseenter', function() {
-								widgetEdit.parent().addClass( 'so-hovered' );
-								thisView.highlightElement( $$ );
-							} )
-							.on( 'mouseleave', function() {
-								widgetEdit.parent().removeClass( 'so-hovered' );
-								thisView.resetHighlights();
-							} )
-							.on( 'click', function( e ) {
-								e.preventDefault();
-								// When we click a widget, send that click to the form
-								widgetEdit.find( '.title h4' ).trigger( 'click' );
-							} );
+						thisView.bindPreviewWidget( $$, thisView.$( '.so-live-editor-builder .so-widget' ).eq( $$.data( 'index' ) ) );
 					} );
 
 				// Prevent default clicks inside the preview iframe
-				$iframeContents.find( "a" ).css( {'pointer-events': 'none'} ).on( 'click', function( e ) {
-					e.preventDefault();
-				} );
+				thisView.disablePreviewLinks( $iframeContents.find( 'body' ) );
 
 			} )
 			.on( 'load', function(){
-				var $$ = $( this );
-				if( ! $$.data( 'iframeready' ) ) {
-					$$.trigger('iframeready');
+				var $$ = $( this ),
+					doc = null;
+
+				// Null, or a throw, when the response is in another agent cluster (a blocked response under isolation).
+				try {
+					doc = this.contentDocument;
+				} catch ( e ) {
+					doc = null;
 				}
+
+				// The initial blank document: the preview is still loading.
+				if ( doc && doc.URL === 'about:blank' ) {
+					return;
+				}
+
+				// A load from an older preview.
+				if ( ! thisView.isCurrentPreview( this ) ) {
+					return;
+				}
+
+				thisView.clearPreviewTimer();
+
+				if ( $$.data( 'iframeready' ) ) {
+					return;
+				}
+
+				// A Live Editor preview whose ready event did not arrive (body class or front script, see previewDocument()).
+				if ( thisView.previewDocument( this ) ) {
+					$$.trigger( 'iframeready' );
+				} else {
+					thisView.failPreview( this, 'load' );
+				}
+			} );
+	},
+
+	/**
+	 * Map the rows, cells and widgets of the preview snapshot to their elements in the preview.
+	 *
+	 * Null (every change reloads) unless the preview is the post's own layout (#pl-{postId}; the admin-ajax
+	 * preview and the Layout Block use other ids), every row, cell and widget is where the snapshot puts it,
+	 * every non-empty cell's widgets are the only children of one container, and widget margins are not
+	 * inline (inline-styles writes position-dependent margins into each widget).
+	 *
+	 * @param {Document|null} doc The preview document.
+	 * @return {Object|null}
+	 */
+	buildPreviewMap: function ( doc ) {
+		var snap = this.previewSnapshot,
+			postId = this.builder.config.postId;
+
+		if (
+			! doc ||
+			! snap ||
+			! snap.data ||
+			! _.isArray( snap.data.grid_cells ) ||
+			( typeof panelsOptions !== 'undefined' && panelsOptions.live_editor_inline_styles )
+		) {
+			return null;
+		}
+
+		var wrapper = doc.getElementById( 'pl-' + postId );
+		if ( ! wrapper ) {
+			return null;
+		}
+
+		var map = {
+				doc: doc,
+				wrapper: wrapper,
+				rows: {},
+				cells: {},
+				containers: {},
+				widgets: {},
+				renderedWeights: {},
+				widthRules: {},
+			},
+			cellIndex = 0,
+			widgetIndex = 0,
+			valid = true;
+
+		_.each( snap.rows, function ( row, ri ) {
+			var rowEl = doc.getElementById( 'pg-' + postId + '-' + ri );
+			if ( ! rowEl || rowEl.parentNode !== wrapper ) {
+				valid = false;
+				return;
+			}
+			map.rows[ row.cid ] = rowEl;
+
+			_.each( row.cells, function ( cell, ci ) {
+				var cellEl = doc.getElementById( 'pgc-' + postId + '-' + ri + '-' + ci );
+				var cellData = snap.data.grid_cells[ cellIndex++ ];
+				if ( ! cellEl || ! rowEl.contains( cellEl ) || ! cellData ) {
+					valid = false;
+					return;
+				}
+				map.cells[ cell.cid ] = cellEl;
+				map.renderedWeights[ cell.cid ] = Number( cellData.weight );
+
+				var widgetEls = _.map( cell.widgets, function ( widgetCid, wi ) {
+					var el = doc.getElementById( 'panel-' + postId + '-' + ri + '-' + ci + '-' + wi );
+					if ( ! el || ! cellEl.contains( el ) || String( el.getAttribute( 'data-index' ) ) !== String( widgetIndex ) ) {
+						valid = false;
+					}
+					widgetIndex++;
+					map.widgets[ widgetCid ] = el;
+
+					return el;
+				} );
+
+				if ( valid && widgetEls.length ) {
+					var container = widgetEls[0].parentNode;
+					var children = Array.prototype.slice.call( container.children );
+					if ( children.length !== widgetEls.length || _.some( children, function ( child, i ) {
+						return child !== widgetEls[ i ];
+					} ) ) {
+						valid = false;
+						return;
+					}
+					map.containers[ cell.cid ] = container;
+				}
+			} );
+		} );
+
+		var rowCount = _.filter( wrapper.children, function ( el ) {
+			return el.classList.contains( 'panel-grid' );
+		} ).length;
+
+		return valid && rowCount === snap.rows.length ? map : null;
+	},
+
+	/**
+	 * Whether the current preview may be changed without a reload: it is mapped, ready, of the current
+	 * generation, still the mapped document, not loading and not failed.
+	 *
+	 * @return {boolean}
+	 */
+	canChangePreviewInPlace: function () {
+		var map = this.previewMap;
+
+		return !! map &&
+			! _.isNull( this.previewIframe ) &&
+			!! this.previewIframe.data( 'iframeready' ) &&
+			this.isCurrentPreview( this.previewIframe[0] ) &&
+			this.readablePreviewDocument( this.previewIframe[0] ) === map.doc &&
+			! this.$( '.so-preview-overlay' ).is( ':visible' ) &&
+			! this.$( '.so-preview-error' ).hasClass( 'so-active' );
+	},
+
+	/**
+	 * Cancel the single-widget swap in flight, if any.
+	 */
+	abortSwap: function () {
+		if ( this.swapRequest && this.swapRequest.controller ) {
+			this.swapRequest.controller.abort();
+		}
+		this.swapRequest = null;
+	},
+
+	/**
+	 * After an edit to one allow-listed widget, replace only that widget in the preview.
+	 *
+	 * The editor sends the request the preview iframe sends (same URL with its nonce, same fields, same
+	 * encoding, same cookies) twice: with the data the preview shows and with the new data. Both responses
+	 * are parsed inertly (DOMParser: no scripts, no loads). The widget is replaced only when both are HTML
+	 * 200 responses with no document policy, the two pages are the same apart from the widget's element,
+	 * and the new element holds no script. Otherwise, or on any error, the preview reloads.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} True when a swap started (it reloads by itself if it fails). False to try a patch or reload.
+	 */
+	swapPreview: function ( data ) {
+		var swap = panels.helpers.liveEditorSwap,
+			patch = panels.helpers.liveEditorPatch,
+			map = this.previewMap,
+			request = this.previewRequest;
+
+		if (
+			this.previewPatched ||
+			! this.canChangePreviewInPlace() ||
+			! request ||
+			typeof window.fetch !== 'function' ||
+			typeof window.DOMParser !== 'function' ||
+			typeof window.URLSearchParams !== 'function' ||
+			typeof panelsOptions === 'undefined' ||
+			! _.isArray( panelsOptions.live_editor_swap_widgets )
+		) {
+			return false;
+		}
+
+		var origin;
+		try {
+			origin = map.doc.location.origin;
+		} catch ( e ) {
+			return false;
+		}
+		if ( ! swap.isSwapRoute( request.url, origin ) ) {
+			return false;
+		}
+
+		var next = patch.snapshot( this.builder.model, data ),
+			changed = patch.changedWidgets( this.previewSnapshot, next );
+		if ( ! changed || changed.length !== 1 ) {
+			return false;
+		}
+
+		// The widget's position: the same in both renders, because the structure is unchanged.
+		var cid = changed[0],
+			position = null,
+			widgetIndex = 0;
+		_.each( next.rows, function ( row, ri ) {
+			_.each( row.cells, function ( cell, ci ) {
+				_.each( cell.widgets, function ( widgetCid, wi ) {
+					if ( widgetCid === cid ) {
+						position = { ri: ri, ci: ci, wi: wi, index: widgetIndex };
+					}
+					widgetIndex++;
+				} );
+			} );
+		} );
+		if ( ! position || ! swap.isSwapWidget( next.data.widgets[ position.index ], panelsOptions.live_editor_swap_widgets ) ) {
+			return false;
+		}
+
+		// Shortcodes and auto-embeds can render markup that is set up on document load: reload.
+		if (
+			swap.hasDeferredContent( this.previewSnapshot.data.widgets[ position.index ] ) ||
+			swap.hasDeferredContent( next.data.widgets[ position.index ] )
+		) {
+			return false;
+		}
+
+		var targetId = 'panel-' + this.builder.config.postId + '-' + position.ri + '-' + position.ci + '-' + position.wi,
+			oldEl = map.widgets[ cid ],
+			$sidebarWidget = this.$( '.so-live-editor-builder .so-widget' ).filter( function () {
+				var view = $( this ).data( 'view' );
+				return !! view && !! view.model && view.model.cid === cid;
+			} );
+		if ( ! oldEl || oldEl.id !== targetId || ! oldEl.parentNode || $sidebarWidget.length !== 1 ) {
+			return false;
+		}
+
+		// One swap at a time: a newer edit replaces an older swap.
+		this.abortSwap();
+		var thisView = this,
+			controller = typeof AbortController === 'function' ? new AbortController() : null,
+			current = this.swapRequest = { controller: controller, generation: this.previewGeneration },
+			prevJson = JSON.stringify( this.previewSnapshot.data ),
+			nextJson = JSON.stringify( next.data ),
+			isCurrent = function () {
+				return thisView.swapRequest === current && current.generation === thisView.previewGeneration;
+			},
+			parse = function ( text ) {
+				return new window.DOMParser().parseFromString( text, 'text/html' );
+			},
+			fetchPreview = function ( json ) {
+				return window.fetch( request.url, {
+					method: 'POST',
+					credentials: 'same-origin',
+					redirect: 'manual',
+					cache: 'no-store',
+					signal: controller ? controller.signal : undefined,
+					// The fields and the encoding of the preview form.
+					body: new window.URLSearchParams( {
+						live_editor_panels_data: json,
+						live_editor_post_ID: String( request.fields.live_editor_post_ID ),
+					} ),
+				} ).then( function ( response ) {
+					var type = String( response.headers.get( 'content-type' ) || '' ).toLowerCase();
+					if (
+						response.status !== 200 ||
+						response.redirected ||
+						response.type === 'opaqueredirect' ||
+						type.indexOf( 'text/html' ) !== 0
+					) {
+						throw new Error( 'The response is not a preview.' );
+					}
+
+					return response.text().then( function ( text ) {
+						var doc = parse( text );
+						if ( swap.hasDocumentPolicy( response.headers, doc ) ) {
+							throw new Error( 'The response has a document policy.' );
+						}
+
+						return { text: text, doc: doc };
+					} );
+				} );
+			},
+			cache = this.swapCache,
+			before = cache && cache.dataJson === prevJson ?
+				Promise.resolve( { text: cache.text, doc: parse( cache.text ) } ) :
+				fetchPreview( prevJson );
+
+		Promise.all( [ before, fetchPreview( nextJson ) ] ).then( function ( results ) {
+			if ( ! isCurrent() ) {
+				return;
+			}
+			thisView.swapRequest = null;
+
+			var prevShell = swap.shell( results[0].doc, targetId ),
+				nextShell = swap.shell( results[1].doc, targetId ),
+				target = swap.target( results[1].doc, targetId );
+
+			if ( ! prevShell || prevShell !== nextShell || ! target ) {
+				throw new Error( 'A reload would change more than the widget.' );
+			}
+
+			// The preview must still be the one that was mapped, with the same element in place.
+			if ( thisView.previewPatched || ! thisView.canChangePreviewInPlace() || thisView.previewMap !== map || map.widgets[ cid ] !== oldEl || ! oldEl.parentNode ) {
+				throw new Error( 'The preview changed during the swap.' );
+			}
+
+			var node = map.doc.importNode( target, true );
+			oldEl.parentNode.replaceChild( node, oldEl );
+			map.widgets[ cid ] = node;
+
+			// What the preview gets when it loads, for this widget: disabled links, hover and click to edit.
+			thisView.disablePreviewLinks( $( node ) );
+			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
+
+			thisView.previewSnapshot = next;
+			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
+
+			var previewWindow = thisView.previewIframe[0].contentWindow;
+			previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+		} ).catch( function ( error ) {
+			// Aborted, or replaced by a newer swap or a reload: that one owns the preview now.
+			if (
+				( error && error.name === 'AbortError' ) ||
+				current.generation !== thisView.previewGeneration ||
+				( thisView.swapRequest !== null && thisView.swapRequest !== current )
+			) {
+				return;
+			}
+
+			thisView.swapRequest = null;
+			if ( ! thisView.$el.is( ':visible' ) ) {
+				return;
+			}
+
+			// Today's behaviour: reload with the builder's current data.
+			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+		} );
+
+		return true;
+	},
+
+	/**
+	 * Apply a move or resize to the preview without a reload.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} False when the preview must reload.
+	 */
+	patchPreview: function ( data ) {
+		var map = this.previewMap;
+
+		if ( ! this.canChangePreviewInPlace() ) {
+			return false;
+		}
+
+		var patch = panels.helpers.liveEditorPatch,
+			next = patch.snapshot( this.builder.model, data ),
+			ops = patch.plan( this.previewSnapshot, next );
+
+		if ( ! ops ) {
+			return false;
+		}
+
+		// Work out every new width before the DOM changes, so a width that cannot be read reloads cleanly.
+		var widths = _.clone( this.previewWidths || {} );
+		var widthsOk = _.every( ops.weights, function ( weight, cellCid ) {
+			var rule = this.cellWidthRule( cellCid );
+			var width = rule ? patch.cellWidth( rule.width, map.renderedWeights[ cellCid ], weight ) : null;
+			if ( ! width ) {
+				return false;
+			}
+			widths[ cellCid ] = { selector: rule.selector, media: rule.media, width: width };
+
+			return true;
+		}, this );
+		if ( ! widthsOk ) {
+			return false;
+		}
+
+		try {
+			this.moveRows( ops.rowOrder );
+			this.moveWidgets( ops.cells );
+			this.writeWidths( widths );
+		} catch ( e ) {
+			return false;
+		}
+
+		this.previewWidths = widths;
+		this.previewSnapshot = next;
+		this.previewPatched = true;
+
+		// Widgets that measure their layout listen for this.
+		var previewWindow = this.previewIframe[0].contentWindow;
+		previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+
+		return true;
+	},
+
+	/**
+	 * Put the row elements into the places the rows held, in the new order. Other children of the layout
+	 * wrapper stay where they are.
+	 *
+	 * @param {string[]} rowOrder Row cids.
+	 */
+	moveRows: function ( rowOrder ) {
+		var map = this.previewMap,
+			rowEls = _.values( map.rows ),
+			current = _.filter( map.wrapper.children, function ( el ) {
+				return _.contains( rowEls, el );
+			} ),
+			desired = _.map( rowOrder, function ( cid ) {
+				return map.rows[ cid ];
+			} );
+
+		if ( sameElements( current, desired ) ) {
+			return;
+		}
+
+		var markers = _.map( current, function ( el ) {
+			var marker = map.doc.createComment( '' );
+			map.wrapper.insertBefore( marker, el );
+
+			return marker;
+		} );
+
+		_.each( markers, function ( marker, i ) {
+			map.wrapper.replaceChild( desired[ i ], marker );
+		} );
+	},
+
+	/**
+	 * Put the widget elements into their cells in the new order, and set the first and last child classes.
+	 *
+	 * @param {Object} cells Widget cids by cell cid, for every non-empty cell.
+	 */
+	moveWidgets: function ( cells ) {
+		var map = this.previewMap,
+			elementsOf = function ( widgetCids ) {
+				return _.map( widgetCids, function ( cid ) {
+					return map.widgets[ cid ];
+				} );
+			};
+
+		// Append in order to every cell whose widgets changed. A widget that left a cell is appended to its new one.
+		_.each( cells, function ( widgetCids, cellCid ) {
+			var container = map.containers[ cellCid ];
+			var desired = elementsOf( widgetCids );
+			if ( ! sameElements( container.children, desired ) ) {
+				_.each( desired, function ( el ) {
+					container.appendChild( el );
+				} );
+			}
+		} );
+
+		_.each( cells, function ( widgetCids, cellCid ) {
+			var container = map.containers[ cellCid ];
+			var desired = elementsOf( widgetCids );
+			if ( ! sameElements( container.children, desired ) ) {
+				throw new Error( 'The preview cell does not hold the expected widgets.' );
+			}
+
+			_.each( desired, function ( el, i ) {
+				el.classList.toggle( 'panel-first-child', i === 0 );
+				el.classList.toggle( 'panel-last-child', i === desired.length - 1 );
+			} );
+		} );
+	},
+
+	/**
+	 * The server's width rule for a cell: the one rule whose selector list names the cell's id and sets a
+	 * width, with its @media condition. Null when there is not exactly one, or it is inside another kind of
+	 * group (@supports, @layer, @container).
+	 *
+	 * @param {string} cellCid
+	 * @return {Object|null} { selector, media, width }
+	 */
+	cellWidthRule: function ( cellCid ) {
+		var map = this.previewMap;
+		if ( _.has( map.widthRules, cellCid ) ) {
+			return map.widthRules[ cellCid ];
+		}
+
+		var selector = '#' + map.cells[ cellCid ].id,
+			found = [];
+
+		var walk = function ( rules, media, unsupported ) {
+			_.each( rules, function ( rule ) {
+				if ( rule.type === 1 ) {
+					// A style rule. With CSS nesting it also has cssRules, so test the type first.
+					var selectors = _.map( String( rule.selectorText || '' ).split( ',' ), function ( part ) {
+						return part.trim();
+					} );
+					if ( _.contains( selectors, selector ) && rule.style && rule.style.width ) {
+						found.push( { selector: selector, media: media, width: rule.style.width, unsupported: unsupported } );
+					}
+				} else if ( rule.type === 4 ) {
+					// @media. A nested @media has two conditions to keep: not supported.
+					walk( rule.cssRules, rule.conditionText || rule.media.mediaText, unsupported || !! media );
+				} else if ( rule.cssRules ) {
+					walk( rule.cssRules, media, true );
+				}
+			} );
+		};
+
+		_.each( map.doc.styleSheets, function ( sheet ) {
+			if ( sheet.ownerNode && sheet.ownerNode.id === 'so-live-editor-patch' ) {
+				return;
+			}
+
+			var rules;
+			try {
+				rules = sheet.cssRules;
+			} catch ( e ) {
+				// A cross-origin stylesheet.
+				return;
+			}
+			walk( rules, '', false );
+		} );
+
+		var rule = found.length === 1 && ! found[0].unsupported ? _.omit( found[0], 'unsupported' ) : null;
+		map.widthRules[ cellCid ] = rule;
+
+		return rule;
+	},
+
+	/**
+	 * Write the patched cell widths into one style element at the end of the preview body. A later rule with
+	 * the same selector and condition wins over the server's rule; the mobile rule (id and class) still wins.
+	 *
+	 * @param {Object} widths { selector, media, width } by cell cid.
+	 */
+	writeWidths: function ( widths ) {
+		var doc = this.previewMap.doc;
+		var css = _.map( widths, function ( entry ) {
+			var rule = entry.selector + ' { width: ' + entry.width + '; }';
+
+			return entry.media ? '@media ' + entry.media + ' { ' + rule + ' }' : rule;
+		} ).join( '\n' );
+
+		var style = doc.getElementById( 'so-live-editor-patch' );
+		if ( ! css ) {
+			if ( style ) {
+				style.parentNode.removeChild( style );
+			}
+			return;
+		}
+
+		if ( ! style ) {
+			style = doc.createElement( 'style' );
+			style.id = 'so-live-editor-patch';
+			doc.body.appendChild( style );
+		}
+		style.textContent = css;
+	},
+
+	/**
+	 * Disable the links in part of the preview: no pointer events, and a click does not navigate.
+	 *
+	 * @param {jQuery} $root The preview body, or a swapped widget.
+	 */
+	disablePreviewLinks: function ( $root ) {
+		$root.find( 'a' ).addBack( 'a' ).css( { 'pointer-events': 'none' } ).on( 'click', function( e ) {
+			e.preventDefault();
+		} );
+	},
+
+	/**
+	 * Bind a preview widget to its widget in the Live Editor sidebar: pointer cursor, hover highlight in both
+	 * directions, and click to edit.
+	 *
+	 * @param {jQuery} $previewEl The widget wrapper (.so-panel) in the preview.
+	 * @param {jQuery} $sidebarWidget The widget (.so-widget) in the Live Editor sidebar.
+	 */
+	bindPreviewWidget: function ( $previewEl, $sidebarWidget ) {
+		var thisView = this;
+		$sidebarWidget.data( 'live-editor-preview-widget', $previewEl );
+
+		$previewEl
+			.css( {
+				'cursor': 'pointer'
+			} )
+			.on( 'mouseenter', function() {
+				$sidebarWidget.parent().addClass( 'so-hovered' );
+				thisView.highlightElement( $previewEl );
+			} )
+			.on( 'mouseleave', function() {
+				$sidebarWidget.parent().removeClass( 'so-hovered' );
+				thisView.resetHighlights();
+			} )
+			.on( 'click', function( e ) {
+				e.preventDefault();
+				// When we click a widget, send that click to the form
+				$sidebarWidget.find( '.title h4' ).trigger( 'click' );
 			} );
 	},
 

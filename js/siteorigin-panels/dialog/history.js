@@ -43,7 +43,8 @@ module.exports = panels.view.dialog.extend( {
 		this.renderDialog( this.parseDialogContent( $( '#siteorigin-panels-dialog-history' ).html(), {} ) );
 
 		// Set the history URL.
-		this.$( 'form.history-form' ).attr( 'action', this.builder.config.editorPreview );
+		// An isolated editor needs a preview with the same isolation policy (#1400).
+		this.$( 'form.history-form' ).attr( 'action', panels.helpers.utils.isolatedPreviewUrl( this.builder.config.editorPreview ) );
 
 		this.$( 'iframe.siteorigin-panels-history-iframe' ).on( 'load', function () {
 			var $$ = $( this );
@@ -54,7 +55,8 @@ module.exports = panels.view.dialog.extend( {
 	},
 
 	/**
-	 * Set the original entry. This should be set when creating the dialog.
+	 * Set the original entry. The builder sets it when it creates the dialog,
+	 * and again in setData() once the stored layout has loaded.
 	 *
 	 * @param {panels.model.builder} builder
 	 */

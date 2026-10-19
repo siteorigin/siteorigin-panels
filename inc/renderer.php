@@ -2,6 +2,8 @@
 
 class SiteOrigin_Panels_Renderer {
 	private $inline_css;
+	private $footer_css_count = 0;
+	private $printed_footer_css = array();
 	private $container;
 	private $side = array( 'top', 'right', 'bottom', 'left' );
 
@@ -140,8 +142,23 @@ class SiteOrigin_Panels_Renderer {
 
 	/**
 	 * Add CSS that needs to go inline.
+	 *
+	 * @return bool True when no later wp_footer priority can print the CSS, so the caller must
+	 *              return it with the layout.
 	 */
 	public function add_inline_css( $post_id, $css ) {
+		// A layout that the footer already printed with this exact CSS, rendered again by a later
+		// wp_footer callback, doesn't need its CSS again. Changed CSS is still printed, and so is
+		// CSS that replaces a queued version, so the latest CSS for a layout always prints last.
+		if (
+			doing_action( 'wp_footer' ) &&
+			! isset( $this->inline_css[ $post_id ] ) &&
+			isset( $this->printed_footer_css[ $post_id ] ) &&
+			$this->printed_footer_css[ $post_id ] === $css
+		) {
+			return false;
+		}
+
 		if ( is_null( $this->inline_css ) ) {
 			// Initialize the inline CSS array and add actions to handle printing.
 			$this->inline_css = array();
@@ -166,12 +183,30 @@ class SiteOrigin_Panels_Renderer {
 			}
 		}
 
+		// A layout first rendered by a wp_footer callback comes after wp_head, and possibly
+		// after the default wp_footer priority has run. Print its CSS at a priority still to come.
+		$with_layout = false;
+		if ( doing_action( 'wp_footer' ) && isset( $GLOBALS['wp_filter']['wp_footer'] ) ) {
+			$priority = $GLOBALS['wp_filter']['wp_footer']->current_priority();
+
+			if ( $priority === false || $priority < 10 ) {
+				add_action( 'wp_footer', array( $this, 'print_inline_css' ), 10 );
+			} elseif ( $priority < PHP_INT_MAX ) {
+				add_action( 'wp_footer', array( $this, 'print_inline_css' ), $priority + 1 );
+			} else {
+				// No later priority exists, so the CSS is returned with the layout.
+				$with_layout = true;
+			}
+		}
+
 		$this->inline_css[ $post_id ] = $css;
 
 		// Enqueue the front styles, if they haven't already been enqueued
 		if ( ! wp_style_is( 'siteorigin-panels-front', 'enqueued' ) ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
 		}
+
+		return $with_layout;
 	}
 
 	/**
@@ -758,15 +793,22 @@ class SiteOrigin_Panels_Renderer {
 
 		$html = ob_get_clean();
 
+		$css_with_layout = false;
 		if ( $enqueue_css && ! isset( $this->inline_css[ $post_id ] ) ) {
 			wp_enqueue_style( 'siteorigin-panels-front' );
-			$this->add_inline_css( $post_id, $this->generate_css( $post_id, $panels_data, $layout_data ) );
+			$css_with_layout = $this->add_inline_css( $post_id, $this->generate_css( $post_id, $panels_data, $layout_data ) );
 		}
 
 		// Reset the current post
 		$siteorigin_panels_current_post = $old_current_post;
 
 		$rendered_layout = apply_filters( 'siteorigin_panels_render', $html, $post_id, ! empty( $post ) ? $post : null );
+
+		if ( $css_with_layout ) {
+			// Rendered at the last wp_footer priority: this layout's CSS goes wherever the layout
+			// goes. Other layouts' queued CSS stays for its own print.
+			$rendered_layout = $this->output_inline_css( true, 'wp_footer', false, $post_id ) . $rendered_layout;
+		}
 
 		if ( $is_preview ) {
 			$widget_css = '@import url(' . esc_url( SiteOrigin_Panels::front_css_url() ) . '); ';
@@ -1060,10 +1102,26 @@ class SiteOrigin_Panels_Renderer {
 	 * Print inline CSS in the header and footer.
 	 */
 	public function print_inline_css( $return_css = false ) {
+		// Only a footer print the hook makes is known to reach the page.
+		$remember = ! $return_css && current_filter() === 'wp_footer';
+
+		return $this->output_inline_css( $return_css, current_filter(), $remember );
+	}
+
+	/**
+	 * Print or return the inline CSS, with an ID for the hook it belongs to.
+	 *
+	 * @param bool   $return_css Return the CSS instead of printing it.
+	 * @param string $hook       The hook the CSS is printed for.
+	 * @param bool   $remember   Remember the printed footer CSS, so an identical repeat isn't printed again.
+	 * @param string $only       Print only this layout's CSS and keep the rest queued. Default all.
+	 */
+	private function output_inline_css( $return_css, $hook, $remember = false, $only = null ) {
 		if ( ! empty( $this->inline_css ) ) {
 			$the_css = '';
+			$printed = $only === null ? $this->inline_css : array_intersect_key( $this->inline_css, array( $only => true ) );
 
-			foreach ( $this->inline_css as $post_id => $css ) {
+			foreach ( $printed as $post_id => $css ) {
 				if ( empty( $css ) ) {
 					continue;
 				}
@@ -1071,10 +1129,13 @@ class SiteOrigin_Panels_Renderer {
 				$the_css .= $css;
 			}
 
-			// Reset the inline CSS
-			$this->inline_css = null;
+			// Reset the inline CSS, or take out only the CSS printed now.
+			$this->inline_css = $only === null ? null : array_diff_key( $this->inline_css, $printed );
+			if ( empty( $this->inline_css ) ) {
+				$this->inline_css = null;
+			}
 
-			switch ( current_filter() ) {
+			switch ( $hook ) {
 				case 'wp_head':
 					$css_id = 'head';
 					break;
@@ -1084,7 +1145,7 @@ class SiteOrigin_Panels_Renderer {
 					break;
 
 				default:
-					$css_id = sanitize_html_class( current_filter() );
+					$css_id = sanitize_html_class( $hook );
 					break;
 			}
 
@@ -1096,7 +1157,32 @@ class SiteOrigin_Panels_Renderer {
 					ob_start();
 				}
 
+				// Late styles print with the footer scripts, so a layout rendered after them
+				// needs the front stylesheet printed here.
+				if (
+					$css_id === 'footer' &&
+					did_action( 'wp_print_footer_scripts' ) &&
+					! wp_style_is( 'siteorigin-panels-front', 'done' )
+				) {
+					if ( $return_css ) {
+						// Returned CSS may never reach the page, so the stylesheet isn't marked as printed.
+						wp_styles()->do_item( 'siteorigin-panels-front' );
+					} else {
+						wp_print_styles( 'siteorigin-panels-front' );
+					}
+				}
+
+				// A layout rendered by a late wp_footer callback prints a second footer block.
+				// Keep the first ID and number the others, so each ID stays unique.
+				if ( $css_id === 'footer' && ++$this->footer_css_count > 1 ) {
+					$css_id .= '-' . $this->footer_css_count;
+				}
+
 				printf( '<style media="all" id="siteorigin-panels-layouts-%s">%s</style>', esc_attr( $css_id ), $the_css );
+
+				if ( $remember ) {
+					$this->printed_footer_css = array_replace( $this->printed_footer_css, $printed );
+				}
 
 				if ( $return_css ) {
 					return ob_get_clean();

@@ -59,6 +59,8 @@ add_action(
 	}
 );
 
+// Print before priority 10: Page Builder prints the layout CSS for widgets on wp_footer at the
+// default priority, so a widget area printed at or after it would render without that CSS.
 add_action(
 	'wp_footer',
 	function () {
@@ -67,7 +69,8 @@ add_action(
 			dynamic_sidebar( 'panels-e2e-sidebar' );
 			echo '</div>';
 		}
-	}
+	},
+	5
 );
 
 add_filter(
@@ -100,6 +103,7 @@ add_action(
 			'panels_e2e_classic_widgets',
 			'sidebars_widgets',
 			'widget_siteorigin-panels-builder',
+			'widget_block',
 			'show_on_front',
 			'page_on_front',
 			'siteorigin_panels_home_page_id',
@@ -168,6 +172,17 @@ add_action(
 
 					if ( ! get_post( $post_id ) || ! is_array( $panels_data ) ) {
 						return new WP_Error( 'panels_e2e_seed', 'A post ID and a layout are required.', array( 'status' => 400 ) );
+					}
+
+					// Opt into save-time processing for parity with Layout Block saves.
+					// Raw seeding remains available for historic-style geometry tests.
+					if ( $request->get_param( 'sanitize' ) === true ) {
+						// Load lazy widget classes before calling their update() methods.
+						if ( class_exists( 'SiteOrigin_Widgets_Bundle' ) ) {
+							SiteOrigin_Widgets_Bundle::single()->load_missing_widgets( $panels_data );
+						}
+						$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( isset( $panels_data['widgets'] ) ? $panels_data['widgets'] : array() );
+						$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
 					}
 
 					update_post_meta( $post_id, 'panels_data', wp_slash( $panels_data ) );

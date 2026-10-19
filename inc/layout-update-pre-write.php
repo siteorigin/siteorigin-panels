@@ -49,6 +49,14 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 *    will receive, and after the layout structure check on that stored
 		 *    form; before the block preview render and the post update.
 		 *
+		 * The kses floor applies to every new or changed widget. A widget the
+		 * caller sent back equal to a stored widget is not floored: it is in
+		 * $panels_data with its stored value, as it will be stored. On the
+		 * 'block' path, for a user without `unfiltered_html`, a write whose
+		 * save transforms would change such a widget stops before this filter
+		 * with the code `siteorigin_panels_layout_update_needs_unfiltered_html`.
+		 * Then nothing is stored or rendered.
+		 *
 		 * Layout structure check: the final layout must be one the builder can
 		 * load (SiteOrigin_Panels_Admin::validate_layout_structure()). It needs
 		 * `grids` and `grid_cells` lists, each `grid_cells` entry must point at
@@ -74,8 +82,9 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 		 * objects (stdClass), which is all REST or MCP input can hold. If it
 		 * holds any other object, the write stops before this filter with the
 		 * code `siteorigin_panels_layout_update_unsupported_value`, because
-		 * such an object can keep state the copy cannot reach. Then nothing is
-		 * stored, deleted, mirrored or rendered.
+		 * such an object can keep state the copy cannot reach. A layout that
+		 * holds a cycle stops with the same code. Then nothing is stored,
+		 * deleted, mirrored or rendered.
 		 *
 		 * Scope of "equals what is stored": $panels_data equals the stored
 		 * layout for the WordPress core and Page Builder save pipeline — core's
@@ -127,16 +136,21 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	}
 
 	/**
-	 * Recursive copy of a layout value for the filter payload.
+	 * Recursive copy of a layout value.
 	 *
-	 * Arrays are copied value by value; plain objects (stdClass) are cloned
-	 * and their properties copied, so a listener that changes a nested object
-	 * in its payload cannot change the value that is stored. A plain object
-	 * has only public properties, so the copy reaches all of its state.
+	 * Arrays are rebuilt key by key and plain objects (stdClass) are rebuilt
+	 * property by property, so the copy holds no PHP reference and shares no
+	 * object with the original: a listener that changes its payload, or code
+	 * that still holds a reference into the original, cannot change the copy.
+	 * Keys, property order, values and types are kept. A plain object has only
+	 * public properties, so the copy reaches all of its state.
 	 *
 	 * Any other object stops the write: it can hold state a copy cannot
 	 * reach (non-public or readonly properties, or storage inside an internal
 	 * class). REST and JSON input only ever holds arrays and plain objects.
+	 *
+	 * The value must not contain a cycle; layout-update writes check that with
+	 * SiteOrigin_Panels_Layout_Update_Unchanged::walkable() first.
 	 *
 	 * @param mixed $value The value to copy.
 	 *
@@ -144,13 +158,14 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 	 *
 	 * @return mixed
 	 */
-	private static function detach( $value ) {
+	public static function detach( $value ) {
 		if ( is_array( $value ) ) {
+			$copy = array();
 			foreach ( $value as $key => $item ) {
-				$value[ $key ] = self::detach( $item );
+				$copy[ $key ] = self::detach( $item );
 			}
 
-			return $value;
+			return $copy;
 		}
 
 		if ( is_object( $value ) ) {
@@ -163,8 +178,8 @@ class SiteOrigin_Panels_Layout_Update_Pre_Write {
 				);
 			}
 
-			$copy = clone $value;
-			foreach ( get_object_vars( $copy ) as $key => $item ) {
+			$copy = new stdClass();
+			foreach ( get_object_vars( $value ) as $key => $item ) {
 				$copy->$key = self::detach( $item );
 			}
 
