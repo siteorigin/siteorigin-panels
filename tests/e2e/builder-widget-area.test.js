@@ -269,7 +269,10 @@ test.describe( 'widget area', () => {
 				await page.goto( target, { waitUntil: 'commit' } );
 				// The request the route holds, then the script element that points at that exact URL.
 				// The request alone is not enough: the preload scanner can send it before the element exists.
-				const stylingUrl = await heldUrl;
+				const stylingUrl = await Promise.race( [
+					heldUrl,
+					new Promise( ( resolve, reject ) => setTimeout( () => reject( new Error( 'styling.js was never requested' ) ), 15000 ) ),
+				] );
 				await page.waitForFunction(
 					( url ) => Array.from( document.querySelectorAll( 'script[src]' ) ).some( ( script ) => script.src === url ),
 					stylingUrl,
