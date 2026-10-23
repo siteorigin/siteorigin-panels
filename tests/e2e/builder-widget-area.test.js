@@ -241,30 +241,30 @@ test.describe( 'widget area', () => {
 				storageState: { cookies: [], origins: [] },
 			} );
 			let release = () => {};
-			let entered;
 			const held = new Promise( ( resolve ) => { release = resolve; } );
-			const gateEntered = new Promise( ( resolve ) => { entered = resolve; } );
 
 			try {
 				const target = siteUrl( '?p=1&panels_e2e_legacy_container=1' );
-				const gate = siteUrl( 'widget-cls-ready-gate.js' );
-				await context.route( gate, async ( route ) => {
-					entered();
+				// Hold styling.js itself. The parser inserts its script element and then blocks on the
+				// request, so once that element exists the rows are measured before DOMContentLoaded
+				// and before the script runs. A sentinel script at the end of the body is not a safe
+				// signal: the preload scanner requests it while the parser can still be waiting on
+				// jQuery, before the styling script element exists.
+				await context.route( /\/js\/styling(\.min)?\.js/, async ( route ) => {
 					await held;
-					await route.fulfill( { contentType: 'application/javascript', body: '' } );
+					await route.continue();
 				} );
 				await context.route( target, async ( route ) => {
 					const response = await route.fetch();
-					let html = ( await response.text() ).replace(
+					const html = ( await response.text() ).replace(
 						'</head>',
 						'<style>.panel-layout:not(.panel-layout .panel-layout){width:min(600px,100%)!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}</style></head>'
 					);
-					html = html.replace( '</body>', `<script src="${ gate }"></script></body>` );
 					await route.fulfill( { response, body: html } );
 				} );
 				const page = await context.newPage();
 				await page.goto( target, { waitUntil: 'commit' } );
-				await gateEntered;
+				await page.waitForFunction( () => !! document.querySelector( 'script[src*="js/styling"]' ), null, { polling: 50 } );
 
 				// styling.js removes the fallback class first in its DOM-ready callback, so the class
 				// still being there shows the rows below are measured before that callback ran.
@@ -272,11 +272,9 @@ test.describe( 'widget area', () => {
 				await expect( rows ).toHaveCount( 2 );
 				const state = await page.evaluate( () => ( {
 					ready: document.readyState,
-					styling: !! document.querySelector( 'script[src*="js/styling"]' ),
 					classes: Array.from( document.body.classList ),
 				} ) );
 				expect( state.ready ).toBe( 'loading' );
-				expect( state.styling ).toBe( true );
 				expect( state.classes ).toContain( FALLBACK );
 				expect( state.classes ).not.toContain( 'siteorigin-panels' );
 				await expect.poll( () => rows.first().evaluate( ( element ) => getComputedStyle( element ).marginLeft ) ).toBe( '-1000px' );
