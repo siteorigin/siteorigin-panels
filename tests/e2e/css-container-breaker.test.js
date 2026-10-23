@@ -3,7 +3,7 @@
  * and Page Builder stretches Full Width rows with CSS instead of the stretch
  * script. The breaker must keep a child combinator in the selector, let a
  * container with a fixed width go full width, and leave search and archive
- * pages alone when an excerpt renders a layout.
+ * pages alone when they render a layout.
  */
 const { expect, test } = require( '@playwright/test' );
 const { adminLogin, createPost, deletePost, seedLayout, siteUrl } = require( './builder-helpers' );
