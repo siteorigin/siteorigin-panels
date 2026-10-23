@@ -1,9 +1,23 @@
 /* global _, jQuery */
 
 jQuery( function ( $ ) {
+	// A caching plugin that delays inline scripts can run this file before
+	// panelsStyles exists. Read the settings when they are needed, and fall
+	// back to the plugin defaults so the rows still stretch.
+	const settings = function () {
+		if ( typeof panelsStyles !== 'undefined' && panelsStyles ) {
+			return panelsStyles;
+		}
+
+		return {
+			fullContainer: 'body',
+			stretchRows: ! $( 'body' ).hasClass( 'siteorigin-panels-css-container' ),
+		};
+	};
+
 	// Stretch all the full width rows
 	const stretchFullWidthRows = function () {
-		let fullContainer = $( panelsStyles.fullContainer );
+		let fullContainer = $( settings().fullContainer );
 		if ( fullContainer.length === 0 ) {
 			fullContainer = $( 'body' );
 		}
@@ -48,7 +62,7 @@ jQuery( function ( $ ) {
 	// callback as stretching so the un-stretched rows cannot paint in between.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
 
-	if ( panelsStyles.stretchRows ) {
+	if ( settings().stretchRows ) {
 		$( window ).on( 'resize load', stretchFullWidthRows ).trigger( 'resize' );
 	}
 
