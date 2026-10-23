@@ -242,6 +242,8 @@ test.describe( 'widget area', () => {
 			} );
 			let release = () => {};
 			const held = new Promise( ( resolve ) => { release = resolve; } );
+			let entered = () => {};
+			const heldUrl = new Promise( ( resolve ) => { entered = resolve; } );
 
 			try {
 				const target = siteUrl( '?p=1&panels_e2e_legacy_container=1' );
@@ -251,6 +253,7 @@ test.describe( 'widget area', () => {
 				// signal: the preload scanner requests it while the parser can still be waiting on
 				// jQuery, before the styling script element exists.
 				await context.route( /\/js\/styling(\.min)?\.js/, async ( route ) => {
+					entered( route.request().url() );
 					await held;
 					await route.continue();
 				} );
@@ -264,7 +267,14 @@ test.describe( 'widget area', () => {
 				} );
 				const page = await context.newPage();
 				await page.goto( target, { waitUntil: 'commit' } );
-				await page.waitForFunction( () => !! document.querySelector( 'script[src*="js/styling"]' ), null, { polling: 50 } );
+				// The request the route holds, then the script element that points at that exact URL.
+				// The request alone is not enough: the preload scanner can send it before the element exists.
+				const stylingUrl = await heldUrl;
+				await page.waitForFunction(
+					( url ) => Array.from( document.querySelectorAll( 'script[src]' ) ).some( ( script ) => script.src === url ),
+					stylingUrl,
+					{ polling: 50 }
+				);
 
 				// styling.js removes the fallback class first in its DOM-ready callback, so the class
 				// still being there shows the rows below are measured before that callback ran.
