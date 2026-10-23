@@ -602,17 +602,23 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Do we need to remove the theme container on this page?
+		// Only a singular page, or the legacy home layout, owns the theme container. A search
+		// or archive page can render this layout too, and its container must keep its width.
 		if (
 			$this->container['css_override'] &&
 			$this->container['full_width'] && // Does this layout have full width layouts?
+			( is_singular() || $post_id === 'home' ) &&
 			! defined( 'siteorigin_css_override' )
 		) {
 			// Prevent this CSS from being added again.
 			define( 'siteorigin_css_override', true );
 
 			$css->add_css(
-				esc_html( $this->container['selector'] ),
+				// Keep combinators such as > in the selector. Only tags and braces are unsafe here.
+				str_replace( array( '{', '}' ), '', wp_strip_all_tags( $this->container['selector'] ) ),
 				array(
+					// Themes such as Bootstrap set width rather than max-width on the container.
+					'width' => 'auto',
 					'max-width' => 'none',
 					// Clear horizontal spacing from container to prevent any indents.
 					'padding-right' => '0',
