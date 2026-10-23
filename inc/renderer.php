@@ -602,12 +602,12 @@ class SiteOrigin_Panels_Renderer {
 		}
 
 		// Do we need to remove the theme container on this page?
-		// Only a singular page owns the theme container. A search or archive page can render
-		// this layout for an excerpt, and its container must keep its width.
+		// Only a singular page, or the legacy home layout, owns the theme container. A search
+		// or archive page can render this layout too, and its container must keep its width.
 		if (
 			$this->container['css_override'] &&
 			$this->container['full_width'] && // Does this layout have full width layouts?
-			( is_singular() || siteorigin_panels_is_home() ) &&
+			( is_singular() || $post_id === 'home' ) &&
 			! defined( 'siteorigin_css_override' )
 		) {
 			// Prevent this CSS from being added again.
