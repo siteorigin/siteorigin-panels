@@ -190,12 +190,6 @@
         <field type="Meta: Title">title</field>
       </fields>
     </widget>
-    <widget name="WP_Widget_Text_Icl">
-      <fields>
-        <field type="Widget: Title">title</field>
-        <field type="Widget: Text" editor_type="AREA">text</field>
-      </fields>
-    </widget>
     <widget name="WP_Nav_Menu_Widget">
       <fields>
         <field type="Menu: Title">title</field>
@@ -237,6 +231,73 @@
         <field type="Widget: Title">title</field>
         <field type="Widget: Text" editor_type="AREA">text</field>
       </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widgets_PostLoop">
+      <fields>
+        <field type="Post Loop: Title">title</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Block">
+      <fields>
+        <field type="Block: Content" editor_type="AREA">content</field>
+      </fields>
+    </widget>
+    <widget name="WP_Widget_Media_Video">
+      <fields>
+        <field type="Video: Title">title</field>
+        <field type="Video: URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_Animated_Image">
+      <fields>
+        <field type="Animated Image: Image URL" editor_type="LINK">image</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_Button">
+      <fields>
+        <field type="Button (PB): Text">text</field>
+        <field type="Button (PB): URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_Call_To_Action">
+      <fields>
+        <field type="Call To Action (PB): Title">title</field>
+        <field type="Call To Action (PB): Subtitle">subtitle</field>
+        <field type="Call To Action (PB): Button Text">button_text</field>
+        <field type="Call To Action (PB): Button URL" editor_type="LINK">button_url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_List">
+      <fields>
+        <field type="List (PB): Title">title</field>
+        <field type="List (PB): Text" editor_type="AREA">text</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_Price_Box">
+      <fields>
+        <field type="Price Box (PB): Title">title</field>
+        <field type="Price Box (PB): Price">price</field>
+        <field type="Price Box (PB): Per">per</field>
+        <field type="Price Box (PB): Information">information</field>
+        <field type="Price Box (PB): Features" editor_type="AREA">features</field>
+        <field type="Price Box (PB): Button Text">button_text</field>
+        <field type="Price Box (PB): Button URL" editor_type="LINK">button_url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Panels_Widget_Testimonial">
+      <fields>
+        <field type="Testimonial (PB): Name">name</field>
+        <field type="Testimonial (PB): Location">location</field>
+        <field type="Testimonial (PB): Text" editor_type="AREA">text</field>
+        <field type="Testimonial (PB): URL" editor_type="LINK">url</field>
+      </fields>
+    </widget>
+    <widget name="SiteOrigin_Widget_Button_Grid_Widget">
+      <fields-in-item items_of="buttons">
+        <field type="Button Grid: Button Text">widget>text</field>
+        <field type="Button Grid: Button URL" editor_type="LINK">widget>url</field>
+        <field type="Button Grid: Button Title">widget>attributes>title</field>
+      </fields-in-item>
     </widget>
   </siteorigin-widgets>
   <custom-fields>
