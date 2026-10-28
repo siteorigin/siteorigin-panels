@@ -20,5 +20,9 @@
 		"backbone": "^1.6.0",
 		"siteorigin-tests-common": "github:siteorigin/siteorigin-tests-common",
 		"underscore": "^1.13.7"
+	},
+	"overrides": {
+		"sha.js@2.4.11": "2.4.12",
+		"ws@8.18.1": "8.21.0"
 	}
 }
