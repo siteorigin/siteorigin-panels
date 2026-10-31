@@ -3,19 +3,20 @@
  * Plugin Name: Page Builder e2e WP Rocket stand-in
  * Description: Test-only must-use plugin for the WP Rocket widget purge e2e test. Never shipped, and never installed beside real WP Rocket, because it defines the same function.
  *
- * With the panels_e2e_wp_rocket_on option set:
- * - A stand-in for rocket_widget_update_callback, attached the way WP Rocket
- *   attaches it. It counts each call in panels_e2e_wp_rocket_purges, keyed by
- *   the request's action.
- * - A witness callback on the same filter, which shows other callbacks still run.
- * - A prebuilt layout, a non-public post type that uses the builder, and the
- *   Customizer's widgets on a block theme.
+ * Only requests that carry the panels_e2e_wp_rocket cookie, or the
+ * X-Panels-E2E-WP-Rocket header, get any of this, so specs running in parallel
+ * see nothing. The value is the mode:
+ * - on: a stand-in for rocket_widget_update_callback, attached the way WP Rocket
+ *   attaches it, counting each call in panels_e2e_wp_rocket_purges by the
+ *   request's action. A witness callback on the same filter shows other
+ *   callbacks still run. The request also gets a prebuilt layout, a non-public
+ *   post type that uses the builder, and the Customizer's widgets on a block theme.
+ * - baseline: the same, with the stand-in attached again after the compatibility
+ *   code has run, which gives the behavior without it.
+ * - count-home, count-widgets: the stand-in only, counting in its own option,
+ *   for the specs that own those saves.
  *
- * With panels_e2e_wp_rocket_baseline set too, the stand-in is attached again
- * after the compatibility code has run, which gives the behavior without it.
- *
- * With the option off the function doesn't exist, so the compatibility code
- * doesn't load and other specs are unaffected.
+ * Without a mode the function doesn't exist, so the compatibility code doesn't load.
  */
 
 /**
@@ -55,7 +56,23 @@ add_action(
 	}
 );
 
-if ( get_option( 'panels_e2e_wp_rocket_on' ) ) {
+$panels_e2e_wp_rocket_mode = '';
+if ( ! empty( $_SERVER['HTTP_X_PANELS_E2E_WP_ROCKET'] ) ) {
+	$panels_e2e_wp_rocket_mode = (string) $_SERVER['HTTP_X_PANELS_E2E_WP_ROCKET'];
+} elseif ( ! empty( $_COOKIE['panels_e2e_wp_rocket'] ) ) {
+	$panels_e2e_wp_rocket_mode = (string) $_COOKIE['panels_e2e_wp_rocket'];
+}
+
+$panels_e2e_wp_rocket_options = array(
+	'on'            => 'panels_e2e_wp_rocket_purges',
+	'baseline'      => 'panels_e2e_wp_rocket_purges',
+	'count-home'    => 'panels_e2e_wp_rocket_purges_home',
+	'count-widgets' => 'panels_e2e_wp_rocket_purges_widgets',
+);
+
+if ( isset( $panels_e2e_wp_rocket_options[ $panels_e2e_wp_rocket_mode ] ) ) {
+	define( 'PANELS_E2E_WP_ROCKET_OPTION', $panels_e2e_wp_rocket_options[ $panels_e2e_wp_rocket_mode ] );
+
 	function rocket_widget_update_callback( $instance ) {
 		if ( isset( $_REQUEST['action'] ) && is_string( $_REQUEST['action'] ) ) {
 			$key = $_REQUEST['action'];
@@ -65,26 +82,18 @@ if ( get_option( 'panels_e2e_wp_rocket_on' ) ) {
 
 		// The Customizer captures option writes during a widget update, so the count goes straight to the table.
 		global $wpdb;
-		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'panels_e2e_wp_rocket_purges' ) );
+		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", PANELS_E2E_WP_ROCKET_OPTION ) );
 		$counts = $stored ? maybe_unserialize( $stored ) : array();
 		$counts[ $key ] = ( isset( $counts[ $key ] ) ? $counts[ $key ] : 0 ) + 1;
 		$wpdb->replace(
 			$wpdb->options,
 			array(
-				'option_name'  => 'panels_e2e_wp_rocket_purges',
+				'option_name'  => PANELS_E2E_WP_ROCKET_OPTION,
 				'option_value' => serialize( $counts ),
 				'autoload'     => 'off',
 			)
 		);
-		wp_cache_delete( 'panels_e2e_wp_rocket_purges', 'options' );
-
-		return $instance;
-	}
-
-	function panels_e2e_wp_rocket_witness( $instance ) {
-		if ( is_array( $instance ) ) {
-			$instance['panels_e2e_witness'] = 'kept';
-		}
+		wp_cache_delete( PANELS_E2E_WP_ROCKET_OPTION, 'options' );
 
 		return $instance;
 	}
@@ -93,11 +102,22 @@ if ( get_option( 'panels_e2e_wp_rocket_on' ) ) {
 		'plugins_loaded',
 		function () {
 			add_filter( 'widget_update_callback', 'rocket_widget_update_callback' );
-			add_filter( 'widget_update_callback', 'panels_e2e_wp_rocket_witness', 11 );
 		}
 	);
+}
 
-	if ( get_option( 'panels_e2e_wp_rocket_baseline' ) ) {
+if ( in_array( $panels_e2e_wp_rocket_mode, array( 'on', 'baseline' ), true ) ) {
+	function panels_e2e_wp_rocket_witness( $instance ) {
+		if ( is_array( $instance ) ) {
+			$instance['panels_e2e_witness'] = 'kept';
+		}
+
+		return $instance;
+	}
+
+	add_filter( 'widget_update_callback', 'panels_e2e_wp_rocket_witness', 11 );
+
+	if ( $panels_e2e_wp_rocket_mode === 'baseline' ) {
 		$panels_e2e_wp_rocket_attach = function () {
 			add_filter( 'widget_update_callback', 'rocket_widget_update_callback' );
 		};

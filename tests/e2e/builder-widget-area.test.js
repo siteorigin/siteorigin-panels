@@ -30,6 +30,7 @@ test.describe.configure( { mode: 'serial' } );
 const TEXT = 'Widget area text';
 const SIDEBAR = 'panels-e2e-sidebar';
 const OPTIONS = [ 'panels_e2e_classic_widgets', 'sidebars_widgets', 'widget_siteorigin-panels-builder', 'widget_block' ];
+const ROCKET_PURGES = 'panels_e2e_wp_rocket_purges_widgets';
 const FALLBACK = 'siteorigin-panels-before-js';
 const FALLBACK_CLASS = new RegExp( `(^|\\s)${ FALLBACK }(\\s|$)` );
 const STRIP = 'document.body.className = document.body.className.replace("siteorigin-panels-before-js","");';
@@ -184,10 +185,16 @@ test.describe( 'widget area', () => {
 		await closeDialog( page );
 		await expectOpenDialogs( page, 0 );
 
+		// A widget save keeps WP Rocket's purge. See panels-e2e-wp-rocket.php.
+		await uiOption( admin, ROCKET_PURGES, { exists: false } );
+		await ctx.context.addCookies( [ { name: 'panels_e2e_wp_rocket', value: 'count-widgets', url: siteUrl( '' ) } ] );
 		const save = sidebarWidget( page ).locator( '.widget-control-save' );
 		await save.click();
 		await expect( sidebarWidget( page ).locator( '.spinner.is-active' ) ).toHaveCount( 0, { timeout: 30000 } );
 		await expect( save ).toBeDisabled( { timeout: 30000 } );
+		await ctx.context.clearCookies( { name: 'panels_e2e_wp_rocket' } );
+		expect( ( await uiOption( admin, ROCKET_PURGES ) ).value[ 'save-widget' ] ).toBeGreaterThan( 0 );
+		await uiOption( admin, ROCKET_PURGES, { exists: false } );
 		expectNoPageErrors( ctx.errors );
 	} );
 

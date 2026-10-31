@@ -22,6 +22,7 @@ const {
 test.describe.configure( { mode: 'serial' } );
 
 const TEXT = 'Home page text';
+const ROCKET_PURGES = 'panels_e2e_wp_rocket_purges_home';
 const OPTIONS = [ 'panels_e2e_home_page', 'show_on_front', 'page_on_front', 'siteorigin_panels_home_page_id' ];
 
 const openHomeBuilder = async ( page ) => {
@@ -82,12 +83,18 @@ test.describe( 'custom home page', () => {
 		}
 		await expect( toggle ).toBeChecked();
 
+		// A home page save keeps WP Rocket's purge. See panels-e2e-wp-rocket.php.
+		await uiOption( admin, ROCKET_PURGES, { exists: false } );
+		await ctx.context.addCookies( [ { name: 'panels_e2e_wp_rocket', value: 'count-home', url: siteUrl( '' ) } ] );
 		await Promise.all( [
 			page.waitForLoadState( 'load' ),
 			page.waitForURL( /so_panels_home_page/ ),
 			page.locator( '#panels-save-home-page' ).click( { noWaitAfter: true } ),
 		] );
 		await expect( page.locator( '#message.updated' ) ).toBeVisible( { timeout: 30000 } );
+		await ctx.context.clearCookies( { name: 'panels_e2e_wp_rocket' } );
+		expect( ( await uiOption( admin, ROCKET_PURGES ) ).value.page ).toBeGreaterThan( 0 );
+		await uiOption( admin, ROCKET_PURGES, { exists: false } );
 		expectNoPageErrors( ctx.errors );
 	} );
 

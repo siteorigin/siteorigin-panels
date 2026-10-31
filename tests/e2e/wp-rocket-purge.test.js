@@ -3,7 +3,8 @@
  * tests/playground/mu-plugins/panels-e2e-wp-rocket.php supplies a stand-in for WP Rocket's callback.
  * Each preparing request runs twice: in baseline mode the stand-in is attached again after the
  * compatibility code, so the count must be above zero, which shows the request reaches the filter.
- * With the baseline off the count must be zero.
+ * In the on mode the count must be zero. The mode is a cookie or a header, so only this spec's requests
+ * get the stand-in. builder-widget-area and builder-home-page check their own saves.
  */
 const { expect, test } = require( '@playwright/test' );
 
@@ -11,7 +12,6 @@ const {
 	addRow,
 	addWidget,
 	adminLogin,
-	closeDialog,
 	createPost,
 	deletePost,
 	expectOpenDialogs,
@@ -28,12 +28,9 @@ const {
 
 test.describe.configure( { mode: 'serial' } );
 
-const ON = 'panels_e2e_wp_rocket_on';
-const BASELINE = 'panels_e2e_wp_rocket_baseline';
+const MODE_COOKIE = 'panels_e2e_wp_rocket';
+const MODE_HEADER = 'X-Panels-E2E-WP-Rocket';
 const PURGES = 'panels_e2e_wp_rocket_purges';
-const HOME_OPTIONS = [ 'panels_e2e_home_page', 'show_on_front', 'page_on_front', 'siteorigin_panels_home_page_id' ];
-const WIDGET_OPTIONS = [ 'panels_e2e_classic_widgets', 'sidebars_widgets', 'widget_siteorigin-panels-builder', 'widget_panels_e2e_text' ];
-const SIDEBAR = 'panels-e2e-sidebar';
 const TEXT = 'Rocket text';
 const LISTED = [
 	'so_panels_builder_content',
@@ -54,7 +51,6 @@ const layout = ( text = TEXT ) => ( {
 } );
 
 const ajax = ( query ) => siteUrl( `wp-admin/admin-ajax.php?${ new URLSearchParams( query ) }` );
-const total = ( counts ) => Object.values( counts ).reduce( ( sum, count ) => sum + Number( count ), 0 );
 
 // The action of an admin-ajax request, from its URL or its body.
 const requestAction = ( request ) => {
@@ -95,10 +91,13 @@ test.describe( 'WP Rocket widget purge', () => {
 	let ctx;
 	let settled;
 	let nonces;
+	let mode = 'on';
 	const created = [];
-	const saved = {};
 
-	const setBaseline = ( on ) => uiOption( admin, BASELINE, on ? { value: 1 } : { exists: false } );
+	const setMode = async ( value ) => {
+		mode = value;
+		await ctx.context.addCookies( [ { name: MODE_COOKIE, value, url: siteUrl( '' ) } ] );
+	};
 	const resetCounts = () => uiOption( admin, PURGES, { exists: false } );
 	const counts = async () => ( await uiOption( admin, PURGES ) ).value || {};
 
@@ -110,22 +109,22 @@ test.describe( 'WP Rocket widget purge', () => {
 	 */
 	const bothModes = async ( key, trigger ) => {
 		const results = {};
-		for ( const [ mode, baseline ] of [ [ 'baseline', true ], [ 'fixed', false ] ] ) {
+		for ( const run of [ 'baseline', 'on' ] ) {
 			await settled();
-			await setBaseline( baseline );
+			await setMode( run );
 			await resetCounts();
-			results[ mode ] = await trigger( mode );
+			results[ run ] = await trigger( run );
 			await settled();
 			const count = ( await counts() )[ key ] || 0;
 			// eslint-disable-next-line no-console
-			console.log( `${ key } ${ mode }: count ${ count }` );
-			if ( baseline ) {
+			console.log( `${ key } ${ run }: count ${ count }` );
+			if ( run === 'baseline' ) {
 				expect( count, `${ key } reaches the filter` ).toBeGreaterThan( 0 );
 			} else {
 				expect( count, `${ key } doesn't purge` ).toBe( 0 );
 			}
 		}
-		await setBaseline( false );
+		await setMode( 'on' );
 
 		return results;
 	};
@@ -154,23 +153,14 @@ test.describe( 'WP Rocket widget purge', () => {
 
 	test.beforeAll( async ( { browser } ) => {
 		admin = await adminLogin();
-		for ( const name of [ ...HOME_OPTIONS, ...WIDGET_OPTIONS ] ) {
-			saved[ name ] = await uiOption( admin, name );
-		}
-		await uiOption( admin, ON, { value: 1 } );
 		ctx = await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
 		settled = trackRequests( ctx.page );
+		await setMode( 'on' );
 		nonces = ( await rest( admin, 'GET', '/panels-e2e/v1/wp-rocket/nonces' ) ).body;
 	} );
 
 	test.afterAll( async () => {
-		for ( const name of [ ON, BASELINE, PURGES ] ) {
-			await uiOption( admin, name, { exists: false } );
-		}
-		for ( const name of [ ...HOME_OPTIONS, ...WIDGET_OPTIONS ] ) {
-			const old = saved[ name ];
-			await uiOption( admin, name, old.exists ? { value: old.value } : { exists: false } );
-		}
+		await resetCounts();
 		for ( const [ type, id ] of created ) {
 			await deletePost( admin, type, id );
 		}
@@ -189,17 +179,15 @@ test.describe( 'WP Rocket widget purge', () => {
 	};
 
 	test( 'J0 the compatibility code loads only with the callback', async () => {
-		const header = async () => {
-			const response = await admin.context.get( siteUrl( `wp-json/panels-e2e/v1/ui/option?name=${ ON }` ), { headers: { 'X-WP-Nonce': admin.nonce } } );
+		const loaded = async ( headers ) => {
+			const response = await admin.context.get( siteUrl( `wp-json/panels-e2e/v1/ui/option?name=${ PURGES }` ), { headers: { 'X-WP-Nonce': admin.nonce, ...headers } } );
 			expect( response.status() ).toBe( 200 );
 
 			return response.headers()[ 'x-panels-e2e-wp-rocket-compat' ];
 		};
 
-		expect( await header() ).toBe( '1' );
-		await uiOption( admin, ON, { exists: false } );
-		expect( await header() ).toBe( '0' );
-		await uiOption( admin, ON, { value: 1 } );
+		expect( await loaded( { [ MODE_HEADER ]: 'on' } ) ).toBe( '1' );
+		expect( await loaded( {} ) ).toBe( '0' );
 	} );
 
 	test.describe( 'R1 each request', () => {
@@ -211,7 +199,7 @@ test.describe( 'WP Rocket widget purge', () => {
 		} );
 
 		const send = async ( options, query ) => {
-			const response = await admin.context.post( ajax( query ), options );
+			const response = await admin.context.post( ajax( query ), { ...options, headers: { [ MODE_HEADER ]: mode } } );
 			const body = await response.text();
 			// eslint-disable-next-line no-console
 			console.log( `${ query.action }: ${ response.status() }, ${ body.length } bytes` );
@@ -238,7 +226,7 @@ test.describe( 'WP Rocket widget purge', () => {
 
 				return json.sanitized_panels_data;
 			} );
-			expect( results.fixed ).toEqual( results.baseline );
+			expect( results.on ).toEqual( results.baseline );
 		} );
 
 		test( 'so_panels_get_layout', async () => {
@@ -319,11 +307,11 @@ test.describe( 'WP Rocket widget purge', () => {
 			page.waitForURL( /message=\d+/, { timeout: 60000 } ),
 			page.locator( '#publish' ).click(),
 		] );
-		expect( total( await counts() ), 'a classic save purges' ).toBeGreaterThan( 0 );
+		expect( ( await counts() ).editpost, 'a classic save purges' ).toBeGreaterThan( 0 );
 
 		// J5: the front end shows what was saved.
 		await page.goto( siteUrl( `?p=${ postId }` ) );
-		await expect( page.locator( '.panels-e2e-text', { hasText: 'Changed fixed' } ) ).toHaveCount( 1 );
+		await expect( page.locator( '.panels-e2e-text', { hasText: 'Changed on' } ) ).toHaveCount( 1 );
 	} );
 
 	test( 'J3 editing and saving a Layout Block', async () => {
@@ -391,14 +379,14 @@ test.describe( 'WP Rocket widget purge', () => {
 			const editor = wp.data.select( 'core/editor' );
 			return ! editor.isSavingPost() && editor.didPostSaveRequestSucceed();
 		}, null, { timeout: 30000 } );
-		expect( total( await counts() ), 'a Layout Block save purges' ).toBeGreaterThan( 0 );
+		expect( ( await counts() ).rest, 'a Layout Block save purges' ).toBeGreaterThan( 0 );
 
 		const raw = await rawStorage( admin, postId );
-		expect( raw.blocks[ 0 ].widgets.map( ( w ) => w.text ) ).toEqual( [ 'Block text fixed' ] );
+		expect( raw.blocks[ 0 ].widgets.map( ( w ) => w.text ) ).toEqual( [ 'Block text on' ] );
 
 		// J5: the front end shows what was saved.
 		await page.goto( siteUrl( `?p=${ postId }` ) );
-		await expect( page.locator( '.panels-e2e-text', { hasText: 'Block text fixed' } ) ).toHaveCount( 1 );
+		await expect( page.locator( '.panels-e2e-text', { hasText: 'Block text on' } ) ).toHaveCount( 1 );
 	} );
 
 	test( 'J4 the Live Editor on the front end', async () => {
@@ -489,69 +477,21 @@ test.describe( 'WP Rocket widget purge', () => {
 		} );
 	} );
 
-	test( 'J6 widget saves keep the purge', async () => {
-		const { page } = ctx;
-		await uiOption( admin, 'panels_e2e_classic_widgets', { value: 1 } );
-
-		// A widget on the Widgets screen.
-		await page.goto( siteUrl( 'wp-admin/widgets.php' ) );
-		await page.locator( '#widget-list .widget[id*="panels_e2e_text"] .widget-title' ).first().click();
-		const chooser = page.locator( '.widgets-chooser' );
-		await chooser.locator( 'li', { hasText: 'Panels E2E Sidebar' } ).click();
+	test( 'J6 a REST widget save with the Live Editor query arg keeps the purge', async () => {
 		await resetCounts();
-		await during( page, forAction( 'save-widget' ), () => chooser.locator( '.widgets-chooser-add' ).click() );
-		const placed = page.locator( `#${ SIDEBAR } .widget` ).last();
-		await placed.locator( '.widget-inside .panels-e2e-text-field' ).fill( TEXT );
-		await resetCounts();
-		await during( page, forAction( 'save-widget' ), () => placed.locator( '.widget-control-save' ).click() );
-		expect( ( await counts() )[ 'save-widget' ], 'a Widgets screen save purges' ).toBeGreaterThan( 0 );
-
-		// A REST save carrying the Live Editor query arg.
-		await resetCounts();
-		const response = await rest( admin, 'POST', '/wp/v2/widgets', {
+		const response = await admin.context.fetch( siteUrl( 'wp-json/wp/v2/widgets' ), {
+			method: 'POST',
 			params: { siteorigin_panels_live_editor: '1' },
+			headers: { 'X-WP-Nonce': admin.nonce, 'Content-Type': 'application/json', [ MODE_HEADER ]: 'on' },
 			data: {
 				id_base: 'panels_e2e_text',
-				sidebar: SIDEBAR,
+				sidebar: 'wp_inactive_widgets',
 				form_data: 'widget-panels_e2e_text[3][text]=Rest+text',
 			},
 		} );
-		expect( response.status, JSON.stringify( response.body ) ).toBe( 201 );
+		const body = await response.json();
+		expect( response.status(), JSON.stringify( body ) ).toBe( 201 );
 		expect( ( await counts() ).rest, 'a REST widget save purges' ).toBeGreaterThan( 0 );
-	} );
-
-	test( 'J6 a Layout Builder widget keeps the purge', async () => {
-		const { page } = ctx;
-		await page.goto( siteUrl( 'wp-admin/widgets.php' ) );
-		await page.locator( '#widget-list .widget[id*="siteorigin-panels-builder"] .widget-title' ).first().click();
-		const chooser = page.locator( '.widgets-chooser' );
-		await chooser.locator( 'li', { hasText: 'Panels E2E Sidebar' } ).click();
-		await chooser.locator( '.widgets-chooser-add' ).click();
-		const placed = page.locator( `#${ SIDEBAR } .widget[id*="siteorigin-panels-builder"]` ).last();
-		await expect( placed ).toHaveCount( 1 );
-
-		// A newly added widget opens with a slide. Let it finish before the click.
-		const button = placed.locator( '.siteorigin-panels-display-builder' );
-		await expect( button ).toBeVisible();
-		await expect.poll( async () => {
-			const before = await button.boundingBox();
-			await page.waitForTimeout( 200 );
-			const after = await button.boundingBox();
-			return !! before && !! after && before.y === after.y;
-		} ).toBe( true );
-		await button.click();
-		const root = openDialog( page ).locator( '.so-content' );
-		await expect( openDialog( page ).locator( '.so-builder-toolbar' ) ).toBeVisible( { timeout: 15000 } );
-		const row = await addRow( root, 1, page );
-		const widget = await addWidget( root, row.locator( '.so-cells .cell' ).first(), 'Panels_E2E_Text_Widget', page );
-		await setWidgetText( root, widget, TEXT, page );
-		await closeDialog( page );
-		await expectOpenDialogs( page, 0 );
-		await settled();
-
-		await resetCounts();
-		await during( page, forAction( 'save-widget' ), () => placed.locator( '.widget-control-save' ).click() );
-		expect( ( await counts() )[ 'save-widget' ], 'a Layout Builder widget save purges' ).toBeGreaterThan( 0 );
 	} );
 
 	test( 'J6 a Customizer widget save keeps the purge', async () => {
@@ -582,34 +522,5 @@ test.describe( 'WP Rocket widget purge', () => {
 		expect( result.status ).toBe( 200 );
 		expect( JSON.parse( result.body ).success, result.body ).toBe( true );
 		expect( ( await counts() )[ 'update-widget' ], 'a Customizer widget save purges' ).toBeGreaterThan( 0 );
-	} );
-
-	test( 'J6 the custom home page save keeps the purge', async () => {
-		const { page } = ctx;
-		await uiOption( admin, 'panels_e2e_home_page', { value: 1 } );
-		await page.goto( siteUrl( 'wp-admin/themes.php?page=so_panels_home_page' ) );
-		const root = page.locator( '#panels-home-page .siteorigin-panels-builder-container' );
-		await expect( root.locator( '.so-builder-toolbar' ) ).toBeVisible( { timeout: 30000 } );
-		const row = await addRow( root, 1 );
-		const widget = await addWidget( root, row.locator( '.so-cells .cell' ).first(), 'Panels_E2E_Text_Widget' );
-		await setWidgetText( root, widget, TEXT );
-		const toggle = page.locator( '#panels-home-page .so-toggle-switch-input' );
-		if ( ! ( await toggle.isChecked() ) ) {
-			await page.locator( '#panels-home-page .so-toggle-switch' ).click();
-		}
-		await settled();
-		await resetCounts();
-		await Promise.all( [
-			page.waitForLoadState( 'load' ),
-			page.waitForURL( /so_panels_home_page/ ),
-			page.locator( '#panels-save-home-page' ).click( { noWaitAfter: true } ),
-		] );
-		await expect( page.locator( '#message.updated' ) ).toBeVisible( { timeout: 30000 } );
-		expect( total( await counts() ), 'a home page save purges' ).toBeGreaterThan( 0 );
-
-		const homeId = Number( ( await uiOption( admin, 'siteorigin_panels_home_page_id' ) ).value );
-		if ( homeId && String( homeId ) !== String( saved.page_on_front.value ) ) {
-			created.push( [ 'page', homeId ] );
-		}
 	} );
 } );
