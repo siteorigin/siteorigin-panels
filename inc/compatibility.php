@@ -50,6 +50,11 @@ class SiteOrigin_Panels_Compatibility {
 			require_once $this->compat_path . 'widget-options.php';
 		}
 
+		// Compatibility with WP Rocket's widget purge.
+		if ( function_exists( 'rocket_widget_update_callback' ) ) {
+			require_once $this->compat_path . 'wp-rocket.php';
+		}
+
 		// Compatibility with Yoast plugins.
 		if (
 			defined( 'WPSEO_FILE' ) ||
