@@ -107,6 +107,10 @@ add_action(
 			'show_on_front',
 			'page_on_front',
 			'siteorigin_panels_home_page_id',
+			'panels_e2e_wp_rocket_on',
+			'panels_e2e_wp_rocket_baseline',
+			'panels_e2e_wp_rocket_purges',
+			'widget_panels_e2e_text',
 		);
 
 		register_rest_route(
