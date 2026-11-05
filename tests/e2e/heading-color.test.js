@@ -11,6 +11,9 @@ const CELL = '#abcdef';
 const WIDGET = '#fedcba';
 const OWN = '#c81e1e';
 const LINK = '#1e8c1e';
+// Used first in row 1, so their rule groups print in the order row 1 creates them.
+const NEAR = '#d0e0f0';
+const FAR = '#f0e0d0';
 
 const LEVELS = [ 1, 2, 3, 4, 5, 6 ];
 const linkedHeadings = LEVELS.map( ( n ) => `<h${ n } class="hc-h${ n }">Heading ${ n } <a href="/">link ${ n }</a></h${ n }>` ).join( '' );
@@ -38,6 +41,7 @@ const layout = {
 	widgets: [
 		// Row 0, cell 0: column Heading Color.
 		editor( 'Editor title', linkedHeadings, 0, 0, { class: 'hc-editor' } ),
+		editor( '', '<h2 class="hc-natural">Natural</h2>', 0, 0, { heading_color: WIDGET } ),
 		editor( '', '<h2 class="hc-linkcolor">Linked <a href="/">link</a></h2>', 0, 0, { link_color: LINK } ),
 		block( 0, 0 ),
 		headline( 'hc-headline-own', OWN, 0, 0 ),
@@ -57,18 +61,19 @@ const layout = {
 		editor( 'Widget title', '<h2 class="hc-w">Widget <a href="/">link</a></h2>', 0, 1, { heading_color: WIDGET } ),
 		recent( 'hc-recent-w', '', 0, 1, { heading_color: WIDGET } ),
 		author( 'hc-author-w', '', 0, 1, { heading_color: WIDGET } ),
-		// Row 1, cell 0: an earlier column with the widget's colour, so its rule group prints first.
+		// Row 1, cell 0: an earlier column with the next widget's colour, so a rule holding that
+		// colour would print before the rule holding its own column's colour.
 		editor( '', '<h2 class="hc-first">First</h2>', 1, 0 ),
 		// Row 1, cell 1: column and widget Heading Color.
-		editor( '', '<h2 class="hc-nested">Nested <a href="/">link</a></h2>', 1, 1, { heading_color: WIDGET } ),
+		editor( '', '<h2 class="hc-nested">Nested <a href="/">link</a></h2>', 1, 1, { heading_color: NEAR } ),
 		editor( '', '<h2 class="hc-sibling">Sibling</h2>', 1, 1 ),
 	],
 	grids: [ { cells: 2, style: {} }, { cells: 2, style: {} } ],
 	grid_cells: [
 		{ grid: 0, index: 0, weight: 0.5, style: { ...dark, heading_color: CELL } },
 		{ grid: 0, index: 1, weight: 0.5, style: dark },
-		{ grid: 1, index: 0, weight: 0.5, style: { ...dark, heading_color: WIDGET } },
-		{ grid: 1, index: 1, weight: 0.5, style: { ...dark, heading_color: CELL } },
+		{ grid: 1, index: 0, weight: 0.5, style: { ...dark, heading_color: NEAR } },
+		{ grid: 1, index: 1, weight: 0.5, style: { ...dark, heading_color: FAR } },
 	],
 };
 layout.widgets.forEach( ( widget, i ) => {
@@ -135,13 +140,14 @@ const ASSERTIONS = [
 	[ '.test-widget .weak', CELL ],
 	[ '.test-widget .strong', '#654321' ],
 	// AC 4: the nearest setting wins, in either print order.
+	[ '.hc-natural', WIDGET ],
 	[ '.hc-w', WIDGET ],
 	[ '.hc-w a', WIDGET ],
 	[ '#panel-{id}-0-1-0 .widget-title', WIDGET ],
-	[ '.hc-first', WIDGET ],
-	[ '.hc-nested', WIDGET ],
-	[ '.hc-nested a', WIDGET ],
-	[ '.hc-sibling', CELL ],
+	[ '.hc-first', NEAR ],
+	[ '.hc-nested', NEAR ],
+	[ '.hc-nested a', NEAR ],
+	[ '.hc-sibling', FAR ],
 ];
 
 for ( const legacy of [ false, true ] ) {
