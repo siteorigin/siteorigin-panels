@@ -1,11 +1,12 @@
 /**
  * Heading Color on a column and a widget colours h1 to h6 and the links in them, below a widget's
  * own heading or title link colour and below Page Builder's Link Color. The nearest column or
- * widget setting wins, whatever order the rules print in. Runs on Twenty Twenty-Five with
- * Widgets Bundle (PANELS_E2E_WIDGETS_BUNDLE_ROOT), with the flex and the legacy renderer.
+ * widget setting wins, whatever order the rules print in. A user sets and changes the field in
+ * the column and widget dialogs. The widget checks need Widgets Bundle
+ * (PANELS_E2E_WIDGETS_BUNDLE_ROOT) and run with the flex and the legacy renderer.
  */
 const { expect, test } = require( '@playwright/test' );
-const { adminLogin, createPost, deletePost, seedLayout, siteUrl, uiOption } = require( './builder-helpers' );
+const { adminLogin, browserLogin, closeDialog, createPost, deletePost, expectOpenDialogs, openClassicBuilder, openDialog, openWidgetDialog, seedLayout, siteUrl, uiOption } = require( './builder-helpers' );
 
 const CELL = '#abcdef';
 const WIDGET = '#fedcba';
@@ -80,98 +81,205 @@ layout.widgets.forEach( ( widget, i ) => {
 	widget.panels_info.id = `hc-${ i }`;
 } );
 
-let admin;
-let postId;
-let activeWidgets;
-
-test.beforeAll( async () => {
-	admin = await adminLogin();
-
-	// Widgets Bundle does not load these two from their class names, so turn them on.
-	activeWidgets = await uiOption( admin, 'siteorigin_widgets_active' );
-	await uiOption( admin, 'siteorigin_widgets_active', { value: { ...( activeWidgets.value || {} ), 'recent-posts': true, 'author-box': true } } );
-
-	postId = await createPost( admin, 'page', { title: 'Heading Color', status: 'publish' } );
-	await seedLayout( admin, postId, layout );
-} );
-
-test.afterAll( async () => {
-	await deletePost( admin, 'page', postId );
-	await uiOption( admin, 'siteorigin_widgets_active', activeWidgets.exists ? { value: activeWidgets.value } : { exists: false } );
-} );
-
 const rgb = ( hex ) => `rgb(${ [ 1, 3, 5 ].map( ( i ) => parseInt( hex.slice( i, i + 2 ), 16 ) ).join( ', ' ) })`;
 
-const ASSERTIONS = [
-	// AC 2: Editor headings, their links and the widget title follow the column.
-	...LEVELS.flatMap( ( n ) => [ [ `.hc-editor .hc-h${ n }`, CELL ], [ `.hc-editor .hc-h${ n } a`, CELL ] ] ),
-	[ '.hc-editor .widget-title', CELL ],
-	// Page Builder Link Color wins over a heading's colour.
-	[ '.hc-linkcolor', CELL ],
-	[ '.hc-linkcolor a', LINK ],
-	// Core blocks, as in the benchmark builders: the block's inherited text colour and its generated
-	// link and heading element colours lose to Heading Color.
-	[ '.hc-cover', CELL ],
-	[ '.hc-block-link', CELL ],
-	[ '.hc-block-link a', CELL ],
-	[ '.hc-group', CELL ],
-	// AC 3: a widget's own heading or title colour wins, set or at its form default.
-	[ '.hc-headline-own .sow-headline', OWN ],
-	[ '.hc-headline-own .sow-headline a', OWN ],
-	[ '.hc-headline .sow-headline', CELL ],
-	[ '.hc-headline .sow-headline a', CELL ],
-	[ '.hc-cta-own .sow-cta-title', OWN ],
-	[ '.hc-cta .sow-cta-title', CELL ],
-	[ '.hc-features-own .sow-features-feature-title', OWN ],
-	[ '.hc-features-own .sow-features-feature-title a', OWN ],
-	[ '.hc-features .sow-features-feature-title', CELL ],
-	[ '.hc-features .sow-features-feature-title a', CELL ],
-	[ '.hc-hero-default .sow-slider-image h2', '#ffffff' ],
-	[ '.hc-hero-default .sow-slider-image h2 a', '#ffffff' ],
-	[ '.hc-hero-own .sow-slider-image h2', OWN ],
-	[ '.hc-hero-own .sow-slider-image h2 a', OWN ],
-	[ '.hc-recent-default .sow-recent-posts-title a', '#2d2d2d' ],
-	[ '.hc-recent-own .sow-recent-posts-title a', OWN ],
-	[ '.hc-recent-w .sow-recent-posts-title a', '#2d2d2d' ],
-	[ '.hc-author-default .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', '#2d2d2d' ],
-	[ '.hc-author-own .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', OWN ],
-	[ '.hc-author-w .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', '#2d2d2d' ],
-	// Third-party boundary: a widget rule below 0,2,1 loses, a stronger one keeps its colour.
-	[ '.test-widget .weak', CELL ],
-	[ '.test-widget .strong', '#654321' ],
-	// AC 4: the nearest setting wins, in either print order.
-	[ '.hc-natural', WIDGET ],
-	[ '.hc-w', WIDGET ],
-	[ '.hc-w a', WIDGET ],
-	[ '#panel-{id}-0-1-0 .widget-title', WIDGET ],
-	[ '.hc-first', NEAR ],
-	[ '.hc-nested', NEAR ],
-	[ '.hc-nested a', NEAR ],
-	[ '.hc-sibling', FAR ],
-];
+test.describe( 'with Widgets Bundle', () => {
+	test.skip( ! process.env.PANELS_E2E_WIDGETS_BUNDLE_ROOT, 'Requires Widgets Bundle.' );
 
-for ( const legacy of [ false, true ] ) {
-	test( `headings take the nearest Heading Color${ legacy ? ' with the legacy renderer' : '' }`, async ( { page } ) => {
-		await page.goto( siteUrl( `?page_id=${ postId }${ legacy ? '&panels_e2e_legacy_renderer=1' : '' }` ) );
-		await expect( page.locator( '#siteorigin-panels-front-css' ) ).toHaveAttribute( 'href', legacy ? /front-legacy/ : /front-flex/ );
-		await page.addStyleTag( { content: '.test-widget .weak { color: #123456 } .test-widget .test-wrap .strong { color: #654321 }' } );
+	let admin;
+	let postId;
+	let activeWidgets;
 
-		// A preset text colour on a block still wins (its class carries !important).
-		const preset = await page.evaluate( () => {
-			const probe = document.createElement( 'span' );
-			probe.style.color = 'var(--wp--preset--color--accent-3)';
-			document.body.append( probe );
-			const color = getComputedStyle( probe ).color;
-			probe.remove();
-			return color;
-		} );
-		expect( preset ).not.toBe( rgb( CELL ) );
-		await expect( page.locator( '.hc-preset' ) ).toHaveCSS( 'color', preset );
+	test.beforeAll( async () => {
+		admin = await adminLogin();
 
-		for ( const [ selector, color ] of ASSERTIONS ) {
-			const target = page.locator( selector.replace( '{id}', postId ) );
-			await expect( target, selector ).toHaveCount( 1 );
-			await expect.soft( target, selector ).toHaveCSS( 'color', rgb( color ) );
-		}
+		// Widgets Bundle does not load these two from their class names, so turn them on.
+		activeWidgets = await uiOption( admin, 'siteorigin_widgets_active' );
+		await uiOption( admin, 'siteorigin_widgets_active', { value: { ...( activeWidgets.value || {} ), 'recent-posts': true, 'author-box': true } } );
+
+		postId = await createPost( admin, 'page', { title: 'Heading Color', status: 'publish' } );
+		await seedLayout( admin, postId, layout );
 	} );
-}
+
+	test.afterAll( async () => {
+		await deletePost( admin, 'page', postId );
+		await uiOption( admin, 'siteorigin_widgets_active', activeWidgets.exists ? { value: activeWidgets.value } : { exists: false } );
+	} );
+
+	const ASSERTIONS = [
+		// AC 2: Editor headings, their links and the widget title follow the column.
+		...LEVELS.flatMap( ( n ) => [ [ `.hc-editor .hc-h${ n }`, CELL ], [ `.hc-editor .hc-h${ n } a`, CELL ] ] ),
+		[ '.hc-editor .widget-title', CELL ],
+		// Page Builder Link Color wins over a heading's colour.
+		[ '.hc-linkcolor', CELL ],
+		[ '.hc-linkcolor a', LINK ],
+		// Core blocks, as in the benchmark builders: the block's inherited text colour and its generated
+		// link and heading element colours lose to Heading Color.
+		[ '.hc-cover', CELL ],
+		[ '.hc-block-link', CELL ],
+		[ '.hc-block-link a', CELL ],
+		[ '.hc-group', CELL ],
+		// AC 3: a widget's own heading or title colour wins, set or at its form default.
+		[ '.hc-headline-own .sow-headline', OWN ],
+		[ '.hc-headline-own .sow-headline a', OWN ],
+		[ '.hc-headline .sow-headline', CELL ],
+		[ '.hc-headline .sow-headline a', CELL ],
+		[ '.hc-cta-own .sow-cta-title', OWN ],
+		[ '.hc-cta .sow-cta-title', CELL ],
+		[ '.hc-features-own .sow-features-feature-title', OWN ],
+		[ '.hc-features-own .sow-features-feature-title a', OWN ],
+		[ '.hc-features .sow-features-feature-title', CELL ],
+		[ '.hc-features .sow-features-feature-title a', CELL ],
+		[ '.hc-hero-default .sow-slider-image h2', '#ffffff' ],
+		[ '.hc-hero-default .sow-slider-image h2 a', '#ffffff' ],
+		[ '.hc-hero-own .sow-slider-image h2', OWN ],
+		[ '.hc-hero-own .sow-slider-image h2 a', OWN ],
+		[ '.hc-recent-default .sow-recent-posts-title a', '#2d2d2d' ],
+		[ '.hc-recent-own .sow-recent-posts-title a', OWN ],
+		[ '.hc-recent-w .sow-recent-posts-title a', '#2d2d2d' ],
+		[ '.hc-author-default .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', '#2d2d2d' ],
+		[ '.hc-author-own .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', OWN ],
+		[ '.hc-author-w .sow-author-box :is(h1,h2,h3,h4,h5,h6) a', '#2d2d2d' ],
+		// Third-party boundary: a widget rule below 0,2,1 loses, a stronger one keeps its colour.
+		[ '.test-widget .weak', CELL ],
+		[ '.test-widget .strong', '#654321' ],
+		// AC 4: the nearest setting wins, in either print order.
+		[ '.hc-natural', WIDGET ],
+		[ '.hc-w', WIDGET ],
+		[ '.hc-w a', WIDGET ],
+		[ '#panel-{id}-0-1-0 .widget-title', WIDGET ],
+		[ '.hc-first', NEAR ],
+		[ '.hc-nested', NEAR ],
+		[ '.hc-nested a', NEAR ],
+		[ '.hc-sibling', FAR ],
+	];
+
+	for ( const legacy of [ false, true ] ) {
+		test( `headings take the nearest Heading Color${ legacy ? ' with the legacy renderer' : '' }`, async ( { page } ) => {
+			await page.goto( siteUrl( `?page_id=${ postId }${ legacy ? '&panels_e2e_legacy_renderer=1' : '' }` ) );
+			await expect( page.locator( '#siteorigin-panels-front-css' ) ).toHaveAttribute( 'href', legacy ? /front-legacy/ : /front-flex/ );
+			await page.addStyleTag( { content: '.test-widget .weak { color: #123456 } .test-widget .test-wrap .strong { color: #654321 }' } );
+
+			// A preset text colour on a block still wins (its class carries !important).
+			const preset = await page.evaluate( () => {
+				const probe = document.createElement( 'span' );
+				probe.style.color = 'var(--wp--preset--color--accent-3)';
+				document.body.append( probe );
+				const color = getComputedStyle( probe ).color;
+				probe.remove();
+				return color;
+			} );
+			expect( preset ).not.toBe( rgb( CELL ) );
+			await expect( page.locator( '.hc-preset' ) ).toHaveCSS( 'color', preset );
+
+			for ( const [ selector, color ] of ASSERTIONS ) {
+				const target = page.locator( selector.replace( '{id}', postId ) );
+				await expect( target, selector ).toHaveCount( 1 );
+				await expect.soft( target, selector ).toHaveCSS( 'color', rgb( color ) );
+			}
+		} );
+	}
+} );
+
+// AC 1: a user sets Heading Color in the column and widget Design settings, saves, and changes it.
+test( 'Heading Color is set and changed in the column and widget dialogs', async ( { page } ) => {
+	const session = await adminLogin();
+	const id = await createPost( session, 'page', { title: 'Heading Color controls', status: 'publish' } );
+	await seedLayout( session, id, {
+		// A core widget with a form, so saving its dialog keeps its title.
+		widgets: [ { title: 'Heading', content: '<p>Text</p>', panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 'hc-ui', style: {} } } ],
+		grids: [ { cells: 1, style: {} } ],
+		grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+	} );
+
+	// The Design group of the open dialog's column or widget styles, opened, and its Heading Color field.
+	const design = async ( dialog, type ) => {
+		const styles = dialog.locator( `.so-sidebar .so-visual-styles.so-${ type }-styles` );
+		await expect( styles.locator( '.so-field-heading_color' ) ).toBeAttached( { timeout: 15000 } );
+		const section = styles.locator( '.style-section-wrapper' ).filter( { has: page.locator( '.so-field-heading_color' ) } );
+		await expect( section.locator( '.style-section-head h4' ) ).toHaveText( 'Design' );
+		if ( ! await section.locator( '.style-section-fields' ).isVisible() ) {
+			await section.locator( '.style-section-head' ).click();
+		}
+		const order = await section.locator( '.style-field-wrapper' ).evaluateAll( ( wrappers ) => wrappers.map( ( w ) => [ ...w.classList ].find( ( c ) => c.startsWith( 'so-field-' ) ) ) );
+		expect( order[ order.indexOf( 'so-field-link_color_hover' ) + 1 ] ).toBe( 'so-field-heading_color' );
+		await expect( section.locator( '.so-field-heading_color > label' ) ).toHaveText( 'Heading Color' );
+
+		return section.locator( '.so-field-heading_color' );
+	};
+
+	// Type a colour into the picker's text field, as a person does.
+	const setColor = async ( field, color ) => {
+		await field.locator( '.wp-color-result' ).click();
+		const input = field.locator( 'input[name="style[heading_color]"]' );
+		await input.fill( color );
+		await input.press( 'Enter' );
+		await expect( input ).toHaveValue( color );
+	};
+
+	const openColumn = async ( root ) => {
+		await root.locator( '.so-row-toolbar .so-row-settings.so-tool-button' ).first().click();
+		await expectOpenDialogs( page, 1 );
+		const dialog = openDialog( page );
+		// The column's styles show once the column is selected.
+		await dialog.locator( '.row-preview .preview-cell-in' ).first().click( { position: { x: 10, y: 10 } } );
+		await expect( dialog.locator( '.row-preview .preview-cell-in' ).first() ).toHaveClass( /cell-selected/ );
+		return dialog;
+	};
+
+	const save = () => Promise.all( [
+		page.waitForURL( /message=\d+/, { timeout: 60000 } ),
+		page.locator( '#publish' ).click( { noWaitAfter: true } ),
+	] );
+
+	const expectFront = async ( heading, widget ) => {
+		await page.goto( siteUrl( `?page_id=${ id }` ) );
+		await expect( page.locator( `#pl-${ id } .widget-title` ) ).toHaveText( 'Heading' );
+		await expect( page.locator( `#pl-${ id } .widget-title` ) ).toHaveCSS( 'color', rgb( widget || heading ) );
+	};
+
+	try {
+		await browserLogin( page, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+		let root = await openClassicBuilder( page, { postId: id } );
+		await expect( root.locator( '.so-widget' ) ).toHaveCount( 1 );
+
+		// Column: Heading Color in the row dialog's column styles.
+		let dialog = await openColumn( root );
+		await setColor( await design( dialog, 'cell' ), CELL );
+		await dialog.locator( '.so-toolbar .so-save' ).click();
+		await expectOpenDialogs( page, 0 );
+		await save();
+		await expectFront( CELL );
+
+		// Widget: Heading Color in the widget dialog, nearer than the column.
+		root = await openClassicBuilder( page, { postId: id } );
+		dialog = await openWidgetDialog( root.locator( '.so-widget' ).first(), page );
+		await setColor( await design( dialog, 'widget' ), WIDGET );
+		await closeDialog( page );
+		await expectOpenDialogs( page, 0 );
+		await save();
+		await expectFront( CELL, WIDGET );
+
+		// Reopen: both dialogs show the saved values; clear the widget's and change the column's.
+		root = await openClassicBuilder( page, { postId: id } );
+		dialog = await openWidgetDialog( root.locator( '.so-widget' ).first(), page );
+		let field = await design( dialog, 'widget' );
+		await expect( field.locator( 'input[name="style[heading_color]"]' ) ).toHaveValue( WIDGET );
+		await field.locator( '.wp-color-result' ).click();
+		await field.locator( '.wp-picker-clear' ).click();
+		await expect( field.locator( 'input[name="style[heading_color]"]' ) ).toHaveValue( '' );
+		await closeDialog( page );
+		await expectOpenDialogs( page, 0 );
+
+		dialog = await openColumn( root );
+		field = await design( dialog, 'cell' );
+		await expect( field.locator( 'input[name="style[heading_color]"]' ) ).toHaveValue( CELL );
+		await setColor( field, NEAR );
+		await dialog.locator( '.so-toolbar .so-save' ).click();
+		await expectOpenDialogs( page, 0 );
+		await save();
+		await expectFront( NEAR );
+	} finally {
+		await deletePost( session, 'page', id );
+	}
+} );

@@ -956,8 +956,8 @@ class SiteOrigin_Panels_Styles {
 	 *
 	 * The ID is inside :where(), so headings get the strength of a class and
 	 * a heading (0,2,1) and links in them a class and two elements (0,1,2).
-	 * A widget's own heading or title link colour is stronger and wins; theme
-	 * rules up to that strength printed earlier lose.
+	 * A stronger rule wins, such as a Widgets Bundle heading or title link
+	 * colour; a rule up to that strength printed earlier loses.
 	 *
 	 * @param SiteOrigin_Panels_Css_Builder $css     The CSS builder.
 	 * @param string                        $id      The cell or widget ID selector.
