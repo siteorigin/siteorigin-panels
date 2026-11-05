@@ -17,7 +17,8 @@
       "phpunit -c phpunit-import-layout.xml",
       "phpunit -c phpunit-sidebars-emulator.xml",
       "phpunit -c phpunit-meta-cap.xml",
-      "phpunit -c phpunit-renderer.xml"
+      "phpunit -c phpunit-renderer.xml",
+      "phpunit -c phpunit-styles.xml"
     ]
   }
 }
