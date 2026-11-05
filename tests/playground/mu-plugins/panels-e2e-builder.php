@@ -80,6 +80,10 @@ add_filter(
 			$settings['home-page'] = true;
 		}
 
+		if ( isset( $_GET['panels_e2e_legacy_renderer'] ) ) {
+			$settings['legacy-layout'] = 'always';
+		}
+
 		return $settings;
 	}
 );
@@ -107,6 +111,7 @@ add_action(
 			'show_on_front',
 			'page_on_front',
 			'siteorigin_panels_home_page_id',
+			'siteorigin_widgets_active',
 		);
 
 		register_rest_route(
