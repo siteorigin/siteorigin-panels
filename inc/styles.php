@@ -954,8 +954,8 @@ class SiteOrigin_Panels_Styles {
 	/**
 	 * The heading rules for one cell or widget with a Heading Color.
 	 *
-	 * The ID is inside :where(), so headings get the strength of a class and
-	 * a heading (0,2,1) and links in them a class and two elements (0,1,2).
+	 * The ID is inside :where(), so headings get the strength of two classes
+	 * and a heading (0,2,1) and links in them a class and two elements (0,1,2).
 	 * A stronger rule wins, such as a Widgets Bundle heading or title link
 	 * colour; a rule up to that strength printed earlier loses.
 	 *
