@@ -28,6 +28,8 @@ class SiteOrigin_Panels_Styles {
 		add_filter( 'siteorigin_panels_row_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'general_style_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_widget_style_css', array( $this, 'general_style_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_cell_style_css', array( $this, 'heading_color_css' ), 10, 2 );
+		add_filter( 'siteorigin_panels_widget_style_css', array( $this, 'heading_color_css' ), 10, 2 );
 
 		add_filter( 'siteorigin_panels_row_style_tablet_css', array( $this, 'general_style_tablet_css' ), 10, 2 );
 		add_filter( 'siteorigin_panels_cell_style_tablet_css', array( $this, 'general_style_tablet_css' ), 10, 2 );
@@ -566,6 +568,13 @@ class SiteOrigin_Panels_Styles {
 			'priority'    => 17,
 		);
 
+		$fields['heading_color'] = array(
+			'name'     => __( 'Heading Color', 'siteorigin-panels' ),
+			'type'     => 'color',
+			'group'    => 'design',
+			'priority' => 18,
+		);
+
 		return $fields;
 	}
 
@@ -606,6 +615,13 @@ class SiteOrigin_Panels_Styles {
 			'type'        => 'color',
 			'group'       => 'design',
 			'priority'    => 17,
+		);
+
+		$fields['heading_color'] = array(
+			'name'     => __( 'Heading Color', 'siteorigin-panels' ),
+			'type'     => 'color',
+			'group'    => 'design',
+			'priority' => 18,
 		);
 
 		return $fields;
@@ -915,6 +931,44 @@ class SiteOrigin_Panels_Styles {
 			$padding[1] = $padding[3] = "0$unit";
 			$style[ $field ] = implode( ' ', $padding );
 		}
+	}
+
+	/**
+	 * Put the Heading Color of a cell or widget on its style wrapper as a
+	 * custom property. filter_css_object() colours the headings with it, so
+	 * the nearest cell or widget that sets one wins.
+	 *
+	 * @param array $css   The style wrapper CSS.
+	 * @param array $style The cell or widget style.
+	 *
+	 * @return array
+	 */
+	public static function heading_color_css( $css, $style ) {
+		if ( ! empty( $style['heading_color'] ) ) {
+			$css['--so-heading-color'] = $style['heading_color'];
+		}
+
+		return $css;
+	}
+
+	/**
+	 * The heading rules for one cell or widget with a Heading Color.
+	 *
+	 * The ID is inside :where(), so headings get the strength of a class and
+	 * a heading (0,2,1) and links in them a class and two elements (0,1,2).
+	 * A widget's own heading or title link colour is stronger and wins; theme
+	 * rules up to that strength printed earlier lose.
+	 *
+	 * @param SiteOrigin_Panels_Css_Builder $css     The CSS builder.
+	 * @param string                        $id      The cell or widget ID selector.
+	 * @param string                        $element `.panel-grid-cell` or `.so-panel`.
+	 * @param string                        $wrapper `.panel-cell-style` or `.panel-widget-style`.
+	 */
+	private static function add_heading_color_css( $css, $id, $element, $wrapper ) {
+		$headings = ':where(' . $id . ') > ' . $wrapper . ' :is(h1,h2,h3,h4,h5,h6)';
+
+		$css->add_css( $element . $headings, array( 'color' => 'var(--so-heading-color)' ) );
+		$css->add_css( $headings . ' a', array( 'color' => 'inherit' ) );
 	}
 
 	/**
@@ -1235,6 +1289,10 @@ class SiteOrigin_Panels_Styles {
 					);
 				}
 
+				if ( ! empty( $cell['style']['heading_color'] ) ) {
+					self::add_heading_color_css( $css, $css->element_selector( $post_id, $ri, $ci ), '.panel-grid-cell', '.panel-cell-style' );
+				}
+
 				// Process the widgets if there are any.
 				if ( empty( $cell['widgets'] ) ) {
 					continue;
@@ -1298,6 +1356,10 @@ class SiteOrigin_Panels_Styles {
 						$css->add_widget_css( $post_id, $ri, $ci, $wi, ' a:hover', array(
 							'color' => $widget['panels_info']['style']['link_color_hover'],
 						) );
+					}
+
+					if ( ! empty( $widget['panels_info']['style']['heading_color'] ) ) {
+						self::add_heading_color_css( $css, $css->element_selector( $post_id, $ri, $ci, $wi ), '.so-panel', '.panel-widget-style' );
 					}
 
 					if (

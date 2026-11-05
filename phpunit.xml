@@ -40,6 +40,10 @@
                  REAL SiteOrigin_Panels_Admin::is_block_editor(); AbilitiesTest's Admin shim has
                  no such method. It runs separately via phpunit-renderer.xml. -->
             <exclude>./tests/renderer</exclude>
+            <!-- The styles suite loads the REAL SiteOrigin_Panels_Styles; the
+                 StylesAdmin tests define a stand-in under that name. It runs
+                 separately via phpunit-styles.xml. -->
+            <exclude>./tests/styles</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
