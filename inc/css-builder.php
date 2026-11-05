@@ -281,6 +281,39 @@ class SiteOrigin_Panels_Css_Builder {
 	}
 
 	/**
+	 * The ID selector of one cell or one widget, with each index checked as
+	 * add_cell_css() and add_widget_css() check it.
+	 *
+	 * @param int|string      $li The layout ID.
+	 * @param int|string      $ri The row index.
+	 * @param int|string      $ci The cell index.
+	 * @param int|string|bool $wi The widget index, or false for the cell.
+	 *
+	 * @return string `#pgc-{li}-{ri}-{ci}` or `#panel-{li}-{ri}-{ci}-{wi}`.
+	 */
+	public function element_selector( $li, $ri, $ci, $wi = false ) {
+		if ( is_string( $li ) && ! isset( $this->safe_indexes[ $li ] ) ) {
+			$li = $this->safe_selector_index( $li );
+		}
+		if ( is_string( $ri ) && ! isset( $this->safe_indexes[ $ri ] ) ) {
+			$ri = $this->safe_selector_index( $ri );
+		}
+		if ( is_string( $ci ) && ! isset( $this->safe_indexes[ $ci ] ) ) {
+			$ci = $this->safe_selector_index( $ci );
+		}
+
+		if ( $wi === false ) {
+			return '#pgc-' . $li . '-' . $ri . '-' . $ci;
+		}
+
+		if ( is_string( $wi ) && ! isset( $this->safe_indexes[ $wi ] ) ) {
+			$wi = $this->safe_selector_index( $wi );
+		}
+
+		return '#panel-' . $li . '-' . $ri . '-' . $ci . '-' . $wi;
+	}
+
+	/**
 	 * Add a sub selector to the main selector
 	 *
 	 * @param string       $selector
