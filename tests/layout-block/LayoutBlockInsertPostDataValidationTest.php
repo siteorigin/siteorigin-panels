@@ -321,7 +321,7 @@ class LayoutBlockInsertPostDataValidationTest extends TestCase {
 		Functions\when( 'siteorigin_panels_setting' )->justReturn( array( 'post', 'page' ) );
 		Filters\expectAdded( 'wp_insert_post_data' )
 			->once()
-			->with( Mockery::type( 'array' ), 10, 1 );
+			->with( Mockery::type( 'array' ), 10, 3 );
 
 		$instance = $this->construct_layout_block();
 

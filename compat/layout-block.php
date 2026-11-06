@@ -134,7 +134,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// origin-untrusted write (sanitize_block_untrusted() sets
 		// force_kses_floor), which always sanitizes regardless of the memo so
 		// the forced floor can never be skipped.
-		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
+		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 3 );
 	}
 
 	public function register_layout_block() {
@@ -923,10 +923,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * tag-free panelsData strings is undone before the memo check (#1377, see
 	 * repair_core_kses_ampersands()).
 	 *
-	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * Also reports markup removed from Layout Blocks, by the post save filters
+	 * and by this pass, through siteorigin_panels_layout_block_markup_removed
+	 * (see SiteOrigin_Panels_Markup_Removal::fire()).
+	 *
+	 * @param array $data                Slashed, processed post data about to be inserted/updated.
+	 * @param array $postarr             Sanitized post data; its ID is 0 for a new post.
+	 * @param array $unsanitized_postarr Slashed post data as passed to wp_insert_post().
 	 * @return array The (possibly modified) $data to actually persist.
 	 */
-	public function validate_post_data( $data ) {
+	public function validate_post_data( $data, $postarr = array(), $unsanitized_postarr = array() ) {
 		if ( ! empty( $data['post_type'] ) && $data['post_type'] === 'revision' ) {
 			// Revisions AND autosaves are both nested wp_insert_post() calls
 			// with post_type 'revision', fired on the same request as the
@@ -936,6 +942,105 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $data;
 		}
 
+		$post_id = is_array( $postarr ) && isset( $postarr['ID'] ) ? (int) $postarr['ID'] : 0;
+
+		// Report only (#1454): what the save filters removed before this
+		// check, then what Page Builder removes below. Both are fired when
+		// this call ends, whichever return it takes.
+		$this->open_attempt();
+		try {
+			$this->record_post_save_filter_removals( $data, $unsanitized_postarr );
+
+			return $this->sanitize_post_data( $data );
+		} finally {
+			SiteOrigin_Panels_Markup_Removal::fire( $post_id, 'wp_insert_post_data', $this->close_attempt() );
+		}
+	}
+
+	/**
+	 * Record markup that was in the content passed to wp_insert_post() and
+	 * is missing from the content that reached validate_post_data().
+	 *
+	 * Between the two, WordPress runs the post save filters (pre_post_content,
+	 * content_save_pre, with core kses for a user without unfiltered_html)
+	 * and any earlier wp_insert_post_data callback. On a REST or ability save
+	 * the submitted content is Page Builder's own output, so this sees only
+	 * what was removed after Page Builder. It runs before the early returns
+	 * below, so a post whose only Layout Block was removed is still measured.
+	 *
+	 * @param array $data                The post data reaching this filter (slashed).
+	 * @param array $unsanitized_postarr The post data passed to wp_insert_post() (slashed).
+	 */
+	private function record_post_save_filter_removals( $data, $unsanitized_postarr ) {
+		if (
+			! is_array( $unsanitized_postarr ) ||
+			! isset( $unsanitized_postarr['post_content'] ) ||
+			! is_string( $unsanitized_postarr['post_content'] )
+		) {
+			return;
+		}
+
+		$submitted = wp_unslash( $unsanitized_postarr['post_content'] );
+		// A cheap gate before parsing: any content that names a Layout Block.
+		if ( strpos( $submitted, 'layout-block' ) === false ) {
+			return;
+		}
+
+		$incoming = isset( $data['post_content'] ) && is_string( $data['post_content'] ) ? wp_unslash( $data['post_content'] ) : '';
+		if ( $submitted === $incoming ) {
+			return;
+		}
+
+		$attempt = end( $this->attempts );
+		if ( $attempt === false ) {
+			return;
+		}
+
+		$found = SiteOrigin_Panels_Markup_Removal::attribute(
+			$this->layout_block_widget_lists( parse_blocks( $submitted ) ),
+			$incoming === '' ? array() : $this->layout_block_widget_lists( parse_blocks( $incoming ) ),
+			'post_save_filters'
+		);
+		if ( ! empty( $found ) ) {
+			$attempt->findings = array_merge( $attempt->findings, $found );
+		}
+	}
+
+	/**
+	 * Each Layout Block's widgets, in document order, nested and empty
+	 * blocks included, matching the ordinal sanitize_blocks() counts.
+	 *
+	 * @param array $blocks Parsed blocks.
+	 *
+	 * @return array List of widget maps.
+	 */
+	private function layout_block_widget_lists( $blocks ) {
+		$lists = array();
+		if ( ! is_array( $blocks ) ) {
+			return $lists;
+		}
+
+		foreach ( $blocks as $block ) {
+			if ( ! is_array( $block ) ) {
+				continue;
+			}
+			foreach ( $this->find_layout_block( $block ) as $layout_block ) {
+				$lists[] = isset( $layout_block['attrs']['panelsData']['widgets'] ) && is_array( $layout_block['attrs']['panelsData']['widgets'] )
+					? $layout_block['attrs']['panelsData']['widgets']
+					: array();
+			}
+		}
+
+		return $lists;
+	}
+
+	/**
+	 * The wp_insert_post_data sanitize pass of validate_post_data().
+	 *
+	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * @return array The (possibly modified) $data to actually persist.
+	 */
+	private function sanitize_post_data( $data ) {
 		if ( empty( $data['post_content'] ) ) {
 			return $data;
 		}

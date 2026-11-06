@@ -549,6 +549,114 @@ class LayoutBlockMarkupRemovedTest extends TestCase {
 		);
 	}
 
+	/**
+	 * Run validate_post_data() the way wp_insert_post() does: $data has been
+	 * through the post save filters, $unsanitized is what the caller passed.
+	 */
+	private function insert( $compat, array $submitted_blocks, $stored_content, $id = 0, $post_type = 'page' ) {
+		return $compat->validate_post_data(
+			array(
+				'post_type'    => $post_type,
+				'post_content' => $stored_content,
+			),
+			array( 'ID' => $id ),
+			array( 'post_content' => json_encode( $submitted_blocks ) )
+		);
+	}
+
+	public function test_a_no_user_insert_stripped_by_the_save_filters_reports_them_on_create_and_update() {
+		$submitted = array( $this->layout_block_of( array( $this->widget( 'w1', self::IFRAME ), $this->widget( 'w2', 'Tom & Jerry' ) ) ) );
+		// What core kses leaves: the iframe is gone, & is escaped.
+		$filtered  = array( $this->layout_block_of( array( $this->widget( 'w1', '<p>a</p>' ), $this->widget( 'w2', 'Tom &amp; Jerry' ) ) ) );
+
+		$this->insert( $this->layout_block(), $submitted, json_encode( $filtered ), 0 );
+		$this->insert( $this->layout_block(), $submitted, json_encode( $filtered ), 55 );
+
+		$expected = array( $this->finding( 0, 'w1', 'post_save_filters' ) );
+		$this->assertSame(
+			array(
+				array( 'post_id' => 0, 'context' => 'wp_insert_post_data', 'widgets' => $expected ),
+				array( 'post_id' => 55, 'context' => 'wp_insert_post_data', 'widgets' => $expected ),
+			),
+			$this->reports
+		);
+	}
+
+	public function test_the_insert_pass_after_a_rest_save_does_not_report_again() {
+		$compat = $this->layout_block();
+		$saved  = $this->rest_save( $compat, array( $this->layout_block_of( array( $this->widget( 'w1', self::IFRAME ), $this->widget( 'w2', 'Tom & Jerry' ) ) ) ) );
+
+		$escaped = str_replace( 'Tom & Jerry', 'Tom &amp; Jerry', $saved->post_content );
+		$compat->validate_post_data(
+			array( 'post_type' => 'page', 'post_content' => $escaped ),
+			array( 'ID' => 42 ),
+			array( 'post_content' => $saved->post_content )
+		);
+
+		$this->assertCount( 1, $this->reports );
+		$this->assertSame( 'rest_pre_insert', $this->reports[0]['context'] );
+	}
+
+	public function test_a_rest_save_reports_twice_when_a_save_filter_removes_more_after_page_builder() {
+		$compat = $this->layout_block();
+		$saved  = $this->rest_save( $compat, array( $this->layout_block_of( array( $this->widget( 'w1', '<iframe src=x></iframe><strong>k</strong>' ) ) ) ) );
+
+		// A content_save_pre filter at a later priority strips <strong>, which
+		// Page Builder's kses kept.
+		$compat->validate_post_data(
+			array( 'post_type' => 'page', 'post_content' => str_replace( '<strong>k<\/strong>', 'k', $saved->post_content ) ),
+			array( 'ID' => 42 ),
+			array( 'post_content' => $saved->post_content )
+		);
+
+		$this->assertSame( array( 'rest_pre_insert', 'wp_insert_post_data' ), array_column( $this->reports, 'context' ) );
+		$this->assertSame( 'page_builder', $this->reports[0]['widgets'][0]['source'] );
+		$this->assertSame( 'post_save_filters', $this->reports[1]['widgets'][0]['source'] );
+	}
+
+	public function test_blocks_swapped_or_markup_moved_by_a_save_filter_do_not_report() {
+		// A capable user, so Page Builder's own pass keeps the iframes and only
+		// the save-filter comparison is under test.
+		Functions\when( 'current_user_can' )->justReturn( true );
+		$a =$this->layout_block_of( array( $this->widget( 'a', self::IFRAME ) ) );
+		$b = $this->layout_block_of( array( $this->widget( 'b', 'plain' ) ) );
+		$this->insert( $this->layout_block(), array( $a, $b ), json_encode( array( $b, $a ) ) );
+
+		$moved = array( $this->layout_block_of( array( $this->widget( 'a', '' ), $this->widget( 'b', self::IFRAME ) ) ) );
+		$this->insert( $this->layout_block(), array( $this->layout_block_of( array( $this->widget( 'a', self::IFRAME ), $this->widget( 'b', '' ) ) ) ), json_encode( $moved ) );
+
+		$this->assertSame( array(), $this->reports );
+	}
+
+	public function test_reordered_blocks_with_a_removal_name_the_right_block() {
+		$a = $this->layout_block_of( array( $this->widget( 'a', self::IFRAME ) ) );
+		$b = $this->layout_block_of( array( $this->widget( 'b', 'plain' ) ) );
+		$stripped_a = $this->layout_block_of( array( $this->widget( 'a', '<p>a</p>' ) ) );
+
+		$this->insert( $this->layout_block(), array( $a, $b ), json_encode( array( $b, $stripped_a ) ) );
+
+		$this->assertSame( array( $this->finding( 1, 'a', 'post_save_filters' ) ), $this->reports[0]['widgets'] );
+	}
+
+	public function test_a_removed_only_block_or_emptied_post_still_reports() {
+		$submitted = array( $this->layout_block_of( array( $this->widget( 'w1', self::IFRAME ) ) ) );
+		$paragraph = array( array( 'blockName' => 'core/paragraph', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => '<p>x</p>', 'innerContent' => array() ) );
+
+		$this->insert( $this->layout_block(), $submitted, json_encode( $paragraph ) );
+		$this->insert( $this->layout_block(), $submitted, '' );
+
+		$null = array( $this->finding( null, null, 'post_save_filters', null, null ) );
+		$this->assertSame( array( $null, $null ), array_column( $this->reports, 'widgets' ) );
+	}
+
+	public function test_a_revision_never_reports() {
+		$submitted = array( $this->layout_block_of( array( $this->widget( 'w1', self::IFRAME ) ) ) );
+
+		$this->insert( $this->layout_block(), $submitted, '', 0, 'revision' );
+
+		$this->assertSame( array(), $this->reports );
+	}
+
 	public function test_process_raw_widgets_calls_the_observer_once_per_widget_on_both_branches() {
 		$seen = array();
 		$admin = \SiteOrigin_Panels_Admin::single();
