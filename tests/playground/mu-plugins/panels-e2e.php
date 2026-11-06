@@ -97,9 +97,21 @@ add_action(
 		$log[] = $report;
 		update_option( 'panels_e2e_markup_removed_log', $log, false );
 
-		if ( get_option( 'panels_e2e_markup_removed_throws', 0 ) ) {
+		$throws = (int) get_option( 'panels_e2e_markup_removed_throws', 0 );
+		if ( $throws === 1 ) {
 			throw new RuntimeException( 'Thrown by the e2e markup-removed listener.' );
 		}
+		if ( $throws === 2 ) {
+			// A hook the listener runs throws, so that hook is interrupted too.
+			do_action( 'panels_e2e_markup_removed_inner' );
+		}
+	}
+);
+
+add_action(
+	'panels_e2e_markup_removed_inner',
+	function () {
+		throw new RuntimeException( 'Thrown by a hook the e2e markup-removed listener ran.' );
 	}
 );
 
@@ -153,7 +165,7 @@ add_action(
 						update_option( 'panels_e2e_probe_renders', 0, false );
 						update_option( 'panels_e2e_markup_removed_log', array(), false );
 						update_option( 'panels_e2e_markup_removed_stack_after', array(), false );
-						update_option( 'panels_e2e_markup_removed_throws', $request->get_param( 'markup_removed_throws' ) ? 1 : 0, false );
+						update_option( 'panels_e2e_markup_removed_throws', (int) $request->get_param( 'markup_removed_throws' ), false );
 
 						if ( $request->has_param( 'deny_unfiltered_html' ) ) {
 							update_option( 'panels_e2e_deny_unfiltered_html', (int) $request->get_param( 'deny_unfiltered_html' ), false );
@@ -185,21 +197,36 @@ add_action(
 						'post_title'   => 'Panels e2e no-user save',
 						'post_content' => (string) $request->get_param( 'content' ),
 					);
-					$id = (int) $request->get_param( 'id' );
+					$id     = (int) $request->get_param( 'id' );
+					$repeat = max( 1, min( 5, (int) $request->get_param( 'repeat' ) ) );
+					$ids    = array();
 
 					try {
-						if ( $id ) {
-							$postarr['ID'] = $id;
-							$result = wp_update_post( wp_slash( $postarr ), true );
-						} else {
-							$result = wp_insert_post( wp_slash( $postarr ), true );
+						for ( $i = 0; $i < $repeat; $i++ ) {
+							if ( $id ) {
+								$postarr['ID'] = $id;
+								$result = wp_update_post( wp_slash( $postarr ), true );
+							} else {
+								$result = wp_insert_post( wp_slash( $postarr ), true );
+							}
+							if ( is_wp_error( $result ) ) {
+								return $result;
+							}
+							$ids[] = (int) $result;
 						}
 					} finally {
 						wp_set_current_user( $caller );
 						kses_init();
 					}
 
-					return is_wp_error( $result ) ? $result : array( 'id' => (int) $result );
+					global $wp_current_filter;
+
+					return array(
+						'id'    => $ids[0],
+						'ids'   => $ids,
+						// The current-filter stack after the saves, inside this callback.
+						'stack' => array_values( (array) $wp_current_filter ),
+					);
 				},
 			)
 		);
