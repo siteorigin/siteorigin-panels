@@ -688,6 +688,35 @@ class LayoutBlockMarkupRemovedTest extends TestCase {
 		$this->assertCount( 2, $seen );
 	}
 
+	public function test_a_legacy_widget_with_info_is_named_on_a_rest_save() {
+		$legacy = array(
+			'content' => self::IFRAME,
+			'info'    => array( 'class' => 'MarkupRemovedKses', 'grid' => 0, 'cell' => 0, 'id' => 0, 'widget_id' => 'legacy' ),
+		);
+
+		$this->rest_save( $this->layout_block(), array( $this->layout_block_of( array( $legacy ) ) ) );
+
+		$this->assertSame( array( $this->finding( 0, 'legacy' ) ), $this->reports[0]['widgets'] );
+	}
+
+	public function test_the_observer_sees_a_legacy_widget_as_it_entered() {
+		$inputs = array();
+		$admin  = \SiteOrigin_Panels_Admin::single();
+		$admin->observe_next_process_raw_widgets(
+			function ( $key, $input, $output ) use ( &$inputs ) {
+				$inputs[] = array( isset( $input['info']['widget_id'] ) ? $input['info']['widget_id'] : null, $output['panels_info']['widget_id'] );
+			}
+		);
+
+		$admin->process_raw_widgets(
+			array( array( 'content' => 'x', 'info' => array( 'class' => 'MarkupRemovedKses', 'widget_id' => 'legacy' ) ) ),
+			false,
+			true
+		);
+
+		$this->assertSame( array( array( 'legacy', 'legacy' ) ), $inputs );
+	}
+
 	public function test_a_nested_process_raw_widgets_call_never_sees_the_outer_observer() {
 		$seen  = array();
 		$outer = $this->widget( 'outer', '' , 'MarkupRemovedNested' );

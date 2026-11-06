@@ -1436,12 +1436,17 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			if ( is_array( $widget ) ) {
-				$info = (array) ( is_array( $widget['panels_info'] ) ? $widget['panels_info'] : $widget['info'] );
+				$info = (array) (
+					isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] )
+						? $widget['panels_info']
+						: ( isset( $widget['info'] ) ? $widget['info'] : array() )
+				);
 			} else {
 				$info = array();
 			}
-			unset( $widget['info'] );
+			// The widget as it entered, older `info` key included, so its identity is kept.
 			$observed_input = $observer !== null ? $widget : null;
+			unset( $widget['info'] );
 
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
 

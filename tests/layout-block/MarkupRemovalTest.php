@@ -57,7 +57,7 @@ class MarkupRemovalTest extends TestCase {
 
 	#[DataProvider( 'removal_cases' )]
 	public function test_lost_reports_removals_and_ignores_harmless_changes( $before, $after, $expected ) {
-		$this->assertSame( $expected, Removal::lost( Removal::inventory( $before ), Removal::inventory( $after ) ) );
+		$this->assertSame( $expected, array() !== Removal::losses( Removal::inventory( $before ), Removal::inventory( $after ) ) );
 	}
 
 	public function test_inventory_counts_elements_and_attributes() {
@@ -166,6 +166,18 @@ class MarkupRemovalTest extends TestCase {
 		$this->assertSame(
 			array( $this->finding( 0, 0, 'a', 'WP_Widget_Custom_HTML', 'page_builder' ) ),
 			Removal::attribute( $before, $after, 'page_builder' )
+		);
+	}
+
+	public function test_a_legacy_widget_with_info_is_named() {
+		// process_raw_widgets() accepts an older widget whose metadata is under
+		// `info` and stores it under panels_info.
+		$before = array( 'content' => '<iframe src=x></iframe>', 'info' => array( 'class' => 'WP_Widget_Custom_HTML', 'widget_id' => 'legacy' ) );
+		$after  = $this->widget( 'legacy', '' );
+
+		$this->assertSame(
+			array( $this->finding( 0, 0, 'legacy', 'WP_Widget_Custom_HTML', 'page_builder' ) ),
+			Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )
 		);
 	}
 

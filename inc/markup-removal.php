@@ -134,18 +134,6 @@ class SiteOrigin_Panels_Markup_Removal {
 	}
 
 	/**
-	 * Whether any token's count fell.
-	 *
-	 * @param array<string,int> $before Counts before a filtering stage.
-	 * @param array<string,int> $after  Counts after it.
-	 *
-	 * @return bool
-	 */
-	public static function lost( $before, $after ) {
-		return ! empty( self::losses( $before, $after ) );
-	}
-
-	/**
 	 * Turn one comparison into findings.
 	 *
 	 * 1. Pool first: one inventory over every widget on each side. When no
@@ -354,6 +342,9 @@ class SiteOrigin_Panels_Markup_Removal {
 			return;
 		}
 
+		global $wp_current_filter;
+		$depth = is_array( $wp_current_filter ) ? count( $wp_current_filter ) : 0;
+
 		try {
 			do_action(
 				self::ACTION,
@@ -367,7 +358,7 @@ class SiteOrigin_Panels_Markup_Removal {
 			// A listener cannot break the save. No WordPress hook or notice runs
 			// here: one could throw again and replace an exception the save is
 			// already carrying.
-			self::restore_hook_state();
+			self::restore_hook_state( $depth );
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
 				error_log( 'SiteOrigin Page Builder: a ' . self::ACTION . ' callback threw ' . get_class( $e ) . ': ' . $e->getMessage() );
 			}
@@ -379,27 +370,36 @@ class SiteOrigin_Panels_Markup_Removal {
 	 *
 	 * do_action() pushes the hook name onto $wp_current_filter and moves the
 	 * WP_Hook's iteration state before it runs the callbacks, and restores both
-	 * only after they return. When a callback throws, neither happens, so
-	 * doing_action() and current_filter() would stay wrong for the rest of the
-	 * request. Pop the name, and rebuild the hook from its callbacks so its
-	 * iteration state starts clean. The remaining callbacks for that report do
-	 * not run, as with any WordPress action whose callback throws.
+	 * only after they return. When a callback throws, neither happens, for this
+	 * action and for any hook a listener ran that the same throw interrupted,
+	 * so doing_action() and current_filter() would stay wrong for the rest of
+	 * the request. Cut the stack back to its depth before this action, and
+	 * rebuild each interrupted hook from its callbacks so its iteration state
+	 * starts clean. The remaining callbacks for that report do not run, as with
+	 * any WordPress action whose callback throws; later reports run them all.
+	 *
+	 * @param int $depth The size of $wp_current_filter before do_action().
 	 */
-	private static function restore_hook_state() {
+	private static function restore_hook_state( $depth ) {
 		global $wp_filter, $wp_current_filter;
 
-		if ( is_array( $wp_current_filter ) && end( $wp_current_filter ) === self::ACTION ) {
-			array_pop( $wp_current_filter );
+		if ( ! is_array( $wp_current_filter ) || count( $wp_current_filter ) <= $depth ) {
+			return;
 		}
 
-		if (
-			class_exists( 'WP_Hook', false ) &&
-			isset( $wp_filter[ self::ACTION ] ) &&
-			$wp_filter[ self::ACTION ] instanceof WP_Hook
-		) {
-			$rebuilt = WP_Hook::build_preinitialized_hooks( array( self::ACTION => $wp_filter[ self::ACTION ]->callbacks ) );
-			if ( isset( $rebuilt[ self::ACTION ] ) ) {
-				$wp_filter[ self::ACTION ] = $rebuilt[ self::ACTION ];
+		$interrupted       = array_unique( array_slice( $wp_current_filter, $depth ) );
+		$wp_current_filter = array_slice( $wp_current_filter, 0, $depth );
+
+		if ( ! class_exists( 'WP_Hook', false ) ) {
+			return;
+		}
+
+		foreach ( $interrupted as $hook_name ) {
+			if ( isset( $wp_filter[ $hook_name ] ) && $wp_filter[ $hook_name ] instanceof WP_Hook ) {
+				$rebuilt = WP_Hook::build_preinitialized_hooks( array( $hook_name => $wp_filter[ $hook_name ]->callbacks ) );
+				if ( isset( $rebuilt[ $hook_name ] ) ) {
+					$wp_filter[ $hook_name ] = $rebuilt[ $hook_name ];
+				}
 			}
 		}
 	}
@@ -471,8 +471,9 @@ class SiteOrigin_Panels_Markup_Removal {
 				if ( ! is_array( $widget ) ) {
 					continue;
 				}
-				$id = isset( $widget['panels_info']['widget_id'] ) && is_string( $widget['panels_info']['widget_id'] ) && $widget['panels_info']['widget_id'] !== ''
-					? $widget['panels_info']['widget_id']
+				$info = self::widget_info( $widget );
+				$id   = isset( $info['widget_id'] ) && is_string( $info['widget_id'] ) && $info['widget_id'] !== ''
+					? $info['widget_id']
 					: null;
 
 				$entries[] = array(
@@ -503,6 +504,22 @@ class SiteOrigin_Panels_Markup_Removal {
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * A widget's metadata: panels_info, or the older `info` key that
+	 * SiteOrigin_Panels_Admin::process_raw_widgets() still accepts.
+	 *
+	 * @param array $widget The widget.
+	 *
+	 * @return array
+	 */
+	private static function widget_info( $widget ) {
+		if ( isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] ) ) {
+			return $widget['panels_info'];
+		}
+
+		return isset( $widget['info'] ) && is_array( $widget['info'] ) ? $widget['info'] : array();
 	}
 
 	/**
@@ -544,10 +561,11 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * @return string|null
 	 */
 	private static function widget_class( $widget ) {
-		if ( ! isset( $widget['panels_info']['class'] ) || ! is_string( $widget['panels_info']['class'] ) ) {
+		$info = self::widget_info( $widget );
+		if ( ! isset( $info['class'] ) || ! is_string( $info['class'] ) ) {
 			return null;
 		}
-		$class = substr( preg_replace( '/[^A-Za-z0-9_\\\\]/', '', $widget['panels_info']['class'] ), 0, 128 );
+		$class = substr( preg_replace( '/[^A-Za-z0-9_\\\\]/', '', $info['class'] ), 0, 128 );
 
 		return $class === '' ? null : $class;
 	}
