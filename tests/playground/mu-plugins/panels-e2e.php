@@ -225,6 +225,15 @@ add_action(
 							}
 							$ids[] = (int) $result;
 						}
+
+						// Each hook's own iteration state: false when it is not running.
+						// Read before the finally removes the `all` callback, which
+						// would unset an empty `all` hook.
+						global $wp_filter;
+						$priorities = array();
+						foreach ( array( 'siteorigin_panels_layout_block_markup_removed', 'panels_e2e_markup_removed_inner', 'all' ) as $hook_name ) {
+							$priorities[ $hook_name ] = isset( $wp_filter[ $hook_name ] ) ? $wp_filter[ $hook_name ]->current_priority() : false;
+						}
 					} finally {
 						wp_set_current_user( $caller );
 						kses_init();
@@ -233,13 +242,7 @@ add_action(
 						}
 					}
 
-					global $wp_current_filter, $wp_filter;
-
-					// Each hook's own iteration state: false when it is not running.
-					$priorities = array();
-					foreach ( array( 'siteorigin_panels_layout_block_markup_removed', 'panels_e2e_markup_removed_inner', 'all' ) as $hook_name ) {
-						$priorities[ $hook_name ] = isset( $wp_filter[ $hook_name ] ) ? $wp_filter[ $hook_name ]->current_priority() : false;
-					}
+					global $wp_current_filter;
 
 					return array(
 						'id'         => $ids[0],
