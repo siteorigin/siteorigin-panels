@@ -37,28 +37,30 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * Count the elements and attributes in a value.
 	 *
 	 * Walks arrays and skips widget metadata: every `panels_info` key at any
-	 * depth, and, on the widget itself, an `info` key holding an array (the
-	 * older name for panels_info, which SiteOrigin_Panels_Admin::process_raw_widgets()
-	 * moves to panels_info). Each
+	 * depth, and, on a widget root, an `info` key holding an array (the older
+	 * name for panels_info, which SiteOrigin_Panels_Admin::process_raw_widgets()
+	 * moves to panels_info). A widget root is the widget passed in, and each
+	 * widget in a `panels_data` `widgets` list inside it, such as a nested
+	 * Layout widget's children. An `info` array anywhere else is content. Each
 	 * string that contains `<` is scanned left to right: comments and CDATA
 	 * sections are skipped whole, the content of a raw-text or RCDATA element
 	 * is skipped up to its end tag, and every opening or self-closing tag adds
 	 * `t:<name>` and one `a:<name>@<attribute>` per attribute, all lowercased.
 	 * Closing tags and text are not counted.
 	 *
-	 * @param mixed $value        A widget, or any part of one.
-	 * @param array $counts       Counts to add to.
-	 * @param bool  $widget_level Whether $value is the widget itself, where a legacy `info` array is metadata.
+	 * @param mixed  $value  A widget, or any part of one.
+	 * @param array  $counts Counts to add to.
+	 * @param string $role   What $value is: 'widget' (a widget root), 'panels_data', 'widgets' (a widget list) or '' (content).
 	 *
 	 * @return array<string,int> Token => count.
 	 */
-	public static function inventory( $value, $counts = array(), $widget_level = true ) {
+	public static function inventory( $value, $counts = array(), $role = 'widget' ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( self::is_metadata( $key, $item, $widget_level ) ) {
+				if ( self::is_metadata( $key, $item, $role ) ) {
 					continue;
 				}
-				$counts = self::inventory( $item, $counts, false );
+				$counts = self::inventory( $item, $counts, self::child_role( $role, $key ) );
 			}
 
 			return $counts;
@@ -378,15 +380,16 @@ class SiteOrigin_Panels_Markup_Removal {
 	 *
 	 * @param mixed $value  A widget or any part of one; metadata is skipped (see is_metadata()).
 	 * @param array $strings Token => list of strings, to add to.
+	 * @param string $role   What $value is (see inventory()).
 	 * @param bool  $top     Whether this is the outermost call, which sorts the lists.
 	 *
 	 * @return array<string,string[]>
 	 */
-	private static function token_strings( $value, $strings = array(), $top = true ) {
+	private static function token_strings( $value, $strings = array(), $role = 'widget', $top = true ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( ! self::is_metadata( $key, $item, $top ) ) {
-					$strings = self::token_strings( $item, $strings, false );
+				if ( ! self::is_metadata( $key, $item, $role ) ) {
+					$strings = self::token_strings( $item, $strings, self::child_role( $role, $key ), false );
 				}
 			}
 		} elseif ( is_string( $value ) && strpos( $value, '<' ) !== false ) {
@@ -463,18 +466,39 @@ class SiteOrigin_Panels_Markup_Removal {
 
 	/**
 	 * Whether a key holds widget metadata rather than content: `panels_info`
-	 * anywhere, or, on the widget itself, an `info` array, its older name.
-	 * A string field named `info`, or an `info` array inside a widget's
-	 * content, is content.
+	 * anywhere, or, on a widget root, an `info` array, its older name. A string
+	 * field named `info`, or an `info` array in other content, is content.
 	 *
-	 * @param mixed $key          The array key.
-	 * @param mixed $item         The value under it.
-	 * @param bool  $widget_level Whether the key is on the widget itself.
+	 * @param mixed  $key  The array key.
+	 * @param mixed  $item The value under it.
+	 * @param string $role What the array holding the key is (see inventory()).
 	 *
 	 * @return bool
 	 */
-	private static function is_metadata( $key, $item, $widget_level ) {
-		return $key === 'panels_info' || ( $widget_level && $key === 'info' && is_array( $item ) );
+	private static function is_metadata( $key, $item, $role ) {
+		return $key === 'panels_info' || ( $role === 'widget' && $key === 'info' && is_array( $item ) );
+	}
+
+	/**
+	 * The role of a child value, for inventory() and token_strings().
+	 *
+	 * @param string $role The parent's role.
+	 * @param mixed  $key  The child's key.
+	 *
+	 * @return string
+	 */
+	private static function child_role( $role, $key ) {
+		if ( $role === 'widgets' ) {
+			return 'widget';
+		}
+		if ( $key === 'panels_data' ) {
+			return 'panels_data';
+		}
+		if ( $role === 'panels_data' && $key === 'widgets' ) {
+			return 'widgets';
+		}
+
+		return '';
 	}
 
 	/**

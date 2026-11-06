@@ -197,6 +197,34 @@ class MarkupRemovalTest extends TestCase {
 		$this->assertSame( 'w1', Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )[0]['widget_id'] );
 	}
 
+	public function test_legacy_info_of_a_nested_layout_widgets_child_is_metadata() {
+		// A nested Layout widget's save runs process_raw_widgets() on its
+		// children, moving a legacy child's info to panels_info.
+		$child_before = array( 'content' => 'plain', 'info' => array( 'class' => 'WP_Widget_Custom_HTML', 'widget_id' => 'child', 'label' => '<b>L</b>' ) );
+		$child_after  = $this->widget( 'child', 'plain', array( 'label' => '<b>L</b>' ) );
+		$outer_before = $this->widget( 'outer', '' );
+		$outer_before['panels_data'] = array( 'widgets' => array( $child_before ) );
+		$outer_after = $this->widget( 'outer', '' );
+		$outer_after['panels_data'] = array( 'widgets' => array( $child_after ) );
+
+		$this->assertSame( array(), Removal::attribute( array( array( 0 => $outer_before ) ), array( array( 0 => $outer_after ) ), 'page_builder' ) );
+	}
+
+	public function test_markup_that_may_have_moved_into_another_widgets_nested_info_is_not_attributed() {
+		// A loses two iframes; one may have moved into B's settings.info. The
+		// total falls by one, but naming A would be a guess.
+		$a_before = $this->widget( 'a', '<iframe src=1></iframe><iframe src=2></iframe>' );
+		$b_before = $this->widget( 'b', 'plain' );
+		$b_before['settings'] = array( 'info' => array( 'embed' => '' ) );
+		$b_after = $this->widget( 'b', 'plain' );
+		$b_after['settings'] = array( 'info' => array( 'embed' => '<iframe src=2></iframe>' ) );
+
+		$this->assertSame(
+			array( $this->finding( null, null, null, null, 'page_builder' ) ),
+			Removal::attribute( array( array( 0 => $a_before, 1 => $b_before ) ), array( array( 0 => $this->widget( 'a', '' ), 1 => $b_after ) ), 'page_builder' )
+		);
+	}
+
 	public function test_identified_and_unidentified_losses_give_a_named_and_a_null_finding() {
 		$unidentified = $this->widget( '', '<iframe src=x></iframe>' );
 		$before = array( array( 0 => $this->widget( 'w1', '<iframe src=x></iframe>' ), 1 => $unidentified ) );
