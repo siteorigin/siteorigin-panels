@@ -103,6 +103,18 @@ add_action(
 	}
 );
 
+/*
+ * Later in the same REST save, record whether the markup-removed action still
+ * looks in progress, so a test can check that a throwing listener left the
+ * hook state clean.
+ */
+add_action(
+	'rest_after_insert_post',
+	function () {
+		update_option( 'panels_e2e_markup_removed_doing_after', doing_action( 'siteorigin_panels_layout_block_markup_removed' ) ? 1 : 0, false );
+	}
+);
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -123,6 +135,7 @@ add_action(
 							'log'           => array_values( (array) get_option( 'panels_e2e_pre_write_log', array() ) ),
 							'probe_renders' => (int) get_option( 'panels_e2e_probe_renders', 0 ),
 							'markup_removed' => array_values( (array) get_option( 'panels_e2e_markup_removed_log', array() ) ),
+							'markup_removed_doing_after' => (int) get_option( 'panels_e2e_markup_removed_doing_after', -1 ),
 						);
 					},
 				),
@@ -139,6 +152,7 @@ add_action(
 						update_option( 'panels_e2e_pre_write_log', array(), false );
 						update_option( 'panels_e2e_probe_renders', 0, false );
 						update_option( 'panels_e2e_markup_removed_log', array(), false );
+						update_option( 'panels_e2e_markup_removed_doing_after', -1, false );
 						update_option( 'panels_e2e_markup_removed_throws', $request->get_param( 'markup_removed_throws' ) ? 1 : 0, false );
 
 						if ( $request->has_param( 'deny_unfiltered_html' ) ) {

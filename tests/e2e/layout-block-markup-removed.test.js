@@ -273,6 +273,8 @@ test( 'M5: a listener that throws does not break the save', async () => {
 
 		const state = await probeState( admin );
 		expect( state.markup_removed ).toHaveLength( 1 );
+		// Later in the same save, the action no longer looks in progress.
+		expect( state.markup_removed_doing_after ).toBe( 0 );
 
 		const raw = await rawStorage( admin, response.body.id );
 		expect( raw.blocks ).toHaveLength( 1 );
