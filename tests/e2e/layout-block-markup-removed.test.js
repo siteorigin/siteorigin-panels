@@ -191,6 +191,74 @@ test( 'M4: an ability write stopped by the pre-write hook still reports, and the
 	}
 } );
 
+/**
+ * A Layout Block comment serialized the way WordPress's serialize_block_attributes()
+ * does, so markup in attribute strings is escaped. Core kses reads raw `<` inside a
+ * block comment as tags and breaks the comment; content saved through the editor,
+ * serialize_blocks() or an integration never has that shape.
+ */
+const serializedLayoutBlock = ( panelsData ) => {
+	const attributes = JSON.stringify( { panelsData } )
+		.replace( /--/g, '\\u002d\\u002d' )
+		.replace( /</g, '\\u003c' )
+		.replace( />/g, '\\u003e' )
+		.replace( /&/g, '\\u0026' )
+		.replace( /\\"/g, '\\u0022' );
+
+	return `<!-- wp:siteorigin-panels/layout-block ${ attributes } /-->`;
+};
+
+const saveAsNobody = async ( layout, id = 0 ) => {
+	const response = await rest( admin, 'POST', '/panels-e2e/v1/insert-as-nobody', { data: { content: serializedLayoutBlock( layout ), id } } );
+	expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
+	if ( ! id ) {
+		created.push( { type: 'post', id: response.body.id } );
+	}
+
+	return response.body.id;
+};
+
+test( 'M6: a no-user wp_insert_post() save reports what the save filters removed, on create and update', async () => {
+	await setProbe( admin, 'pass' );
+
+	const id = await saveAsNobody( embedLayout( IFRAME, 'e2e-nobody' ) );
+
+	let state = await probeState( admin );
+	expect( state.markup_removed ).toStrictEqual( [
+		{
+			post_id: 0,
+			context: 'wp_insert_post_data',
+			widgets: [
+				{
+					block: 0,
+					block_index: null,
+					widget: 0,
+					widget_id: 'e2e-nobody',
+					class: 'Panels_E2E_Probe_Widget',
+					source: 'post_save_filters',
+				},
+			],
+		},
+	] );
+	expect( JSON.stringify( ( await rawStorage( admin, id ) ).blocks[ 0 ] ) ).not.toContain( 'iframe' );
+
+	await setProbe( admin, 'pass' );
+	await saveAsNobody( embedLayout( IFRAME, 'e2e-nobody' ), id );
+
+	state = await probeState( admin );
+	expect( state.markup_removed ).toHaveLength( 1 );
+	expect( state.markup_removed[ 0 ].post_id ).toBe( id );
+	expect( state.markup_removed[ 0 ].widgets[ 0 ].source ).toBe( 'post_save_filters' );
+} );
+
+test( 'M7: a no-user save with no markup reports nothing', async () => {
+	await setProbe( admin, 'pass' );
+
+	await saveAsNobody( embedLayout( 'Tom & Jerry <strong>kept</strong>', 'e2e-plain' ) );
+
+	expect( ( await probeState( admin ) ).markup_removed ).toStrictEqual( [] );
+} );
+
 test( 'M5: a listener that throws does not break the save', async () => {
 	await setThrowingListener();
 

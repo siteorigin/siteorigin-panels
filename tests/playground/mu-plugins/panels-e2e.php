@@ -151,6 +151,45 @@ add_action(
 			)
 		);
 
+		// Save a post with no current user, the way a webhook or a cron job
+		// does: core's kses runs on content_save_pre and there is no REST
+		// validation. The admin who called the route is restored afterwards.
+		register_rest_route(
+			'panels-e2e/v1',
+			'/insert-as-nobody',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => $permission,
+				'callback'            => function ( WP_REST_Request $request ) {
+					$caller = get_current_user_id();
+					wp_set_current_user( 0 );
+					kses_init();
+
+					$postarr = array(
+						'post_type'    => 'post',
+						'post_status'  => 'draft',
+						'post_title'   => 'Panels e2e no-user save',
+						'post_content' => (string) $request->get_param( 'content' ),
+					);
+					$id = (int) $request->get_param( 'id' );
+
+					try {
+						if ( $id ) {
+							$postarr['ID'] = $id;
+							$result = wp_update_post( wp_slash( $postarr ), true );
+						} else {
+							$result = wp_insert_post( wp_slash( $postarr ), true );
+						}
+					} finally {
+						wp_set_current_user( $caller );
+						kses_init();
+					}
+
+					return is_wp_error( $result ) ? $result : array( 'id' => (int) $result );
+				},
+			)
+		);
+
 		register_rest_route(
 			'panels-e2e/v1',
 			'/raw/(?P<id>\d+)',
