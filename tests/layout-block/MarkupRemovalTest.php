@@ -153,6 +153,22 @@ class MarkupRemovalTest extends TestCase {
 		);
 	}
 
+	public function test_a_widget_whose_only_change_is_metadata_does_not_block_naming() {
+		// process_raw_widgets() drops panels_info.raw from every widget, and a
+		// widget's update() can add a timestamp. B keeps its own iframe as it was.
+		$b_before = $this->widget( 'b', '<iframe src=b></iframe>', array( 'raw' => true ) );
+		$b_after  = $this->widget( 'b', '<iframe src=b></iframe>' );
+		$b_after['_sow_form_timestamp'] = 123;
+
+		$before = array( array( 0 => $this->widget( 'a', '<iframe src=a></iframe>', array( 'raw' => true ) ), 1 => $b_before ) );
+		$after  = array( array( 0 => $this->widget( 'a', '' ), 1 => $b_after ) );
+
+		$this->assertSame(
+			array( $this->finding( 0, 0, 'a', 'WP_Widget_Custom_HTML', 'page_builder' ) ),
+			Removal::attribute( $before, $after, 'page_builder' )
+		);
+	}
+
 	public function test_identified_and_unidentified_losses_give_a_named_and_a_null_finding() {
 		$unidentified = $this->widget( '', '<iframe src=x></iframe>' );
 		$before = array( array( 0 => $this->widget( 'w1', '<iframe src=x></iframe>' ), 1 => $unidentified ) );

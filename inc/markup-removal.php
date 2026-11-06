@@ -155,10 +155,12 @@ class SiteOrigin_Panels_Markup_Removal {
 	 *    is a non-empty string found exactly once on each side. Keys, block
 	 *    positions and classes never decide identity.
 	 * 3. A widget is named for a lost token when it has identity, holds fewer
-	 *    of that token after than before, and no other after-side widget that
-	 *    changed, or that has no identity, still holds the token. A move always
-	 *    leaves the token in its destination, so a possible move is never
-	 *    named.
+	 *    of that token after than before, and no other widget could be where
+	 *    the token went: one that holds the token afterwards and has no
+	 *    identity, or whose strings holding the token changed. A move always
+	 *    changes its destination's strings, so a possible move is never named;
+	 *    a widget whose only change is metadata (panels_info, timestamps) does
+	 *    not block naming.
 	 * 4. Losses no named widget accounts for, by count, add at most one
 	 *    finding with null identifiers.
 	 *
@@ -207,11 +209,14 @@ class SiteOrigin_Panels_Markup_Removal {
 				&& isset( $before_by_id[ $id ] );
 
 			$candidates[ $position ] = array(
-				'entry'      => $entry,
-				'identified' => $identified,
-				'changed'    => ! $identified || $before_by_id[ $id ]['widget'] !== $entry['widget'],
-				'before'     => $identified ? self::inventory( $before_by_id[ $id ]['widget'] ) : array(),
-				'after'      => self::inventory( $entry['widget'] ),
+				'entry'          => $entry,
+				'identified'     => $identified,
+				'before'         => $identified ? self::inventory( $before_by_id[ $id ]['widget'] ) : array(),
+				'after'          => self::inventory( $entry['widget'] ),
+				// Per token, the strings that hold it. Changes elsewhere in the
+				// widget (panels_info, timestamps, defaults) leave these alone.
+				'before_strings' => $identified ? self::token_strings( $before_by_id[ $id ]['widget'] ) : array(),
+				'after_strings'  => self::token_strings( $entry['widget'] ),
 			);
 		}
 
@@ -229,13 +234,17 @@ class SiteOrigin_Panels_Markup_Removal {
 					continue;
 				}
 
+				// Another widget could be where the token went when it holds the
+				// token afterwards and either has no identity or its strings
+				// holding the token changed.
 				$possible_move = false;
 				foreach ( $candidates as $other_position => $other ) {
-					if (
-						$other_position !== $position &&
-						( $other['changed'] || ! $other['identified'] ) &&
-						! empty( $other['after'][ $token ] )
-					) {
+					if ( $other_position === $position || empty( $other['after'][ $token ] ) ) {
+						continue;
+					}
+					$before_strings = isset( $other['before_strings'][ $token ] ) ? $other['before_strings'][ $token ] : array();
+					$after_strings  = isset( $other['after_strings'][ $token ] ) ? $other['after_strings'][ $token ] : array();
+					if ( ! $other['identified'] || $before_strings !== $after_strings ) {
 						$possible_move = true;
 						break;
 					}
@@ -309,6 +318,9 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * kses or any other content filter at that point, named for the boundary,
 	 * not for a cause.
 	 *
+	 * A listener that throws is caught and the save continues; hook state is
+	 * restored, and the remaining listeners for that report do not run.
+	 *
 	 * Each detecting hook fires at most once per call, and `context` names it:
 	 * `rest_pre_insert`, `wp_insert_post_data` or `ability`. A REST save normally
 	 * fires once; it fires again from `wp_insert_post_data` only when a save
@@ -355,8 +367,39 @@ class SiteOrigin_Panels_Markup_Removal {
 			// A listener cannot break the save. No WordPress hook or notice runs
 			// here: one could throw again and replace an exception the save is
 			// already carrying.
+			self::restore_hook_state();
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
 				error_log( 'SiteOrigin Page Builder: a ' . self::ACTION . ' callback threw ' . get_class( $e ) . ': ' . $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * Undo what an interrupted do_action() left behind.
+	 *
+	 * do_action() pushes the hook name onto $wp_current_filter and moves the
+	 * WP_Hook's iteration state before it runs the callbacks, and restores both
+	 * only after they return. When a callback throws, neither happens, so
+	 * doing_action() and current_filter() would stay wrong for the rest of the
+	 * request. Pop the name, and rebuild the hook from its callbacks so its
+	 * iteration state starts clean. The remaining callbacks for that report do
+	 * not run, as with any WordPress action whose callback throws.
+	 */
+	private static function restore_hook_state() {
+		global $wp_filter, $wp_current_filter;
+
+		if ( is_array( $wp_current_filter ) && end( $wp_current_filter ) === self::ACTION ) {
+			array_pop( $wp_current_filter );
+		}
+
+		if (
+			class_exists( 'WP_Hook', false ) &&
+			isset( $wp_filter[ self::ACTION ] ) &&
+			$wp_filter[ self::ACTION ] instanceof WP_Hook
+		) {
+			$rebuilt = WP_Hook::build_preinitialized_hooks( array( self::ACTION => $wp_filter[ self::ACTION ]->callbacks ) );
+			if ( isset( $rebuilt[ self::ACTION ] ) ) {
+				$wp_filter[ self::ACTION ] = $rebuilt[ self::ACTION ];
 			}
 		}
 	}
@@ -373,6 +416,38 @@ class SiteOrigin_Panels_Markup_Removal {
 		$counts[ $token ] = ( isset( $counts[ $token ] ) ? $counts[ $token ] : 0 ) + 1;
 
 		return $counts;
+	}
+
+	/**
+	 * For each token, the sorted strings in a value that hold it.
+	 *
+	 * @param mixed $value  A widget or any part of one; panels_info is skipped.
+	 * @param array $strings Token => list of strings, to add to.
+	 * @param bool  $top     Whether this is the outermost call, which sorts the lists.
+	 *
+	 * @return array<string,string[]>
+	 */
+	private static function token_strings( $value, $strings = array(), $top = true ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				if ( $key !== 'panels_info' ) {
+					$strings = self::token_strings( $item, $strings, false );
+				}
+			}
+		} elseif ( is_string( $value ) && strpos( $value, '<' ) !== false ) {
+			foreach ( array_keys( self::inventory( $value ) ) as $token ) {
+				$strings[ $token ][] = $value;
+			}
+		}
+
+		if ( $top ) {
+			foreach ( $strings as $token => $list ) {
+				sort( $list, SORT_STRING );
+				$strings[ $token ] = $list;
+			}
+		}
+
+		return $strings;
 	}
 
 	/**
