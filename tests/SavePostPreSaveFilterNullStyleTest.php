@@ -65,6 +65,7 @@ class SavePostPreSaveFilterNullStyleTest extends SiteOriginTests {
 			eval(
 				'class SiteOrigin_Panels {'
 				. ' public static function get_widget_instance( $class ) { return null; }'
+				. ' public static function is_live_editor() { return ! empty( $_GET["siteorigin_panels_live_editor"] ); }'
 				. '}'
 			);
 		}
