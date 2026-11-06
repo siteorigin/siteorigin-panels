@@ -64,8 +64,8 @@ const savePost = async ( session, type, id, layout ) => {
 	return response;
 };
 
-const setThrowingListener = async ( how = 1 ) => {
-	const response = await rest( admin, 'POST', '/panels-e2e/v1/state', { data: { mode: 'pass', markup_removed_throws: how } } );
+const setThrowingListener = async () => {
+	const response = await rest( admin, 'POST', '/panels-e2e/v1/state', { data: { mode: 'pass', markup_removed_throws: 1 } } );
 	expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
 };
 
@@ -256,43 +256,6 @@ test( 'M6: a no-user wp_insert_post() save reports what the save filters removed
 	expect( state.markup_removed[ 0 ].widgets[ 0 ].source ).toBe( 'post_save_filters' );
 } );
 
-for ( const [ how, label ] of [ [ 1, 'throws' ], [ 2, 'runs a hook that throws' ], [ 3, 'is preceded by an all callback that throws' ] ] ) {
-	test( `M8: when a listener ${ label }, a second removal in the same request still reports and the stack is clean`, async () => {
-		await setThrowingListener( how );
-
-		try {
-			const response = await rest( admin, 'POST', '/panels-e2e/v1/insert-as-nobody', {
-				data: { content: serializedLayoutBlock( embedLayout( IFRAME, `e2e-batch-${ how }` ) ), repeat: 2 },
-			} );
-			expect( response.status, JSON.stringify( response.body ) ).toBe( 200 );
-			for ( const id of response.body.ids ) {
-				created.push( { type: 'post', id } );
-			}
-			expect( response.body.ids ).toHaveLength( 2 );
-
-			// Only this route's own REST callback is on the stack: no name left
-			// by the action, by the hook the listener ran, or by the save.
-			expect( response.body.stack ).not.toContain( 'siteorigin_panels_layout_block_markup_removed' );
-			expect( response.body.stack ).not.toContain( 'panels_e2e_markup_removed_inner' );
-			expect( response.body.stack ).not.toContain( 'wp_insert_post_data' );
-			// Neither hook's own iteration state is left mid-run.
-			expect( response.body.priorities ).toStrictEqual( {
-				siteorigin_panels_layout_block_markup_removed: false,
-				panels_e2e_markup_removed_inner: false,
-				all: false,
-			} );
-
-			// An `all` callback runs before the action's own listeners, so when it
-			// throws the recorder never runs; the other modes record both reports.
-			const state = await probeState( admin );
-			const expected = how === 3 ? [] : [ `e2e-batch-${ how }`, `e2e-batch-${ how }` ];
-			expect( state.markup_removed.map( ( report ) => report.widgets[ 0 ].widget_id ) ).toStrictEqual( expected );
-		} finally {
-			await setProbe( admin, 'pass' );
-		}
-	} );
-}
-
 test( 'M7: a no-user save with no markup reports nothing', async () => {
 	await setProbe( admin, 'pass' );
 
@@ -301,25 +264,23 @@ test( 'M7: a no-user save with no markup reports nothing', async () => {
 	expect( ( await probeState( admin ) ).markup_removed ).toStrictEqual( [] );
 } );
 
-test( 'M5: a listener that throws does not break the save', async () => {
+test( 'M5: a listener that throws fails the save, as with any WordPress action', async () => {
+	const authorPosts = async () => {
+		const response = await rest( admin, 'GET', '/wp/v2/posts', { params: { author: author.userId, status: 'draft', per_page: 100 } } );
+		expect( response.status ).toBe( 200 );
+
+		return response.body.length;
+	};
+	const before = await authorPosts();
 	await setThrowingListener();
 
 	try {
 		const response = await savePost( author, 'post', 0, embedLayout( IFRAME, 'e2e-throw' ) );
-		expect( response.status, JSON.stringify( response.body ) ).toBe( 201 );
+		expect( response.status, JSON.stringify( response.body ) ).toBeGreaterThanOrEqual( 500 );
 
-		const state = await probeState( admin );
-		expect( state.markup_removed ).toHaveLength( 1 );
-		// Later in the same save, no hook name is left on the current-filter
-		// stack: neither this action nor the REST filter it ran inside.
-		expect( state.markup_removed_stack_after ).toContain( 'rest_after_insert_post' );
-		expect( state.markup_removed_stack_after ).not.toContain( 'siteorigin_panels_layout_block_markup_removed' );
-		expect( state.markup_removed_stack_after ).not.toContain( 'rest_pre_insert_post' );
-
-		const raw = await rawStorage( admin, response.body.id );
-		expect( raw.blocks ).toHaveLength( 1 );
-		expect( JSON.stringify( raw.blocks[ 0 ] ) ).toContain( 'e2e-throw' );
-		expect( JSON.stringify( raw.blocks[ 0 ] ) ).not.toContain( 'iframe' );
+		// The listener ran, and its exception stopped the save before the post was stored.
+		expect( ( await probeState( admin ) ).markup_removed ).toHaveLength( 1 );
+		expect( await authorPosts() ).toBe( before );
 	} finally {
 		await setProbe( admin, 'pass' );
 	}
