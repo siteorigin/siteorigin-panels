@@ -201,6 +201,17 @@ add_action(
 					$repeat = max( 1, min( 5, (int) $request->get_param( 'repeat' ) ) );
 					$ids    = array();
 
+					// Throw mode 3: an `all` callback throws while the action runs.
+					$all = function ( $hook_name ) {
+						if ( $hook_name === 'siteorigin_panels_layout_block_markup_removed' ) {
+							throw new RuntimeException( 'Thrown by an all callback during the markup-removed action.' );
+						}
+					};
+					$all_throws = (int) get_option( 'panels_e2e_markup_removed_throws', 0 ) === 3;
+					if ( $all_throws ) {
+						add_action( 'all', $all );
+					}
+
 					try {
 						for ( $i = 0; $i < $repeat; $i++ ) {
 							if ( $id ) {
@@ -217,13 +228,16 @@ add_action(
 					} finally {
 						wp_set_current_user( $caller );
 						kses_init();
+						if ( $all_throws ) {
+							remove_action( 'all', $all );
+						}
 					}
 
 					global $wp_current_filter, $wp_filter;
 
 					// Each hook's own iteration state: false when it is not running.
 					$priorities = array();
-					foreach ( array( 'siteorigin_panels_layout_block_markup_removed', 'panels_e2e_markup_removed_inner' ) as $hook_name ) {
+					foreach ( array( 'siteorigin_panels_layout_block_markup_removed', 'panels_e2e_markup_removed_inner', 'all' ) as $hook_name ) {
 						$priorities[ $hook_name ] = isset( $wp_filter[ $hook_name ] ) ? $wp_filter[ $hook_name ]->current_priority() : false;
 					}
 

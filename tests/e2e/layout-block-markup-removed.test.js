@@ -256,7 +256,7 @@ test( 'M6: a no-user wp_insert_post() save reports what the save filters removed
 	expect( state.markup_removed[ 0 ].widgets[ 0 ].source ).toBe( 'post_save_filters' );
 } );
 
-for ( const [ how, label ] of [ [ 1, 'throws' ], [ 2, 'runs a hook that throws' ] ] ) {
+for ( const [ how, label ] of [ [ 1, 'throws' ], [ 2, 'runs a hook that throws' ], [ 3, 'is preceded by an all callback that throws' ] ] ) {
 	test( `M8: when a listener ${ label }, a second removal in the same request still reports and the stack is clean`, async () => {
 		await setThrowingListener( how );
 
@@ -279,11 +279,14 @@ for ( const [ how, label ] of [ [ 1, 'throws' ], [ 2, 'runs a hook that throws' 
 			expect( response.body.priorities ).toStrictEqual( {
 				siteorigin_panels_layout_block_markup_removed: false,
 				panels_e2e_markup_removed_inner: false,
+				all: false,
 			} );
 
+			// An `all` callback runs before the action's own listeners, so when it
+			// throws the recorder never runs; the other modes record both reports.
 			const state = await probeState( admin );
-			expect( state.markup_removed ).toHaveLength( 2 );
-			expect( state.markup_removed.map( ( report ) => report.widgets[ 0 ].widget_id ) ).toStrictEqual( [ `e2e-batch-${ how }`, `e2e-batch-${ how }` ] );
+			const expected = how === 3 ? [] : [ `e2e-batch-${ how }`, `e2e-batch-${ how }` ];
+			expect( state.markup_removed.map( ( report ) => report.widgets[ 0 ].widget_id ) ).toStrictEqual( expected );
 		} finally {
 			await setProbe( admin, 'pass' );
 		}
