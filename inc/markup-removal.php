@@ -36,28 +36,29 @@ class SiteOrigin_Panels_Markup_Removal {
 	/**
 	 * Count the elements and attributes in a value.
 	 *
-	 * Walks arrays and skips widget metadata at any depth: every `panels_info`
-	 * key, and an `info` key holding an array (the older name for panels_info,
-	 * which SiteOrigin_Panels_Admin::process_raw_widgets() moves to
-	 * panels_info). Each
+	 * Walks arrays and skips widget metadata: every `panels_info` key at any
+	 * depth, and, on the widget itself, an `info` key holding an array (the
+	 * older name for panels_info, which SiteOrigin_Panels_Admin::process_raw_widgets()
+	 * moves to panels_info). Each
 	 * string that contains `<` is scanned left to right: comments and CDATA
 	 * sections are skipped whole, the content of a raw-text or RCDATA element
 	 * is skipped up to its end tag, and every opening or self-closing tag adds
 	 * `t:<name>` and one `a:<name>@<attribute>` per attribute, all lowercased.
 	 * Closing tags and text are not counted.
 	 *
-	 * @param mixed $value  A widget, a list of widgets, or any part of one.
-	 * @param array $counts Counts to add to.
+	 * @param mixed $value        A widget, or any part of one.
+	 * @param array $counts       Counts to add to.
+	 * @param bool  $widget_level Whether $value is the widget itself, where a legacy `info` array is metadata.
 	 *
 	 * @return array<string,int> Token => count.
 	 */
-	public static function inventory( $value, $counts = array() ) {
+	public static function inventory( $value, $counts = array(), $widget_level = true ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( self::is_metadata( $key, $item ) ) {
+				if ( self::is_metadata( $key, $item, $widget_level ) ) {
 					continue;
 				}
-				$counts = self::inventory( $item, $counts );
+				$counts = self::inventory( $item, $counts, false );
 			}
 
 			return $counts;
@@ -309,8 +310,11 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * kses or any other content filter at that point, named for the boundary,
 	 * not for a cause.
 	 *
-	 * A listener that throws is caught and the save continues; hook state is
-	 * restored, and the remaining listeners for that report do not run.
+	 * A listener that throws is not caught: the exception propagates and the
+	 * save fails, as with any WordPress action. Listeners must not throw. The
+	 * action runs while the save's own cleanup runs, so an exception thrown
+	 * there replaces one the save was already carrying, which PHP keeps as
+	 * its previous exception.
 	 *
 	 * Each detecting hook fires at most once per call, and `context` names it:
 	 * `rest_pre_insert`, `wp_insert_post_data` or `ability`. A REST save normally
@@ -345,68 +349,14 @@ class SiteOrigin_Panels_Markup_Removal {
 			return;
 		}
 
-		global $wp_current_filter;
-		$depth = is_array( $wp_current_filter ) ? count( $wp_current_filter ) : 0;
-
-		try {
-			do_action(
-				self::ACTION,
-				array(
-					'post_id' => (int) $post_id,
-					'context' => (string) $context,
-					'widgets' => array_values( $widgets ),
-				)
-			);
-		} catch ( Throwable $e ) {
-			// A listener cannot break the save. No WordPress hook or notice runs
-			// here: one could throw again and replace an exception the save is
-			// already carrying.
-			self::restore_hook_state( $depth );
-			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-				error_log( 'SiteOrigin Page Builder: a ' . self::ACTION . ' callback threw ' . get_class( $e ) . ': ' . $e->getMessage() );
-			}
-		}
-	}
-
-	/**
-	 * Undo what an interrupted do_action() left behind.
-	 *
-	 * do_action() pushes the hook name onto $wp_current_filter and moves the
-	 * WP_Hook's iteration state before it runs the callbacks, and restores both
-	 * only after they return. When a callback throws, neither happens, for this
-	 * action and for any hook a listener ran that the same throw interrupted,
-	 * so doing_action() and current_filter() would stay wrong for the rest of
-	 * the request. Cut the stack back to its depth before this action, and
-	 * rebuild each interrupted hook from its callbacks so its iteration state
-	 * starts clean. The remaining callbacks for that report do not run, as with
-	 * any WordPress action whose callback throws; later reports run them all.
-	 *
-	 * @param int $depth The size of $wp_current_filter before do_action().
-	 */
-	private static function restore_hook_state( $depth ) {
-		global $wp_filter, $wp_current_filter;
-
-		if ( ! is_array( $wp_current_filter ) || count( $wp_current_filter ) <= $depth ) {
-			return;
-		}
-
-		// WordPress runs `all` callbacks inside do_action() without putting `all`
-		// on the stack, so a throw from one leaves that hook mid-run as well.
-		$interrupted       = array_unique( array_merge( array_slice( $wp_current_filter, $depth ), array( 'all' ) ) );
-		$wp_current_filter = array_slice( $wp_current_filter, 0, $depth );
-
-		if ( ! class_exists( 'WP_Hook', false ) ) {
-			return;
-		}
-
-		foreach ( $interrupted as $hook_name ) {
-			if ( isset( $wp_filter[ $hook_name ] ) && $wp_filter[ $hook_name ] instanceof WP_Hook ) {
-				$rebuilt = WP_Hook::build_preinitialized_hooks( array( $hook_name => $wp_filter[ $hook_name ]->callbacks ) );
-				if ( isset( $rebuilt[ $hook_name ] ) ) {
-					$wp_filter[ $hook_name ] = $rebuilt[ $hook_name ];
-				}
-			}
-		}
+		do_action(
+			self::ACTION,
+			array(
+				'post_id' => (int) $post_id,
+				'context' => (string) $context,
+				'widgets' => array_values( $widgets ),
+			)
+		);
 	}
 
 	/**
@@ -435,7 +385,7 @@ class SiteOrigin_Panels_Markup_Removal {
 	private static function token_strings( $value, $strings = array(), $top = true ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( ! self::is_metadata( $key, $item ) ) {
+				if ( ! self::is_metadata( $key, $item, $top ) ) {
 					$strings = self::token_strings( $item, $strings, false );
 				}
 			}
@@ -512,16 +462,19 @@ class SiteOrigin_Panels_Markup_Removal {
 	}
 
 	/**
-	 * Whether a key holds widget metadata rather than content: `panels_info`,
-	 * or an `info` array, its older name. A string field named `info` is content.
+	 * Whether a key holds widget metadata rather than content: `panels_info`
+	 * anywhere, or, on the widget itself, an `info` array, its older name.
+	 * A string field named `info`, or an `info` array inside a widget's
+	 * content, is content.
 	 *
-	 * @param mixed $key  The array key.
-	 * @param mixed $item The value under it.
+	 * @param mixed $key          The array key.
+	 * @param mixed $item         The value under it.
+	 * @param bool  $widget_level Whether the key is on the widget itself.
 	 *
 	 * @return bool
 	 */
-	private static function is_metadata( $key, $item ) {
-		return $key === 'panels_info' || ( $key === 'info' && is_array( $item ) );
+	private static function is_metadata( $key, $item, $widget_level ) {
+		return $key === 'panels_info' || ( $widget_level && $key === 'info' && is_array( $item ) );
 	}
 
 	/**

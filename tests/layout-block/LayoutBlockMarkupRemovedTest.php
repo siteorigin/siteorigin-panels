@@ -482,15 +482,40 @@ class LayoutBlockMarkupRemovedTest extends TestCase {
 		$this->assertCount( 1, $this->reports );
 	}
 
-	public function test_a_throwing_listener_does_not_change_the_save() {
+	public function test_a_throwing_listener_fails_the_save_like_any_action() {
 		$blocks = array( $this->layout_block_of( array( $this->widget( 'w1', self::IFRAME ) ) ) );
-		$plain  = $this->layout_block()->sanitize_blocks( $blocks[0] );
 
 		$this->listener_throws = true;
-		$saved = $this->rest_save( $this->layout_block(), $blocks );
+		try {
+			$this->rest_save( $this->layout_block(), $blocks );
+			$this->fail( 'The listener exception must propagate.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'listener failed', $e->getMessage() );
+		}
 
 		$this->assertCount( 1, $this->reports, 'The listener ran.' );
-		$this->assertSame( json_encode( array( $plain ) ), $saved->post_content );
+	}
+
+	public function test_a_listener_exception_during_a_failing_save_keeps_the_save_exception_as_previous() {
+		$this->listener_throws = true;
+		try {
+			$this->rest_save(
+				$this->layout_block(),
+				array(
+					$this->layout_block_of(
+						array(
+							$this->widget( 'w1', self::IFRAME ),
+							$this->widget( 'w2', 'text', 'MarkupRemovedThrowing' ),
+						)
+					),
+				)
+			);
+			$this->fail( 'An exception must propagate.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'listener failed', $e->getMessage() );
+			$this->assertInstanceOf( \RuntimeException::class, $e->getPrevious() );
+			$this->assertSame( 'widget update failed', $e->getPrevious()->getMessage() );
+		}
 	}
 
 	public function test_an_ability_write_reports_its_block_index() {

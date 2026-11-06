@@ -299,16 +299,26 @@ class MarkupRemovalTest extends TestCase {
 		Removal::fire( '5', 'rest_pre_insert', array( 3 => $finding ) );
 	}
 
-	public function test_a_throwing_listener_cannot_escape_fire() {
+	public function test_a_throwing_listener_propagates_like_any_action() {
 		Actions\expectDone( Removal::ACTION )->once()->whenHappen(
 			function () {
 				throw new \RuntimeException( 'listener failed' );
 			}
 		);
 
-		Removal::fire( 5, 'ability', array( $this->finding( 0, 0, 'w1', null, 'page_builder' ) ) );
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'listener failed' );
 
-		$this->addToAssertionCount( 1 );
+		Removal::fire( 5, 'ability', array( $this->finding( 0, 0, 'w1', null, 'page_builder' ) ) );
+	}
+
+	public function test_an_info_array_inside_widget_content_is_content() {
+		$before = $this->widget( 'w1', 'plain' );
+		$before['settings'] = array( 'info' => array( 'embed' => '<iframe src=x></iframe>' ) );
+		$after = $this->widget( 'w1', 'plain' );
+		$after['settings'] = array( 'info' => array( 'embed' => '' ) );
+
+		$this->assertSame( 'w1', Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )[0]['widget_id'] );
 	}
 
 	/**
