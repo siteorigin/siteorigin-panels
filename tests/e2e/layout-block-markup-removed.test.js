@@ -197,13 +197,18 @@ test( 'M4: an ability write stopped by the pre-write hook still reports, and the
  * block comment as tags and breaks the comment; content saved through the editor,
  * serialize_blocks() or an integration never has that shape.
  */
+const SERIALIZE_ESCAPES = {
+	'\\\\': '\\u005c',
+	'--': '\\u002d\\u002d',
+	'<': '\\u003c',
+	'>': '\\u003e',
+	'&': '\\u0026',
+	'\\"': '\\u0022',
+};
+
 const serializedLayoutBlock = ( panelsData ) => {
-	const attributes = JSON.stringify( { panelsData } )
-		.replace( /--/g, '\\u002d\\u002d' )
-		.replace( /</g, '\\u003c' )
-		.replace( />/g, '\\u003e' )
-		.replace( /&/g, '\\u0026' )
-		.replace( /\\"/g, '\\u0022' );
+	// One left-to-right pass over the same table as serialize_block_attributes()'s strtr().
+	const attributes = JSON.stringify( { panelsData } ).replace( /\\\\|--|<|>|&|\\"/g, ( match ) => SERIALIZE_ESCAPES[ match ] );
 
 	return `<!-- wp:siteorigin-panels/layout-block ${ attributes } /-->`;
 };
