@@ -7,6 +7,8 @@
  *   any change to stored markup comes from Page Builder or WordPress.
  * - A listener on siteorigin_panels_layout_update_pre_write that records each
  *   call and passes, returns a WP_Error, or returns false.
+ * - A listener on siteorigin_panels_layout_block_markup_removed that records
+ *   each report and, when asked, throws after recording.
  * - REST routes to control the listener and read raw storage.
  */
 
@@ -88,6 +90,20 @@ add_filter(
 );
 
 add_action(
+	'siteorigin_panels_layout_block_markup_removed',
+	function ( $report ) {
+		$log   = get_option( 'panels_e2e_markup_removed_log', array() );
+		$log   = is_array( $log ) ? $log : array();
+		$log[] = $report;
+		update_option( 'panels_e2e_markup_removed_log', $log, false );
+
+		if ( get_option( 'panels_e2e_markup_removed_throws', 0 ) ) {
+			throw new RuntimeException( 'Thrown by the e2e markup-removed listener.' );
+		}
+	}
+);
+
+add_action(
 	'rest_api_init',
 	function () {
 		$permission = function () {
@@ -106,6 +122,7 @@ add_action(
 							'mode'          => get_option( 'panels_e2e_pre_write_mode', 'pass' ),
 							'log'           => array_values( (array) get_option( 'panels_e2e_pre_write_log', array() ) ),
 							'probe_renders' => (int) get_option( 'panels_e2e_probe_renders', 0 ),
+							'markup_removed' => array_values( (array) get_option( 'panels_e2e_markup_removed_log', array() ) ),
 						);
 					},
 				),
@@ -121,6 +138,8 @@ add_action(
 						update_option( 'panels_e2e_pre_write_mode', $mode, false );
 						update_option( 'panels_e2e_pre_write_log', array(), false );
 						update_option( 'panels_e2e_probe_renders', 0, false );
+						update_option( 'panels_e2e_markup_removed_log', array(), false );
+						update_option( 'panels_e2e_markup_removed_throws', $request->get_param( 'markup_removed_throws' ) ? 1 : 0, false );
 
 						if ( $request->has_param( 'deny_unfiltered_html' ) ) {
 							update_option( 'panels_e2e_deny_unfiltered_html', (int) $request->get_param( 'deny_unfiltered_html' ), false );

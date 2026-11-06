@@ -8,6 +8,7 @@ const config = require( 'siteorigin-tests-common/playwright/config' );
 // The other specs still run in parallel with them on CI.
 const LISTENER_SPECS = [
 	'**/abilities-mcp.test.js',
+	'**/layout-block-markup-removed.test.js',
 	'**/layout-update-pre-write.test.js',
 	'**/layout-update-structure.test.js',
 	'**/layout-update-unchanged-widgets.test.js',
