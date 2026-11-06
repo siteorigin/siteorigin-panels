@@ -273,8 +273,11 @@ test( 'M5: a listener that throws does not break the save', async () => {
 
 		const state = await probeState( admin );
 		expect( state.markup_removed ).toHaveLength( 1 );
-		// Later in the same save, the action no longer looks in progress.
-		expect( state.markup_removed_doing_after ).toBe( 0 );
+		// Later in the same save, no hook name is left on the current-filter
+		// stack: neither this action nor the REST filter it ran inside.
+		expect( state.markup_removed_stack_after ).toContain( 'rest_after_insert_post' );
+		expect( state.markup_removed_stack_after ).not.toContain( 'siteorigin_panels_layout_block_markup_removed' );
+		expect( state.markup_removed_stack_after ).not.toContain( 'rest_pre_insert_post' );
 
 		const raw = await rawStorage( admin, response.body.id );
 		expect( raw.blocks ).toHaveLength( 1 );
