@@ -80,6 +80,10 @@ add_filter(
 			$settings['home-page'] = true;
 		}
 
+		if ( isset( $_GET['panels_e2e_legacy_renderer'] ) ) {
+			$settings['legacy-layout'] = 'always';
+		}
+
 		return $settings;
 	}
 );
@@ -110,6 +114,7 @@ add_action(
 			'panels_e2e_wp_rocket_purges',
 			'panels_e2e_wp_rocket_purges_home',
 			'panels_e2e_wp_rocket_purges_widgets',
+			'siteorigin_widgets_active',
 		);
 
 		register_rest_route(

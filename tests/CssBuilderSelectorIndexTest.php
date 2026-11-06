@@ -447,4 +447,35 @@ class CssBuilderSelectorIndexTest extends TestCase {
 		$this->assertSame( '#abc', $first );
 		$this->assertSame( $first, $second );
 	}
+
+	/* ---- element_selector() gives the id that add_cell_css() and add_widget_css() print ---- */
+
+	public static function element_indexes() {
+		return array(
+			'integers'           => array( 12, 3, 1, 2 ),
+			'numeric strings'    => array( 12, '0', '0', '0' ),
+			'safe strings'       => array( 'gb42-6a6f097d9d775', 'myrow', '1', 'w' ),
+			'non-ASCII string'   => array( 12, 'über-row', 0, 0 ),
+			'unsafe strings'     => array( '</style><x>', 'a b', 'x{color:red}', "a\n" ),
+			'invalid UTF-8'      => array( "\xff\xfeab<c", 3, "a\xc3</style>", 0 ),
+		);
+	}
+
+	#[DataProvider( 'element_indexes' )]
+	public function test_element_selector_matches_the_cell_and_widget_ids( $li, $ri, $ci, $wi ) {
+		$red     = array( 'color' => 'red' );
+		$builder = new \SiteOrigin_Panels_Css_Builder();
+
+		$this->assertSame( $this->selector( 'add_cell_css', array( $li, $ri, $ci, '', $red ) ), $builder->element_selector( $li, $ri, $ci ) );
+		$this->assertSame( $this->selector( 'add_widget_css', array( $li, $ri, $ci, $wi, '', $red ) ), $builder->element_selector( $li, $ri, $ci, $wi ) );
+	}
+
+	public function test_element_selector_cleans_every_index_of_one_builder_on_every_call() {
+		$builder = new \SiteOrigin_Panels_Css_Builder();
+
+		for ( $call = 0; $call < 3; $call++ ) {
+			$this->assertSame( '#pgc-12-ab-1', $builder->element_selector( 12, 'a b', 1 ) );
+			$this->assertSame( '#panel-12-3-1-xcolorred', $builder->element_selector( 12, 3, 1, 'x{color:red}' ) );
+		}
+	}
 }
