@@ -14,3 +14,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 if ( ! class_exists( 'SiteOrigin_Panels_Admin', false ) ) {
 	require __DIR__ . '/../inc/admin.php';
 }
+
+// compat/layout-block.php reports removed markup through this class; tests
+// that load the compat file directly have no autoloader to find it.
+require_once __DIR__ . '/../inc/markup-removal.php';

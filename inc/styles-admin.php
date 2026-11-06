@@ -1,6 +1,12 @@
 <?php
 
 class SiteOrigin_Panels_Styles_Admin {
+	/**
+	 * @var callable|null Read-only observer for the next sanitize_all() call
+	 *                    only. See observe_next_sanitize_all().
+	 */
+	private $migration_observer = null;
+
 	public function __construct() {
 		add_action( 'wp_ajax_so_panels_style_form', array( $this, 'action_style_form' ) );
 
@@ -623,12 +629,36 @@ class SiteOrigin_Panels_Styles_Admin {
 	}
 
 	/**
+	 * Watch the next sanitize_all() call, read-only.
+	 *
+	 * The observer is called once with the layout as the
+	 * `siteorigin_panels_data_migration` filter returned it, before the style
+	 * sanitizers run. The next sanitize_all() call takes it and clears it, so
+	 * no other call sees it. Pass null to clear it. Used by the Layout Block
+	 * markup-removed report.
+	 *
+	 * @internal
+	 *
+	 * @param callable|null $observer function( $panels_data ).
+	 */
+	public function observe_next_sanitize_all( $observer ) {
+		$this->migration_observer = is_callable( $observer ) ? $observer : null;
+	}
+
+	/**
 	 * Sanitize the style fields in panels_data
 	 *
 	 * @return mixed
 	 */
 	public function sanitize_all( $panels_data ) {
+		// Take the observer once, so a nested call never sees it.
+		$observer = $this->migration_observer;
+		$this->migration_observer = null;
+
 		$panels_data = apply_filters( 'siteorigin_panels_data_migration', $panels_data );
+		if ( $observer !== null ) {
+			call_user_func( $observer, $panels_data );
+		}
 		$panels_data = $this->remove_invalid_styles( $panels_data );
 
 		if ( ! empty( $panels_data['widgets'] ) ) {

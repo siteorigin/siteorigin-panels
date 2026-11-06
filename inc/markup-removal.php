@@ -258,7 +258,9 @@ class SiteOrigin_Panels_Markup_Removal {
 				'block_index' => $block_index,
 				'widget'      => self::widget_key( $entry['key'] ),
 				'widget_id'   => self::widget_id( $entry['id'] ),
-				'class'       => self::widget_class( $entry['widget'] ),
+				// The class as submitted: the save escapes namespace backslashes
+				// in the stored copy (SiteOrigin_Panels_Admin::process_raw_widgets()).
+				'class'       => self::widget_class( $before_by_id[ $entry['id'] ]['widget'] ),
 				'source'      => $source,
 			);
 		}
