@@ -219,13 +219,20 @@ add_action(
 						kses_init();
 					}
 
-					global $wp_current_filter;
+					global $wp_current_filter, $wp_filter;
+
+					// Each hook's own iteration state: false when it is not running.
+					$priorities = array();
+					foreach ( array( 'siteorigin_panels_layout_block_markup_removed', 'panels_e2e_markup_removed_inner' ) as $hook_name ) {
+						$priorities[ $hook_name ] = isset( $wp_filter[ $hook_name ] ) ? $wp_filter[ $hook_name ]->current_priority() : false;
+					}
 
 					return array(
-						'id'    => $ids[0],
-						'ids'   => $ids,
+						'id'         => $ids[0],
+						'ids'        => $ids,
 						// The current-filter stack after the saves, inside this callback.
-						'stack' => array_values( (array) $wp_current_filter ),
+						'stack'      => array_values( (array) $wp_current_filter ),
+						'priorities' => $priorities,
 					);
 				},
 			)

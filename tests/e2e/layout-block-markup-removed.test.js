@@ -275,6 +275,11 @@ for ( const [ how, label ] of [ [ 1, 'throws' ], [ 2, 'runs a hook that throws' 
 			expect( response.body.stack ).not.toContain( 'siteorigin_panels_layout_block_markup_removed' );
 			expect( response.body.stack ).not.toContain( 'panels_e2e_markup_removed_inner' );
 			expect( response.body.stack ).not.toContain( 'wp_insert_post_data' );
+			// Neither hook's own iteration state is left mid-run.
+			expect( response.body.priorities ).toStrictEqual( {
+				siteorigin_panels_layout_block_markup_removed: false,
+				panels_e2e_markup_removed_inner: false,
+			} );
 
 			const state = await probeState( admin );
 			expect( state.markup_removed ).toHaveLength( 2 );
