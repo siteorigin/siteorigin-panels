@@ -36,7 +36,10 @@ class SiteOrigin_Panels_Markup_Removal {
 	/**
 	 * Count the elements and attributes in a value.
 	 *
-	 * Walks arrays and skips every `panels_info` key at any depth. Each
+	 * Walks arrays and skips widget metadata at any depth: every `panels_info`
+	 * key, and an `info` key holding an array (the older name for panels_info,
+	 * which SiteOrigin_Panels_Admin::process_raw_widgets() moves to
+	 * panels_info). Each
 	 * string that contains `<` is scanned left to right: comments and CDATA
 	 * sections are skipped whole, the content of a raw-text or RCDATA element
 	 * is skipped up to its end tag, and every opening or self-closing tag adds
@@ -51,7 +54,7 @@ class SiteOrigin_Panels_Markup_Removal {
 	public static function inventory( $value, $counts = array() ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( $key === 'panels_info' ) {
+				if ( self::is_metadata( $key, $item ) ) {
 					continue;
 				}
 				$counts = self::inventory( $item, $counts );
@@ -387,7 +390,9 @@ class SiteOrigin_Panels_Markup_Removal {
 			return;
 		}
 
-		$interrupted       = array_unique( array_slice( $wp_current_filter, $depth ) );
+		// WordPress runs `all` callbacks inside do_action() without putting `all`
+		// on the stack, so a throw from one leaves that hook mid-run as well.
+		$interrupted       = array_unique( array_merge( array_slice( $wp_current_filter, $depth ), array( 'all' ) ) );
 		$wp_current_filter = array_slice( $wp_current_filter, 0, $depth );
 
 		if ( ! class_exists( 'WP_Hook', false ) ) {
@@ -421,7 +426,7 @@ class SiteOrigin_Panels_Markup_Removal {
 	/**
 	 * For each token, the sorted strings in a value that hold it.
 	 *
-	 * @param mixed $value  A widget or any part of one; panels_info is skipped.
+	 * @param mixed $value  A widget or any part of one; metadata is skipped (see is_metadata()).
 	 * @param array $strings Token => list of strings, to add to.
 	 * @param bool  $top     Whether this is the outermost call, which sorts the lists.
 	 *
@@ -430,7 +435,7 @@ class SiteOrigin_Panels_Markup_Removal {
 	private static function token_strings( $value, $strings = array(), $top = true ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $item ) {
-				if ( $key !== 'panels_info' ) {
+				if ( ! self::is_metadata( $key, $item ) ) {
 					$strings = self::token_strings( $item, $strings, false );
 				}
 			}
@@ -504,6 +509,19 @@ class SiteOrigin_Panels_Markup_Removal {
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * Whether a key holds widget metadata rather than content: `panels_info`,
+	 * or an `info` array, its older name. A string field named `info` is content.
+	 *
+	 * @param mixed $key  The array key.
+	 * @param mixed $item The value under it.
+	 *
+	 * @return bool
+	 */
+	private static function is_metadata( $key, $item ) {
+		return $key === 'panels_info' || ( $key === 'info' && is_array( $item ) );
 	}
 
 	/**

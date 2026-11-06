@@ -1515,7 +1515,8 @@ class SiteOrigin_Panels_Admin {
 	 * Watch the next process_raw_widgets() call, read-only.
 	 *
 	 * The observer is called once per widget with the widget's key, the widget
-	 * as it entered and the widget as it left, both with panels_info. The next
+	 * as it entered (with panels_info, or with the older info key for a legacy
+	 * widget) and the widget as it left (always with panels_info). The next
 	 * process_raw_widgets() call takes it and clears it, so no other call sees
 	 * it. Pass null to clear it. Used by the Layout Block markup-removed report.
 	 *

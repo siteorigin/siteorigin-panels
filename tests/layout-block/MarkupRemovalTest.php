@@ -181,6 +181,22 @@ class MarkupRemovalTest extends TestCase {
 		);
 	}
 
+	public function test_markup_in_legacy_info_moved_to_panels_info_does_not_report() {
+		$before = array( 'content' => 'plain', 'info' => array( 'class' => 'WP_Widget_Custom_HTML', 'widget_id' => 'legacy', 'label' => '<b>L</b>' ) );
+		$after  = $this->widget( 'legacy', 'plain', array( 'label' => '<b>L</b>' ) );
+
+		$this->assertSame( array(), Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' ) );
+	}
+
+	public function test_a_string_field_named_info_is_content() {
+		$before = $this->widget( 'w1', 'plain' );
+		$before['info'] = '<iframe src=x></iframe>';
+		$after = $this->widget( 'w1', 'plain' );
+		$after['info'] = '';
+
+		$this->assertSame( 'w1', Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )[0]['widget_id'] );
+	}
+
 	public function test_identified_and_unidentified_losses_give_a_named_and_a_null_finding() {
 		$unidentified = $this->widget( '', '<iframe src=x></iframe>' );
 		$before = array( array( 0 => $this->widget( 'w1', '<iframe src=x></iframe>' ), 1 => $unidentified ) );
