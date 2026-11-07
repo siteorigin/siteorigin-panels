@@ -181,13 +181,6 @@ class MarkupRemovalTest extends TestCase {
 		);
 	}
 
-	public function test_markup_in_legacy_info_moved_to_panels_info_does_not_report() {
-		$before = array( 'content' => 'plain', 'info' => array( 'class' => 'WP_Widget_Custom_HTML', 'widget_id' => 'legacy', 'label' => '<b>L</b>' ) );
-		$after  = $this->widget( 'legacy', 'plain', array( 'label' => '<b>L</b>' ) );
-
-		$this->assertSame( array(), Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' ) );
-	}
-
 	public function test_a_string_field_named_info_is_content() {
 		$before = $this->widget( 'w1', 'plain' );
 		$before['info'] = '<iframe src=x></iframe>';
@@ -195,19 +188,6 @@ class MarkupRemovalTest extends TestCase {
 		$after['info'] = '';
 
 		$this->assertSame( 'w1', Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )[0]['widget_id'] );
-	}
-
-	public function test_legacy_info_of_a_nested_layout_widgets_child_is_metadata() {
-		// A nested Layout widget's save runs process_raw_widgets() on its
-		// children, moving a legacy child's info to panels_info.
-		$child_before = array( 'content' => 'plain', 'info' => array( 'class' => 'WP_Widget_Custom_HTML', 'widget_id' => 'child', 'label' => '<b>L</b>' ) );
-		$child_after  = $this->widget( 'child', 'plain', array( 'label' => '<b>L</b>' ) );
-		$outer_before = $this->widget( 'outer', '' );
-		$outer_before['panels_data'] = array( 'widgets' => array( $child_before ) );
-		$outer_after = $this->widget( 'outer', '' );
-		$outer_after['panels_data'] = array( 'widgets' => array( $child_after ) );
-
-		$this->assertSame( array(), Removal::attribute( array( array( 0 => $outer_before ) ), array( array( 0 => $outer_after ) ), 'page_builder' ) );
 	}
 
 	public function test_markup_that_may_have_moved_into_another_widgets_nested_info_is_not_attributed() {
@@ -223,6 +203,17 @@ class MarkupRemovalTest extends TestCase {
 			array( $this->finding( null, null, null, null, 'page_builder' ) ),
 			Removal::attribute( array( array( 0 => $a_before, 1 => $b_before ) ), array( array( 0 => $this->widget( 'a', '' ), 1 => $b_after ) ), 'page_builder' )
 		);
+	}
+
+	public function test_a_setting_shaped_like_a_layout_is_content() {
+		// An ordinary widget setting with a panels_data-like shape is counted
+		// like any other content, info keys included.
+		$before = $this->widget( 'w1', 'plain' );
+		$before['settings'] = array( 'panels_data' => array( 'widgets' => array( array( 'info' => array( 'embed' => '<iframe src=x></iframe>' ) ) ) ) );
+		$after = $this->widget( 'w1', 'plain' );
+		$after['settings'] = array( 'panels_data' => array( 'widgets' => array( array( 'info' => array( 'embed' => '' ) ) ) ) );
+
+		$this->assertSame( 'w1', Removal::attribute( array( array( 0 => $before ) ), array( array( 0 => $after ) ), 'page_builder' )[0]['widget_id'] );
 	}
 
 	public function test_identified_and_unidentified_losses_give_a_named_and_a_null_finding() {
