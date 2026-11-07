@@ -38,8 +38,11 @@ class SiteOrigin_Panels_Markup_Removal {
 	 *
 	 * Walks arrays and skips every `panels_info` key at any depth: it holds
 	 * widget metadata (class, position, label, style), not content. Everything
-	 * else is counted, including an older `info` key, which only ever held a
-	 * class and a position, never markup. Each
+	 * else is counted. attribute() first moves a widget's older `info`
+	 * metadata to panels_info, as the save does; an `info` key in content is
+	 * counted. Known limit: a legacy child of a nested Layout widget is not
+	 * normalised, so markup in its `info` metadata would read as removed;
+	 * legacy metadata only ever held a class and a position. Each
 	 * string that contains `<` is scanned left to right: comments and CDATA
 	 * sections are skipped whole, the content of a raw-text or RCDATA element
 	 * is skipped up to its end tag, and every opening or self-closing tag adds
@@ -424,6 +427,16 @@ class SiteOrigin_Panels_Markup_Removal {
 			foreach ( $widgets as $key => $widget ) {
 				if ( ! is_array( $widget ) ) {
 					continue;
+				}
+				// The same move SiteOrigin_Panels_Admin::process_raw_widgets() makes:
+				// a widget with no panels_info array keeps its metadata under the
+				// older info key, which the save stores as panels_info.
+				if (
+					( ! isset( $widget['panels_info'] ) || ! is_array( $widget['panels_info'] ) ) &&
+					isset( $widget['info'] ) && is_array( $widget['info'] )
+				) {
+					$widget['panels_info'] = $widget['info'];
+					unset( $widget['info'] );
 				}
 				$info = self::widget_info( $widget );
 				$id   = isset( $info['widget_id'] ) && is_string( $info['widget_id'] ) && $info['widget_id'] !== ''
