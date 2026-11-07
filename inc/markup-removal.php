@@ -325,12 +325,13 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * filtering still reports, because the filtering happened.
 	 *
 	 * Not covered: block widget areas, classic (meta) layouts, attachment posts,
-	 * and writes that bypass wp_insert_post(). Nor are edits made in the block
-	 * editor's Layout Block: on each change it sends the layout to the
-	 * so_panels_builder_content_json request, which runs each widget's
-	 * update(), and keeps the filtered layout it returns, so the save that
-	 * follows has nothing left to remove. Identifiers only: no markup and no
-	 * field values are passed.
+	 * and writes that bypass wp_insert_post(). Nor is markup removed while
+	 * editing a Layout Block in the block editor: on each change the block
+	 * sends its layout to the so_panels_builder_content_json request, which
+	 * runs each widget's update(), and keeps the filtered layout it returns.
+	 * What the save itself then removes, such as markup the kses floor strips,
+	 * is still reported. Identifiers only: no markup and no field values are
+	 * passed.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
