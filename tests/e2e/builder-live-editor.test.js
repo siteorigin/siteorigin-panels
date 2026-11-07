@@ -555,8 +555,10 @@ const expectErrorPanel = async ( page, reason, timeout = 30000 ) => {
 };
 
 /**
- * In a window too short for the panel, everything in it can still be reached by scrolling: the title is not
- * clipped above the top edge, and Retry is inside the window once the panel is scrolled to the bottom. Then
+ * In a window too short for the panel, everything in it can still be reached by scrolling. Content that
+ * overflows at the top of a scroll container cannot be scrolled to, so the title must not start above the
+ * panel's top edge; that is the check that fails for centred overflow. Content that overflows at the bottom
+ * is always reachable, so Retry's position at the bottom only states that the panel scrolls that far. Then
  * Retry works (the blocking cookie is cleared first, as in E1, or Retry would get another 403).
  */
 const expectErrorPanelReachable = async ( page, context ) => {
@@ -571,6 +573,7 @@ const expectErrorPanelReachable = async ( page, context ) => {
 	} );
 	const panelBox = await panel.boundingBox();
 	const titleBox = await panel.locator( '.so-preview-error-title' ).boundingBox();
+	expect( titleBox, 'the title is rendered' ).not.toBeNull();
 	expect( titleBox.y, 'the title is not clipped above the panel' ).toBeGreaterThanOrEqual( panelBox.y );
 
 	await panel.evaluate( ( el ) => {
