@@ -12,6 +12,12 @@ class SiteOrigin_Panels_Admin {
 	private $in_save_post;
 
 	/**
+	 * @var callable|null Read-only observer for the next process_raw_widgets()
+	 *                    call only. See observe_next_process_raw_widgets().
+	 */
+	private $widget_observer = null;
+
+	/**
 	 * @var bool Whether save_home_page() wrote the home page layout during this request.
 	 */
 	private $home_page_saved = false;
@@ -1404,6 +1410,11 @@ class SiteOrigin_Panels_Admin {
 	 * @return array
 	 */
 	public function process_raw_widgets( $widgets, $old_widgets = array(), $escape_classes = false, $force = false, $structural_only = false ) {
+		// Take the observer once, so a nested call (a Layout widget's own
+		// update(), or a save started from inside one) never sees it.
+		$observer = $this->widget_observer;
+		$this->widget_observer = null;
+
 		if ( empty( $widgets ) || ! is_array( $widgets ) ) {
 			return array();
 		}
@@ -1425,10 +1436,16 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			if ( is_array( $widget ) ) {
-				$info = (array) ( is_array( $widget['panels_info'] ) ? $widget['panels_info'] : $widget['info'] );
+				$info = (array) (
+					isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] )
+						? $widget['panels_info']
+						: ( isset( $widget['info'] ) ? $widget['info'] : array() )
+				);
 			} else {
 				$info = array();
 			}
+			// The widget as it entered, older `info` key included, so its identity is kept.
+			$observed_input = $observer !== null ? $widget : null;
 			unset( $widget['info'] );
 
 			$info[ 'class' ] = apply_filters( 'siteorigin_panels_widget_class', $info[ 'class' ] );
@@ -1485,9 +1502,30 @@ class SiteOrigin_Panels_Admin {
 			}
 
 			$widget['panels_info'] = $info;
+
+			if ( $observer !== null ) {
+				call_user_func( $observer, $i, $observed_input, $widget );
+			}
 		}
 
 		return $widgets;
+	}
+
+	/**
+	 * Watch the next process_raw_widgets() call, read-only.
+	 *
+	 * The observer is called once per widget with the widget's key, the widget
+	 * as it entered (with panels_info, or with the older info key for a legacy
+	 * widget) and the widget as it left (always with panels_info). The next
+	 * process_raw_widgets() call takes it and clears it, so no other call sees
+	 * it. Pass null to clear it. Used by the Layout Block markup-removed report.
+	 *
+	 * @internal
+	 *
+	 * @param callable|null $observer function( $key, $input, $output ).
+	 */
+	public function observe_next_process_raw_widgets( $observer ) {
+		$this->widget_observer = is_callable( $observer ) ? $observer : null;
 	}
 
 	/**

@@ -46,6 +46,27 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	private $layout_update_pre_write = null;
 
 	/**
+	 * Open save attempts, innermost last, for the markup-removed report (#1454).
+	 *
+	 * Each entry point that sanitizes Layout Blocks (server_side_validation(),
+	 * validate_post_data(), sanitize_block_for_layout_update()) opens one, and
+	 * fires its findings when it closes, on success or on a throw. Each is an
+	 * object: record_depth, ordinal, block_index, findings, pending.
+	 *
+	 * @var array<int,object>
+	 */
+	private $attempts = array();
+
+	/**
+	 * How many sanitize_block() calls are running. An attempt records only the
+	 * blocks sanitized at its own depth, so a nested save started from a filter
+	 * or a widget update() is never credited to the outer block.
+	 *
+	 * @var int
+	 */
+	private $sanitize_depth = 0;
+
+	/**
 	 * Get the singleton instance
 	 *
 	 * @return SiteOrigin_Panels_Compat_Layout_Block
@@ -113,7 +134,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// origin-untrusted write (sanitize_block_untrusted() sets
 		// force_kses_floor), which always sanitizes regardless of the memo so
 		// the forced floor can never be skipped.
-		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 1 );
+		add_filter( 'wp_insert_post_data', array( $this, 'validate_post_data' ), 10, 3 );
 	}
 
 	public function register_layout_block() {
@@ -306,9 +327,24 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				}
 			}
 
+			// Report only (#1454): when this block belongs to an open save
+			// attempt, keep a copy of the widgets as they enter Page Builder's
+			// filtering, after the AI pre-save filter, to compare with each
+			// completed stage below. Nothing here changes what is stored.
+			$attempt  = $this->recording_attempt();
+			$snapshot = null;
+			if ( $attempt !== null && isset( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ) {
+				$snapshot         = $panels_data['widgets'];
+				$attempt->pending = array(
+					'before'  => array(),
+					'after'   => array(),
+					'ordinal' => $attempt->ordinal,
+				);
+			}
+
 			// Save-time validation (sanitize_block()): strict, capability-gated
 			// sanitize.
-			$panels_data = $this->sanitize_panels_data( $panels_data, $restored );
+			$panels_data = $this->sanitize_panels_data( $panels_data, $restored, $snapshot !== null ? $attempt : null );
 
 			// current_user_can() runs in the real save-time request context
 			// (the author's session), which is the only place capability-gated
@@ -336,6 +372,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				}
 			}
 
+			// Page Builder's filtering of this block is complete: record what it
+			// removed, replacing the provisional per-widget record.
+			$filtered_widgets = null;
+			if ( $snapshot !== null ) {
+				$filtered_widgets = isset( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ? $panels_data['widgets'] : array();
+				$attempt->pending = null;
+				$this->record_removed( $attempt, $snapshot, $filtered_widgets, 'page_builder', $attempt->ordinal );
+			}
+
 			// Layout-update ability write: settle the layout into the form the
 			// post update will store, check that the builder can load that
 			// form, then let an add-on stop the write. All three run before
@@ -348,6 +393,14 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 				}
 
 				$panels_data = $this->final_stored_panels_data( $panels_data );
+
+				// Settling runs the post save filters (pre_post_content,
+				// content_save_pre), so what it removed is theirs, not Page
+				// Builder's.
+				if ( $filtered_widgets !== null ) {
+					$settled_widgets = isset( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ? $panels_data['widgets'] : array();
+					$this->record_removed( $attempt, $filtered_widgets, $settled_widgets, 'post_save_filters', $attempt->ordinal );
+				}
 
 				// For a user without unfiltered_html, WordPress kses runs over
 				// the post content. A kept widget it would change or strip
@@ -564,8 +617,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * @param array $restored    Key => widget kept from storage. These skip
 	 *                           process_raw_widgets(); every other widget is
 	 *                           processed and written back at its own key.
+	 * @param object|null $attempt The open save attempt to keep a provisional
+	 *                           record in, or null. The record only reads the
+	 *                           widgets; it never changes them.
 	 */
-	private function sanitize_panels_data( $panels_data, $restored = array() ) {
+	private function sanitize_panels_data( $panels_data, $restored = array(), $attempt = null ) {
 		if ( ! is_array( $panels_data ) ) {
 			return $panels_data;
 		}
@@ -574,18 +630,65 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// re-save and never persist into stored panels_data.
 		unset( $panels_data['sanitize_signature'] );
 
-		if ( ! empty( $restored ) && is_array( $panels_data['widgets'] ) ) {
-			$processed = SiteOrigin_Panels_Admin::single()->process_raw_widgets( array_diff_key( $panels_data['widgets'], $restored ), false, true );
-			foreach ( $processed as $key => $widget ) {
-				$panels_data['widgets'][ $key ] = $widget;
-			}
-			foreach ( $restored as $key => $widget ) {
-				$panels_data['widgets'][ $key ] = $widget;
-			}
-		} else {
-			$panels_data['widgets'] = SiteOrigin_Panels_Admin::single()->process_raw_widgets( $panels_data['widgets'], false, true );
+		$admin = SiteOrigin_Panels_Admin::single();
+		$entry_widgets = isset( $panels_data['widgets'] ) && is_array( $panels_data['widgets'] ) ? $panels_data['widgets'] : array();
+
+		// Provisional record (#1454): each widget's input and output as its
+		// update() completes, so a later throw still reports the widgets that
+		// were done. Only the next process_raw_widgets() call sees the observer.
+		// A replaced admin class without the method simply records nothing
+		// provisional; stage (a) still reports.
+		$observe_widgets = $attempt !== null && method_exists( $admin, 'observe_next_process_raw_widgets' );
+		if ( $observe_widgets ) {
+			$admin->observe_next_process_raw_widgets(
+				function ( $key, $input, $output ) use ( $attempt ) {
+					$attempt->pending['before'][ $key ] = $input;
+					$attempt->pending['after'][ $key ]  = $output;
+				}
+			);
 		}
-		$panels_data = SiteOrigin_Panels_Styles_Admin::single()->sanitize_all( $panels_data );
+
+		try {
+			if ( ! empty( $restored ) && is_array( $panels_data['widgets'] ) ) {
+				$processed = $admin->process_raw_widgets( array_diff_key( $panels_data['widgets'], $restored ), false, true );
+				foreach ( $processed as $key => $widget ) {
+					$panels_data['widgets'][ $key ] = $widget;
+				}
+				foreach ( $restored as $key => $widget ) {
+					$panels_data['widgets'][ $key ] = $widget;
+				}
+			} else {
+				$panels_data['widgets'] = $admin->process_raw_widgets( $panels_data['widgets'], false, true );
+			}
+		} finally {
+			if ( $observe_widgets ) {
+				$admin->observe_next_process_raw_widgets( null );
+			}
+		}
+
+		$styles = SiteOrigin_Panels_Styles_Admin::single();
+		$observe_migration = $attempt !== null && method_exists( $styles, 'observe_next_sanitize_all' );
+		if ( $attempt !== null ) {
+			$attempt->pending['before'] = $entry_widgets;
+			$attempt->pending['after']  = is_array( $panels_data['widgets'] ) ? $panels_data['widgets'] : array();
+		}
+		if ( $observe_migration ) {
+			// The data migration filter inside sanitize_all() can change
+			// widgets before the style sanitizers run.
+			$styles->observe_next_sanitize_all(
+				function ( $migrated ) use ( $attempt ) {
+					$attempt->pending['after'] = isset( $migrated['widgets'] ) && is_array( $migrated['widgets'] ) ? $migrated['widgets'] : array();
+				}
+			);
+		}
+
+		try {
+			$panels_data = $styles->sanitize_all( $panels_data );
+		} finally {
+			if ( $observe_migration ) {
+				$styles->observe_next_sanitize_all( null );
+			}
+		}
 
 		return $panels_data;
 	}
@@ -714,8 +817,18 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $prepared_post;
 		}
 
-		foreach( $blocks as &$block ) {
-			$block = $this->sanitize_blocks( $block );
+		$this->open_attempt();
+		try {
+			foreach( $blocks as &$block ) {
+				$block = $this->sanitize_blocks( $block );
+			}
+			unset( $block );
+		} finally {
+			SiteOrigin_Panels_Markup_Removal::fire(
+				isset( $prepared_post->ID ) ? (int) $prepared_post->ID : 0,
+				'rest_pre_insert',
+				$this->close_attempt()
+			);
 		}
 
 		$prepared_post->post_content = serialize_blocks( $blocks );
@@ -810,10 +923,16 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 	 * tag-free panelsData strings is undone before the memo check (#1377, see
 	 * repair_core_kses_ampersands()).
 	 *
-	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * Also reports markup removed from Layout Blocks, by the post save filters
+	 * and by this pass, through siteorigin_panels_layout_block_markup_removed
+	 * (see SiteOrigin_Panels_Markup_Removal::fire()).
+	 *
+	 * @param array $data                Slashed, processed post data about to be inserted/updated.
+	 * @param array $postarr             Sanitized post data; its ID is 0 for a new post.
+	 * @param array $unsanitized_postarr Slashed post data as passed to wp_insert_post().
 	 * @return array The (possibly modified) $data to actually persist.
 	 */
-	public function validate_post_data( $data ) {
+	public function validate_post_data( $data, $postarr = array(), $unsanitized_postarr = array() ) {
 		if ( ! empty( $data['post_type'] ) && $data['post_type'] === 'revision' ) {
 			// Revisions AND autosaves are both nested wp_insert_post() calls
 			// with post_type 'revision', fired on the same request as the
@@ -823,6 +942,105 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			return $data;
 		}
 
+		$post_id = is_array( $postarr ) && isset( $postarr['ID'] ) ? (int) $postarr['ID'] : 0;
+
+		// Report only (#1454): what the save filters removed before this
+		// check, then what Page Builder removes below. Both are fired when
+		// this call ends, whichever return it takes.
+		$this->open_attempt();
+		try {
+			$this->record_post_save_filter_removals( $data, $unsanitized_postarr );
+
+			return $this->sanitize_post_data( $data );
+		} finally {
+			SiteOrigin_Panels_Markup_Removal::fire( $post_id, 'wp_insert_post_data', $this->close_attempt() );
+		}
+	}
+
+	/**
+	 * Record markup that was in the content passed to wp_insert_post() and
+	 * is missing from the content that reached validate_post_data().
+	 *
+	 * Between the two, WordPress runs the post save filters (pre_post_content,
+	 * content_save_pre, with core kses for a user without unfiltered_html)
+	 * and any earlier wp_insert_post_data callback. On a REST or ability save
+	 * the submitted content is Page Builder's own output, so this sees only
+	 * what was removed after Page Builder. It runs before the early returns
+	 * below, so a post whose only Layout Block was removed is still measured.
+	 *
+	 * @param array $data                The post data reaching this filter (slashed).
+	 * @param array $unsanitized_postarr The post data passed to wp_insert_post() (slashed).
+	 */
+	private function record_post_save_filter_removals( $data, $unsanitized_postarr ) {
+		if (
+			! is_array( $unsanitized_postarr ) ||
+			! isset( $unsanitized_postarr['post_content'] ) ||
+			! is_string( $unsanitized_postarr['post_content'] )
+		) {
+			return;
+		}
+
+		$submitted = wp_unslash( $unsanitized_postarr['post_content'] );
+		// A cheap gate before parsing: any content that names a Layout Block.
+		if ( strpos( $submitted, 'layout-block' ) === false ) {
+			return;
+		}
+
+		$incoming = isset( $data['post_content'] ) && is_string( $data['post_content'] ) ? wp_unslash( $data['post_content'] ) : '';
+		if ( $submitted === $incoming ) {
+			return;
+		}
+
+		$attempt = end( $this->attempts );
+		if ( $attempt === false ) {
+			return;
+		}
+
+		$found = SiteOrigin_Panels_Markup_Removal::attribute(
+			$this->layout_block_widget_lists( parse_blocks( $submitted ) ),
+			$incoming === '' ? array() : $this->layout_block_widget_lists( parse_blocks( $incoming ) ),
+			'post_save_filters'
+		);
+		if ( ! empty( $found ) ) {
+			$attempt->findings = array_merge( $attempt->findings, $found );
+		}
+	}
+
+	/**
+	 * Each Layout Block's widgets, in document order, nested and empty
+	 * blocks included, matching the ordinal sanitize_blocks() counts.
+	 *
+	 * @param array $blocks Parsed blocks.
+	 *
+	 * @return array List of widget maps.
+	 */
+	private function layout_block_widget_lists( $blocks ) {
+		$lists = array();
+		if ( ! is_array( $blocks ) ) {
+			return $lists;
+		}
+
+		foreach ( $blocks as $block ) {
+			if ( ! is_array( $block ) ) {
+				continue;
+			}
+			foreach ( $this->find_layout_block( $block ) as $layout_block ) {
+				$lists[] = isset( $layout_block['attrs']['panelsData']['widgets'] ) && is_array( $layout_block['attrs']['panelsData']['widgets'] )
+					? $layout_block['attrs']['panelsData']['widgets']
+					: array();
+			}
+		}
+
+		return $lists;
+	}
+
+	/**
+	 * The wp_insert_post_data sanitize pass of validate_post_data().
+	 *
+	 * @param array $data Slashed, processed post data about to be inserted/updated.
+	 * @return array The (possibly modified) $data to actually persist.
+	 */
+	private function sanitize_post_data( $data ) {
 		if ( empty( $data['post_content'] ) ) {
 			return $data;
 		}
@@ -995,6 +1213,7 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			! empty( $block['blockName'] ) &&
 			$block['blockName'] === 'siteorigin-panels/layout-block'
 		) {
+				$this->advance_attempt_ordinal();
 				$block = $this->sanitize_block( $block );
 		}
 
@@ -1056,9 +1275,11 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		// flipping the OUTER call back to the render branch mid-save.
 		$previous_return_layout = $this->return_layout;
 		$this->return_layout = false;
+		$this->sanitize_depth++;
 		try {
 			$block['attrs'] = $this->render_layout_block( $block['attrs'] );
 		} finally {
+			$this->sanitize_depth--;
 			$this->return_layout = $previous_return_layout;
 		}
 		unset( $block['innerHTML'] );
@@ -1087,6 +1308,88 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 		}
 
 		return $block;
+	}
+
+	/**
+	 * Open a save attempt for the markup-removed report.
+	 *
+	 * @param int|null $block_index The ability's layout-get block_index, or
+	 *                              null. With a block_index there is no
+	 *                              document walk, so the ordinal stays null.
+	 */
+	private function open_attempt( $block_index = null ) {
+		$this->attempts[] = (object) array(
+			// The depth of the sanitize_block() calls this entry point makes.
+			'record_depth' => $this->sanitize_depth + 1,
+			'ordinal'      => $block_index === null ? -1 : null,
+			'block_index'  => $block_index === null ? null : (int) $block_index,
+			'findings'     => array(),
+			'pending'      => null,
+		);
+	}
+
+	/**
+	 * Close the innermost attempt and return its findings, including the
+	 * provisional record of a block whose filtering a throw interrupted.
+	 *
+	 * @return array Findings for SiteOrigin_Panels_Markup_Removal::fire().
+	 */
+	private function close_attempt() {
+		$attempt = array_pop( $this->attempts );
+		if ( $attempt === null ) {
+			return array();
+		}
+
+		if ( ! empty( $attempt->pending ) ) {
+			$this->record_removed( $attempt, $attempt->pending['before'], $attempt->pending['after'], 'page_builder', $attempt->pending['ordinal'] );
+			$attempt->pending = null;
+		}
+
+		return $attempt->findings;
+	}
+
+	/**
+	 * The attempt that records the block being saved now, or null.
+	 *
+	 * @return object|null
+	 */
+	private function recording_attempt() {
+		$attempt = end( $this->attempts );
+
+		return $attempt !== false && $attempt->record_depth === $this->sanitize_depth ? $attempt : null;
+	}
+
+	/**
+	 * Count the Layout Block the entry point's own walk is about to sanitize.
+	 * A walk started from inside a save runs deeper and leaves it alone.
+	 */
+	private function advance_attempt_ordinal() {
+		$attempt = end( $this->attempts );
+		if ( $attempt !== false && $attempt->ordinal !== null && $this->sanitize_depth === $attempt->record_depth - 1 ) {
+			$attempt->ordinal++;
+		}
+	}
+
+	/**
+	 * Add what one comparison found to an attempt.
+	 *
+	 * @param object   $attempt The attempt.
+	 * @param array    $before  Widgets before the stage.
+	 * @param array    $after   Widgets after it.
+	 * @param string   $source  'page_builder' or 'post_save_filters'.
+	 * @param int|null $ordinal The block's document-order ordinal, or null.
+	 */
+	private function record_removed( $attempt, $before, $after, $source, $ordinal ) {
+		$found = SiteOrigin_Panels_Markup_Removal::attribute(
+			array( is_array( $before ) ? $before : array() ),
+			array( is_array( $after ) ? $after : array() ),
+			$source,
+			array( 0 => $ordinal ),
+			$attempt->block_index
+		);
+		if ( ! empty( $found ) ) {
+			$attempt->findings = array_merge( $attempt->findings, $found );
+		}
 	}
 
 	/**
@@ -1170,11 +1473,15 @@ class SiteOrigin_Panels_Compat_Layout_Block {
 			'object_keys' => is_array( $object_keys ) ? $object_keys : array(),
 		);
 
+		$this->open_attempt( (int) $block_index );
 		try {
 			$block = $this->sanitize_block_untrusted( $block );
 			$fired = ( null === $this->layout_update_pre_write );
 		} finally {
 			$this->layout_update_pre_write = $previous;
+			// Reports what the filtering removed even when the pre-write hook,
+			// the structure check or a widget then stops the write.
+			SiteOrigin_Panels_Markup_Removal::fire( (int) $post_id, 'ability', $this->close_attempt() );
 		}
 
 		if ( ! $fired ) {
