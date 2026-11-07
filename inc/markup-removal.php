@@ -325,12 +325,12 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * filtering still reports, because the filtering happened.
 	 *
 	 * Not covered: block widget areas, classic (meta) layouts, attachment posts,
-	 * and writes that bypass wp_insert_post(). Nor are edits made in the Page
-	 * Builder editors: the block editor's Layout Block and the classic builder
-	 * filter each widget while editing (the so_panels_builder_content_json
-	 * request) and keep the filtered layout, so the save that follows has
-	 * nothing left to remove. Identifiers only: no markup and no field values
-	 * are passed.
+	 * and writes that bypass wp_insert_post(). Nor are edits made in the block
+	 * editor's Layout Block: on each change it sends the layout to the
+	 * so_panels_builder_content_json request, which runs each widget's
+	 * update(), and keeps the filtered layout it returns, so the save that
+	 * follows has nothing left to remove. Identifiers only: no markup and no
+	 * field values are passed.
 	 *
 	 * @since {NEXT_VERSION}
 	 * @api
