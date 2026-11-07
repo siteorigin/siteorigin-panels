@@ -328,10 +328,9 @@ class SiteOrigin_Panels_Markup_Removal {
 	 * and writes that bypass wp_insert_post(). Nor is markup removed while
 	 * editing a Layout Block in the block editor: when its layout holds
 	 * widgets, the block sends it to the so_panels_builder_content_json
-	 * request, which filters the widgets the way
-	 * SiteOrigin_Panels_Admin::process_raw_widgets() does (a widget's own
-	 * update(), or kses for a class that doesn't resolve), and keeps the
-	 * filtered layout it returns.
+	 * request, which filters the widgets through
+	 * SiteOrigin_Panels_Admin::process_raw_widgets(), and keeps the filtered
+	 * layout it returns.
 	 * What the save itself then removes, such as markup the kses floor strips,
 	 * is still reported. Identifiers only: no markup and no field values are
 	 * passed.
