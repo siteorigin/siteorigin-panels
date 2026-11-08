@@ -3413,6 +3413,9 @@
 		padding: 40px 20px;
 		background-color: #f4f4f4;
 		place-content: center;
+		// Content taller than the panel starts at the top edge and scrolls, instead of centring above it.
+		// A browser that does not know "safe" keeps the plain centring above.
+		place-content: safe center;
 		grid-template-columns: minmax( 0, 480px );
 		color: #3c434a;
 

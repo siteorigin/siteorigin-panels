@@ -554,6 +554,40 @@ const expectErrorPanel = async ( page, reason, timeout = 30000 ) => {
 	await expect( liveBuilder( page ).locator( '.so-widget' ) ).toHaveCount( 1 );
 };
 
+/**
+ * In a window too short for the panel, everything in it can still be reached by scrolling with the mouse
+ * wheel, as a user does (a script can set scrollTop on a panel the user cannot scroll). Content that
+ * overflows at the top of a scroll container cannot be scrolled to, so the title must not start above the
+ * panel's top edge; that is the check that fails for centred overflow. Content that overflows at the bottom
+ * is always reachable, so Retry's position at the bottom only states that the panel scrolls that far. Then
+ * Retry works (the blocking cookie is cleared first, as in E1, or Retry would get another 403).
+ */
+const expectErrorPanelReachable = async ( page, context ) => {
+	const panel = errorPanel( page );
+	const { height } = page.viewportSize();
+
+	const size = await panel.evaluate( ( el ) => ( { scroll: el.scrollHeight, client: el.clientHeight } ) );
+	expect( size.scroll, 'the window is short enough for the panel to overflow' ).toBeGreaterThan( size.client );
+
+	const panelBox = await panel.boundingBox();
+	await page.mouse.move( panelBox.x + panelBox.width / 2, panelBox.y + panelBox.height / 2 );
+	await page.mouse.wheel( 0, -5000 );
+	await expect.poll( () => panel.evaluate( ( el ) => el.scrollTop ), 'the wheel scrolls the panel to its top' ).toBe( 0 );
+	const titleBox = await panel.locator( '.so-preview-error-title' ).boundingBox();
+	expect( titleBox, 'the title is rendered' ).not.toBeNull();
+	expect( titleBox.y, 'the title is not clipped above the panel' ).toBeGreaterThanOrEqual( panelBox.y );
+
+	await page.mouse.wheel( 0, 5000 );
+	await expect.poll( () => panel.evaluate( ( el ) => el.scrollHeight - el.clientHeight - el.scrollTop ), 'the wheel scrolls the panel to its bottom' ).toBeLessThanOrEqual( 1 );
+	const retryBox = await panel.locator( '.so-preview-error-retry' ).boundingBox();
+	expect( retryBox.y + retryBox.height, 'Retry is inside the window at the bottom of the panel' ).toBeLessThanOrEqual( height );
+
+	await context.clearCookies( { name: 'panels_e2e_preview_block' } );
+	await panel.locator( '.so-preview-error-retry' ).click( { timeout: 5000 } );
+	await expect( panel ).toBeHidden( { timeout: 30000 } );
+	await expectRealPreview( page );
+};
+
 test.describe( 'Live Editor preview errors', () => {
 	let admin;
 	let ctx;
@@ -653,6 +687,45 @@ test.describe( 'Live Editor preview errors', () => {
 			await page.locator( '.so-panels-live-editor .live-editor-close' ).click( { timeout: 5000 } );
 			await expect( page.locator( '.so-panels-live-editor' ) ).toBeHidden();
 			await expect( errorPanel( page ) ).toBeHidden();
+		} finally {
+			await page.setViewportSize( { width: 1280, height: 720 } );
+		}
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E8 in a short window the panel can be scrolled to its title and Retry', async () => {
+		try {
+			await setCookie( ctx.context, 'panels_e2e_preview_block', '403' );
+			await openLiveEditorOnly( page, errorPostId );
+			await expectErrorPanel( page, 'The preview request failed with HTTP status 403.' );
+
+			await page.setViewportSize( { width: 1280, height: 200 } );
+			await expectErrorPanelReachable( page, ctx.context );
+		} finally {
+			await page.setViewportSize( { width: 1280, height: 720 } );
+		}
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'E9 with the sidebar collapsed in a narrow, short window the panel can be scrolled to its title and Retry', async () => {
+		await page.setViewportSize( { width: 800, height: 720 } );
+		try {
+			await setCookie( ctx.context, 'panels_e2e_preview_block', '403' );
+			await openLiveEditorOnly( page, errorPostId );
+			await expect( errorPanel( page ).locator( '.so-preview-error-reason' ) ).toHaveText( 'The preview request failed with HTTP status 403.', { timeout: 30000 } );
+
+			// Collapsed, the preview area, and so the panel, shows at this width (E6 covers it hidden).
+			await page.locator( '.so-panels-live-editor .live-editor-collapse' ).click();
+			await expect( errorPanel( page ) ).toBeVisible();
+
+			await page.setViewportSize( { width: 800, height: 200 } );
+			await expectErrorPanelReachable( page, ctx.context );
+
+			// The collapsed sidebar hides its own tools on purpose: reopen it, and Close works.
+			await page.setViewportSize( { width: 800, height: 720 } );
+			await page.locator( '.so-panels-live-editor .live-editor-collapse' ).click();
+			await page.locator( '.so-panels-live-editor .live-editor-close' ).click( { timeout: 5000 } );
+			await expect( page.locator( '.so-panels-live-editor' ) ).toBeHidden();
 		} finally {
 			await page.setViewportSize( { width: 1280, height: 720 } );
 		}
