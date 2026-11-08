@@ -555,7 +555,8 @@ const expectErrorPanel = async ( page, reason, timeout = 30000 ) => {
 };
 
 /**
- * In a window too short for the panel, everything in it can still be reached by scrolling. Content that
+ * In a window too short for the panel, everything in it can still be reached by scrolling with the mouse
+ * wheel, as a user does (a script can set scrollTop on a panel the user cannot scroll). Content that
  * overflows at the top of a scroll container cannot be scrolled to, so the title must not start above the
  * panel's top edge; that is the check that fails for centred overflow. Content that overflows at the bottom
  * is always reachable, so Retry's position at the bottom only states that the panel scrolls that far. Then
@@ -568,17 +569,16 @@ const expectErrorPanelReachable = async ( page, context ) => {
 	const size = await panel.evaluate( ( el ) => ( { scroll: el.scrollHeight, client: el.clientHeight } ) );
 	expect( size.scroll, 'the window is short enough for the panel to overflow' ).toBeGreaterThan( size.client );
 
-	await panel.evaluate( ( el ) => {
-		el.scrollTop = 0;
-	} );
 	const panelBox = await panel.boundingBox();
+	await page.mouse.move( panelBox.x + panelBox.width / 2, panelBox.y + panelBox.height / 2 );
+	await page.mouse.wheel( 0, -5000 );
+	await expect.poll( () => panel.evaluate( ( el ) => el.scrollTop ), 'the wheel scrolls the panel to its top' ).toBe( 0 );
 	const titleBox = await panel.locator( '.so-preview-error-title' ).boundingBox();
 	expect( titleBox, 'the title is rendered' ).not.toBeNull();
 	expect( titleBox.y, 'the title is not clipped above the panel' ).toBeGreaterThanOrEqual( panelBox.y );
 
-	await panel.evaluate( ( el ) => {
-		el.scrollTop = el.scrollHeight;
-	} );
+	await page.mouse.wheel( 0, 5000 );
+	await expect.poll( () => panel.evaluate( ( el ) => el.scrollHeight - el.clientHeight - el.scrollTop ), 'the wheel scrolls the panel to its bottom' ).toBeLessThanOrEqual( 1 );
 	const retryBox = await panel.locator( '.so-preview-error-retry' ).boundingBox();
 	expect( retryBox.y + retryBox.height, 'Retry is inside the window at the bottom of the panel' ).toBeLessThanOrEqual( height );
 
