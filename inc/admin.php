@@ -1318,7 +1318,16 @@ class SiteOrigin_Panels_Admin {
 		$widgets = array();
 
 		foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
-			$class = preg_match( '/[0-9a-f]{32}/', $class ) ? get_class( $widget_obj ) : $class;
+			// A widget registered as an object is keyed by spl_object_hash() before
+			// WordPress 7.1, by the integer spl_object_id() in 7.1.0 and by
+			// 'spl_object_id:' . spl_object_id() from 7.1.1. Those keys change
+			// between requests, so the object's class is used instead. Any other key
+			// is the plugin's own name for the widget and is kept.
+			$is_instance_key = preg_match( '/[0-9a-f]{32}/', $class ) || (
+				function_exists( 'spl_object_id' ) &&
+				in_array( $class, array( spl_object_id( $widget_obj ), 'spl_object_id:' . spl_object_id( $widget_obj ) ), true )
+			);
+			$class = $is_instance_key ? get_class( $widget_obj ) : $class;
 			$widgets[ $class ] = array(
 				'class'       => $class,
 				'title'       => ! empty( $widget_obj->name ) ? $widget_obj->name : __( 'Untitled Widget', 'siteorigin-panels' ),
