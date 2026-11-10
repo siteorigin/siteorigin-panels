@@ -70,7 +70,8 @@ test.describe( 'widget registered as an object', () => {
 		await expect( widget.locator( '.title h4' ) ).toHaveText( WIDGET_TITLE );
 
 		const dialog = await openWidgetDialog( widget, page );
-		await expect( dialog.locator( 'input.panels-e2e-text-field' ) ).toBeVisible( { timeout: 15000 } );
+		await expect( dialog.locator( '.panels-e2e-instance-form' ) ).toBeVisible( { timeout: 15000 } );
+		await expect( dialog.locator( 'input.panels-e2e-text-field' ) ).toBeVisible();
 		await expect( dialog ).not.toContainText( 'is not available' );
 		await closeDialog( page );
 		await expectOpenDialogs( page, 0 );
@@ -113,7 +114,8 @@ test.describe( 'widget registered as an object', () => {
 		await expect( widget.locator( '.title h4' ) ).toHaveText( WIDGET_TITLE );
 
 		const dialog = await openWidgetDialog( widget, page );
-		await expect( dialog.locator( 'input.panels-e2e-text-field' ) ).toHaveValue( TEXT, { timeout: 15000 } );
+		await expect( dialog.locator( '.panels-e2e-instance-form' ) ).toBeVisible( { timeout: 15000 } );
+		await expect( dialog.locator( 'input.panels-e2e-text-field' ) ).toHaveValue( TEXT );
 		await expect( dialog ).not.toContainText( 'is not available' );
 		await closeDialog( page );
 		expectNoPageErrors( ctx.errors );

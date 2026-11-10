@@ -8,7 +8,8 @@
  * requests, so Page Builder must list and store it under its class. The class is
  * namespaced so its name carries backslashes through the editor, save and render.
  * Its text field shares the class of the builder text widget's field, so the
- * builder helpers can fill it.
+ * builder helpers can fill it; the form's first paragraph identifies this widget's
+ * form, so a test can tell it from the text widget's.
  */
 
 namespace Panels_E2E;
@@ -33,6 +34,7 @@ class Instance_Widget extends \WP_Widget {
 	public function form( $instance ) {
 		$text = isset( $instance['text'] ) ? $instance['text'] : '';
 		?>
+		<p class="panels-e2e-instance-form">Panels E2E instance widget form.</p>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>">Text</label>
 			<input
