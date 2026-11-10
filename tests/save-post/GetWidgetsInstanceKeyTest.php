@@ -96,10 +96,11 @@ class GetWidgetsInstanceKeyTest extends TestCase {
 
 	public function test_class_key_is_kept() {
 		$widgets = $this->list_widgets(
-			array( 'Foo_Widget' => new GetWidgetsClassKeyWidget() )
+			array( GetWidgetsClassKeyWidget::class => new GetWidgetsClassKeyWidget() )
 		);
 
-		$this->assert_listed_as( $widgets, 'Foo_Widget', 'Class Key Widget' );
+		$this->assertCount( 1, $widgets );
+		$this->assert_listed_as( $widgets, GetWidgetsClassKeyWidget::class, 'Class Key Widget' );
 	}
 
 	public function test_hash_key_from_before_wordpress_7_1_uses_the_object_class() {
