@@ -346,11 +346,9 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			if ( ! is_array( $widget ) ) {
 				continue;
 			}
-			// Older layouts keep the class under info; it is read only when panels_info is absent, as
-			// SiteOrigin_Panels_Admin::process_raw_widgets() does.
-			$info = isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] )
-				? $widget['panels_info']
-				: ( isset( $widget['info'] ) && is_array( $widget['info'] ) ? $widget['info'] : array() );
+			// Older layouts keep the class under info; it is read when panels_info is empty, as
+			// SiteOrigin_Panels::process_panels_data() does before rendering.
+			$info = empty( $widget['panels_info'] ) && ! empty( $widget['info'] ) ? $widget['info'] : ( isset( $widget['panels_info'] ) ? $widget['panels_info'] : array() );
 			if ( isset( $info['class'] ) && is_string( $info['class'] ) ) {
 				$classes[ $info['class'] ] = true;
 			}
@@ -364,10 +362,12 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 * Mask the values seen to change between two renders of the same post, and nothing else, so any
 	 * other difference in a render is compared:
 	 * - uniqid() stamps in layout, row, cell and widget ids and selectors: 13 hex digits whose first
-	 *   8 are the current Unix time, with any more-entropy digits after them;
-	 * - the Widgets Bundle's per-render storage hash, found where it is made (a contact form's
-	 *   instance_hash field and a blog widget's data-hash on its sow-blog element) and masked at
-	 *   exactly those values, with a contact form's contact-form-xxxx id made from its first 4 characters;
+	 *   8 are the current Unix time, with any more-entropy digits after them, and a Google Map
+	 *   widget's map id, the first 6 of those digits (substr( uniqid(), 0, 6 )), which changes every
+	 *   256 seconds;
+	 * - the Widgets Bundle's per-render storage hash, only where it is written: a contact form's
+	 *   instance_hash field and its contact-form-xxxx id (the hash's first 4 characters), and a blog
+	 *   widget's data-hash on its sow-blog element;
 	 * - nonces in fields named for them.
 	 *
 	 * @param string $html Rendered HTML.
@@ -383,17 +383,21 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			},
 			$html
 		);
+		$html = preg_replace_callback(
+			'/(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
+			function ( $map ) use ( $now ) {
+				return abs( hexdec( $map[2] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $map[1] . 'U' . $map[3] : $map[0];
+			},
+			$html
+		);
 		preg_match_all( '/name="instance_hash(?:-\d+)?"\s+value="([0-9a-f]{8})"/', $html, $contact );
-		preg_match_all( '/<div\s+class="sow-blog [^"]*"[^>]*?\sdata-hash="([0-9a-f]{8})"/', $html, $blog );
-		$hashes = array();
+		$ids = array();
 		foreach ( $contact[1] as $hash ) {
-			$hashes[ 'contact-form-' . substr( $hash, 0, 4 ) . '"' ] = 'contact-form-H"';
-			$hashes[ '"' . $hash . '"' ] = '"H"';
+			$ids[ 'id="contact-form-' . substr( $hash, 0, 4 ) . '"' ] = 'id="contact-form-H"';
 		}
-		foreach ( $blog[1] as $hash ) {
-			$hashes[ '"' . $hash . '"' ] = '"H"';
-		}
-		$html = strtr( $html, $hashes );
+		$html = strtr( $html, $ids );
+		$html = preg_replace( '/(name="instance_hash(?:-\d+)?"\s+value=)"[0-9a-f]{8}"/', '$1"H"', $html );
+		$html = preg_replace( '/(<div\s+class="sow-blog [^"]*"[^>]*?\sdata-hash=)"[0-9a-f]{8}"/', '$1"H"', $html );
 
 		return preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
 	}

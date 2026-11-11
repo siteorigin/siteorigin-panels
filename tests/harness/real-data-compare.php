@@ -56,8 +56,13 @@ function siteorigin_rd_refuse( $message ) {
 $snapshots = array_map(
 	function ( $path ) {
 		$data = json_decode( (string) file_get_contents( $path ), true );
-		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) || ( $data['factory'] && ! array_key_exists( 'object_key', $data['factory'][0] ) ) ) {
+		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) ) {
 			siteorigin_rd_refuse( "not a snapshot: $path" );
+		}
+		foreach ( $data['factory'] as $entry ) {
+			if ( ! is_array( $entry ) || ! array_key_exists( 'object_key', $entry ) ) {
+				siteorigin_rd_refuse( "a factory entry has no object_key, so the snapshot is from an older harness: $path" );
+			}
 		}
 		return $data;
 	},
