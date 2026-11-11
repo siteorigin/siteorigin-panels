@@ -53,6 +53,12 @@ if ( empty( $siteorigin_rd_out ) ) {
 class SiteOrigin_Panels_Real_Data_Snapshot {
 
 	/**
+	 * One attribute in an opening tag: the space before it, its name, and its value with the quotes
+	 * around it.
+	 */
+	const ATTRIBUTE = '/(\s)([a-zA-Z_:.-]+)=("[^"]*"|\'[^\']*\')/';
+
+	/**
 	 * When the snapshot started, to tell uniqid() stamps from other hex.
 	 *
 	 * @var int
@@ -359,17 +365,17 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
-	 * The double-quoted attributes of an opening tag, by lower-case name.
+	 * The quoted attributes of an opening tag, by lower-case name.
 	 *
 	 * @param string $opening An opening tag.
 	 *
 	 * @return array
 	 */
 	private function attributes( $opening ) {
-		preg_match_all( '/\s([a-zA-Z_:.-]+)="([^"]*)"/', $opening, $found, PREG_SET_ORDER );
+		preg_match_all( self::ATTRIBUTE, $opening, $found, PREG_SET_ORDER );
 		$attributes = array();
 		foreach ( $found as $attribute ) {
-			$attributes[ strtolower( $attribute[1] ) ] = $attribute[2];
+			$attributes[ strtolower( $attribute[2] ) ] = substr( $attribute[3], 1, -1 );
 		}
 
 		return $attributes;
@@ -408,10 +414,11 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		$contact    = $this->is_contact_hash_field( $opening, $attributes );
 
 		return preg_replace_callback(
-			'/(\s)([a-zA-Z_:.-]+)="([^"]*)"/',
+			self::ATTRIBUTE,
 			function ( $attribute ) use ( $now, $short, $map, $blog, $contact ) {
 				$name  = strtolower( $attribute[2] );
-				$value = $attribute[3];
+				$quote = $attribute[3][0];
+				$value = substr( $attribute[3], 1, -1 );
 				if ( $map && $name === 'data-options' ) {
 					$value = preg_replace_callback(
 						'/(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
@@ -426,7 +433,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 					$value = 'contact-form-H';
 				}
 
-				return $attribute[1] . $attribute[2] . '="' . $value . '"';
+				return $attribute[1] . $attribute[2] . '=' . $quote . $value . $quote;
 			},
 			$opening
 		);
@@ -460,11 +467,11 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		// The Widgets Bundle values are read from each opening tag's attributes, in any order and
 		// beside any other classes. A contact form's id comes before the field holding its hash, so
 		// the hashes are collected first.
-		// A tag runs to the first > outside double quotes, as a quoted attribute may hold a raw >.
-		// Neither the tag nor a quoted value spans a <, which WordPress escapes in attributes, so a
-		// stray < in script text can't swallow the markup after it. Quantifiers are possessive so a
-		// long page can't exhaust the backtracking limit.
-		$tag   = '/<[a-zA-Z][^>"<]*+(?:"[^"<]*+"[^>"<]*+)*+>/';
+		// A tag runs to the first > outside quotes, single or double, as a quoted attribute may hold
+		// a raw >. Neither the tag nor a quoted value spans a <, which WordPress escapes in attributes,
+		// so a stray < in script text can't swallow the markup after it. Quantifiers are possessive
+		// so a long page can't exhaust the backtracking limit.
+		$tag   = '/<[a-zA-Z][^>"\'<]*+(?:(?:"[^"<]*+"|\'[^\'<]*+\')[^>"\'<]*+)*+>/';
 		$short = array();
 		$this->checked( preg_match_all( $tag, $html, $tags ) );
 		foreach ( $tags[0] as $opening ) {
