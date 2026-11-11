@@ -86,10 +86,12 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 
 		foreach ( $wp_widget_factory->widgets as $key => $widget ) {
 			$snapshot['factory'][] = array(
-				'key'      => $key,
-				'key_type' => gettype( $key ),
-				'class'    => get_class( $widget ),
-				'id_base'  => $widget->id_base,
+				'key'        => $key,
+				'key_type'   => gettype( $key ),
+				// Whether WordPress made the key from this object, so it changes between requests.
+				'object_key' => $this->is_object_key( $key, $widget ),
+				'class'      => get_class( $widget ),
+				'id_base'    => $widget->id_base,
 			);
 		}
 
@@ -129,6 +131,23 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		}
 
 		return $snapshot;
+	}
+
+	/**
+	 * Whether a factory key is one WordPress makes from the widget object itself: spl_object_hash()
+	 * before 7.1, the integer spl_object_id() in 7.1.0, 'spl_object_id:' . spl_object_id() from 7.1.1.
+	 *
+	 * @param int|string $key    The factory key.
+	 * @param object     $widget The widget.
+	 *
+	 * @return bool
+	 */
+	private function is_object_key( $key, $widget ) {
+		if ( $key === spl_object_hash( $widget ) ) {
+			return true;
+		}
+
+		return function_exists( 'spl_object_id' ) && in_array( $key, array( spl_object_id( $widget ), 'spl_object_id:' . spl_object_id( $widget ) ), true );
 	}
 
 	/**
@@ -327,11 +346,13 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			if ( ! is_array( $widget ) ) {
 				continue;
 			}
-			// Older layouts keep the class under info rather than panels_info.
-			foreach ( array( 'panels_info', 'info' ) as $info ) {
-				if ( isset( $widget[ $info ]['class'] ) && is_string( $widget[ $info ]['class'] ) ) {
-					$classes[ $widget[ $info ]['class'] ] = true;
-				}
+			// Older layouts keep the class under info; it is read only when panels_info is absent, as
+			// SiteOrigin_Panels_Admin::process_raw_widgets() does.
+			$info = isset( $widget['panels_info'] ) && is_array( $widget['panels_info'] )
+				? $widget['panels_info']
+				: ( isset( $widget['info'] ) && is_array( $widget['info'] ) ? $widget['info'] : array() );
+			if ( isset( $info['class'] ) && is_string( $info['class'] ) ) {
+				$classes[ $info['class'] ] = true;
 			}
 			if ( ! empty( $widget['panels_data'] ) ) {
 				$this->collect_classes( $widget['panels_data'], $classes, $depth + 1 );
@@ -344,7 +365,9 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 * other difference in a render is compared:
 	 * - uniqid() stamps in layout, row, cell and widget ids and selectors: 13 hex digits whose first
 	 *   8 are the current Unix time, with any more-entropy digits after them;
-	 * - the contact form's per-render hash: its instance_hash fields, data-hash and contact-form-xxxx id;
+	 * - the Widgets Bundle's per-render storage hash, found where it is made (a contact form's
+	 *   instance_hash field and a blog widget's data-hash on its sow-blog element) and masked at
+	 *   exactly those values, with a contact form's contact-form-xxxx id made from its first 4 characters;
 	 * - nonces in fields named for them.
 	 *
 	 * @param string $html Rendered HTML.
@@ -360,8 +383,17 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			},
 			$html
 		);
-		$html = preg_replace( '/(name="instance_hash(?:-\d+)?"\s+value=|data-hash=)"[0-9a-f]{8}"/', '$1"H"', $html );
-		$html = preg_replace( '/\bcontact-form-[0-9a-f]{4}\b/', 'contact-form-H', $html );
+		preg_match_all( '/name="instance_hash(?:-\d+)?"\s+value="([0-9a-f]{8})"/', $html, $contact );
+		preg_match_all( '/<div\s+class="sow-blog [^"]*"[^>]*?\sdata-hash="([0-9a-f]{8})"/', $html, $blog );
+		$hashes = array();
+		foreach ( $contact[1] as $hash ) {
+			$hashes[ 'contact-form-' . substr( $hash, 0, 4 ) . '"' ] = 'contact-form-H"';
+			$hashes[ '"' . $hash . '"' ] = '"H"';
+		}
+		foreach ( $blog[1] as $hash ) {
+			$hashes[ '"' . $hash . '"' ] = '"H"';
+		}
+		$html = strtr( $html, $hashes );
 
 		return preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
 	}

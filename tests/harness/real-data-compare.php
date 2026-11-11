@@ -13,8 +13,9 @@
  * Renders whose hash differs between any two base snapshots are noise and are left out; more base
  * snapshots catch rarer noise. Everything else that differs between base-1 and the change is
  * reported: renders, widget factory entries, the editor's widget list, how each stored widget class
- * resolves, whether its form says it is missing, and errors. A factory key WordPress makes from the
- * widget object is compared by its type only, as it changes from one request to the next.
+ * resolves, whether its form says it is missing, and errors. A factory key WordPress made from the
+ * widget object (the snapshot checks it against the object) is compared by its type only, as it
+ * changes from one request to the next.
  *
  * Exits 1 when anything outside the noise changed, 0 when nothing did, 2 when the snapshots can't be
  * compared.
@@ -55,7 +56,7 @@ function siteorigin_rd_refuse( $message ) {
 $snapshots = array_map(
 	function ( $path ) {
 		$data = json_decode( (string) file_get_contents( $path ), true );
-		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) ) {
+		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) || ( $data['factory'] && ! array_key_exists( 'object_key', $data['factory'][0] ) ) ) {
 			siteorigin_rd_refuse( "not a snapshot: $path" );
 		}
 		return $data;
@@ -109,15 +110,13 @@ foreach ( array_keys( $base['renders'] + $change['renders'] ) as $id ) {
 	}
 }
 
-// Factory entries, grouped by class and id_base. A key WordPress makes from the object (an integer,
-// a 32-character hash, or 'spl_object_id:' and a number) changes with the objects built before it, so
-// only its type is compared; a class name or a plugin's own key is compared as it is.
+// Factory entries, grouped by class and id_base. A key the snapshot found WordPress made from the
+// widget object changes with the objects built before it, so only its type is compared; a class name
+// or a plugin's own key is compared as it is.
 $factory = function ( $snapshot ) {
 	$entries = array();
 	foreach ( $snapshot['factory'] as $entry ) {
-		$key      = (string) $entry['key'];
-		$per_call = $entry['key_type'] === 'integer' || preg_match( '/^(?:[0-9a-f]{32}|spl_object_id:\d+)$/', $key );
-		$entries[ $entry['class'] . ' ' . $entry['id_base'] ][] = $entry['key_type'] . ' ' . ( $per_call ? '(object key)' : $key );
+		$entries[ $entry['class'] . ' ' . $entry['id_base'] ][] = $entry['key_type'] . ' ' . ( empty( $entry['object_key'] ) ? (string) $entry['key'] : '(object key)' );
 	}
 	foreach ( $entries as &$list ) {
 		sort( $list );
