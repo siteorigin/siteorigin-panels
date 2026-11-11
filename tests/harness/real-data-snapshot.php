@@ -294,15 +294,24 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			$error                = get_class( $e ) . ': ' . $e->getMessage();
 			$snapshot['errors'][] = "render $id: $error";
 		}
+		// Collect every buffer the render opened. A buffer that can't be removed would leave the
+		// level unchanged, so stop rather than loop.
 		$html = '';
 		while ( ob_get_level() > $level ) {
-			$html = ob_get_clean() . $html;
+			$before = ob_get_level();
+			$output = ob_get_clean();
+			if ( ob_get_level() >= $before ) {
+				throw new RuntimeException( "render $id left an output buffer that can't be removed" );
+			}
+			$html = $output . $html;
 		}
 
 		try {
 			$normalised = $this->normalise( $html );
 		} catch ( Throwable $e ) {
 			$normalised           = $html;
+			// real-data-compare.php refuses a comparison with this error, as an unmasked render can
+			// differ between base snapshots and drop out as noise.
 			$snapshot['errors'][] = "normalise $id: " . $e->getMessage();
 		}
 

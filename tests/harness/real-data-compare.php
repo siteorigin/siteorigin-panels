@@ -18,7 +18,7 @@
  * changes from one request to the next.
  *
  * Exits 1 when anything outside the noise changed, 0 when nothing did, 2 when the snapshots can't be
- * compared.
+ * compared, which includes a snapshot with a render its normaliser couldn't mask.
  *
  * @package siteorigin-panels
  */
@@ -62,6 +62,11 @@ $snapshots = array_map(
 		foreach ( array( 'renders', 'factory', 'listed', 'stored', 'errors' ) as $section ) {
 			if ( ! is_array( $data[ $section ] ) ) {
 				siteorigin_rd_refuse( "not a snapshot, $section is not a list: $path" );
+			}
+		}
+		foreach ( $data['errors'] as $error ) {
+			if ( is_string( $error ) && strpos( $error, 'normalise ' ) === 0 ) {
+				siteorigin_rd_refuse( "a render couldn't be masked, so it can't be told from noise ($error): $path" );
 			}
 		}
 		foreach ( $data['factory'] as $entry ) {
