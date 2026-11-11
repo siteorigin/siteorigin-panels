@@ -376,14 +376,17 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
-	 * Whether a tag is a contact form's hidden instance_hash field holding an 8-character hash.
+	 * Whether a tag is a contact form's hidden instance_hash input holding an 8-character hash.
 	 *
-	 * @param array $attributes The tag's attributes.
+	 * @param string $opening    The opening tag.
+	 * @param array  $attributes The tag's attributes.
 	 *
 	 * @return bool
 	 */
-	private function is_contact_hash_field( array $attributes ) {
-		return isset( $attributes['name'], $attributes['value'] ) &&
+	private function is_contact_hash_field( $opening, array $attributes ) {
+		return preg_match( '/^<input\b/i', $opening ) &&
+			isset( $attributes['type'], $attributes['name'], $attributes['value'] ) &&
+			strtolower( $attributes['type'] ) === 'hidden' &&
 			preg_match( '/^instance_hash(?:-\d+)?$/', $attributes['name'] ) &&
 			preg_match( '/^[0-9a-f]{8}$/', $attributes['value'] );
 	}
@@ -402,7 +405,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		$classes    = isset( $attributes['class'] ) ? preg_split( '/\s+/', trim( $attributes['class'] ) ) : array();
 		$map        = in_array( 'sow-google-map-canvas', $classes, true );
 		$blog       = in_array( 'sow-blog', $classes, true );
-		$contact    = $this->is_contact_hash_field( $attributes );
+		$contact    = $this->is_contact_hash_field( $opening, $attributes );
 
 		return preg_replace_callback(
 			'/(\s)([a-zA-Z_:.-]+)="([^"]*)"/',
@@ -447,34 +450,55 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 */
 	private function normalise( $html ) {
 		$now  = $this->now;
-		$html = preg_replace_callback(
+		$html = $this->checked( preg_replace_callback(
 			'/[0-9a-f]{13}(?:\.?\d{1,10})?/',
 			function ( $stamp ) use ( $now ) {
 				return abs( hexdec( substr( $stamp[0], 0, 8 ) ) - $now ) < 2 * DAY_IN_SECONDS ? 'U' : $stamp[0];
 			},
 			$html
-		);
+		) );
 		// The Widgets Bundle values are read from each opening tag's attributes, in any order and
 		// beside any other classes. A contact form's id comes before the field holding its hash, so
 		// the hashes are collected first.
-		$tag   = '/<[a-zA-Z][^>]*>/';
+		// A tag runs to the first > outside double quotes, as a quoted attribute may hold a raw >.
+		// Neither the tag nor a quoted value spans a <, which WordPress escapes in attributes, so a
+		// stray < in script text can't swallow the markup after it. Quantifiers are possessive so a
+		// long page can't exhaust the backtracking limit.
+		$tag   = '/<[a-zA-Z][^>"<]*+(?:"[^"<]*+"[^>"<]*+)*+>/';
 		$short = array();
-		preg_match_all( $tag, $html, $tags );
+		$this->checked( preg_match_all( $tag, $html, $tags ) );
 		foreach ( $tags[0] as $opening ) {
 			$attributes = $this->attributes( $opening );
-			if ( $this->is_contact_hash_field( $attributes ) ) {
+			if ( $this->is_contact_hash_field( $opening, $attributes ) ) {
 				$short[ substr( $attributes['value'], 0, 4 ) ] = true;
 			}
 		}
-		$html = preg_replace_callback(
+		$html = $this->checked( preg_replace_callback(
 			$tag,
 			function ( $opening ) use ( $now, $short ) {
 				return $this->normalise_tag( $opening[0], $now, $short );
 			},
 			$html
-		);
+		) );
 
-		return preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
+		return $this->checked( preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html ) );
+	}
+
+	/**
+	 * Stop on a failed regex, so the render is recorded as an error rather than hashed as empty.
+	 *
+	 * @param mixed $result A preg function's result.
+	 *
+	 * @return mixed The result.
+	 *
+	 * @throws RuntimeException When the regex failed.
+	 */
+	private function checked( $result ) {
+		if ( $result === null || $result === false ) {
+			throw new RuntimeException( 'normalise failed, preg error ' . preg_last_error() );
+		}
+
+		return $result;
 	}
 }
 
