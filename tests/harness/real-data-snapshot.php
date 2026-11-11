@@ -14,18 +14,23 @@
  *   php <plugin>/tests/harness/real-data-compare.php /tmp/rd/base-1.json /tmp/rd/base-2.json /tmp/rd/change.json
  *
  * The snapshot records, for the site:
+ * - which Page Builder checkout ran: its directory, and its git commit and uncommitted changes;
  * - every widget factory entry: its key, the key's type, its class and id_base;
- * - the widget list the editor receives (SiteOrigin_Panels_Admin::get_widgets());
- * - every widget class stored in panels_data meta or in Layout Blocks, whether it resolves, whether
- *   it is in the list, and whether its form says the widget is missing;
- * - a normalised hash of the render of every post with panels_data or a Layout Block.
+ * - the widget list the editor receives (SiteOrigin_Panels_Admin::get_widgets(), with its filters);
+ * - every widget class stored in panels_data meta, in Layout Blocks (in posts and in widget areas)
+ *   and in Layout Builder widgets, nested layouts included: whether it resolves, whether it is in
+ *   the list, and whether its form says the widget is missing;
+ * - a normalised hash of the render of every post with panels_data or a Layout Block, and of every
+ *   widget-area Layout Block and Layout Builder widget. The byte and widget counts beside each hash
+ *   are there to read a reported change; only the hash is compared.
  *
  * Use a copy, never a live or shared site: the render runs plugin and theme code, and the snapshot
  * clears the widget-list transient. Block outbound HTTP and mail on the copy first, for example with
  * a must-use plugin returning a WP_Error from pre_http_request and false from pre_wp_mail.
  *
  * Before trusting a comparison, see it fail: register a widget with register_widget( new X() ) or
- * add a siteorigin_panels_render filter for one snapshot only, and check the comparison reports it.
+ * add a siteorigin_panels_render filter for one snapshot only, and check the comparison reports it
+ * (pass --same-checkout to the compare for such a control).
  *
  * @package siteorigin-panels
  */
@@ -54,9 +59,11 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	public function take() {
 		global $wp_widget_factory;
 
-		$snapshot = array(
+		$panels_dir = class_exists( 'SiteOrigin_Panels' ) ? dirname( ( new ReflectionClass( 'SiteOrigin_Panels' ) )->getFileName() ) : null;
+		$snapshot   = array(
 			'site'       => home_url(),
-			'panels_dir' => class_exists( 'SiteOrigin_Panels' ) ? dirname( ( new ReflectionClass( 'SiteOrigin_Panels' ) )->getFileName() ) : null,
+			'panels_dir' => $panels_dir,
+			'panels_rev' => $this->revision( $panels_dir ),
 			'factory'    => array(),
 			'listed'     => array(),
 			'stored'     => array(),
@@ -77,8 +84,10 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			);
 		}
 
+		// The singleton the plugin itself uses, so the widget dialog's filters (recommended widgets)
+		// shape the list as they do in the editor.
 		delete_transient( 'siteorigin_panels_widgets' );
-		$admin  = ( new ReflectionClass( 'SiteOrigin_Panels_Admin' ) )->newInstanceWithoutConstructor();
+		$admin  = SiteOrigin_Panels_Admin::single();
 		$listed = $admin->get_widgets();
 		foreach ( $listed as $key => $entry ) {
 			$snapshot['listed'][ (string) $key ] = array(
@@ -92,6 +101,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		foreach ( $this->post_ids() as $post_id ) {
 			$this->snapshot_post( $post_id, $snapshot, $classes );
 		}
+		$this->snapshot_widget_areas( $snapshot, $classes );
 
 		ksort( $classes );
 		foreach ( array_keys( $classes ) as $class ) {
@@ -114,6 +124,30 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		}
 
 		return $snapshot;
+	}
+
+	/**
+	 * The checkout's git commit and a hash of its uncommitted changes, so two snapshots of one
+	 * directory on different branches still differ.
+	 *
+	 * @param string|null $dir The plugin directory.
+	 *
+	 * @return string|null
+	 */
+	private function revision( $dir ) {
+		if ( ! $dir || ! function_exists( 'shell_exec' ) ) {
+			return null;
+		}
+
+		$git  = 'git -C ' . escapeshellarg( $dir ) . ' ';
+		$head = trim( (string) shell_exec( $git . 'rev-parse HEAD 2>/dev/null' ) );
+		if ( $head === '' ) {
+			return null;
+		}
+
+		$dirty = (string) shell_exec( $git . 'diff HEAD 2>/dev/null' );
+
+		return $dirty === '' ? $head : $head . '+' . md5( $dirty );
 	}
 
 	/**
@@ -151,35 +185,84 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		if ( is_array( $meta ) ) {
 			$this->collect_classes( $meta, $classes );
 		}
-
-		if ( has_blocks( $post->post_content ) ) {
-			$stack = parse_blocks( $post->post_content );
-			while ( $stack ) {
-				$block = array_pop( $stack );
-				if ( $block['blockName'] === 'siteorigin-panels/layout-block' && ! empty( $block['attrs']['panelsData'] ) ) {
-					$this->collect_classes( $block['attrs']['panelsData'], $classes );
-				}
-				foreach ( $block['innerBlocks'] as $inner ) {
-					$stack[] = $inner;
-				}
-			}
-		}
+		$this->collect_block_classes( $post->post_content, $classes );
 
 		$GLOBALS['post'] = $post;
 		setup_postdata( $post );
+		$this->record_render(
+			(string) $post_id,
+			$post->post_type,
+			function () use ( $post_id, $post, $meta ) {
+				if ( is_array( $meta ) && ! empty( $meta ) ) {
+					echo SiteOrigin_Panels::renderer()->render( $post_id );
+				} else {
+					echo apply_filters( 'the_content', $post->post_content );
+				}
+			},
+			$snapshot
+		);
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Record Layout Blocks in block widgets and Layout Builder widgets, which live in options rather
+	 * than posts.
+	 *
+	 * @param array $snapshot The snapshot.
+	 * @param array $classes  Stored widget classes, as keys.
+	 */
+	private function snapshot_widget_areas( array &$snapshot, array &$classes ) {
+		foreach ( (array) get_option( 'widget_block', array() ) as $number => $instance ) {
+			if ( ! is_array( $instance ) || empty( $instance['content'] ) || strpos( $instance['content'], 'wp:siteorigin-panels/layout-block' ) === false ) {
+				continue;
+			}
+
+			$this->collect_block_classes( $instance['content'], $classes );
+			$this->record_render(
+				"widget_block-$number",
+				'widget_block',
+				function () use ( $instance ) {
+					echo do_blocks( $instance['content'] );
+				},
+				$snapshot
+			);
+		}
+
+		foreach ( (array) get_option( 'widget_siteorigin-panels-builder', array() ) as $number => $instance ) {
+			if ( ! is_array( $instance ) || empty( $instance['panels_data'] ) ) {
+				continue;
+			}
+
+			$this->collect_classes( $instance['panels_data'], $classes );
+			$this->record_render(
+				"widget_siteorigin-panels-builder-$number",
+				'siteorigin-panels-builder',
+				function () use ( $instance ) {
+					the_widget( 'SiteOrigin_Panels_Widgets_Layout', $instance );
+				},
+				$snapshot
+			);
+		}
+	}
+
+	/**
+	 * Render into the snapshot, recording a throw as an error.
+	 *
+	 * @param string   $id       The render's id in the snapshot.
+	 * @param string   $type     What was rendered.
+	 * @param callable $render   Echoes the render.
+	 * @param array    $snapshot The snapshot.
+	 */
+	private function record_render( $id, $type, $render, array &$snapshot ) {
 		$level = ob_get_level();
 		try {
 			ob_start();
-			if ( is_array( $meta ) && ! empty( $meta ) ) {
-				echo SiteOrigin_Panels::renderer()->render( $post_id );
-			} else {
-				echo apply_filters( 'the_content', $post->post_content );
-			}
+			$render();
 			$html       = ob_get_clean();
 			$normalised = $this->normalise( $html );
 
-			$snapshot['renders'][ $post_id ] = array(
-				'type'    => $post->post_type,
+			$snapshot['renders'][ $id ] = array(
+				'type'    => $type,
 				'bytes'   => strlen( $html ),
 				'hash'    => md5( $normalised ),
 				'widgets' => substr_count( $html, 'class="so-panel widget' ),
@@ -187,36 +270,71 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 
 			// Keep the normalised HTML when asked, to read what a flagged render changed.
 			if ( getenv( 'SO_RD_HTML' ) && is_dir( getenv( 'SO_RD_HTML' ) ) ) {
-				file_put_contents( getenv( 'SO_RD_HTML' ) . "/$post_id.html", $normalised );
+				file_put_contents( getenv( 'SO_RD_HTML' ) . "/$id.html", $normalised );
 			}
 		} catch ( Throwable $e ) {
 			while ( ob_get_level() > $level ) {
 				ob_end_clean();
 			}
-			$snapshot['errors'][] = "render $post_id: " . get_class( $e ) . ': ' . $e->getMessage();
+			$snapshot['errors'][] = "render $id: " . get_class( $e ) . ': ' . $e->getMessage();
 		}
-		wp_reset_postdata();
 	}
 
 	/**
-	 * @param mixed $panels_data A layout.
-	 * @param array $classes     Stored widget classes, as keys.
+	 * Collect the classes of every Layout Block in some block content.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $classes Stored widget classes, as keys.
 	 */
-	private function collect_classes( $panels_data, array &$classes ) {
-		if ( empty( $panels_data['widgets'] ) || ! is_array( $panels_data['widgets'] ) ) {
+	private function collect_block_classes( $content, array &$classes ) {
+		if ( ! has_blocks( $content ) ) {
+			return;
+		}
+
+		$stack = parse_blocks( $content );
+		while ( $stack ) {
+			$block = array_pop( $stack );
+			if ( $block['blockName'] === 'siteorigin-panels/layout-block' && ! empty( $block['attrs']['panelsData'] ) ) {
+				$this->collect_classes( $block['attrs']['panelsData'], $classes );
+			}
+			foreach ( $block['innerBlocks'] as $inner ) {
+				$stack[] = $inner;
+			}
+		}
+	}
+
+	/**
+	 * Collect the widget classes of a layout, and of every layout nested in its widgets.
+	 *
+	 * @param mixed $panels_data A layout, as an array or JSON.
+	 * @param array $classes     Stored widget classes, as keys.
+	 * @param int   $depth       How deep the layout is nested.
+	 */
+	private function collect_classes( $panels_data, array &$classes, $depth = 0 ) {
+		if ( is_string( $panels_data ) ) {
+			$panels_data = json_decode( $panels_data, true );
+		}
+		if ( $depth > 20 || empty( $panels_data['widgets'] ) || ! is_array( $panels_data['widgets'] ) ) {
 			return;
 		}
 
 		foreach ( $panels_data['widgets'] as $widget ) {
+			if ( ! is_array( $widget ) ) {
+				continue;
+			}
 			if ( isset( $widget['panels_info']['class'] ) && is_string( $widget['panels_info']['class'] ) ) {
 				$classes[ $widget['panels_info']['class'] ] = true;
+			}
+			if ( ! empty( $widget['panels_data'] ) ) {
+				$this->collect_classes( $widget['panels_data'], $classes, $depth + 1 );
 			}
 		}
 	}
 
 	/**
 	 * Mask values that change on every render: long hex ids, short hex hashes in attributes (such as a
-	 * widget's instance_hash and data-hash), nonces, timestamps and numeric ids.
+	 * widget's instance_hash and data-hash), nonces, timestamps and numeric ids. Long numbers are
+	 * masked only inside attribute values, so numbers in the page's text are still compared.
 	 *
 	 * @param string $html Rendered HTML.
 	 *
@@ -226,14 +344,23 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		$html = preg_replace( '/[0-9a-f]{13,}/', 'X', $html );
 		$html = preg_replace( '/="[0-9a-f]{8}"/', '="H"', $html );
 		$html = preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
-		$html = preg_replace( '/\b\d{9,}\b/', 'T', $html );
+		$html = preg_replace_callback(
+			'/="[^"<>]*"/',
+			function ( $value ) {
+				return preg_replace( '/\b\d{9,}\b/', 'T', $value[0] );
+			},
+			$html
+		);
 
 		return preg_replace( '/(id|for|aria-[a-z]+|data-[a-z-]+)="([a-z_-]*?)-?\d{3,}([^"]*)"/i', '$1="$2-#$3"', $html );
 	}
 }
 
 $siteorigin_rd_snapshot = ( new SiteOrigin_Panels_Real_Data_Snapshot() )->take();
-file_put_contents( $siteorigin_rd_out, wp_json_encode( $siteorigin_rd_snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+if ( file_put_contents( $siteorigin_rd_out, wp_json_encode( $siteorigin_rd_snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ) === false ) {
+	fwrite( STDERR, "could not write $siteorigin_rd_out\n" );
+	exit( 1 );
+}
 printf(
 	"%s: %d factory entries, %d listed, %d stored classes, %d renders, %d errors\n",
 	$siteorigin_rd_snapshot['site'],

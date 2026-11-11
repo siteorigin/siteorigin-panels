@@ -2,36 +2,92 @@
 /**
  * Compare real-data snapshots taken by real-data-snapshot.php.
  *
- * Usage: php real-data-compare.php <base-1.json> <base-2.json> [<base-3.json> ...] <change.json>
+ * Usage: php real-data-compare.php [--same-checkout] <base-1.json> <base-2.json> [<base-3.json> ...] <change.json>
  *
- * Every file but the last is a snapshot of the base checkout; the last is the change. Renders whose
- * hash differs between any two base snapshots are noise and are left out. More base snapshots catch
- * rarer noise. Everything
- * else that differs between base-1 and the change is reported: renders, the editor's widget list,
- * how each stored widget class resolves, whether its form says it is missing, and errors.
- * Exits 1 when anything outside the noise changed, 0 when nothing did.
+ * Every file but the last is a snapshot of the base checkout; the last is the change. The base
+ * snapshots must come from one checkout and the change from another (its directory or its git
+ * revision differs), so a change snapshot that silently loaded the base checkout is an error, not a
+ * clean result. --same-checkout lifts that check for a control run, where the change snapshot is the
+ * base checkout with something added on purpose.
+ *
+ * Renders whose hash differs between any two base snapshots are noise and are left out; more base
+ * snapshots catch rarer noise. Everything else that differs between base-1 and the change is
+ * reported: renders, widget factory entries, the editor's widget list, how each stored widget class
+ * resolves, whether its form says it is missing, and errors. A factory key that differs between base
+ * snapshots is a per-request key: only its type is compared.
+ *
+ * Exits 1 when anything outside the noise changed, 0 when nothing did, 2 when the snapshots can't be
+ * compared.
  *
  * @package siteorigin-panels
  */
 
-if ( PHP_SAPI !== 'cli' || $argc < 4 ) {
-	fwrite( STDERR, "usage: php real-data-compare.php <base-1.json> <base-2.json> [<base-3.json> ...] <change.json>\n" );
+$args          = array_slice( $argv, 1 );
+$same_checkout = in_array( '--same-checkout', $args, true );
+$args          = array_values( array_diff( $args, array( '--same-checkout' ) ) );
+
+if ( PHP_SAPI !== 'cli' || count( $args ) < 3 ) {
+	fwrite( STDERR, "usage: php real-data-compare.php [--same-checkout] <base-1.json> <base-2.json> [<base-3.json> ...] <change.json>\n" );
+	exit( 2 );
+}
+
+/**
+ * JSON for a report line.
+ *
+ * @param mixed $value Any value.
+ *
+ * @return string
+ */
+function siteorigin_rd_json( $value ) {
+	return json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+}
+
+/**
+ * Stop: the snapshots can't be compared.
+ *
+ * @param string $message Why.
+ */
+function siteorigin_rd_refuse( $message ) {
+	fwrite( STDERR, "$message\n" );
 	exit( 2 );
 }
 
 $snapshots = array_map(
 	function ( $path ) {
 		$data = json_decode( (string) file_get_contents( $path ), true );
-		if ( ! is_array( $data ) ) {
-			fwrite( STDERR, "not a snapshot: $path\n" );
-			exit( 2 );
+		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) ) {
+			siteorigin_rd_refuse( "not a snapshot: $path" );
 		}
 		return $data;
 	},
-	array_slice( $argv, 1 )
+	$args
 );
 $change = array_pop( $snapshots );
 $base   = $snapshots[0];
+
+// Which checkout each snapshot ran.
+$checkout = function ( $snapshot ) {
+	return array(
+		'dir' => isset( $snapshot['panels_dir'] ) ? $snapshot['panels_dir'] : null,
+		'rev' => isset( $snapshot['panels_rev'] ) ? $snapshot['panels_rev'] : null,
+	);
+};
+foreach ( array_merge( $snapshots, array( $change ) ) as $snapshot ) {
+	if ( $snapshot['site'] !== $base['site'] ) {
+		siteorigin_rd_refuse( 'snapshots are of different sites: ' . $base['site'] . ' and ' . $snapshot['site'] );
+	}
+	if ( empty( $snapshot['panels_dir'] ) ) {
+		siteorigin_rd_refuse( 'a snapshot ran without Page Builder: ' . $snapshot['site'] );
+	}
+}
+foreach ( array_slice( $snapshots, 1 ) as $again ) {
+	if ( $checkout( $again ) !== $checkout( $base ) ) {
+		siteorigin_rd_refuse( 'base snapshots ran different checkouts: ' . siteorigin_rd_json( $checkout( $base ) ) . ' and ' . siteorigin_rd_json( $checkout( $again ) ) );
+	}
+}
+if ( ! $same_checkout && $checkout( $change ) === $checkout( $base ) ) {
+	siteorigin_rd_refuse( 'the change snapshot ran the base checkout ' . siteorigin_rd_json( $checkout( $base ) ) . '; check SO_PANELS_DIR and the loader, or pass --same-checkout for a control' );
+}
 
 $hash = function ( $snapshot, $id ) {
 	return isset( $snapshot['renders'][ $id ]['hash'] ) ? $snapshot['renders'][ $id ]['hash'] : null;
@@ -53,6 +109,50 @@ foreach ( array_keys( $base['renders'] + $change['renders'] ) as $id ) {
 	}
 }
 
+// Factory entries, grouped by class and id_base. Keys that differ between base snapshots change per
+// request, so for those only the key's type is kept.
+$factory = function ( $snapshot ) {
+	$entries = array();
+	foreach ( $snapshot['factory'] as $entry ) {
+		$entries[ $entry['class'] . ' ' . $entry['id_base'] ][] = array( $entry['key_type'], (string) $entry['key'] );
+	}
+	foreach ( $entries as &$list ) {
+		sort( $list );
+	}
+	ksort( $entries );
+	return $entries;
+};
+$base_factory     = $factory( $base );
+$per_request_keys = array();
+foreach ( array_slice( $snapshots, 1 ) as $again ) {
+	$again_factory = $factory( $again );
+	foreach ( array_keys( $base_factory + $again_factory ) as $id ) {
+		if ( ( isset( $base_factory[ $id ] ) ? $base_factory[ $id ] : null ) !== ( isset( $again_factory[ $id ] ) ? $again_factory[ $id ] : null ) ) {
+			$per_request_keys[ $id ] = true;
+		}
+	}
+}
+$key_types = function ( $list ) {
+	return $list === null ? null : array_map(
+		function ( $key ) {
+			return $key[0];
+		},
+		$list
+	);
+};
+$change_factory = $factory( $change );
+foreach ( array_keys( $base_factory + $change_factory ) as $id ) {
+	$before = isset( $base_factory[ $id ] ) ? $base_factory[ $id ] : null;
+	$after  = isset( $change_factory[ $id ] ) ? $change_factory[ $id ] : null;
+	if ( isset( $per_request_keys[ $id ] ) ) {
+		$before = $key_types( $before );
+		$after  = $key_types( $after );
+	}
+	if ( $before !== $after ) {
+		$changes[] = 'factory ' . siteorigin_rd_json( $id ) . ': ' . siteorigin_rd_json( $before ) . ' -> ' . siteorigin_rd_json( $after );
+	}
+}
+
 foreach ( array( 'listed', 'stored' ) as $section ) {
 	foreach ( array_keys( $base[ $section ] + $change[ $section ] ) as $key ) {
 		$before = isset( $base[ $section ][ $key ] ) ? $base[ $section ][ $key ] : null;
@@ -67,33 +167,16 @@ if ( $base['errors'] !== $change['errors'] ) {
 	$changes[] = 'errors: ' . siteorigin_rd_json( $base['errors'] ) . ' -> ' . siteorigin_rd_json( $change['errors'] );
 }
 
-/**
- * JSON for a report line.
- *
- * @param mixed $value Any value.
- *
- * @return string
- */
-function siteorigin_rd_json( $value ) {
-	return json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-}
-
-$object_keys = array_filter(
-	$base['factory'],
-	function ( $entry ) {
-		return (string) $entry['key'] !== $entry['class'];
-	}
-);
-
 printf(
-	"%s: renders=%d noise=%d changes=%d keys-not-class=%s\n%s -> %s\n",
+	"%s: renders=%d noise=%d per-request-keys=%d changes=%d\n%s -> %s%s\n",
 	$base['site'],
 	count( $base['renders'] ),
 	count( $noise ),
+	count( $per_request_keys ),
 	count( $changes ),
-	siteorigin_rd_json( array_map( function ( $e ) { return $e['key'] . ' => ' . $e['class']; }, array_values( $object_keys ) ) ),
-	$base['panels_dir'],
-	$change['panels_dir']
+	siteorigin_rd_json( $checkout( $base ) ),
+	siteorigin_rd_json( $checkout( $change ) ),
+	$same_checkout ? ' (control: same checkout allowed)' : ''
 );
 foreach ( $changes as $line ) {
 	echo "  $line\n";
