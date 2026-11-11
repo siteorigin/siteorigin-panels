@@ -41,6 +41,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit( 1 );
 }
 
+if ( ! class_exists( 'WP_HTML_Tag_Processor' ) || ! method_exists( 'WP_HTML_Tag_Processor', 'paused_at_incomplete_token' ) ) {
+	fwrite( STDERR, "needs WordPress 6.5 or later, for WP_HTML_Tag_Processor\n" );
+	exit( 1 );
+}
+
 $siteorigin_rd_out = getenv( 'SO_RD_OUT' );
 if ( empty( $siteorigin_rd_out ) ) {
 	fwrite( STDERR, "set SO_RD_OUT to the snapshot file to write\n" );
@@ -51,12 +56,6 @@ if ( empty( $siteorigin_rd_out ) ) {
  * Builds one snapshot.
  */
 class SiteOrigin_Panels_Real_Data_Snapshot {
-
-	/**
-	 * One attribute in an opening tag: the space before it, its name, and its value with the quotes
-	 * around it.
-	 */
-	const ATTRIBUTE = '/(\s)([a-zA-Z_:.-]+)=("[^"]*"|\'[^\']*\')/';
 
 	/**
 	 * When the snapshot started, to tell uniqid() stamps from other hex.
@@ -365,78 +364,84 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
-	 * The quoted attributes of an opening tag, by lower-case name.
+	 * Whether the tag processor is on a contact form's hidden instance_hash input holding an
+	 * 8-character hash.
 	 *
-	 * @param string $opening An opening tag.
-	 *
-	 * @return array
-	 */
-	private function attributes( $opening ) {
-		preg_match_all( self::ATTRIBUTE, $opening, $found, PREG_SET_ORDER );
-		$attributes = array();
-		foreach ( $found as $attribute ) {
-			$attributes[ strtolower( $attribute[2] ) ] = substr( $attribute[3], 1, -1 );
-		}
-
-		return $attributes;
-	}
-
-	/**
-	 * Whether a tag is a contact form's hidden instance_hash input holding an 8-character hash.
-	 *
-	 * @param string $opening    The opening tag.
-	 * @param array  $attributes The tag's attributes.
+	 * @param WP_HTML_Tag_Processor $tags The processor, on a tag.
 	 *
 	 * @return bool
 	 */
-	private function is_contact_hash_field( $opening, array $attributes ) {
-		return preg_match( '/^<input\b/i', $opening ) &&
-			isset( $attributes['type'], $attributes['name'], $attributes['value'] ) &&
-			strtolower( $attributes['type'] ) === 'hidden' &&
-			preg_match( '/^instance_hash(?:-\d+)?$/', $attributes['name'] ) &&
-			preg_match( '/^[0-9a-f]{8}$/', $attributes['value'] );
+	private function is_contact_hash_input( WP_HTML_Tag_Processor $tags ) {
+		$type  = $tags->get_attribute( 'type' );
+		$name  = $tags->get_attribute( 'name' );
+		$value = $tags->get_attribute( 'value' );
+
+		return $tags->get_tag() === 'INPUT' &&
+			is_string( $type ) && strtolower( $type ) === 'hidden' &&
+			is_string( $name ) && preg_match( '/^instance_hash(?:-\d+)?$/', $name ) &&
+			is_string( $value ) && preg_match( '/^[0-9a-f]{8}$/', $value );
 	}
 
 	/**
-	 * Mask the Widgets Bundle's per-render values in one opening tag.
+	 * Mask the Widgets Bundle's per-render values, read from tags by WordPress's own tag processor,
+	 * so quoting, spacing and attribute order are read as a browser reads them and the text of
+	 * script and style elements is never taken for tags. A contact form's id comes before the field
+	 * holding its hash, so the hashes are collected first.
 	 *
-	 * @param string $opening An opening tag.
-	 * @param int    $now     The snapshot time.
-	 * @param array  $short   The first 4 characters of each contact form hash, as keys.
+	 * @param string $html Rendered HTML.
+	 * @param int    $now  The snapshot time.
 	 *
 	 * @return string
+	 *
+	 * @throws RuntimeException When the HTML ends inside a tag the processor can't finish.
 	 */
-	private function normalise_tag( $opening, $now, array $short ) {
-		$attributes = $this->attributes( $opening );
-		$classes    = isset( $attributes['class'] ) ? preg_split( '/\s+/', trim( $attributes['class'] ) ) : array();
-		$map        = in_array( 'sow-google-map-canvas', $classes, true );
-		$blog       = in_array( 'sow-blog', $classes, true );
-		$contact    = $this->is_contact_hash_field( $opening, $attributes );
+	private function normalise_tags( $html, $now ) {
+		$short = array();
+		$tags  = new WP_HTML_Tag_Processor( $html );
+		while ( $tags->next_tag( 'INPUT' ) ) {
+			if ( $this->is_contact_hash_input( $tags ) ) {
+				$short[ substr( $tags->get_attribute( 'value' ), 0, 4 ) ] = true;
+			}
+		}
 
-		return preg_replace_callback(
-			self::ATTRIBUTE,
-			function ( $attribute ) use ( $now, $short, $map, $blog, $contact ) {
-				$name  = strtolower( $attribute[2] );
-				$quote = $attribute[3][0];
-				$value = substr( $attribute[3], 1, -1 );
-				if ( $map && $name === 'data-options' ) {
-					$value = preg_replace_callback(
-						'/(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
+		$tags = new WP_HTML_Tag_Processor( $html );
+		while ( $tags->next_tag() ) {
+			if ( $tags->has_class( 'sow-google-map-canvas' ) ) {
+				$options = $tags->get_attribute( 'data-options' );
+				if ( is_string( $options ) ) {
+					$masked = $this->checked( preg_replace_callback(
+						'/("id":")([0-9a-f]{6})(")/',
 						function ( $id ) use ( $now ) {
 							return abs( hexdec( $id[2] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $id[1] . 'U' . $id[3] : $id[0];
 						},
-						$value
-					);
-				} elseif ( ( $blog && $name === 'data-hash' ) || ( $contact && $name === 'value' ) ) {
-					$value = preg_match( '/^[0-9a-f]{8}$/', $value ) ? 'H' : $value;
-				} elseif ( $name === 'id' && preg_match( '/^contact-form-([0-9a-f]{4})$/', $value, $id ) && isset( $short[ $id[1] ] ) ) {
-					$value = 'contact-form-H';
+						$options
+					) );
+					if ( $masked !== $options ) {
+						$tags->set_attribute( 'data-options', $masked );
+					}
 				}
+			}
 
-				return $attribute[1] . $attribute[2] . '=' . $quote . $value . $quote;
-			},
-			$opening
-		);
+			$hash = $tags->get_attribute( 'data-hash' );
+			if ( $tags->has_class( 'sow-blog' ) && is_string( $hash ) && preg_match( '/^[0-9a-f]{8}$/', $hash ) ) {
+				$tags->set_attribute( 'data-hash', 'H' );
+			}
+
+			if ( $this->is_contact_hash_input( $tags ) ) {
+				$tags->set_attribute( 'value', 'H' );
+			}
+
+			$id = $tags->get_attribute( 'id' );
+			if ( is_string( $id ) && preg_match( '/^contact-form-([0-9a-f]{4})$/', $id, $short_hash ) && isset( $short[ $short_hash[1] ] ) ) {
+				$tags->set_attribute( 'id', 'contact-form-H' );
+			}
+		}
+
+		if ( $tags->paused_at_incomplete_token() ) {
+			throw new RuntimeException( 'normalise stopped at an unfinished tag' );
+		}
+
+		return $tags->get_updated_html();
 	}
 
 	/**
@@ -464,29 +469,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			},
 			$html
 		) );
-		// The Widgets Bundle values are read from each opening tag's attributes, in any order and
-		// beside any other classes. A contact form's id comes before the field holding its hash, so
-		// the hashes are collected first.
-		// A tag runs to the first > outside quotes, single or double, as a quoted attribute may hold
-		// a raw >. Neither the tag nor a quoted value spans a <, which WordPress escapes in attributes,
-		// so a stray < in script text can't swallow the markup after it. Quantifiers are possessive
-		// so a long page can't exhaust the backtracking limit.
-		$tag   = '/<[a-zA-Z][^>"\'<]*+(?:(?:"[^"<]*+"|\'[^\'<]*+\')[^>"\'<]*+)*+>/';
-		$short = array();
-		$this->checked( preg_match_all( $tag, $html, $tags ) );
-		foreach ( $tags[0] as $opening ) {
-			$attributes = $this->attributes( $opening );
-			if ( $this->is_contact_hash_field( $opening, $attributes ) ) {
-				$short[ substr( $attributes['value'], 0, 4 ) ] = true;
-			}
-		}
-		$html = $this->checked( preg_replace_callback(
-			$tag,
-			function ( $opening ) use ( $now, $short ) {
-				return $this->normalise_tag( $opening[0], $now, $short );
-			},
-			$html
-		) );
+		$html = $this->normalise_tags( $html, $now );
 
 		return $this->checked( preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html ) );
 	}
