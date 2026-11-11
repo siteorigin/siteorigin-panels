@@ -13,8 +13,8 @@
  * Renders whose hash differs between any two base snapshots are noise and are left out; more base
  * snapshots catch rarer noise. Everything else that differs between base-1 and the change is
  * reported: renders, widget factory entries, the editor's widget list, how each stored widget class
- * resolves, whether its form says it is missing, and errors. A factory key that differs between base
- * snapshots is a per-request key: only its type is compared.
+ * resolves, whether its form says it is missing, and errors. A factory key WordPress makes from the
+ * widget object is compared by its type only, as it changes from one request to the next.
  *
  * Exits 1 when anything outside the noise changed, 0 when nothing did, 2 when the snapshots can't be
  * compared.
@@ -109,12 +109,15 @@ foreach ( array_keys( $base['renders'] + $change['renders'] ) as $id ) {
 	}
 }
 
-// Factory entries, grouped by class and id_base. Keys that differ between base snapshots change per
-// request, so for those only the key's type is kept.
+// Factory entries, grouped by class and id_base. A key WordPress makes from the object (an integer,
+// a 32-character hash, or 'spl_object_id:' and a number) changes with the objects built before it, so
+// only its type is compared; a class name or a plugin's own key is compared as it is.
 $factory = function ( $snapshot ) {
 	$entries = array();
 	foreach ( $snapshot['factory'] as $entry ) {
-		$entries[ $entry['class'] . ' ' . $entry['id_base'] ][] = array( $entry['key_type'], (string) $entry['key'] );
+		$key      = (string) $entry['key'];
+		$per_call = $entry['key_type'] === 'integer' || preg_match( '/^(?:[0-9a-f]{32}|spl_object_id:\d+)$/', $key );
+		$entries[ $entry['class'] . ' ' . $entry['id_base'] ][] = $entry['key_type'] . ' ' . ( $per_call ? '(object key)' : $key );
 	}
 	foreach ( $entries as &$list ) {
 		sort( $list );
@@ -122,32 +125,11 @@ $factory = function ( $snapshot ) {
 	ksort( $entries );
 	return $entries;
 };
-$base_factory     = $factory( $base );
-$per_request_keys = array();
-foreach ( array_slice( $snapshots, 1 ) as $again ) {
-	$again_factory = $factory( $again );
-	foreach ( array_keys( $base_factory + $again_factory ) as $id ) {
-		if ( ( isset( $base_factory[ $id ] ) ? $base_factory[ $id ] : null ) !== ( isset( $again_factory[ $id ] ) ? $again_factory[ $id ] : null ) ) {
-			$per_request_keys[ $id ] = true;
-		}
-	}
-}
-$key_types = function ( $list ) {
-	return $list === null ? null : array_map(
-		function ( $key ) {
-			return $key[0];
-		},
-		$list
-	);
-};
+$base_factory   = $factory( $base );
 $change_factory = $factory( $change );
 foreach ( array_keys( $base_factory + $change_factory ) as $id ) {
 	$before = isset( $base_factory[ $id ] ) ? $base_factory[ $id ] : null;
 	$after  = isset( $change_factory[ $id ] ) ? $change_factory[ $id ] : null;
-	if ( isset( $per_request_keys[ $id ] ) ) {
-		$before = $key_types( $before );
-		$after  = $key_types( $after );
-	}
 	if ( $before !== $after ) {
 		$changes[] = 'factory ' . siteorigin_rd_json( $id ) . ': ' . siteorigin_rd_json( $before ) . ' -> ' . siteorigin_rd_json( $after );
 	}
@@ -168,11 +150,10 @@ if ( $base['errors'] !== $change['errors'] ) {
 }
 
 printf(
-	"%s: renders=%d noise=%d per-request-keys=%d changes=%d\n%s -> %s%s\n",
+	"%s: renders=%d noise=%d changes=%d\n%s -> %s%s\n",
 	$base['site'],
 	count( $base['renders'] ),
 	count( $noise ),
-	count( $per_request_keys ),
 	count( $changes ),
 	siteorigin_rd_json( $checkout( $base ) ),
 	siteorigin_rd_json( $checkout( $change ) ),

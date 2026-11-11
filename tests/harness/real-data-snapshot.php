@@ -16,7 +16,8 @@
  * The snapshot records, for the site:
  * - which Page Builder checkout ran: its directory, and its git commit and uncommitted changes;
  * - every widget factory entry: its key, the key's type, its class and id_base;
- * - the widget list the editor receives (SiteOrigin_Panels_Admin::get_widgets(), with its filters);
+ * - the widget list the editor receives, every field of every entry (SiteOrigin_Panels_Admin::get_widgets(),
+ *   with its filters);
  * - every widget class stored in panels_data meta, in Layout Blocks (in posts and in widget areas)
  *   and in Layout Builder widgets, nested layouts included: whether it resolves, whether it is in
  *   the list, and whether its form says the widget is missing;
@@ -52,6 +53,13 @@ if ( empty( $siteorigin_rd_out ) ) {
 class SiteOrigin_Panels_Real_Data_Snapshot {
 
 	/**
+	 * When the snapshot started, to tell uniqid() stamps from other hex.
+	 *
+	 * @var int
+	 */
+	private $now;
+
+	/**
 	 * The snapshot.
 	 *
 	 * @return array
@@ -59,6 +67,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	public function take() {
 		global $wp_widget_factory;
 
+		$this->now  = time();
 		$panels_dir = class_exists( 'SiteOrigin_Panels' ) ? dirname( ( new ReflectionClass( 'SiteOrigin_Panels' ) )->getFileName() ) : null;
 		$snapshot   = array(
 			'site'       => home_url(),
@@ -90,11 +99,7 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 		$admin  = SiteOrigin_Panels_Admin::single();
 		$listed = $admin->get_widgets();
 		foreach ( $listed as $key => $entry ) {
-			$snapshot['listed'][ (string) $key ] = array(
-				'class'     => isset( $entry['class'] ) ? (string) $entry['class'] : null,
-				'title'     => isset( $entry['title'] ) ? $entry['title'] : null,
-				'installed' => ! empty( $entry['installed'] ),
-			);
+			$snapshot['listed'][ (string) $key ] = $entry;
 		}
 
 		$classes = array();
@@ -322,8 +327,11 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			if ( ! is_array( $widget ) ) {
 				continue;
 			}
-			if ( isset( $widget['panels_info']['class'] ) && is_string( $widget['panels_info']['class'] ) ) {
-				$classes[ $widget['panels_info']['class'] ] = true;
+			// Older layouts keep the class under info rather than panels_info.
+			foreach ( array( 'panels_info', 'info' ) as $info ) {
+				if ( isset( $widget[ $info ]['class'] ) && is_string( $widget[ $info ]['class'] ) ) {
+					$classes[ $widget[ $info ]['class'] ] = true;
+				}
 			}
 			if ( ! empty( $widget['panels_data'] ) ) {
 				$this->collect_classes( $widget['panels_data'], $classes, $depth + 1 );
@@ -332,27 +340,30 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
-	 * Mask values that change on every render: long hex ids, short hex hashes in attributes (such as a
-	 * widget's instance_hash and data-hash), nonces, timestamps and numeric ids. Long numbers are
-	 * masked only inside attribute values, so numbers in the page's text are still compared.
+	 * Mask the values seen to change between two renders of the same post, and nothing else, so any
+	 * other difference in a render is compared:
+	 * - uniqid() stamps in layout, row, cell and widget ids and selectors: 13 hex digits whose first
+	 *   8 are the current Unix time, with any more-entropy digits after them;
+	 * - the contact form's per-render hash: its instance_hash fields, data-hash and contact-form-xxxx id;
+	 * - nonces in fields named for them.
 	 *
 	 * @param string $html Rendered HTML.
 	 *
 	 * @return string
 	 */
 	private function normalise( $html ) {
-		$html = preg_replace( '/[0-9a-f]{13,}/', 'X', $html );
-		$html = preg_replace( '/="[0-9a-f]{8}"/', '="H"', $html );
-		$html = preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
+		$now  = $this->now;
 		$html = preg_replace_callback(
-			'/="[^"<>]*"/',
-			function ( $value ) {
-				return preg_replace( '/\b\d{9,}\b/', 'T', $value[0] );
+			'/[0-9a-f]{13}(?:\.?\d{1,10})?/',
+			function ( $stamp ) use ( $now ) {
+				return abs( hexdec( substr( $stamp[0], 0, 8 ) ) - $now ) < 2 * DAY_IN_SECONDS ? 'U' : $stamp[0];
 			},
 			$html
 		);
+		$html = preg_replace( '/(name="instance_hash(?:-\d+)?"\s+value=|data-hash=)"[0-9a-f]{8}"/', '$1"H"', $html );
+		$html = preg_replace( '/\bcontact-form-[0-9a-f]{4}\b/', 'contact-form-H', $html );
 
-		return preg_replace( '/(id|for|aria-[a-z]+|data-[a-z-]+)="([a-z_-]*?)-?\d{3,}([^"]*)"/i', '$1="$2-#$3"', $html );
+		return preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
 	}
 }
 
