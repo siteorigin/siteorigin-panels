@@ -363,8 +363,8 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 * other difference in a render is compared:
 	 * - uniqid() stamps in layout, row, cell and widget ids and selectors: 13 hex digits whose first
 	 *   8 are the current Unix time, with any more-entropy digits after them, and a Google Map
-	 *   widget's map id, the first 6 of those digits (substr( uniqid(), 0, 6 )), which changes every
-	 *   256 seconds;
+	 *   widget's generated map id in its canvas's data-options, the first 6 of those digits
+	 *   (substr( uniqid(), 0, 6 )), which changes every 256 seconds;
 	 * - the Widgets Bundle's per-render storage hash, only where it is written: a contact form's
 	 *   instance_hash field and its contact-form-xxxx id (the hash's first 4 characters), and a blog
 	 *   widget's data-hash on its sow-blog element;
@@ -383,10 +383,11 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			},
 			$html
 		);
+		// Only in the data-options of a Google Map canvas, the map_data JSON that holds the id.
 		$html = preg_replace_callback(
-			'/(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
+			'/(<div\s+class="sow-google-map-canvas"[^>]*?\sdata-options="[^"]*?)(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
 			function ( $map ) use ( $now ) {
-				return abs( hexdec( $map[2] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $map[1] . 'U' . $map[3] : $map[0];
+				return abs( hexdec( $map[3] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $map[1] . $map[2] . 'U' . $map[4] : $map[0];
 			},
 			$html
 		);

@@ -59,6 +59,11 @@ $snapshots = array_map(
 		if ( ! is_array( $data ) || ! isset( $data['renders'], $data['factory'], $data['listed'], $data['stored'], $data['errors'] ) ) {
 			siteorigin_rd_refuse( "not a snapshot: $path" );
 		}
+		foreach ( array( 'renders', 'factory', 'listed', 'stored', 'errors' ) as $section ) {
+			if ( ! is_array( $data[ $section ] ) ) {
+				siteorigin_rd_refuse( "not a snapshot, $section is not a list: $path" );
+			}
+		}
 		foreach ( $data['factory'] as $entry ) {
 			if ( ! is_array( $entry ) || ! array_key_exists( 'object_key', $entry ) ) {
 				siteorigin_rd_refuse( "a factory entry has no object_key, so the snapshot is from an older harness: $path" );
