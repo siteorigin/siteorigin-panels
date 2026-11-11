@@ -99,11 +99,11 @@ class GetWidgetsInstanceKeyFuzzTest extends TestCase {
 	}
 
 	/**
-	 * A factory key of one of thirteen shapes for this widget.
+	 * A factory key of one of fifteen shapes for this widget.
 	 */
 	private static function random_key( $class, $widget, $other, $n ) {
 		$id = spl_object_id( $widget );
-		switch ( mt_rand( 0, 12 ) ) {
+		switch ( mt_rand( 0, 14 ) ) {
 			case 0:
 				return $class;
 			case 1:
@@ -129,6 +129,11 @@ class GetWidgetsInstanceKeyFuzzTest extends TestCase {
 				return $other !== $widget ? 'spl_object_id:' . spl_object_id( $other ) : 'Plugin_Key_B_' . $n;
 			case 11:
 				return 'SPL_OBJECT_ID:' . $id;
+			case 12:
+				// Any 32-character hash counts, not only this widget's own.
+				return spl_object_hash( $other !== $widget ? $other : new \stdClass() );
+			case 13:
+				return 'Plugin_Key_' . md5( (string) mt_rand() );
 			default:
 				return 'spl_object_id:' . $id . 'x';
 		}
@@ -154,16 +159,18 @@ class GetWidgetsInstanceKeyFuzzTest extends TestCase {
 				$factory[ self::random_key( $class, $widget, $other, $n ) ] = $widget;
 			}
 
+			// The name keeps its type: a plugin's integer key stays an integer.
 			$expected = array();
 			foreach ( $factory as $key => $widget ) {
-				$expected[ (string) self::expected_name( $key, $widget ) ] = $widget->name;
+				$name = self::expected_name( $key, $widget );
+				$expected[ (string) $name ] = array( $name, $widget->name );
 			}
 
 			$GLOBALS['wp_widget_factory'] = (object) array( 'widgets' => $factory );
 			$listed = array();
 			foreach ( $admin->get_widgets() as $key => $entry ) {
-				$this->assertSame( (string) $key, (string) $entry['class'], "Seed $seed iteration $iteration: a widget's class matches its list key." );
-				$listed[ (string) $key ] = $entry['title'];
+				$this->assertSame( $key, $entry['class'], "Seed $seed iteration $iteration: a widget's class matches its list key." );
+				$listed[ (string) $key ] = array( $entry['class'], $entry['title'] );
 			}
 
 			ksort( $expected );
