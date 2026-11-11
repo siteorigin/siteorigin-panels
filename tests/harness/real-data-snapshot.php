@@ -283,35 +283,60 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 * @param array    $snapshot The snapshot.
 	 */
 	private function record_render( $id, $type, $render, array &$snapshot ) {
-		// Every render keeps a hash, so a page that throws or can't be masked is still compared:
-		// what it printed before throwing plus the error, or its unmasked HTML.
-		$level = ob_get_level();
-		$error = '';
-		ob_start();
+		// Every render keeps a hash: what it printed, plus the error if it threw. A render that can't
+		// be masked keeps its unmasked hash, and real-data-compare.php refuses the comparison.
+		//
+		// The capture buffer's handler keeps every chunk it is given, so output the render flushes
+		// with ob_flush() is captured too, and returns nothing, so none of it reaches the page. A
+		// chunk handed over to be cleaned is output the render threw away. Once the render is
+		// abandoned, the handler passes output on, so the error that stops the snapshot is seen.
+		$level     = ob_get_level();
+		$error     = '';
+		$html      = '';
+		$closed    = false;
+		$capturing = true;
+		ob_start(
+			function ( $chunk, $phase ) use ( &$html, &$closed, &$capturing ) {
+				if ( ! $capturing ) {
+					return $chunk;
+				}
+				if ( ! ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) ) {
+					$html .= $chunk;
+				}
+				if ( $phase & PHP_OUTPUT_HANDLER_FINAL ) {
+					$closed = true;
+				}
+				return '';
+			}
+		);
 		try {
 			$render();
 		} catch ( Throwable $e ) {
 			$error                = get_class( $e ) . ': ' . $e->getMessage();
 			$snapshot['errors'][] = "render $id: $error";
 		}
-		// Collect every buffer the render opened. A buffer that can't be removed would leave the
-		// level unchanged, so stop rather than loop.
-		$html = '';
+		if ( $closed ) {
+			$capturing = false;
+			throw new RuntimeException( "render $id closed the buffer capturing it, so later output escaped" );
+		}
+		// Flush every buffer the render left open into the capture buffer, then the capture buffer
+		// into its handler. A buffer that can't be removed would leave the level unchanged, so stop
+		// rather than loop.
 		while ( ob_get_level() > $level ) {
 			$before = ob_get_level();
-			$output = ob_get_clean();
+			ob_end_flush();
 			if ( ob_get_level() >= $before ) {
+				$capturing = false;
 				throw new RuntimeException( "render $id left an output buffer that can't be removed" );
 			}
-			$html = $output . $html;
 		}
 
 		try {
 			$normalised = $this->normalise( $html );
 		} catch ( Throwable $e ) {
-			$normalised           = $html;
 			// real-data-compare.php refuses a comparison with this error, as an unmasked render can
 			// differ between base snapshots and drop out as noise.
+			$normalised           = $html;
 			$snapshot['errors'][] = "normalise $id: " . $e->getMessage();
 		}
 
