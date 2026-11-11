@@ -41,8 +41,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit( 1 );
 }
 
-if ( ! class_exists( 'WP_HTML_Tag_Processor' ) || ! method_exists( 'WP_HTML_Tag_Processor', 'paused_at_incomplete_token' ) ) {
-	fwrite( STDERR, "needs WordPress 6.5 or later, for WP_HTML_Tag_Processor\n" );
+if ( ! class_exists( 'WP_HTML_Tag_Processor' ) || ! method_exists( 'WP_HTML_Tag_Processor', 'has_class' ) ) {
+	fwrite( STDERR, "needs WordPress 6.4 or later, for WP_HTML_Tag_Processor::has_class()\n" );
 	exit( 1 );
 }
 
@@ -283,31 +283,42 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 * @param array    $snapshot The snapshot.
 	 */
 	private function record_render( $id, $type, $render, array &$snapshot ) {
+		// Every render keeps a hash, so a page that throws or can't be masked is still compared:
+		// what it printed before throwing plus the error, or its unmasked HTML.
 		$level = ob_get_level();
+		$error = '';
+		ob_start();
 		try {
-			ob_start();
 			$render();
-			$html       = ob_get_clean();
-			$normalised = $this->normalise( $html );
-
-			$snapshot['renders'][ $id ] = array(
-				'type'    => $type,
-				'bytes'   => strlen( $html ),
-				'hash'    => md5( $normalised ),
-				'widgets' => substr_count( $html, 'class="so-panel widget' ),
-			);
-
-			// Keep the normalised HTML when asked, to read what a flagged render changed.
-			if ( getenv( 'SO_RD_HTML' ) && is_dir( getenv( 'SO_RD_HTML' ) ) ) {
-				file_put_contents( getenv( 'SO_RD_HTML' ) . "/$id.html", $normalised );
-			}
 		} catch ( Throwable $e ) {
-			while ( ob_get_level() > $level ) {
-				ob_end_clean();
-			}
-			$snapshot['errors'][] = "render $id: " . get_class( $e ) . ': ' . $e->getMessage();
+			$error                = get_class( $e ) . ': ' . $e->getMessage();
+			$snapshot['errors'][] = "render $id: $error";
+		}
+		$html = '';
+		while ( ob_get_level() > $level ) {
+			$html = ob_get_clean() . $html;
+		}
+
+		try {
+			$normalised = $this->normalise( $html );
+		} catch ( Throwable $e ) {
+			$normalised           = $html;
+			$snapshot['errors'][] = "normalise $id: " . $e->getMessage();
+		}
+
+		$snapshot['renders'][ $id ] = array(
+			'type'    => $type,
+			'bytes'   => strlen( $html ),
+			'hash'    => md5( $normalised . ( $error === '' ? '' : "\n<!-- render error: $error -->" ) ),
+			'widgets' => substr_count( $html, 'class="so-panel widget' ),
+		);
+
+		// Keep the normalised HTML when asked, to read what a flagged render changed.
+		if ( getenv( 'SO_RD_HTML' ) && is_dir( getenv( 'SO_RD_HTML' ) ) ) {
+			file_put_contents( getenv( 'SO_RD_HTML' ) . "/$id.html", $normalised );
 		}
 	}
+
 
 	/**
 	 * Collect the classes of every Layout Block in some block content.
@@ -393,7 +404,6 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	 *
 	 * @return string
 	 *
-	 * @throws RuntimeException When the HTML ends inside a tag the processor can't finish.
 	 */
 	private function normalise_tags( $html, $now ) {
 		$short = array();
@@ -437,10 +447,8 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			}
 		}
 
-		if ( $tags->paused_at_incomplete_token() ) {
-			throw new RuntimeException( 'normalise stopped at an unfinished tag' );
-		}
-
+		// At an unfinished tag (a trailing <!-- or an unclosed <script>) the processor stops; the HTML
+		// before it is masked and the rest is kept as written, so it is still compared.
 		return $tags->get_updated_html();
 	}
 
@@ -475,7 +483,8 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
-	 * Stop on a failed regex, so the render is recorded as an error rather than hashed as empty.
+	 * Stop on a failed regex, so the render is hashed unmasked and recorded as an error rather than
+	 * hashed as empty.
 	 *
 	 * @param mixed $result A preg function's result.
 	 *
