@@ -359,6 +359,77 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 	}
 
 	/**
+	 * The double-quoted attributes of an opening tag, by lower-case name.
+	 *
+	 * @param string $opening An opening tag.
+	 *
+	 * @return array
+	 */
+	private function attributes( $opening ) {
+		preg_match_all( '/\s([a-zA-Z_:.-]+)="([^"]*)"/', $opening, $found, PREG_SET_ORDER );
+		$attributes = array();
+		foreach ( $found as $attribute ) {
+			$attributes[ strtolower( $attribute[1] ) ] = $attribute[2];
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Whether a tag is a contact form's hidden instance_hash field holding an 8-character hash.
+	 *
+	 * @param array $attributes The tag's attributes.
+	 *
+	 * @return bool
+	 */
+	private function is_contact_hash_field( array $attributes ) {
+		return isset( $attributes['name'], $attributes['value'] ) &&
+			preg_match( '/^instance_hash(?:-\d+)?$/', $attributes['name'] ) &&
+			preg_match( '/^[0-9a-f]{8}$/', $attributes['value'] );
+	}
+
+	/**
+	 * Mask the Widgets Bundle's per-render values in one opening tag.
+	 *
+	 * @param string $opening An opening tag.
+	 * @param int    $now     The snapshot time.
+	 * @param array  $short   The first 4 characters of each contact form hash, as keys.
+	 *
+	 * @return string
+	 */
+	private function normalise_tag( $opening, $now, array $short ) {
+		$attributes = $this->attributes( $opening );
+		$classes    = isset( $attributes['class'] ) ? preg_split( '/\s+/', trim( $attributes['class'] ) ) : array();
+		$map        = in_array( 'sow-google-map-canvas', $classes, true );
+		$blog       = in_array( 'sow-blog', $classes, true );
+		$contact    = $this->is_contact_hash_field( $attributes );
+
+		return preg_replace_callback(
+			'/(\s)([a-zA-Z_:.-]+)="([^"]*)"/',
+			function ( $attribute ) use ( $now, $short, $map, $blog, $contact ) {
+				$name  = strtolower( $attribute[2] );
+				$value = $attribute[3];
+				if ( $map && $name === 'data-options' ) {
+					$value = preg_replace_callback(
+						'/(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
+						function ( $id ) use ( $now ) {
+							return abs( hexdec( $id[2] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $id[1] . 'U' . $id[3] : $id[0];
+						},
+						$value
+					);
+				} elseif ( ( $blog && $name === 'data-hash' ) || ( $contact && $name === 'value' ) ) {
+					$value = preg_match( '/^[0-9a-f]{8}$/', $value ) ? 'H' : $value;
+				} elseif ( $name === 'id' && preg_match( '/^contact-form-([0-9a-f]{4})$/', $value, $id ) && isset( $short[ $id[1] ] ) ) {
+					$value = 'contact-form-H';
+				}
+
+				return $attribute[1] . $attribute[2] . '="' . $value . '"';
+			},
+			$opening
+		);
+	}
+
+	/**
 	 * Mask the values seen to change between two renders of the same post, and nothing else, so any
 	 * other difference in a render is compared:
 	 * - uniqid() stamps in layout, row, cell and widget ids and selectors: 13 hex digits whose first
@@ -383,22 +454,25 @@ class SiteOrigin_Panels_Real_Data_Snapshot {
 			},
 			$html
 		);
-		// Only in the data-options of a Google Map canvas, the map_data JSON that holds the id.
+		// The Widgets Bundle values are read from each opening tag's attributes, in any order and
+		// beside any other classes. A contact form's id comes before the field holding its hash, so
+		// the hashes are collected first.
+		$tag   = '/<[a-zA-Z][^>]*>/';
+		$short = array();
+		preg_match_all( $tag, $html, $tags );
+		foreach ( $tags[0] as $opening ) {
+			$attributes = $this->attributes( $opening );
+			if ( $this->is_contact_hash_field( $attributes ) ) {
+				$short[ substr( $attributes['value'], 0, 4 ) ] = true;
+			}
+		}
 		$html = preg_replace_callback(
-			'/(<div\s+class="sow-google-map-canvas"[^>]*?\sdata-options="[^"]*?)(&quot;id&quot;:&quot;)([0-9a-f]{6})(&quot;)/',
-			function ( $map ) use ( $now ) {
-				return abs( hexdec( $map[3] ) * 256 - $now ) < 2 * DAY_IN_SECONDS ? $map[1] . $map[2] . 'U' . $map[4] : $map[0];
+			$tag,
+			function ( $opening ) use ( $now, $short ) {
+				return $this->normalise_tag( $opening[0], $now, $short );
 			},
 			$html
 		);
-		preg_match_all( '/name="instance_hash(?:-\d+)?"\s+value="([0-9a-f]{8})"/', $html, $contact );
-		$ids = array();
-		foreach ( $contact[1] as $hash ) {
-			$ids[ 'id="contact-form-' . substr( $hash, 0, 4 ) . '"' ] = 'id="contact-form-H"';
-		}
-		$html = strtr( $html, $ids );
-		$html = preg_replace( '/(name="instance_hash(?:-\d+)?"\s+value=)"[0-9a-f]{8}"/', '$1"H"', $html );
-		$html = preg_replace( '/(<div\s+class="sow-blog [^"]*"[^>]*?\sdata-hash=)"[0-9a-f]{8}"/', '$1"H"', $html );
 
 		return preg_replace( '/(nonce|_wpnonce|data-nonce)(["\'=:\s]+(?:value=["\'])?)[0-9a-zA-Z]{8,12}/', '$1$2N', $html );
 	}
