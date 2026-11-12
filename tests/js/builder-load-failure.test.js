@@ -318,11 +318,11 @@ test( 'concatenating onto an unparseable source loads the new layout alone', fun
 	assert.equal( model.getPanelsData().widgets.length, 3 );
 } );
 
-test( 'an empty string, null or the string "null" is a failed load, wherever the layout comes from', function () {
+test( 'an empty string, `""`, null or the string "null" is a failed load, wherever the layout comes from', function () {
 	// Pane setup clears a field holding `""` before it loads, but prebuilt
 	// layouts, history and imports reach the model directly, and none of these
 	// values is a layout there.
-	[ '', null, 'null' ].forEach( function ( bad ) {
+	[ '', '""', null, 'null' ].forEach( function ( bad ) {
 		const model = builder();
 		const events = countEvents( model );
 

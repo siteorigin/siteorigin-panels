@@ -352,9 +352,9 @@ test.describe( 'pane widgets that hold a layout per pane', () => {
 		expectNoPageErrors( ctx.errors );
 	} );
 
-	test( '`""`, null and "null" handed straight to the builder still lock', async () => {
+	test( 'an empty string, `""`, null and "null" handed straight to the builder still lock', async () => {
 		const { page } = ctx;
-		for ( const value of [ '', null, 'null' ] ) {
+		for ( const value of [ '', '""', null, 'null' ] ) {
 			const root = await openClassicBuilder( page, { postType: 'page' } );
 			// The call the Prebuilt and History dialogs make with the layout they hold.
 			const state = await page.evaluate( ( v ) => {

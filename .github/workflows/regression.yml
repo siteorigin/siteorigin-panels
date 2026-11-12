@@ -48,9 +48,11 @@ jobs:
           npm ci
           npx gulp css browserify
       # The pane fuzz spec (tests/e2e/builder-pane-fuzz.test.js) compares this revision's builder script with the base revision's.
+      # Pull requests only: elsewhere there is no earlier revision to compare with, and the spec is skipped.
       - name: Build the base revision's builder script for the pane fuzz spec
+        if: github.event_name == 'pull_request'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           mkdir -p tests/cache/fuzz/src

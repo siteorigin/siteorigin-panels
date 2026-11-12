@@ -60,14 +60,9 @@ module.exports = function ( config, force ) {
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, dialog );
 		}
 
-		// Pane widgets that JSON-encode an empty pane, such as tab and accordion
-		// widgets that hold a layout per pane, render `""`. That value holds no
-		// layout, so the pane starts as an empty builder, the same as an empty
-		// field. Only this exact value qualifies: `null`, other strings and
-		// partial layouts still fail to load and keep what is stored. The check
-		// lives here rather than in setDataField(), which also loads the main
-		// builder and form values written by other code.
-		// setDataField() reads the first match, so only that one is checked.
+		// Pane widgets that JSON-encode an empty pane render `""`, which holds no
+		// layout: treat exactly that value as an empty field. Anything else loads
+		// or fails as usual. setDataField() reads the first match, so only it is checked.
 		var $dataField = $$.find( 'input.panels-data' );
 		if ( $dataField.first().val() === '""' ) {
 			$dataField.first().val( '' );

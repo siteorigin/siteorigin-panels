@@ -1,7 +1,8 @@
 /**
  * Pane setup fuzz (#1464). Generated field values go through pane setup
  * (jQuery.fn.soPanelsSetupBuilderWidget) on the base revision's builder script and on this one,
- * inside a real Page Builder widget dialog, the place a third-party pane widget's pane is set up.
+ * inside a real Page Builder widget dialog, the place a third-party pane widget's pane is set up, and
+ * under a .widget-content ancestor, the branch pane setup takes on the widgets screen.
  *
  * Only one value may behave differently: a field holding exactly `""` opens as an empty, unlocked
  * builder. Every other value must load, lock or stay empty exactly as it does on the base revision:
@@ -10,7 +11,8 @@
  *
  * The base script is tests/cache/fuzz/base.js, built from the base revision (CI builds it from the
  * pull request's base; locally: git archive <ref> js/siteorigin-panels, then browserify its main.js).
- * PANELS_FUZZ_COUNT sets the number of generated values (default 2000) and PANELS_FUZZ_SEED the seed.
+ * Without that file the spec is skipped. PANELS_FUZZ_COUNT sets the number of generated values
+ * (default 2000) and PANELS_FUZZ_SEED the seed.
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
@@ -252,8 +254,11 @@ test.describe( 'pane setup fuzz against the base revision', () => {
 	let postId;
 	const values = generate( COUNT, SEED );
 
+	// CI builds the base script for pull requests only: elsewhere there is no earlier revision to
+	// compare with, and comparing the script with itself would prove nothing.
+	test.skip( ! fs.existsSync( BASE_SCRIPT ), `No base revision script at ${ BASE_SCRIPT }.` );
+
 	test.beforeAll( async ( { browser } ) => {
-		expect( fs.existsSync( BASE_SCRIPT ), `Build the base revision's builder script into ${ BASE_SCRIPT } first.` ).toBe( true );
 		admin = await adminLogin();
 		ctx = await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
 		postId = await createPost( admin, 'page', { title: 'Pane fuzz' } );
@@ -275,36 +280,63 @@ test.describe( 'pane setup fuzz against the base revision', () => {
 	} );
 
 	/**
-	 * Run values through pane setup on one revision, a batch per page load.
+	 * Open the editor on one revision, with the pane widget's dialog open when the context needs it.
+	 * A slow request can leave the dialog without its form, so a page load is tried up to three times.
 	 */
-	const runAll = async ( revision, list, context ) => {
+	const openRevision = async ( revision, context ) => {
 		const { page } = ctx;
-		const records = [];
-		for ( let start = 0; start < list.length; start += BATCH ) {
-			await openClassicBuilder( page, { postId } );
-			if ( revision === 'base' ) {
-				await page.goto( page.url() + '&panels_e2e_bundle=base' );
-				await expect( page.locator( '#siteorigin-panels-metabox .so-builder-toolbar' ).first() ).toBeVisible( { timeout: 30000 } );
+		for ( let attempt = 1; ; attempt++ ) {
+			try {
+				await openClassicBuilder( page, { postId } );
+				if ( revision === 'base' ) {
+					await page.goto( page.url() + '&panels_e2e_bundle=base' );
+					await expect( page.locator( '#siteorigin-panels-metabox .so-builder-toolbar' ).first() ).toBeVisible( { timeout: 30000 } );
+				}
+				if ( context === 'dialog' ) {
+					const dialog = await openWidgetDialog( page.locator( '#siteorigin-panels-metabox .so-widget' ).first(), page );
+					await expect( dialog.locator( '.panels-e2e-add-pane' ) ).toBeVisible( { timeout: 15000 } );
+				}
+				break;
+			} catch ( error ) {
+				if ( attempt === 3 ) {
+					throw error;
+				}
 			}
-			const script = await page.evaluate( () => ( document.getElementById( 'so-panels-admin-js' ) || {} ).src || '' );
-			expect( script, revision ).toContain( revision === 'base' ? 'tests/cache/fuzz/base.js' : 'js/siteorigin-panels' );
-
-			if ( context === 'dialog' ) {
-				const dialog = await openWidgetDialog( page.locator( '#siteorigin-panels-metabox .so-widget' ).first(), page );
-				await expect( dialog.locator( '.panels-e2e-add-pane' ) ).toBeVisible( { timeout: 15000 } );
-			}
-			records.push( ...await page.evaluate( runInPage, { values: list.slice( start, start + BATCH ), context } ) );
 		}
-
-		return records;
+		const script = await page.evaluate( () => ( document.getElementById( 'so-panels-admin-js' ) || {} ).src || '' );
+		expect( script, revision ).toContain( revision === 'base' ? 'tests/cache/fuzz/base.js' : 'js/siteorigin-panels' );
 	};
 
-	const compare = ( list, base, candidate ) => {
+	/**
+	 * Run the values a batch at a time, each batch on the base revision and then on this one, and
+	 * compare as it goes. Returns the problems and the candidate's records.
+	 */
+	const runAll = async ( list, context ) => {
+		const { page } = ctx;
+		const problems = [];
+		const candidates = [];
+		for ( let start = 0; start < list.length; start += BATCH ) {
+			const batch = list.slice( start, start + BATCH );
+			await openRevision( 'base', context );
+			const base = await page.evaluate( runInPage, { values: batch, context } );
+			await openRevision( 'candidate', context );
+			const candidate = await page.evaluate( runInPage, { values: batch, context } );
+			problems.push( ...compare( batch, base, candidate, start ) );
+			candidates.push( ...candidate );
+			if ( problems.length ) {
+				break;
+			}
+		}
+
+		return { problems, candidates };
+	};
+
+	const compare = ( list, base, candidate, offset = 0 ) => {
 		const problems = [];
 		list.forEach( ( value, i ) => {
 			const b = base[ i ];
 			const c = candidate[ i ];
-			const show = ( message ) => problems.push( { seed: SEED, index: i, value: JSON.stringify( value ).slice( 0, 160 ), message, base: b, candidate: c } );
+			const show = ( message ) => problems.push( { seed: SEED, index: offset + i, value: JSON.stringify( value ).slice( 0, 160 ), message, base: b, candidate: c } );
 
 			if ( c.error || c.threw || c.unknownIds ) {
 				show( 'the candidate record is not usable' );
@@ -324,24 +356,22 @@ test.describe( 'pane setup fuzz against the base revision', () => {
 
 	test( `${ values.length } values in a widget dialog behave as on the base revision, except \`""\``, async () => {
 		test.setTimeout( Math.max( 120000, values.length * 60 ) );
-		const base = await runAll( 'base', values, 'dialog' );
-		const candidate = await runAll( 'candidate', values, 'dialog' );
-		const problems = compare( values, base, candidate );
+		const { problems, candidates } = await runAll( values, 'dialog' );
 
-		expect( problems.slice( 0, 5 ), `${ problems.length } of ${ values.length } values (seed ${ SEED })` ).toEqual( [] );
+		expect( problems.slice( 0, 5 ), `${ problems.length } problems, first at value ${ problems.length ? problems[ 0 ].index : '-' } of ${ values.length } (seed ${ SEED })` ).toEqual( [] );
+		expect( candidates ).toHaveLength( values.length );
 		// Sanity: the run saw every outcome.
-		const kinds = new Set( candidate.map( ( r ) => ( r.failed ? ( r.trusted ? 'locked' : 'unparseable' ) : ( r.rows ? 'loaded' : 'empty' ) ) ) );
+		const kinds = new Set( candidates.map( ( r ) => ( r.failed ? ( r.trusted ? 'locked' : 'unparseable' ) : ( r.rows ? 'loaded' : 'empty' ) ) ) );
 		expect( [ ...kinds ].sort() ).toEqual( [ 'empty', 'loaded', 'locked', 'unparseable' ] );
 		expectNoPageErrors( ctx.errors );
 	} );
 
-	test( `${ Math.min( WIDGETS_SCREEN_COUNT, values.length ) } values in a widgets screen form behave as on the base revision, except \`""\``, async () => {
+	test( `${ Math.min( WIDGETS_SCREEN_COUNT, values.length ) } values set up under a .widget-content ancestor (the widgets screen branch) behave as on the base revision, except \`""\``, async () => {
 		const list = values.slice( 0, WIDGETS_SCREEN_COUNT );
-		const base = await runAll( 'base', list, 'widgets-screen' );
-		const candidate = await runAll( 'candidate', list, 'widgets-screen' );
-		const problems = compare( list, base, candidate );
+		const { problems, candidates } = await runAll( list, 'widgets-screen' );
 
-		expect( problems.slice( 0, 5 ), `${ problems.length } of ${ list.length } values (seed ${ SEED })` ).toEqual( [] );
+		expect( problems.slice( 0, 5 ), `${ problems.length } problems of ${ list.length } values (seed ${ SEED })` ).toEqual( [] );
+		expect( candidates ).toHaveLength( list.length );
 		expectNoPageErrors( ctx.errors );
 	} );
 } );
