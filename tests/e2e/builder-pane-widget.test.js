@@ -4,6 +4,8 @@
  * A new or empty pane opens as an empty builder, and its content saves. Everything that holds or
  * might hold content still locks and keeps what is stored: a pane or page whose layout fails
  * part-way through loading, and `""` reaching the builder any other way than pane setup (#1464).
+ * Pane setup runs for a nested builder however its widget arrives: added, pasted, restored by History
+ * or inserted by a prebuilt layout.
  */
 const { expect, test } = require( '@playwright/test' );
 
@@ -304,6 +306,49 @@ test.describe( 'pane widgets that hold a layout per pane', () => {
 		const dialog = await openWidgetDialog( root.locator( '.so-widget' ).first(), page );
 		await expect.poll( () => paneStates( dialog, '.siteorigin-page-builder-widget' ) ).toEqual( [ EMPTY_UNLOCKED ] );
 		await closeDialog( page );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	const copyAndPaste = async ( root, page ) => {
+		const widget = root.locator( '.so-widget' ).first();
+		await widget.click( { button: 'right' } );
+		await page.getByText( 'Copy Widget', { exact: true } ).filter( { visible: true } ).first().click();
+		await widget.click( { button: 'right' } );
+		await page.getByText( 'Paste Widget', { exact: true } ).filter( { visible: true } ).first().click();
+		await expect( root.locator( '.so-widget' ) ).toHaveCount( 2 );
+	};
+
+	test( 'a Layout Builder widget pasted with an inner layout of `""` opens empty', async () => {
+		const { page } = ctx;
+		const id = await newPage( 'Pane widget: paste empty', layoutWidgetPage( '""' ), false );
+		const root = await openClassicBuilder( page, { postId: id } );
+		await copyAndPaste( root, page );
+
+		const dialog = await openWidgetDialog( root.locator( '.so-widget' ).nth( 1 ), page );
+		await expect.poll( () => paneStates( dialog, '.siteorigin-page-builder-widget' ) ).toEqual( [ EMPTY_UNLOCKED ] );
+		await closeDialog( page );
+		expectNoPageErrors( ctx.errors );
+	} );
+
+	test( 'a Layout Builder widget pasted with an inner layout that fails part-way through loading locks and keeps it', async () => {
+		const { page } = ctx;
+		const id = await newPage( 'Pane widget: paste failing', layoutWidgetPage( failingLayout() ) );
+		const seeded = ( await rawStorage( admin, id ) ).meta.widgets[ 0 ].panels_data;
+		const root = await openClassicBuilder( page, { postId: id } );
+		await copyAndPaste( root, page );
+
+		const dialog = await openWidgetDialog( root.locator( '.so-widget' ).nth( 1 ), page );
+		await expect.poll( () => paneStates( dialog, '.siteorigin-page-builder-widget' ) ).toEqual( [
+			{ value: expect.stringContaining( 'Keep 6' ), disabled: true, failed: true, notice: true, rows: 5, widgets: 2 },
+		] );
+		await closeDialog( page );
+		await save( page );
+
+		const widgets = ( await rawStorage( admin, id ) ).meta.widgets;
+		expect( widgets ).toHaveLength( 2 );
+		for ( const widget of widgets ) {
+			expect( withoutEmulatorKeys( widget.panels_data ) ).toEqual( seeded );
+		}
 		expectNoPageErrors( ctx.errors );
 	} );
 
