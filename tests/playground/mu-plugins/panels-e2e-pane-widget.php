@@ -207,3 +207,26 @@ add_filter(
 		return $layouts;
 	}
 );
+
+// The pane fuzz spec loads the base revision's builder script, built into
+// tests/cache/fuzz/base.js, when an admin URL carries panels_e2e_bundle=base.
+add_filter(
+	'script_loader_src',
+	function ( $src, $handle ) {
+		if (
+			$handle !== 'so-panels-admin' ||
+			! is_admin() ||
+			! isset( $_GET['panels_e2e_bundle'] ) ||
+			$_GET['panels_e2e_bundle'] !== 'base' ||
+			! defined( 'SITEORIGIN_PANELS_BASE_FILE' )
+		) {
+			return $src;
+		}
+
+		$file = plugin_dir_path( SITEORIGIN_PANELS_BASE_FILE ) . 'tests/cache/fuzz/base.js';
+
+		return file_exists( $file ) ? plugins_url( 'tests/cache/fuzz/base.js', SITEORIGIN_PANELS_BASE_FILE ) . '?ver=' . filemtime( $file ) : $src;
+	},
+	10,
+	2
+);

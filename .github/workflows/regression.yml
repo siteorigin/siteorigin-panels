@@ -47,6 +47,16 @@ jobs:
         run: |
           npm ci
           npx gulp css browserify
+      # The pane fuzz spec (tests/e2e/builder-pane-fuzz.test.js) compares this revision's builder script with the base revision's.
+      - name: Build the base revision's builder script for the pane fuzz spec
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          mkdir -p tests/cache/fuzz/src
+          git archive FETCH_HEAD js/siteorigin-panels | tar -x -C tests/cache/fuzz/src
+          build/node_modules/.bin/browserify tests/cache/fuzz/src/js/siteorigin-panels/main.js -o tests/cache/fuzz/base.js
+          test -s tests/cache/fuzz/base.js
       # The browserify task runs babel, which rewrites the tracked Layout Block script. Test the committed one.
       - run: git checkout -- compat/js/
       - run: test -f js/siteorigin-panels.js && test -f css/admin.css
