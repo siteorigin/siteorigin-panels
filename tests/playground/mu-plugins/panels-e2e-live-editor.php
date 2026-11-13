@@ -230,20 +230,29 @@ if ( class_exists( 'Panels_E2E_Text_Widget' ) ) {
 			echo $args['before_widget'];
 			echo '<div class="panels-e2e-measure">' . esc_html( isset( $instance['text'] ) ? $instance['text'] : '' ) . '</div>';
 			echo $args['after_widget'];
-			?>
-			<script>
-			( function () {
-				var measure = function () {
-					document.querySelectorAll( '.panels-e2e-measure' ).forEach( function ( el ) {
-						el.style.width = Math.floor( el.parentNode.clientWidth / 2 ) + 'px';
-					} );
-				};
-				document.addEventListener( 'DOMContentLoaded', measure );
-				window.addEventListener( 'resize', measure );
-			}() );
-			</script>
-			<?php
+
+			// The script is printed once in the footer, outside the layout, like an enqueued script.
+			if ( ! has_action( 'wp_footer', 'panels_e2e_measure_script' ) ) {
+				add_action( 'wp_footer', 'panels_e2e_measure_script' );
+			}
 		}
+	}
+
+	function panels_e2e_measure_script() {
+		?>
+		<script>
+		( function () {
+			var measure = function () {
+				document.querySelectorAll( '.panels-e2e-measure' ).forEach( function ( el ) {
+					el.style.width = Math.floor( el.parentNode.clientWidth / 2 ) + 'px';
+				} );
+			};
+			document.addEventListener( 'DOMContentLoaded', measure );
+			window.addEventListener( 'resize', measure );
+			measure();
+		}() );
+		</script>
+		<?php
 	}
 
 	add_action(
