@@ -10,6 +10,9 @@
 // The positional id of a widget wrapper: panel-{postId}-{row}-{cell}-{widget}.
 var TARGET_ID = /^panel-\d+-\d+-\d+-\d+$/;
 
+// The id prefix of the layout CSS blocks Page Builder prints.
+var LAYOUT_STYLE_PREFIX = 'siteorigin-panels-layouts-';
+
 // Replaces the target in a shell, so two shells compare everything but the target.
 var PLACEHOLDER = 'so-live-editor-swap-target';
 
@@ -202,6 +205,83 @@ module.exports = {
 		var doctype = doc.doctype ? '<!DOCTYPE ' + doc.doctype.name + '>' : '';
 
 		return doctype + copy.outerHTML;
+	},
+
+	/**
+	 * The layout style blocks of a parsed response, and the document with their text blanked, so two
+	 * responses compare equal when they differ only in the layout CSS. A block is keyed by its id
+	 * (`siteorigin-panels-layouts-head`, `-footer`, `-footer-2`), or for a `style.panels-style` block by
+	 * `panels-style-{post id}`.
+	 *
+	 * @param {Document} doc A parsed response.
+	 * @return {null|{ styles: Array, shell: string }} Null when there is no document.
+	 */
+	layoutStyles: function ( doc ) {
+		if ( ! doc || ! doc.documentElement ) {
+			return null;
+		}
+
+		var copy = doc.documentElement.cloneNode( true );
+		var styles = [];
+		Array.prototype.forEach.call( copy.querySelectorAll( 'style' ), function ( style ) {
+			var id = style.getAttribute( 'id' ) || '';
+			var key = null;
+
+			if ( id.indexOf( LAYOUT_STYLE_PREFIX ) === 0 ) {
+				key = id;
+			} else if ( style.classList.contains( 'panels-style' ) && style.hasAttribute( 'data-panels-style-for-post' ) ) {
+				key = 'panels-style-' + style.getAttribute( 'data-panels-style-for-post' );
+			}
+
+			if ( key ) {
+				styles.push( { key: key, text: style.textContent } );
+				style.textContent = '';
+			}
+		} );
+
+		var doctype = doc.doctype ? '<!DOCTYPE ' + doc.doctype.name + '>' : '';
+
+		return { styles: styles, shell: doctype + copy.outerHTML };
+	},
+
+	/**
+	 * Pair the style blocks of two responses by key.
+	 *
+	 * @param {Array} before Blocks { key, text } of the first response.
+	 * @param {Array} after Blocks of the second response.
+	 * @return {null|Array} { key, before, after } in the first response's order. Null when there is no block,
+	 *         a key is repeated, or the two responses do not hold the same keys.
+	 */
+	pairStyles: function ( before, after ) {
+		if ( ! Array.isArray( before ) || ! Array.isArray( after ) || ! before.length || before.length !== after.length ) {
+			return null;
+		}
+
+		var unique = function ( list ) {
+			return list.every( function ( item, i ) {
+				return list.findIndex( function ( other ) {
+					return other.key === item.key;
+				} ) === i;
+			} );
+		};
+		if ( ! unique( before ) || ! unique( after ) ) {
+			return null;
+		}
+
+		var pairs = [];
+		var ok = before.every( function ( item ) {
+			var match = after.find( function ( other ) {
+				return other.key === item.key;
+			} );
+			if ( ! match ) {
+				return false;
+			}
+			pairs.push( { key: item.key, before: item.text, after: match.text } );
+
+			return true;
+		} );
+
+		return ok ? pairs : null;
 	},
 
 	/**

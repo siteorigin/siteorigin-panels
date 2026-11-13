@@ -241,11 +241,81 @@ module.exports = {
 	},
 
 	/**
+	 * The rows, cells and widgets whose style object changed between two snapshots that are otherwise the
+	 * same: the same rows, cells and widgets in the same places, the same cell weights, and equal row, cell
+	 * and widget settings apart from `style`. Null when anything else differs, when no style differs, or
+	 * when a snapshot cannot be trusted.
+	 *
+	 * @param {Object} prev Snapshot the preview shows.
+	 * @param {Object} next Snapshot of the builder now.
+	 * @return {null|{ rows: string[], cells: string[], widgets: string[] }} Cids of the changed rows, cells and widgets.
+	 */
+	styleChange: function ( prev, next ) {
+		var a = index( prev );
+		var b = index( next );
+
+		if ( ! a || ! b || ! same( a.rowOrder, b.rowOrder ) ) {
+			return null;
+		}
+
+		var out = { rows: [], cells: [], widgets: [] };
+		var structureSame = _.every( b.rowOrder, function ( rowCid ) {
+			var before = a.rows[ rowCid ];
+			var after = b.rows[ rowCid ];
+
+			if ( ! same( before.cells, after.cells ) || ! same( without( before.grid, [ 'style' ] ), without( after.grid, [ 'style' ] ) ) ) {
+				return false;
+			}
+			if ( ! same( ( before.grid || {} ).style, ( after.grid || {} ).style ) ) {
+				out.rows.push( rowCid );
+			}
+
+			return _.every( after.cells, function ( cellCid ) {
+				var cellBefore = a.cells[ cellCid ];
+				var cellAfter = b.cells[ cellCid ];
+
+				if (
+					! same( cellBefore.widgets, cellAfter.widgets ) ||
+					! same( without( cellBefore.data, [ 'style' ] ), without( cellAfter.data, [ 'style' ] ) )
+				) {
+					return false;
+				}
+				if ( ! same( cellBefore.data.style, cellAfter.data.style ) ) {
+					out.cells.push( cellCid );
+				}
+
+				return _.every( cellAfter.widgets, function ( widgetCid ) {
+					var widgetBefore = copy( a.widgets[ widgetCid ] );
+					var widgetAfter = copy( b.widgets[ widgetCid ] );
+
+					widgetBefore.panels_info = without( widgetBefore.panels_info, [ 'style' ] );
+					widgetAfter.panels_info = without( widgetAfter.panels_info, [ 'style' ] );
+					if ( ! same( widgetBefore, widgetAfter ) ) {
+						return false;
+					}
+					if ( ! same( ( a.widgets[ widgetCid ].panels_info || {} ).style, ( b.widgets[ widgetCid ].panels_info || {} ).style ) ) {
+						out.widgets.push( widgetCid );
+					}
+
+					return true;
+				} );
+			} );
+		} );
+
+		if ( ! structureSame || ( ! out.rows.length && ! out.cells.length && ! out.widgets.length ) ) {
+			return null;
+		}
+
+		return out;
+	},
+
+	/**
 	 * The patch from the preview of `prev` to the preview of `next`. Null means a full reload.
 	 *
 	 * @param {Object} prev Snapshot the preview shows.
 	 * @param {Object} next Snapshot of the builder now.
-	 * @return {null|{ rowOrder: string[], cells: Object, weights: Object }}
+	 * @return {null|{ rowOrder: string[], cells: Object, weights: Object, reordered: boolean }} `reordered` is true when a
+	 *         row or a widget changed place, false for a change of weights alone.
 	 */
 	plan: function ( prev, next ) {
 		var a = index( prev );
@@ -273,8 +343,9 @@ module.exports = {
 			return null;
 		}
 
-		var ops = { rowOrder: b.rowOrder.slice(), cells: {}, weights: {} };
+		var ops = { rowOrder: b.rowOrder.slice(), cells: {}, weights: {}, reordered: false };
 		var changed = ! same( a.rowOrder, b.rowOrder );
+		ops.reordered = changed;
 
 		var cellsOk = _.every( _.keys( b.cells ), function ( cid ) {
 			var before = a.cells[ cid ];
@@ -299,6 +370,7 @@ module.exports = {
 				ops.cells[ cid ] = after.widgets.slice();
 				if ( ! same( before.widgets, after.widgets ) ) {
 					changed = true;
+					ops.reordered = true;
 				}
 			}
 
