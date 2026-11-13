@@ -134,3 +134,24 @@ test( 'target refuses a widget that needs document setup', () => {
 	twin.id = 'panel-1-0-0-0';
 	assert.equal( swap.target( el( 'body', [], [ plain, twin ] ), 'panel-1-0-0-0' ), null, 'not unique' );
 } );
+
+test( 'pairStyles pairs the layout style blocks of two responses by key', () => {
+	const a = [ { key: 'siteorigin-panels-layouts-head', text: 'a{}' }, { key: 'panels-style-5', text: 'x' } ];
+	const b = [ { key: 'panels-style-5', text: 'y' }, { key: 'siteorigin-panels-layouts-head', text: 'b{}' } ];
+
+	assert.deepEqual( swap.pairStyles( a, b ), [
+		{ key: 'siteorigin-panels-layouts-head', before: 'a{}', after: 'b{}' },
+		{ key: 'panels-style-5', before: 'x', after: 'y' },
+	] );
+} );
+
+test( 'pairStyles is null for a missing, extra, duplicate or absent block', () => {
+	const head = { key: 'siteorigin-panels-layouts-head', text: 'a{}' };
+	const footer = { key: 'siteorigin-panels-layouts-footer', text: 'f{}' };
+
+	assert.equal( swap.pairStyles( [ head ], [ footer ] ), null, 'different keys' );
+	assert.equal( swap.pairStyles( [ head ], [ head, footer ] ), null, 'an extra block' );
+	assert.equal( swap.pairStyles( [ head, head ], [ head, head ] ), null, 'a duplicate key' );
+	assert.equal( swap.pairStyles( [], [] ), null, 'no block' );
+	assert.equal( swap.pairStyles( null, [ head ] ), null );
+} );
