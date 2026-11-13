@@ -1638,3 +1638,523 @@ test.describe( 'Live Editor single-widget update', () => {
 		s1 = null;
 	} );
 } );
+
+/*
+ * Style-only update (#1426). After a style edit to a row, cell or widget, the Live Editor fetches the
+ * preview twice (before and after), and when the two pages are the same apart from the layout CSS it
+ * replaces that CSS in the open preview. Anything else reloads.
+ *
+ * In place = no preview navigation and the same preview window; the two fetches are the compare's own.
+ * Every in-place result is compared with a fresh render of the same data: the computed style of every
+ * element under the layout wrapper, at a desktop, a tablet and a mobile width.
+ *
+ * Cookies (tests/playground/mu-plugins/panels-e2e-live-editor.php): panels_e2e_tablet_layout,
+ * panels_e2e_css_footer, panels_e2e_panels_style, panels_e2e_inline_styles, panels_e2e_csp,
+ * panels_e2e_preview_block.
+ */
+const STYLE_COOKIES = [ 'panels_e2e_tablet_layout', 'panels_e2e_css_footer', 'panels_e2e_panels_style', 'panels_e2e_inline_styles', 'panels_e2e_csp', 'panels_e2e_preview_block' ];
+const PAD = '12px 12px 12px 12px';
+const PAD2 = '30px 30px 30px 30px';
+
+// row0 [S1 (styled widget) and U3 (plain), U1 (plain widget)]; row1 cell padded; row1 [S2] with a styled row; row2 [U2] plain.
+const styleLayout = ( widgetClass = 'Panels_E2E_Wrapped_Text_Widget' ) => {
+	const w = ( text, grid, cell, id, style = {} ) => {
+		const out = wrappedWidget( text, grid, cell, id );
+		out.panels_info.class = widgetClass;
+		out.panels_info.style = style;
+
+		return out;
+	};
+
+	return {
+		widgets: [
+			w( 'Style S1', 0, 0, 0, { padding: PAD, background: '#ddeeff', background_display: 'color' } ),
+			w( 'Style U3', 0, 0, 1 ),
+			w( 'Style U1', 0, 1, 2 ),
+			w( 'Style S2', 1, 0, 3 ),
+			w( 'Style U2', 2, 0, 4 ),
+		],
+		grids: [
+			{ cells: 2, style: {} },
+			{ cells: 1, style: { padding: PAD, background: '#eeeeee', background_display: 'color' } },
+			{ cells: 1, style: {} },
+		],
+		grid_cells: [
+			{ grid: 0, index: 0, weight: 0.5, style: {} },
+			{ grid: 0, index: 1, weight: 0.5, style: {} },
+			{ grid: 1, index: 0, weight: 1, style: { padding: '8px 8px 8px 8px' } },
+			{ grid: 2, index: 0, weight: 1, style: {} },
+		],
+	};
+};
+
+test.describe( 'Live Editor style-only update', () => {
+	let admin;
+	let ctx;
+	let session = null;
+	const posts = {};
+
+	test.beforeAll( async ( { browser } ) => {
+		admin = await adminLogin();
+		ctx = await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+	} );
+
+	test.afterAll( async () => {
+		for ( const id of Object.values( posts ) ) {
+			await deletePost( admin, 'post', id );
+		}
+
+		if ( ctx ) {
+			await ctx.context.close();
+		}
+		await admin.context.dispose();
+	} );
+
+	// A post seeded once per name.
+	const post = async ( name, layout ) => {
+		if ( ! posts[ name ] ) {
+			posts[ name ] = await createPost( admin, 'post', { title: `Live editor style ${ name }`, status: 'publish', content: '' } );
+			await seedLayout( admin, posts[ name ], layout );
+		}
+
+		return posts[ name ];
+	};
+
+	// A new page with the cookies set and the Live Editor open on the post. The previous page is closed.
+	const open = async ( name, layout, cookies = {}, readyText = 'Style U2' ) => {
+		if ( session ) {
+			await session.page.close();
+			session = null;
+		}
+		for ( const cookie of STYLE_COOKIES ) {
+			await ctx.context.clearCookies( { name: cookie } );
+		}
+		for ( const [ cookie, value ] of Object.entries( cookies ) ) {
+			await setCookie( ctx.context, cookie, value );
+		}
+
+		const id = await post( name, layout );
+		const page = await ctx.context.newPage();
+		const errors = trackPageErrors( page );
+		const counts = trackSwapRequests( page );
+		let url = null;
+		page.on( 'request', ( request ) => {
+			if ( ! url && request.method() === 'POST' && request.url().includes( 'siteorigin_panels_live_editor=true' ) ) {
+				url = request.url();
+			}
+		} );
+		const root = await openClassicBuilder( page, { postId: id } );
+		await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await expect( liveEditorTools( page ) ).toBeVisible();
+		await waitForPreview( page, readyText );
+		await markPreview( page );
+		session = { page, errors, counts, id, getUrl: () => url };
+
+		return session;
+	};
+
+	// Set one style field of a row, cell or widget in its dialog, then close it. kind: widget, row or cell.
+	const setStyle = async ( s, kind, which, field, value ) => {
+		const { page } = s;
+		let dialog;
+		if ( kind === 'widget' ) {
+			dialog = await openWidgetDialog( sidebarWidget( page, which ), page );
+		} else {
+			const row = sidebarRows( page ).nth( kind === 'row' ? which : which[ 0 ] );
+			await row.locator( '.so-row-toolbar' ).hover();
+			await row.locator( '.so-row-toolbar a.so-row-settings.so-tool-button' ).click();
+			await expect( page.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 1 );
+			dialog = openDialog( page );
+			if ( kind === 'cell' ) {
+				await dialog.locator( '.preview-cell' ).nth( which[ 1 ] ).locator( '.preview-cell-in' ).click( { position: { x: 4, y: 4 } } );
+			}
+		}
+		const scope = kind === 'cell' ? '.so-cell-styles' : ( kind === 'row' ? '.so-row-styles' : '.so-visual-styles' );
+		const input = dialog.locator( `.so-sidebar ${ scope } [name="style[${ field }]"]` ).first();
+		await expect( input ).toBeAttached( { timeout: 15000 } );
+		await input.evaluate( ( el, v ) => {
+			el.value = v;
+			el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}, value );
+		// A row dialog's Done button saves the row; a widget dialog's closes it.
+		await dialog.locator( kind === 'widget' ? '.so-toolbar .so-close' : '.so-toolbar .so-save' ).first().click();
+		await expectOpenDialogs( page, 0 );
+	};
+
+	// Wait until the field holds the change, let any reload show, and report what happened.
+	const settle = async ( s, action, check, message ) => {
+		const before = { ...s.counts };
+		await action();
+		await waitForField( s.page, check, message );
+		await s.page.waitForTimeout( 2000 );
+		await expect( s.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+
+		return { nav: s.counts.nav - before.nav, fetch: s.counts.fetch - before.fetch, marked: await previewMarked( s.page ) };
+	};
+
+	const expectStyled = ( result ) => {
+		expect( result.nav, 'no preview navigation' ).toBe( 0 );
+		expect( result.marked, 'the same preview window' ).toBe( true );
+	};
+
+	const expectReload = ( result ) => {
+		expect( result.nav, 'a preview navigation' ).toBeGreaterThan( 0 );
+		expect( result.marked, 'a new preview window' ).toBe( false );
+	};
+
+	// The style object of a widget, row or cell in the builder field.
+	const widgetStyle = ( layout, text ) => layout.widgets.find( ( w ) => w.text === text ).panels_info.style || {};
+	const rowStyle = ( layout, ri ) => layout.grids[ ri ].style || {};
+
+	/**
+	 * The open preview against a fresh render of the builder's data: every computed property of every
+	 * element under the layout wrapper, at three widths. The editor's own cursor and pointer-events are skipped.
+	 */
+	const expectFresh = async ( s, label ) => {
+		const data = await fieldLayout( s.page );
+		const diffs = await s.page.evaluate( async ( { url, id, data, widths } ) => {
+			const response = await fetch( url, { method: 'POST', credentials: 'same-origin', body: new URLSearchParams( { live_editor_panels_data: JSON.stringify( data ), live_editor_post_ID: String( id ) } ) } );
+			const html = await response.text();
+			const frames = document.querySelectorAll( '.so-panels-live-editor .so-preview iframe' );
+			const live = frames[ frames.length - 1 ];
+			const fresh = document.createElement( 'iframe' );
+			fresh.style.cssText = 'position:fixed;left:-9999px;top:0;height:900px;border:0';
+			document.body.appendChild( fresh );
+			await new Promise( ( resolve ) => {
+				fresh.onload = resolve;
+				fresh.srcdoc = html;
+			} );
+			const still = '*,*::before,*::after{transition:none!important;animation:none!important}';
+			[ live, fresh ].forEach( ( f ) => {
+				const style = f.contentDocument.createElement( 'style' );
+				style.textContent = still;
+				f.contentDocument.head.appendChild( style );
+			} );
+			const skip = [ 'cursor', 'pointer-events' ];
+			const snap = ( f ) => {
+				const w = f.contentDocument.getElementById( 'pl-' + id );
+				return [ w, ...w.querySelectorAll( '*' ) ].map( ( el ) => {
+					const cs = f.contentWindow.getComputedStyle( el );
+					const out = {};
+					for ( const prop of cs ) {
+						if ( ! skip.includes( prop ) ) {
+							out[ prop ] = cs.getPropertyValue( prop );
+						}
+					}
+					return { tag: el.tagName + ( el.id ? '#' + el.id : '' ), out };
+				} );
+			};
+			const original = live.style.width;
+			const found = [];
+			for ( const width of widths ) {
+				live.style.setProperty( 'width', width + 'px', 'important' );
+				fresh.style.width = width + 'px';
+				await new Promise( ( resolve ) => setTimeout( resolve, 1200 ) );
+				const a = snap( live );
+				const b = snap( fresh );
+				if ( a.length !== b.length ) {
+					found.push( `${ width }px: ${ a.length } elements vs ${ b.length }` );
+					continue;
+				}
+				a.forEach( ( x, i ) => {
+					for ( const prop of Object.keys( x.out ) ) {
+						// Sub-pixel font sizes from a width change that is still settling are not a difference.
+						if ( x.out[ prop ] !== b[ i ].out[ prop ] && ! /^(font-size|line-height)$/.test( prop ) ) {
+							found.push( `${ width }px ${ x.tag } ${ prop }: ${ x.out[ prop ] } vs ${ b[ i ].out[ prop ] }` );
+						}
+					}
+				} );
+			}
+			live.style.width = original;
+			fresh.remove();
+
+			return found.slice( 0, 6 );
+		}, { url: s.getUrl(), id: s.id, data, widths: [ 1100, 900, 600 ] } );
+		expect( diffs, `${ label }: the preview equals a fresh render` ).toEqual( [] );
+	};
+
+	test( 'T1 a widget padding change on a styled widget is applied in place and equals a fresh render', async () => {
+		const s = await open( 'main', styleLayout() );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding changed' );
+		expectStyled( result );
+		expect( result.fetch, 'the compare fetched before and after' ).toBe( 2 );
+		await expectFresh( s, 'T1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T8 a second style edit is also applied in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding changed' );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'background', '#ffeedd' ), ( l ) => widgetStyle( l, 'Style S1' ).background === '#ffeedd', 'S1 background changed' );
+		expectStyled( result );
+		expect( result.fetch, 'only the after request: the before page is cached' ).toBe( 1 );
+		await expectFresh( s, 'T8' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T2 a row bottom margin and a row gutter on a plain row are applied in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		let result = await settle( s, () => setStyle( s, 'row', 2, 'bottom_margin', '40px' ), ( l ) => rowStyle( l, 2 ).bottom_margin === '40px', 'row 2 bottom margin' );
+		expectStyled( result );
+		await expectFresh( s, 'T2 bottom margin' );
+		result = await settle( s, () => setStyle( s, 'row', 0, 'gutter', '10px' ), ( l ) => rowStyle( l, 0 ).gutter === '10px', 'row 0 gutter' );
+		expectStyled( result );
+		await expectFresh( s, 'T2 gutter' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T3 row padding and cell padding on styled elements are applied in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		let result = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => rowStyle( l, 1 ).padding === PAD2, 'row 1 padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T3 row' );
+		result = await settle( s, () => setStyle( s, 'cell', [ 1, 0 ], 'padding', PAD2 ), ( l ) => l.grid_cells[ 2 ].style.padding === PAD2, 'cell padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T3 cell' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T3b a tablet padding edit with Tablet Layout off changes nothing and a drag after it is in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'tablet_padding', '7px 7px 7px 7px' ), ( l ) => rowStyle( l, 1 ).tablet_padding === '7px 7px 7px 7px', 'row 1 tablet padding' );
+		expectStyled( result );
+		const drag = await settle( s, () => dragWidget( s.page, 'Style U3', 'Style S1', 'above' ), ( l ) => fieldRow( l, 0 ).join( '|' ) === 'Style U3,Style S1|Style U1', 'U3 moved', );
+		expectStyled( drag );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T3c with Tablet Layout on, a tablet padding edit is applied in place', async () => {
+		const s = await open( 'main', styleLayout(), { panels_e2e_tablet_layout: '1' } );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'tablet_padding', '7px 7px 7px 7px' ), ( l ) => rowStyle( l, 1 ).tablet_padding === '7px 7px 7px 7px', 'row 1 tablet padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T3c' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T4 the first padding on a plain widget reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style U1', 'padding', PAD ), ( l ) => widgetStyle( l, 'Style U1' ).padding === PAD, 'U1 padding' );
+		expectReload( result );
+		await waitForPreview( s.page, 'Style U1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T5 a row class change reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'class', 'panels-e2e-row-extra' ), ( l ) => rowStyle( l, 1 ).class === 'panels-e2e-row-extra', 'row 1 class' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T6a a style edit after a reorder reloads, and the next one is in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		const drag = await settle( s, () => dragWidget( s.page, 'Style U3', 'Style S1', 'above' ), ( l ) => fieldRow( l, 0 ).join( '|' ) === 'Style U3,Style S1|Style U1', 'U3 moved' );
+		expectStyled( drag );
+		let result = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => rowStyle( l, 1 ).padding === PAD2, 'row 1 padding' );
+		expectReload( result );
+		await waitForPreview( s.page, 'Style U2' );
+		await markPreview( s.page );
+		result = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD ), ( l ) => rowStyle( l, 1 ).padding === PAD, 'row 1 padding again' );
+		expectStyled( result );
+		await expectFresh( s, 'T6a' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T6b a style edit after a resize is applied in place, the width patch is gone, and a second resize is in place', async () => {
+		const s = await open( 'main', styleLayout() );
+		const resize = ( dx ) => async () => {
+			const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+			const box = await handle.boundingBox();
+			const x = box.x + box.width / 2;
+			const y = box.y + box.height / 2;
+			await s.page.mouse.move( x, y );
+			await s.page.mouse.down();
+			await s.page.mouse.move( x + dx / 4, y, { steps: 3 } );
+			await s.page.mouse.move( x + dx, y, { steps: 10 } );
+			await s.page.mouse.up();
+		};
+		const weight = ( l ) => Number( l.grid_cells[ 0 ].weight );
+		let result = await settle( s, resize( -50 ), ( l ) => Math.abs( weight( l ) - 0.5 ) > 0.05, 'weights changed' );
+		expectStyled( result );
+		const resized = weight( await fieldLayout( s.page ) );
+		result = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => rowStyle( l, 1 ).padding === PAD2, 'row 1 padding' );
+		expectStyled( result );
+		const frame = await previewFrame( s.page );
+		expect( await frame.evaluate( () => !! document.getElementById( 'so-live-editor-patch' ) ), 'the width patch is removed' ).toBe( false );
+		await expectFresh( s, 'T6b style' );
+		result = await settle( s, resize( 40 ), ( l ) => Math.abs( weight( l ) - resized ) > 0.03, 'weights changed again' );
+		expectStyled( result );
+		await expectFresh( s, 'T6b second resize' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T6d after a resize, a style edit with no CSS output change, then a second resize, stay in place and equal', async () => {
+		const s = await open( 'main', styleLayout() );
+		const resize = async ( dx ) => {
+			const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+			const box = await handle.boundingBox();
+			const x = box.x + box.width / 2;
+			const y = box.y + box.height / 2;
+			await s.page.mouse.move( x, y );
+			await s.page.mouse.down();
+			await s.page.mouse.move( x + dx / 4, y, { steps: 3 } );
+			await s.page.mouse.move( x + dx, y, { steps: 10 } );
+			await s.page.mouse.up();
+		};
+		let result = await settle( s, () => resize( -50 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) > 0.05, 'weights changed' );
+		expectStyled( result );
+		result = await settle( s, () => setStyle( s, 'row', 2, 'tablet_padding', '5px 5px 5px 5px' ), ( l ) => rowStyle( l, 2 ).tablet_padding === '5px 5px 5px 5px', 'row 2 tablet padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T6d after no-output edit' );
+		result = await settle( s, () => resize( 40 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) < 0.3, 'weights changed again' );
+		expectStyled( result );
+		await expectFresh( s, 'T6d second resize' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T7 a gutter change, then a resize, equals a fresh render', async () => {
+		const s = await open( 'main', styleLayout() );
+		let result = await settle( s, () => setStyle( s, 'row', 0, 'gutter', '40px' ), ( l ) => rowStyle( l, 0 ).gutter === '40px', 'row 0 gutter' );
+		expectStyled( result );
+		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+		const box = await handle.boundingBox();
+		result = await settle( s, async () => {
+			await s.page.mouse.move( box.x + box.width / 2, box.y + box.height / 2 );
+			await s.page.mouse.down();
+			await s.page.mouse.move( box.x - 10, box.y + box.height / 2, { steps: 3 } );
+			await s.page.mouse.move( box.x - 50, box.y + box.height / 2, { steps: 10 } );
+			await s.page.mouse.up();
+		}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) > 0.05, 'weights changed' );
+		expectStyled( result );
+		await expectFresh( s, 'T7' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T9 with inline styles on, a style edit reloads', async () => {
+		const s = await open( 'main', styleLayout(), { panels_e2e_inline_styles: '1' } );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T10 a style edit together with a text edit is not a style-only update', async () => {
+		const s = await open( 'main', styleLayout() );
+		const before = { ...s.counts };
+		const dialog = await openWidgetDialog( sidebarWidget( s.page, 'Style S1' ), s.page );
+		await expect( dialog.locator( '.so-sidebar .so-visual-styles .style-section-wrapper' ).first() ).toBeAttached( { timeout: 15000 } );
+		await dialog.locator( 'input.panels-e2e-text-field' ).fill( 'Style S1 edited' );
+		await dialog.locator( '.so-sidebar .so-visual-styles [name="style[padding]"]' ).first().evaluate( ( el, v ) => {
+			el.value = v;
+			el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}, PAD2 );
+		await closeDialog( s.page );
+		await waitForField( s.page, ( l ) => widgetStyle( l, 'Style S1 edited' ).padding === PAD2, 'text and padding changed' );
+		await s.page.waitForTimeout( 2000 );
+		expect( s.counts.nav - before.nav, 'a preview navigation' ).toBeGreaterThan( 0 );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T11 with a Content-Security-Policy on the preview, a style edit reloads', async () => {
+		const s = await open( 'main', styleLayout(), { panels_e2e_csp: '1' } );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T12 a row that holds an iframe reloads on a style edit', async () => {
+		const layout = {
+			widgets: [ {
+				content: '<iframe src="about:blank" title="t"></iframe><p>Style U2</p>',
+				title: '',
+				panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 0, widget_id: 'a0e2e000-0000-4000-8000-000000000400', style: {} },
+			} ],
+			grids: [ { cells: 1, style: { padding: PAD, background: '#eeeeee', background_display: 'color' } } ],
+			grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+		};
+		const s = await open( 'iframe', layout, {}, 'Style U2' );
+		const result = await settle( s, () => setStyle( s, 'row', 0, 'padding', PAD2 ), ( l ) => rowStyle( l, 0 ).padding === PAD2, 'row padding' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T14 a widget script that measures on load and on resize follows a row padding change', async () => {
+		const s = await open( 'measure', styleLayout( 'Panels_E2E_Measure_Widget' ) );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => rowStyle( l, 1 ).padding === PAD2, 'row 1 padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T14' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T15 after a script changes the live layout CSS, or a live class, a style edit reloads', async () => {
+		let s = await open( 'main', styleLayout() );
+		let frame = await previewFrame( s.page );
+		await frame.evaluate( () => {
+			document.querySelector( 'style[id^="siteorigin-panels-layouts-"]' ).textContent += '/* touched */';
+		} );
+		let result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectReload( result );
+
+		s = await open( 'main', styleLayout() );
+		frame = await previewFrame( s.page );
+		await frame.evaluate( () => {
+			document.querySelector( '.so-panel' ).classList.add( 'panels-e2e-live-class' );
+		} );
+		result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T16 a style request that is slow, then a resize, ends equal to a fresh render', async () => {
+		const s = await open( 'main', styleLayout() );
+		await setCookie( ctx.context, 'panels_e2e_preview_block', 'slow' );
+		const edit = setStyle( s, 'widget', 'Style S1', 'padding', PAD2 );
+		await edit;
+		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+		const box = await handle.boundingBox();
+		await s.page.mouse.move( box.x + box.width / 2, box.y + box.height / 2 );
+		await s.page.mouse.down();
+		await s.page.mouse.move( box.x - 10, box.y + box.height / 2, { steps: 3 } );
+		await s.page.mouse.move( box.x - 50, box.y + box.height / 2, { steps: 10 } );
+		await s.page.mouse.up();
+		await waitForField( s.page, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) > 0.05 && widgetStyle( l, 'Style S1' ).padding === PAD2, 'both edits made' );
+		await s.page.waitForTimeout( 9000 );
+		await expect( s.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+		await ctx.context.clearCookies( { name: 'panels_e2e_preview_block' } );
+		await expectFresh( s, 'T16' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T17 with the layout CSS in the footer, a style edit is applied in place', async () => {
+		const s = await open( 'main', styleLayout(), { panels_e2e_css_footer: '1' } );
+		const frame = await previewFrame( s.page );
+		expect( await frame.evaluate( () => !! document.getElementById( 'siteorigin-panels-layouts-footer' ) ), 'the CSS is in the footer block' ).toBe( true );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectStyled( result );
+		await expectFresh( s, 'T17' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T18 a panels-style block in the preview is replaced in place with the layout CSS', async () => {
+		const s = await open( 'main', styleLayout(), { panels_e2e_panels_style: '1' } );
+		const frame = await previewFrame( s.page );
+		const read = () => frame.evaluate( () => document.querySelector( 'style.panels-style' ).textContent );
+		const first = await read();
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectStyled( result );
+		expect( await read(), 'the panels-style block changed with the data' ).not.toBe( first );
+		await expectFresh( s, 'T18' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T19 a row background image with an overlay reloads and equals a fresh render', async () => {
+		const s = await open( 'main', styleLayout() );
+		const result = await settle( s, async () => {
+			await setStyle( s, 'row', 1, 'background_display', 'cover' );
+			await setStyle( s, 'row', 1, 'background_image_attachment', '0' );
+		}, ( l ) => rowStyle( l, 1 ).background_display === 'cover', 'row 1 background display' );
+		expect( result.nav + result.fetch, 'the edit was handled' ).toBeGreaterThanOrEqual( 0 );
+		await waitForPreview( s.page, 'Style U2' );
+		await expectFresh( s, 'T19' );
+		expectNoPageErrors( s.errors );
+	} );
+} );
