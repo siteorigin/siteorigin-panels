@@ -317,3 +317,61 @@ test( 'concatenating onto an unparseable source loads the new layout alone', fun
 	assert.equal( model.getPanelsData().grids.length, 2 );
 	assert.equal( model.getPanelsData().widgets.length, 3 );
 } );
+
+test( 'an empty string, `""`, null or the string "null" is a failed load, wherever the layout comes from', function () {
+	// Pane setup clears a field holding `""` before it loads, but prebuilt
+	// layouts, history and imports reach the model directly, and none of these
+	// values is a layout there.
+	[ '', '""', null, 'null' ].forEach( function ( bad ) {
+		const model = builder();
+		const events = countEvents( model );
+
+		model.loadPanelsData( bad );
+
+		assert.equal( model.loadFailed, true, JSON.stringify( bad ) );
+		assert.equal( events.load_panels_data_failed, 1, JSON.stringify( bad ) );
+		assert.equal( events.load_panels_data, 0, JSON.stringify( bad ) );
+		assert.equal( model.getPanelsData(), null, 'nothing to hand out for ' + JSON.stringify( bad ) );
+
+		model.refreshPanelsData();
+
+		assert.equal( events[ 'change:data' ], 0, JSON.stringify( bad ) );
+		assert.equal( events.refresh_panels_data, 0, JSON.stringify( bad ) );
+	} );
+} );
+
+test( 'a page of five rows and seven widgets that throws at the third widget keeps all seven', function () {
+	// The shape of the layout that lost widgets in 2.36.0: five rows, six
+	// cells, seven widgets, with a throw part-way through the widgets.
+	const cells = [ 1, 1, 1, 2, 1 ];
+	const placements = [ [ 0, 0 ], [ 1, 0 ], [ 1, 0 ], [ 2, 0 ], [ 3, 0 ], [ 3, 1 ], [ 4, 0 ] ];
+	const input = {
+		grids: cells.map( function ( count ) {
+			return { cells: count, style: {} };
+		} ),
+		grid_cells: [],
+		widgets: placements.map( function ( place, index ) {
+			return widget( index, place[ 0 ], place[ 1 ], index === 2 ? BOOM : null );
+		} )
+	};
+	cells.forEach( function ( count, grid ) {
+		for ( let index = 0; index < count; index++ ) {
+			input.grid_cells.push( { grid: grid, index: index, weight: 1 / count, style: {} } );
+		}
+	} );
+	const reference = clone( input );
+	const model = builder();
+	const events = countEvents( model );
+
+	model.loadPanelsData( input );
+
+	assert.equal( model.loadFailed, true );
+	assert.equal( events.load_panels_data, 0 );
+	assert.equal( model.getPanelsData().widgets.length, 7 );
+	assert.deepEqual( model.getPanelsData(), reference );
+
+	model.refreshPanelsData();
+
+	assert.equal( events[ 'change:data' ], 0 );
+	assert.deepEqual( model.get( 'data' ), reference );
+} );

@@ -60,6 +60,14 @@ module.exports = function ( config, force ) {
 			builderView.setDialogParents( panelsOptions.loc.layout_widget, dialog );
 		}
 
+		// Pane widgets that JSON-encode an empty pane render `""`, which holds no
+		// layout: treat exactly that value as an empty field. Anything else loads
+		// or fails as usual. setDataField() reads the first match, so only it is checked.
+		var $dataField = $$.find( 'input.panels-data' );
+		if ( $dataField.first().val() === '""' ) {
+			$dataField.first().val( '' );
+		}
+
 		// Basic setup for the builder
 		var isWidget = Boolean( $$.closest( '.widget-content' ).length );
 		builderView
@@ -69,7 +77,7 @@ module.exports = function ( config, force ) {
 				dialog: isWidget || $$.data('mode') === 'dialog',
 				type: $$.data( 'type' )
 			} )
-			.setDataField( $$.find( 'input.panels-data' ) );
+			.setDataField( $dataField );
 
 		if ( isWidget || $$.data('mode') === 'dialog' ) {
 			// Set up the dialog opening

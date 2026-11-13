@@ -217,6 +217,8 @@ add_action(
 						'meta_exists'  => count( $rows ) > 0,
 						// Test-only: a value this site just stored.
 						'meta'         => $rows ? maybe_unserialize( $rows[0] ) : null,
+						// The stored bytes, for checks that a save left the row untouched.
+						'meta_bytes'   => $rows ? $rows[0] : null,
 						'post_content' => $content,
 						'blocks'       => $blocks,
 					);
