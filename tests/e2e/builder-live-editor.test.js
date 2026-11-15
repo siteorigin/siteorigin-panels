@@ -1861,8 +1861,9 @@ test.describe( 'Live Editor style-only update', () => {
 				}
 				a.forEach( ( x, i ) => {
 					for ( const prop of Object.keys( x.out ) ) {
-						// Sub-pixel font sizes from a width change that is still settling are not a difference.
-						if ( x.out[ prop ] !== b[ i ].out[ prop ] && ! /^(font-size|line-height)$/.test( prop ) ) {
+						// Font sizes that scale with the width can differ by a fraction of a pixel while the width settles.
+						const near = /^(font-size|line-height)$/.test( prop ) && Math.abs( parseFloat( x.out[ prop ] ) - parseFloat( b[ i ].out[ prop ] ) ) < 0.5;
+						if ( x.out[ prop ] !== b[ i ].out[ prop ] && ! near ) {
 							found.push( `${ width }px ${ x.tag } ${ prop }: ${ x.out[ prop ] } vs ${ b[ i ].out[ prop ] }` );
 						}
 					}
@@ -1872,7 +1873,7 @@ test.describe( 'Live Editor style-only update', () => {
 			fresh.remove();
 
 			return found.slice( 0, 6 );
-		}, { url: s.getUrl(), id: s.id, data, widths: [ 1100, 900, 600 ] } );
+		}, { url: s.getUrl(), id: s.id, data, widths: [ 1280, 720, 320 ] } );
 		expect( diffs, `${ label }: the preview equals a fresh render` ).toEqual( [] );
 	};
 
@@ -2014,7 +2015,8 @@ test.describe( 'Live Editor style-only update', () => {
 		result = await settle( s, () => setStyle( s, 'row', 1, 'collapse_order', 'right-top' ), ( l ) => rowStyle( l, 1 ).collapse_order === 'right-top', 'row 1 collapse order' );
 		expectStyled( result );
 		await expectFresh( s, 'T6d after no-output edit' );
-		result = await settle( s, () => resize( 40 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) < 0.3, 'weights changed again' );
+		const weightBefore = Number( ( await fieldLayout( s.page ) ).grid_cells[ 0 ].weight );
+		result = await settle( s, () => resize( 40 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - weightBefore ) > 0.02, 'weights changed again' );
 		expectStyled( result );
 		await expectFresh( s, 'T6d second resize' );
 		expectNoPageErrors( s.errors );
@@ -2119,6 +2121,31 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
+	test( 'T15c after a script adds a rule through the CSS object model, a style edit reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		const frame = await previewFrame( s.page );
+		await frame.evaluate( () => {
+			document.querySelector( 'style[id^="siteorigin-panels-layouts-"]' ).sheet.insertRule( '.panels-e2e-cssom { color: red }' );
+		} );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T20 a style request that takes longer than the deadline reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		await s.page.evaluate( () => {
+			window.soPanelsBuilderView.liveEditor.styleTimeout = 500;
+		} );
+		await setCookie( ctx.context, 'panels_e2e_preview_block', 'slow' );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		await ctx.context.clearCookies( { name: 'panels_e2e_preview_block' } );
+		expectReload( result );
+		await waitForPreview( s.page, 'Style U2' );
+		await expectFresh( s, 'T20' );
+		expectNoPageErrors( s.errors );
+	} );
+
 	test( 'T16 a style request that is slow, then a resize, ends equal to a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
 		await setCookie( ctx.context, 'panels_e2e_preview_block', 'slow' );
@@ -2195,15 +2222,25 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T19 a row background image with an overlay reloads and equals a fresh render', async () => {
+	test( 'T19a a background image set on an already styled row equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
-		const result = await settle( s, async () => {
-			await setStyle( s, 'row', 1, 'background_display', 'cover' );
-			await setStyle( s, 'row', 1, 'background_image_attachment', '0' );
-		}, ( l ) => rowStyle( l, 1 ).background_display === 'cover', 'row 1 background display' );
-		expect( result.nav + result.fetch, 'the edit was handled' ).toBeGreaterThanOrEqual( 0 );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', 'https://example.invalid/bg.png' ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === 'https://example.invalid/bg.png', 'row 1 background image' );
+		expectStyled( result );
+		await expectFresh( s, 'T19a' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'T19b a background image with reduced opacity adds an overlay, reloads, and equals a fresh render', async () => {
+		const s = await open( 'main', styleLayout() );
+		await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', 'https://example.invalid/bg.png' ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === 'https://example.invalid/bg.png', 'row 1 background image' );
 		await waitForPreview( s.page, 'Style U2' );
-		await expectFresh( s, 'T19' );
+		await markPreview( s.page );
+		await setStyle( s, 'row', 1, 'background_display', 'cover' );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_opacity', '50' ), ( l ) => rowStyle( l, 1 ).background_image_opacity === '50', 'row 1 background opacity' );
+		expectReload( result );
+		await waitForPreview( s.page, 'Style U2' );
+		expect( await ( await previewFrame( s.page ) ).locator( '.panel-row-style .panel-background-overlay, #pg-' + s.id + '-1 [class*="overlay"]' ).count(), 'the row has an overlay' ).toBeGreaterThan( 0 );
+		await expectFresh( s, 'T19b' );
 		expectNoPageErrors( s.errors );
 	} );
 } );
