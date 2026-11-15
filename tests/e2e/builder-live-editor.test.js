@@ -1830,6 +1830,8 @@ test.describe( 'Live Editor style-only update', () => {
 				style.textContent = still;
 				f.contentDocument.head.appendChild( style );
 			} );
+			// The editor's hover highlight (faded widgets) is not part of the layout.
+			live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
 			const skip = [ 'cursor', 'pointer-events' ];
 			const snap = ( f ) => {
 				const w = f.contentDocument.getElementById( 'pl-' + id );
@@ -1850,6 +1852,7 @@ test.describe( 'Live Editor style-only update', () => {
 				live.style.setProperty( 'width', width + 'px', 'important' );
 				fresh.style.width = width + 'px';
 				await new Promise( ( resolve ) => setTimeout( resolve, 1200 ) );
+				live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
 				const a = snap( live );
 				const b = snap( fresh );
 				if ( a.length !== b.length ) {
@@ -1892,11 +1895,15 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T2 a row bottom margin and a row gutter on a plain row are applied in place', async () => {
+	test( 'T2 a row bottom margin on a styled row and a row gutter are applied in place', async () => {
 		const s = await open( 'main', styleLayout() );
-		let result = await settle( s, () => setStyle( s, 'row', 2, 'bottom_margin', '40px' ), ( l ) => rowStyle( l, 2 ).bottom_margin === '40px', 'row 2 bottom margin' );
+		let result = await settle( s, () => setStyle( s, 'row', 1, 'bottom_margin', '40px' ), ( l ) => rowStyle( l, 1 ).bottom_margin === '40px', 'row 1 bottom margin' );
 		expectStyled( result );
 		await expectFresh( s, 'T2 bottom margin' );
+		// Row 0 has no style yet: its first style adds a wrapper and reloads (L2), so give it one first.
+		await settle( s, () => setStyle( s, 'row', 0, 'padding', '8px' ), ( l ) => rowStyle( l, 0 ).padding === '8px', 'row 0 padding' );
+		await waitForPreview( s.page, 'Style U2' );
+		await markPreview( s.page );
 		result = await settle( s, () => setStyle( s, 'row', 0, 'gutter', '10px' ), ( l ) => rowStyle( l, 0 ).gutter === '10px', 'row 0 gutter' );
 		expectStyled( result );
 		await expectFresh( s, 'T2 gutter' );
@@ -1914,9 +1921,10 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T3b a tablet padding edit with Tablet Layout off changes nothing and a drag after it is in place', async () => {
+	test( 'T3b an edit that changes no CSS and no markup does not reload, and a drag after it is in place', async () => {
 		const s = await open( 'main', styleLayout() );
-		const result = await settle( s, () => setStyle( s, 'row', 1, 'tablet_padding', '7px 7px 7px 7px' ), ( l ) => rowStyle( l, 1 ).tablet_padding === '7px 7px 7px 7px', 'row 1 tablet padding' );
+		// Collapse order has no output on a one-cell row. (The tablet fields are not in the dialog with Tablet Layout off.)
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'collapse_order', 'right-top' ), ( l ) => rowStyle( l, 1 ).collapse_order === 'right-top', 'row 1 collapse order' );
 		expectStyled( result );
 		const drag = await settle( s, () => dragWidget( s.page, 'Style U3', 'Style S1', 'above' ), ( l ) => fieldRow( l, 0 ).join( '|' ) === 'Style U3,Style S1|Style U1', 'U3 moved', );
 		expectStyled( drag );
@@ -2003,7 +2011,7 @@ test.describe( 'Live Editor style-only update', () => {
 		};
 		let result = await settle( s, () => resize( -50 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) > 0.05, 'weights changed' );
 		expectStyled( result );
-		result = await settle( s, () => setStyle( s, 'row', 2, 'tablet_padding', '5px 5px 5px 5px' ), ( l ) => rowStyle( l, 2 ).tablet_padding === '5px 5px 5px 5px', 'row 2 tablet padding' );
+		result = await settle( s, () => setStyle( s, 'row', 1, 'collapse_order', 'right-top' ), ( l ) => rowStyle( l, 1 ).collapse_order === 'right-top', 'row 1 collapse order' );
 		expectStyled( result );
 		await expectFresh( s, 'T6d after no-output edit' );
 		result = await settle( s, () => resize( 40 ), ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.5 ) < 0.3, 'weights changed again' );
@@ -2014,6 +2022,10 @@ test.describe( 'Live Editor style-only update', () => {
 
 	test( 'T7 a gutter change, then a resize, equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
+		// Row 0 has no style yet: its first style adds a wrapper and reloads (L2), so give it one first.
+		await settle( s, () => setStyle( s, 'row', 0, 'padding', '8px' ), ( l ) => rowStyle( l, 0 ).padding === '8px', 'row 0 padding' );
+		await waitForPreview( s.page, 'Style U2' );
+		await markPreview( s.page );
 		let result = await settle( s, () => setStyle( s, 'row', 0, 'gutter', '40px' ), ( l ) => rowStyle( l, 0 ).gutter === '40px', 'row 0 gutter' );
 		expectStyled( result );
 		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
@@ -2085,21 +2097,24 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T15 after a script changes the live layout CSS, or a live class, a style edit reloads', async () => {
-		let s = await open( 'main', styleLayout() );
-		let frame = await previewFrame( s.page );
+	test( 'T15a after a script changes the live layout CSS, a style edit reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		const frame = await previewFrame( s.page );
 		await frame.evaluate( () => {
 			document.querySelector( 'style[id^="siteorigin-panels-layouts-"]' ).textContent += '/* touched */';
 		} );
-		let result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
 		expectReload( result );
+		expectNoPageErrors( s.errors );
+	} );
 
-		s = await open( 'main', styleLayout() );
-		frame = await previewFrame( s.page );
+	test( 'T15b after a script changes a class in the live preview, a style edit reloads', async () => {
+		const s = await open( 'main', styleLayout() );
+		const frame = await previewFrame( s.page );
 		await frame.evaluate( () => {
 			document.querySelector( '.so-panel' ).classList.add( 'panels-e2e-live-class' );
 		} );
-		result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+		const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
 		expectReload( result );
 		expectNoPageErrors( s.errors );
 	} );
