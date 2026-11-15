@@ -58,6 +58,10 @@ module.exports = Backbone.View.extend( {
 	previewRevision: 0,
 	installedCss: null,
 
+	// The style and stylesheet link elements of the preview in document order when it became ready: the
+	// cascade order the layout CSS was written for.
+	installedOwners: null,
+
 	// How long a style update waits for the two preview responses before it reloads, in milliseconds.
 	styleTimeout: 15000,
 
@@ -353,6 +357,7 @@ module.exports = Backbone.View.extend( {
 		this.previewReordered = false;
 		this.previewRevision++;
 		this.installedCss = null;
+		this.installedOwners = null;
 		this.swapCache = null;
 		this.abortSwap();
 
@@ -677,6 +682,7 @@ module.exports = Backbone.View.extend( {
 				// Map the preview before the binding below changes it.
 				thisView.previewMap = thisView.buildPreviewMap( thisView.readablePreviewDocument( this ) );
 					thisView.installedCss = thisView.previewMap ? thisView.layoutCss( thisView.previewMap.doc ) : null;
+					thisView.installedOwners = thisView.previewMap ? thisView.styleOwners( thisView.previewMap.doc ) : null;
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
@@ -1110,6 +1116,32 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * True when two lists hold the same elements in the same order.
+	 *
+	 * @param {Element[]|null} a
+	 * @param {Element[]} b
+	 * @return {boolean}
+	 */
+	sameOwners: function ( a, b ) {
+		return !! a && a.length === b.length && _.every( a, function ( el, i ) {
+			return el === b[ i ];
+		} );
+	},
+
+	/**
+	 * The style elements and stylesheet links of a preview document, in document order, which is their cascade
+	 * order. The Live Editor's own width style element is left out.
+	 *
+	 * @param {Document} doc
+	 * @return {Element[]}
+	 */
+	styleOwners: function ( doc ) {
+		return _.filter( doc.querySelectorAll( 'style, link[rel~="stylesheet"]' ), function ( el ) {
+			return el.id !== 'so-live-editor-patch';
+		} );
+	},
+
+	/**
 	 * True when a style element in the preview still applies as the server printed it: the same attributes, the
 	 * same parent (head or body), the same neighbours (its place in the cascade), and a sheet that has not been
 	 * disabled by a script. The Live Editor's own width style element is not a neighbour.
@@ -1323,6 +1355,7 @@ module.exports = Backbone.View.extend( {
 						rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
 						thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
 				} ) ||
+				! thisView.sameOwners( thisView.installedOwners, thisView.styleOwners( map.doc ) ) ||
 				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
 			) {
 				throw new Error( 'The preview is not what the server rendered.' );
@@ -1379,7 +1412,7 @@ module.exports = Backbone.View.extend( {
 				return;
 			}
 
-			// Today's behaviour: reload with the builder's current data.
+			// Reload the preview with the builder's current data.
 			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
 		} );
 
