@@ -2132,6 +2132,24 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
+	test( 'T15d after a script disables the layout style sheet or changes its media, a style edit reloads', async () => {
+		for ( const change of [ 'disabled', 'media' ] ) {
+			const s = await open( 'main', styleLayout() );
+			const frame = await previewFrame( s.page );
+			await frame.evaluate( ( kind ) => {
+				const style = document.querySelector( 'style[id^="siteorigin-panels-layouts-"]' );
+				if ( kind === 'disabled' ) {
+					style.sheet.disabled = true;
+				} else {
+					style.setAttribute( 'media', 'print' );
+				}
+			}, change );
+			const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
+			expectReload( result );
+			expectNoPageErrors( s.errors );
+		}
+	} );
+
 	test( 'T20 a style request that takes longer than the deadline reloads', async () => {
 		const s = await open( 'main', styleLayout() );
 		await s.page.evaluate( () => {
@@ -2222,9 +2240,13 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
+	const BG_URL = () => siteUrl( 'wp-includes/images/blank.gif' );
+
 	test( 'T19a a background image set on an already styled row equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
-		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', 'https://example.invalid/bg.png' ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === 'https://example.invalid/bg.png', 'row 1 background image' );
+		const response = await ctx.context.request.get( BG_URL() );
+		expect( response.status(), 'the background image is served' ).toBe( 200 );
+		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', BG_URL() ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === BG_URL(), 'row 1 background image' );
 		expectStyled( result );
 		await expectFresh( s, 'T19a' );
 		expectNoPageErrors( s.errors );
@@ -2232,14 +2254,15 @@ test.describe( 'Live Editor style-only update', () => {
 
 	test( 'T19b a background image with reduced opacity adds an overlay, reloads, and equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
-		await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', 'https://example.invalid/bg.png' ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === 'https://example.invalid/bg.png', 'row 1 background image' );
+		await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', BG_URL() ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === BG_URL(), 'row 1 background image' );
+		const display = await settle( s, () => setStyle( s, 'row', 1, 'background_display', 'cover' ), ( l ) => rowStyle( l, 1 ).background_display === 'cover', 'row 1 background display' );
+		expect( display.nav + display.fetch, 'the display edit was handled' ).toBeGreaterThan( 0 );
 		await waitForPreview( s.page, 'Style U2' );
 		await markPreview( s.page );
-		await setStyle( s, 'row', 1, 'background_display', 'cover' );
 		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_opacity', '50' ), ( l ) => rowStyle( l, 1 ).background_image_opacity === '50', 'row 1 background opacity' );
 		expectReload( result );
 		await waitForPreview( s.page, 'Style U2' );
-		expect( await ( await previewFrame( s.page ) ).locator( '.panel-row-style .panel-background-overlay, #pg-' + s.id + '-1 [class*="overlay"]' ).count(), 'the row has an overlay' ).toBeGreaterThan( 0 );
+		expect( await ( await previewFrame( s.page ) ).locator( '#pg-' + s.id + '-1 [class*="overlay"]' ).count(), 'the row has an overlay' ).toBeGreaterThan( 0 );
 		await expectFresh( s, 'T19b' );
 		expectNoPageErrors( s.errors );
 	} );
