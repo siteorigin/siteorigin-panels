@@ -1110,6 +1110,24 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * True when a style element in the preview still applies as the server printed it: the same media, the same
+	 * parent (head or body), and a sheet that has not been disabled by a script.
+	 *
+	 * @param {Element} el The style element in the preview.
+	 * @param {Element} served The same style element in the server's response.
+	 * @return {boolean}
+	 */
+	styleApplies: function ( el, served ) {
+		return !! served &&
+			!! el.sheet &&
+			! el.sheet.disabled &&
+			el.getAttribute( 'media' ) === served.getAttribute( 'media' ) &&
+			!! el.parentNode &&
+			!! served.parentNode &&
+			el.parentNode.nodeName === served.parentNode.nodeName;
+	},
+
+	/**
 	 * The rules that CSS text gives when parsed in a preview document, read from a style element that
 	 * applies to nothing.
 	 *
@@ -1268,6 +1286,7 @@ module.exports = Backbone.View.extend( {
 
 			// The layout CSS in the preview is the CSS last installed, and its markup is what the server rendered.
 			var live = thisView.layoutCss( map.doc ),
+				served = thisView.layoutCss( results[0].doc ),
 				installed = thisView.installedCss,
 				beforeWrapper = results[0].doc.getElementById( map.wrapper.id );
 			if (
@@ -1282,7 +1301,9 @@ module.exports = Backbone.View.extend( {
 					}
 					rules = thisView.ruleText( live[ pair.key ].el );
 
-					return rules !== null && rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text );
+					return rules !== null &&
+						rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
+						thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
 				} ) ||
 				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
 			) {
