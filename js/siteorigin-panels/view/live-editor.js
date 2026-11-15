@@ -1116,19 +1116,6 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * True when two lists hold the same elements in the same order.
-	 *
-	 * @param {Element[]|null} a
-	 * @param {Element[]} b
-	 * @return {boolean}
-	 */
-	sameOwners: function ( a, b ) {
-		return !! a && a.length === b.length && _.every( a, function ( el, i ) {
-			return el === b[ i ];
-		} );
-	},
-
-	/**
 	 * The style elements and stylesheet links of a preview document, in document order, which is their cascade
 	 * order. The Live Editor's own width style element is left out.
 	 *
@@ -1355,7 +1342,8 @@ module.exports = Backbone.View.extend( {
 						rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
 						thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
 				} ) ||
-				! thisView.sameOwners( thisView.installedOwners, thisView.styleOwners( map.doc ) ) ||
+				! thisView.installedOwners ||
+				! sameElements( thisView.installedOwners, thisView.styleOwners( map.doc ) ) ||
 				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
 			) {
 				throw new Error( 'The preview is not what the server rendered.' );

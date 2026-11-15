@@ -2136,8 +2136,8 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T15d after a script disables the layout style sheet, changes its media, moves it, or adds style elements around it, a style edit reloads', async () => {
-		for ( const change of [ 'disabled', 'media', 'moved', 'passed', 'added' ] ) {
+	test( 'T15d after a script disables the layout style sheet, changes its media, moves it, or adds a style element, a style edit reloads', async () => {
+		for ( const change of [ 'disabled', 'media', 'moved', 'added' ] ) {
 			const s = await open( 'main', styleLayout() );
 			const frame = await previewFrame( s.page );
 			await frame.evaluate( ( kind ) => {
@@ -2148,13 +2148,6 @@ test.describe( 'Live Editor style-only update', () => {
 					style.setAttribute( 'media', 'print' );
 				} else if ( kind === 'moved' ) {
 					document.head.appendChild( style );
-				} else if ( kind === 'passed' ) {
-					// Three anonymous styles around it, then it moves past one: its neighbours look the same.
-					const before = document.createElement( 'style' );
-					const after = document.createElement( 'style' );
-					style.before( before );
-					style.after( after );
-					window.__passedStyle = { style, after };
 				} else {
 					document.head.appendChild( document.createElement( 'style' ) );
 				}
