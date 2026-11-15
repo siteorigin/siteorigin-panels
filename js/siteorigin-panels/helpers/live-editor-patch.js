@@ -288,8 +288,9 @@ module.exports = {
 					var widgetBefore = copy( a.widgets[ widgetCid ] );
 					var widgetAfter = copy( b.widgets[ widgetCid ] );
 
-					widgetBefore.panels_info = without( widgetBefore.panels_info, [ 'style' ] );
-					widgetAfter.panels_info = without( widgetAfter.panels_info, [ 'style' ] );
+					// `raw` marks form values the preview processes; the page compare sees any difference it makes.
+					widgetBefore.panels_info = without( widgetBefore.panels_info, [ 'style', 'raw' ] );
+					widgetAfter.panels_info = without( widgetAfter.panels_info, [ 'style', 'raw' ] );
 					if ( ! same( widgetBefore, widgetAfter ) ) {
 						return false;
 					}

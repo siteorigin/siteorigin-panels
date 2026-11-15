@@ -291,6 +291,19 @@ test( 'styleChange is null when nothing changed', () => {
 	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null );
 } );
 
+test( 'styleChange ignores the raw flag the widget dialog sets', () => {
+	const s = setup();
+	const w = s.byText( 'A' );
+	w.set( 'style', { padding: '1px' } );
+	const data = patch.snapshot( s.model ).data;
+	data.widgets[ 0 ].panels_info.raw = true;
+
+	const change = patch.styleChange( s.prev, { data, rows: patch.snapshot( s.model ).rows } );
+
+	assert.ok( change );
+	assert.deepEqual( change.widgets, [ w.cid ] );
+} );
+
 test( 'styleChange is null when a widget value changes with the style', () => {
 	const s = setup();
 	s.byText( 'A' ).set( 'style', { padding: '1px' } );

@@ -208,6 +208,27 @@ module.exports = {
 	},
 
 	/**
+	 * The key of a Page Builder layout style block: its id (`siteorigin-panels-layouts-head`, `-footer`,
+	 * `-footer-2`), or for a `style.panels-style` block `panels-style-{post id}`. Null for any other element.
+	 *
+	 * @param {Element} style A style element.
+	 * @return {string|null}
+	 */
+	styleKey: function ( style ) {
+		var id = style.getAttribute( 'id' ) || '';
+
+		if ( id.indexOf( LAYOUT_STYLE_PREFIX ) === 0 ) {
+			return id;
+		}
+
+		if ( style.classList.contains( 'panels-style' ) && style.hasAttribute( 'data-panels-style-for-post' ) ) {
+			return 'panels-style-' + style.getAttribute( 'data-panels-style-for-post' );
+		}
+
+		return null;
+	},
+
+	/**
 	 * The layout style blocks of a parsed response, and the document with their text blanked, so two
 	 * responses compare equal when they differ only in the layout CSS. A block is keyed by its id
 	 * (`siteorigin-panels-layouts-head`, `-footer`, `-footer-2`), or for a `style.panels-style` block by
@@ -224,14 +245,7 @@ module.exports = {
 		var copy = doc.documentElement.cloneNode( true );
 		var styles = [];
 		Array.prototype.forEach.call( copy.querySelectorAll( 'style' ), function ( style ) {
-			var id = style.getAttribute( 'id' ) || '';
-			var key = null;
-
-			if ( id.indexOf( LAYOUT_STYLE_PREFIX ) === 0 ) {
-				key = id;
-			} else if ( style.classList.contains( 'panels-style' ) && style.hasAttribute( 'data-panels-style-for-post' ) ) {
-				key = 'panels-style-' + style.getAttribute( 'data-panels-style-for-post' );
-			}
+			var key = module.exports.styleKey( style );
 
 			if ( key ) {
 				styles.push( { key: key, text: style.textContent } );
