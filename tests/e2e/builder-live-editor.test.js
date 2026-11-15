@@ -2161,6 +2161,40 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
+	test( 'T13 a style edit on a page with a Layout Slider reloads, because its own style tag leaves the preview unmapped', async () => {
+		test.skip( ! process.env.PANELS_E2E_WIDGETS_BUNDLE_ROOT, 'Requires Widgets Bundle.' );
+		const frame = ( label ) => ( { content: {
+			widgets: [ { text: label, panels_info: { class: 'Panels_E2E_Text_Widget', grid: 0, cell: 0, id: 0, style: {} } } ],
+			grids: [ { cells: 1, style: {} } ],
+			grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} } ],
+		} } );
+		const layout = {
+			widgets: [
+				{
+					frames: [ frame( 'Slide one' ), frame( 'Slide two' ) ],
+					controls: { pagination: true, arrows: true, autoplay: false },
+					layout: { desktop: { height: '300px', width: '600px' } },
+					panels_info: { class: 'SiteOrigin_Widget_LayoutSlider_Widget', grid: 0, cell: 0, id: 0, style: {} },
+				},
+				wrappedWidget( 'Style U2', 1, 0, 1 ),
+			],
+			grids: [
+				{ cells: 1, style: { padding: PAD, background: '#eeeeee', background_display: 'color' } },
+				{ cells: 1, style: {} },
+			],
+			grid_cells: [
+				{ grid: 0, index: 0, weight: 1, style: {} },
+				{ grid: 1, index: 0, weight: 1, style: {} },
+			],
+		};
+		layout.widgets[ 1 ].panels_info.class = 'Panels_E2E_Wrapped_Text_Widget';
+		const s = await open( 'slider', layout );
+		const result = await settle( s, () => setStyle( s, 'row', 0, 'padding', PAD2 ), ( l ) => rowStyle( l, 0 ).padding === PAD2, 'row 0 padding' );
+		expectReload( result );
+		await waitForPreview( s.page, 'Style U2' );
+		expectNoPageErrors( s.errors );
+	} );
+
 	test( 'T19 a row background image with an overlay reloads and equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
 		const result = await settle( s, async () => {
