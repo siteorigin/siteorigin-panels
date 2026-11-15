@@ -304,6 +304,19 @@ test( 'styleChange ignores the raw flag the widget dialog sets', () => {
 	assert.deepEqual( change.widgets, [ w.cid ] );
 } );
 
+test( 'styleChange ignores a widget_id that is made up again on every read', () => {
+	const s = setup();
+	const w = s.byText( 'A' );
+	w.set( 'style', { padding: '1px' } );
+	const data = patch.snapshot( s.model ).data;
+	data.widgets[ 0 ].panels_info.widget_id = 'a-new-id';
+
+	const change = patch.styleChange( s.prev, { data, rows: patch.snapshot( s.model ).rows } );
+
+	assert.ok( change );
+	assert.deepEqual( change.widgets, [ w.cid ] );
+} );
+
 test( 'styleChange is null when a widget value changes with the style', () => {
 	const s = setup();
 	s.byText( 'A' ).set( 'style', { padding: '1px' } );
