@@ -58,6 +58,9 @@ module.exports = Backbone.View.extend( {
 	previewRevision: 0,
 	installedCss: null,
 
+	// How long a style update waits for the two preview responses before it reloads, in milliseconds.
+	styleTimeout: 15000,
+
 	// The single-widget swap in flight ({ controller, generation }), and the last swapped-in response
 	// ({ dataJson, text }), reused as the "before" render of the next swap.
 	swapRequest: null,
@@ -1090,6 +1093,47 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * The rules a style element holds, as text. A script can add or change rules through the CSS object model
+	 * without changing the element's text.
+	 *
+	 * @param {Element} el A style element.
+	 * @return {string|null} Null when the rules cannot be read.
+	 */
+	ruleText: function ( el ) {
+		try {
+			return el.sheet ? _.map( el.sheet.cssRules, function ( rule ) {
+				return rule.cssText;
+			} ).join( '\n' ) : null;
+		} catch ( e ) {
+			return null;
+		}
+	},
+
+	/**
+	 * The rules that CSS text gives when parsed in a preview document, read from a style element that
+	 * applies to nothing.
+	 *
+	 * @param {Document} doc
+	 * @param {string} text
+	 * @return {string|null}
+	 */
+	parsedRuleText: function ( doc, text ) {
+		if ( ! doc.head ) {
+			return null;
+		}
+		var probe = doc.createElement( 'style' ),
+			rules;
+
+		probe.media = 'not all';
+		probe.textContent = text;
+		doc.head.appendChild( probe );
+		rules = this.ruleText( probe );
+		doc.head.removeChild( probe );
+
+		return rules;
+	},
+
+	/**
 	 * The layout wrapper of the preview as markup, without what the Live Editor and scripts add: the highlight
 	 * classes and inline style attributes (the cursor, stretched rows, widget scripts that size on load and resize).
 	 *
@@ -1186,9 +1230,23 @@ module.exports = Backbone.View.extend( {
 			cache = this.swapCache,
 			before = cache && cache.dataJson === prevJson ?
 				Promise.resolve( { text: cache.text, doc: this.parsePreview( cache.text ) } ) :
-				this.fetchPreviewDocument( request, prevJson, controller );
+				this.fetchPreviewDocument( request, prevJson, controller ),
+			// A request that never settles must not leave the old styles in the preview: reload instead.
+			timer = setTimeout( function () {
+				if ( ! isCurrent() ) {
+					return;
+				}
+				thisView.swapRequest = null;
+				if ( controller ) {
+					controller.abort();
+				}
+				if ( thisView.$el.is( ':visible' ) ) {
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				}
+			}, this.styleTimeout );
 
 		Promise.all( [ before, this.fetchPreviewDocument( request, nextJson, controller ) ] ).then( function ( results ) {
+			clearTimeout( timer );
 			if ( ! isCurrent() ) {
 				return;
 			}
@@ -1217,7 +1275,14 @@ module.exports = Backbone.View.extend( {
 				! beforeWrapper ||
 				_.size( live ) !== pairs.length ||
 				! _.every( pairs, function ( pair ) {
-					return _.has( live, pair.key ) && _.has( installed, pair.key ) && live[ pair.key ].text === installed[ pair.key ].text;
+					var rules;
+
+					if ( ! _.has( live, pair.key ) || ! _.has( installed, pair.key ) || live[ pair.key ].text !== installed[ pair.key ].text ) {
+						return false;
+					}
+					rules = thisView.ruleText( live[ pair.key ].el );
+
+					return rules !== null && rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text );
 				} ) ||
 				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
 			) {
@@ -1260,6 +1325,7 @@ module.exports = Backbone.View.extend( {
 				previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
 			}
 		} ).catch( function ( error ) {
+			clearTimeout( timer );
 			// Aborted, or replaced by a newer update or a reload: that one owns the preview now.
 			if (
 				( error && error.name === 'AbortError' ) ||
