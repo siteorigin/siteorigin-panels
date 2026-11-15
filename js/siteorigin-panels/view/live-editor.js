@@ -1110,21 +1110,39 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * True when a style element in the preview still applies as the server printed it: the same media, the same
-	 * parent (head or body), and a sheet that has not been disabled by a script.
+	 * True when a style element in the preview still applies as the server printed it: the same attributes, the
+	 * same parent (head or body), the same neighbours (its place in the cascade), and a sheet that has not been
+	 * disabled by a script. The Live Editor's own width style element is not a neighbour.
 	 *
 	 * @param {Element} el The style element in the preview.
 	 * @param {Element} served The same style element in the server's response.
 	 * @return {boolean}
 	 */
 	styleApplies: function ( el, served ) {
+		var attributes = function ( node ) {
+				return _.map( node.attributes, function ( attribute ) {
+					return attribute.name + '=' + attribute.value;
+				} ).sort().join( '|' );
+			},
+			neighbour = function ( node, direction ) {
+				var other = node[ direction ];
+
+				while ( other && other.id === 'so-live-editor-patch' ) {
+					other = other[ direction ];
+				}
+
+				return other ? other.nodeName + '#' + other.id + '|' + ( other.getAttribute( 'href' ) || '' ) : '';
+			};
+
 		return !! served &&
 			!! el.sheet &&
 			! el.sheet.disabled &&
-			el.getAttribute( 'media' ) === served.getAttribute( 'media' ) &&
+			attributes( el ) === attributes( served ) &&
 			!! el.parentNode &&
 			!! served.parentNode &&
-			el.parentNode.nodeName === served.parentNode.nodeName;
+			el.parentNode.nodeName === served.parentNode.nodeName &&
+			neighbour( el, 'previousElementSibling' ) === neighbour( served, 'previousElementSibling' ) &&
+			neighbour( el, 'nextElementSibling' ) === neighbour( served, 'nextElementSibling' );
 	},
 
 	/**
