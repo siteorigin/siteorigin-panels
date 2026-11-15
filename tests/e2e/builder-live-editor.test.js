@@ -1825,10 +1825,12 @@ test.describe( 'Live Editor style-only update', () => {
 				fresh.srcdoc = html;
 			} );
 			const still = '*,*::before,*::after{transition:none!important;animation:none!important}';
-			[ live, fresh ].forEach( ( f ) => {
+			const stills = [ live, fresh ].map( ( f ) => {
 				const style = f.contentDocument.createElement( 'style' );
 				style.textContent = still;
 				f.contentDocument.head.appendChild( style );
+
+				return style;
 			} );
 			// The editor's hover highlight (faded widgets) is not part of the layout.
 			live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
@@ -1870,6 +1872,8 @@ test.describe( 'Live Editor style-only update', () => {
 				} );
 			}
 			live.style.width = original;
+			// The preview keeps the stylesheets it was loaded with.
+			stills[ 0 ].remove();
 			fresh.remove();
 
 			return found.slice( 0, 6 );
@@ -2132,8 +2136,8 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T15d after a script disables the layout style sheet, changes its media or moves it, a style edit reloads', async () => {
-		for ( const change of [ 'disabled', 'media', 'moved' ] ) {
+	test( 'T15d after a script disables the layout style sheet, changes its media, moves it, or adds style elements around it, a style edit reloads', async () => {
+		for ( const change of [ 'disabled', 'media', 'moved', 'passed', 'added' ] ) {
 			const s = await open( 'main', styleLayout() );
 			const frame = await previewFrame( s.page );
 			await frame.evaluate( ( kind ) => {
@@ -2142,8 +2146,17 @@ test.describe( 'Live Editor style-only update', () => {
 					style.sheet.disabled = true;
 				} else if ( kind === 'media' ) {
 					style.setAttribute( 'media', 'print' );
-				} else {
+				} else if ( kind === 'moved' ) {
 					document.head.appendChild( style );
+				} else if ( kind === 'passed' ) {
+					// Three anonymous styles around it, then it moves past one: its neighbours look the same.
+					const before = document.createElement( 'style' );
+					const after = document.createElement( 'style' );
+					style.before( before );
+					style.after( after );
+					window.__passedStyle = { style, after };
+				} else {
+					document.head.appendChild( document.createElement( 'style' ) );
 				}
 			}, change );
 			const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
