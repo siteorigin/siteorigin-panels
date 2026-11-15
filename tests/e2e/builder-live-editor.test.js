@@ -2132,16 +2132,18 @@ test.describe( 'Live Editor style-only update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	test( 'T15d after a script disables the layout style sheet or changes its media, a style edit reloads', async () => {
-		for ( const change of [ 'disabled', 'media' ] ) {
+	test( 'T15d after a script disables the layout style sheet, changes its media or moves it, a style edit reloads', async () => {
+		for ( const change of [ 'disabled', 'media', 'moved' ] ) {
 			const s = await open( 'main', styleLayout() );
 			const frame = await previewFrame( s.page );
 			await frame.evaluate( ( kind ) => {
 				const style = document.querySelector( 'style[id^="siteorigin-panels-layouts-"]' );
 				if ( kind === 'disabled' ) {
 					style.sheet.disabled = true;
-				} else {
+				} else if ( kind === 'media' ) {
 					style.setAttribute( 'media', 'print' );
+				} else {
+					document.head.appendChild( style );
 				}
 			}, change );
 			const result = await settle( s, () => setStyle( s, 'widget', 'Style S1', 'padding', PAD2 ), ( l ) => widgetStyle( l, 'Style S1' ).padding === PAD2, 'S1 padding' );
@@ -2256,8 +2258,8 @@ test.describe( 'Live Editor style-only update', () => {
 		const s = await open( 'main', styleLayout() );
 		await settle( s, () => setStyle( s, 'row', 1, 'background_image_attachment_fallback', BG_URL() ), ( l ) => rowStyle( l, 1 ).background_image_attachment_fallback === BG_URL(), 'row 1 background image' );
 		const display = await settle( s, () => setStyle( s, 'row', 1, 'background_display', 'cover' ), ( l ) => rowStyle( l, 1 ).background_display === 'cover', 'row 1 background display' );
-		expect( display.nav + display.fetch, 'the display edit was handled' ).toBeGreaterThan( 0 );
-		await waitForPreview( s.page, 'Style U2' );
+		expectStyled( display );
+		await expectFresh( s, 'T19b display' );
 		await markPreview( s.page );
 		const result = await settle( s, () => setStyle( s, 'row', 1, 'background_image_opacity', '50' ), ( l ) => rowStyle( l, 1 ).background_image_opacity === '50', 'row 1 background opacity' );
 		expectReload( result );
