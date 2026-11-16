@@ -269,3 +269,97 @@ test( 'changedWidgets is null for any structural change', () => {
 	const s = setup();
 	assert.equal( patch.changedWidgets( null, patch.snapshot( s.model ) ), null );
 } );
+
+// A style edit, the way the dialogs make it: set the model's style object.
+test( 'styleChange names the rows, cells and widgets whose style changed', () => {
+	const s = setup();
+	s.row( 0 ).set( 'style', { padding: '10px' } );
+	s.cell( 1, 0 ).set( 'style', { background: '#fff' } );
+	s.byText( 'E' ).set( 'style', { margin: '4px' } );
+
+	const change = patch.styleChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.rows, [ s.row( 0 ).cid ] );
+	assert.deepEqual( change.cells, [ s.cell( 1, 0 ).cid ] );
+	assert.deepEqual( change.widgets, [ s.byText( 'E' ).cid ] );
+} );
+
+test( 'styleChange is null when nothing changed', () => {
+	const s = setup();
+
+	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'styleChange ignores the raw flag the widget dialog sets', () => {
+	const s = setup();
+	const w = s.byText( 'A' );
+	w.set( 'style', { padding: '1px' } );
+	const data = patch.snapshot( s.model ).data;
+	data.widgets[ 0 ].panels_info.raw = true;
+
+	const change = patch.styleChange( s.prev, { data, rows: patch.snapshot( s.model ).rows } );
+
+	assert.ok( change );
+	assert.deepEqual( change.widgets, [ w.cid ] );
+} );
+
+test( 'styleChange ignores a widget_id that is made up again on every read', () => {
+	const s = setup();
+	const w = s.byText( 'A' );
+	w.set( 'style', { padding: '1px' } );
+	const data = patch.snapshot( s.model ).data;
+	data.widgets[ 0 ].panels_info.widget_id = 'a-new-id';
+
+	const change = patch.styleChange( s.prev, { data, rows: patch.snapshot( s.model ).rows } );
+
+	assert.ok( change );
+	assert.deepEqual( change.widgets, [ w.cid ] );
+} );
+
+test( 'styleChange is null when a widget value changes with the style', () => {
+	const s = setup();
+	s.byText( 'A' ).set( 'style', { padding: '1px' } );
+	s.byText( 'A' ).set( 'values', Object.assign( {}, s.byText( 'A' ).get( 'values' ), { text: 'A2' } ) );
+
+	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'styleChange is null when a weight, a place or the structure changes', () => {
+	let s = setup();
+	s.row( 0 ).set( 'style', { padding: '1px' } );
+	s.cell( 0, 0 ).set( 'weight', 0.3 );
+	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null, 'weight' );
+
+	s = setup();
+	s.row( 0 ).set( 'style', { padding: '1px' } );
+	moveWidget( s.byText( 'C' ), s.cell( 0, 1 ), 0 );
+	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null, 'widget place' );
+
+	s = setup();
+	s.row( 0 ).set( 'style', { padding: '1px' } );
+	moveRow( s.rows, s.row( 1 ), 0 );
+	assert.equal( patch.styleChange( s.prev, patch.snapshot( s.model ) ), null, 'row order' );
+} );
+
+test( 'styleChange is null for a snapshot that cannot be trusted', () => {
+	const s = setup();
+
+	assert.equal( patch.styleChange( null, patch.snapshot( s.model ) ), null );
+	assert.equal( patch.styleChange( s.prev, { data: {}, rows: [] } ), null );
+} );
+
+test( 'plan reports whether a patch reordered anything', () => {
+	let s = setup();
+	s.cell( 0, 0 ).set( 'weight', 0.3 );
+	s.cell( 0, 1 ).set( 'weight', 0.7 );
+	assert.equal( patch.plan( s.prev, patch.snapshot( s.model ) ).reordered, false, 'a resize' );
+
+	s = setup();
+	moveWidget( s.byText( 'C' ), s.cell( 0, 1 ), 0 );
+	assert.equal( patch.plan( s.prev, patch.snapshot( s.model ) ).reordered, true, 'a widget move' );
+
+	s = setup();
+	moveRow( s.rows, s.row( 1 ), 0 );
+	assert.equal( patch.plan( s.prev, patch.snapshot( s.model ) ).reordered, true, 'a row move' );
+} );

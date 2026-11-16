@@ -49,6 +49,22 @@ module.exports = Backbone.View.extend( {
 	// refreshPreview() resets it. A single-widget swap needs it false.
 	previewPatched: false,
 
+	// True after a row or widget was moved in the preview (a resize alone does not set it). The layout CSS
+	// selects by position id, so CSS from a fresh render no longer matches. Only refreshPreview() resets it.
+	previewReordered: false,
+
+	// Increased by every change made in place (move, resize, swap, style update), so a request that started
+	// earlier does not overwrite a later change. The layout CSS last installed in the preview, by block key.
+	previewRevision: 0,
+	installedCss: null,
+
+	// The style and stylesheet link elements of the preview in document order when it became ready: the
+	// cascade order the layout CSS was written for.
+	installedOwners: null,
+
+	// How long a style update waits for the two preview responses before it reloads, in milliseconds.
+	styleTimeout: 15000,
+
 	// The single-widget swap in flight ({ controller, generation }), and the last swapped-in response
 	// ({ dataJson, text }), reused as the "before" render of the next swap.
 	swapRequest: null,
@@ -297,6 +313,11 @@ module.exports = Backbone.View.extend( {
 			return this;
 		}
 
+		// A style edit replaces the layout CSS, when a reload would change nothing else.
+		if ( this.stylePreview( newData ) ) {
+			return this;
+		}
+
 		// An edit to one allow-listed widget replaces only that widget, when a reload would change nothing else.
 		if ( this.swapPreview( newData ) ) {
 			return this;
@@ -333,6 +354,10 @@ module.exports = Backbone.View.extend( {
 		this.previewMap = null;
 		this.previewWidths = {};
 		this.previewPatched = false;
+		this.previewReordered = false;
+		this.previewRevision++;
+		this.installedCss = null;
+		this.installedOwners = null;
 		this.swapCache = null;
 		this.abortSwap();
 
@@ -656,6 +681,8 @@ module.exports = Backbone.View.extend( {
 
 				// Map the preview before the binding below changes it.
 				thisView.previewMap = thisView.buildPreviewMap( thisView.readablePreviewDocument( this ) );
+					thisView.installedCss = thisView.previewMap ? thisView.layoutCss( thisView.previewMap.doc ) : null;
+					thisView.installedOwners = thisView.previewMap ? thisView.styleOwners( thisView.previewMap.doc ) : null;
 
 				// Lets find all the first level grids. This is to account for the Page Builder layout widget.
 				var layoutWrapper = $iframeContents.find( '#pl-' + thisView.builder.config.postId );
@@ -822,6 +849,63 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * Parse a preview response inertly: no scripts run and nothing loads.
+	 *
+	 * @param {string} text
+	 * @return {Document}
+	 */
+	parsePreview: function ( text ) {
+		return new window.DOMParser().parseFromString( text, 'text/html' );
+	},
+
+	/**
+	 * Send the request the preview iframe sends (same URL with its nonce, same fields, same encoding, same
+	 * cookies) with other layout data. Resolves to { text, doc } only for an HTML 200 response with no redirect
+	 * and no document policy.
+	 *
+	 * @param {Object} request this.previewRequest
+	 * @param {string} json The layout data, as JSON.
+	 * @param {AbortController|null} controller
+	 * @return {Promise}
+	 */
+	fetchPreviewDocument: function ( request, json, controller ) {
+		var swap = panels.helpers.liveEditorSwap,
+			parse = this.parsePreview;
+
+		return window.fetch( request.url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			redirect: 'manual',
+			cache: 'no-store',
+			signal: controller ? controller.signal : undefined,
+			// The fields and the encoding of the preview form.
+			body: new window.URLSearchParams( {
+				live_editor_panels_data: json,
+				live_editor_post_ID: String( request.fields.live_editor_post_ID ),
+			} ),
+		} ).then( function ( response ) {
+			var type = String( response.headers.get( 'content-type' ) || '' ).toLowerCase();
+			if (
+				response.status !== 200 ||
+				response.redirected ||
+				response.type === 'opaqueredirect' ||
+				type.indexOf( 'text/html' ) !== 0
+			) {
+				throw new Error( 'The response is not a preview.' );
+			}
+
+			return response.text().then( function ( text ) {
+				var doc = parse( text );
+				if ( swap.hasDocumentPolicy( response.headers, doc ) ) {
+					throw new Error( 'The response has a document policy.' );
+				}
+
+				return { text: text, doc: doc };
+			} );
+		} );
+	},
+
+	/**
 	 * Cancel the single-widget swap in flight, if any.
 	 */
 	abortSwap: function () {
@@ -924,41 +1008,9 @@ module.exports = Backbone.View.extend( {
 			isCurrent = function () {
 				return thisView.swapRequest === current && current.generation === thisView.previewGeneration;
 			},
-			parse = function ( text ) {
-				return new window.DOMParser().parseFromString( text, 'text/html' );
-			},
+			parse = this.parsePreview,
 			fetchPreview = function ( json ) {
-				return window.fetch( request.url, {
-					method: 'POST',
-					credentials: 'same-origin',
-					redirect: 'manual',
-					cache: 'no-store',
-					signal: controller ? controller.signal : undefined,
-					// The fields and the encoding of the preview form.
-					body: new window.URLSearchParams( {
-						live_editor_panels_data: json,
-						live_editor_post_ID: String( request.fields.live_editor_post_ID ),
-					} ),
-				} ).then( function ( response ) {
-					var type = String( response.headers.get( 'content-type' ) || '' ).toLowerCase();
-					if (
-						response.status !== 200 ||
-						response.redirected ||
-						response.type === 'opaqueredirect' ||
-						type.indexOf( 'text/html' ) !== 0
-					) {
-						throw new Error( 'The response is not a preview.' );
-					}
-
-					return response.text().then( function ( text ) {
-						var doc = parse( text );
-						if ( swap.hasDocumentPolicy( response.headers, doc ) ) {
-							throw new Error( 'The response has a document policy.' );
-						}
-
-						return { text: text, doc: doc };
-					} );
-				} );
+				return thisView.fetchPreviewDocument( request, json, controller );
 			},
 			cache = this.swapCache,
 			before = cache && cache.dataJson === prevJson ?
@@ -994,6 +1046,7 @@ module.exports = Backbone.View.extend( {
 
 			thisView.previewSnapshot = next;
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
+			thisView.previewRevision++;
 
 			var previewWindow = thisView.previewIframe[0].contentWindow;
 			previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
@@ -1013,6 +1066,341 @@ module.exports = Backbone.View.extend( {
 			}
 
 			// Today's behaviour: reload with the builder's current data.
+			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+		} );
+
+		return true;
+	},
+
+	/**
+	 * The layout CSS of a preview document, by block key: { key: { el, text } }. Null when there is none or a
+	 * key is repeated.
+	 *
+	 * @param {Document} doc
+	 * @return {Object|null}
+	 */
+	layoutCss: function ( doc ) {
+		var swap = panels.helpers.liveEditorSwap,
+			found = {},
+			ok = true;
+
+		_.each( doc.querySelectorAll( 'style' ), function ( el ) {
+			var key = swap.styleKey( el );
+			if ( ! key ) {
+				return;
+			}
+			if ( _.has( found, key ) ) {
+				ok = false;
+			}
+			found[ key ] = { el: el, text: el.textContent };
+		} );
+
+		return ok && ! _.isEmpty( found ) ? found : null;
+	},
+
+	/**
+	 * The rules a style element holds, as text. A script can add or change rules through the CSS object model
+	 * without changing the element's text.
+	 *
+	 * @param {Element} el A style element.
+	 * @return {string|null} Null when the rules cannot be read.
+	 */
+	ruleText: function ( el ) {
+		try {
+			return el.sheet ? _.map( el.sheet.cssRules, function ( rule ) {
+				return rule.cssText;
+			} ).join( '\n' ) : null;
+		} catch ( e ) {
+			return null;
+		}
+	},
+
+	/**
+	 * The style elements and stylesheet links of a preview document, in document order, which is their cascade
+	 * order. The Live Editor's own width style element is left out.
+	 *
+	 * @param {Document} doc
+	 * @return {Element[]}
+	 */
+	styleOwners: function ( doc ) {
+		return _.filter( doc.querySelectorAll( 'style, link[rel~="stylesheet"]' ), function ( el ) {
+			return el.id !== 'so-live-editor-patch';
+		} );
+	},
+
+	/**
+	 * True when a style element in the preview still applies as the server printed it: the same attributes, the
+	 * same parent (head or body), the same neighbours (its place in the cascade), and a sheet that has not been
+	 * disabled by a script. The Live Editor's own width style element is not a neighbour.
+	 *
+	 * @param {Element} el The style element in the preview.
+	 * @param {Element} served The same style element in the server's response.
+	 * @return {boolean}
+	 */
+	styleApplies: function ( el, served ) {
+		var attributes = function ( node ) {
+				return _.map( node.attributes, function ( attribute ) {
+					return attribute.name + '=' + attribute.value;
+				} ).sort().join( '|' );
+			},
+			neighbour = function ( node, direction ) {
+				var other = node[ direction ];
+
+				while ( other && other.id === 'so-live-editor-patch' ) {
+					other = other[ direction ];
+				}
+
+				return other ? other.nodeName + '#' + other.id + '|' + ( other.getAttribute( 'href' ) || '' ) : '';
+			};
+
+		return !! served &&
+			!! el.sheet &&
+			! el.sheet.disabled &&
+			attributes( el ) === attributes( served ) &&
+			!! el.parentNode &&
+			!! served.parentNode &&
+			el.parentNode.nodeName === served.parentNode.nodeName &&
+			neighbour( el, 'previousElementSibling' ) === neighbour( served, 'previousElementSibling' ) &&
+			neighbour( el, 'nextElementSibling' ) === neighbour( served, 'nextElementSibling' );
+	},
+
+	/**
+	 * The rules that CSS text gives when parsed in a preview document, read from a style element that
+	 * applies to nothing.
+	 *
+	 * @param {Document} doc
+	 * @param {string} text
+	 * @return {string|null}
+	 */
+	parsedRuleText: function ( doc, text ) {
+		if ( ! doc.head ) {
+			return null;
+		}
+		var probe = doc.createElement( 'style' ),
+			rules;
+
+		probe.media = 'not all';
+		probe.textContent = text;
+		doc.head.appendChild( probe );
+		rules = this.ruleText( probe );
+		doc.head.removeChild( probe );
+
+		return rules;
+	},
+
+	/**
+	 * The layout wrapper of the preview as markup, without what the Live Editor and scripts add: the highlight
+	 * classes and inline style attributes (the cursor, stretched rows, widget scripts that size on load and resize).
+	 *
+	 * @param {Element} wrapper
+	 * @return {string}
+	 */
+	normalisedWrapper: function ( wrapper ) {
+		var copy = wrapper.cloneNode( true );
+
+		_.each( [ copy ].concat( _.toArray( copy.querySelectorAll( '*' ) ) ), function ( el ) {
+			el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' );
+			if ( el.hasAttribute( 'class' ) && ! el.getAttribute( 'class' ) ) {
+				el.removeAttribute( 'class' );
+			}
+
+			// Inline sizes are written by scripts (stretch, sliders, editor cursor); they re-measure on resize.
+			el.removeAttribute( 'style' );
+		} );
+
+		return copy.outerHTML;
+	},
+
+	/**
+	 * After a style-only edit, replace the layout CSS in the preview when a reload would change nothing else.
+	 *
+	 * The editor sends the preview request twice (the data the preview shows, and the new data) as the
+	 * single-widget swap does, and parses both inertly. The CSS is replaced only when the two pages are the
+	 * same apart from the text of the layout style blocks, the blocks in the preview are the ones last
+	 * installed, the preview's layout is still what the server rendered, and nothing that changed holds
+	 * markup set up on document load. Otherwise, or on any error, the preview reloads.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} True when an update started (it reloads by itself if it fails). False to try the next path.
+	 */
+	stylePreview: function ( data ) {
+		var swap = panels.helpers.liveEditorSwap,
+			patch = panels.helpers.liveEditorPatch,
+			map = this.previewMap,
+			request = this.previewRequest;
+
+		if (
+			this.previewReordered ||
+			! this.installedCss ||
+			! this.canChangePreviewInPlace() ||
+			! request ||
+			typeof window.fetch !== 'function' ||
+			typeof window.DOMParser !== 'function' ||
+			typeof window.URLSearchParams !== 'function'
+		) {
+			return false;
+		}
+
+		var origin;
+		try {
+			origin = map.doc.location.origin;
+		} catch ( e ) {
+			return false;
+		}
+		if ( ! swap.isSwapRoute( request.url, origin ) ) {
+			return false;
+		}
+
+		var next = patch.snapshot( this.builder.model, data ),
+			change = patch.styleChange( this.previewSnapshot, next );
+		if ( ! change ) {
+			return false;
+		}
+
+		// Everything that changed must be in the preview, and none of it set up on document load.
+		var scope = _.map( change.rows, function ( cid ) {
+				return map.rows[ cid ];
+			} ).concat( _.map( change.cells, function ( cid ) {
+				return map.cells[ cid ];
+			} ), _.map( change.widgets, function ( cid ) {
+				return map.widgets[ cid ];
+			} ) );
+		if ( _.some( scope, function ( el ) {
+			return ! el || swap.needsDocumentSetup( el );
+		} ) ) {
+			return false;
+		}
+
+		// One update at a time: a newer edit replaces an older one.
+		this.abortSwap();
+		var thisView = this,
+			revision = this.previewRevision,
+			controller = typeof AbortController === 'function' ? new AbortController() : null,
+			current = this.swapRequest = { controller: controller, generation: this.previewGeneration },
+			prevJson = JSON.stringify( this.previewSnapshot.data ),
+			nextJson = JSON.stringify( next.data ),
+			isCurrent = function () {
+				return thisView.swapRequest === current && current.generation === thisView.previewGeneration;
+			},
+			cache = this.swapCache,
+			before = cache && cache.dataJson === prevJson ?
+				Promise.resolve( { text: cache.text, doc: this.parsePreview( cache.text ) } ) :
+				this.fetchPreviewDocument( request, prevJson, controller ),
+			// A request that never settles must not leave the old styles in the preview: reload instead.
+			timer = setTimeout( function () {
+				if ( ! isCurrent() ) {
+					return;
+				}
+				thisView.swapRequest = null;
+				if ( controller ) {
+					controller.abort();
+				}
+				if ( thisView.$el.is( ':visible' ) ) {
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				}
+			}, this.styleTimeout );
+
+		Promise.all( [ before, this.fetchPreviewDocument( request, nextJson, controller ) ] ).then( function ( results ) {
+			clearTimeout( timer );
+			if ( ! isCurrent() ) {
+				return;
+			}
+			thisView.swapRequest = null;
+
+			// The two renders are the same apart from the text of the layout style blocks.
+			var prevStyles = swap.layoutStyles( results[0].doc ),
+				nextStyles = swap.layoutStyles( results[1].doc ),
+				pairs = prevStyles && nextStyles && prevStyles.shell === nextStyles.shell ?
+					swap.pairStyles( prevStyles.styles, nextStyles.styles ) : null;
+			if ( ! pairs ) {
+				throw new Error( 'A reload would change more than the style.' );
+			}
+
+			// The preview must still be the one that was mapped, unchanged since the request began.
+			if ( thisView.previewRevision !== revision || thisView.previewReordered || ! thisView.canChangePreviewInPlace() || thisView.previewMap !== map ) {
+				throw new Error( 'The preview changed during the update.' );
+			}
+
+			// The layout CSS in the preview is the CSS last installed, and its markup is what the server rendered.
+			var live = thisView.layoutCss( map.doc ),
+				served = thisView.layoutCss( results[0].doc ),
+				installed = thisView.installedCss,
+				beforeWrapper = results[0].doc.getElementById( map.wrapper.id );
+			if (
+				! live ||
+				! beforeWrapper ||
+				_.size( live ) !== pairs.length ||
+				! _.every( pairs, function ( pair ) {
+					var rules;
+
+					if ( ! _.has( live, pair.key ) || ! _.has( installed, pair.key ) || live[ pair.key ].text !== installed[ pair.key ].text ) {
+						return false;
+					}
+					rules = thisView.ruleText( live[ pair.key ].el );
+
+					return rules !== null &&
+						rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
+						thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
+				} ) ||
+				! thisView.installedOwners ||
+				! sameElements( thisView.installedOwners, thisView.styleOwners( map.doc ) ) ||
+				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
+			) {
+				throw new Error( 'The preview is not what the server rendered.' );
+			}
+
+			var written = false;
+			_.each( pairs, function ( pair ) {
+				if ( pair.after !== installed[ pair.key ].text ) {
+					live[ pair.key ].el.textContent = pair.after;
+					installed[ pair.key ] = { el: live[ pair.key ].el, text: pair.after };
+					written = true;
+				}
+			} );
+
+			if ( written ) {
+				// The new CSS holds the cell widths: the patched widths and the cached rules go.
+				map.widthRules = {};
+				if ( thisView.previewPatched ) {
+					thisView.writeWidths( {} );
+					thisView.previewWidths = {};
+				}
+				var cellIndex = 0;
+				_.each( next.rows, function ( row ) {
+					_.each( row.cells, function ( cell ) {
+						var cellData = next.data.grid_cells[ cellIndex++ ];
+						if ( cellData ) {
+							map.renderedWeights[ cell.cid ] = Number( cellData.weight );
+						}
+					} );
+				} );
+			}
+
+			thisView.previewSnapshot = next;
+			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
+			thisView.previewRevision++;
+
+			if ( written ) {
+				var previewWindow = thisView.previewIframe[0].contentWindow;
+				previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+			}
+		} ).catch( function ( error ) {
+			clearTimeout( timer );
+			// Aborted, or replaced by a newer update or a reload: that one owns the preview now.
+			if (
+				( error && error.name === 'AbortError' ) ||
+				current.generation !== thisView.previewGeneration ||
+				( thisView.swapRequest !== null && thisView.swapRequest !== current )
+			) {
+				return;
+			}
+
+			thisView.swapRequest = null;
+			if ( ! thisView.$el.is( ':visible' ) ) {
+				return;
+			}
+
+			// Reload the preview with the builder's current data.
 			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
 		} );
 
@@ -1067,6 +1455,10 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = widths;
 		this.previewSnapshot = next;
 		this.previewPatched = true;
+		this.previewRevision++;
+		if ( ops.reordered ) {
+			this.previewReordered = true;
+		}
 
 		// Widgets that measure their layout listen for this.
 		var previewWindow = this.previewIframe[0].contentWindow;

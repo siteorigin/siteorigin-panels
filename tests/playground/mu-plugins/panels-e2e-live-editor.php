@@ -26,6 +26,12 @@
  *   - Panels_E2E_Random_Widget prints a new random number on every render;
  *   - a request for /?panels-e2e-inert-probe=1 answers 204, uncached, so each real load is counted;
  *   - panels_e2e_preview_block=slow delays every preview response by 2 seconds, slow5 by 5 seconds.
+ * - Style-only update (#1426) fixtures, each for that browser only:
+ *   - the cookie panels_e2e_tablet_layout=1 turns on Tablet Layout;
+ *   - the cookie panels_e2e_css_footer=1 prints the layout CSS in the footer, not the header;
+ *   - the cookie panels_e2e_panels_style=1 appends a style.panels-style block to the rendered layout, whose
+ *     text holds a hash of the layout data, so it changes with every edit;
+ *   - Panels_E2E_Measure_Widget sets an inline width from its parent's width on DOMContentLoaded and on resize.
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -104,7 +110,12 @@ if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['p
 
 add_filter( 'enable_login_autofocus', '__return_false' );
 
-if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) || ! empty( $_COOKIE['panels_e2e_zero_gutter'] ) ) {
+if (
+	! empty( $_COOKIE['panels_e2e_inline_styles'] ) ||
+	! empty( $_COOKIE['panels_e2e_zero_gutter'] ) ||
+	! empty( $_COOKIE['panels_e2e_tablet_layout'] ) ||
+	! empty( $_COOKIE['panels_e2e_css_footer'] )
+) {
 	add_filter(
 		'siteorigin_panels_settings',
 		function ( $settings ) {
@@ -116,8 +127,43 @@ if ( ! empty( $_COOKIE['panels_e2e_inline_styles'] ) || ! empty( $_COOKIE['panel
 				$settings['margin-sides'] = 0;
 			}
 
+			if ( ! empty( $_COOKIE['panels_e2e_tablet_layout'] ) ) {
+				$settings['tablet-layout'] = true;
+			}
+
+			if ( ! empty( $_COOKIE['panels_e2e_css_footer'] ) ) {
+				$settings['output-css-header'] = 'footer';
+			}
+
 			return $settings;
 		}
+	);
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_panels_style'] ) && ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+	$panels_e2e_style_hash = '';
+
+	add_action(
+		'siteorigin_panels_after_render',
+		function ( $panels_data ) use ( &$panels_e2e_style_hash ) {
+			$panels_e2e_style_hash = md5( wp_json_encode( $panels_data ) );
+		},
+		10,
+		1
+	);
+
+	add_filter(
+		'siteorigin_panels_render',
+		function ( $html, $post_id ) use ( &$panels_e2e_style_hash ) {
+			return $html . sprintf(
+				"<style class='panels-style' data-panels-style-for-post='%d'>/* %s */ #pl-%d { outline: 0 solid transparent; }</style>",
+				(int) $post_id,
+				esc_html( $panels_e2e_style_hash ),
+				(int) $post_id
+			);
+		},
+		10,
+		2
 	);
 }
 
@@ -168,9 +214,51 @@ if ( class_exists( 'Panels_E2E_Text_Widget' ) ) {
 		}
 	}
 
+	/**
+	 * A wrapped widget whose script sets an inline width from its parent on DOMContentLoaded and on resize.
+	 */
+	class Panels_E2E_Measure_Widget extends Panels_E2E_Text_Widget {
+		public function __construct() {
+			WP_Widget::__construct(
+				'panels_e2e_measure',
+				'Panels E2E Measure',
+				array( 'description' => 'Sets an inline width from its parent, for the Live Editor tests.' )
+			);
+		}
+
+		public function widget( $args, $instance ) {
+			echo $args['before_widget'];
+			echo '<div class="panels-e2e-measure">' . esc_html( isset( $instance['text'] ) ? $instance['text'] : '' ) . '</div>';
+			echo $args['after_widget'];
+
+			// The script is printed once in the footer, outside the layout, like an enqueued script.
+			if ( ! has_action( 'wp_footer', 'panels_e2e_measure_script' ) ) {
+				add_action( 'wp_footer', 'panels_e2e_measure_script' );
+			}
+		}
+	}
+
+	function panels_e2e_measure_script() {
+		?>
+		<script>
+		( function () {
+			var measure = function () {
+				document.querySelectorAll( '.panels-e2e-measure' ).forEach( function ( el ) {
+					el.style.width = Math.floor( el.parentNode.clientWidth / 2 ) + 'px';
+				} );
+			};
+			document.addEventListener( 'DOMContentLoaded', measure );
+			window.addEventListener( 'resize', measure );
+			measure();
+		}() );
+		</script>
+		<?php
+	}
+
 	add_action(
 		'widgets_init',
 		function () {
+			register_widget( 'Panels_E2E_Measure_Widget' );
 			register_widget( 'Panels_E2E_Wrapped_Text_Widget' );
 			register_widget( 'Panels_E2E_Random_Widget' );
 		}
