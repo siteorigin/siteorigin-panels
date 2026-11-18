@@ -511,30 +511,35 @@ test( 'structureChange is null when nothing was added or removed, and for a snap
 	assert.equal( patch.structureChange( null, patch.snapshot( s.model ) ), null );
 } );
 
-test( 'structureChange ignores a widget_id that is made up again on every read, and so do changedWidgets and plan', () => {
+test( 'a widget_id that is made up again on every read is ignored, and a stored one that changes is a change', () => {
+	// A duplicate has no stored id: its id is new on every read.
 	const s = setup();
 	const copy = duplicateWidget( s.byText( 'B' ) );
 	const next = patch.snapshot( s.model );
-	next.data.widgets.forEach( ( w ) => {
-		w.panels_info.widget_id = 'fresh-' + Math.random();
-	} );
+	assert.deepEqual( next.generated, [ copy.cid ] );
 	const change = patch.structureChange( s.prev, next );
 	assert.ok( change );
 	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
 
+	// A retained widget whose stored id changed is a change.
+	const stored = patch.snapshot( s.model );
+	stored.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.equal( patch.structureChange( s.prev, stored ), null );
+
+	// changedWidgets and plan: only a generated id is ignored.
 	const t = setup();
 	const same = patch.snapshot( t.model );
-	same.data.widgets.forEach( ( w ) => {
-		w.panels_info.widget_id = 'fresh-' + Math.random();
-	} );
-	assert.deepEqual( patch.changedWidgets( t.prev, same ), [], 'changedWidgets: no widget changed' );
+	same.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.deepEqual( patch.changedWidgets( t.prev, same ), [ t.byText( 'A' ).cid ], 'a stored id changed' );
+	same.generated = [ t.byText( 'A' ).cid ];
+	assert.deepEqual( patch.changedWidgets( t.prev, same ), [], 'a generated id' );
 
 	moveWidget( t.byText( 'C' ), t.cell( 0, 1 ), 0 );
 	const moved = patch.snapshot( t.model );
-	moved.data.widgets.forEach( ( w ) => {
-		w.panels_info.widget_id = 'fresh-' + Math.random();
-	} );
-	assert.ok( patch.plan( t.prev, moved ), 'plan: a move with new widget ids is still a patch' );
+	moved.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.equal( patch.plan( t.prev, moved ), null, 'plan: a stored id changed with a move' );
+	moved.generated = [ t.byText( 'A' ).cid ];
+	assert.ok( patch.plan( t.prev, moved ), 'plan: a generated id' );
 } );
 
 test( 'structureChange leaves row and cell style to the page compare', () => {

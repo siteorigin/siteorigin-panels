@@ -2360,6 +2360,21 @@ const structShortcodeLayout = () => ( {
 	],
 } );
 
+// row0 [A, H: Custom HTML with a style element]; row1 [G].
+const structHtmlStyleLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<style>.panels-e2e-html-style { color: rgb(1, 2, 3); }</style><p class="panels-e2e-html-style">Str H</p>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000640', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: STRUCT_STYLE }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
 // row0 [A | empty]; row1 [G].
 const structEmptyCellLayout = () => ( {
 	widgets: [ structWidget( WRAPPED, 'Str A', 0, 0, 0 ), structWidget( WRAPPED, 'Str G', 1, 0, 1 ) ],
@@ -2681,6 +2696,18 @@ test.describe( 'Live Editor structure update', () => {
 		const widget = await settle( s, () => widgetAction( s, 'Str E', 'duplicate', 1 ), widgetCount( 12 ), 'E duplicated in the new row' );
 		expectInPlaceStruct( widget );
 		await expectFresh( s, 'S5' );
+	} );
+
+	test( 'S6 a Custom HTML widget with a style element is added in place, then a style edit is applied in place', async () => {
+		const s = await open( 'htmlstyle', structHtmlStyleLayout() );
+		const add = await settle( s, () => widgetAction( s, 'Str H', 'duplicate' ), widgetCount( 4 ), 'H duplicated' );
+		expectInPlaceStruct( add );
+		await expectFresh( s, 'S6 add' );
+		const style = await settle( s, () => setStyle( s, 'row', 0, 'padding', PAD2 ), ( l ) => ( l.grids[ 0 ].style || {} ).padding === PAD2, 'row padding' );
+		expect( style.nav, 'the style edit did not navigate' ).toBe( 0 );
+		expect( style.marked ).toBe( true );
+		await expectFresh( s, 'S6 style' );
+		expectNoPageErrors( s.errors );
 	} );
 
 	test( 'X1 a delayed add followed by a style edit ends equal to a fresh render', async () => {

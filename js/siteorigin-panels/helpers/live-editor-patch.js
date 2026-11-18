@@ -68,7 +68,7 @@ var index = function ( snap ) {
 		return null;
 	}
 
-	var out = { rowOrder: [], rows: {}, cells: {}, widgets: {}, lastRow: null };
+	var out = { rowOrder: [], rows: {}, cells: {}, widgets: {}, lastRow: null, generated: _.isArray( snap.generated ) ? snap.generated : [] };
 	var cellIndex = 0;
 	var widgetIndex = 0;
 	var valid = true;
@@ -126,16 +126,23 @@ var round4 = function ( value ) {
 };
 
 /**
- * A widget's data without `panels_info.widget_id`, which the builder makes up again on every read for a widget
- * that has none stored, and without more `panels_info` keys when given.
+ * A widget's data without some `panels_info` keys.
  */
-var withoutWidgetId = function ( widgetData, keys ) {
+var omitInfo = function ( widgetData, keys ) {
 	var out = copy( widgetData );
 	if ( out && _.isObject( out.panels_info ) ) {
-		out.panels_info = _.omit( out.panels_info, [ 'widget_id' ].concat( keys || [] ) );
+		out.panels_info = _.omit( out.panels_info, keys || [] );
 	}
 
 	return out;
+};
+
+/**
+ * The `widget_id` key when either snapshot made the widget's id up: the builder gives a widget with no stored id a
+ * new one on every read, so two reads differ without the widget having changed. A stored id that differs is a change.
+ */
+var idKeys = function ( a, b, cid ) {
+	return _.contains( a.generated, cid ) || _.contains( b.generated, cid ) ? [ 'widget_id' ] : [];
 };
 
 /**
@@ -207,10 +214,11 @@ module.exports = {
 	 *
 	 * @param {panels.model.builder} builderModel
 	 * @param {Object} [data] The data that was posted, when the caller already has it. Defaults to getPanelsData().
-	 * @return {{ data: Object, rows: Array }}
+	 * @return {{ data: Object, rows: Array, generated: string[] }} `generated`: the widgets that have no stored `widget_id`.
 	 */
 	snapshot: function ( builderModel, data ) {
-		var rows = [];
+		var rows = [],
+			generated = [];
 
 		builderModel.get( 'rows' ).each( function ( row ) {
 			rows.push( {
@@ -220,6 +228,10 @@ module.exports = {
 						cid: cell.cid,
 						weight: cell.get( 'weight' ),
 						widgets: cell.get( 'widgets' ).map( function ( widget ) {
+							if ( _.isEmpty( widget.get( 'widget_id' ) ) ) {
+								generated.push( widget.cid );
+							}
+
 							return widget.cid;
 						} ),
 					};
@@ -230,6 +242,7 @@ module.exports = {
 		return {
 			data: copy( data === undefined ? builderModel.getPanelsData() : data ),
 			rows: rows,
+			generated: generated,
 		};
 	},
 
@@ -269,7 +282,7 @@ module.exports = {
 		_.each( b.rowOrder, function ( rowCid ) {
 			_.each( b.rows[ rowCid ].cells, function ( cellCid ) {
 				_.each( b.cells[ cellCid ].widgets, function ( widgetCid ) {
-					if ( ! same( withoutWidgetId( a.widgets[ widgetCid ] ), withoutWidgetId( b.widgets[ widgetCid ] ) ) ) {
+					if ( ! same( omitInfo( a.widgets[ widgetCid ], idKeys( a, b, widgetCid ) ), omitInfo( b.widgets[ widgetCid ], idKeys( a, b, widgetCid ) ) ) ) {
 						changed.push( widgetCid );
 					}
 				} );
@@ -428,7 +441,7 @@ module.exports = {
 				} );
 			};
 
-			return ! before || ( cellOf( a ) === cellOf( b ) && same( withoutWidgetId( before, [ 'grid', 'cell', 'id' ] ), withoutWidgetId( b.widgets[ widgetCid ], [ 'grid', 'cell', 'id' ] ) ) );
+			return ! before || ( cellOf( a ) === cellOf( b ) && same( omitInfo( before, [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, widgetCid ) ) ), omitInfo( b.widgets[ widgetCid ], [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, widgetCid ) ) ) ) );
 		} );
 		if ( ! cellsOk || ! widgetsOk ) {
 			return null;
@@ -550,8 +563,9 @@ module.exports = {
 		var widgetsSame = _.every( _.keys( b.widgets ), function ( cid ) {
 			var before = copy( a.widgets[ cid ] );
 			var after = copy( b.widgets[ cid ] );
-			before.panels_info = without( before.panels_info, [ 'grid', 'cell', 'id', 'widget_id' ] );
-			after.panels_info = without( after.panels_info, [ 'grid', 'cell', 'id', 'widget_id' ] );
+			var skip = [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, cid ) );
+			before.panels_info = without( before.panels_info, skip );
+			after.panels_info = without( after.panels_info, skip );
 
 			return same( before, after );
 		} );

@@ -1050,6 +1050,10 @@ module.exports = Backbone.View.extend( {
 			thisView.disablePreviewLinks( $( node ) );
 			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
 
+			// The widget can hold a style element: the recorded style owners are the ones the preview has now.
+			if ( thisView.installedOwners ) {
+				thisView.installedOwners = thisView.styleOwners( map.doc );
+			}
 			thisView.previewSnapshot = next;
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewRevision++;
@@ -1641,6 +1645,8 @@ module.exports = Backbone.View.extend( {
 				}
 			} );
 			thisView.previewMap = newMap;
+			// A widget can hold a style element: the recorded style owners are the ones the new preview has.
+			thisView.installedOwners = thisView.styleOwners( map.doc );
 			thisView.writeWidths( {} );
 			thisView.previewWidths = {};
 
