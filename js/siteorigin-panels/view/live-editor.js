@@ -26,7 +26,6 @@ module.exports = Backbone.View.extend( {
 	previewFrameId: 1,
 
 	previewUrl: null,
-	previewQuiet: [],
 	previewIframe: null,
 
 	// How long a preview may take to load before the error panel shows (ms). panelsOptions.live_editor_preview_timeout overrides it.
@@ -361,7 +360,6 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = {};
 		this.previewPatched = false;
 		this.previewReordered = false;
-		this.previewQuiet = [];
 		this.previewRevision++;
 		this.installedCss = null;
 		this.installedOwners = null;
@@ -965,7 +963,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var next = patch.snapshot( this.builder.model, data ),
-			changed = patch.changedWidgets( this.previewSnapshot, next, this.previewQuiet );
+			changed = patch.changedWidgets( this.previewSnapshot, next );
 		if ( ! changed || changed.length !== 1 ) {
 			return false;
 		}
@@ -1053,7 +1051,6 @@ module.exports = Backbone.View.extend( {
 			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
 
 			thisView.previewSnapshot = next;
-			thisView.updateQuiet( next );
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewRevision++;
 
@@ -1398,7 +1395,6 @@ module.exports = Backbone.View.extend( {
 			}
 
 			thisView.previewSnapshot = next;
-			thisView.updateQuiet( next );
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewRevision++;
 
@@ -1430,16 +1426,41 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
-	 * Keep the widgets whose form may still fill in `raw` and `style` after they were added: the added ones, until a
-	 * snapshot shows `raw` set (the form has loaded).
+	 * A widget that was just added loads its form in the background, which fills in its `raw` and `style` settings
+	 * without a refresh, and the server then renders it differently (a style wrapper). When that happens, render
+	 * the widget again, as a single-widget edit does, so the preview and the data it is compared with agree.
 	 *
-	 * @param {Object} next The snapshot the preview now shows.
-	 * @param {string[]} [added] Widgets added in place by this update.
+	 * @param {string[]} cids The added widgets.
+	 * @param {Function} sidebarWidget Finds a widget in the Live Editor sidebar by cid.
 	 */
-	updateQuiet: function ( next, added ) {
-		this.previewQuiet = panels.helpers.liveEditorPatch.quietWidgets( next, this.previewQuiet, added );
-	},
+	settleAddedWidgets: function ( cids, sidebarWidget ) {
+		var thisView = this,
+			generation = this.previewGeneration,
+			settle = function () {
+				// The form sets `raw` first and the style right after, in the same call.
+				setTimeout( function () {
+					if ( generation === thisView.previewGeneration && thisView.$el.is( ':visible' ) ) {
+						thisView.swapPreview( thisView.builder.model.getPanelsData() );
+					}
+				}, 0 );
+			};
 
+		_.each( cids, function ( cid ) {
+			var view = sidebarWidget( cid ).data( 'view' ),
+				model = view && view.model;
+
+			if ( ! model ) {
+				return;
+			}
+
+			// The form may have loaded while the preview was being fetched.
+			if ( model.get( 'raw' ) ) {
+				settle();
+			} else {
+				model.once( 'change:raw', settle );
+			}
+		} );
+	},
 
 	/**
 	 * After widgets or rows were added or removed, change the preview in place when a reload would change
@@ -1487,7 +1508,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var next = patch.snapshot( this.builder.model, data ),
-			change = patch.structureChange( this.previewSnapshot, next, this.previewQuiet );
+			change = patch.structureChange( this.previewSnapshot, next );
 		if ( ! change ) {
 			return false;
 		}
@@ -1578,7 +1599,7 @@ module.exports = Backbone.View.extend( {
 			// What is added holds nothing set up on document load, and what is kept renders the same inline styles.
 			var added = structure.addedElements( afterWrapper, change );
 			if (
-				_.some( added.rows.concat( added.widgets ), function ( el ) {
+				_.some( added.rows.concat( added.widgets, structure.renumberedElements( held.beforeWrapper, change ) ), function ( el ) {
 					return swap.needsDocumentSetup( el );
 				} ) ||
 				structure.serverStylesDiffer( held.beforeWrapper, afterWrapper, change )
@@ -1613,7 +1634,7 @@ module.exports = Backbone.View.extend( {
 			thisView.previewWidths = {};
 
 			// What the preview gets when it loads, for the new widgets: disabled links, hover and click to edit.
-			_.each( change.addedWidgets.concat( change.refreshed ), function ( cid ) {
+			_.each( change.addedWidgets, function ( cid ) {
 				var node = newMap.widgets[ cid ],
 					$sidebar = sidebarWidget( cid );
 
@@ -1624,8 +1645,8 @@ module.exports = Backbone.View.extend( {
 			thisView.previewSnapshot = next;
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewPatched = false;
-			thisView.updateQuiet( next, change.addedWidgets );
 			thisView.previewRevision++;
+			thisView.settleAddedWidgets( change.addedWidgets, sidebarWidget );
 
 			var previewWindow = thisView.previewIframe[0].contentWindow;
 			previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
@@ -1667,7 +1688,7 @@ module.exports = Backbone.View.extend( {
 
 		var patch = panels.helpers.liveEditorPatch,
 			next = patch.snapshot( this.builder.model, data ),
-			ops = patch.plan( this.previewSnapshot, next, this.previewQuiet );
+			ops = patch.plan( this.previewSnapshot, next );
 
 		if ( ! ops ) {
 			return false;
@@ -1699,7 +1720,6 @@ module.exports = Backbone.View.extend( {
 
 		this.previewWidths = widths;
 		this.previewSnapshot = next;
-		this.updateQuiet( next );
 		this.previewPatched = true;
 		this.previewRevision++;
 		if ( ops.reordered ) {

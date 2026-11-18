@@ -1721,7 +1721,8 @@ const setStyle = async ( s, kind, which, field, value ) => {
  * element under the layout wrapper, at three widths. The editor's own cursor and pointer-events are skipped.
  */
 const expectFresh = async ( s, label ) => {
-	const data = await fieldLayout( s.page );
+	// What a reload would post: the builder's own data (the field holds the data of the last refresh, and a form that loads in the background changes the model without one).
+	const data = await s.page.evaluate( () => window.soPanelsBuilderView.model.getPanelsData() );
 	const diffs = await s.page.evaluate( async ( { url, id, data, widths } ) => {
 		const response = await fetch( url, { method: 'POST', credentials: 'same-origin', body: new URLSearchParams( { live_editor_panels_data: JSON.stringify( data ), live_editor_post_ID: String( id ) } ) } );
 		const html = await response.text();
@@ -1755,6 +1756,11 @@ const expectFresh = async ( s, label ) => {
 						out[ prop ] = cs.getPropertyValue( prop );
 					}
 				}
+				// Identity as well as style: the tag, id, classes (without the editor's hover classes), data-index and own text.
+				const classes = Array.from( el.classList ).filter( ( name ) => ! /^so-panels-(faded|highlighted)$/.test( name ) ).sort().join( ' ' );
+				const text = Array.from( el.childNodes ).filter( ( node ) => node.nodeType === 3 ).map( ( node ) => node.textContent.trim() ).join( '' );
+				out[ '@identity' ] = `${ el.tagName }#${ el.id }.${ classes }[${ el.getAttribute( 'data-index' ) }]=${ text }`;
+
 				return { tag: el.tagName + ( el.id ? '#' + el.id : '' ), out };
 			} );
 		};
@@ -2621,6 +2627,7 @@ test.describe( 'Live Editor structure update', () => {
 		}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.6 ) > 0.05, 'weights changed' );
 		expect( resize.nav, 'the resize did not navigate' ).toBe( 0 );
 		expect( resize.marked ).toBe( true );
+		await expectFresh( s, 'S2' );
 		expectNoPageErrors( s.errors );
 	} );
 
@@ -2640,7 +2647,6 @@ test.describe( 'Live Editor structure update', () => {
 		expect( resize.nav ).toBe( 0 );
 		const add = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 10 ), 'E duplicated' );
 		expectInPlaceStruct( add );
-		// The new widget: its form fills in its settings in the background, so an edit to another widget right after reloads.
 		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str E' ).nth( 1 ), 'Str E3', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str E3' ), 'E text' );
 		expect( text.nav, 'the text swap did not navigate' ).toBe( 0 );
 		expect( text.marked ).toBe( true );
@@ -2684,7 +2690,7 @@ test.describe( 'Live Editor structure update', () => {
 		expectNoPageErrors( s.errors );
 	} );
 
-	// Reloads (these pass on develop too: the preview reloads for every add and delete today).
+	// Cases that reload.
 
 	test( 'N1 adding a widget before a non-listed widget reloads', async () => {
 		const s = await open( 'random', structRandomLayout() );

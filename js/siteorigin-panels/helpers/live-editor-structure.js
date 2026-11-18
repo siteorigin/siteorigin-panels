@@ -21,9 +21,6 @@ var EDITOR_CLASSES = [ 'so-panels-faded', 'so-panels-highlighted' ];
 // The style wrappers between a row, cell or widget element and what it holds.
 var WRAPPER_CLASSES = [ 'panel-row-style', 'panel-cell-style', 'panel-widget-style' ];
 
-// A cell or widget element id.
-var ENTITY_ID = /^(pgc|panel)-/;
-
 var postIdOf = function ( wrapper ) {
 	return String( wrapper.id ).replace( /^pl-/, '' );
 };
@@ -122,10 +119,10 @@ var syncAttributes = function ( live, served ) {
 
 /**
  * The server-rendered `style` attribute values of an element and what it holds, each with the child-index path
- * of the element that carries it, in document order. Cells and widgets inside a row or cell are other entities:
- * they are left out unless `whole` is true.
+ * of the element that carries it, in document order. The cell and widget elements of the snapshot (`entities`)
+ * inside a row or cell are other entities: they are left out unless `whole` is true.
  */
-var inlineStyles = function ( el, whole ) {
+var inlineStyles = function ( el, whole, entities ) {
 	var out = [];
 
 	var walk = function ( node, path ) {
@@ -133,7 +130,7 @@ var inlineStyles = function ( el, whole ) {
 			out.push( path + ':' + node.getAttribute( 'style' ) );
 		}
 		Array.prototype.forEach.call( node.children, function ( child, i ) {
-			if ( whole || ! ENTITY_ID.test( child.id || '' ) ) {
+			if ( whole || entities.indexOf( child ) === -1 ) {
 				walk( child, path + '/' + i );
 			}
 		} );
@@ -181,8 +178,7 @@ module.exports = {
 	 *
 	 * @param {Element} afterWrapper The layout wrapper of the new render.
 	 * @param {Object} change
-	 * @return {{ rows: Element[], widgets: Element[] }} `widgets` holds the added widgets of retained rows and the
-	 *         refreshed widgets.
+	 * @return {{ rows: Element[], widgets: Element[] }} `widgets` holds only the added widgets of retained rows.
 	 */
 	addedElements: function ( afterWrapper, change ) {
 		var served = resolve( afterWrapper, change.after ),
@@ -194,10 +190,41 @@ module.exports = {
 			} ),
 			widgets: change.addedWidgets.filter( function ( cid ) {
 				return addedRows.indexOf( rowCidOf( change, cid ) ) === -1;
-			} ).concat( change.refreshed ).map( function ( cid ) {
+			} ).map( function ( cid ) {
 				return served.widgets[ cid ];
 			} ),
 		};
+	},
+
+	/**
+	 * The retained rows, cells and widgets of the preview whose number changes, as they are in the response for the
+	 * data the preview shows: the elements a fresh load would create again at their new number.
+	 *
+	 * @param {Element} beforeWrapper Layout wrapper of the response for the data the preview shows.
+	 * @param {Object} change
+	 * @return {Element[]}
+	 */
+	renumberedElements: function ( beforeWrapper, change ) {
+		var before = resolve( beforeWrapper, change.before ),
+			out = [];
+
+		retained( before.rows, change.after.rows ).forEach( function ( cid ) {
+			if ( change.before.rows[ cid ] !== change.after.rows[ cid ] ) {
+				out.push( before.rows[ cid ] );
+			}
+		} );
+		retained( before.cells, change.after.cells ).forEach( function ( cid ) {
+			if ( JSON.stringify( change.before.cells[ cid ] ) !== JSON.stringify( change.after.cells[ cid ] ) ) {
+				out.push( before.cells[ cid ] );
+			}
+		} );
+		change.affected.forEach( function ( cid ) {
+			if ( before.widgets[ cid ] && Object.prototype.hasOwnProperty.call( change.after.widgets, cid ) ) {
+				out.push( before.widgets[ cid ] );
+			}
+		} );
+
+		return out;
 	},
 
 	/**
@@ -216,13 +243,19 @@ module.exports = {
 		var before = resolve( beforeWrapper, change.before ),
 			after = resolve( afterWrapper, change.after );
 
+		var entities = function ( resolved ) {
+			return Object.keys( resolved.cells ).map( function ( cid ) {
+				return resolved.cells[ cid ];
+			} ).concat( Object.keys( resolved.widgets ).map( function ( cid ) {
+				return resolved.widgets[ cid ];
+			} ) );
+		};
+		var beforeEntities = entities( before ),
+			afterEntities = entities( after );
+
 		var differ = function ( group, whole ) {
 			return retained( before[ group ], after[ group ] ).some( function ( cid ) {
-				if ( group === 'widgets' && change.refreshed.indexOf( cid ) !== -1 ) {
-					return false;
-				}
-
-				return JSON.stringify( inlineStyles( before[ group ][ cid ], whole ) ) !== JSON.stringify( inlineStyles( after[ group ][ cid ], whole ) );
+				return JSON.stringify( inlineStyles( before[ group ][ cid ], whole, beforeEntities ) ) !== JSON.stringify( inlineStyles( after[ group ][ cid ], whole, afterEntities ) );
 			} );
 		};
 
@@ -252,15 +285,6 @@ module.exports = {
 			afterRows = Object.keys( change.after.rows ).sort( function ( a, b ) {
 				return rowAt( a ) - rowAt( b );
 			} );
-
-		// A widget whose data the builder filled in after it was added is rendered again by the server: replace its
-		// element with the new render.
-		change.refreshed.forEach( function ( cid ) {
-			var node = doc.importNode( served.widgets[ cid ], true );
-
-			live.widgets[ cid ].parentNode.replaceChild( node, live.widgets[ cid ] );
-			live.widgets[ cid ] = node;
-		} );
 
 		// Removed widgets and rows.
 		change.removedWidgets.forEach( function ( cid ) {
@@ -331,9 +355,6 @@ module.exports = {
 		// The retained rows, cells and widgets take the position attributes of the new render.
 		[ 'rows', 'cells', 'widgets' ].forEach( function ( group ) {
 			retained( live[ group ], served[ group ] ).forEach( function ( cid ) {
-				if ( group === 'widgets' && change.refreshed.indexOf( cid ) !== -1 ) {
-					return;
-				}
 				syncAttributes( live[ group ][ cid ], served[ group ][ cid ] );
 			} );
 		} );
