@@ -2657,15 +2657,19 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const first = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
 		expectInPlaceStruct( first );
+		await expectFresh( s, 'S4 a' );
 		const second = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 9 ), 'E duplicated' );
 		expectInPlaceStruct( second );
+		await expectFresh( s, 'S4 b' );
 		const third = await settle( s, () => widgetAction( s, 'Str F', 'duplicate' ), widgetCount( 10 ), 'F duplicated' );
 		expectInPlaceStruct( third );
+		await expectFresh( s, 'S4 c' );
 		const fourth = await settle( s, () => widgetAction( s, 'Str C', 'delete' ), widgetCount( 9 ), 'C deleted' );
 		expectInPlaceStruct( fourth );
+		await expectFresh( s, 'S4 d' );
 		const fifth = await settle( s, () => widgetAction( s, 'Str E', 'delete' ), widgetCount( 8 ), 'E deleted' );
 		expectInPlaceStruct( fifth );
-		await expectFresh( s, 'S4' );
+		await expectFresh( s, 'S4 e' );
 		expectNoPageErrors( s.errors );
 	} );
 
@@ -2673,6 +2677,7 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const row = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
 		expectInPlaceStruct( row );
+		await expectFresh( s, 'S5 row' );
 		const widget = await settle( s, () => widgetAction( s, 'Str E', 'duplicate', 1 ), widgetCount( 12 ), 'E duplicated in the new row' );
 		expectInPlaceStruct( widget );
 		await expectFresh( s, 'S5' );

@@ -1436,11 +1436,24 @@ module.exports = Backbone.View.extend( {
 	settleAddedWidgets: function ( cids, sidebarWidget ) {
 		var thisView = this,
 			generation = this.previewGeneration,
+			patch = panels.helpers.liveEditorPatch,
 			settle = function () {
 				// The form sets `raw` first and the style right after, in the same call.
 				setTimeout( function () {
-					if ( generation === thisView.previewGeneration && thisView.$el.is( ':visible' ) ) {
-						thisView.swapPreview( thisView.builder.model.getPanelsData() );
+					if ( generation !== thisView.previewGeneration || ! thisView.$el.is( ':visible' ) ) {
+						return;
+					}
+
+					var data = thisView.builder.model.getPanelsData(),
+						changed = patch.changedWidgets( thisView.previewSnapshot, patch.snapshot( thisView.builder.model, data ) );
+
+					// Nothing the preview shows has changed, or the structure did and that refresh handles it. Otherwise one
+					// widget is rendered again, and anything else reloads.
+					if ( ! changed || ! changed.length ) {
+						return;
+					}
+					if ( ! thisView.swapPreview( data ) ) {
+						thisView.refreshPreview( data );
 					}
 				}, 0 );
 			};
@@ -1453,12 +1466,10 @@ module.exports = Backbone.View.extend( {
 				return;
 			}
 
-			// The form may have loaded while the preview was being fetched.
-			if ( model.get( 'raw' ) ) {
-				settle();
-			} else {
-				model.once( 'change:raw', settle );
-			}
+			// The form may have loaded while the preview was being fetched; a duplicate keeps `raw` from its source, so
+			// the settings the form saves are watched as well.
+			settle();
+			model.once( 'change:raw change:style change:values', settle );
 		} );
 	},
 

@@ -9,8 +9,8 @@
  * when a full reload is needed. It returns a patch only when the change is a pure reorder of rows, a pure
  * reorder or move of widgets between non-empty cells, or a change of cell weights, and nothing else.
  *
- * structureChange() describes a change that only adds or removes widgets and rows, and positions() the
- * position of every row, cell and widget in a snapshot, as the server numbers them.
+ * structureChange() describes a change that only adds or removes widgets and rows, with the position the server
+ * numbers every row, cell and widget with before and after.
  *
  * Depends only on `_`, so the node unit tests can load it.
  */
@@ -348,19 +348,6 @@ module.exports = {
 		}
 
 		return out;
-	},
-
-	/**
-	 * The position the server numbers each row, cell and widget with in a snapshot.
-	 *
-	 * @param {Object} snap
-	 * @return {null|{ rows: Object, cells: Object, widgets: Object }} Rows by cid: the row number; cells: `{ row, cell }`;
-	 *         widgets: `{ row, cell, widget, index }` (`index` is the flat data-index).
-	 */
-	positions: function ( snap ) {
-		var indexed = index( snap );
-
-		return indexed ? positionsOf( indexed ) : null;
 	},
 
 	/**

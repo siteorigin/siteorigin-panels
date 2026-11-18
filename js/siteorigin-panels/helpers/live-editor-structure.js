@@ -259,7 +259,15 @@ module.exports = {
 			} );
 		};
 
-		return differ( 'rows', false ) || differ( 'cells', false ) || differ( 'widgets', true );
+		// What the layout wrapper holds besides the rows (filters on the content before and after the rows).
+		var rowEls = function ( resolved ) {
+			return Object.keys( resolved.rows ).map( function ( cid ) {
+				return resolved.rows[ cid ];
+			} );
+		};
+		var wrapperDiffers = JSON.stringify( inlineStyles( beforeWrapper, false, rowEls( before ) ) ) !== JSON.stringify( inlineStyles( afterWrapper, false, rowEls( after ) ) );
+
+		return wrapperDiffers || differ( 'rows', false ) || differ( 'cells', false ) || differ( 'widgets', true );
 	},
 
 	/**
