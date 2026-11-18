@@ -607,3 +607,20 @@ test( 'structureChange lists a quiet widget whose data the builder filled in as 
 	const plain = patch.structureChange( s.prev, mid, [ copy.cid ] );
 	assert.deepEqual( plain.refreshed, [], 'a quiet widget that did not change is not refreshed' );
 } );
+
+test( 'quietWidgets keeps an added widget until its raw is set, and drops a removed one', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const snap = patch.snapshot( s.model );
+
+	assert.deepEqual( patch.quietWidgets( snap, [], [ copy.cid ] ), [ copy.cid ], 'just added' );
+	assert.deepEqual( patch.quietWidgets( snap, [ copy.cid ] ), [ copy.cid ], 'still quiet' );
+
+	const filled = patch.snapshot( s.model );
+	filled.data.widgets[ patch.positions( filled ).widgets[ copy.cid ].index ].panels_info.raw = true;
+	assert.deepEqual( patch.quietWidgets( filled, [ copy.cid ] ), [], 'the form has loaded' );
+
+	s.cell( 0, 1 ).get( 'widgets' ).remove( copy );
+	assert.deepEqual( patch.quietWidgets( patch.snapshot( s.model ), [ copy.cid ] ), [], 'removed' );
+	assert.deepEqual( patch.quietWidgets( snap, undefined, undefined ), [], 'nothing' );
+} );

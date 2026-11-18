@@ -34,7 +34,8 @@
  *   - Panels_E2E_Measure_Widget sets an inline width from its parent's width on DOMContentLoaded and on resize.
  * - Add and delete (#1425) fixtures, each for that browser only:
  *   - the cookie panels_e2e_position_style=1 prints an empty element with an inline style that holds the
- *     widget's position number inside every widget, so a renumbered widget renders differently;
+ *     widget's position number inside every widget, so a renumbered widget renders differently (the value
+ *     'move' keeps the style the same and moves it between before and after the content by position);
  *   - the cookie panels_e2e_row_embed=1 prints an iframe at the start of every row, outside any widget;
  *   - panels_e2e_swap also allow-lists Panels_E2E_Measure_Widget.
  * - The post date block is left out of preview responses: the theme prints it as a relative time ("20 seconds
@@ -180,10 +181,21 @@ if ( ! empty( $_COOKIE['panels_e2e_panels_style'] ) && ! empty( $_GET['siteorigi
 }
 
 if ( ! empty( $_COOKIE['panels_e2e_position_style'] ) ) {
+	$panels_e2e_move = 'move' === $_COOKIE['panels_e2e_position_style'];
+
 	add_filter(
 		'siteorigin_panels_inside_widget_before',
-		function ( $html, $widget_info ) {
+		function ( $html, $widget_info ) use ( $panels_e2e_move ) {
 			$position = isset( $widget_info['widget_index'] ) ? (int) $widget_info['widget_index'] : 0;
+
+			if ( $panels_e2e_move ) {
+				// Two empty elements in every widget; the same style sits on the first for an even position and on the second for an odd one.
+				return $html . sprintf(
+					'<span class="panels-e2e-first"%1$s></span><span class="panels-e2e-second"%2$s></span>',
+					0 === $position % 2 ? ' style="order:1"' : '',
+					0 === $position % 2 ? '' : ' style="order:1"'
+				);
+			}
 
 			return $html . sprintf( '<span class="panels-e2e-position" style="order:%d"></span>', $position );
 		},
