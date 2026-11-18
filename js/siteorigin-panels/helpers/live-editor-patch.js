@@ -374,6 +374,25 @@ module.exports = {
 	},
 
 	/**
+	 * The widgets whose form may still fill in `raw` and `style` after they were added in place: those already
+	 * quiet and those just added, that are still in the snapshot and whose `raw` is not set yet.
+	 *
+	 * @param {Object} snap The snapshot the preview now shows.
+	 * @param {string[]} quiet The widgets that were quiet.
+	 * @param {string[]} [added] The widgets added in place by this update.
+	 * @return {string[]}
+	 */
+	quietWidgets: function ( snap, quiet, added ) {
+		var positions = module.exports.positions( snap );
+
+		return _.filter( _.union( quiet || [], added || [] ), function ( cid ) {
+			var at = positions && positions.widgets[ cid ];
+
+			return !! at && ! snap.data.widgets[ at.index ].panels_info.raw;
+		} );
+	},
+
+	/**
 	 * The widgets and rows added and removed between two snapshots, when that is all that differs: the retained
 	 * rows keep their order and the last row is the same row, retained rows and cells have the same settings, each
 	 * retained widget stays in its cell in the same order with the same values (its position and `widget_id`

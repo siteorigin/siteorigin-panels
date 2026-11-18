@@ -1437,14 +1437,9 @@ module.exports = Backbone.View.extend( {
 	 * @param {string[]} [added] Widgets added in place by this update.
 	 */
 	updateQuiet: function ( next, added ) {
-		var positions = panels.helpers.liveEditorPatch.positions( next );
-
-		this.previewQuiet = _.filter( _.union( this.previewQuiet, added || [] ), function ( cid ) {
-			var at = positions && positions.widgets[ cid ];
-
-			return !! at && ! next.data.widgets[ at.index ].panels_info.raw;
-		} );
+		this.previewQuiet = panels.helpers.liveEditorPatch.quietWidgets( next, this.previewQuiet, added );
 	},
+
 
 	/**
 	 * After widgets or rows were added or removed, change the preview in place when a reload would change
