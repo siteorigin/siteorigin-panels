@@ -489,7 +489,7 @@ test( 'structureChange is null when a retained widget value, cell weight or row 
 
 	const u = setup();
 	duplicateWidget( u.byText( 'B' ) );
-	u.row( 1 ).set( 'style', { padding: '9px' } );
+	u.row( 1 ).set( 'color_label', 'blue' );
 	assert.equal( patch.structureChange( u.prev, patch.snapshot( u.model ) ), null, 'a row setting' );
 } );
 
@@ -535,4 +535,75 @@ test( 'structureChange ignores a widget_id that is made up again on every read, 
 		w.panels_info.widget_id = 'fresh-' + Math.random();
 	} );
 	assert.ok( patch.plan( t.prev, moved ), 'plan: a move with new widget ids is still a patch' );
+} );
+
+test( 'structureChange leaves row and cell style to the page compare', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const next = patch.snapshot( s.model );
+	next.data.grids.forEach( ( g ) => {
+		g.style = { padding: '' };
+	} );
+	next.data.grid_cells.forEach( ( c ) => {
+		c.style = { padding: '' };
+	} );
+	const change = patch.structureChange( s.prev, next );
+	assert.ok( change );
+	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
+
+	const t = setup();
+	duplicateWidget( t.byText( 'B' ) );
+	const widgets = patch.snapshot( t.model );
+	widgets.data.widgets.forEach( ( w ) => {
+		w.panels_info.style = { padding: '' };
+	} );
+	assert.equal( patch.structureChange( t.prev, widgets ), null, 'a widget style is not left to the compare' );
+} );
+
+test( 'plan and changedWidgets skip raw and style only for the quiet widgets', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const mid = patch.snapshot( s.model );
+
+	// The form of the new widget loads and fills in `raw` and `style`.
+	const fill = ( snap ) => {
+		const w = snap.data.widgets[ patch.positions( snap ).widgets[ copy.cid ].index ];
+		w.panels_info.raw = true;
+		w.panels_info.style = { padding: '' };
+
+		return snap;
+	};
+
+	const same = fill( patch.snapshot( s.model ) );
+	assert.deepEqual( patch.changedWidgets( mid, same ), [ copy.cid ], 'not quiet: the data differs' );
+	assert.deepEqual( patch.changedWidgets( mid, same, [ copy.cid ] ), [], 'quiet: nothing changed' );
+
+	moveWidget( s.byText( 'C' ), s.cell( 0, 1 ), 0 );
+	const moved = fill( patch.snapshot( s.model ) );
+	assert.equal( patch.plan( mid, moved ), null, 'not quiet: the data differs' );
+	assert.ok( patch.plan( mid, moved, [ copy.cid ] ), 'quiet: a move' );
+	assert.equal( patch.plan( mid, moved, [ s.byText( 'A' ).cid ] ), null, 'another widget is quiet' );
+} );
+
+test( 'structureChange lists a quiet widget whose data the builder filled in as refreshed, and refuses it otherwise', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const mid = patch.snapshot( s.model );
+
+	// A later add, after the new widget's form filled in raw and style.
+	const extra = duplicateWidget( s.byText( 'C' ) );
+	const next = patch.snapshot( s.model );
+	const w = next.data.widgets[ patch.positions( next ).widgets[ copy.cid ].index ];
+	w.panels_info.raw = true;
+	w.panels_info.style = { padding: '' };
+
+	assert.equal( patch.structureChange( mid, next ), null, 'not quiet: a retained widget changed' );
+	const change = patch.structureChange( mid, next, [ copy.cid ] );
+	assert.ok( change );
+	assert.deepEqual( change.addedWidgets, [ extra.cid ] );
+	assert.deepEqual( change.refreshed, [ copy.cid ] );
+	assert.equal( patch.structureChange( mid, next, [ s.byText( 'A' ).cid ] ), null, 'another widget is quiet' );
+
+	const plain = patch.structureChange( s.prev, mid, [ copy.cid ] );
+	assert.deepEqual( plain.refreshed, [], 'a quiet widget that did not change is not refreshed' );
 } );

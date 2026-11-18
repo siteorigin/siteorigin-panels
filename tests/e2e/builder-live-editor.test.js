@@ -1429,7 +1429,7 @@ test.describe( 'Live Editor single-widget update', () => {
 		s1 = { page: session.page, keep: true };
 
 		// Duplicates and non-strings from the filter are dropped.
-		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML', 'Panels_E2E_Wrapped_Text_Widget' ] );
+		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML', 'Panels_E2E_Wrapped_Text_Widget', 'Panels_E2E_Measure_Widget' ] );
 
 		// The sibling keeps an expando: the swap leaves other nodes alone.
 		await ( await previewPanel( session.page, 'Swap two' ) ).evaluate( ( el ) => {
@@ -2295,7 +2295,7 @@ const WRAPPED = 'Panels_E2E_Wrapped_Text_Widget';
 const MEASURE = 'Panels_E2E_Measure_Widget';
 const RANDOM = 'Panels_E2E_Random_Widget';
 
-// row0 [A, B (styled), C | D]; row1 (styled row, padded cell) [E, F]; row2 [M (Measure) | N (Measure)]; row3 [G].
+// row0 [A, B (styled), C | D]; row1 (styled row, padded cell) [E, F]; row2 [M, N (both Measure)]; row3 [G].
 const structLayout = () => ( {
 	widgets: [
 		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
@@ -2305,21 +2305,20 @@ const structLayout = () => ( {
 		structWidget( WRAPPED, 'Str E', 1, 0, 4 ),
 		structWidget( WRAPPED, 'Str F', 1, 0, 5 ),
 		structWidget( MEASURE, 'Str M', 2, 0, 6 ),
-		structWidget( MEASURE, 'Str N', 2, 1, 7 ),
+		structWidget( MEASURE, 'Str N', 2, 0, 7 ),
 		structWidget( WRAPPED, 'Str G', 3, 0, 8 ),
 	],
 	grids: [
 		{ cells: 2, style: {} },
 		{ cells: 1, style: STRUCT_STYLE },
-		{ cells: 2, style: {} },
+		{ cells: 1, style: {} },
 		{ cells: 1, style: {} },
 	],
 	grid_cells: [
 		{ grid: 0, index: 0, weight: 0.6, style: {} },
 		{ grid: 0, index: 1, weight: 0.4, style: {} },
 		{ grid: 1, index: 0, weight: 1, style: { padding: '8px 8px 8px 8px' } },
-		{ grid: 2, index: 0, weight: 0.5, style: {} },
-		{ grid: 2, index: 1, weight: 0.5, style: {} },
+		{ grid: 2, index: 0, weight: 1, style: {} },
 		{ grid: 3, index: 0, weight: 1, style: {} },
 	],
 } );
@@ -2641,7 +2640,8 @@ test.describe( 'Live Editor structure update', () => {
 		expect( resize.nav ).toBe( 0 );
 		const add = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 10 ), 'E duplicated' );
 		expectInPlaceStruct( add );
-		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str G' ), 'Str G3', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str G3' ), 'G text' );
+		// The new widget: its form fills in its settings in the background, so an edit to another widget right after reloads.
+		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str E' ).nth( 1 ), 'Str E3', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str E3' ), 'E text' );
 		expect( text.nav, 'the text swap did not navigate' ).toBe( 0 );
 		expect( text.marked ).toBe( true );
 		await expectFresh( s, 'S3' );
@@ -2657,7 +2657,7 @@ test.describe( 'Live Editor structure update', () => {
 		expectInPlaceStruct( third );
 		const fourth = await settle( s, () => widgetAction( s, 'Str C', 'delete' ), widgetCount( 9 ), 'C deleted' );
 		expectInPlaceStruct( fourth );
-		const fifth = await settle( s, () => widgetAction( s, 'Str B', 'delete' ), widgetCount( 8 ), 'B deleted' );
+		const fifth = await settle( s, () => widgetAction( s, 'Str E', 'delete' ), widgetCount( 8 ), 'E deleted' );
 		expectInPlaceStruct( fifth );
 		await expectFresh( s, 'S4' );
 		expectNoPageErrors( s.errors );
@@ -2667,7 +2667,7 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const row = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
 		expectInPlaceStruct( row );
-		const widget = await settle( s, () => widgetAction( s, 'Str E', 'duplicate', 1 ), widgetCount( 11 ), 'E duplicated in the new row' );
+		const widget = await settle( s, () => widgetAction( s, 'Str E', 'duplicate', 1 ), widgetCount( 12 ), 'E duplicated in the new row' );
 		expectInPlaceStruct( widget );
 		await expectFresh( s, 'S5' );
 	} );

@@ -37,6 +37,8 @@
  *     widget's position number inside every widget, so a renumbered widget renders differently;
  *   - the cookie panels_e2e_row_embed=1 prints an iframe at the start of every row, outside any widget;
  *   - panels_e2e_swap also allow-lists Panels_E2E_Measure_Widget.
+ * - The post date block is left out of preview responses: the theme prints it as a relative time ("20 seconds
+ *   ago") that differs between two renders a second apart, so the page compare would see a different page.
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -115,6 +117,10 @@ if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['p
 }
 
 add_filter( 'enable_login_autofocus', '__return_false' );
+
+if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+	add_filter( 'render_block_core/post-date', '__return_empty_string' );
+}
 
 if (
 	! empty( $_COOKIE['panels_e2e_inline_styles'] ) ||
