@@ -139,6 +139,13 @@ var withoutWidgetId = function ( widgetData, keys ) {
 };
 
 /**
+ * The `panels_info` keys of a widget that the builder fills in silently, with no refresh, shortly after the widget
+ * is created or duplicated: its form loads in the background and saves default style values and `raw`. The data
+ * changes and what is rendered does not. A caller passes the cids of the widgets it added in place as `quiet`.
+ */
+var quietKeys = [ 'raw', 'style' ];
+
+/**
  * Where the server numbers each row, cell and widget of an indexed snapshot: `pg-{row}`, `pgc-{row}-{cell}`,
  * `panel-{row}-{cell}-{widget}` and the flat `data-index` of a widget.
  */
@@ -240,9 +247,10 @@ module.exports = {
 	 *
 	 * @param {Object} prev Snapshot the preview shows.
 	 * @param {Object} next Snapshot of the builder now.
+	 * @param {string[]} [quiet] Widgets whose `raw` and `style` are not compared (see quietKeys).
 	 * @return {null|string[]} Widget cids, in layout order.
 	 */
-	changedWidgets: function ( prev, next ) {
+	changedWidgets: function ( prev, next, quiet ) {
 		var a = index( prev );
 		var b = index( next );
 
@@ -269,7 +277,9 @@ module.exports = {
 		_.each( b.rowOrder, function ( rowCid ) {
 			_.each( b.rows[ rowCid ].cells, function ( cellCid ) {
 				_.each( b.cells[ cellCid ].widgets, function ( widgetCid ) {
-					if ( ! same( withoutWidgetId( a.widgets[ widgetCid ], [] ), withoutWidgetId( b.widgets[ widgetCid ], [] ) ) ) {
+					var skip = _.contains( quiet || [], widgetCid ) ? quietKeys : [];
+
+					if ( ! same( withoutWidgetId( a.widgets[ widgetCid ], skip ), withoutWidgetId( b.widgets[ widgetCid ], skip ) ) ) {
 						changed.push( widgetCid );
 					}
 				} );
@@ -373,10 +383,12 @@ module.exports = {
 	 *
 	 * @param {Object} prev Snapshot the preview shows.
 	 * @param {Object} next Snapshot of the builder now.
-	 * @return {null|Object} Cids of `addedRows`, `removedRows`, `addedWidgets`, `removedWidgets`; `affected`: the removed
-	 *         widgets and the retained widgets whose position id or data-index changes; `before` and `after`: positions().
+	 * @param {string[]} [quiet] Widgets whose `raw` and `style` the builder fills in silently (see quietKeys): they may
+	 *        differ, and a widget whose data does differ is listed as `refreshed`.
+	 * @return {null|Object} Cids of `addedRows`, `removedRows`, `addedWidgets`, `removedWidgets`, `refreshed`; `affected`: the
+	 *         removed widgets and the retained widgets whose position id or data-index changes; `before` and `after`: positions().
 	 */
-	structureChange: function ( prev, next ) {
+	structureChange: function ( prev, next, quiet ) {
 		var a = index( prev );
 		var b = index( next );
 
@@ -394,7 +406,10 @@ module.exports = {
 		}
 
 		var ok = _.every( keptRows, function ( rowCid ) {
-			if ( ! same( a.rows[ rowCid ].grid, b.rows[ rowCid ].grid ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
+			// A row, cell or widget `style` is left to the page compare: a form that loads in the background (a new or
+			// duplicated widget, a dialog) fills in default style values and `raw` silently, which changes the data without
+			// changing what is rendered, and a real style change is in the layout CSS and markup the compare sees.
+			if ( ! same( without( a.rows[ rowCid ].grid, [ 'style' ] ), without( b.rows[ rowCid ].grid, [ 'style' ] ) ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
 				return false;
 			}
 
@@ -411,7 +426,7 @@ module.exports = {
 
 				// Cell settings, apart from the position, are unchanged; no cell becomes empty or stops being empty.
 				if (
-					! same( without( before.data, [ 'grid', 'index' ] ), without( after.data, [ 'grid', 'index' ] ) ) ||
+					! same( without( before.data, [ 'grid', 'index', 'style' ] ), without( after.data, [ 'grid', 'index', 'style' ] ) ) ||
 					( before.widgets.length > 0 ) !== ( after.widgets.length > 0 ) ||
 					! same( keptBefore, keptAfter )
 				) {
@@ -438,7 +453,9 @@ module.exports = {
 				} );
 			};
 
-			return ! before || ( cellOf( a ) === cellOf( b ) && same( withoutWidgetId( before, [ 'grid', 'cell', 'id', 'raw' ] ), withoutWidgetId( b.widgets[ widgetCid ], [ 'grid', 'cell', 'id', 'raw' ] ) ) );
+			var skip = [ 'grid', 'cell', 'id' ].concat( _.contains( quiet || [], widgetCid ) ? quietKeys : [] );
+
+			return ! before || ( cellOf( a ) === cellOf( b ) && same( withoutWidgetId( before, skip ), withoutWidgetId( b.widgets[ widgetCid ], skip ) ) );
 		} );
 		if ( ! cellsOk || ! widgetsOk ) {
 			return null;
@@ -449,6 +466,7 @@ module.exports = {
 			removedRows: _.difference( a.rowOrder, b.rowOrder ),
 			addedWidgets: _.difference( _.keys( b.widgets ), _.keys( a.widgets ) ),
 			removedWidgets: _.difference( _.keys( a.widgets ), _.keys( b.widgets ) ),
+			refreshed: [],
 			before: positionsOf( a ),
 			after: positionsOf( b ),
 		};
@@ -470,6 +488,10 @@ module.exports = {
 		};
 		out.addedWidgets = order( out.addedWidgets, b );
 		out.removedWidgets = order( out.removedWidgets, a );
+		out.refreshed = order( _.filter( _.keys( b.widgets ), function ( cid ) {
+			return a.widgets[ cid ] && _.contains( quiet || [], cid ) &&
+				! same( withoutWidgetId( a.widgets[ cid ], [ 'grid', 'cell', 'id' ] ), withoutWidgetId( b.widgets[ cid ], [ 'grid', 'cell', 'id' ] ) );
+		} ), b );
 		out.affected = out.removedWidgets.slice();
 		_.each( order( _.keys( b.widgets ), b ), function ( cid ) {
 			if ( a.widgets[ cid ] && ! same( out.before.widgets[ cid ], out.after.widgets[ cid ] ) ) {
@@ -485,10 +507,11 @@ module.exports = {
 	 *
 	 * @param {Object} prev Snapshot the preview shows.
 	 * @param {Object} next Snapshot of the builder now.
+	 * @param {string[]} [quiet] Widgets whose `raw` and `style` are not compared (see quietKeys).
 	 * @return {null|{ rowOrder: string[], cells: Object, weights: Object, reordered: boolean }} `reordered` is true when a
 	 *         row or a widget changed place, false for a change of weights alone.
 	 */
-	plan: function ( prev, next ) {
+	plan: function ( prev, next, quiet ) {
 		var a = index( prev );
 		var b = index( next );
 
@@ -560,8 +583,9 @@ module.exports = {
 		var widgetsSame = _.every( _.keys( b.widgets ), function ( cid ) {
 			var before = copy( a.widgets[ cid ] );
 			var after = copy( b.widgets[ cid ] );
-			before.panels_info = without( before.panels_info, [ 'grid', 'cell', 'id', 'widget_id' ] );
-			after.panels_info = without( after.panels_info, [ 'grid', 'cell', 'id', 'widget_id' ] );
+			var skip = [ 'grid', 'cell', 'id', 'widget_id' ].concat( _.contains( quiet || [], cid ) ? quietKeys : [] );
+			before.panels_info = without( before.panels_info, skip );
+			after.panels_info = without( after.panels_info, skip );
 
 			return same( before, after );
 		} );

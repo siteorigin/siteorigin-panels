@@ -235,14 +235,23 @@ module.exports = {
 	 * `panels-style-{post id}`.
 	 *
 	 * @param {Document} doc A parsed response.
-	 * @return {null|{ styles: Array, shell: string }} Null when there is no document.
+	 * @param {string} [emptyId] The id of an element whose contents are left out of the shell too (the layout wrapper,
+	 *        for a change that adds or removes what it holds).
+	 * @return {null|{ styles: Array, shell: string }} Null when there is no document, or no unique element with `emptyId`.
 	 */
-	layoutStyles: function ( doc ) {
+	layoutStyles: function ( doc, emptyId ) {
 		if ( ! doc || ! doc.documentElement ) {
 			return null;
 		}
 
 		var copy = doc.documentElement.cloneNode( true );
+		if ( emptyId !== undefined ) {
+			var holders = copy.querySelectorAll( '[id="' + emptyId + '"]' );
+			if ( holders.length !== 1 ) {
+				return null;
+			}
+			holders[0].textContent = '';
+		}
 		var styles = [];
 		Array.prototype.forEach.call( copy.querySelectorAll( 'style' ), function ( style ) {
 			var key = module.exports.styleKey( style );

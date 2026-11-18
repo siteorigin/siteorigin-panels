@@ -26,6 +26,7 @@ module.exports = Backbone.View.extend( {
 	previewFrameId: 1,
 
 	previewUrl: null,
+	previewQuiet: [],
 	previewIframe: null,
 
 	// How long a preview may take to load before the error panel shows (ms). panelsOptions.live_editor_preview_timeout overrides it.
@@ -315,6 +316,11 @@ module.exports = Backbone.View.extend( {
 
 		// A style edit replaces the layout CSS, when a reload would change nothing else.
 		if ( this.stylePreview( newData ) ) {
+			return this;
+		}
+
+		// Adding or removing widgets or rows changes the preview in place, when a reload would change nothing else.
+		if ( this.structurePreview( newData ) ) {
 			return this;
 		}
 
@@ -745,10 +751,11 @@ module.exports = Backbone.View.extend( {
 	 * inline (inline-styles writes position-dependent margins into each widget).
 	 *
 	 * @param {Document|null} doc The preview document.
+	 * @param {Object} [snapshot] The snapshot the document is checked against. Defaults to the one the preview shows.
 	 * @return {Object|null}
 	 */
-	buildPreviewMap: function ( doc ) {
-		var snap = this.previewSnapshot,
+	buildPreviewMap: function ( doc, snapshot ) {
+		var snap = snapshot || this.previewSnapshot,
 			postId = this.builder.config.postId;
 
 		if (
@@ -957,7 +964,7 @@ module.exports = Backbone.View.extend( {
 		}
 
 		var next = patch.snapshot( this.builder.model, data ),
-			changed = patch.changedWidgets( this.previewSnapshot, next );
+			changed = patch.changedWidgets( this.previewSnapshot, next, this.previewQuiet );
 		if ( ! changed || changed.length !== 1 ) {
 			return false;
 		}
@@ -1196,19 +1203,51 @@ module.exports = Backbone.View.extend( {
 	 * @return {string}
 	 */
 	normalisedWrapper: function ( wrapper ) {
-		var copy = wrapper.cloneNode( true );
+		return panels.helpers.liveEditorStructure.normalisedWrapper( wrapper );
+	},
 
-		_.each( [ copy ].concat( _.toArray( copy.querySelectorAll( '*' ) ) ), function ( el ) {
-			el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' );
-			if ( el.hasAttribute( 'class' ) && ! el.getAttribute( 'class' ) ) {
-				el.removeAttribute( 'class' );
-			}
+	/**
+	 * Whether the preview still shows what the server rendered for the data it was loaded or last updated with:
+	 * the layout CSS blocks are the ones last installed and apply as printed, the style elements are the ones
+	 * recorded, and the layout wrapper's markup equals the response's.
+	 *
+	 * @param {Object} map this.previewMap
+	 * @param {Array} pairs swap.pairStyles() of the two responses.
+	 * @param {Document} servedDoc The parsed response for the data the preview shows.
+	 * @return {Object|null} `live` (the layout CSS blocks in the preview), `installed` (the blocks last installed) and
+	 *         `beforeWrapper`; null when the preview is not as served.
+	 */
+	previewIsAsServed: function ( map, pairs, servedDoc ) {
+		var thisView = this,
+			live = this.layoutCss( map.doc ),
+			served = this.layoutCss( servedDoc ),
+			installed = this.installedCss,
+			beforeWrapper = servedDoc.getElementById( map.wrapper.id );
 
-			// Inline sizes are written by scripts (stretch, sliders, editor cursor); they re-measure on resize.
-			el.removeAttribute( 'style' );
-		} );
+		if (
+			! live ||
+			! beforeWrapper ||
+			_.size( live ) !== pairs.length ||
+			! _.every( pairs, function ( pair ) {
+				var rules;
 
-		return copy.outerHTML;
+				if ( ! _.has( live, pair.key ) || ! _.has( installed, pair.key ) || live[ pair.key ].text !== installed[ pair.key ].text ) {
+					return false;
+				}
+				rules = thisView.ruleText( live[ pair.key ].el );
+
+				return rules !== null &&
+					rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
+					thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
+			} ) ||
+			! this.installedOwners ||
+			! sameElements( this.installedOwners, this.styleOwners( map.doc ) ) ||
+			this.normalisedWrapper( map.wrapper ) !== this.normalisedWrapper( beforeWrapper )
+		) {
+			return null;
+		}
+
+		return { live: live, installed: installed, beforeWrapper: beforeWrapper };
 	},
 
 	/**
@@ -1322,32 +1361,12 @@ module.exports = Backbone.View.extend( {
 			}
 
 			// The layout CSS in the preview is the CSS last installed, and its markup is what the server rendered.
-			var live = thisView.layoutCss( map.doc ),
-				served = thisView.layoutCss( results[0].doc ),
-				installed = thisView.installedCss,
-				beforeWrapper = results[0].doc.getElementById( map.wrapper.id );
-			if (
-				! live ||
-				! beforeWrapper ||
-				_.size( live ) !== pairs.length ||
-				! _.every( pairs, function ( pair ) {
-					var rules;
-
-					if ( ! _.has( live, pair.key ) || ! _.has( installed, pair.key ) || live[ pair.key ].text !== installed[ pair.key ].text ) {
-						return false;
-					}
-					rules = thisView.ruleText( live[ pair.key ].el );
-
-					return rules !== null &&
-						rules === thisView.parsedRuleText( map.doc, installed[ pair.key ].text ) &&
-						thisView.styleApplies( live[ pair.key ].el, served && served[ pair.key ] && served[ pair.key ].el );
-				} ) ||
-				! thisView.installedOwners ||
-				! sameElements( thisView.installedOwners, thisView.styleOwners( map.doc ) ) ||
-				thisView.normalisedWrapper( map.wrapper ) !== thisView.normalisedWrapper( beforeWrapper )
-			) {
+			var held = thisView.previewIsAsServed( map, pairs, results[0].doc );
+			if ( ! held ) {
 				throw new Error( 'The preview is not what the server rendered.' );
 			}
+			var live = held.live,
+				installed = held.installed;
 
 			var written = false;
 			_.each( pairs, function ( pair ) {
@@ -1408,6 +1427,217 @@ module.exports = Backbone.View.extend( {
 	},
 
 	/**
+	 * After widgets or rows were added or removed, change the preview in place when a reload would change
+	 * nothing else.
+	 *
+	 * The editor sends the preview request twice (the data the preview shows, and the new data), as the style
+	 * path does, and parses both inertly. The preview changes only when the two pages are the same outside the layout
+	 * wrapper apart from the layout CSS, the preview is as the server rendered it, every widget that is added,
+	 * removed or renumbered is of a class on the swap allow list, nothing that is added needs document-load setup,
+	 * no retained row, cell or widget has a server-rendered inline style that differs, and the preview's wrapper
+	 * changed on a copy equals the response's wrapper. Otherwise, or on any error, the preview reloads.
+	 *
+	 * @param {Object} data The new builder data.
+	 * @return {boolean} True when an update started (it reloads by itself if it fails). False to try the next path.
+	 */
+	structurePreview: function ( data ) {
+		var swap = panels.helpers.liveEditorSwap,
+			patch = panels.helpers.liveEditorPatch,
+			structure = panels.helpers.liveEditorStructure,
+			map = this.previewMap,
+			request = this.previewRequest;
+
+		if (
+			this.previewReordered ||
+			! this.installedCss ||
+			! this.canChangePreviewInPlace() ||
+			! request ||
+			typeof window.fetch !== 'function' ||
+			typeof window.DOMParser !== 'function' ||
+			typeof window.URLSearchParams !== 'function' ||
+			typeof panelsOptions === 'undefined' ||
+			! _.isArray( panelsOptions.live_editor_swap_widgets )
+		) {
+			return false;
+		}
+
+		var origin;
+		try {
+			origin = map.doc.location.origin;
+		} catch ( e ) {
+			return false;
+		}
+		if ( ! swap.isSwapRoute( request.url, origin ) ) {
+			return false;
+		}
+
+		var next = patch.snapshot( this.builder.model, data ),
+			change = patch.structureChange( this.previewSnapshot, next, this.previewQuiet );
+		if ( ! change ) {
+			return false;
+		}
+
+		// Only widgets that opted in are created, removed or renumbered in place: a loaded script may hold
+		// timers or handlers that markup cannot show. A shortcode or URL in an added widget can render markup set up on load.
+		var prevWidgets = this.previewSnapshot.data.widgets,
+			nextWidgets = next.data.widgets,
+			allowed = panelsOptions.live_editor_swap_widgets,
+			widgetData = function ( cid ) {
+				return change.after.widgets[ cid ] ? nextWidgets[ change.after.widgets[ cid ].index ] : prevWidgets[ change.before.widgets[ cid ].index ];
+			};
+		if (
+			_.some( change.affected.concat( change.addedWidgets ), function ( cid ) {
+				return ! swap.isSwapWidget( widgetData( cid ), allowed );
+			} ) ||
+			_.some( change.addedWidgets, function ( cid ) {
+				return swap.hasDeferredContent( widgetData( cid ) );
+			} )
+		) {
+			return false;
+		}
+
+		// One update at a time: a newer edit replaces an older one.
+		this.abortSwap();
+		var thisView = this,
+			wrapperId = map.wrapper.id,
+			sidebarWidget = function ( cid ) {
+				return thisView.$( '.so-live-editor-builder .so-widget' ).filter( function () {
+					var view = $( this ).data( 'view' );
+
+					return !! view && !! view.model && view.model.cid === cid;
+				} );
+			},
+			revision = this.previewRevision,
+			controller = typeof AbortController === 'function' ? new AbortController() : null,
+			current = this.swapRequest = { controller: controller, generation: this.previewGeneration },
+			prevJson = JSON.stringify( this.previewSnapshot.data ),
+			nextJson = JSON.stringify( next.data ),
+			isCurrent = function () {
+				return thisView.swapRequest === current && current.generation === thisView.previewGeneration;
+			},
+			cache = this.swapCache,
+			before = cache && cache.dataJson === prevJson ?
+				Promise.resolve( { text: cache.text, doc: this.parsePreview( cache.text ) } ) :
+				this.fetchPreviewDocument( request, prevJson, controller ),
+			// A request that never settles must not leave the old preview in place: reload instead.
+			timer = setTimeout( function () {
+				if ( ! isCurrent() ) {
+					return;
+				}
+				thisView.swapRequest = null;
+				if ( controller ) {
+					controller.abort();
+				}
+				if ( thisView.$el.is( ':visible' ) ) {
+					thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+				}
+			}, this.styleTimeout );
+
+		Promise.all( [ before, this.fetchPreviewDocument( request, nextJson, controller ) ] ).then( function ( results ) {
+			clearTimeout( timer );
+			if ( ! isCurrent() ) {
+				return;
+			}
+			thisView.swapRequest = null;
+
+			// The pages are the same outside the layout wrapper apart from the layout CSS.
+			var prevStyles = swap.layoutStyles( results[0].doc, wrapperId ),
+				nextStyles = swap.layoutStyles( results[1].doc, wrapperId ),
+				pairs = prevStyles && nextStyles && prevStyles.shell === nextStyles.shell ?
+					swap.pairStyles( prevStyles.styles, nextStyles.styles ) : null;
+			if ( ! pairs ) {
+				throw new Error( 'A reload would change more than the layout.' );
+			}
+
+			// The preview must still be the one that was mapped, unchanged since the request began.
+			if ( thisView.previewRevision !== revision || thisView.previewReordered || ! thisView.canChangePreviewInPlace() || thisView.previewMap !== map ) {
+				throw new Error( 'The preview changed during the update.' );
+			}
+
+			var held = thisView.previewIsAsServed( map, pairs, results[0].doc ),
+				afterWrapper = results[1].doc.getElementById( wrapperId );
+			if ( ! held || ! afterWrapper ) {
+				throw new Error( 'The preview is not what the server rendered.' );
+			}
+
+			// What is added holds nothing set up on document load, and what is kept renders the same inline styles.
+			var added = structure.addedElements( afterWrapper, change );
+			if (
+				_.some( added.rows.concat( added.widgets ), function ( el ) {
+					return swap.needsDocumentSetup( el );
+				} ) ||
+				structure.serverStylesDiffer( held.beforeWrapper, afterWrapper, change )
+			) {
+				throw new Error( 'A reload would change more than the structure.' );
+			}
+
+			// Try the change on a copy first: the copy must equal the server's wrapper.
+			var trial = map.wrapper.cloneNode( true );
+			structure.syncStructure( trial, afterWrapper, change );
+			if ( thisView.normalisedWrapper( trial ) !== thisView.normalisedWrapper( afterWrapper ) ) {
+				throw new Error( 'The changed preview would not equal the server render.' );
+			}
+
+			// The change itself. From here a failure reloads.
+			structure.syncStructure( map.wrapper, afterWrapper, change );
+
+			var newMap = thisView.buildPreviewMap( map.doc, next );
+			if ( ! newMap ) {
+				throw new Error( 'The changed preview cannot be mapped.' );
+			}
+
+			// The new layout CSS, and no patched widths: the server's CSS holds the cell widths.
+			_.each( pairs, function ( pair ) {
+				if ( pair.after !== held.installed[ pair.key ].text ) {
+					held.live[ pair.key ].el.textContent = pair.after;
+					held.installed[ pair.key ] = { el: held.live[ pair.key ].el, text: pair.after };
+				}
+			} );
+			thisView.previewMap = newMap;
+			thisView.writeWidths( {} );
+			thisView.previewWidths = {};
+
+			// What the preview gets when it loads, for the new widgets: disabled links, hover and click to edit.
+			_.each( change.addedWidgets.concat( change.refreshed ), function ( cid ) {
+				var node = newMap.widgets[ cid ],
+					$sidebar = sidebarWidget( cid );
+
+				thisView.disablePreviewLinks( $( node ) );
+				thisView.bindPreviewWidget( $( node ), $sidebar );
+			} );
+
+			thisView.previewSnapshot = next;
+			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
+			thisView.previewPatched = false;
+			thisView.previewQuiet = _.union( thisView.previewQuiet, change.addedWidgets );
+			thisView.previewRevision++;
+
+			var previewWindow = thisView.previewIframe[0].contentWindow;
+			previewWindow.dispatchEvent( new previewWindow.Event( 'resize' ) );
+		} ).catch( function ( error ) {
+			clearTimeout( timer );
+			// Aborted, or replaced by a newer update or a reload: that one owns the preview now.
+			if (
+				( error && error.name === 'AbortError' ) ||
+				current.generation !== thisView.previewGeneration ||
+				( thisView.swapRequest !== null && thisView.swapRequest !== current )
+			) {
+				return;
+			}
+
+			thisView.swapRequest = null;
+			if ( ! thisView.$el.is( ':visible' ) ) {
+				return;
+			}
+
+			// Reload the preview with the builder's current data.
+			thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+		} );
+
+		return true;
+	},
+
+	/**
 	 * Apply a move or resize to the preview without a reload.
 	 *
 	 * @param {Object} data The new builder data.
@@ -1422,7 +1652,7 @@ module.exports = Backbone.View.extend( {
 
 		var patch = panels.helpers.liveEditorPatch,
 			next = patch.snapshot( this.builder.model, data ),
-			ops = patch.plan( this.previewSnapshot, next );
+			ops = patch.plan( this.previewSnapshot, next, this.previewQuiet );
 
 		if ( ! ops ) {
 			return false;
