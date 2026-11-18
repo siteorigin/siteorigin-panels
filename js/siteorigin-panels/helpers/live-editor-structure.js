@@ -121,23 +121,24 @@ var syncAttributes = function ( live, served ) {
 };
 
 /**
- * The server-rendered `style` attribute values of an element and what it holds, in document order. Cells and
- * widgets inside a row or cell are other entities: they are left out unless `whole` is true.
+ * The server-rendered `style` attribute values of an element and what it holds, each with the child-index path
+ * of the element that carries it, in document order. Cells and widgets inside a row or cell are other entities:
+ * they are left out unless `whole` is true.
  */
 var inlineStyles = function ( el, whole ) {
 	var out = [];
 
-	var walk = function ( node ) {
+	var walk = function ( node, path ) {
 		if ( node.hasAttribute( 'style' ) ) {
-			out.push( node.getAttribute( 'style' ) );
+			out.push( path + ':' + node.getAttribute( 'style' ) );
 		}
-		Array.prototype.forEach.call( node.children, function ( child ) {
+		Array.prototype.forEach.call( node.children, function ( child, i ) {
 			if ( whole || ! ENTITY_ID.test( child.id || '' ) ) {
-				walk( child );
+				walk( child, path + '/' + i );
 			}
 		} );
 	};
-	walk( el );
+	walk( el, '' );
 
 	return out;
 };

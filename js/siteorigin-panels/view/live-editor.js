@@ -361,6 +361,7 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = {};
 		this.previewPatched = false;
 		this.previewReordered = false;
+		this.previewQuiet = [];
 		this.previewRevision++;
 		this.installedCss = null;
 		this.installedOwners = null;
@@ -1052,6 +1053,7 @@ module.exports = Backbone.View.extend( {
 			thisView.bindPreviewWidget( $( node ), $sidebarWidget );
 
 			thisView.previewSnapshot = next;
+			thisView.updateQuiet( next );
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewRevision++;
 
@@ -1396,6 +1398,7 @@ module.exports = Backbone.View.extend( {
 			}
 
 			thisView.previewSnapshot = next;
+			thisView.updateQuiet( next );
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewRevision++;
 
@@ -1424,6 +1427,23 @@ module.exports = Backbone.View.extend( {
 		} );
 
 		return true;
+	},
+
+	/**
+	 * Keep the widgets whose form may still fill in `raw` and `style` after they were added: the added ones, until a
+	 * snapshot shows `raw` set (the form has loaded).
+	 *
+	 * @param {Object} next The snapshot the preview now shows.
+	 * @param {string[]} [added] Widgets added in place by this update.
+	 */
+	updateQuiet: function ( next, added ) {
+		var positions = panels.helpers.liveEditorPatch.positions( next );
+
+		this.previewQuiet = _.filter( _.union( this.previewQuiet, added || [] ), function ( cid ) {
+			var at = positions && positions.widgets[ cid ];
+
+			return !! at && ! next.data.widgets[ at.index ].panels_info.raw;
+		} );
 	},
 
 	/**
@@ -1609,7 +1629,7 @@ module.exports = Backbone.View.extend( {
 			thisView.previewSnapshot = next;
 			thisView.swapCache = { dataJson: nextJson, text: results[1].text };
 			thisView.previewPatched = false;
-			thisView.previewQuiet = _.union( thisView.previewQuiet, change.addedWidgets );
+			thisView.updateQuiet( next, change.addedWidgets );
 			thisView.previewRevision++;
 
 			var previewWindow = thisView.previewIframe[0].contentWindow;
@@ -1684,6 +1704,7 @@ module.exports = Backbone.View.extend( {
 
 		this.previewWidths = widths;
 		this.previewSnapshot = next;
+		this.updateQuiet( next );
 		this.previewPatched = true;
 		this.previewRevision++;
 		if ( ops.reordered ) {
