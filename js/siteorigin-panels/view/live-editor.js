@@ -361,8 +361,8 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = {};
 		this.previewPatched = false;
 		this.previewReordered = false;
-		_.each( this.previewListeners, function ( off ) {
-			off();
+		_.each( this.previewListeners, function ( listener ) {
+			listener.off();
 		} );
 		this.previewListeners = [];
 		this.previewRevision++;
@@ -1507,9 +1507,9 @@ module.exports = Backbone.View.extend( {
 			// the settings the form saves are watched as well.
 			settle( 60 );
 			model.on( events, listener );
-			thisView.previewListeners.push( function () {
+			thisView.previewListeners.push( { cid: cid, off: function () {
 				model.off( events, listener );
-			} );
+			} } );
 		} );
 	},
 
@@ -1705,6 +1705,16 @@ module.exports = Backbone.View.extend( {
 
 				thisView.disablePreviewLinks( $( node ) );
 				thisView.bindPreviewWidget( $( node ), $sidebar );
+			} );
+
+			// A removed widget needs no more watching.
+			thisView.previewListeners = _.filter( thisView.previewListeners, function ( listener ) {
+				if ( _.contains( change.removedWidgets, listener.cid ) ) {
+					listener.off();
+					return false;
+				}
+
+				return true;
 			} );
 
 			thisView.previewSnapshot = next;

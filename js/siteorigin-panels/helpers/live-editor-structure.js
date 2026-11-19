@@ -218,7 +218,8 @@ module.exports = {
 				return false;
 			}
 
-			return ! ROW_CLASSES.some( function ( name ) {
+			// The renderer prints divs with these classes only.
+			return node.tagName !== 'DIV' || ! ROW_CLASSES.some( function ( name ) {
 				return node.classList.contains( name );
 			} ) || Array.prototype.some.call( node.children, unexpected );
 		};
