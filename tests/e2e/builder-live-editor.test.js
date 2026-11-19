@@ -2366,7 +2366,7 @@ const structHtmlStyleLayout = () => ( {
 		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
 		{
 			title: '',
-			content: '<style>.panels-e2e-html-style { color: rgb(1, 2, 3); }</style><p class="panels-e2e-html-style">Str H</p>',
+			content: '<style>.panels-e2e-html-style { color: rgb(1, 2, 3); }</style><p class="panels-e2e-html-style">Str H <a href="/panels-e2e-link">link</a></p>',
 			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000640', style: {} },
 		},
 		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
@@ -2383,6 +2383,21 @@ const structScriptLayout = () => ( {
 			title: '',
 			content: '<p>Str H</p><script>window.panelsE2eScript = 1;</script>',
 			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000650', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
+// row0 [A, H: Custom HTML with an iframe]; row1 [G].
+const structIframeLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<p>Str H</p><iframe src="about:blank" title="e2e"></iframe>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000660', style: {} },
 		},
 		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
 	],
@@ -2627,6 +2642,7 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const add = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
 		expectInPlaceStruct( add );
+		await expectFresh( s, 'S1 add' );
 		const style = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => ( l.grids[ 1 ].style || {} ).padding === PAD2, 'row padding' );
 		expect( style.nav, 'the style edit did not navigate' ).toBe( 0 );
 		expect( style.marked ).toBe( true );
@@ -2645,6 +2661,7 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const add = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
 		expectInPlaceStruct( add );
+		await expectFresh( s, 'S2 add' );
 		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
 		const resize = await settle( s, async () => {
 			const box = await handle.boundingBox();
@@ -2676,8 +2693,10 @@ test.describe( 'Live Editor structure update', () => {
 			await s.page.mouse.up();
 		}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.6 ) > 0.05, 'weights changed' );
 		expect( resize.nav ).toBe( 0 );
+		await expectFresh( s, 'S3 resize' );
 		const add = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 10 ), 'E duplicated' );
 		expectInPlaceStruct( add );
+		await expectFresh( s, 'S3 add' );
 		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str E' ).nth( 1 ), 'Str E3', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str E3' ), 'E text' );
 		expect( text.nav, 'the text swap did not navigate' ).toBe( 0 );
 		expect( text.marked ).toBe( true );
@@ -2719,6 +2738,9 @@ test.describe( 'Live Editor structure update', () => {
 		const add = await settle( s, () => widgetAction( s, 'Str H', 'duplicate' ), widgetCount( 4 ), 'H duplicated' );
 		expectInPlaceStruct( add );
 		await expectFresh( s, 'S6 add' );
+		// The new widget's links are disabled, as the loaded ones are.
+		const frame = await previewFrame( s.page );
+		expect( await frame.locator( '.so-panel a' ).evaluateAll( ( links ) => links.map( ( a ) => getComputedStyle( a ).pointerEvents ) ) ).toEqual( [ 'none', 'none' ] );
 		const style = await settle( s, () => setStyle( s, 'row', 0, 'padding', PAD2 ), ( l ) => ( l.grids[ 0 ].style || {} ).padding === PAD2, 'row padding' );
 		expect( style.nav, 'the style edit did not navigate' ).toBe( 0 );
 		expect( style.marked ).toBe( true );
@@ -2812,6 +2834,25 @@ test.describe( 'Live Editor structure update', () => {
 	test( 'N14 deleting a widget that holds a script reloads', async () => {
 		const s = await open( 'script', structScriptLayout() );
 		const result = await settle( s, () => widgetAction( s, 'Str H', 'delete' ), widgetCount( 2 ), 'H deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N15 the first widget whose script is added to the page reloads', async () => {
+		const s = await open( 'emptycell', structEmptyCellLayout() );
+		const cell = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 0 );
+		const result = await settle( s, () => addWidget( liveBuilder( s.page ), cell, MEASURE, s.page ), widgetCount( 3 ), 'Measure added' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N16 with a Content-Security-Policy on the preview, an add reloads', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_csp: '1' } );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N17 adding a widget that holds an iframe reloads', async () => {
+		const s = await open( 'iframe', structIframeLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str H', 'duplicate' ), widgetCount( 4 ), 'H duplicated' );
 		expectReloadStruct( result );
 	} );
 

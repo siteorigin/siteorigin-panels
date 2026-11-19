@@ -1442,11 +1442,18 @@ module.exports = Backbone.View.extend( {
 			generation = this.previewGeneration,
 			patch = panels.helpers.liveEditorPatch,
 			events = 'change:raw change:style change:values',
-			settle = function () {
+			settle = function ( tries ) {
 				// The form sets `raw` first and the style right after, in the same call.
 				setTimeout( function () {
-					// Another update (an edit by the person) is being applied: it owns the preview.
-					if ( generation !== thisView.previewGeneration || ! thisView.$el.is( ':visible' ) || thisView.swapRequest ) {
+					if ( generation !== thisView.previewGeneration || ! thisView.$el.is( ':visible' ) ) {
+						return;
+					}
+
+					// An update is being applied: a form that changed meanwhile is looked at once it is done.
+					if ( thisView.swapRequest ) {
+						if ( tries > 0 ) {
+							settle( tries - 1 );
+						}
 						return;
 					}
 
@@ -1461,7 +1468,7 @@ module.exports = Backbone.View.extend( {
 					if ( ! thisView.swapPreview( data ) ) {
 						thisView.refreshPreview( data );
 					}
-				}, 0 );
+				}, tries === 20 ? 0 : 300 );
 			};
 
 		_.each( cids, function ( cid ) {
@@ -1472,7 +1479,7 @@ module.exports = Backbone.View.extend( {
 						model.off( events, listener );
 						return;
 					}
-					settle();
+					settle( 20 );
 				};
 
 			if ( ! model ) {
@@ -1481,7 +1488,7 @@ module.exports = Backbone.View.extend( {
 
 			// The form may have loaded while the preview was being fetched; a duplicate keeps `raw` from its source, so
 			// the settings the form saves are watched as well.
-			settle();
+			settle( 20 );
 			model.on( events, listener );
 		} );
 	},
