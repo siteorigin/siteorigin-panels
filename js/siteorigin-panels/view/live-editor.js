@@ -1467,8 +1467,20 @@ module.exports = Backbone.View.extend( {
 					}
 					if ( ! thisView.swapPreview( data ) ) {
 						thisView.refreshPreview( data );
+						return;
 					}
-				}, tries === 20 ? 0 : 300 );
+
+					// A request that never settles must not leave the old widget in the preview: reload instead.
+					var request = thisView.swapRequest;
+					setTimeout( function () {
+						if ( request && thisView.swapRequest === request && request.generation === thisView.previewGeneration ) {
+							thisView.abortSwap();
+							if ( thisView.$el.is( ':visible' ) ) {
+								thisView.refreshPreview( thisView.builder.model.getPanelsData() );
+							}
+						}
+					}, thisView.styleTimeout );
+				}, tries === 60 ? 0 : 300 );
 			};
 
 		_.each( cids, function ( cid ) {
@@ -1479,7 +1491,7 @@ module.exports = Backbone.View.extend( {
 						model.off( events, listener );
 						return;
 					}
-					settle( 20 );
+					settle( 60 );
 				};
 
 			if ( ! model ) {
@@ -1488,7 +1500,7 @@ module.exports = Backbone.View.extend( {
 
 			// The form may have loaded while the preview was being fetched; a duplicate keeps `raw` from its source, so
 			// the settings the form saves are watched as well.
-			settle( 20 );
+			settle( 60 );
 			model.on( events, listener );
 		} );
 	},

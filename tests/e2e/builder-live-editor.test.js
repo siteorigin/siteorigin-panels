@@ -2537,6 +2537,7 @@ test.describe( 'Live Editor structure update', () => {
 		const cell = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 );
 		const result = await settle( s, () => addWidget( liveBuilder( s.page ), cell, WRAPPED, s.page ), widgetCount( 10 ), 'widget added' );
 		expectInPlaceStruct( result );
+		await expectFresh( s, 'A2 add' );
 		const edit = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str D' ).first().locator( 'xpath=following::*[contains(@class,"so-widget")][1]' ), 'Str New', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str New' ), 'new text' );
 		expect( edit.nav, 'the text edit did not navigate' ).toBe( 0 );
 		expect( edit.marked, 'the same preview window' ).toBe( true );
