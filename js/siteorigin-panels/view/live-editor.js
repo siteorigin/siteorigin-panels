@@ -26,6 +26,7 @@ module.exports = Backbone.View.extend( {
 	previewFrameId: 1,
 
 	previewUrl: null,
+	previewListeners: [],
 	previewIframe: null,
 
 	// How long a preview may take to load before the error panel shows (ms). panelsOptions.live_editor_preview_timeout overrides it.
@@ -360,6 +361,10 @@ module.exports = Backbone.View.extend( {
 		this.previewWidths = {};
 		this.previewPatched = false;
 		this.previewReordered = false;
+		_.each( this.previewListeners, function ( off ) {
+			off();
+		} );
+		this.previewListeners = [];
 		this.previewRevision++;
 		this.installedCss = null;
 		this.installedOwners = null;
@@ -1453,6 +1458,10 @@ module.exports = Backbone.View.extend( {
 					if ( thisView.swapRequest ) {
 						if ( tries > 0 ) {
 							settle( tries - 1 );
+						} else {
+							// The update has not finished in all this time: do not leave the preview behind the data.
+							thisView.abortSwap();
+							thisView.refreshPreview( thisView.builder.model.getPanelsData() );
 						}
 						return;
 					}
@@ -1487,10 +1496,6 @@ module.exports = Backbone.View.extend( {
 			var view = sidebarWidget( cid ).data( 'view' ),
 				model = view && view.model,
 				listener = function () {
-					if ( generation !== thisView.previewGeneration ) {
-						model.off( events, listener );
-						return;
-					}
 					settle( 60 );
 				};
 
@@ -1502,6 +1507,9 @@ module.exports = Backbone.View.extend( {
 			// the settings the form saves are watched as well.
 			settle( 60 );
 			model.on( events, listener );
+			thisView.previewListeners.push( function () {
+				model.off( events, listener );
+			} );
 		} );
 	},
 
@@ -1648,6 +1656,13 @@ module.exports = Backbone.View.extend( {
 				structure.serverStylesDiffer( held.beforeWrapper, afterWrapper, change )
 			) {
 				throw new Error( 'A reload would change more than the structure.' );
+			}
+
+			// Every added widget has its widget in the sidebar to bind to.
+			if ( _.some( change.addedWidgets, function ( cid ) {
+				return sidebarWidget( cid ).length !== 1;
+			} ) ) {
+				throw new Error( 'A new widget is not in the sidebar.' );
 			}
 
 			// Try the change on a copy first: the copy must equal the server's wrapper.

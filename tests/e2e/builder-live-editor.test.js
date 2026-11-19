@@ -1756,10 +1756,12 @@ const expectFresh = async ( s, label ) => {
 						out[ prop ] = cs.getPropertyValue( prop );
 					}
 				}
-				// Identity as well as style: the tag, id, classes (without the editor's hover classes), data-index and own text.
+				// Identity as well as style: the tag, classes (without the editor's hover classes), attributes and own text.
 				const classes = Array.from( el.classList ).filter( ( name ) => ! /^so-panels-(faded|highlighted)$/.test( name ) ).sort().join( ' ' );
 				const text = Array.from( el.childNodes ).filter( ( node ) => node.nodeType === 3 ).map( ( node ) => node.textContent.trim() ).join( '' );
-				out[ '@identity' ] = `${ el.tagName }#${ el.id }.${ classes }[${ el.getAttribute( 'data-index' ) }]=${ text }`;
+				// Every attribute but style (the editor writes the cursor and disabled links there) and class (above).
+				const attributes = Array.from( el.attributes ).filter( ( a ) => ! [ 'style', 'class' ].includes( a.name ) ).map( ( a ) => `${ a.name }=${ a.value }` ).sort().join( ' ' );
+				out[ '@identity' ] = `${ el.tagName }.${ classes }[${ attributes }]=${ text }`;
 
 				return { tag: el.tagName + ( el.id ? '#' + el.id : '' ), out };
 			} );
