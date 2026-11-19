@@ -2859,6 +2859,12 @@ test.describe( 'Live Editor structure update', () => {
 		expectReloadStruct( result );
 	} );
 
+	test( 'N18 a row that holds markup from a row filter reloads when it is added', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_row_embed: 'button' } );
+		const result = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
+		expectReloadStruct( result );
+	} );
+
 	test( 'N13 a retained widget whose same inline style moves to another element reloads', async () => {
 		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_position_style: 'move' } );
 		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );

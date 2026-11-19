@@ -1653,6 +1653,7 @@ module.exports = Backbone.View.extend( {
 				_.some( added.rows.concat( added.widgets, structure.renumberedElements( held.beforeWrapper, change ), structure.removedElements( held.beforeWrapper, change ) ), function ( el ) {
 					return swap.needsDocumentSetup( el );
 				} ) ||
+				structure.unexpectedRowMarkup( afterWrapper, change ) ||
 				structure.serverStylesDiffer( held.beforeWrapper, afterWrapper, change )
 			) {
 				throw new Error( 'A reload would change more than the structure.' );

@@ -18,6 +18,9 @@ var POSITION_ATTRIBUTES = [ 'id', 'class', 'data-index' ];
 // Classes the Live Editor adds to a preview widget on hover.
 var EDITOR_CLASSES = [ 'so-panels-faded', 'so-panels-highlighted' ];
 
+// The classes of the elements the renderer itself prints for a row and its cells.
+var ROW_CLASSES = [ 'panel-grid', 'panel-row-style', 'panel-grid-cell', 'panel-cell-style', 'panel-background-overlay' ];
+
 // The style wrappers between a row, cell or widget element and what it holds.
 var WRAPPER_CLASSES = [ 'panel-row-style', 'panel-cell-style', 'panel-widget-style' ];
 
@@ -194,6 +197,35 @@ module.exports = {
 				return served.widgets[ cid ];
 			} ),
 		};
+	},
+
+	/**
+	 * True when an added row holds markup the renderer does not print itself: output of a row or cell filter, which
+	 * a script on the page may set up on document load. Widgets are looked at on their own.
+	 *
+	 * @param {Element} afterWrapper The layout wrapper of the new render.
+	 * @param {Object} change
+	 * @return {boolean}
+	 */
+	unexpectedRowMarkup: function ( afterWrapper, change ) {
+		var served = resolve( afterWrapper, change.after ),
+			widgets = Object.keys( served.widgets ).map( function ( cid ) {
+				return served.widgets[ cid ];
+			} );
+
+		var unexpected = function ( node ) {
+			if ( widgets.indexOf( node ) !== -1 ) {
+				return false;
+			}
+
+			return ! ROW_CLASSES.some( function ( name ) {
+				return node.classList.contains( name );
+			} ) || Array.prototype.some.call( node.children, unexpected );
+		};
+
+		return change.addedRows.some( function ( cid ) {
+			return unexpected( served.rows[ cid ] );
+		} );
 	},
 
 	/**
