@@ -542,25 +542,22 @@ test( 'a widget_id that is made up again on every read is ignored, and a stored 
 	assert.ok( patch.plan( t.prev, moved ), 'plan: a generated id' );
 } );
 
-test( 'structureChange leaves row and cell style to the page compare', () => {
+test( 'structureChange is null when a row, cell or widget style changes with the add', () => {
 	const s = setup();
-	const copy = duplicateWidget( s.byText( 'B' ) );
-	const next = patch.snapshot( s.model );
-	next.data.grids.forEach( ( g ) => {
-		g.style = { padding: '' };
-	} );
-	next.data.grid_cells.forEach( ( c ) => {
-		c.style = { padding: '' };
-	} );
-	const change = patch.structureChange( s.prev, next );
-	assert.ok( change );
-	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
+	duplicateWidget( s.byText( 'B' ) );
+	s.row( 1 ).set( 'style', { padding: '9px' } );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null, 'a row style' );
 
 	const t = setup();
 	duplicateWidget( t.byText( 'B' ) );
-	const widgets = patch.snapshot( t.model );
+	t.cell( 1, 0 ).set( 'style', { padding: '9px' } );
+	assert.equal( patch.structureChange( t.prev, patch.snapshot( t.model ) ), null, 'a cell style' );
+
+	const u = setup();
+	duplicateWidget( u.byText( 'B' ) );
+	const widgets = patch.snapshot( u.model );
 	widgets.data.widgets.forEach( ( w ) => {
 		w.panels_info.style = { padding: '' };
 	} );
-	assert.equal( patch.structureChange( t.prev, widgets ), null, 'a widget style is not left to the compare' );
+	assert.equal( patch.structureChange( u.prev, widgets ), null, 'a widget style' );
 } );

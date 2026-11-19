@@ -90,8 +90,8 @@ test( 'hasDeferredContent refuses shortcodes and auto-embed URLs in any widget v
 } );
 
 // A minimal element tree for needsDocumentSetup() and target().
-const el = ( tag, classes = [], children = [] ) => {
-	const node = { tagName: tag.toUpperCase(), classList: classes, children };
+const el = ( tag, classes = [], children = [], attributes = [] ) => {
+	const node = { tagName: tag.toUpperCase(), classList: classes, children, hasAttribute: ( name ) => attributes.includes( name ) };
 	node.querySelectorAll = ( selector ) => {
 		const all = [];
 		const walk = ( n ) => n.children.forEach( ( c ) => {
@@ -117,6 +117,8 @@ test( 'needsDocumentSetup finds scripts, media, embeds, noscript and template at
 	assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'blockquote', [ 'wp-embedded-content' ] ) ] ) ), true );
 	assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'figure', [ 'wp-block-embed', 'is-type-video' ] ) ] ) ), true );
 	assert.equal( swap.needsDocumentSetup( el( 'div', [ 'my-wp-embed' ] ) ), false, 'the prefix must start the class name' );
+	assert.equal( swap.needsDocumentSetup( el( 'div', [], [ el( 'div', [], [], [ 'data-siteorigin-parallax' ] ) ] ) ), true, 'a parallax background' );
+	assert.equal( swap.needsDocumentSetup( el( 'div', [], [], [ 'data-index' ] ) ), false );
 	assert.deepEqual( swap.documentSetupMarkup.classPrefixes, [ 'wp-embed', 'wp-block-embed' ] );
 } );
 

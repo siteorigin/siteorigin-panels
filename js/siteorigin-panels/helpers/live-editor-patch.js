@@ -394,9 +394,7 @@ module.exports = {
 		}
 
 		var ok = _.every( keptRows, function ( rowCid ) {
-			// A row or cell `style` is left to the page compare: a real style change is in the layout CSS and the markup
-			// the compare sees. A widget's own data, `style` included, must be the same.
-			if ( ! same( without( a.rows[ rowCid ].grid, [ 'style' ] ), without( b.rows[ rowCid ].grid, [ 'style' ] ) ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
+			if ( ! same( a.rows[ rowCid ].grid, b.rows[ rowCid ].grid ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
 				return false;
 			}
 
@@ -413,7 +411,7 @@ module.exports = {
 
 				// Cell settings, apart from the position, are unchanged; no cell becomes empty or stops being empty.
 				if (
-					! same( without( before.data, [ 'grid', 'index', 'style' ] ), without( after.data, [ 'grid', 'index', 'style' ] ) ) ||
+					! same( without( before.data, [ 'grid', 'index' ] ), without( after.data, [ 'grid', 'index' ] ) ) ||
 					( before.widgets.length > 0 ) !== ( after.widgets.length > 0 ) ||
 					! same( keptBefore, keptAfter )
 				) {

@@ -22,12 +22,15 @@ var PLACEHOLDER = 'so-live-editor-swap-target';
  * - media and embeds (iframe, video, audio, object, embed, and wp-embed / wp-block-embed classes): their
  *   players and sizing are set up by scripts on document load (MediaElement, wp-embed.js);
  * - noscript and template: DOMParser parses with scripting off, so noscript content becomes live markup and
- *   a declarative shadow root is not attached.
+ *   a declarative shadow root is not attached;
+ * - a parallax background (data-siteorigin-parallax): its script starts it on document load.
  * A later opt-in (for example a Widgets Bundle widget with its own setup) can extend these lists.
  */
 var documentSetupMarkup = {
 	tags: [ 'script', 'iframe', 'video', 'audio', 'object', 'embed', 'noscript', 'template' ],
 	classPrefixes: [ 'wp-embed', 'wp-block-embed' ],
+	// Set up by a script on document load (the parallax of a row or cell background).
+	attributes: [ 'data-siteorigin-parallax' ],
 };
 
 // A line, or a paragraph, that holds only a URL: WordPress replaces it with an embed (WP_Embed::autoembed()).
@@ -103,6 +106,12 @@ module.exports = {
 		return nodes.some( function ( node ) {
 			var tag = String( node.tagName || '' ).toLowerCase();
 			if ( documentSetupMarkup.tags.indexOf( tag ) !== -1 ) {
+				return true;
+			}
+
+			if ( typeof node.hasAttribute === 'function' && documentSetupMarkup.attributes.some( function ( name ) {
+				return node.hasAttribute( name );
+			} ) ) {
 				return true;
 			}
 

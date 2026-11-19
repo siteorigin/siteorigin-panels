@@ -1693,7 +1693,11 @@ module.exports = Backbone.View.extend( {
 			thisView.writeWidths( {} );
 			thisView.previewWidths = {};
 
-			// What the preview gets when it loads, for the new widgets: disabled links, hover and click to edit.
+			// What the preview gets when it loads: disabled links in the new rows (a row or cell filter can print a link outside
+			// a widget), then hover and click to edit for the new widgets.
+			_.each( change.addedRows, function ( cid ) {
+				thisView.disablePreviewLinks( $( newMap.rows[ cid ] ) );
+			} );
 			_.each( change.addedWidgets, function ( cid ) {
 				var node = newMap.widgets[ cid ],
 					$sidebar = sidebarWidget( cid );
