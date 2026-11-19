@@ -1756,6 +1756,12 @@ const expectFresh = async ( s, label ) => {
 						out[ prop ] = cs.getPropertyValue( prop );
 					}
 				}
+				// The generated content and display of the pseudo-elements.
+				for ( const pseudo of [ '::before', '::after' ] ) {
+					const ps = f.contentWindow.getComputedStyle( el, pseudo );
+					out[ `${ pseudo } content` ] = ps.getPropertyValue( 'content' );
+					out[ `${ pseudo } display` ] = ps.getPropertyValue( 'display' );
+				}
 				// Identity as well as style: the tag, classes (without the editor's hover classes), attributes and own text.
 				const classes = Array.from( el.classList ).filter( ( name ) => ! /^so-panels-(faded|highlighted)$/.test( name ) ).sort().join( ' ' );
 				const text = Array.from( el.childNodes ).filter( ( node ) => node.nodeType === 3 ).map( ( node ) => node.textContent.trim() ).join( '' );
