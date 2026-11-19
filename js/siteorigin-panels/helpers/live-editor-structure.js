@@ -19,7 +19,7 @@ var POSITION_ATTRIBUTES = [ 'id', 'class', 'data-index' ];
 var EDITOR_CLASSES = [ 'so-panels-faded', 'so-panels-highlighted' ];
 
 // The classes of the elements the renderer itself prints for a row and its cells.
-var ROW_CLASSES = [ 'panel-grid', 'panel-row-style', 'panel-grid-cell', 'panel-cell-style', 'panel-background-overlay' ];
+var ROW_CLASSES = [ 'panel-grid', 'panel-row-style', 'panel-grid-cell', 'panel-cell-style', 'panel-background-overlay', 'so-panels-full-wrapper', 'so-panels-background-alt' ];
 
 // The style wrappers between a row, cell or widget element and what it holds.
 var WRAPPER_CLASSES = [ 'panel-row-style', 'panel-cell-style', 'panel-widget-style' ];

@@ -1565,7 +1565,8 @@ module.exports = Backbone.View.extend( {
 		}
 
 		// Only widgets that opted in are created, removed or renumbered in place: a loaded script may hold
-		// timers or handlers that markup cannot show. A shortcode or URL in an added widget can render markup set up on load.
+		// timers or handlers that markup cannot show. A shortcode or URL in a widget that is added, removed or renumbered can
+		// render markup set up on load.
 		var prevWidgets = this.previewSnapshot.data.widgets,
 			nextWidgets = next.data.widgets,
 			allowed = panelsOptions.live_editor_swap_widgets,
@@ -1576,7 +1577,7 @@ module.exports = Backbone.View.extend( {
 			_.some( change.affected.concat( change.addedWidgets ), function ( cid ) {
 				return ! swap.isSwapWidget( widgetData( cid ), allowed );
 			} ) ||
-			_.some( change.addedWidgets, function ( cid ) {
+			_.some( change.addedWidgets.concat( change.affected ), function ( cid ) {
 				return swap.hasDeferredContent( widgetData( cid ) );
 			} )
 		) {
