@@ -197,6 +197,23 @@ module.exports = {
 	},
 
 	/**
+	 * The row and widget elements the change removes, as they are in the response for the data the preview shows.
+	 *
+	 * @param {Element} beforeWrapper Layout wrapper of the response for the data the preview shows.
+	 * @param {Object} change
+	 * @return {Element[]}
+	 */
+	removedElements: function ( beforeWrapper, change ) {
+		var before = resolve( beforeWrapper, change.before );
+
+		return change.removedRows.map( function ( cid ) {
+			return before.rows[ cid ];
+		} ).concat( change.removedWidgets.map( function ( cid ) {
+			return before.widgets[ cid ];
+		} ) );
+	},
+
+	/**
 	 * The retained rows, cells and widgets of the preview whose number changes, as they are in the response for the
 	 * data the preview shows: the elements a fresh load would create again at their new number.
 	 *

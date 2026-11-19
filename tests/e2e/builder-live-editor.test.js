@@ -2375,6 +2375,21 @@ const structHtmlStyleLayout = () => ( {
 	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
 } );
 
+// row0 [A, H: Custom HTML with a script]; row1 [G]. The script is inert (it only sets a variable).
+const structScriptLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<p>Str H</p><script>window.panelsE2eScript = 1;</script>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000650', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
 // row0 [A | empty]; row1 [G].
 const structEmptyCellLayout = () => ( {
 	widgets: [ structWidget( WRAPPED, 'Str A', 0, 0, 0 ), structWidget( WRAPPED, 'Str G', 1, 0, 1 ) ],
@@ -2587,6 +2602,7 @@ test.describe( 'Live Editor structure update', () => {
 		const s = await open( 'main', structLayout() );
 		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
 		expectInPlaceStruct( result );
+		await expectFresh( s, 'B1' );
 		const frame = await previewFrame( s.page );
 		const sidebar = liveBuilder( s.page ).locator( '.so-widget' );
 		// The new widget (index 2): sidebar hover highlights it, preview hover marks the sidebar widget.
@@ -2790,6 +2806,12 @@ test.describe( 'Live Editor structure update', () => {
 	test( 'N11 a retained widget whose inline style holds its position reloads', async () => {
 		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_position_style: '1' } );
 		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N14 deleting a widget that holds a script reloads', async () => {
+		const s = await open( 'script', structScriptLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str H', 'delete' ), widgetCount( 2 ), 'H deleted' );
 		expectReloadStruct( result );
 	} );
 

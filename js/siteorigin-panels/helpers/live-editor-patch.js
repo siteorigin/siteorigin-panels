@@ -394,9 +394,8 @@ module.exports = {
 		}
 
 		var ok = _.every( keptRows, function ( rowCid ) {
-			// A row, cell or widget `style` is left to the page compare: a form that loads in the background (a new or
-			// duplicated widget, a dialog) fills in default style values and `raw` silently, which changes the data without
-			// changing what is rendered, and a real style change is in the layout CSS and markup the compare sees.
+			// A row or cell `style` is left to the page compare: a real style change is in the layout CSS and the markup
+			// the compare sees. A widget's own data, `style` included, must be the same.
 			if ( ! same( without( a.rows[ rowCid ].grid, [ 'style' ] ), without( b.rows[ rowCid ].grid, [ 'style' ] ) ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
 				return false;
 			}

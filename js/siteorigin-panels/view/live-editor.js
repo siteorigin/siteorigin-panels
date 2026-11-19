@@ -1441,10 +1441,12 @@ module.exports = Backbone.View.extend( {
 		var thisView = this,
 			generation = this.previewGeneration,
 			patch = panels.helpers.liveEditorPatch,
+			events = 'change:raw change:style change:values',
 			settle = function () {
 				// The form sets `raw` first and the style right after, in the same call.
 				setTimeout( function () {
-					if ( generation !== thisView.previewGeneration || ! thisView.$el.is( ':visible' ) ) {
+					// Another update (an edit by the person) is being applied: it owns the preview.
+					if ( generation !== thisView.previewGeneration || ! thisView.$el.is( ':visible' ) || thisView.swapRequest ) {
 						return;
 					}
 
@@ -1464,7 +1466,14 @@ module.exports = Backbone.View.extend( {
 
 		_.each( cids, function ( cid ) {
 			var view = sidebarWidget( cid ).data( 'view' ),
-				model = view && view.model;
+				model = view && view.model,
+				listener = function () {
+					if ( generation !== thisView.previewGeneration ) {
+						model.off( events, listener );
+						return;
+					}
+					settle();
+				};
 
 			if ( ! model ) {
 				return;
@@ -1473,7 +1482,7 @@ module.exports = Backbone.View.extend( {
 			// The form may have loaded while the preview was being fetched; a duplicate keeps `raw` from its source, so
 			// the settings the form saves are watched as well.
 			settle();
-			model.once( 'change:raw change:style change:values', settle );
+			model.on( events, listener );
 		} );
 	},
 
@@ -1614,7 +1623,7 @@ module.exports = Backbone.View.extend( {
 			// What is added holds nothing set up on document load, and what is kept renders the same inline styles.
 			var added = structure.addedElements( afterWrapper, change );
 			if (
-				_.some( added.rows.concat( added.widgets, structure.renumberedElements( held.beforeWrapper, change ) ), function ( el ) {
+				_.some( added.rows.concat( added.widgets, structure.renumberedElements( held.beforeWrapper, change ), structure.removedElements( held.beforeWrapper, change ) ), function ( el ) {
 					return swap.needsDocumentSetup( el );
 				} ) ||
 				structure.serverStylesDiffer( held.beforeWrapper, afterWrapper, change )
