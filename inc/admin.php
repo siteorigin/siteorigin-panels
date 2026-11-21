@@ -763,11 +763,14 @@ class SiteOrigin_Panels_Admin {
 					array_unique(
 						array_filter(
 							/**
-							 * Filters the widget classes the Live Editor may update in place after an edit.
+							 * Filters the widget classes the Live Editor may update in place.
 							 *
 							 * After an edit to one of these widgets, the Live Editor fetches the preview twice
 							 * (before and after the edit) and replaces only that widget in the preview, if the two
-							 * pages are the same apart from it. Otherwise the preview reloads.
+							 * pages are the same apart from it. Otherwise the preview reloads. The same classes
+							 * are the ones that may be added, deleted or renumbered in the preview without a reload
+							 * when widgets or rows are added or deleted: a widget that is not listed makes that
+							 * change reload.
 							 *
 							 * List a class only if its front end needs no script setup: the replaced markup runs
 							 * no setup code. Page Builder's legacy widgets are not listed (the embedded video

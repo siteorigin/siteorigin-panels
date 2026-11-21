@@ -1429,7 +1429,7 @@ test.describe( 'Live Editor single-widget update', () => {
 		s1 = { page: session.page, keep: true };
 
 		// Duplicates and non-strings from the filter are dropped.
-		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML', 'Panels_E2E_Wrapped_Text_Widget' ] );
+		expect( await session.page.evaluate( () => window.panelsOptions.live_editor_swap_widgets ) ).toEqual( [ 'WP_Widget_Text', 'WP_Widget_Custom_HTML', 'Panels_E2E_Wrapped_Text_Widget', 'Panels_E2E_Measure_Widget' ] );
 
 		// The sibling keeps an expando: the swap leaves other nodes alone.
 		await ( await previewPanel( session.page, 'Swap two' ) ).evaluate( ( el ) => {
@@ -1688,6 +1688,123 @@ const styleLayout = ( widgetClass = 'Panels_E2E_Wrapped_Text_Widget' ) => {
 	};
 };
 
+// Set one style field of a row, cell or widget in its dialog, then close it. kind: widget, row or cell.
+const setStyle = async ( s, kind, which, field, value ) => {
+	const { page } = s;
+	let dialog;
+	if ( kind === 'widget' ) {
+		dialog = await openWidgetDialog( sidebarWidget( page, which ), page );
+	} else {
+		const row = sidebarRows( page ).nth( kind === 'row' ? which : which[ 0 ] );
+		await row.locator( '.so-row-toolbar' ).hover();
+		await row.locator( '.so-row-toolbar a.so-row-settings.so-tool-button' ).click();
+		await expect( page.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 1 );
+		dialog = openDialog( page );
+		if ( kind === 'cell' ) {
+			await dialog.locator( '.preview-cell' ).nth( which[ 1 ] ).locator( '.preview-cell-in' ).click( { position: { x: 4, y: 4 } } );
+		}
+	}
+	const scope = kind === 'cell' ? '.so-cell-styles' : ( kind === 'row' ? '.so-row-styles' : '.so-visual-styles' );
+	const input = dialog.locator( `.so-sidebar ${ scope } [name="style[${ field }]"]` ).first();
+	await expect( input ).toBeAttached( { timeout: 15000 } );
+	await input.evaluate( ( el, v ) => {
+		el.value = v;
+		el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	}, value );
+	// A row dialog's Done button saves the row; a widget dialog's closes it.
+	await dialog.locator( kind === 'widget' ? '.so-toolbar .so-close' : '.so-toolbar .so-save' ).first().click();
+	await expectOpenDialogs( page, 0 );
+};
+
+/**
+ * The open preview against a fresh render of the builder's data: every computed property of every
+ * element under the layout wrapper, at three widths. The editor's own cursor and pointer-events are skipped.
+ */
+const expectFresh = async ( s, label ) => {
+	// What a reload would post: the builder's own data (the field holds the data of the last refresh, and a form that loads in the background changes the model without one).
+	const data = await s.page.evaluate( () => window.soPanelsBuilderView.model.getPanelsData() );
+	const diffs = await s.page.evaluate( async ( { url, id, data, widths } ) => {
+		const response = await fetch( url, { method: 'POST', credentials: 'same-origin', body: new URLSearchParams( { live_editor_panels_data: JSON.stringify( data ), live_editor_post_ID: String( id ) } ) } );
+		const html = await response.text();
+		const frames = document.querySelectorAll( '.so-panels-live-editor .so-preview iframe' );
+		const live = frames[ frames.length - 1 ];
+		const fresh = document.createElement( 'iframe' );
+		fresh.style.cssText = 'position:fixed;left:-9999px;top:0;height:900px;border:0';
+		document.body.appendChild( fresh );
+		await new Promise( ( resolve ) => {
+			fresh.onload = resolve;
+			fresh.srcdoc = html;
+		} );
+		const still = '*,*::before,*::after{transition:none!important;animation:none!important}';
+		const stills = [ live, fresh ].map( ( f ) => {
+			const style = f.contentDocument.createElement( 'style' );
+			style.textContent = still;
+			f.contentDocument.head.appendChild( style );
+
+			return style;
+		} );
+		// The editor's hover highlight (faded widgets) is not part of the layout.
+		live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
+		const skip = [ 'cursor', 'pointer-events' ];
+		const snap = ( f ) => {
+			const w = f.contentDocument.getElementById( 'pl-' + id );
+			return [ w, ...w.querySelectorAll( '*' ) ].map( ( el ) => {
+				const cs = f.contentWindow.getComputedStyle( el );
+				const out = {};
+				for ( const prop of cs ) {
+					if ( ! skip.includes( prop ) ) {
+						out[ prop ] = cs.getPropertyValue( prop );
+					}
+				}
+				// The generated content and display of the pseudo-elements.
+				for ( const pseudo of [ '::before', '::after' ] ) {
+					const ps = f.contentWindow.getComputedStyle( el, pseudo );
+					out[ `${ pseudo } content` ] = ps.getPropertyValue( 'content' );
+					out[ `${ pseudo } display` ] = ps.getPropertyValue( 'display' );
+				}
+				// Identity as well as style: the tag, classes (without the editor's hover classes), attributes and own text.
+				const classes = Array.from( el.classList ).filter( ( name ) => ! /^so-panels-(faded|highlighted)$/.test( name ) ).sort().join( ' ' );
+				const text = Array.from( el.childNodes ).filter( ( node ) => node.nodeType === 3 ).map( ( node ) => node.textContent.trim() ).join( '' );
+				// Every attribute but style (the editor writes the cursor and disabled links there) and class (above).
+				const attributes = Array.from( el.attributes ).filter( ( a ) => ! [ 'style', 'class' ].includes( a.name ) ).map( ( a ) => `${ a.name }=${ a.value }` ).sort().join( ' ' );
+				out[ '@identity' ] = `${ el.tagName }.${ classes }[${ attributes }]=${ text }`;
+
+				return { tag: el.tagName + ( el.id ? '#' + el.id : '' ), out };
+			} );
+		};
+		const original = live.style.width;
+		const found = [];
+		for ( const width of widths ) {
+			live.style.setProperty( 'width', width + 'px', 'important' );
+			fresh.style.width = width + 'px';
+			await new Promise( ( resolve ) => setTimeout( resolve, 1200 ) );
+			live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
+			const a = snap( live );
+			const b = snap( fresh );
+			if ( a.length !== b.length ) {
+				found.push( `${ width }px: ${ a.length } elements vs ${ b.length }` );
+				continue;
+			}
+			a.forEach( ( x, i ) => {
+				for ( const prop of Object.keys( x.out ) ) {
+					// Font sizes that scale with the width can differ by a fraction of a pixel while the width settles.
+					const near = /^(font-size|line-height)$/.test( prop ) && Math.abs( parseFloat( x.out[ prop ] ) - parseFloat( b[ i ].out[ prop ] ) ) < 0.5;
+					if ( x.out[ prop ] !== b[ i ].out[ prop ] && ! near ) {
+						found.push( `${ width }px ${ x.tag } ${ prop }: ${ x.out[ prop ] } vs ${ b[ i ].out[ prop ] }` );
+					}
+				}
+			} );
+		}
+		live.style.width = original;
+		// The preview keeps the stylesheets it was loaded with.
+		stills[ 0 ].remove();
+		fresh.remove();
+
+		return found.slice( 0, 6 );
+	}, { url: s.getUrl(), id: s.id, data, widths: [ 1280, 720, 320 ] } );
+	expect( diffs, `${ label }: the preview equals a fresh render` ).toEqual( [] );
+};
+
 test.describe( 'Live Editor style-only update', () => {
 	let admin;
 	let ctx;
@@ -1753,34 +1870,6 @@ test.describe( 'Live Editor style-only update', () => {
 		return session;
 	};
 
-	// Set one style field of a row, cell or widget in its dialog, then close it. kind: widget, row or cell.
-	const setStyle = async ( s, kind, which, field, value ) => {
-		const { page } = s;
-		let dialog;
-		if ( kind === 'widget' ) {
-			dialog = await openWidgetDialog( sidebarWidget( page, which ), page );
-		} else {
-			const row = sidebarRows( page ).nth( kind === 'row' ? which : which[ 0 ] );
-			await row.locator( '.so-row-toolbar' ).hover();
-			await row.locator( '.so-row-toolbar a.so-row-settings.so-tool-button' ).click();
-			await expect( page.locator( '.so-panels-dialog .so-title-bar:visible' ) ).toHaveCount( 1 );
-			dialog = openDialog( page );
-			if ( kind === 'cell' ) {
-				await dialog.locator( '.preview-cell' ).nth( which[ 1 ] ).locator( '.preview-cell-in' ).click( { position: { x: 4, y: 4 } } );
-			}
-		}
-		const scope = kind === 'cell' ? '.so-cell-styles' : ( kind === 'row' ? '.so-row-styles' : '.so-visual-styles' );
-		const input = dialog.locator( `.so-sidebar ${ scope } [name="style[${ field }]"]` ).first();
-		await expect( input ).toBeAttached( { timeout: 15000 } );
-		await input.evaluate( ( el, v ) => {
-			el.value = v;
-			el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
-		}, value );
-		// A row dialog's Done button saves the row; a widget dialog's closes it.
-		await dialog.locator( kind === 'widget' ? '.so-toolbar .so-close' : '.so-toolbar .so-save' ).first().click();
-		await expectOpenDialogs( page, 0 );
-	};
-
 	// Wait until the field holds the change, let any reload show, and report what happened.
 	const settle = async ( s, action, check, message ) => {
 		const before = { ...s.counts };
@@ -1805,81 +1894,6 @@ test.describe( 'Live Editor style-only update', () => {
 	// The style object of a widget, row or cell in the builder field.
 	const widgetStyle = ( layout, text ) => layout.widgets.find( ( w ) => w.text === text ).panels_info.style || {};
 	const rowStyle = ( layout, ri ) => layout.grids[ ri ].style || {};
-
-	/**
-	 * The open preview against a fresh render of the builder's data: every computed property of every
-	 * element under the layout wrapper, at three widths. The editor's own cursor and pointer-events are skipped.
-	 */
-	const expectFresh = async ( s, label ) => {
-		const data = await fieldLayout( s.page );
-		const diffs = await s.page.evaluate( async ( { url, id, data, widths } ) => {
-			const response = await fetch( url, { method: 'POST', credentials: 'same-origin', body: new URLSearchParams( { live_editor_panels_data: JSON.stringify( data ), live_editor_post_ID: String( id ) } ) } );
-			const html = await response.text();
-			const frames = document.querySelectorAll( '.so-panels-live-editor .so-preview iframe' );
-			const live = frames[ frames.length - 1 ];
-			const fresh = document.createElement( 'iframe' );
-			fresh.style.cssText = 'position:fixed;left:-9999px;top:0;height:900px;border:0';
-			document.body.appendChild( fresh );
-			await new Promise( ( resolve ) => {
-				fresh.onload = resolve;
-				fresh.srcdoc = html;
-			} );
-			const still = '*,*::before,*::after{transition:none!important;animation:none!important}';
-			const stills = [ live, fresh ].map( ( f ) => {
-				const style = f.contentDocument.createElement( 'style' );
-				style.textContent = still;
-				f.contentDocument.head.appendChild( style );
-
-				return style;
-			} );
-			// The editor's hover highlight (faded widgets) is not part of the layout.
-			live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
-			const skip = [ 'cursor', 'pointer-events' ];
-			const snap = ( f ) => {
-				const w = f.contentDocument.getElementById( 'pl-' + id );
-				return [ w, ...w.querySelectorAll( '*' ) ].map( ( el ) => {
-					const cs = f.contentWindow.getComputedStyle( el );
-					const out = {};
-					for ( const prop of cs ) {
-						if ( ! skip.includes( prop ) ) {
-							out[ prop ] = cs.getPropertyValue( prop );
-						}
-					}
-					return { tag: el.tagName + ( el.id ? '#' + el.id : '' ), out };
-				} );
-			};
-			const original = live.style.width;
-			const found = [];
-			for ( const width of widths ) {
-				live.style.setProperty( 'width', width + 'px', 'important' );
-				fresh.style.width = width + 'px';
-				await new Promise( ( resolve ) => setTimeout( resolve, 1200 ) );
-				live.contentDocument.querySelectorAll( '.so-panels-faded, .so-panels-highlighted' ).forEach( ( el ) => el.classList.remove( 'so-panels-faded', 'so-panels-highlighted' ) );
-				const a = snap( live );
-				const b = snap( fresh );
-				if ( a.length !== b.length ) {
-					found.push( `${ width }px: ${ a.length } elements vs ${ b.length }` );
-					continue;
-				}
-				a.forEach( ( x, i ) => {
-					for ( const prop of Object.keys( x.out ) ) {
-						// Font sizes that scale with the width can differ by a fraction of a pixel while the width settles.
-						const near = /^(font-size|line-height)$/.test( prop ) && Math.abs( parseFloat( x.out[ prop ] ) - parseFloat( b[ i ].out[ prop ] ) ) < 0.5;
-						if ( x.out[ prop ] !== b[ i ].out[ prop ] && ! near ) {
-							found.push( `${ width }px ${ x.tag } ${ prop }: ${ x.out[ prop ] } vs ${ b[ i ].out[ prop ] }` );
-						}
-					}
-				} );
-			}
-			live.style.width = original;
-			// The preview keeps the stylesheets it was loaded with.
-			stills[ 0 ].remove();
-			fresh.remove();
-
-			return found.slice( 0, 6 );
-		}, { url: s.getUrl(), id: s.id, data, widths: [ 1280, 720, 320 ] } );
-		expect( diffs, `${ label }: the preview equals a fresh render` ).toEqual( [] );
-	};
 
 	test( 'T1 a widget padding change on a styled widget is applied in place and equals a fresh render', async () => {
 		const s = await open( 'main', styleLayout() );
@@ -2273,5 +2287,599 @@ test.describe( 'Live Editor style-only update', () => {
 		expect( await ( await previewFrame( s.page ) ).locator( '#pg-' + s.id + '-1 [class*="overlay"]' ).count(), 'the row has an overlay' ).toBeGreaterThan( 0 );
 		await expectFresh( s, 'T19b' );
 		expectNoPageErrors( s.errors );
+	} );
+} );
+
+
+/**
+ * Add and delete widgets and rows (#1425). Each in-place case also compares the preview with a fresh render.
+ */
+const STRUCT_COOKIES = [ 'panels_e2e_swap', 'panels_e2e_position_style', 'panels_e2e_row_embed', 'panels_e2e_inline_styles', 'panels_e2e_csp', 'panels_e2e_preview_block' ];
+const STRUCT_STYLE = { padding: PAD, background: '#ddeeff', background_display: 'color' };
+
+const structWidget = ( widgetClass, text, grid, cell, id, style = {} ) => {
+	const out = wrappedWidget( text, grid, cell, id );
+	out.panels_info.class = widgetClass;
+	out.panels_info.style = style;
+
+	return out;
+};
+
+const WRAPPED = 'Panels_E2E_Wrapped_Text_Widget';
+const MEASURE = 'Panels_E2E_Measure_Widget';
+const RANDOM = 'Panels_E2E_Random_Widget';
+
+// row0 [A, B (styled), C | D]; row1 (styled row, padded cell) [E, F]; row2 [M, N (both Measure)]; row3 [G].
+const structLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		structWidget( WRAPPED, 'Str B', 0, 0, 1, STRUCT_STYLE ),
+		structWidget( WRAPPED, 'Str C', 0, 0, 2 ),
+		structWidget( WRAPPED, 'Str D', 0, 1, 3 ),
+		structWidget( WRAPPED, 'Str E', 1, 0, 4 ),
+		structWidget( WRAPPED, 'Str F', 1, 0, 5 ),
+		structWidget( MEASURE, 'Str M', 2, 0, 6 ),
+		structWidget( MEASURE, 'Str N', 2, 0, 7 ),
+		structWidget( WRAPPED, 'Str G', 3, 0, 8 ),
+	],
+	grids: [
+		{ cells: 2, style: {} },
+		{ cells: 1, style: STRUCT_STYLE },
+		{ cells: 1, style: {} },
+		{ cells: 1, style: {} },
+	],
+	grid_cells: [
+		{ grid: 0, index: 0, weight: 0.6, style: {} },
+		{ grid: 0, index: 1, weight: 0.4, style: {} },
+		{ grid: 1, index: 0, weight: 1, style: { padding: '8px 8px 8px 8px' } },
+		{ grid: 2, index: 0, weight: 1, style: {} },
+		{ grid: 3, index: 0, weight: 1, style: {} },
+	],
+} );
+
+// row0 [A, R (Random) | empty]; row1 [G].
+const structRandomLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{ text: '', panels_info: { class: RANDOM, grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000630', style: {} } },
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 2, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [
+		{ grid: 0, index: 0, weight: 0.5, style: {} },
+		{ grid: 0, index: 1, weight: 0.5, style: {} },
+		{ grid: 1, index: 0, weight: 1, style: {} },
+	],
+} );
+
+// row0 [A, B | S: a shortcode alone on a line]; row1 [G].
+const structShortcodeLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		structWidget( WRAPPED, 'Str B', 0, 0, 1 ),
+		structWidget( WRAPPED, '[video src="/wp-content/panels-e2e.mp4"]', 0, 1, 2 ),
+		structWidget( WRAPPED, 'Str G', 1, 0, 3 ),
+	],
+	grids: [ { cells: 2, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [
+		{ grid: 0, index: 0, weight: 0.5, style: {} },
+		{ grid: 0, index: 1, weight: 0.5, style: {} },
+		{ grid: 1, index: 0, weight: 1, style: {} },
+	],
+} );
+
+// row0 [A, H: Custom HTML with a style element]; row1 [G].
+const structHtmlStyleLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<style>.panels-e2e-html-style { color: rgb(1, 2, 3); }</style><p class="panels-e2e-html-style">Str H <a href="/panels-e2e-link">link</a></p>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000640', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: STRUCT_STYLE }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
+// row0 [A, H: Custom HTML with a script]; row1 [G]. The script is inert (it only sets a variable).
+const structScriptLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<p>Str H</p><script>window.panelsE2eScript = 1;</script>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000650', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
+// row0 [A, H: Custom HTML with an iframe]; row1 [G].
+const structIframeLayout = () => ( {
+	widgets: [
+		structWidget( WRAPPED, 'Str A', 0, 0, 0 ),
+		{
+			title: '',
+			content: '<p>Str H</p><iframe src="about:blank" title="e2e"></iframe>',
+			panels_info: { class: 'WP_Widget_Custom_HTML', grid: 0, cell: 0, id: 1, widget_id: 'a0e2e000-0000-4000-8000-000000000660', style: {} },
+		},
+		structWidget( WRAPPED, 'Str G', 1, 0, 2 ),
+	],
+	grids: [ { cells: 1, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [ { grid: 0, index: 0, weight: 1, style: {} }, { grid: 1, index: 0, weight: 1, style: {} } ],
+} );
+
+// row0 [A | empty]; row1 [G].
+const structEmptyCellLayout = () => ( {
+	widgets: [ structWidget( WRAPPED, 'Str A', 0, 0, 0 ), structWidget( WRAPPED, 'Str G', 1, 0, 1 ) ],
+	grids: [ { cells: 2, style: {} }, { cells: 1, style: {} } ],
+	grid_cells: [
+		{ grid: 0, index: 0, weight: 0.5, style: {} },
+		{ grid: 0, index: 1, weight: 0.5, style: {} },
+		{ grid: 1, index: 0, weight: 1, style: {} },
+	],
+} );
+
+test.describe( 'Live Editor structure update', () => {
+	let admin;
+	let ctx;
+	let session = null;
+	const posts = {};
+
+	test.beforeAll( async ( { browser } ) => {
+		admin = await adminLogin();
+		ctx = await newLoggedInPage( browser, process.env.WP_USERNAME, process.env.WP_PASSWORD );
+	} );
+
+	test.afterAll( async () => {
+		for ( const id of Object.values( posts ) ) {
+			await deletePost( admin, 'post', id );
+		}
+
+		if ( ctx ) {
+			await ctx.context.close();
+		}
+		await admin.context.dispose();
+	} );
+
+	const post = async ( name, layout ) => {
+		if ( ! posts[ name ] ) {
+			posts[ name ] = await createPost( admin, 'post', { title: `Live editor structure ${ name }`, status: 'publish', content: '' } );
+			await seedLayout( admin, posts[ name ], layout );
+		}
+
+		return posts[ name ];
+	};
+
+	// A new page with the cookies set and the Live Editor open on the post. The previous page is closed.
+	const open = async ( name, layout, cookies = { panels_e2e_swap: '1' }, readyText = 'Str G' ) => {
+		if ( session ) {
+			await session.page.close();
+			session = null;
+		}
+		for ( const cookie of STRUCT_COOKIES ) {
+			await ctx.context.clearCookies( { name: cookie } );
+		}
+		for ( const [ cookie, value ] of Object.entries( cookies ) ) {
+			await setCookie( ctx.context, cookie, value );
+		}
+
+		const id = await post( name, layout );
+		const page = await ctx.context.newPage();
+		page.on( 'dialog', ( dialog ) => dialog.dismiss().catch( () => {} ) );
+		const errors = trackPageErrors( page );
+		const counts = trackSwapRequests( page );
+		let url = null;
+		page.on( 'request', ( request ) => {
+			if ( ! url && request.method() === 'POST' && request.url().includes( 'siteorigin_panels_live_editor=true' ) ) {
+				url = request.url();
+			}
+		} );
+		const root = await openClassicBuilder( page, { postId: id } );
+		await root.locator( '.so-builder-toolbar .so-live-editor' ).click();
+		await expect( liveEditorTools( page ) ).toBeVisible();
+		await waitForPreview( page, readyText );
+		await markPreview( page );
+		session = { page, errors, counts, id, getUrl: () => url };
+
+		return session;
+	};
+
+	// Wait until the field holds the change, let any reload show, and report what happened.
+	const settle = async ( s, action, check, message ) => {
+		const before = { ...s.counts };
+		await action();
+		await waitForField( s.page, check, message );
+		await s.page.waitForTimeout( 2500 );
+		await expect( s.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+
+		return { nav: s.counts.nav - before.nav, fetch: s.counts.fetch - before.fetch, marked: await previewMarked( s.page ) };
+	};
+
+	const expectInPlaceStruct = ( result ) => {
+		expect( result.nav, 'no preview navigation' ).toBe( 0 );
+		expect( result.marked, 'the same preview window' ).toBe( true );
+		expect( result.fetch, 'the structure compare fetched the preview' ).toBeGreaterThan( 0 );
+	};
+
+	const expectReloadStruct = ( result ) => {
+		expect( result.nav, 'a preview navigation' ).toBeGreaterThan( 0 );
+		expect( result.marked, 'a new preview window' ).toBe( false );
+	};
+
+	const widgetCount = ( n ) => ( l ) => l.widgets.length === n;
+	const rowCount = ( n ) => ( l ) => l.grids.length === n;
+
+	// A widget action link (they show on hover; a click event reaches the handler without it).
+	const widgetAction = async ( s, text, action, index = 0 ) => {
+		const widget = sidebarWidget( s.page, text ).nth( index );
+		await widget.hover();
+		await widget.locator( `.actions .widget-${ action }` ).dispatchEvent( 'click' );
+	};
+
+	const rowAction = async ( s, ri, action ) => {
+		const link = sidebarRows( s.page ).nth( ri ).locator( `.so-row-toolbar .so-row-${ action }` ).first();
+		await link.dispatchEvent( 'click' );
+		if ( action === 'delete' ) {
+			// The first click asks for a confirmation, the second confirms.
+			await link.dispatchEvent( 'click' );
+		}
+	};
+
+	const panelTexts = async ( s ) => ( await previewFrame( s.page ) ).locator( '.so-panel' ).allInnerTexts();
+
+	test( 'A1 a duplicated widget in the middle of a cell is added in place and equals a fresh render', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'A1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'A2 a widget added from the dialog to a cell that has widgets is added in place, then its text edit swaps in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const cell = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 );
+		const result = await settle( s, () => addWidget( liveBuilder( s.page ), cell, WRAPPED, s.page ), widgetCount( 10 ), 'widget added' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'A2 add' );
+		const edit = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str D' ).first().locator( 'xpath=following::*[contains(@class,"so-widget")][1]' ), 'Str New', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str New' ), 'new text' );
+		expect( edit.nav, 'the text edit did not navigate' ).toBe( 0 );
+		expect( edit.marked, 'the same preview window' ).toBe( true );
+		await expectFresh( s, 'A2' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'A3 a duplicated first widget of a cell is added in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'duplicate' ), widgetCount( 10 ), 'A duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'A3' );
+	} );
+
+	test( 'A4 a duplicated last widget of a cell is added in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str F', 'duplicate' ), widgetCount( 10 ), 'F duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'A4' );
+	} );
+
+	test( 'D1 deleting the first widget of a cell that stays non-empty is applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
+		expectInPlaceStruct( result );
+		expect( ( await panelTexts( s ) ).join( '|' ) ).not.toContain( 'Str A' );
+		await expectFresh( s, 'D1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'D2 deleting a middle widget and the last widget of a cell is applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const middle = await settle( s, () => widgetAction( s, 'Str B', 'delete' ), widgetCount( 8 ), 'B deleted' );
+		expectInPlaceStruct( middle );
+		await expectFresh( s, 'D2 middle' );
+		const last = await settle( s, () => widgetAction( s, 'Str C', 'delete' ), widgetCount( 7 ), 'C deleted' );
+		expectInPlaceStruct( last );
+		await expectFresh( s, 'D2 last' );
+	} );
+
+	test( 'R1 a duplicated middle row (styled row and padded cell) is added in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'R1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'R2 deleting a middle row is applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => rowAction( s, 1, 'delete' ), rowCount( 3 ), 'row deleted' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'R2' );
+	} );
+
+	test( 'R3 a duplicated first row is added in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => rowAction( s, 0, 'duplicate' ), rowCount( 5 ), 'first row duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'R3' );
+	} );
+
+	test( 'M1 a second Measure widget is added in place and its script sizes it on resize', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str M', 'duplicate' ), widgetCount( 10 ), 'M duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'M1' );
+	} );
+
+	test( 'M2 deleting one of two Measure widgets keeps the other working', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str M', 'delete' ), widgetCount( 8 ), 'M deleted' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'M2' );
+	} );
+
+	test( 'B1 a new widget and the widgets that moved position are bound like loaded ones', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectInPlaceStruct( result );
+		await expectFresh( s, 'B1' );
+		const frame = await previewFrame( s.page );
+		const sidebar = liveBuilder( s.page ).locator( '.so-widget' );
+		// The new widget (index 2): sidebar hover highlights it, preview hover marks the sidebar widget.
+		await sidebar.nth( 2 ).hover();
+		await expect( frame.locator( '.so-panel' ).nth( 2 ) ).toHaveClass( /so-panels-highlighted/ );
+		await frame.locator( '.so-panel' ).nth( 2 ).hover();
+		await expect( sidebar.nth( 2 ).locator( 'xpath=..' ) ).toHaveClass( /so-hovered/ );
+		// A widget after the change point (it moved one position): click opens its own editor.
+		await frame.locator( '.so-panel' ).filter( { hasText: 'Str D' } ).click();
+		await expect( openDialog( s.page ).locator( 'input.panels-e2e-text-field' ) ).toHaveValue( 'Str D', { timeout: 15000 } );
+		await closeDialog( s.page );
+		await expectOpenDialogs( s.page, 0 );
+		// The new widget opens its own editor.
+		await frame.locator( '.so-panel' ).nth( 2 ).click();
+		await expect( openDialog( s.page ).locator( 'input.panels-e2e-text-field' ) ).toHaveValue( 'Str B', { timeout: 15000 } );
+		await closeDialog( s.page );
+		await expectOpenDialogs( s.page, 0 );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'S1 after an add, a style edit, a text swap and a move are applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const add = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectInPlaceStruct( add );
+		await expectFresh( s, 'S1 add' );
+		const style = await settle( s, () => setStyle( s, 'row', 1, 'padding', PAD2 ), ( l ) => ( l.grids[ 1 ].style || {} ).padding === PAD2, 'row padding' );
+		expect( style.nav, 'the style edit did not navigate' ).toBe( 0 );
+		expect( style.marked ).toBe( true );
+		await expectFresh( s, 'S1 style' );
+		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str G' ), 'Str G2', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str G2' ), 'G text' );
+		expect( text.nav, 'the text swap did not navigate' ).toBe( 0 );
+		expect( text.marked ).toBe( true );
+		await expectFresh( s, 'S1 text' );
+		const move = await settle( s, () => dragWidget( s.page, 'Str C', 'Str A', 'above' ), ( l ) => l.widgets[ 0 ].text === 'Str C', 'C moved first' );
+		expect( move.nav, 'the move did not navigate' ).toBe( 0 );
+		expect( move.marked ).toBe( true );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'S2 after an add, a cell resize is applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const add = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectInPlaceStruct( add );
+		await expectFresh( s, 'S2 add' );
+		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+		const resize = await settle( s, async () => {
+			const box = await handle.boundingBox();
+			const x = box.x + box.width / 2;
+			const y = box.y + box.height / 2;
+			await s.page.mouse.move( x, y );
+			await s.page.mouse.down();
+			await s.page.mouse.move( x - 10, y, { steps: 3 } );
+			await s.page.mouse.move( x - 50, y, { steps: 10 } );
+			await s.page.mouse.up();
+		}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.6 ) > 0.05, 'weights changed' );
+		expect( resize.nav, 'the resize did not navigate' ).toBe( 0 );
+		expect( resize.marked ).toBe( true );
+		await expectFresh( s, 'S2' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'S3 a resize, then an add, then a text swap are all applied in place and equal a fresh render', async () => {
+		const s = await open( 'main', structLayout() );
+		const handle = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 ).locator( '.resize-handle' );
+		const resize = await settle( s, async () => {
+			const box = await handle.boundingBox();
+			const x = box.x + box.width / 2;
+			const y = box.y + box.height / 2;
+			await s.page.mouse.move( x, y );
+			await s.page.mouse.down();
+			await s.page.mouse.move( x - 10, y, { steps: 3 } );
+			await s.page.mouse.move( x - 50, y, { steps: 10 } );
+			await s.page.mouse.up();
+		}, ( l ) => Math.abs( Number( l.grid_cells[ 0 ].weight ) - 0.6 ) > 0.05, 'weights changed' );
+		expect( resize.nav ).toBe( 0 );
+		await expectFresh( s, 'S3 resize' );
+		const add = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 10 ), 'E duplicated' );
+		expectInPlaceStruct( add );
+		await expectFresh( s, 'S3 add' );
+		const text = await settle( s, () => setWidgetText( liveBuilder( s.page ), sidebarWidget( s.page, 'Str E' ).nth( 1 ), 'Str E3', s.page ), ( l ) => l.widgets.some( ( w ) => w.text === 'Str E3' ), 'E text' );
+		expect( text.nav, 'the text swap did not navigate' ).toBe( 0 );
+		expect( text.marked ).toBe( true );
+		await expectFresh( s, 'S3' );
+	} );
+
+	test( 'S4 delete then add, two adds in a row and two deletes in a row each stay in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const first = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
+		expectInPlaceStruct( first );
+		await expectFresh( s, 'S4 a' );
+		const second = await settle( s, () => widgetAction( s, 'Str E', 'duplicate' ), widgetCount( 9 ), 'E duplicated' );
+		expectInPlaceStruct( second );
+		await expectFresh( s, 'S4 b' );
+		const third = await settle( s, () => widgetAction( s, 'Str F', 'duplicate' ), widgetCount( 10 ), 'F duplicated' );
+		expectInPlaceStruct( third );
+		await expectFresh( s, 'S4 c' );
+		const fourth = await settle( s, () => widgetAction( s, 'Str C', 'delete' ), widgetCount( 9 ), 'C deleted' );
+		expectInPlaceStruct( fourth );
+		await expectFresh( s, 'S4 d' );
+		const fifth = await settle( s, () => widgetAction( s, 'Str E', 'delete' ), widgetCount( 8 ), 'E deleted' );
+		expectInPlaceStruct( fifth );
+		await expectFresh( s, 'S4 e' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'S5 a row added in place and then a widget added to it are each applied in place', async () => {
+		const s = await open( 'main', structLayout() );
+		const row = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
+		expectInPlaceStruct( row );
+		await expectFresh( s, 'S5 row' );
+		const widget = await settle( s, () => widgetAction( s, 'Str E', 'duplicate', 1 ), widgetCount( 12 ), 'E duplicated in the new row' );
+		expectInPlaceStruct( widget );
+		await expectFresh( s, 'S5' );
+	} );
+
+	test( 'S6 a Custom HTML widget with a style element is added in place, then a style edit is applied in place', async () => {
+		const s = await open( 'htmlstyle', structHtmlStyleLayout() );
+		const add = await settle( s, () => widgetAction( s, 'Str H', 'duplicate' ), widgetCount( 4 ), 'H duplicated' );
+		expectInPlaceStruct( add );
+		await expectFresh( s, 'S6 add' );
+		// The new widget's links are disabled, as the loaded ones are.
+		const frame = await previewFrame( s.page );
+		expect( await frame.locator( '.so-panel a' ).evaluateAll( ( links ) => links.map( ( a ) => getComputedStyle( a ).pointerEvents ) ) ).toEqual( [ 'none', 'none' ] );
+		const style = await settle( s, () => setStyle( s, 'row', 0, 'padding', PAD2 ), ( l ) => ( l.grids[ 0 ].style || {} ).padding === PAD2, 'row padding' );
+		expect( style.nav, 'the style edit did not navigate' ).toBe( 0 );
+		expect( style.marked ).toBe( true );
+		await expectFresh( s, 'S6 style' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	test( 'X1 a delayed add followed by a style edit ends equal to a fresh render', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_preview_block: 'slow' } );
+		await widgetAction( s, 'Str B', 'duplicate' );
+		await waitForField( s.page, widgetCount( 10 ), 'B duplicated' );
+		await setStyle( s, 'row', 1, 'padding', PAD2 );
+		await waitForField( s.page, ( l ) => ( l.grids[ 1 ].style || {} ).padding === PAD2, 'row padding' );
+		await s.page.waitForTimeout( 9000 );
+		await expect( s.page.locator( '.so-panels-live-editor .so-preview-overlay' ) ).toBeHidden( { timeout: 30000 } );
+		await expectFresh( s, 'X1' );
+		expectNoPageErrors( s.errors );
+	} );
+
+	// Cases that reload.
+
+	test( 'N1 adding a widget before a non-listed widget reloads', async () => {
+		const s = await open( 'random', structRandomLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'duplicate' ), widgetCount( 4 ), 'A duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N2 deleting a widget before a non-listed widget reloads', async () => {
+		const s = await open( 'random', structRandomLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 2 ), 'A deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N3 adding a non-listed widget reloads', async () => {
+		const s = await open( 'random', structRandomLayout() );
+		const result = await settle( s, () => widgetAction( s, '', 'duplicate', 1 ), widgetCount( 4 ), 'R duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N4 adding a widget with a shortcode value reloads', async () => {
+		const s = await open( 'shortcode', structShortcodeLayout() );
+		const result = await settle( s, () => widgetAction( s, 'video src', 'duplicate' ), widgetCount( 5 ), 'shortcode widget duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N5 adding a widget to an empty cell reloads', async () => {
+		const s = await open( 'emptycell', structEmptyCellLayout() );
+		const cell = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 1 );
+		const result = await settle( s, () => addWidget( liveBuilder( s.page ), cell, WRAPPED, s.page ), widgetCount( 3 ), 'widget added to the empty cell' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N6 deleting the only widget of a cell reloads', async () => {
+		const s = await open( 'emptycell', structEmptyCellLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 1 ), 'A deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N7 adding a row at the end reloads', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => addRow( liveBuilder( s.page ), 1, s.page ), rowCount( 5 ), 'row added' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N8 deleting the last row reloads', async () => {
+		const s = await open( 'main', structLayout() );
+		const result = await settle( s, () => rowAction( s, 3, 'delete' ), rowCount( 3 ), 'last row deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N9 with inline styles on, an add reloads', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_inline_styles: '1' } );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N10 an edit after a move reloads (the ids are stale)', async () => {
+		const s = await open( 'main', structLayout() );
+		const move = await settle( s, () => dragWidget( s.page, 'Str C', 'Str A', 'above' ), ( l ) => l.widgets[ 0 ].text === 'Str C', 'C moved first' );
+		expect( move.nav, 'the move did not navigate' ).toBe( 0 );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N11 a retained widget whose inline style holds its position reloads', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_position_style: '1' } );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N14 deleting a widget that holds a script reloads', async () => {
+		const s = await open( 'script', structScriptLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str H', 'delete' ), widgetCount( 2 ), 'H deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N15 the first widget whose script is added to the page reloads', async () => {
+		const s = await open( 'emptycell', structEmptyCellLayout() );
+		const cell = sidebarRows( s.page ).nth( 0 ).locator( '.so-cells .cell' ).nth( 0 );
+		const result = await settle( s, () => addWidget( liveBuilder( s.page ), cell, MEASURE, s.page ), widgetCount( 3 ), 'Measure added' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N16 with a Content-Security-Policy on the preview, an add reloads', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_csp: '1' } );
+		const result = await settle( s, () => widgetAction( s, 'Str B', 'duplicate' ), widgetCount( 10 ), 'B duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N17 adding a widget that holds an iframe reloads', async () => {
+		const s = await open( 'iframe', structIframeLayout() );
+		const result = await settle( s, () => widgetAction( s, 'Str H', 'duplicate' ), widgetCount( 4 ), 'H duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N18 a row that holds markup from a row filter reloads when it is added', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_row_embed: 'button' } );
+		const result = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N13 a retained widget whose same inline style moves to another element reloads', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_position_style: 'move' } );
+		const result = await settle( s, () => widgetAction( s, 'Str A', 'delete' ), widgetCount( 8 ), 'A deleted' );
+		expectReloadStruct( result );
+	} );
+
+	test( 'N12 a row that holds an iframe outside any widget reloads when it is added', async () => {
+		const s = await open( 'main', structLayout(), { panels_e2e_swap: '1', panels_e2e_row_embed: '1' } );
+		const result = await settle( s, () => rowAction( s, 1, 'duplicate' ), rowCount( 5 ), 'row duplicated' );
+		expectReloadStruct( result );
 	} );
 } );

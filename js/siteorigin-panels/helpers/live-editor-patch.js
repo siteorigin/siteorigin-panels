@@ -9,6 +9,9 @@
  * when a full reload is needed. It returns a patch only when the change is a pure reorder of rows, a pure
  * reorder or move of widgets between non-empty cells, or a change of cell weights, and nothing else.
  *
+ * structureChange() describes a change that only adds or removes widgets and rows, with the position the server
+ * numbers every row, cell and widget with before and after.
+ *
  * Depends only on `_`, so the node unit tests can load it.
  */
 
@@ -65,7 +68,7 @@ var index = function ( snap ) {
 		return null;
 	}
 
-	var out = { rowOrder: [], rows: {}, cells: {}, widgets: {}, lastRow: null };
+	var out = { rowOrder: [], rows: {}, cells: {}, widgets: {}, lastRow: null, generated: _.isArray( snap.generated ) ? snap.generated : [] };
 	var cellIndex = 0;
 	var widgetIndex = 0;
 	var valid = true;
@@ -122,6 +125,49 @@ var round4 = function ( value ) {
 	return Math.round( value * 10000 ) / 10000;
 };
 
+/**
+ * A widget's data without some `panels_info` keys.
+ */
+var omitInfo = function ( widgetData, keys ) {
+	var out = copy( widgetData );
+	if ( out && _.isObject( out.panels_info ) ) {
+		out.panels_info = _.omit( out.panels_info, keys || [] );
+	}
+
+	return out;
+};
+
+/**
+ * The `widget_id` key when either snapshot made the widget's id up: the builder gives a widget with no stored id a
+ * new one on every read, so two reads differ without the widget having changed. A stored id that differs is a change.
+ */
+var idKeys = function ( a, b, cid ) {
+	return _.contains( a.generated, cid ) || _.contains( b.generated, cid ) ? [ 'widget_id' ] : [];
+};
+
+/**
+ * Where the server numbers each row, cell and widget of an indexed snapshot: `pg-{row}`, `pgc-{row}-{cell}`,
+ * `panel-{row}-{cell}-{widget}` and the flat `data-index` of a widget.
+ */
+var positionsOf = function ( indexed ) {
+	var out = { rows: {}, cells: {}, widgets: {} };
+	var flat = 0;
+
+	_.each( indexed.rowOrder, function ( rowCid, ri ) {
+		out.rows[ rowCid ] = ri;
+
+		_.each( indexed.rows[ rowCid ].cells, function ( cellCid, ci ) {
+			out.cells[ cellCid ] = { row: ri, cell: ci };
+
+			_.each( indexed.cells[ cellCid ].widgets, function ( widgetCid, wi ) {
+				out.widgets[ widgetCid ] = { row: ri, cell: ci, widget: wi, index: flat++ };
+			} );
+		} );
+	} );
+
+	return out;
+};
+
 module.exports = {
 
 	/**
@@ -168,10 +214,11 @@ module.exports = {
 	 *
 	 * @param {panels.model.builder} builderModel
 	 * @param {Object} [data] The data that was posted, when the caller already has it. Defaults to getPanelsData().
-	 * @return {{ data: Object, rows: Array }}
+	 * @return {{ data: Object, rows: Array, generated: string[] }} `generated`: the widgets that have no stored `widget_id`.
 	 */
 	snapshot: function ( builderModel, data ) {
-		var rows = [];
+		var rows = [],
+			generated = [];
 
 		builderModel.get( 'rows' ).each( function ( row ) {
 			rows.push( {
@@ -181,6 +228,10 @@ module.exports = {
 						cid: cell.cid,
 						weight: cell.get( 'weight' ),
 						widgets: cell.get( 'widgets' ).map( function ( widget ) {
+							if ( _.isEmpty( widget.get( 'widget_id' ) ) ) {
+								generated.push( widget.cid );
+							}
+
 							return widget.cid;
 						} ),
 					};
@@ -191,6 +242,7 @@ module.exports = {
 		return {
 			data: copy( data === undefined ? builderModel.getPanelsData() : data ),
 			rows: rows,
+			generated: generated,
 		};
 	},
 
@@ -230,7 +282,7 @@ module.exports = {
 		_.each( b.rowOrder, function ( rowCid ) {
 			_.each( b.rows[ rowCid ].cells, function ( cellCid ) {
 				_.each( b.cells[ cellCid ].widgets, function ( widgetCid ) {
-					if ( ! same( a.widgets[ widgetCid ], b.widgets[ widgetCid ] ) ) {
+					if ( ! same( omitInfo( a.widgets[ widgetCid ], idKeys( a, b, widgetCid ) ), omitInfo( b.widgets[ widgetCid ], idKeys( a, b, widgetCid ) ) ) ) {
 						changed.push( widgetCid );
 					}
 				} );
@@ -307,6 +359,123 @@ module.exports = {
 		if ( ! structureSame || ( ! out.rows.length && ! out.cells.length && ! out.widgets.length ) ) {
 			return null;
 		}
+
+		return out;
+	},
+
+	/**
+	 * The widgets and rows added and removed between two snapshots, when that is all that differs: the retained
+	 * rows keep their order and the last row is the same row, retained rows and cells have the same settings, each
+	 * retained widget stays in its cell in the same order with the same values (its position and `widget_id`
+	 * apart), no retained cell becomes empty or stops being empty, and each retained cell that gains a widget keeps a
+	 * retained widget to insert next to. Null for anything else, when nothing was added or removed, or when a
+	 * snapshot cannot be trusted.
+	 *
+	 * @param {Object} prev Snapshot the preview shows.
+	 * @param {Object} next Snapshot of the builder now.
+	 * @return {null|Object} Cids of `addedRows`, `removedRows`, `addedWidgets`, `removedWidgets`; `affected`: the
+	 *         removed widgets and the retained widgets whose position id or data-index changes; `before` and `after`: positions().
+	 */
+	structureChange: function ( prev, next ) {
+		var a = index( prev );
+		var b = index( next );
+
+		if ( ! a || ! b || ! a.lastRow || a.lastRow !== b.lastRow ) {
+			return null;
+		}
+
+		var keptRows = _.filter( a.rowOrder, function ( cid ) {
+			return !! b.rows[ cid ];
+		} );
+		if ( ! same( keptRows, _.filter( b.rowOrder, function ( cid ) {
+			return !! a.rows[ cid ];
+		} ) ) ) {
+			return null;
+		}
+
+		var ok = _.every( keptRows, function ( rowCid ) {
+			if ( ! same( a.rows[ rowCid ].grid, b.rows[ rowCid ].grid ) || ! same( a.rows[ rowCid ].cells, b.rows[ rowCid ].cells ) ) {
+				return false;
+			}
+
+			return _.every( b.rows[ rowCid ].cells, function ( cellCid ) {
+				var before = a.cells[ cellCid ];
+				var after = b.cells[ cellCid ];
+				var kept = function ( list, other ) {
+					return _.filter( list, function ( cid ) {
+						return !! other[ cid ];
+					} );
+				};
+				var keptBefore = kept( before.widgets, b.widgets );
+				var keptAfter = kept( after.widgets, a.widgets );
+
+				// Cell settings, apart from the position, are unchanged; no cell becomes empty or stops being empty.
+				if (
+					! same( without( before.data, [ 'grid', 'index' ] ), without( after.data, [ 'grid', 'index' ] ) ) ||
+					( before.widgets.length > 0 ) !== ( after.widgets.length > 0 ) ||
+					! same( keptBefore, keptAfter )
+				) {
+					return false;
+				}
+
+				// A cell that gains a widget keeps a retained one to insert next to.
+				return after.widgets.length === keptAfter.length || keptAfter.length > 0;
+			} );
+		} );
+		if ( ! ok ) {
+			return null;
+		}
+
+		// Cells never change row, and retained widgets keep their cell and values.
+		var cellsOk = _.every( _.keys( b.cells ), function ( cellCid ) {
+			return ! a.cells[ cellCid ] || a.cells[ cellCid ].row === b.cells[ cellCid ].row;
+		} );
+		var widgetsOk = _.every( _.keys( b.widgets ), function ( widgetCid ) {
+			var before = a.widgets[ widgetCid ];
+			var cellOf = function ( indexed ) {
+				return _.find( _.keys( indexed.cells ), function ( cellCid ) {
+					return _.contains( indexed.cells[ cellCid ].widgets, widgetCid );
+				} );
+			};
+
+			return ! before || ( cellOf( a ) === cellOf( b ) && same( omitInfo( before, [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, widgetCid ) ) ), omitInfo( b.widgets[ widgetCid ], [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, widgetCid ) ) ) ) );
+		} );
+		if ( ! cellsOk || ! widgetsOk ) {
+			return null;
+		}
+
+		var out = {
+			addedRows: _.difference( b.rowOrder, a.rowOrder ),
+			removedRows: _.difference( a.rowOrder, b.rowOrder ),
+			addedWidgets: _.difference( _.keys( b.widgets ), _.keys( a.widgets ) ),
+			removedWidgets: _.difference( _.keys( a.widgets ), _.keys( b.widgets ) ),
+			before: positionsOf( a ),
+			after: positionsOf( b ),
+		};
+		if ( ! out.addedRows.length && ! out.removedRows.length && ! out.addedWidgets.length && ! out.removedWidgets.length ) {
+			return null;
+		}
+
+		// Layout order, as the data lists them.
+		var order = function ( cids, indexed ) {
+			var all = _.flatten( _.map( indexed.rowOrder, function ( rowCid ) {
+				return _.flatten( _.map( indexed.rows[ rowCid ].cells, function ( cellCid ) {
+					return indexed.cells[ cellCid ].widgets;
+				} ) );
+			} ) );
+
+			return _.filter( all, function ( cid ) {
+				return _.contains( cids, cid );
+			} );
+		};
+		out.addedWidgets = order( out.addedWidgets, b );
+		out.removedWidgets = order( out.removedWidgets, a );
+		out.affected = out.removedWidgets.slice();
+		_.each( order( _.keys( b.widgets ), b ), function ( cid ) {
+			if ( a.widgets[ cid ] && ! same( out.before.widgets[ cid ], out.after.widgets[ cid ] ) ) {
+				out.affected.push( cid );
+			}
+		} );
 
 		return out;
 	},
@@ -391,8 +560,9 @@ module.exports = {
 		var widgetsSame = _.every( _.keys( b.widgets ), function ( cid ) {
 			var before = copy( a.widgets[ cid ] );
 			var after = copy( b.widgets[ cid ] );
-			before.panels_info = without( before.panels_info, [ 'grid', 'cell', 'id' ] );
-			after.panels_info = without( after.panels_info, [ 'grid', 'cell', 'id' ] );
+			var skip = [ 'grid', 'cell', 'id' ].concat( idKeys( a, b, cid ) );
+			before.panels_info = without( before.panels_info, skip );
+			after.panels_info = without( after.panels_info, skip );
 
 			return same( before, after );
 		} );

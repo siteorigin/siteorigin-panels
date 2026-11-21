@@ -173,6 +173,9 @@ const WIDGET_TITLES = {
 	'Panels_E2E\\Instance_Widget': 'Panels E2E Instance',
 	SiteOrigin_Panels_Widgets_Layout: 'Layout Builder',
 	SiteOrigin_Widget_LayoutSlider_Widget: 'SiteOrigin Layout Slider',
+	Panels_E2E_Wrapped_Text_Widget: 'Panels E2E Wrapped Text',
+	Panels_E2E_Measure_Widget: 'Panels E2E Measure',
+	Panels_E2E_Random_Widget: 'Panels E2E Random',
 };
 
 /**

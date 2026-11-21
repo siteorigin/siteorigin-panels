@@ -32,6 +32,15 @@
  *   - the cookie panels_e2e_panels_style=1 appends a style.panels-style block to the rendered layout, whose
  *     text holds a hash of the layout data, so it changes with every edit;
  *   - Panels_E2E_Measure_Widget sets an inline width from its parent's width on DOMContentLoaded and on resize.
+ * - Add and delete (#1425) fixtures, each for that browser only:
+ *   - the cookie panels_e2e_position_style=1 prints an empty element with an inline style that holds the
+ *     widget's position number inside every widget, so a renumbered widget renders differently (the value
+ *     'move' keeps the style the same and moves it between before and after the content by position);
+ *   - the cookie panels_e2e_row_embed=1 prints an iframe at the start of every row, outside any widget (the value
+ *     'button' prints a button, markup a script on the page could set up);
+ *   - panels_e2e_swap also allow-lists Panels_E2E_Measure_Widget.
+ * - The post date block is left out of preview responses: the theme prints it as a relative time ("20 seconds
+ *   ago") that differs between two renders a second apart, so the page compare would see a different page.
  * - No login autofocus: its 200 ms timer focuses and selects the username field, and can catch a test's
  *   password typing (the username then holds the password and the login fails).
  *
@@ -78,6 +87,7 @@ if ( ! empty( $_COOKIE['panels_e2e_swap'] ) ) {
 		function ( $classes ) {
 			$classes[] = 'Panels_E2E_Wrapped_Text_Widget';
 			$classes[] = 'WP_Widget_Text';
+			$classes[] = 'Panels_E2E_Measure_Widget';
 			$classes[] = 123;
 			$classes[] = array( 'Not_A_String' );
 
@@ -109,6 +119,10 @@ if ( ! empty( $_COOKIE['panels_e2e_preview_timeout_ms'] ) && absint( $_COOKIE['p
 }
 
 add_filter( 'enable_login_autofocus', '__return_false' );
+
+if ( ! empty( $_GET['siteorigin_panels_live_editor'] ) ) {
+	add_filter( 'render_block_core/post-date', '__return_empty_string' );
+}
 
 if (
 	! empty( $_COOKIE['panels_e2e_inline_styles'] ) ||
@@ -164,6 +178,43 @@ if ( ! empty( $_COOKIE['panels_e2e_panels_style'] ) && ! empty( $_GET['siteorigi
 		},
 		10,
 		2
+	);
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_position_style'] ) ) {
+	$panels_e2e_move = 'move' === $_COOKIE['panels_e2e_position_style'];
+
+	add_filter(
+		'siteorigin_panels_inside_widget_before',
+		function ( $html, $widget_info ) use ( $panels_e2e_move ) {
+			$position = isset( $widget_info['widget_index'] ) ? (int) $widget_info['widget_index'] : 0;
+
+			if ( $panels_e2e_move ) {
+				// Two empty elements in every widget; the same style sits on the first for an even position and on the second for an odd one.
+				return $html . sprintf(
+					'<span class="panels-e2e-first"%1$s></span><span class="panels-e2e-second"%2$s></span>',
+					0 === $position % 2 ? ' style="order:1"' : '',
+					0 === $position % 2 ? '' : ' style="order:1"'
+				);
+			}
+
+			return $html . sprintf( '<span class="panels-e2e-position" style="order:%d"></span>', $position );
+		},
+		10,
+		2
+	);
+}
+
+if ( ! empty( $_COOKIE['panels_e2e_row_embed'] ) ) {
+	add_filter(
+		'siteorigin_panels_inside_row_before',
+		function ( $html ) {
+			if ( 'button' === $_COOKIE['panels_e2e_row_embed'] ) {
+				return $html . '<button type="button" class="panels-e2e-row-button">e2e</button>';
+			}
+
+			return $html . '<iframe class="panels-e2e-row-embed" src="about:blank" title="e2e"></iframe>';
+		}
 	);
 }
 

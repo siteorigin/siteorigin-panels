@@ -363,3 +363,201 @@ test( 'plan reports whether a patch reordered anything', () => {
 	moveRow( s.rows, s.row( 1 ), 0 );
 	assert.equal( patch.plan( s.prev, patch.snapshot( s.model ) ).reordered, true, 'a row move' );
 } );
+
+// structureChange: adding or removing widgets and rows while everything retained stays the same.
+
+const duplicateWidget = ( w ) => {
+	const copy = w.clone( w.cell );
+	w.cell.get( 'widgets' ).add( copy, { at: w.collection.indexOf( w ) + 1 } );
+
+	return copy;
+};
+
+const duplicateRow = ( s, r ) => {
+	const copy = r.clone( s.model );
+	s.rows.add( copy, { at: s.rows.indexOf( r ) + 1 } );
+
+	return copy;
+};
+
+test( 'structureChange: a duplicated widget is added and the widgets after it are renumbered', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const change = patch.structureChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
+	assert.deepEqual( change.removedWidgets, [] );
+	assert.deepEqual( change.addedRows, [] );
+	assert.deepEqual( change.removedRows, [] );
+	assert.deepEqual( change.affected.sort(), [ s.byText( 'C' ).cid, s.byText( 'D' ).cid, s.byText( 'E' ).cid ].sort(), 'C, D and E change position id or data-index' );
+	assert.deepEqual( change.after.widgets[ copy.cid ], { row: 0, cell: 1, widget: 1, index: 2 } );
+	assert.deepEqual( change.before.widgets[ s.byText( 'C' ).cid ], { row: 0, cell: 1, widget: 1, index: 2 } );
+} );
+
+test( 'structureChange: a removed widget from a cell that stays non-empty', () => {
+	const s = setup();
+	const b = s.byText( 'B' );
+	s.cell( 0, 1 ).get( 'widgets' ).remove( b );
+	const change = patch.structureChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.removedWidgets, [ b.cid ] );
+	assert.deepEqual( change.addedWidgets, [] );
+	assert.deepEqual( change.affected.sort(), [ b.cid, s.byText( 'C' ).cid, s.byText( 'D' ).cid, s.byText( 'E' ).cid ].sort() );
+} );
+
+test( 'structureChange: a widget added after the last widget of a cell renumbers only the widgets after it', () => {
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'C' ) );
+	const change = patch.structureChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
+	assert.deepEqual( change.affected.sort(), [ s.byText( 'D' ).cid, s.byText( 'E' ).cid ].sort() );
+} );
+
+test( 'structureChange: a duplicated middle row is added with its widgets', () => {
+	const s = setup();
+	const copy = duplicateRow( s, s.row( 1 ) );
+	const change = patch.structureChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.addedRows, [ copy.cid ] );
+	assert.equal( change.addedWidgets.length, 1 );
+	assert.deepEqual( change.affected, [ s.byText( 'E' ).cid ] );
+	assert.equal( change.after.rows[ copy.cid ], 2 );
+} );
+
+test( 'structureChange: a removed middle row is removed with its widgets', () => {
+	const s = setup();
+	const d = s.byText( 'D' );
+	const r1 = s.row( 1 );
+	s.rows.remove( r1 );
+	const change = patch.structureChange( s.prev, patch.snapshot( s.model ) );
+
+	assert.ok( change );
+	assert.deepEqual( change.removedRows, [ r1.cid ] );
+	assert.deepEqual( change.removedWidgets, [ d.cid ] );
+	assert.deepEqual( change.affected.sort(), [ d.cid, s.byText( 'E' ).cid ].sort() );
+} );
+
+test( 'structureChange is null when a cell becomes empty', () => {
+	const s = setup();
+	s.cell( 0, 0 ).get( 'widgets' ).remove( s.byText( 'A' ) );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'structureChange is null when a widget is added to an empty cell', () => {
+	const s = setup();
+	s.cell( 0, 0 ).get( 'widgets' ).remove( s.byText( 'A' ) );
+	const mid = patch.snapshot( s.model );
+	const extra = new panels.model.widget( { class: 'Panels_E2E_Text_Widget', values: { text: 'F' } } );
+	s.cell( 0, 0 ).get( 'widgets' ).add( extra );
+	assert.equal( patch.structureChange( mid, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'structureChange is null when a cell that gains a widget has no retained widget to anchor to', () => {
+	const s = setup();
+	const extra = new panels.model.widget( { class: 'Panels_E2E_Text_Widget', values: { text: 'F' } } );
+	s.cell( 1, 0 ).get( 'widgets' ).remove( s.byText( 'D' ) );
+	s.cell( 1, 0 ).get( 'widgets' ).add( extra );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'structureChange is null when the last row is removed or a row is added at the end', () => {
+	const s = setup();
+	s.rows.remove( s.row( 2 ) );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null );
+
+	const t = setup();
+	duplicateRow( t, t.row( 2 ) );
+	assert.equal( patch.structureChange( t.prev, patch.snapshot( t.model ) ), null );
+} );
+
+test( 'structureChange is null when a retained widget value, cell weight or row setting changes with the add', () => {
+	const s = setup();
+	duplicateWidget( s.byText( 'B' ) );
+	s.byText( 'C' ).get( 'values' ).text = 'C2';
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null, 'a retained widget value' );
+
+	const t = setup();
+	duplicateWidget( t.byText( 'B' ) );
+	t.cell( 0, 0 ).set( 'weight', 0.3 );
+	t.cell( 0, 1 ).set( 'weight', 0.7 );
+	assert.equal( patch.structureChange( t.prev, patch.snapshot( t.model ) ), null, 'a cell weight' );
+
+	const u = setup();
+	duplicateWidget( u.byText( 'B' ) );
+	u.row( 1 ).set( 'color_label', 'blue' );
+	assert.equal( patch.structureChange( u.prev, patch.snapshot( u.model ) ), null, 'a row setting' );
+} );
+
+test( 'structureChange is null when a retained widget moves with the add', () => {
+	const s = setup();
+	duplicateWidget( s.byText( 'B' ) );
+	moveWidget( s.byText( 'C' ), s.cell( 0, 0 ), 0 );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'structureChange is null when nothing was added or removed, and for a snapshot that cannot be trusted', () => {
+	const s = setup();
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null, 'no change' );
+
+	duplicateWidget( s.byText( 'B' ) );
+	const broken = patch.snapshot( s.model );
+	broken.data.grids.pop();
+	assert.equal( patch.structureChange( s.prev, broken ), null );
+	assert.equal( patch.structureChange( null, patch.snapshot( s.model ) ), null );
+} );
+
+test( 'a widget_id that is made up again on every read is ignored, and a stored one that changes is a change', () => {
+	// A duplicate has no stored id: its id is new on every read.
+	const s = setup();
+	const copy = duplicateWidget( s.byText( 'B' ) );
+	const next = patch.snapshot( s.model );
+	assert.deepEqual( next.generated, [ copy.cid ] );
+	const change = patch.structureChange( s.prev, next );
+	assert.ok( change );
+	assert.deepEqual( change.addedWidgets, [ copy.cid ] );
+
+	// A retained widget whose stored id changed is a change.
+	const stored = patch.snapshot( s.model );
+	stored.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.equal( patch.structureChange( s.prev, stored ), null );
+
+	// changedWidgets and plan: only a generated id is ignored.
+	const t = setup();
+	const same = patch.snapshot( t.model );
+	same.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.deepEqual( patch.changedWidgets( t.prev, same ), [ t.byText( 'A' ).cid ], 'a stored id changed' );
+	same.generated = [ t.byText( 'A' ).cid ];
+	assert.deepEqual( patch.changedWidgets( t.prev, same ), [], 'a generated id' );
+
+	moveWidget( t.byText( 'C' ), t.cell( 0, 1 ), 0 );
+	const moved = patch.snapshot( t.model );
+	moved.data.widgets[ 0 ].panels_info.widget_id = 'changed';
+	assert.equal( patch.plan( t.prev, moved ), null, 'plan: a stored id changed with a move' );
+	moved.generated = [ t.byText( 'A' ).cid ];
+	assert.ok( patch.plan( t.prev, moved ), 'plan: a generated id' );
+} );
+
+test( 'structureChange is null when a row, cell or widget style changes with the add', () => {
+	const s = setup();
+	duplicateWidget( s.byText( 'B' ) );
+	s.row( 1 ).set( 'style', { padding: '9px' } );
+	assert.equal( patch.structureChange( s.prev, patch.snapshot( s.model ) ), null, 'a row style' );
+
+	const t = setup();
+	duplicateWidget( t.byText( 'B' ) );
+	t.cell( 1, 0 ).set( 'style', { padding: '9px' } );
+	assert.equal( patch.structureChange( t.prev, patch.snapshot( t.model ) ), null, 'a cell style' );
+
+	const u = setup();
+	duplicateWidget( u.byText( 'B' ) );
+	const widgets = patch.snapshot( u.model );
+	widgets.data.widgets.forEach( ( w ) => {
+		w.panels_info.style = { padding: '' };
+	} );
+	assert.equal( patch.structureChange( u.prev, widgets ), null, 'a widget style' );
+} );
